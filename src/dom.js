@@ -527,7 +527,8 @@ Element.Methods = {
 
   absolutize: function(element) {
     element = $(element);
-    if (element.getStyle('position') == 'absolute') return;
+    if (Element.getStyle(element, 'position') === 'absolute')
+      return element;
     // Position.prepare(); // To be done manually by Scripty when it needs it.
 
     var offsets = element.positionedOffset();
@@ -551,7 +552,8 @@ Element.Methods = {
 
   relativize: function(element) {
     element = $(element);
-    if (element.getStyle('position') == 'relative') return;
+    if (Element.getStyle(element, 'position') === 'relative')
+      return element;
     // Position.prepare(); // To be done manually by Scripty when it needs it.
 
     element.style.position = 'relative';

@@ -1239,6 +1239,15 @@ new Test.Unit.Runner({
       elt.absolutize();
       this.assertUndefined(elt._originalLeft, 'absolutize() did not detect absolute positioning');
     }, this);
+    // invoking on "absolute" positioned element should return element
+    var element = $('absolute_fixed_undefined').setStyle({position: 'absolute'});
+    this.assertEqual(element, element.absolutize());
+  },
+  
+  testRelativize: function() {
+    // invoking on "relative" positioned element should return element
+    var element = $('absolute_fixed_undefined').setStyle({position: 'relative'});
+    this.assertEqual(element, element.relativize());
   },
   
   testViewportDimensions: function() {
