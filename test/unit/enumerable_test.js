@@ -103,6 +103,9 @@ new Test.Unit.Runner({
       [3, 2, 1, 11, 7, 5, 19, 17, 13, 31, 29, 23, 43, 41, 37, 59, 53, 47, 71, 67, 61, 83, 79, 73, 97, 89],
       Fixtures.Primes.eachSlice( 3, function(slice){ return slice.reverse() }).flatten()
     );
+    this.assertEnumEqual(Fixtures.Basic, Fixtures.Basic.eachSlice(-10));
+    this.assertEnumEqual(Fixtures.Basic, Fixtures.Basic.eachSlice(0));
+    this.assertNotIdentical(Fixtures.Basic, Fixtures.Basic.eachSlice(0));
   },
   
   testEachWithIndex: function() {
