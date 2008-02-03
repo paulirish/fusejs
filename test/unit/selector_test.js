@@ -169,6 +169,9 @@ new Test.Unit.Runner({
       this.assertUndefined(new Selector('body p[xml:lang]').xpath);
     } else
       this.info("Could not test XPath bypass: no XPath to begin with!");
+
+    this.assertElementsMatch($$('[xml:lang]'), 'html', '#item_3');
+    this.assertElementsMatch($$('*[xml:lang]'), 'html', '#item_3');
   },
 
   testSelectorWithChild: function() {
