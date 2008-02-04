@@ -1038,6 +1038,11 @@ new Test.Unit.Runner({
     this.assertEqual('my_input_field', $(document.body.lastChild).name);
     if (Prototype.Browser.IE)
       this.assertMatch(/name=["']?my_input_field["']?/, $('my_input_field').outerHTML);
+    
+    if (originalElement && Prototype.BrowserFeatures.ElementExtensions) {
+      Element.prototype.fooBar = Prototype.emptyFunction
+      this.assertRespondsTo('fooBar', new Element('div'));
+    }
   },
 
   testElementGetHeight: function() {
