@@ -294,7 +294,7 @@ Abstract.EventObserver = Class.create({
     this.callback = callback;
     
     this.lastValue = this.getValue();
-    if (this.element.tagName.toLowerCase() == 'form')
+    if (this.element.tagName.toUpperCase() == 'FORM')
       this.registerFormCallbacks();
     else
       this.registerCallback(this.element);

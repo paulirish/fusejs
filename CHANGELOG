@@ -1,3 +1,5 @@
+* Make tagName comparisons XHTML-compliant. Closes #11012, #11013, #11014. [cfis, Tobie Langel]
+
 * Avoid breaking Element.prototype in browsers which support it. Closes #11004. [cfis, Tobie Langel]
 
 * Prevent Enumerable#eachSlice from entering into an endless loop if passed an argument smaller than 1. Closes #10665. [kangax, Tobie Langel]
