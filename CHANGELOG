@@ -1,3 +1,9 @@
+* deprecation extension: Mark Class.create() used without arguments as deprecated. [Tobie Langel]
+
+* deprecation extension: Mark Event.unloadCache as removed rather than deprecated. [Tobie Langel]
+
+* deprecation extension: Log everything *but* deprecations with console.error. [Tobie Langel]
+
 * deprecation extension: Use Firebug's console.warn and console.error. [Andrew Dupont, Tobie Langel]
 
 * deprecation extension: Add deprecation extension. [Tobie Langel]
