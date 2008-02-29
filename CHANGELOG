@@ -1,3 +1,5 @@
+* deprecation extension: Mark Hash.toJSON() as removed. [Tobie Langel]
+
 * deprecation extension: Mark Class.create() used without arguments as deprecated. [Tobie Langel]
 
 * deprecation extension: Mark Event.unloadCache as removed rather than deprecated. [Tobie Langel]
