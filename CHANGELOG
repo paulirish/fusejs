@@ -1,3 +1,5 @@
+* unit test: Stop form observers in unit tests. Closes #10938. [kangax]
+
 * deprecation extension: Complete rewrite of the deprecation helper, now renamed UpdateHelper and useable by third-party libs. [Tobie Langel]
 
 * deprecation extension: Mark Hash.toJSON() as removed. [Tobie Langel]
