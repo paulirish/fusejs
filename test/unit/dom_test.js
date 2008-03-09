@@ -976,6 +976,9 @@ new Test.Unit.Runner({
     table.writeAttribute('cellpadding', '3')
     this.assertEqual('2', table.readAttribute('cellspacing'));
     this.assertEqual('3', table.readAttribute('cellpadding'));
+
+    var iframe = new Element('iframe', { frameborder: 0 });
+    this.assertIdentical(0, parseInt(iframe.readAttribute('frameborder')));
   },
   
   testElementWriteAttributeWithCustom: function() {
