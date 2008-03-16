@@ -1,3 +1,5 @@
+* Refactor String#escapeHTML to avoid using the `with` statement. [Tobie Langel]
+
 * Make Element#writeAttribute handle frameborder attribute in IE. Closes #11068. [Nick Stackenburg, Tobie Langel]
 
 * Minor clean-up of selector.js. Closes #10844. [Richard Quadling]
