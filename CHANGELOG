@@ -1,3 +1,5 @@
+* unit test: Remove usage of the 'with' statement from unit tests. [Tobie Langel]
+
 * unit test: Clean-up. [Tobie Langel]
 
 * unit test: Stop form observers in unit tests. Closes #10938. [kangax]
