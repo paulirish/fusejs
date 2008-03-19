@@ -1,3 +1,5 @@
+* Fix Event#pointer in IE strict and quirks mode. Closes #9920. [ephogy, kangax, Tobie Langel]
+
 * Refactor String#escapeHTML to avoid using the `with` statement. [Tobie Langel]
 
 * Make Element#writeAttribute handle frameborder attribute in IE. Closes #11068. [Nick Stackenburg, Tobie Langel]
