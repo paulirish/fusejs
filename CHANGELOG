@@ -1,3 +1,5 @@
+* Avoid re-extending element in Element#getDimensions. [kangax]
+
 * Prevent Hash#toQueryString from serializing objects. [kangax, Tobie Langel]
 
 * Fix Event#pointer in IE strict and quirks mode. Closes #9920. [ephogy, kangax, Tobie Langel]
