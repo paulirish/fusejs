@@ -1,3 +1,5 @@
+* Fix issue where Safari 3 deletes custom properties from the document object when the page is returned to via the back button. Closes #11430. [mzsanford, kangax, Andrew Dupont]
+
 * Integrate support for the W3C Selectors API into the Selector class.
   Will now use the API when possible (browser supports the API *and* recognizes the given selector).
   Means minor changes to the semantics of :enabled, :disabled, and :empty in order to comply with CSS spec. [#1 state:resolved] [Andrew Dupont]
