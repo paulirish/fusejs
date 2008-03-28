@@ -200,6 +200,22 @@ new Test.Unit.Runner({
     this.assert(event.stopped, "event.stopped should be true for an observer that calls stop");
     span.stopObserving("test:somethingHappened");
   },
+  
+  testEventElement: function() {
+    // This bug would occur in IE on any windows event because it doesn't have a event.srcElement.
+    this.assertEqual(false, eventResults.eventElement.windowOnLoadBug, 'Event.element() window onload bug.');
+
+    // This bug would occur in Firefox on window an document events because the 
+    // event.currentTarget does not have a tagName.
+    this.assertEqual(false, eventResults.eventElement.contentLoadedBug, 'Event.element() contentLoaded bug.');
+
+    // This bug would occur in Firefox on image onload/onerror events because the event.target is 
+    // wrong and should use event.currentTarget.
+    this.assertEqual(false, eventResults.eventElement.imageOnErrorBug, 'Event.element() image onerror bug.');
+    this.wait(1000, function() {
+      this.assertEqual(false, eventResults.eventElement.imageOnLoadBug,  'Event.element() image onload bug.');
+    });
+  },
 
   testEventFindElement: function() {
     var span = $("span"), event;
@@ -219,10 +235,35 @@ new Test.Unit.Runner({
 });
 
 document.observe("dom:loaded", function(event) {
+  var body = $(document.body);
+
   eventResults.contentLoaded = {
     endOfDocument: eventResults.endOfDocument,
-    windowLoad:    eventResults.windowLoad
+    windowLoad:  eventResults.windowLoad
   };
+
+  Object.extend(eventResults.eventElement, { 
+    imageOnLoadBug:   false,
+    imageOnErrorBug:  false,
+    windowOnLoadBug:  false,
+    contentLoadedBug: false
+  });
+
+  body.insert(new Element('img', { id:'img_load_test' }));  
+  $('img_load_test').observe('load', function(e) {
+    if (e.element() !== this) 
+      eventResults.eventElement.imageOnLoadBug = true;
+  }).writeAttribute('src', '../fixtures/logo.gif');
+
+  body.insert(new Element('img', { id:'img_error_test' }));  
+  $('img_error_test').observe('error', function(e) {
+    if (e.element() !== this) 
+      eventResults.eventElement.imageOnErrorBug = true;
+  }).writeAttribute('src', 'http://www.prototypejs.org/xyz.gif');
+  
+  try { event.element() } catch(e) {
+    eventResults.eventElement.contentLoadedBug = true;
+  }
 });
 
 Event.observe(window, "load", function(event) {
@@ -230,4 +271,8 @@ Event.observe(window, "load", function(event) {
     endOfDocument: eventResults.endOfDocument,
     contentLoaded: eventResults.contentLoaded
   };
+
+  try { event.element() } catch(e) {
+    eventResults.eventElement.windowOnLoadBug = true;
+  }
 });

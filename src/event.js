@@ -59,8 +59,21 @@ Event.Methods = (function() {
     isRightClick:  function(event) { return isButton(event, 2) },
     
     element: function(event) {
-      var node = Event.extend(event).target;
-      return Element.extend(node.nodeType == Node.TEXT_NODE ? node.parentNode : node);
+      event = Event.extend(event);
+      var node = event.target, type = event.type,
+       currentTarget = event.currentTarget;
+      
+      if (currentTarget && currentTarget.tagName) {
+        // Firefox screws up the "click" event when moving between radio buttons
+        // via arrow keys. It also screws up the "load" and "error" events on images,
+        // reporting the document as the target instead of the original image.
+        if (['load', 'error'].include(type) || (currentTarget.tagName.toUpperCase() === 'INPUT' &&
+         currentTarget.type === 'radio' && type === 'click'))
+          node = currentTarget;
+      }
+      
+      return Element.extend(node && node.nodeType == Node.TEXT_NODE ?
+       node.parentNode : node);
     },
 
     findElement: function(event, expression) {

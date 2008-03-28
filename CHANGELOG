@@ -1,3 +1,6 @@
+* Fix Firefox Event.element() returning the wrong node for image onload/onerror events.
+  Also fixe Event.element() exception in IE when called from a window event observer. Closes #8652, #11296, #11259.  [dcrall, jddalton, kangax]
+
 * Fix issue where Safari 3 deletes custom properties from the document object when the page is returned to via the back button. Closes #11430. [mzsanford, kangax, Andrew Dupont]
 
 * Integrate support for the W3C Selectors API into the Selector class.

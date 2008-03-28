@@ -140,7 +140,7 @@
     })
   </script>
 
-  <p id="target">Event.element() test</p>
+  <p id="target">Event.element() and event.target test</p>
   
   <script type="text/javascript">
     $('target').observe('click', function(e) {
@@ -150,8 +150,32 @@
     });
   </script>
 
-  <p id="currentTarget"><span>Event.currentTarget test</span></p>
+  <p id="eventElementRadioButton">
+    Test Event.element() on radio buttons (Firefox bug). Focus the first radio button then use the arrow keys to move between the others.
+    <br/>
+    <input type="radio" id="radio1" name="group" value="A">
+    <input type="radio" id="radio2" name="group" value="B">
+    <input type="radio" id="radio3" name="group" value="C"> 
+  </p>
   
+  <script type="text/javascript">
+    (function() {
+      var count = 0, prevID = '';
+      $('eventElementRadioButton').childElements().invoke('observe', 'click', function(e) {
+        count++;
+        if (e.element().id === prevID) {
+          $('eventElementRadioButton').failed();
+        } else if (count === 3) {
+          $('eventElementRadioButton').passed();
+        }
+        prevID = e.currentTarget && e.currentTarget.id;
+        log(e);
+      });
+    })();
+  </script>
+
+  <p id="currentTarget"><span>Event.currentTarget test</span></p>
+
   <script type="text/javascript">
     $('currentTarget').observe('click', function(e){
       if (e.currentTarget !== this) this.failed();
