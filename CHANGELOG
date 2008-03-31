@@ -1,3 +1,5 @@
+* Account for context to assure Element#down, et al., work properly with Selectors API. [Andrew Dupont]
+
 * Fix issue where Safari improperly reports an element as a descendant of itself. [Andrew Dupont]
 
 * Greatly simplify IE's implementation of Element#descendantOf. [Andrew Dupont]

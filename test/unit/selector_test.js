@@ -366,5 +366,12 @@ new Test.Unit.Runner({
       Selector.matchElements($('counted_container').descendants(), 'div'), 'div.is_counted', 
       'div.is_counted'
     );
+  },
+  
+  testElementDown: function() {
+    var a = $('dupL4'); 
+    var b = $('dupContainer').down('#dupL4');
+    
+    this.assertEqual(a, b);
   }
 });
