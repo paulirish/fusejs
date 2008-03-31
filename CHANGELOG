@@ -1,3 +1,5 @@
+* Greatly simplify IE's implementation of Element#descendantOf. [Andrew Dupont]
+
 * Prevent exception when using Selector to search for an attribute that is not present. Closes #11395. [gryn, Andrew Dupont]
 
 * Fix Firefox Event.element() returning the wrong node for image onload/onerror events.
