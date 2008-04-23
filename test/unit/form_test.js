@@ -153,7 +153,7 @@ new Test.Unit.Runner({
     field.disable();
     this.assertDisabled(field);
     
-    var field = $('input_enabled');
+    field = $('input_enabled');
     this.assertEnabled(field);
     field.disable();
     this.assertDisabled(field);
@@ -182,7 +182,7 @@ new Test.Unit.Runner({
     
     // Test IE doesn't select text on buttons
     Form.focusFirstElement('bigform');
-    if(document.selection) this.assertEqual('', getSelection(element));
+    if (document.selection) this.assertEqual('', getSelection(element));
     
     // Form.Element.activate shouldn't select text on buttons
     element = $('focus_text');
@@ -200,7 +200,7 @@ new Test.Unit.Runner({
   
   testFormGetElements: function() {
     var elements = Form.getElements('various'),
-      names = $w('tf_selectOne tf_textarea tf_checkbox tf_selectMany tf_text tf_radio tf_hidden tf_password');
+     names = $w('tf_selectOne tf_textarea tf_checkbox tf_selectMany tf_text tf_radio tf_hidden tf_password');
     this.assertEnumEqual(names, elements.pluck('name'))
   },
   
@@ -221,10 +221,10 @@ new Test.Unit.Runner({
   
   testFormSerialize: function() {
     // form is initially empty
-    var form = $('bigform');
-    var expected = { tf_selectOne:'', tf_textarea:'', tf_text:'', tf_hidden:'', tf_password:'' };
+    var form = $('bigform'),
+     expected = { tf_selectOne:'', tf_textarea:'', tf_text:'', tf_hidden:'', tf_password:'' };
     this.assertHashEqual(expected, Form.serialize('various', true));
-      
+    
     // set up some stuff
     form['tf_selectOne'].selectedIndex = 1;
     form['tf_textarea'].value = "boo hoo!";
@@ -233,21 +233,22 @@ new Test.Unit.Runner({
     form['tf_password'].value = 'sekrit code';
     form['tf_checkbox'].checked = true;
     form['tf_radio'].checked = true;
-    var expected = { tf_selectOne:1, tf_textarea:"boo hoo!", tf_text:"123öäü",
-      tf_hidden:"moo%hoo&test", tf_password:'sekrit code', tf_checkbox:'on', tf_radio:'on' }
-
+    
     // return params
+    expected = { tf_selectOne:1, tf_textarea:"boo hoo!", tf_text:"123öäü",
+     tf_hidden:"moo%hoo&test", tf_password:'sekrit code', tf_checkbox:'on', tf_radio:'on' };
     this.assertHashEqual(expected, Form.serialize('various', true));
+    
     // return string
-    this.assertEnumEqual(Object.toQueryString(expected).split('&').sort(),
-                    Form.serialize('various').split('&').sort());
+    expected = Object.toQueryString(expected).split('&').sort();
+    this.assertEnumEqual(expected, Form.serialize('various').split('&').sort());
     this.assertEqual('string', typeof $('form').serialize({ hash:false }));
 
     // Checks that disabled element is not included in serialized form.
     $('input_enabled').enable();
-    this.assertHashEqual({ val1:4, action:'blah', first_submit:'Commit it!' },
-                    $('form').serialize(true));
-
+    
+    this.assertHashEqual({ val1:4, action:'blah', first_submit:'Commit it!' }, $('form').serialize(true));
+    
     // should not eat empty values for duplicate names 
     $('checkbox_hack').checked = false;
     var data = Form.serialize('value_checks', true); 
@@ -256,22 +257,24 @@ new Test.Unit.Runner({
     
     $('checkbox_hack').checked = true; 
     this.assertEnumEqual($w('1 0'), Form.serialize('value_checks', true)['checky']);
-
+    
     // all kinds of SELECT controls
     var params = Form.serialize('selects_fieldset', true);
-    var expected = { 'nvm[]':['One', 'Three'], evu:'', 'evm[]':['', 'Three'] };
+    expected = { 'nvm[]':['One', 'Three'], evu:'', 'evm[]':['', 'Three'] };
     this.assertHashEqual(expected, params);
+    
     params = Form.serialize('selects_wrapper', true);
     this.assertHashEqual(Object.extend(expected, { vu:1, 'vm[]':[1, 3], nvu:'One' }), params);
-
+    
     // explicit submit button
-    this.assertHashEqual({ val1:4, action:'blah', second_submit:'Delete it!' },
-                    $('form').serialize({ submit: 'second_submit' }));
-    this.assertHashEqual({ val1:4, action:'blah' },
-                    $('form').serialize({ submit: false }));
-    this.assertHashEqual({ val1:4, action:'blah' },
-                    $('form').serialize({ submit: 'inexistent' }));
-                    
+    expected = { val1:4, action:'blah', second_submit:'Delete it!' };
+    this.assertHashEqual(expected, $('form').serialize({ submit: 'second_submit' }));
+    
+    expected = { val1:4, action:'blah' };
+    this.assertHashEqual(expected, $('form').serialize({ submit: false }));
+    
+    expected = { val1:4, action:'blah' };
+    this.assertHashEqual(expected, $('form').serialize({ submit: 'inexistent' })); 
   },
   
   testFormMethodsOnExtendedElements: function() {

@@ -62,7 +62,7 @@ new Test.Unit.Runner({
     
     var temp = String.prototype.capitalize;
     String.prototype.capitalize = String.prototype.capitalize.wrap(function(proceed, eachWord) {
-      if(eachWord && this.include(' ')) return this.split(' ').map(function(str){
+      if (eachWord && this.include(' ')) return this.split(' ').map(function(str){
         return str.capitalize();
       }).join(' ');
       return proceed();
@@ -248,13 +248,13 @@ new Test.Unit.Runner({
   testDoesntExtendObjectPrototype: function() {
     // for-in is supported with objects
     var iterations = 0, obj = { a: 1, b: 2, c: 3 };
-    for(property in obj) iterations++;
+    for (property in obj) iterations++;
     this.assertEqual(3, iterations);
     
     // for-in is not supported with arrays
     iterations = 0;
     var arr = [1,2,3];
-    for(property in arr) iterations++;
+    for (property in arr) iterations++;
     this.assert(iterations > 3);
   },
   
@@ -273,7 +273,7 @@ new Test.Unit.Runner({
   },
 
   testBindAsEventListener: function() {
-    for( var i = 0; i < 10; ++i ){
+    for ( var i = 0; i < 10; ++i ) {
       var div = document.createElement('div');
       div.setAttribute('id','test-'+i);
       document.body.appendChild(div);
@@ -354,22 +354,22 @@ new Test.Unit.Runner({
       this.assert(result[1] === false);
     }, this);
     
-    if(navigator.userAgent.indexOf('AppleWebKit/') > -1) {
+    if (navigator.userAgent.indexOf('AppleWebKit/') > -1) {
       this.info('Running on WebKit');
       this.assert(Prototype.Browser.WebKit);
     }
     
-    if(!!window.opera) {
+    if (!!window.opera) {
       this.info('Running on Opera');
       this.assert(Prototype.Browser.Opera);
     }
     
-    if(!!(window.attachEvent && !window.opera)) {
+    if (!!(window.attachEvent && !window.opera)) {
       this.info('Running on IE');
       this.assert(Prototype.Browser.IE);
     }
     
-    if(navigator.userAgent.indexOf('Gecko') > -1 && navigator.userAgent.indexOf('KHTML') == -1) {
+    if (navigator.userAgent.indexOf('Gecko') > -1 && navigator.userAgent.indexOf('KHTML') == -1) {
       this.info('Running on Gecko');
       this.assert(Prototype.Browser.Gecko);
     } 

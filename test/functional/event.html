@@ -81,7 +81,7 @@
   
   <script type="text/javascript">
     $('basic2').observe('click', function(e) {
-      if(this === window) $('basic2').failed('Window scope! (needs scope correction)');
+      if (this === window) $('basic2').failed('Window scope! (needs scope correction)');
       else this.passed();
       log(e);
     });
@@ -154,7 +154,7 @@
   
   <script type="text/javascript">
     $('currentTarget').observe('click', function(e){
-      if(e.currentTarget !== this) this.failed();
+      if (e.currentTarget !== this) this.failed();
       else this.passed();
       log(e);
     })
@@ -164,7 +164,7 @@
   
   <script type="text/javascript">
     $('findElement').observe('click', function(e){
-      if(e.findElement('p') == this && e.findElement('body') == document.body &&
+      if (e.findElement('p') == this && e.findElement('body') == document.body &&
          e.findElement('foo') == null) this.passed();
       else this.failed();
       log(e);

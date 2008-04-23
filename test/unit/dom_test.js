@@ -28,7 +28,7 @@ new Test.Unit.Runner({
         'document.body.offsetHeight', 'document.body.offsetWidth',
         'document.body.offsetTop', 'document.body.offsetLeft'
       ].inject([], function(properties, prop) {
-        if(!self.screen && prop.include('self.screen')) return;
+        if (!self.screen && prop.include('self.screen')) return;
         if (!document.body && prop.include('document.body')) return;
         properties.push(prop);
         if (prop.include('.body') && document.documentElement)
@@ -859,7 +859,7 @@ new Test.Unit.Runner({
     $('op3').setStyle({opacity: 0});
     this.assertEqual(0, $('op3').getStyle('opacity'));
     
-    if(navigator.appVersion.match(/MSIE/)) {
+    if (navigator.appVersion.match(/MSIE/)) {
       this.assertEqual('alpha(opacity=30)', $('op1').getStyle('filter'));
       this.assertEqual('progid:DXImageTransform.Microsoft.Blur(strength=10)alpha(opacity=30)', $('op2').getStyle('filter'));
       $('op2').setStyle({opacity:''});
@@ -877,7 +877,7 @@ new Test.Unit.Runner({
     // margin, padding, or borders
     // TODO: This test fails on IE because there seems to be no way
     // to calculate this properly (clientWidth/Height returns 0)
-    if(!navigator.appVersion.match(/MSIE/)) {
+    if (!navigator.appVersion.match(/MSIE/)) {
       this.assertEqual("14px", $('style_test_dimensions').getStyle('width'));
       this.assertEqual("17px", $('style_test_dimensions').getStyle('height'));
     }
