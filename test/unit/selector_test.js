@@ -93,7 +93,7 @@ new Test.Unit.Runner({
   },
   
   testSelectorWithTagNameAndNegatedAttributeValue: function() {
-    this.assertEnumEqual([], $$('a[href!="#"]'));
+    this.assertEnumEqual([], $$('a[href!=#]'));
   },
 
   testSelectorWithBracketAttributeValue: function() {
@@ -169,9 +169,6 @@ new Test.Unit.Runner({
       this.assertUndefined(new Selector('body p[xml:lang]').xpath);
     } else
       this.info("Could not test XPath bypass: no XPath to begin with!");
-    
-    this.assertElementsMatch($$('[xml:lang]'), 'html', '#item_3');
-    this.assertElementsMatch($$('*[xml:lang]'), 'html', '#item_3');
   },
 
   testSelectorWithChild: function() {
@@ -294,15 +291,15 @@ new Test.Unit.Runner({
   
   testSelectorWithEnabledDisabledChecked: function() {
     this.assertEnumEqual([$('disabled_text_field')], $$('#troubleForm > *:disabled'));
-    this.assertEnumEqual($('troubleForm').getInputs().without($('disabled_text_field'), $('hidden')), $$('#troubleForm > *:enabled'));
+    this.assertEnumEqual($('troubleForm').getInputs().without($('disabled_text_field')), $$('#troubleForm > *:enabled'));
     this.assertEnumEqual($('checked_box', 'checked_radio'), $$('#troubleForm *:checked'));
   },
   
   testSelectorWithEmpty: function() {
-    $('level3_1').innerHTML = "";
-    this.assertEnumEqual($('level3_1', 'level3_2', 'level2_3'),
+    $('level3_1').innerHTML = "\t\n\n\r\n\t   ";
+    this.assertEnumEqual($('level3_1', 'level3_2', 'level_only_child', 'level2_3'),
      $$('#level1 *:empty'), '#level1 *:empty');
-    this.assertEnumEqual([], $$('#level_only_child:empty'), 'newlines count as content!');
+    this.assertEnumEqual([$('level_only_child')], $$('#level_only_child:empty'));
   },    
   
   testIdenticalResultsFromEquivalentSelectors: function() {
@@ -315,6 +312,7 @@ new Test.Unit.Runner({
     this.assertEnumEqual($$('ul > li:nth-child(odd)'), $$('ul > li:nth-child(2n+1)'));
     this.assertEnumEqual($$('ul > li:first-child'), $$('ul > li:nth-child(1)'));
     this.assertEnumEqual($$('ul > li:last-child'), $$('ul > li:nth-last-child(1)'));
+    this.assertEnumEqual($$('#troubleForm *:enabled'), $$('#troubleForm *:not(:disabled)'));
     this.assertEnumEqual($$('ul > li:nth-child(n-999)'), $$('ul > li'));
     this.assertEnumEqual($$('ul>li'), $$('ul > li'));
     this.assertEnumEqual($$('#p a:not(a[rel$="nofollow"])>em'), $$('#p a:not(a[rel$="nofollow"]) > em'))
@@ -366,12 +364,5 @@ new Test.Unit.Runner({
       Selector.matchElements($('counted_container').descendants(), 'div'), 'div.is_counted', 
       'div.is_counted'
     );
-  },
-  
-  testElementDown: function() {
-    var a = $('dupL4'); 
-    var b = $('dupContainer').down('#dupL4');
-    
-    this.assertEqual(a, b);
   }
 });
