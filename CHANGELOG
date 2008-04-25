@@ -1,3 +1,5 @@
+* Ensure Element methods run the element argument through $(). Closes #11472. [jddalton]
+
 * Set document.loaded = true before firing dom:loaded custom event. Closes #11453. [choppsta, jddalton]
 
 * Avoid potential memory leaks in Firefox. [#12 state:resolved] [wpc, Tobie Langel]
