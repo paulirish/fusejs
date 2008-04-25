@@ -209,8 +209,11 @@ new Test.Unit.Runner({
     var russianChars = '//ÐºÐŸÐŒÐµÐœÑÐ°ÑÐžÐ¹\n';
     var longComment  = '//' + Array(7000).join('.') + '\n';
     var longScript   = '\nvar foo = 1;\n' + russianChars + longComment;
-    var longString   = '<script type="text/javascript">'+ longScript + '<'+'/script>';
+    var longString   = 'foo <script type="text/javascript">'+ longScript + '<'+'/script> bar';
     this.assertEnumEqual([longScript], longString.extractScripts());
+    
+    this.assertEnumEqual(['moo();'], ('baz<!--\n<script>foo();<'+'/script>\n--><script type="text/javascript">moo();<'+
+      '/script><!--\n<script>boo();<'+'/script>\n-->buz').extractScripts());
   },
   
   testEvalScripts: function() {

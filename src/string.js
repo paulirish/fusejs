@@ -60,16 +60,25 @@ Object.extend(String.prototype, {
   },
 
   stripScripts: function() {
-    return this.replace(new RegExp(Prototype.ScriptFragment, 'img'), '');
+    return this.replace(new RegExp(Prototype.ScriptFragment, 'gi'), '');
   },
   
-  extractScripts: function() {
-    var matchAll = new RegExp(Prototype.ScriptFragment, 'img');
-    var matchOne = new RegExp(Prototype.ScriptFragment, 'im');
-    return (this.match(matchAll) || []).map(function(scriptTag) {
-      return (scriptTag.match(matchOne) || ['', ''])[1];
-    });
-  },
+  extractScripts: (function() {
+    var matchOpenTag = /<script/i,
+     matchAll = new RegExp(Prototype.ScriptFragment, 'gi'),
+     matchOne = new RegExp(Prototype.ScriptFragment, 'i'),
+     matchComments = new RegExp('<!--\\s*' + Prototype.ScriptFragment + '\\s*-->', 'gi');
+
+    return function() {
+      if (!matchOpenTag.test(this)) return [];
+      var results = [], scriptTags = (this.replace(matchComments, '').match(matchAll) || []);
+      for(var i = 0, code, scriptTag; scriptTag = scriptTags[i]; i++) {
+        if (code = (scriptTag.match(matchOne) || ['', ''])[1])
+          results.push(code);
+      }
+      return results;
+    };
+  })(),
   
   evalScripts: function() {
     return this.extractScripts().map(function(script) { return eval(script) });
