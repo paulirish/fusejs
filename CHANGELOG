@@ -1,3 +1,5 @@
+* Fix scriptFragment Safari bug with non-ASCII characters in scripts. Closes #9663. [Alexey Proskuryakov, jddalton]
+
 * Remove the use of $() in Element#hasAttribute methods to keep Selector class speedy. [Andrew Dupont]
 
 * Ensure Element methods run the element argument through $(). Closes #11472. [jddalton]
