@@ -87,7 +87,7 @@ Object.extend(String.prototype, {
   escapeHTML: function() {
     var self = arguments.callee;
     self.text.data = this;
-    return self.div.innerHTML;
+    return self.div.innerHTML.replace(/"/g, '&quot;');
   },
 
   unescapeHTML: function() {

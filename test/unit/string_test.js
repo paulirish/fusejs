@@ -236,7 +236,7 @@ new Test.Unit.Runner({
     this.assertEqual('ウィメンズ2007\nクルーズコレクション', 
       'ウィメンズ2007\nクルーズコレクション'.escapeHTML());
       
-    this.assertEqual('a&lt;a href="blah"&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g',
+    this.assertEqual('a&lt;a href=&quot;blah&quot;&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g',
       'a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g'.escapeHTML());
     
     this.assertEqual(largeTextEscaped, largeTextUnescaped.escapeHTML());
