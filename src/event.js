@@ -236,6 +236,7 @@ Object.extend(Event, (function() {
   
     stopObserving: function(element, eventName, handler) {
       element = $(element);
+      eventName = Object.isString(eventName) ? eventName : null;
       var id = getEventID(element), c = cache[id];
       
       if (!c) {

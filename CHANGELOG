@@ -1,3 +1,5 @@
+* Make sure Event#stopObserving works when passed non-string value as an eventName. [kangax]
+
 * Cleaned up event.js renaming confusing/contradictory variable names [jddalton]
 
 * Fix Event.stopObserving() IE error on elements with no observers. [jddalton]

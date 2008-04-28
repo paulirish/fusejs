@@ -129,6 +129,10 @@ new Test.Unit.Runner({
     this.assertNothingRaised(function() { $(document.body).stopObserving() });
   },
   
+  testStopObservingWithNoneStringEventName: function() {
+    this.assertNothingRaised(function() { [$("span"), $("outer")].each(Event.stopObserving) });
+  },
+  
   testStopObservingWithoutHandlerArgument: function() {
     var span = $("span"), count = 0, observer = function() { count++ };
     
