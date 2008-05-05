@@ -1,3 +1,5 @@
+* Make Function#argumentNames handle multiple spaces and line breaks between arguments. [#63 state:resolved] [Geoff M. Granum, Tobie Langel]
+
 * Speed up Function#argumentNames. Avoid Enum dependency. [Samuel Lebeau, Tobie Langel]
 
 * unit test: Amended failing Element#identify test. [Andrew Dupont, jddalton]
