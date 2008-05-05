@@ -1,3 +1,5 @@
+* Speed up Function#argumentNames. Avoid Enum dependency. [Samuel Lebeau, Tobie Langel]
+
 * unit test: Amended failing Element#identify test. [Andrew Dupont, jddalton]
 
 * Fix an issue with calling Event.pointer before the DOM is loaded. [kangax, jddalton] [#4 state:resolved]
