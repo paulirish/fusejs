@@ -1,3 +1,5 @@
+* unit test: Add unit tests for #10150, no patch needed because issue is already resolved. [jddalton] 
+
 * Fix Element read/write attribute methods for the 'encType' form attribute in IE. Closes #11126. [kangax, NoiseEee]
 
 * Element#down on an input element should not raise error. Closes #11102. [humeniuc, kangax]
