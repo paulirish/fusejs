@@ -385,14 +385,14 @@ Element.Methods = {
   
   getStyle: function(element, style) {
     element = $(element);
-    style = style == 'float' ? 'cssFloat' : style.camelize();
+    style = style === 'float' ? 'cssFloat' : style.camelize();
     var value = element.style[style];
-    if (!value) {
+    if (!value || value === 'auto') {
       var css = document.defaultView.getComputedStyle(element, null);
       value = css ? css[style] : null;
     }
-    if (style == 'opacity') return value ? parseFloat(value) : 1.0;
-    return value == 'auto' ? null : value;
+    if (style === 'opacity') return value ? parseFloat(value) : 1.0;
+    return value === 'auto' ? null : value;
   },
   
   getOpacity: function(element) {

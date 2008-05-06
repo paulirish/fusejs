@@ -896,6 +896,12 @@ new Test.Unit.Runner({
       this.assertEqual("14px", $('style_test_dimensions').getStyle('width'));
       this.assertEqual("17px", $('style_test_dimensions').getStyle('height'));
     }
+    
+    // check "auto" value for browsers that support document.defaultView.getComputedStyle()
+    var div = $('style_test_3'), backup = div.style.height;
+    div.style.height = 'auto';
+    this.assertNotNull(div.getStyle('height'));
+    div.style.height = backup;
   },
   
   testElementGetOpacity: function() {
