@@ -947,6 +947,12 @@ new Test.Unit.Runner({
     this.assertEqual('write_attribute_without_hash', element2.id);
     element2.writeAttribute('animal', 'cat');
     this.assertEqual('cat', element2.readAttribute('animal'));
+    
+    $('attributes_with_issues_form').writeAttribute('encType', 'multipart/form-data');  
+    this.assertEqual('multipart/form-data', $('attributes_with_issues_form').readAttribute('encType'));
+    
+    var theForm = new Element('form', { name:'encTypeForm', method:'post', action:'myPage.php', enctype:'multipart/form-data' });
+    this.assertEqual('multipart/form-data', theForm.readAttribute('encType'));
   },
   
   testElementWriteAttributeWithBooleans: function() {
