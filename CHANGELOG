@@ -1,3 +1,5 @@
+* Avoid potential memory leaks in Firefox. [#12 state:resolved] [wpc, Tobie Langel]
+
 * unit test: Add more unit tests for Object.isHash. [Tobie Langel]
 
 * Fix Element#getStyle returns null if value is "auto" in browsers supporting getComputedStyle(). Closes #10116. [kangax, ylucas]
