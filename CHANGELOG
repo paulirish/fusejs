@@ -1,3 +1,5 @@
+* unit test: Add more unit tests for Object.isHash. [Tobie Langel]
+
 * Fix Element#getStyle returns null if value is "auto" in browsers supporting getComputedStyle(). Closes #10116. [kangax, ylucas]
 
 * unit test: Add unit tests for #10150, no patch needed because issue is already resolved. [jddalton] 
