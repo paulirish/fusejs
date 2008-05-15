@@ -1,3 +1,5 @@
+* Ensure Element.Methods.Simulated.hasAttribute() returns a boolean value. [jddalton]
+
 * Ensure Array#intersect returns correct result if intersect value is 0. [jddalton]
 
 * Ensure Element#hide and Element#show return an element, even if passed an element ID. [jddalton]
