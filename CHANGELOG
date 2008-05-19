@@ -1,3 +1,5 @@
+* Set document.loaded = true before firing dom:loaded custom event. Closes #11453. [choppsta, jddalton]
+
 * Avoid potential memory leaks in Firefox. [#12 state:resolved] [wpc, Tobie Langel]
 
 * unit test: Add more unit tests for Object.isHash. [Tobie Langel]

@@ -316,8 +316,8 @@ Object.extend(document, {
   function fireContentLoadedEvent() {
     if (document.loaded) return;
     if (timer) window.clearInterval(timer);
-    document.fire("dom:loaded");
     document.loaded = true;
+    document.fire("dom:loaded");
   }
   
   if (document.addEventListener) {
