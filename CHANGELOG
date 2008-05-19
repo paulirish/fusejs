@@ -1,3 +1,5 @@
+* Ensure Element#hide and Element#show return an element, even if passed an element ID. [jddalton]
+
 * Ensure IE $(form).readAttribute('id') behaves properly when child element has id='id' or name='id'. Closes #11092. [#89 state:resolved] [jddalton]
 
 * Stop Form.Element.disable from stealing focus. Closes #11214. [kangax, sjoekie]

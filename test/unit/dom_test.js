@@ -270,14 +270,14 @@ new Test.Unit.Runner({
   testElementShow: function(){
     $('test-show-visible').show();
     this.assert($('test-show-visible').visible());
-    $('test-show-hidden').show();
+    this.assert(Object.isElement(Element.show('test-show-hidden')));
     this.assert($('test-show-hidden').visible());
   },
   
   testElementHide: function(){
     $('test-hide-visible').hide();
     this.assert(!$('test-hide-visible').visible());
-    $('test-hide-hidden').hide();
+    this.assert(Object.isElement(Element.hide('test-hide-hidden')));
     this.assert(!$('test-hide-hidden').visible());
   }, 
   
