@@ -1,3 +1,5 @@
+* Stop Form.Element.disable from stealing focus. Closes #11214. [kangax, sjoekie]
+
 * Ensure String#escapeHTML escapes double quotes. Closes #10622. [kangax]
 
 * Make String#extractScripts remove commented out scripts and remove the "m" RegExp flag from String#(extractScripts|stripScripts). Closes #9599. [bubbatls, jddalton]
