@@ -78,10 +78,13 @@ Object.extend(Array.prototype, {
     });
   },
   
-  intersect: function(array) { 
-    return this.uniq().findAll(function(item) { 
-      return array.detect(function(value) { return item === value });
-    }); 
+  intersect: function(other) {
+    var arr = this, result = [];
+    other._each(function(item) {
+      if (arr.indexOf(item) !== -1 && result.indexOf(item) === -1)
+        result.push(item);
+    });
+    return result;
   },
   
   clone: function() {
