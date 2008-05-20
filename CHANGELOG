@@ -1,3 +1,5 @@
+* unit test: Update DOM unit tests to avoid failing on Element#replace tests in Opera. [Andrew Dupont, jddalton]
+
 * Ensure Element.Methods.Simulated.hasAttribute() returns a boolean value. [jddalton]
 
 * Ensure Array#intersect returns correct result if intersect value is 0. [jddalton]
