@@ -1,3 +1,5 @@
+* unit test: Fix unit test freeze in IE. [Tobie Langel]
+
 * unit test: Instanciate Test.Unit.Logger on window load. [Tobie Langel]
 
 * unit test: Remove usage of the 'with' statement from unit tests. [Tobie Langel]
