@@ -1,3 +1,5 @@
+* unit test: Fix exiting test task on INT signal. [Samuel Lebeau]
+
 * unit test: Fix unit test freeze in IE. [Tobie Langel]
 
 * unit test: Instanciate Test.Unit.Logger on window load. [Tobie Langel]
