@@ -128,7 +128,7 @@ Object.extend(Object, {
   },
   
   isElement: function(object) {
-    return object && object.nodeType == 1;
+    return !!(object && object.nodeType == 1);
   },
   
   isArray: function(object) {
