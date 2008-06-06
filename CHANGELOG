@@ -1,3 +1,5 @@
+* Ensure Object.isHash handles "falsy" values properly. [jddalton]
+
 * Ensure Object.isElement handles "falsy" values properly. [kangax]
 
 * Ensure Hash does not return keys from the prototype chain (e.g., constructor, valueOf, toString). [kangax]

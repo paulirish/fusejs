@@ -201,6 +201,13 @@ new Test.Unit.Runner({
     this.assert(!Object.isHash(false));
     this.assert(!Object.isHash(true));
     this.assert(!Object.isHash([]));
+    
+    // falsy variables should not mess up return value type
+    this.assertIdentical(false, Object.isHash(0));
+    this.assertIdentical(false, Object.isHash(''));
+    this.assertIdentical(false, Object.isHash(NaN));
+    this.assertIdentical(false, Object.isHash(null));
+    this.assertIdentical(false, Object.isHash(undefined));
   },
   
   testObjectIsElement: function() {

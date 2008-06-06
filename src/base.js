@@ -137,7 +137,7 @@ Object.extend(Object, {
   },
   
   isHash: function(object) {
-    return object instanceof Hash;
+    return !!(object && object instanceof Hash);
   },
   
   isFunction: function(object) {
