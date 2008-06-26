@@ -1,3 +1,5 @@
+* Rename confusing variables in Form.Element.Serializers.select(). [#180 state:resolved] [jddalton]
+
 * Rewrite document.viewport methods getDimensions, getWidth, and getHeight to avoid browser sniffs, increase speed, and fix Opera 9.5 support. [#337 state:resolved] [jddalton, Nick Stakenburg]
 
 * Fix Element#clonePosition issues with element margins, borders, and padding. Closes #11613. [azazel, jddalton, Nick Stakenburg]
