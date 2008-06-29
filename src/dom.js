@@ -446,12 +446,12 @@ Element.Methods = {
     els.visibility = 'hidden';
     els.position = 'absolute';
     els.display = 'block';
-    var originalWidth = element.clientWidth;
-    var originalHeight = element.clientHeight;
+    var originalWidth = element.offsetWidth;
+    var originalHeight = element.offsetHeight;
     els.display = originalDisplay;
     els.position = originalPosition;
     els.visibility = originalVisibility;
-    return {width: originalWidth, height: originalHeight};    
+    return {width: originalWidth, height: originalHeight};
   },
   
   makePositioned: function(element) {
