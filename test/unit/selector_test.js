@@ -373,5 +373,15 @@ new Test.Unit.Runner({
     var b = $('dupContainer').down('#dupL4');
     
     this.assertEqual(a, b);
+  },
+  
+  testSelectorNotInsertedNodes: function() {
+    var wrapper = new Element('div');
+    wrapper.update('<table><tr><td id="myTD"></td></tr></table>');
+    this.assertNotNullOrUndefined(new Selector('[id=myTD]').findElements(wrapper)[0]);
+    this.assertNotNullOrUndefined(wrapper.select('[id=myTD]')[0], '[id=myTD]');
+    this.assertNotNullOrUndefined(wrapper.select('td')[0], 'td');
+    this.assertNotNullOrUndefined(wrapper.select('#myTD')[0], '#myTD');
+    this.assertNotNullOrUndefined(wrapper.down().select('[id=myTD]')[0], '[id=myTD] on wrapper child');
   }
 });

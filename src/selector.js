@@ -459,9 +459,22 @@ Object.extend(Selector, {
     },
     
     id: function(nodes, root, id, combinator) {
-      var targetNode = $(id), h = Selector.handlers;
+      var targetNode, h = Selector.handlers;
+
+      // check if the root is detached from the document
+      // (works with detached clones of attached elements too)
+      if (root.currentStyle === null || (root.ownerDocument &&
+         !Element.descendantOf(root, root.ownerDocument))) {
+        var els = root.getElementsByTagName('*');
+        for (var i = 0, el; el = els[i]; i++) {
+          if (el.id === id) {
+            targetNode = $(el); break;
+          }
+        }
+      } else targetNode = $(id);
+ 
       if (!targetNode) return [];
-      if (!nodes && root == document) return [targetNode];
+      if (!nodes && root === document) return [targetNode];
       if (nodes) {
         if (combinator) {
           if (combinator == 'child') {
