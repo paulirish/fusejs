@@ -1,3 +1,5 @@
+* Improve NodeList detection for Safari's $A function. [#187 state:resolved] [Garrett Smith, jddalton]
+
 * Use different tactic to sniff for Opera in order to avoid false positives in IE. [#172 state:resolved] [Tobie Langel, jddalton]
 
 * Ensure Selector.handlers.id finds the proper element even when it's not attached to the document. [#198, #271 state:resolved] [jddalton]
