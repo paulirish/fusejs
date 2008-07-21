@@ -149,7 +149,7 @@ Object.extend(Event, (function() {
   function getEventID(element) {
     if (element._prototypeEventID) return element._prototypeEventID[0];
     arguments.callee.id = arguments.callee.id || 1;
-    return element._prototypeEventID = [++arguments.callee.id];
+    return (element._prototypeEventID = [arguments.callee.id++])[0];
   }
   
   function getDOMEventName(eventName) {
