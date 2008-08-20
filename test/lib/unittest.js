@@ -71,7 +71,7 @@ Event.simulateKey = function(element, eventName) {
 };
 
 Event.simulateKeys = function(element, command) {
-  for (var i=0; i<command.length; i++) {
+  for (var i = 0; i < command.length; i++) {
     Event.simulateKey(element,'keypress',{charCode:command.charCodeAt(i)});
   }
 };
@@ -117,13 +117,15 @@ Test.Unit.Logger = Class.create({
   },
   
   getLastLogLine: function() {
+    //return this.element.descendants('tr').last();
     var trs = this.element.getElementsByTagName('tr');
     return $(trs[trs.length - 1]);
   },
   
   getMessageCell: function() {
-    var tds = this.getLastLogLine().getElementsByTagName('td');
-    return $(tds[2]);
+    return this.getLastLogLine().down('td', 2);
+    //var tds = this.getLastLogLine().getElementsByTagName('td');
+    //return $(tds[2]);
   },
   
   _createLogTable: function() {
@@ -450,7 +452,7 @@ Test.Unit.Assertions = {
   },
   
   assertElementsMatch: function() {
-    var pass = true, expressions = $A(arguments), elements = $A(expressions.shift());
+    var message, pass = true, expressions = $A(arguments), elements = $A(expressions.shift());
     if (elements.length != expressions.length) {
       message = this.buildMessage('assertElementsMatch', 'size mismatch: ? elements, ? expressions (?).', elements.length, expressions.length, expressions);
       this.flunk(message);

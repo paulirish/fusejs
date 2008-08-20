@@ -93,7 +93,7 @@ new Test.Unit.Runner({
   },
   
   testSelectorWithTagNameAndNegatedAttributeValue: function() {
-    this.assertEnumEqual([], $$('a[href!=#]'));
+    this.assertEnumEqual([], $$('a[href!="#"]'));
   },
 
   testSelectorWithBracketAttributeValue: function() {

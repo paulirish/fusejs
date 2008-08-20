@@ -1,3 +1,5 @@
+* unit test: Fix local variables, stop observers, correct css/html and fix Test.Unit.Logger#getMessageCell. [jddalton]
+
 * unit test: Fix exiting test task on INT signal. [Samuel Lebeau]
 
 * unit test: Fix unit test freeze in IE. [Tobie Langel]

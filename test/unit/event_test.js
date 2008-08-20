@@ -108,6 +108,8 @@ new Test.Unit.Runner({
     this.assertEqual(1, count);
     span.fire("test:somethingElseHappened");
     this.assertEqual(2, count);
+    span.stopObserving("test:somethingHappened", observer); 
+    span.stopObserving("test:somethingElseHappened", observer);   
   },
   
   testStopObservingWithoutArguments: function() {
