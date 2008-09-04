@@ -1022,9 +1022,11 @@ Element._insertionTranslations = {
 }).call(Element._insertionTranslations);
 
 Element.Methods.Simulated = {
+  // No use of $ in this function in order to keep things fast.
+  // Used by the Selector class.  
   hasAttribute: function(element, attribute) {
     attribute = Element._attributeTranslations.has[attribute] || attribute;
-    var node = $(element).getAttributeNode(attribute);
+    var node = element.getAttributeNode(attribute);
     return node && node.specified;
   }
 };
@@ -1079,6 +1081,8 @@ Element.extend = (function() {
   return extend;
 })();
 
+// No use of $ in this function in order to keep things fast.
+// Used by the Selector class.
 Element.hasAttribute = function(element, attribute) {
   if (element.hasAttribute) return element.hasAttribute(attribute);
   return Element.Methods.Simulated.hasAttribute(element, attribute);

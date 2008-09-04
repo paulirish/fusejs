@@ -1,3 +1,5 @@
+* Remove the use of $() in Element#hasAttribute methods to keep Selector class speedy. [Andrew Dupont]
+
 * Ensure Element methods run the element argument through $(). Closes #11472. [jddalton]
 
 * Set document.loaded = true before firing dom:loaded custom event. Closes #11453. [choppsta, jddalton]
