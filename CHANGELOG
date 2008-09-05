@@ -1,3 +1,5 @@
+* Fix for IE7 to access local files via Ajax.Request. Closes #8259. [Andrew Dupont, hagen.seifert, jddalton]
+
 * Make Object.isNumber check that the number is finite (rather than NaN or +/-Infinity). Closes #10349. [mkim]
 
 * Ensure Object.isHash handles "falsy" values properly. [jddalton]
