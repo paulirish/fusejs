@@ -1,3 +1,5 @@
+* Make Object.isNumber check that the number is finite (rather than NaN or +/-Infinity). Closes #10349. [mkim]
+
 * Ensure Object.isHash handles "falsy" values properly. [jddalton]
 
 * Ensure Object.isElement handles "falsy" values properly. [kangax]

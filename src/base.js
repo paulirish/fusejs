@@ -149,7 +149,7 @@ Object.extend(Object, {
   },
   
   isNumber: function(object) {
-    return typeof object == "number";
+    return typeof object == "number" && isFinite(object);
   },
   
   isUndefined: function(object) {
