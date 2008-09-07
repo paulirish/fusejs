@@ -1,3 +1,5 @@
+* Ensure Element#getDimensions only unhides elements that are hidden. [Andrew Dupont, Nick Stackenburg, jddalton]
+
 * Make Element#getDimensions use offset(Height|Width) rather than client(Height|Width). Closes #10122. [demian85, jddalton, Nick Stackenburg]
 
 * Fix for IE7 to access local files via Ajax.Request. Closes #8259. [Andrew Dupont, hagen.seifert, jddalton]

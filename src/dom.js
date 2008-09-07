@@ -433,25 +433,29 @@ Element.Methods = {
   
   getDimensions: function(element) {
     element = $(element);
-    var display = element.getStyle('display');
-    if (display != 'none' && display != null) // Safari bug
-      return {width: element.offsetWidth, height: element.offsetHeight};
+    var display = element.getStyle('display'),
+     dimensions = { width: element.offsetWidth, height: element.offsetHeight };
     
-    // All *Width and *Height properties give 0 on elements with display none,
-    // so enable the element temporarily
-    var els = element.style;
-    var originalVisibility = els.visibility;
-    var originalPosition = els.position;
-    var originalDisplay = els.display;
-    els.visibility = 'hidden';
-    els.position = 'absolute';
-    els.display = 'block';
-    var originalWidth = element.offsetWidth;
-    var originalHeight = element.offsetHeight;
-    els.display = originalDisplay;
-    els.position = originalPosition;
-    els.visibility = originalVisibility;
-    return {width: originalWidth, height: originalHeight};
+    // All width and height properties return 0 on elements with display:none,
+    // so show the element temporarily
+    if (display === "none" || display === null ||
+        dimensions.width === 0 || dimensions.height === 0) {
+      var els = element.style,
+       originalVisibility = els.visibility,
+       originalPosition   = els.position,
+       originalDisplay    = els.display;
+
+      els.visibility = 'hidden';
+      els.position = 'absolute';
+      els.display = 'block';
+      
+      dimensions = { width: element.offsetWidth, height: element.offsetHeight };
+
+      els.display = originalDisplay;
+      els.position = originalPosition;
+      els.visibility = originalVisibility;
+    }
+    return dimensions;
   },
   
   makePositioned: function(element) {
