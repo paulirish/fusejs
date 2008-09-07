@@ -1,3 +1,5 @@
+* Fix Event.stopObserving() IE error on elements with no observers. [jddalton]
+
 * Prevent getEventID from assigning `window` and `document` an eventID. [jddalton]
 
 * Fix error when calling Event.stopObserving(window). [#30 state:resolved] [jddalton, kangax]
