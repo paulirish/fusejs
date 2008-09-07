@@ -5,6 +5,32 @@ var createParagraph = function(text) {
   var p = document.createElement('p');
   p.appendChild(document.createTextNode(text));
   return p;
+// Parsing and serializing XML
+// http://developer.mozilla.org/En/Parsing_and_serializing_XML
+// http://www.van-steenbeek.net/?q=explorer_domparser_parsefromstring
+if (typeof(DOMParser) === 'undefined') {
+  DOMParser = function() { };
+  DOMParser.prototype.parseFromString = (function() {
+    if (typeof(ActiveXObject) !== 'undefined') {
+      return function(str, contentType) {
+        var xmldata = new ActiveXObject('MSXML.DomDocument');
+        xmldata.async = false;
+        xmldata.loadXML(str);
+        return xmldata;
+      };
+    }
+    return function(str, contentType) {
+      var transport = Ajax.getTransport();
+      if (!contentType)
+        contentType = 'application/xml';
+ 
+      transport.open('GET', 'data:' + contentType + ';charset=utf-8,' + encodeURIComponent(str), false);
+      if (typeof transport.overrideMimeType !== 'undefined')
+        transport.overrideMimeType(contentType);
+      transport.send(null);
+      return transport.responseXML;
+    };
+  })();
 }
 
 new Test.Unit.Runner({
@@ -653,6 +679,11 @@ new Test.Unit.Runner({
       this.assertEqual(textnode, Element.extend(textnode));
       this.assert(typeof textnode['show'] == 'undefined');
     }, this);
+    
+    // Don't extend XML documents
+    var xmlDoc = (new DOMParser()).parseFromString('<note><to>Sam</to></note>', 'text/xml');
+    Element.extend(xmlDoc.firstChild);
+    this.assertUndefined(xmlDoc.firstChild._extendedByPrototype);
   },
   
   testElementExtendReextendsDiscardedNodes: function() {
