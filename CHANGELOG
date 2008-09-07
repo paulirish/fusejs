@@ -1,3 +1,5 @@
+* Fix issue where Opera 9.5 gets confused by complex selectors in $$(). [#157 state:resolved] [Andre Dupont. Paulo Pereira, Andrea Baron, jddalton]
+
 * Make Element#readAttribute follow W3C specifications for Element#getAttribute by returning an empty string if there is no specified/default value. [jddalton]
 
 * Ensure Form.serializeElements() does not return keys from the prototype chain (e.g., constructor, valueOf, toString). Closes #9609. [gryn, jddalton, kangax]

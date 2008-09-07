@@ -52,6 +52,8 @@ new Test.Unit.Runner({
   },
   
   test$$MatchesAncestryWithTokensSeparatedByWhitespace: function() {
+    // This also tests Opera's XPath engine which breaks down
+    // when selectors are too complex (a regression in version 9.5)
     this.assertEnumEqual($('em2', 'em', 'span'), $$('#fixtures a *'));
     this.assertEnumEqual([$('p')], $$('div#fixtures p'));
   },

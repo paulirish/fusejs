@@ -23,6 +23,12 @@ var Selector = Class.create({
     
     var e = this.expression;
 
+    // Opera's XPath engine breaks down when selectors are too complex
+    // (a regression in version 9.5)
+    if (Prototype.Browser.Opera &&
+     parseFloat(window.opera.version()) === 9.5)
+      return false;
+
     // Safari 3 chokes on :*-of-type and :empty
     if (Prototype.Browser.WebKit && 
      (e.include("-of-type") || e.include(":empty")))
@@ -527,9 +533,8 @@ Object.extend(Selector, {
       if (nodes && combinator) nodes = this[combinator](nodes);
       var handler = Selector.operators[operator], results = [];
       for (var i = 0, node; node = nodes[i]; i++) {
-        var nodeValue = Element.readAttribute(node, attr);
-        if (nodeValue === null) continue;
-        if (handler(nodeValue, value)) results.push(node);
+        if (handler(Element.readAttribute(node, attr), value))
+          results.push(node);
       }
       return results;
     },
