@@ -239,13 +239,13 @@ Object.extend(Event, (function() {
       
       if (!handler && eventName) {
         getWrappersForEventName(id, eventName).each(function(wrapper) {
-          element.stopObserving(eventName, wrapper.handler);
+          Event.stopObserving(element, eventName, wrapper.handler);
         });
         return element;
         
       } else if (!eventName) {
         Object.keys(getCacheForID(id)).each(function(eventName) {
-          element.stopObserving(eventName);
+          Event.stopObserving(element, eventName);
         });
         return element;
       }

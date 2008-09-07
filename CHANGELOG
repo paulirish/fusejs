@@ -1,3 +1,5 @@
+* Fix error when calling Event.stopObserving(window). [#30 state:resolved] [jddalton, kangax]
+
 * Fix bug in getEventID where an array is returned instead of a number. [#228 state:resolved] [jddalton]
 
 * Improve NodeList detection for Safari's $A function. [#187 state:resolved] [Garrett Smith, jddalton]
