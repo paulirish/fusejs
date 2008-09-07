@@ -233,6 +233,14 @@ new Test.Unit.Runner({
     $('container').down().observe("test:somethingHappened", Prototype.emptyFunction);
     $('container').innerHTML += $('container').innerHTML;
     this.assertUndefined($('container').down(1)._prototypeEventID);
+  },
+  
+  testDocumentAndWindowEventID: function() {
+    [document, window].each(function(object) {
+      Event.observe(object, "test:somethingHappened", Prototype.emptyFunction);
+      this.assertUndefined(object._prototypeEventID);
+      Event.stopObserving(object, "test:somethingHappened");
+    }, this);
   }
 });
 

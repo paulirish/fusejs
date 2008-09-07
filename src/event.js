@@ -147,10 +147,12 @@ Object.extend(Event, (function() {
   var cache = Event.cache;
 
   function getEventID(element) {
+    if (element === window) return 1;
+    if (element.nodeType === 9) return 2;
     if (element._prototypeEventID) return element._prototypeEventID[0];
-    arguments.callee.id = arguments.callee.id || 1;
     return (element._prototypeEventID = [arguments.callee.id++])[0];
   }
+  getEventID.id = 3;
   
   function getDOMEventName(eventName) {
     if (eventName && eventName.include(':')) return "dataavailable";
