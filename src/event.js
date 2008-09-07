@@ -170,26 +170,25 @@ Object.extend(Event, (function() {
   
   function createWrapper(element, eventName, handler) {
     var id = getEventID(element);
-    var c = getWrappersForEventName(id, eventName);
-    if (c.pluck("handler").include(handler)) return false;
+    var w = getWrappersForEventName(id, eventName);
+    if (w.pluck("handler").include(handler)) return false;
     
     var wrapper = function(event) {
       if (!Event || !Event.extend ||
         (event.eventName && event.eventName != eventName))
           return false;
       
-      Event.extend(event);
-      handler.call(element, event);
+      handler.call(element, Event.extend(event));
     };
     
     wrapper.handler = handler;
-    c.push(wrapper);
+    w.push(wrapper);
     return wrapper;
   }
   
   function findWrapper(id, eventName, handler) {
-    var c = getWrappersForEventName(id, eventName);
-    return c.find(function(wrapper) { return wrapper.handler == handler });
+    var w = getWrappersForEventName(id, eventName);
+    return w.find(function(wrapper) { return wrapper.handler == handler });
   }
   
   function destroyWrapper(id, eventName, handler) {
@@ -237,9 +236,7 @@ Object.extend(Event, (function() {
   
     stopObserving: function(element, eventName, handler) {
       element = $(element);
-      var id = getEventID(element), 
-       name = getDOMEventName(eventName),
-       c = cache[id];
+      var id = getEventID(element), c = cache[id];
       
       if (!c) {
         return element;
@@ -260,6 +257,7 @@ Object.extend(Event, (function() {
       var wrapper = findWrapper(id, eventName, handler);
       if (!wrapper) return element;
       
+      var name = getDOMEventName(eventName);
       if (element.removeEventListener) {
         element.removeEventListener(name, wrapper, false);
       } else {
