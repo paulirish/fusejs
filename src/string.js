@@ -83,20 +83,6 @@ Object.extend(String.prototype, {
   evalScripts: function() {
     return this.extractScripts().map(function(script) { return eval(script) });
   },
-
-  escapeHTML: function() {
-    var self = arguments.callee;
-    self.text.data = this;
-    return self.div.innerHTML.replace(/"/g, '&quot;');
-  },
-
-  unescapeHTML: function() {
-    var div = new Element('div');
-    div.innerHTML = this.stripTags();
-    return div.childNodes[0] ? (div.childNodes.length > 1 ? 
-      $A(div.childNodes).inject('', function(memo, node) { return memo+node.nodeValue }) : 
-      div.childNodes[0].nodeValue) : '';
-  },
   
   toQueryParams: function(separator) {
     var match = this.strip().match(/([^?#]*)(#.*)?$/);
@@ -215,14 +201,59 @@ Object.extend(String.prototype, {
   }
 });
 
-if (Prototype.Browser.WebKit || Prototype.Browser.IE) Object.extend(String.prototype, {
-  escapeHTML: function() {
-    return this.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  },
-  unescapeHTML: function() {
-    return this.stripTags().replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+(function(SP) {
+  var container = document.createElement('pre'),
+   textNode = container.appendChild(document.createTextNode('')),
+   div = document.createElement('div');
+
+  // Safari 2.x has issues with escaping html inside a "pre"
+  // element so we use the deprecated "xmp" element instead.
+  if ((textNode.data = '&') && container.innerHTML !== '&amp;') {
+    container = document.createElement('xmp');
+    textNode = container.appendChild(document.createTextNode(''));
   }
-});
+
+  SP.escapeHTML = function() {
+    textNode.data = this;
+    return container.innerHTML.replace(/"/g, '&quot;');
+  };
+
+  SP.unescapeHTML = function() {
+    div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+    return div.textContent;
+  };
+
+  // Safari 3.x has issues with escaping the ">" character
+  if ((textNode.data = '>') && container.innerHTML !== '&gt;') {
+    SP.escapeHTML = function() {
+      textNode.data = this;
+      return container.innerHTML.replace(/"/g, '&quot;').replace(/>/g, '&gt;');
+    };
+  }
+
+  if (!('textContent' in div)) {
+    div.innerHTML = '<pre>&lt;span&gt;test&lt;/span&gt;</pre>';
+    if ('innerText' in div && div.firstChild.innerText === '<span>test</span>') {
+      SP.unescapeHTML = function() {
+        div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+        return div.firstChild.innerText.replace(/\r/g, '');
+      };
+    }
+	else if (div.firstChild.innerHTML === '<span>test</span>') {
+	  SP.unescapeHTML = function() {
+        div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+        return div.firstChild.innerHTML;
+      };
+	} else {
+	  SP.unescapeHTML = function() {
+        div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+        return div.firstChild.childNodes[0] ? (div.firstChild.childNodes.length > 1 ?
+          $A(div.firstChild.childNodes).inject('', function(memo, node) { return memo + node.nodeValue }) :
+          div.firstChild.childNodes[0].nodeValue) : '';
+      };
+    }
+  }
+})(String.prototype);
 
 String.prototype.gsub.prepareReplacement = function(replacement) {
   if (Object.isFunction(replacement)) return replacement;
@@ -231,13 +262,6 @@ String.prototype.gsub.prepareReplacement = function(replacement) {
 };
 
 String.prototype.parseQuery = String.prototype.toQueryParams;
-
-Object.extend(String.prototype.escapeHTML, {
-  div:  document.createElement('div'),
-  text: document.createTextNode('')
-});
-
-String.prototype.escapeHTML.div.appendChild(String.prototype.escapeHTML.text);
 
 var Template = Class.create({
   initialize: function(template, pattern) {

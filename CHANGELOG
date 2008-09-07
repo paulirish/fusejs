@@ -1,3 +1,5 @@
+* Rewrite String#escapeHTML and String#unescapeHTML to ensure more consistent output across browsers. Closes #8452. [jddalton, slusarz, Tobie Langel)
+
 * Make sure Event#stopObserving works when passed non-string value as an eventName. [kangax]
 
 * Cleaned up event.js renaming confusing/contradictory variable names [jddalton]
