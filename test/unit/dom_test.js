@@ -1332,6 +1332,14 @@ new Test.Unit.Runner({
     // invoking on "relative" positioned element should return element
     var element = $('absolute_fixed_undefined').setStyle({position: 'relative'});
     this.assertEqual(element, element.relativize());
+    element.style.position = '';
+    
+    // test relativize on elements that have not called absolutize first
+    $w('notInlineAbsoluted inlineAbsoluted absolute_absolute').each(function(id) {
+      var passed = true;
+      try { $(id).relativize() } catch(e) { passed = false }
+      this.assertEqual(false, passed);
+    }, this);
   },
   
   testViewportDimensions: function() {

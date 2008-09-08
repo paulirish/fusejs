@@ -562,11 +562,19 @@ Element.Methods = {
       return element;
     // Position.prepare(); // To be done manually by Scripty when it needs it.
 
-    element.style.position = 'relative';
-    element.style.top    = element._originalTop;
-    element.style.left   = element._originalLeft;
-    element.style.height = element._originalHeight;
-    element.style.width  = element._originalWidth;
+    if (Object.isUndefined(element._originalTop))
+      throw new Error("Element#absolutize must be called first.");
+
+    var s = element.style;
+    s.position = 'relative';
+    s.top      = element._originalTop;
+    s.left     = element._originalLeft;
+    s.width    = element._originalHeight;
+    s.height   = element._originalWidth;
+
+    element.removeAttribute('_originalTop');
+    if (!Object.isUndefined(element._originalTop))
+      delete element._originalTop;
     return element;
   },
 

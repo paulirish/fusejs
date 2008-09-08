@@ -1,3 +1,5 @@
+* Make Element#relativize throw an error if Element#absolutize wasn't previously called. [Andrew Dupont, jddalton]
+
 * Remove overly complex position code from Element#relativize and Element#absolutize. [jddalton]
 
 * Make Element.extend() skip XML nodes to avoid errors in IE. Closes #9709. [jddalton, yanick.rochon]
