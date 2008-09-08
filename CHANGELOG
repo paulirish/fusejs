@@ -1,3 +1,5 @@
+* Use Element#cumulativeScrollOffset in Element#viewportOffset to reduce code duplication. [jddalton]
+
 * Make Element#absolutize account for margins, padding, and borders. Closes #8024, #9918. [chiefcll, jddalton, pphilipp, Nick Stakenburg]
 
 * Make Element#relativize throw an error if Element#absolutize wasn't previously called. [Andrew Dupont, jddalton]

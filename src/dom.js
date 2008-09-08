@@ -624,25 +624,24 @@ Element.Methods = {
 
   viewportOffset: function(forElement) {
     forElement = $(forElement);
+    var element = forElement, valueT = 0, valueL = 0,
+     scrollOffset = Element.cumulativeScrollOffset(element);
 
-    var element = forElement, valueT = 0, valueL = 0;
     do {
       valueT += element.offsetTop  || 0;
       valueL += element.offsetLeft || 0;
 
       // Safari fix
-      if (element.offsetParent == document.body &&
-        Element.getStyle(element, 'position') == 'absolute') break;
+      if (element.offsetParent === document.body &&
+        Element.getStyle(element, 'position') === 'absolute') break;
 
     } while (element = element.offsetParent);
 
-    element = forElement;
-    do {
-      if (!Prototype.Browser.Opera || element.tagName == 'BODY') {
-        valueT -= element.scrollTop  || 0;
-        valueL -= element.scrollLeft || 0;
-      }
-    } while (element = element.parentNode);
+    // Subtract the scrollOffets of forElement from the scrollOffset totals
+    // (cumulativeScrollOffset includes them).
+    // Then subtract the the scrollOffset totals from the element offset totals.
+    valueT -= scrollOffset.top  - (forElement.scrollTop  || 0);
+    valueL -= scrollOffset.left - (forElement.scrollLeft || 0);
 
     return Element._returnOffset(valueL, valueT);
   },
