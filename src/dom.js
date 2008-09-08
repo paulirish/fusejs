@@ -537,22 +537,41 @@ Element.Methods = {
       return element;
     // Position.prepare(); // To be done manually by Scripty when it needs it.
 
-    var offsets = element.positionedOffset();
-    var top     = offsets[1];
-    var left    = offsets[0];
-    var width   = element.clientWidth;
-    var height  = element.clientHeight;
+    var s = element.style,
+     offsets = Element.positionedOffset(element),
+     before = Element.getDimensions(element);
 
-    element._originalLeft   = element.style.left;
-    element._originalTop    = element.style.top;
-    element._originalWidth  = element.style.width;
-    element._originalHeight = element.style.height;
+    var styles = {
+      width:  ['borderLeftWidth', 'paddingLeft', 'borderRightWidth',  'paddingRight'],
+      height: ['borderTopWidth',  'paddingTop',  'borderBottomWidth', 'paddingBottom']
+    };
+    // calculate css dimensions of the element
+    var cssDimensions = { };
+    for (var i in before) {
+      cssDimensions[i] = Math.max(0, styles[i].inject(before[i], function(value, styleName) {
+        return value -= parseFloat(Element.getStyle(element, styleName)) || 0;
+      }));
+    }
 
-    element.style.position = 'absolute';
-    element.style.top    = top + 'px';
-    element.style.left   = left + 'px';
-    element.style.width  = width + 'px';
-    element.style.height = height + 'px';
+    element._originalLeft       = s.left;
+    element._originalTop        = s.top;
+    element._originalWidth      = s.width;
+    element._originalHeight     = s.height;   
+    element._originalMarginTop  = s.marginTop;
+    element._originalMarginLeft = s.marginLeft;
+
+    s.position   = 'absolute';
+    s.marginTop  = '0px';
+    s.marginLeft = '0px';
+    s.top        = offsets.top  + 'px';
+    s.left       = offsets.left + 'px';
+    s.width      = cssDimensions.width  + 'px';
+    s.height     = cssDimensions.height + 'px';
+
+    var after = Element.getDimensions(element);
+    s.width   = Math.max(0, cssDimensions.width  + (before.width  - after.width))  + 'px';
+    s.height  = Math.max(0, cssDimensions.height + (before.height - after.height)) + 'px';
+
     return element;
   },
 
@@ -566,11 +585,13 @@ Element.Methods = {
       throw new Error("Element#absolutize must be called first.");
 
     var s = element.style;
-    s.position = 'relative';
-    s.top      = element._originalTop;
-    s.left     = element._originalLeft;
-    s.width    = element._originalHeight;
-    s.height   = element._originalWidth;
+    s.position   = 'relative';
+    s.marginLeft = element._originalMarginLeft;
+    s.marginTop  = element._originalMarginTop;
+    s.top        = element._originalTop;
+    s.left       = element._originalLeft;
+    s.width      = element._originalHeight;
+    s.height     = element._originalWidth;
 
     element.removeAttribute('_originalTop');
     if (!Object.isUndefined(element._originalTop))
