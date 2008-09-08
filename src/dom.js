@@ -603,6 +603,12 @@ Element.Methods = {
     element = $(element);
     var valueT = 0, valueL = 0;
     do {
+      // Skip body if documentElement has
+      // scroll values as well (i.e. Opera 9.2x)
+      if (element === document.body && ((element.scrollTop && 
+       element.parentNode.scrollTop) || (element.scrollLeft && 
+        element.parentNode.scrollLeft))) continue;
+
       valueT += element.scrollTop  || 0;
       valueL += element.scrollLeft || 0;
     } while (Element.getStyle(element, 'position') !== 'fixed' &&

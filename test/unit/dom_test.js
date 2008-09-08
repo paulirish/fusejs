@@ -1407,7 +1407,8 @@ new Test.Unit.Runner({
   testCumulativeScrollOffset: function() {
     window.scrollTo(0, 30);
     $('absolute_fixed').scrollTop = 20;
-    this.assertEqual(20, $('absolute_fixed').cumulativeScrollOffset().top);
+    this.assertEnumEqual([0, 20], $('absolute_fixed').cumulativeScrollOffset());
+    this.assertEnumEqual([0, 30], $(document.body).cumulativeScrollOffset());
     
     $('absolute_fixed').scrollTop = 0;
     window.scrollTo(0, 0);
