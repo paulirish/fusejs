@@ -604,9 +604,10 @@ Element.Methods = {
     var valueT = 0, valueL = 0;
     do {
       valueT += element.scrollTop  || 0;
-      valueL += element.scrollLeft || 0; 
-      element = element.parentNode;
-    } while (element);
+      valueL += element.scrollLeft || 0;
+    } while (Element.getStyle(element, 'position') !== 'fixed' &&
+     (element = element.parentNode) && element.nodeType === 1);
+
     return Element._returnOffset(valueL, valueT);
   },
   

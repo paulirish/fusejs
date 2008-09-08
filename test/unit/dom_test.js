@@ -1308,6 +1308,14 @@ new Test.Unit.Runner({
       $('absolute_relative').viewportOffset());
     this.assertEnumEqual([20,30],
       $('absolute_relative_undefined').viewportOffset());
+    
+    window.scrollTo(0, 30);
+    $('absolute_fixed').scrollTop = 20;
+    this.assertEnumEqual([10, 10], $('absolute_fixed').viewportOffset());
+    
+    window.scrollTo(0, 0);
+    $('absolute_fixed').scrollTop = 0;
+    this.assertEnumEqual([10, 10], $('absolute_fixed').viewportOffset());
   },
   
   testOffsetParent: function() {
@@ -1394,6 +1402,15 @@ new Test.Unit.Runner({
     
       window.resizeTo(850, 650);
     }.bind(this));
+  },
+  
+  testCumulativeScrollOffset: function() {
+    window.scrollTo(0, 30);
+    $('absolute_fixed').scrollTop = 20;
+    this.assertEqual(20, $('absolute_fixed').cumulativeScrollOffset().top);
+    
+    $('absolute_fixed').scrollTop = 0;
+    window.scrollTo(0, 0);
   },
   
   testNodeConstants: function() {
