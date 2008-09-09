@@ -510,8 +510,7 @@ Element.Methods = {
     do {
       valueT += element.offsetTop  || 0;
       valueL += element.offsetLeft || 0;
-      element = element.offsetParent;
-    } while (element);
+    } while (element = element.offsetParent);
     return Element._returnOffset(valueL, valueT);
   },
 
@@ -522,12 +521,9 @@ Element.Methods = {
       valueT += element.offsetTop  || 0;
       valueL += element.offsetLeft || 0;
       element = element.offsetParent;
-      if (element) {
-        if (element.tagName.toUpperCase() == 'BODY') break;
-        var p = Element.getStyle(element, 'position');
-        if (p !== 'static') break;
-      }
-    } while (element);
+    } while (element && element !== document.body &&
+      Element.getStyle(element, 'position') === 'static');
+    
     return Element._returnOffset(valueL, valueT);
   },
 

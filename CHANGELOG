@@ -1,3 +1,5 @@
+* Minor clean-up to Element#cumulativeOffset and Element#positionedOffset. [jddalton]
+
 * Fix Element#cumulativeScrollOffset for Opera 9.25/9.5. Closes #10486. [jddalton, Nick Stakenburg]
 
 * Make Element#cumulativeScrollOffset stop calculating scroll position after a "fixed" positioned element. Closes #10869. [jddalton, kangax, watersco]
