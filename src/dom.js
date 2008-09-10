@@ -543,8 +543,8 @@ Element.Methods = {
     var width   = element.clientWidth;
     var height  = element.clientHeight;
 
-    element._originalLeft   = left - parseFloat(element.style.left  || 0);
-    element._originalTop    = top  - parseFloat(element.style.top || 0);
+    element._originalLeft   = element.style.left;
+    element._originalTop    = element.style.top;
     element._originalWidth  = element.style.width;
     element._originalHeight = element.style.height;
 
@@ -563,11 +563,8 @@ Element.Methods = {
     // Position.prepare(); // To be done manually by Scripty when it needs it.
 
     element.style.position = 'relative';
-    var top  = parseFloat(element.style.top  || 0) - (element._originalTop || 0);
-    var left = parseFloat(element.style.left || 0) - (element._originalLeft || 0);
-
-    element.style.top    = top + 'px';
-    element.style.left   = left + 'px';
+    element.style.top    = element._originalTop;
+    element.style.left   = element._originalLeft;
     element.style.height = element._originalHeight;
     element.style.width  = element._originalWidth;
     return element;
