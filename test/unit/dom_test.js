@@ -1168,6 +1168,47 @@ new Test.Unit.Runner({
     this.assertIdentical(200, $('dimensions-table').getDimensions().width);
   },
       
+  testElementClonePosition: function() {
+    var rand = function(n) {
+      return Math.ceil(n*Math.random());
+    };
+
+    [$w('absolute relative'), $w('relative absolute'),
+     $w('relative relative'), $w('absolute absolute')]
+     .each(function(positions) {
+       var source = $('clone_position_source_' + positions[0]),
+        target = $('clone_position_target_' + positions[1]);
+
+       var styles = $w('marginLeft marginRight marginTop marginBottom ' +
+        'paddingLeft paddingRight paddingTop paddingBottom borderLeftWidth ' +
+        'borderRightWidth borderTopWidth borderBottomWidth');
+
+       [source, target]._each(function(el) {
+         styles._each(function(s) {
+           el.style[s] = rand(10) + 'px';
+         });
+       });
+
+       source.setOpacity(0.5)
+        .clonePosition(target, {  
+          offsetTop: 25,
+          offsetLeft: 35
+       });
+
+       var srcOffset = source.cumulativeOffset(),
+        targOffset = target.cumulativeOffset();
+       this.assertIdentical(targOffset.top  + 25, srcOffset.top);
+       this.assertIdentical(targOffset.left + 35, srcOffset.left);
+
+       source.clonePosition(target);
+
+       var srcDims = source.cumulativeOffset(),
+        targDims = target.cumulativeOffset();
+       this.assertIdentical(targDims.height, srcDims.height);
+       this.assertIdentical(targDims.width, srcDims.width);
+     }, this);
+  },
+  
   testDOMAttributesHavePrecedenceOverExtendedElementMethods: function() {
     this.assertNothingRaised(function() { $('dom_attribute_precedence').down('form') });
     this.assertEqual($('dom_attribute_precedence').down('input'), $('dom_attribute_precedence').down('form').update);

@@ -651,7 +651,9 @@ Element.Methods = {
 
   clonePosition: function(element, source) {
     element = $(element);
-    var options = Object.extend({
+    source = $(source);
+    var s = element.style,
+     options = Object.extend({
       setLeft:    true,
       setTop:     true,
       setWidth:   true,
@@ -660,31 +662,46 @@ Element.Methods = {
       offsetLeft: 0
     }, arguments[2] || { });
 
-    // find page position of source
-    source = $(source);
-    var p = source.viewportOffset();
-
-    // find coordinate system to use
-    var delta = [0, 0];
-    var parent = null;
-    // delta [0,0] will do fine with position: fixed elements, 
-    // position:absolute needs offsetParent deltas
-    if (Element.getStyle(element, 'position') == 'absolute') {
-      parent = element.getOffsetParent();
-      delta = parent.viewportOffset();
+    if (options.setHeight || options.setWidth) {
+      var subtract = { },
+       dims = Element.getDimensions(source);
+      if (options.setHeight)
+        subtract.height = ['paddingTop',  'paddingBottom', 'borderTopWidth',  'borderBottomWidth'];
+      if (options.setWidth)
+        subtract.width  = ['paddingLeft', 'paddingRight',  'borderLeftWidth', 'borderRightWidth'];
+      for (var i in subtract) {
+        s[i] = Math.max(0, subtract[i].inject(dims[i], function(value, styleName) {
+          return value -= parseFloat(Element.getStyle(element, styleName)) || 0;
+        })) + 'px';
+      }
     }
+    // bail if skipping setLeft and setTop
+    if (!options.setLeft && !options.setTop)
+      return element;
 
-    // correct by body offsets (fixes Safari)
-    if (parent == document.body) {
-      delta[0] -= document.body.offsetLeft;
-      delta[1] -= document.body.offsetTop; 
+    // clear margins
+    if (options.setLeft) s.marginLeft = '0px';
+    if (options.setTop)  s.marginTop  = '0px';
+
+    // find page position of source
+    var p = Element.cumulativeOffset(source),
+     delta = [0, 0],
+     position = Element.getStyle(element, 'position');
+
+    if (position === 'relative') {
+      // clear element coords before getting
+      // the cumulativeOffset because Opera
+      // will fumble the calculations if
+      // you try to subtract the coords after
+      if (options.setLeft) s.left = '0px';
+      if (options.setTop)  s.top  = '0px';
+      // store element offsets so we can subtract them later
+      delta = Element.cumulativeOffset(element);
     }
 
     // set position
-    if (options.setLeft)   element.style.left  = (p[0] - delta[0] + options.offsetLeft) + 'px';
-    if (options.setTop)    element.style.top   = (p[1] - delta[1] + options.offsetTop) + 'px';
-    if (options.setWidth)  element.style.width = source.offsetWidth + 'px';
-    if (options.setHeight) element.style.height = source.offsetHeight + 'px';
+    if (options.setLeft) s.left = (p[0] - delta[0] + options.offsetLeft) + 'px';
+    if (options.setTop)  s.top  = (p[1] - delta[1] + options.offsetTop)  + 'px';
     return element;
   }
 };

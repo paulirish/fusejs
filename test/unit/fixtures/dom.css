@@ -67,6 +67,50 @@ div.style-test { margin-left: 1px }
     width: 20em;
 }
 
+#clone_position_source_absolute {
+  position: absolute;
+  padding: 2px;
+  margin: 2px;
+  border-style: solid;
+  border-color: black;
+  background: #21bacc;
+  z-index: 2;
+}
+
+#clone_position_target_absolute {
+  position: absolute;
+  top: 10px;
+  left: 560px;
+  height: 20px;
+  width: 30px;
+  border-style: solid;
+  border-color: yellow;
+  background: red;
+  z-index: 1;
+}
+
+#clone_position_source_relative {
+  position: relative;
+  padding: 4px;
+  margin: 8px;
+  border-style: solid;
+  border-color: black;
+  background: #21bacc;
+  z-index: 2;
+}
+
+#clone_position_target_relative {
+  position: relative;
+  top: 10px;
+  left: 560px;
+  height: 50px;
+  width: 35px;
+  border-style: solid;
+  border-color: yellow;
+  background: red;
+  z-index: 1;
+}
+
 #notInlineAbsoluted { position: absolute; }
 
 #elementToViewportDimensions {
