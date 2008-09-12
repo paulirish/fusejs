@@ -86,8 +86,9 @@ Form.Methods = {
   },
 
   focusFirstElement: function(form) {
-    form = $(form);
-    form.findFirstElement().activate();
+    form = $(form); 
+    var element = Form.findFirstElement(form); 
+    element && Form.Element.activate(element); 
     return form;
   },
   

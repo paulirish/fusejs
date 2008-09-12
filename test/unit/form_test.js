@@ -196,6 +196,11 @@ new Test.Unit.Runner({
     this.assertNothingRaised(function() {
       $('form_focus_hidden').focusFirstElement();
     });
+    
+    // Form.focusFirstElement should only call activate if the first element exists
+    this.assertNothingRaised(function() {
+      $('form_empty').focusFirstElement();
+    });
   },
   
   testFormGetElements: function() {
