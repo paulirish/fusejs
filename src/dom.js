@@ -1236,22 +1236,7 @@ Element.addMethods = function(methods) {
 
 document.viewport = {
   getDimensions: function() {
-    var dimensions = { };
-    var B = Prototype.Browser;
-    $w('width height').each(function(d) {
-      var D = d.capitalize();
-      dimensions[d] = (B.WebKit && !document.evaluate) ? self['inner' + D] :
-        (B.Opera) ? document.body['client' + D] : document.documentElement['client' + D];
-    });
-    return dimensions;
-  },
-
-  getWidth: function() {
-    return this.getDimensions().width;
-  },
-
-  getHeight: function() {
-    return this.getDimensions().height;
+    return { width: this.getWidth(), height: this.getHeight() };
   },
   
   getScrollOffsets: function() {
@@ -1260,3 +1245,32 @@ document.viewport = {
       window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop);
   }
 };
+
+// Define document.viewport.getWidth() and document.viewport.getHeight()
+(function(v) {
+  var element, backup = { }, doc = document,
+   docEl = doc.documentElement;
+
+  function isBodyActingAsRoot() {
+    if (docEl.clientWidth === 0) return true;
+    ['body', 'documentElement']._each(function(name) {
+       backup[name] = doc[name].style.cssText;
+       doc[name].style.cssText += ';margin:0;height:auto;';
+    });
+    Element.insert(doc.body, { top: '<div style="display:block;height:8500px;"></div>' });
+    var result = docEl.clientHeight >= 8500;
+    doc.body.down().remove();
+
+    for (name in backup) doc[name].style.cssText = backup[name];
+    return result;
+  }
+
+  function define(D) {
+    element = element || (isBodyActingAsRoot() ? doc.body : // Opera < 9.5, Quirks mode
+      ('clientWidth' in doc) ? doc : docEl); // Safari < 3 : Others
+    v['get' + D] = function() { return element['client' + D] };
+    return v['get' + D]();
+  }
+  v.getHeight = define.curry('Height');
+  v.getWidth  = define.curry('Width');
+})(document.viewport);

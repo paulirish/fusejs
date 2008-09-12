@@ -36,6 +36,8 @@ if (Prototype.Browser.MobileSafari)
 
 <%= include 'enumerable.js', 'array.js', 'number.js', 'hash.js', 'range.js' %>
 
-<%= include 'ajax.js', 'dom.js', 'selector.js', 'form.js', 'event.js', 'deprecated.js' %>
+<%= include 'ajax.js', 'dom.js' %>
+
+<%= include 'selector.js', 'form.js', 'event.js', 'deprecated.js' %>
 
 Element.addMethods();

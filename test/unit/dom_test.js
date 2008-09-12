@@ -1403,15 +1403,30 @@ new Test.Unit.Runner({
   },
   
   testViewportDimensions: function() {
-    preservingBrowserDimensions(function() {
-      window.resizeTo(800, 600);
-      var before = document.viewport.getDimensions();
-      window.resizeBy(50, 50);
-      var after  = document.viewport.getDimensions();
+    var self = this,
+     hugeDiv = new Element('div')
+      .update('testViewportDimensions')
+        .setStyle('height:8000px;width:2000px');
     
-      this.assertEqual(before.width + 50, after.width, "NOTE: YOU MUST ALLOW JAVASCRIPT TO RESIZE YOUR WINDOW FOR THIS TEST TO PASS");
-      this.assertEqual(before.height + 50, after.height, "NOTE: YOU MUST ALLOW JAVASCRIPT TO RESIZE YOUR WINDOW FOR THIS TEST TO PASS");
-    }.bind(this));
+    var test = function(msg1, msg2) {
+      preservingBrowserDimensions(function() {
+        window.resizeTo(800, 600);
+        var before = document.viewport.getDimensions();
+        window.resizeBy(50, 50);
+        var after  = document.viewport.getDimensions();
+        
+        self.assertEqual(before.width + 50, after.width, msg1 + " NOTE: YOU MUST ALLOW JAVASCRIPT TO RESIZE YOUR WINDOW FOR THIS TEST TO PASS");
+        self.assertEqual(before.height + 50, after.height, msg2 + " NOTE: YOU MUST ALLOW JAVASCRIPT TO RESIZE YOUR WINDOW FOR THIS TEST TO PASS");
+      });
+    };
+    
+    // regular test
+    test('Width failed.', 'Height failed.');
+    
+    // test with a huge div
+    document.body.appendChild(hugeDiv);
+    test('Width failed (huge div).', 'Height failed (huge div).');
+    hugeDiv.remove();
   },
   
   testElementToViewportDimensionsDoesNotAffectDocumentProperties: function() {
