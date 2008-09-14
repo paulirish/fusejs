@@ -81,7 +81,7 @@ Form.Methods = {
     }).sortBy(function(element) { return element.tabIndex }).first();
     
     return firstByIndex ? firstByIndex : elements.find(function(element) {
-      return ['input', 'select', 'textarea'].include(element.tagName.toLowerCase());
+      return ['button', 'input', 'select', 'textarea'].include(element.tagName.toLowerCase());
     });
   },
 
@@ -165,8 +165,8 @@ Form.Element.Methods = {
     element = $(element);
     try {
       element.focus();
-      if (element.select && (element.tagName.toLowerCase() != 'input' ||
-          !['button', 'reset', 'submit'].include(element.type)))
+      if (element.select && element.tagName.toUpperCase() != 'BUTTON' &&
+          !['button', 'reset', 'submit'].include(element.type))
         element.select();
     } catch (e) { }
     return element;
@@ -206,6 +206,11 @@ Form.Element.Serializers = {
   inputSelector: function(element, value) {
     if (Object.isUndefined(value)) return element.checked ? element.value : null;
     else element.checked = !!value;
+  },
+
+  button: function(element, value){
+    if (Object.isUndefined(value)) return Element.readAttribute(element, 'value');
+    else Element.writeAttribute(element, 'value', value);
   },
 
   textarea: function(element, value) {

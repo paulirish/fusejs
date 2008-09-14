@@ -878,12 +878,16 @@ else if (Prototype.Browser.IE) {
       cellspacing: 'cellSpacing'
     }, Element._attributeTranslations.read.names),
     values: {
-      checked: function(element, value) {
-        element.checked = !!value;
+      _setAttrNode: function(name) {
+        return function(element, value) {
+          var attr = element.getAttributeNode(name);
+          if (!attr) element.setAttributeNode(attr = document.createAttribute(name));
+          attr.value = value;
+        };
       },
       
-      encType: function(element, value) {  
-        element.getAttributeNode('encType').value = value;  
+      checked: function(element, value) {
+        element.checked = !!value;
       },
       
       style: function(element, value) {
@@ -907,6 +911,7 @@ else if (Prototype.Browser.IE) {
       type:        v._getAttr,
       action:      v._getAttrNode,
       encType:     v._getAttrNode,
+      value:       v._getAttrNode,
       disabled:    v._flag,
       checked:     v._flag,
       readonly:    v._flag,
@@ -931,6 +936,13 @@ else if (Prototype.Browser.IE) {
       onchange:    v._getEv
     });
   })(Element._attributeTranslations.read.values);
+  
+  (function(v) {
+    Object.extend(v, {
+      encType: v._setAttrNode('encType'),
+      value:   v._setAttrNode('value')
+    });
+  })(Element._attributeTranslations.write.values);
 }
 
 else if (Prototype.Browser.Gecko && /rv:1\.8\.0/.test(navigator.userAgent)) {
@@ -1154,6 +1166,7 @@ Element.addMethods = function(methods) {
     Object.extend(Form, Form.Methods);
     Object.extend(Form.Element, Form.Element.Methods);
     Object.extend(Element.Methods.ByTag, {
+      "BUTTON":   Object.clone(Form.Element.Methods),
       "FORM":     Object.clone(Form.Methods),
       "INPUT":    Object.clone(Form.Element.Methods),
       "SELECT":   Object.clone(Form.Element.Methods),

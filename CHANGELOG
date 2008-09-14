@@ -1,3 +1,5 @@
+* Extend BUTTON elements with Form.Element.Methods. Closes #9708. [jddalton, mensler]
+
 * unit test: Cleaned up testFormActivating unit test. [jddalton]
 
 * Ensure Form#focusFirstElement skips Form.Element#activate if there is no first element. [Alexander Chernin, kangax]

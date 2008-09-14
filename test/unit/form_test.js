@@ -186,6 +186,14 @@ new Test.Unit.Runner({
     Form.focusFirstElement('bigform');
     this.assertEqual('', getSelection(element));
       
+    element = $('button_submit');
+    this.assertEqual('', getSelection(element.activate()));
+    
+    ['form', 'button_elements'].each(function(container) {
+      Element.select(container, '*[type="button"],*[type="submit"],*[type="reset"]')
+       .each(function(element) { this.assertEqual('', getSelection(element.activate())) }, this);
+    }, this);
+    
     // Form.Element.activate should select text on text input elements
     element = $('focus_text');
     this.assertEqual('Hello', getSelection(element.activate()));
@@ -286,6 +294,9 @@ new Test.Unit.Runner({
     this.assertEqual(Form.Element.serialize('input_enabled'), $('input_enabled').serialize());
     this.assertNotEqual(form.serialize, $('input_enabled').serialize);
     
+    // ensure button elements are extended with Form.Element.Methods
+    this.assertNothingRaised(function() { $('button_submit').getValue() });
+    
     Element.addMethods('INPUT',  { anInputMethod: function(input)  { return 'input'  } });
     Element.addMethods('SELECT', { aSelectMethod: function(select) { return 'select' } });
 
@@ -332,7 +343,23 @@ new Test.Unit.Runner({
     }, this);
   },
 
+  testGetValue: function() {
+  	// test button element
+  	this.assertEqual('1', $('button_submit').getValue());
+  	this.assertEqual('', $('button_novalue').getValue());
+  },
+  
   testSetValue: function(){
+    // test button element
+    var button = $('button_submit');
+    button.setValue('2');
+    this.assertEqual('2', button.getValue());
+
+    // test button with no value attribute
+    button = $('button_novalue');
+    this.assertNothingRaised(function() { button.setValue('something') });
+    this.assertEqual('something', button.getValue());
+
     // text input
     var input = $('input_enabled'), oldValue = input.getValue();
     this.assertEqual(input, input.setValue('foo'), 'setValue chaining is broken');
