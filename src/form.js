@@ -148,12 +148,15 @@ Form.Element.Methods = {
   setValue: function(element, value) {
     element = $(element);
     var method = element.tagName.toLowerCase();
-    Form.Element.Serializers[method](element, value);
+    Form.Element.Serializers[method](element, value || null);
     return element;
   },
 
   clear: function(element) {
-    $(element).value = '';
+    element = $(element);
+    if (element.tagName.toUpperCase() != 'BUTTON' &&
+        !['button', 'image', 'reset', 'submit'].include(element.type))
+      Form.Element.setValue(element, null);
     return element;
   },
 
@@ -215,7 +218,7 @@ Form.Element.Serializers = {
 
   textarea: function(element, value) {
     if (Object.isUndefined(value)) return element.value;
-    else element.value = value;
+    else element.value = value || '';
   },
   
   select: function(element, value) {
@@ -224,6 +227,10 @@ Form.Element.Serializers = {
         'selectOne' : 'selectMany'](element);
     else {
       var opt, currentValue, single = !Object.isArray(value);
+      if (value === null) {
+        element.selectedIndex = -1;
+        return;
+      }
       for (var i = 0, length = element.length; i < length; i++) {
         opt = element.options[i];
         currentValue = this.optionValue(opt);

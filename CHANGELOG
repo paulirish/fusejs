@@ -1,3 +1,5 @@
+* Make Form.Element#clear uncheck checkboxes/radio buttons, clear text inputs, deselect dropdown lists options, and skip button elements. [jddalton]
+
 * Extend BUTTON elements with Form.Element.Methods. Closes #9708. [jddalton, mensler]
 
 * unit test: Cleaned up testFormActivating unit test. [jddalton]

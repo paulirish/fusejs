@@ -332,6 +332,55 @@ new Test.Unit.Runner({
       'wrong default action for form element with empty action attribute');
   },
   
+  testFormElementClear: function() {
+    ['form','bigform'].each(function(container) {
+    
+      // Form.Element#clear should clear text inputs,
+      // uncheck checkboxes/radio buttons, and
+      // deselect any options from a dropdown list
+      
+      // Form.Element#clear should NOT clear button
+      // values of any kind.
+    
+      Element.select(container, 'button,input,select,textarea').each(function(element) {
+        var asserted = element.value, backup = asserted,
+         prop = 'value', tagName = element.tagName.toUpperCase();
+        
+        if (tagName == 'BUTTON' ||
+           ['button', 'image', 'reset', 'submit'].include(element.type)) {
+          // default values for "asserted" and "prop"
+        }
+        else if (tagName == 'INPUT' || tagName  == 'TEXTAREA') {
+          if (['checkbox', 'radio'].include(element.type)) {
+            backup = element.checked;
+            element.checked = true;
+            asserted = false;
+            prop = 'checked'; 
+          }
+          else {
+            element.value = 'something';
+            asserted = '';
+          }
+        }
+        else if (tagName == 'SELECT') {
+          backup = element.selectedIndex;
+          element.selectedIndex = Math.max(0, element.options.length -1);
+          asserted = -1;
+          prop = 'selectedIndex';
+        }
+        
+        Form.Element.clear(element);
+        
+        this.assertEqual(asserted, element[prop],
+          element.inspect() + ';' + (element.name ? ' name="' + element.name + '";' : '') +
+            + (element.type ? ' type="' + element.type + '";' : ''));
+        
+        // restore original value  
+        element[prop] = backup;
+      }, this);
+    }, this);
+  },
+  
   testFormElementMethodsChaining: function(){
     var methods = $w('clear activate disable enable'),
       formElements = $('form').getElements();
