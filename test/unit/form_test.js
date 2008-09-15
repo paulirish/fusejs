@@ -339,6 +339,10 @@ new Test.Unit.Runner({
     request = $("ffe").request({ method: 'post' });
     this.assert(request.url.include("unit/tmp/form_test.html"),
       'wrong default action for form element with empty action attribute');
+      
+    // with explicit options.submit
+    request = $("form").request({ submit: 'second_submit' });
+    this.assert(request.url.include("second_submit=Delete%20it!"));
   },
   
   testFormElementClear: function() {

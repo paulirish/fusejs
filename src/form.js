@@ -94,10 +94,13 @@ Form.Methods = {
   
   request: function(form, options) {
     form = $(form), options = Object.clone(options || { });
-
-    var params = options.parameters, action = form.readAttribute('action') || '';
+    
+    var params = options.parameters, submit = options.submit,
+     action = form.readAttribute('action') || '';
+    delete options.submit;
+    
     if (action.blank()) action = window.location.href;
-    options.parameters = form.serialize(true);
+    options.parameters = form.serialize({ submit:submit, hash:true });
     
     if (params) {
       if (Object.isString(params)) params = params.toQueryParams();

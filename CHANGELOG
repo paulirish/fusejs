@@ -1,3 +1,5 @@
+* Make Form#request pass the "submit" option to Form#serialize. [#66 state:resolved] [Ben Sommerville, jddalton, jodosha]
+
 * Make $F return null for unknown/unsupported elements. Closes #8381. [Christophe Porteneuve, jddalton, Michael Stillwell]
 
 * Make Form.Element#clear uncheck checkboxes/radio buttons, clear text inputs, deselect dropdown lists options, and skip button elements. [jddalton]
