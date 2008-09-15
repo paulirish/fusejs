@@ -167,13 +167,15 @@ new Test.Unit.Runner({
     // Firefox, IE, and Safari 2+
     function getSelection(element){
       try {
+        var result;
         if (typeof element.selectionStart == 'number') {
-          return element.value.substring(element.selectionStart, element.selectionEnd);
+          result = element.value.substring(element.selectionStart, element.selectionEnd);
         } else if (document.selection && document.selection.createRange) {
-          return document.selection.createRange().text;
+          result = document.selection.createRange().text;
         }
+        return result || '';
       }
-      catch(e){ return null }
+      catch(e){ return '' }
     }
     
     // Form.focusFirstElement shouldn't focus disabled elements
@@ -182,15 +184,11 @@ new Test.Unit.Runner({
     
     // Test IE doesn't select text on buttons
     Form.focusFirstElement('bigform');
-    if (document.selection) this.assertEqual('', getSelection(element));
-    
-    // Form.Element.activate shouldn't select text on buttons
-    element = $('focus_text');
     this.assertEqual('', getSelection(element));
       
     // Form.Element.activate should select text on text input elements
-    element.activate();
-    this.assertEqual('Hello', getSelection(element));
+    element = $('focus_text');
+    this.assertEqual('Hello', getSelection(element.activate()));
 
     // Form.Element.activate shouldn't raise an exception when the form or field is hidden
     this.assertNothingRaised(function() {
