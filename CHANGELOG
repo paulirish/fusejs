@@ -1,3 +1,8 @@
+* Rewrite Form#serializeElements() making it more closely follow the W3C specifications. [#22, #85 state:resolved] [jddalton, kangax, Lonesome Boy]
+  - Simulate input type=image coordinates with "x" and "y" options.
+  - Make the "submit" option accept the element or element name.
+  - Non-active submit buttons, disabled elements, input type=(file|reset), and null values are not serialized.
+
 * Make Form#request pass the "submit" option to Form#serialize. [#66 state:resolved] [Ben Sommerville, jddalton, jodosha]
 
 * Make $F return null for unknown/unsupported elements. Closes #8381. [Christophe Porteneuve, jddalton, Michael Stillwell]

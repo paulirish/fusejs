@@ -295,6 +295,22 @@ new Test.Unit.Runner({
     
     expected = { val1:4, action:'blah' };
     this.assertHashEqual(expected, $('form').serialize({ submit: 'inexistent' })); 
+                    
+    // file input should not be serialized  
+    this.assertEqual('', $('form_with_file_input').serialize()); 
+    
+    // test with image input button
+    expected = { clicky:'click me', greeting:'Hello', 'commit_img.x':2, 'commit_img.y':4, 'commit_img': 1 };
+    this.assertHashEqual(expected, Form.serialize('inputs', { submit:$('input_image'), x:2, y:4 }));
+    
+    // test with button element
+    expected = { clicky:'click me', greeting:'Hello', 'bu_submit':1 };
+    var elements = $('inputs').childElements().concat($('button_submit'));
+    this.assertHashEqual(expected, Form.serializeElements(elements, { submit:$('button_submit') }));
+    
+    // test control groups
+    expected = { group_radio:'2r', group_checkbox:'2c' };
+    this.assertHashEqual(expected, Form.serialize('form_with_control_groups', true));
   },
   
   testFormMethodsOnExtendedElements: function() {
