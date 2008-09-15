@@ -191,7 +191,13 @@ Form.Element.Methods = {
 /*--------------------------------------------------------------------------*/
 
 var Field = Form.Element;
-var $F = Form.Element.Methods.getValue;
+
+function $F(element) {
+  element = $(element);
+  var s = Form.Element.Serializers,
+   method = element && element.tagName.toLowerCase();
+  return s[method] ? s[method](element) : null;
+}
 
 /*--------------------------------------------------------------------------*/
 

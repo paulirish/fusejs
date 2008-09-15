@@ -23,7 +23,16 @@ new Test.Unit.Runner({
   },
   
   testDollarF: function(){
+    // test normal execution
     this.assertEqual("4", $F("input_enabled"));
+    
+    // test unsupported element
+    this.assertNothingRaised(function() { $F('inputs') });
+    this.assertEqual(null, $F('inputs'));
+    
+    // test unknown element
+    this.assertNothingRaised(function() { $F('bork') });
+    this.assertEqual(null, $F('bork'));
   },
   
   testFormElementEventObserver: function(){
