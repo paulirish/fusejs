@@ -320,8 +320,8 @@ Object.extend(document, {
   var timer;
   
   function fireContentLoadedEvent() {
-    if (document.loaded) return;
     if (timer) window.clearInterval(timer);
+    if (document.loaded) return;
     document.loaded = true;
     document.fire("dom:loaded");
   }

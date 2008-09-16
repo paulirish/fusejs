@@ -1,3 +1,5 @@
+* Ensure dom:loaded timer is always cleared. [#346 state:resolved] [Mike Belshe]
+
 * Remove unused local variable "h" from Selector.handlers.child(). [#246 state:resolved] [jddalton]
 
 * Fix issue where Opera 9.5 gets confused by complex selectors in $$(). [#157 state:resolved] [Andre Dupont. Paulo Pereira, Andrea Baron, jddalton]
