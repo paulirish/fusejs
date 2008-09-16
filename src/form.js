@@ -42,8 +42,8 @@ var Form = {
         }
       }
       if (!key) return result;
-      
-      if (key in result) {
+      // property exists and and belongs to result
+      if (key in result && result[key] !== Object.prototype[key]) {
         // a key is already present; construct an array of values
         if (!Object.isArray(result[key])) result[key] = [result[key]];
         result[key].push(value);
@@ -62,13 +62,14 @@ Form.Methods = {
   },
   
   getElements: function(form) {
-    return $A($(form).getElementsByTagName('*')).inject([], 
-      function(elements, child) {
-        if (Form.Element.Serializers[child.tagName.toLowerCase()])
-          elements.push(Element.extend(child));
-        return elements;
+    var elements = [], nodes = $(form).getElementsByTagName('*');
+    for (var i = 0, node; node = nodes[i++]; ) {
+      if (node.nodeType === 1 && 
+          Form.Element.Serializers[node.tagName.toLowerCase()]) {
+        elements.push(Element.extend(node));
       }
-    );
+    }
+    return elements;
   },
   
   getInputs: function(form, typeName, name) {

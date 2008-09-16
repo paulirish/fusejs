@@ -311,6 +311,10 @@ new Test.Unit.Runner({
     // test control groups
     expected = { group_radio:'2r', group_checkbox:'2c' };
     this.assertHashEqual(expected, Form.serialize('form_with_control_groups', true));
+    
+    // test form elements names matching Object.prototype properties
+    expected = { length: 'foo', toString: ['bar' , 'baz'], valueOf: 'boo' };
+    this.assertHashEqual(expected,  $('form_with_object_prototypes').serialize(true));  
   },
   
   testFormMethodsOnExtendedElements: function() {

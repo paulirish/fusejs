@@ -1,3 +1,5 @@
+* Ensure Form.serializeElements() does not return keys from the prototype chain (e.g., constructor, valueOf, toString). Closes #9609. [gryn, jddalton, kangax]
+
 * Rewrite Form#serializeElements() making it more closely follow the W3C specifications. [#22, #85 state:resolved] [jddalton, kangax, Lonesome Boy]
   - Simulate input type=image coordinates with "x" and "y" options.
   - Make the "submit" option accept the element or element name.
