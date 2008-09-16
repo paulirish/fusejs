@@ -1,3 +1,5 @@
+* Make Element#readAttribute follow W3C specifications for Element#getAttribute by returning an empty string if there is no specified/default value. [jddalton]
+
 * Ensure Form.serializeElements() does not return keys from the prototype chain (e.g., constructor, valueOf, toString). Closes #9609. [gryn, jddalton, kangax]
 
 * Rewrite Form#serializeElements() making it more closely follow the W3C specifications. [#22, #85 state:resolved] [jddalton, kangax, Lonesome Boy]

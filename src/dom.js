@@ -273,6 +273,7 @@ Element.Methods = {
   
   readAttribute: function(element, name) {
     element = $(element);
+    var result;
     if (Prototype.Browser.IE) {
       var t = Element._attributeTranslations.read;
       if (t.names[name]) name = t.names[name];
@@ -283,13 +284,16 @@ Element.Methods = {
           element.children[name]){
         element = element.cloneNode(false); // don't extend here
       }
-      if (t.values[name]) return t.values[name](element, name);
-      if (name.include(':')) {
-        return (!element.attributes || !element.attributes[name]) ? null : 
+      if (t.values[name])
+        result = t.values[name](element, name);
+      else if (name.include(':')) {
+        result = (!element.attributes || !element.attributes[name]) ? '' : 
          element.attributes[name].value;
       }
     }
-    return element.getAttribute(name);
+    if (Object.isUndefined(result))
+      result = element.getAttribute(name);
+    return result !== null ? result : '';
   },
   
   writeAttribute: function(element, name, value) {

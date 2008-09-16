@@ -966,14 +966,17 @@ new Test.Unit.Runner({
     }, this);
     
     this.assertEqual("alert('hello world');", $('attributes_with_issues_1').readAttribute('onclick'));
-    this.assertNull($('attributes_with_issues_1').readAttribute('onmouseover'));
    
     this.assertEqual('date', $('attributes_with_issues_type').readAttribute('type'));
     this.assertEqual('text', $('attributes_with_issues_readonly').readAttribute('type'));
     
     var elements = $('custom_attributes').immediateDescendants();
     this.assertEnumEqual(['1', '2'], elements.invoke('readAttribute', 'foo'));
-    this.assertEnumEqual(['2', null], elements.invoke('readAttribute', 'bar'));
+    this.assertEnumEqual(['2', ''], elements.invoke('readAttribute', 'bar'));
+    
+    // should return an empty string when the attribute is not found
+    this.assertEqual('', $(document.documentElement).readAttribute('class'));
+    this.assertEqual('', $('attributes_with_issues_1').readAttribute('onmouseover'));
 
     var table = $('write_attribute_table');
     this.assertEqual('4', table.readAttribute('cellspacing'));
