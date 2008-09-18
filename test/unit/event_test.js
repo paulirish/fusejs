@@ -158,13 +158,14 @@ new Test.Unit.Runner({
     eventID = span._prototypeEventID;
     
     this.assert(Event.cache[eventID]);
-    this.assert(Object.isArray(Event.cache[eventID]["test:somethingHappened"]));
-    this.assertEqual(1, Event.cache[eventID]["test:somethingHappened"].length);
+    this.assert(Object.isArray(Event.cache[eventID]
+      .events["test:somethingHappened"].handlers));
+    
+    this.assertEqual(1, Event.cache[eventID]
+      .events["test:somethingHappened"].handlers.length);
     
     span.stopObserving("test:somethingHappened", observer);
-    this.assert(Event.cache[eventID]);
-    this.assert(Object.isArray(Event.cache[eventID]["test:somethingHappened"]));
-    this.assertEqual(0, Event.cache[eventID]["test:somethingHappened"].length);
+    this.assert(!Event.cache[eventID]);
   },
   
   testObserveAndStopObservingAreChainable: function() {

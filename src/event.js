@@ -144,8 +144,6 @@ Event.extend = (function() {
 })();
 
 Object.extend(Event, (function() {
-  var cache = Event.cache;
-
   function getEventID(element) {
     if (element === window) return 1;
     if (element.nodeType === 9) return 2;
@@ -159,120 +157,132 @@ Object.extend(Event, (function() {
     return eventName;
   }
   
-  function getCacheForID(id) {
-    return cache[id] = cache[id] || { };
-  }
-  
-  function getWrappersForEventName(id, eventName) {
-    var c = getCacheForID(id);
-    return c[eventName] = c[eventName] || [];
-  }
-  
-  function createWrapper(element, eventName, handler) {
-    var id = getEventID(element);
-    var w = getWrappersForEventName(id, eventName);
-    if (w.pluck("handler").include(handler)) return false;
-    
-    var wrapper = function(event) {
-      if (!Event || !Event.extend ||
-        (event.eventName && event.eventName != eventName))
-          return false;
-      
-      handler.call(element, Event.extend(event));
-    };
-    
-    wrapper.handler = handler;
-    w.push(wrapper);
-    return wrapper;
+  function getCacheForEventName(id, eventName) {
+    var c = Event.cache[id];
+    return c && c.events[eventName] || { wrappers:[], handlers:[] };
   }
   
   function findWrapper(id, eventName, handler) {
-    var w = getWrappersForEventName(id, eventName);
-    return w.find(function(wrapper) { return wrapper.handler == handler });
+    var enc = getCacheForEventName(id, eventName),
+     length = enc.handlers.length;
+    while (length--) {
+      if (enc.handlers[length] === handler)
+        return { wrapper:enc.wrappers[length], index:length };
+    }
+    return { wrapper:null, index:null };
   }
   
-  function destroyWrapper(id, eventName, handler) {
-    var c = getCacheForID(id);
-    if (!c[eventName]) return false;
-    c[eventName] = c[eventName].without(findWrapper(id, eventName, handler));
+  function isEventValid(event, eventName) {
+    // Prevent a Firefox bug from throwing errors on page load/unload (#5393, #9421).
+    // When firing a custom event all "dataavailable" observers for that element will fire.
+    // Before executing, make sure the event.eventName matches the private eventName.
+    return Event && Event.extend && (!event.eventName ||
+      event.eventName && event.eventName === eventName);
   }
   
-  function destroyCache() {
-    for (var id in cache)
-      for (var eventName in cache[id])
-        cache[id][eventName] = null;
+  function cacheEvent(element, eventName, handler) {
+    var id = getEventID(element),
+     enc = createCacheForEvent(element, eventName);
+    return createAndCacheWrapper(id, eventName, handler);
   }
   
+  function createCacheForEvent(element, eventName) {
+    var id = getEventID(element),
+     c = Event.cache[id] = Event.cache[id] || { events: { } };
+    c.element = c.element || element;
+    return Event.cache[id].events[eventName] = getCacheForEventName(id, eventName);
+  }
   
-  // Internet Explorer needs to remove event handlers on page unload
-  // in order to avoid memory leaks.
-  if (window.attachEvent) {
-    window.attachEvent("onunload", destroyCache);
+  function createAndCacheWrapper(id, eventName, handler) {
+    var enc = getCacheForEventName(id, eventName);
+    if (enc.handlers.include(handler)) return false;
+    
+    // add to beginning of the array because we
+    // iterate with a reverse while loop
+    var wrapper = createWrapper(id, eventName, handler);
+    enc.wrappers.unshift(wrapper);
+    enc.handlers.unshift(handler);
+    return wrapper;
+  }
+  
+  function createWrapper(id, eventName, handler) {
+    return function(event) {
+      if (!isEventValid(event, eventName)) return false;
+      handler.call(Event.cache[id].element, Event.extend(event));
+    };
+  }
+  
+  function destroyWrapper(id, eventName, index) {
+    var c = Event.cache[id], enc = c.events[eventName];
+    enc.wrappers.splice(index, 1);
+    enc.handlers.splice(index, 1);
+    
+    // clean-up cache
+    if (!enc.handlers.length) delete c.events[eventName];
+    for (var i in c.events) return;
+    delete Event.cache[id];
   }
   
   // Safari has a dummy event handler on page unload so that it won't
   // use its bfcache. Safari <= 3.1 has an issue with restoring the "document"
   // object when page is returned to via the back button using its bfcache.
-  else if (Prototype.Browser.WebKit) {    
+  if (Prototype.Browser.WebKit) {
     window.addEventListener("unload", Prototype.emptyFunction, false);
   }
     
   return {
     observe: function(element, eventName, handler) {
       element = $(element);
-      var name = getDOMEventName(eventName);
+      var name = getDOMEventName(eventName),
+       wrapper = cacheEvent(element, eventName, handler);
       
-      var wrapper = createWrapper(element, eventName, handler);
       if (!wrapper) return element;
-      
       if (element.addEventListener) {
         element.addEventListener(name, wrapper, false);
       } else {
         element.attachEvent("on" + name, wrapper);
       }
-      
       return element;
     },
   
     stopObserving: function(element, eventName, handler) {
       element = $(element);
       eventName = Object.isString(eventName) ? eventName : null;
-      var id = getEventID(element), c = cache[id];
+      var id = element._prototypeEventID, c = Event.cache[id];
+       enc = getCacheForEventName(id, eventName);
       
-      if (!c) {
+      if (!c)
         return element;
-      }
       else if (!handler && eventName) {
-        getWrappersForEventName(id, eventName).each(function(wrapper) {
-          Event.stopObserving(element, eventName, wrapper.handler);
-        });
+        var length = enc.wrappers.length;
+        while (length--) Event.stopObserving(element, eventName,
+          { wrapper:enc.wrappers[length], index:length });
         return element;
-        
-      } else if (!eventName) {
-        Object.keys(c).each(function(eventName) {
+      }
+      else if (!eventName) {
+        for (var eventName in c.events)
           Event.stopObserving(element, eventName);
-        });
         return element;
       }
       
-      var wrapper = findWrapper(id, eventName, handler);
-      if (!wrapper) return element;
+      var found = typeof handler === 'object' ?
+        handler : findWrapper(id, eventName, handler);
+      if (!found.wrapper) return element;
       
       var name = getDOMEventName(eventName);
       if (element.removeEventListener) {
-        element.removeEventListener(name, wrapper, false);
+        element.removeEventListener(name, found.wrapper, false);
       } else {
-        element.detachEvent("on" + name, wrapper);
+        element.detachEvent("on" + name, found.wrapper);
       }
       
-      destroyWrapper(id, eventName, handler);
-      
+      destroyWrapper(id, eventName, found.index);
       return element;
     },
   
     fire: function(element, eventName, memo) {
       element = $(element);
-      if (element == document && document.createEvent && !element.dispatchEvent)
+      if (element === document && document.createEvent && !element.dispatchEvent)
         element = document.documentElement;
         
       var event;
@@ -292,7 +302,6 @@ Object.extend(Event, (function() {
       } else {
         element.fireEvent(event.eventType, event);
       }
-
       return Event.extend(event);
     }
   };

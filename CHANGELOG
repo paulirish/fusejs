@@ -1,3 +1,5 @@
+* Rewrite Event cache to avoid memory leaks in IE and unnecessary iterations. [#230 state:resolved] [jddalton]
+
 * Ensure dom:loaded timer is always cleared. [#346 state:resolved] [Mike Belshe]
 
 * Remove unused local variable "h" from Selector.handlers.child(). [#246 state:resolved] [jddalton]
