@@ -155,7 +155,7 @@ new Test.Unit.Runner({
     var span = $("span"), observer = function() { }, eventID;
     
     span.observe("test:somethingHappened", observer);
-    eventID = span._prototypeEventID;
+    eventID = span.getEventID();
     
     this.assert(Event.cache[eventID]);
     this.assert(Object.isArray(Event.cache[eventID]
@@ -241,9 +241,17 @@ new Test.Unit.Runner({
   },
   
   testEventIDDuplication: function() {
-    $('container').down().observe("test:somethingHappened", Prototype.emptyFunction);
+    var element = $('container').down();
+    element.observe("test:somethingHappened", Prototype.emptyFunction);
+    
+    var elementID = element.getEventID(),
+     clone = $(element.cloneNode(true));
+     cloneID = clone.getEventID()
+    
+    this.assertNotEqual(elementID, cloneID);
     $('container').innerHTML += $('container').innerHTML;
-    this.assertUndefined($('container').down(1)._prototypeEventID);
+    this.assertNotEqual(elementID, $('container').down());
+    this.assertNotEqual(elementID, $('container').down(1));
   },
   
   testDocumentAndWindowEventID: function() {

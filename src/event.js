@@ -144,13 +144,20 @@ Event.extend = (function() {
 })();
 
 Object.extend(Event, (function() {
+  var global = this;
+  
   function getEventID(element) {
-    if (element === window) return 1;
+    if (element === global) return 1;
     if (element.nodeType === 9) return 2;
-    if (element._prototypeEventID) return element._prototypeEventID[0];
-    return (element._prototypeEventID = [arguments.callee.id++])[0];
+    return element.getEventID();
   }
   getEventID.id = 3;
+  
+  function getNewEventID(element) {
+    var id = getEventID.id++;
+    element._prototypeEventID = [id]; // backwards compatibility
+    return id;
+  }
   
   function getDOMEventName(eventName) {
     if (eventName && eventName.include(':')) return "dataavailable";
@@ -231,6 +238,24 @@ Object.extend(Event, (function() {
   }
     
   return {
+    getEventID: function() {
+      arguments[0] = $(arguments[0]);
+      // handle calls from Event object
+      if (this !== global)
+        return arguments[0].getEventID();
+      // private id variable
+      var id = getNewEventID(arguments[0]);
+      // if cache doesn't match, request a new id
+      var method = function(element) {
+        var c = Event.cache[id];
+        if (c && c.element !== element)
+          id = getNewEventID(element);
+        return id;
+      };
+      // overwrite element.getEventID and execute
+      return (arguments[0].getEventID = method.methodize())();
+    },
+    
     observe: function(element, eventName, handler) {
       element = $(element);
       var name = getDOMEventName(eventName),
@@ -248,7 +273,7 @@ Object.extend(Event, (function() {
     stopObserving: function(element, eventName, handler) {
       element = $(element);
       eventName = Object.isString(eventName) ? eventName : null;
-      var id = element._prototypeEventID, c = Event.cache[id];
+      var id = getEventID(element), c = Event.cache[id];
        enc = getCacheForEventName(id, eventName);
       
       if (!c)
@@ -311,12 +336,14 @@ Object.extend(Event, Event.Methods);
 
 Element.addMethods({
   fire:          Event.fire,
+  getEventID:    Event.getEventID,
   observe:       Event.observe,
   stopObserving: Event.stopObserving
 });
 
 Object.extend(document, {
   fire:          Element.Methods.fire.methodize(),
+  getEventID:    Element.Methods.getEventID.methodize(),
   observe:       Element.Methods.observe.methodize(),
   stopObserving: Element.Methods.stopObserving.methodize(),
   loaded:        false
