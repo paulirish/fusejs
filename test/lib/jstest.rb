@@ -253,6 +253,10 @@ class NonCachingFileHandler < WEBrick::HTTPServlet::FileHandler
     super
     set_default_content_type(res, req.path)
     prevent_caching(res)
+    
+    if req.query["delay"] != nil
+      sleep(Integer(req.query["delay"]))
+    end
   end
   
   def set_default_content_type(res, path)
