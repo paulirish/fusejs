@@ -1,3 +1,5 @@
+* Ensure all stylesheets have loaded before firing dom:loaded event. [#328 state:resolved] [Diego Perini, jddalton, zichzach]
+
 * Implement Diego Perini's "doScroll" technique for DOMContentLoaded event support in IE. [Diego Perini, jddalton]
 
 * unit test: Added ability to append the query param delay=n to any resource URI to delay its loading by "n" seconds. [jddalton]

@@ -359,6 +359,19 @@ Object.extend(document, {
     timer && global.clearInterval(timer);
   }
   
+  function checkCssAndFire() {
+    return !!(isCssLoaded() && fireDomLoadedEvent());
+  }
+  
+  function cssDoneLoading() {
+    return (isCssLoaded = function() { return true })();
+  }
+  
+  function getCssRules(sheet) {
+    try { return sheet.cssRules }
+    catch(e) { return [] }
+  }
+  
   function fireDomLoadedEvent() {
     clearTimer();
     if (doc.loaded) return;
@@ -375,13 +388,103 @@ Object.extend(document, {
     if (event && event.type === 'DOMContentLoaded' ||
         /loaded|complete/.test(doc.readyState)) {
       doc.stopObserving("readystatechange", respondToReadyState);
-      fireDomLoadedEvent();
+      if (!checkCssAndFire()) timer = setInterval(checkCssAndFire, 10);
     }
+  };
+  
+  var isCssLoaded = function() {
+    // one time call to collect the style elements
+    var elements = $$('style,link[rel="stylesheet"]');
+    
+    // allSheetsEnabled() will cache its current position in the style elements
+    // and css rules so that the next time its called it will resume where
+    // it left off and not re-iterate over already tested elements/rules.
+    var allSheetsEnabled = (function() {
+      var sheet, rules, ruleIndexes, elementIndex;
+      
+      return function() {
+        elementIndex = elementIndex || elements.length;
+        elementloop: while (elementIndex--) {
+          // Safari 2 will bail on each loop because "sheet" is always null
+          sheet = sheet || elements[elementIndex].sheet;
+          rules = rules || getCssRules(sheet);
+          ruleIndexes = ruleIndexes || [rules.length];
+          
+          // sheets that are not loaded will not have rules,
+          // so we always refresh the last ruleIndexes if it is 0
+          if (!ruleIndexes.last())
+            ruleIndexes.splice(-1, 1, rules.length);
+          
+          sheetloop: while (sheet) {
+            // if sheet is disabled, but not the element attribute,
+            // then increment elementIndex so the next time allSheetsEnabled()
+            // is called it will begin at the same element.
+            if (sheet.disabled && (!sheet.ownerNode ||
+                !sheet.ownerNode.getAttribute('disabled')) && ++elementIndex)
+              return false;
+            
+            // each iteration decrements the last index in the stack
+            ruleloop: while (ruleIndexes[ruleIndexes.length - 1]--) {
+              // skip if not an @import rule
+              var rule = rules[ruleIndexes.last()];
+              if (!rule.styleSheet) continue ruleloop;
+              
+              // update vars and add new rules length to the stack
+              sheet = rule.styleSheet;
+              rules = getCssRules(sheet);
+              ruleIndexes.push(rules.length);
+              continue sheetloop;
+            }
+            // walk back down the stack
+            sheet = sheet.parentStyleSheet;
+            ruleIndexes.pop();
+          }
+
+          // clear cached variables
+          sheet = rules = ruleIndexes = null;
+        }
+        return true;
+      };
+    })();
+    
+    // no style elements, then always return true
+    if (!elements.length)
+      return cssDoneLoading();
+    
+    // Firefox > 2
+    try {
+      // Safari 2 has the "sheet" property but it's always null 
+      var sheet = elements[0].sheet;
+      sheet && sheet.cssRules;
+    } catch(e) { 
+      return !(isCssLoaded = (function() {
+        var length = elements.length; // cached
+        return function() {
+          // Firefox will throw an error if you try to
+          // access the cssRules when the stylesheet isn't loaded
+          while (length--) {
+            try { elements[length].sheet.cssRules } catch(e) {
+              if (e.message.indexOf('Security') < 0 && length++) return false; }
+          }
+          return cssDoneLoading();
+        };
+      })());
+    }
+    
+    // Opera
+    if (!allSheetsEnabled()) {
+      isCssLoaded = function() { return allSheetsEnabled() && cssDoneLoading() };
+      return false;
+    }
+    
+    // Safari < 3
+    return (isCssLoaded = function() {
+      return doc.styleSheets.length >= elements.length })();
   };
   
   // IE
   if ('attachEvent' in doc && !('addEventListener' in doc)) {
-    if (global === top) {
+    if (global == top) {
       // doScroll() does not error when the document
       // is in an iframe. Fallback on document readyState.
       checkDomLoadedState = function() {
@@ -389,6 +492,7 @@ Object.extend(document, {
         fireDomLoadedEvent();
       };
     }
+    cssDoneLoading(); // skip checking css load state
     respondToReadyState = checkDomLoadedState;
   }
   

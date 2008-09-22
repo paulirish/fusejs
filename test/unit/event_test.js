@@ -191,6 +191,10 @@ new Test.Unit.Runner({
     this.assert(document.loaded);
   },
   
+  testCssLoadedBeforeDocumentContentLoadedFires: function() {
+    this.assert(eventResults.contentLoaded.cssLoadCheck);
+  },
+  
   testDocumentContentLoadedEventFiresBeforeWindowLoad: function() {
     this.assert(eventResults.contentLoaded, "contentLoaded");
     this.assert(eventResults.contentLoaded.endOfDocument, "contentLoaded.endOfDocument");
@@ -268,7 +272,8 @@ document.observe("dom:loaded", function(event) {
 
   eventResults.contentLoaded = {
     endOfDocument: eventResults.endOfDocument,
-    windowLoad:  eventResults.windowLoad
+    windowLoad:  eventResults.windowLoad,
+    cssLoadCheck:  $('css_load_check').getStyle('height') == '100px'
   };
 
   Object.extend(eventResults.eventElement, { 
