@@ -108,6 +108,8 @@ Event.Methods = (function() {
   };
 })();
 
+Object.extend(Event, Event.Methods);
+
 Event.extend = (function() {
   var methods = Object.keys(Event.Methods).inject({ }, function(m, name) {
     m[name] = Event.Methods[name].methodize();
@@ -143,8 +145,29 @@ Event.extend = (function() {
   }
 })();
 
-Object.extend(Event, (function() {
-  var global = this;
+(function() {
+  
+  var timer, global = this,
+   doc = document, docEl = doc.documentElement,
+   followsSpec = !('attachEvent' in doc && !('addEventListener' in doc));
+  
+  var addEvent = function(element, eventName, handler) {
+    element.addEventListener(getDOMEventName(eventName), handler, false);
+  };
+  
+  var removeEvent = function(element, eventName, handler) {
+    element.removeEventListener(getDOMEventName(eventName), handler, false);
+  };
+  
+  // redefine for IE
+  if (!followsSpec) {
+    addEvent = function(element, eventName, handler) {
+      element.attachEvent("on" + getDOMEventName(eventName), handler);
+    };
+    removeEvent = function(element, eventName, handler) {
+      element.detachEvent("on" + getDOMEventName(eventName), handler);
+    };
+  }
   
   function getEventID(element) {
     if (element === global) return 1;
@@ -230,14 +253,7 @@ Object.extend(Event, (function() {
     delete Event.cache[id];
   }
   
-  // Safari has a dummy event handler on page unload so that it won't
-  // use its bfcache. Safari <= 3.1 has an issue with restoring the "document"
-  // object when page is returned to via the back button using its bfcache.
-  if (Prototype.Browser.WebKit) {
-    window.addEventListener("unload", Prototype.emptyFunction, false);
-  }
-    
-  return {
+  Object.extend(Event, {
     getEventID: function() {
       arguments[0] = $(arguments[0]);
       // handle calls from Event object
@@ -258,22 +274,16 @@ Object.extend(Event, (function() {
     
     observe: function(element, eventName, handler) {
       element = $(element);
-      var name = getDOMEventName(eventName),
-       wrapper = cacheEvent(element, eventName, handler);
-      
+      var wrapper = cacheEvent(element, eventName, handler);
       if (!wrapper) return element;
-      if (element.addEventListener) {
-        element.addEventListener(name, wrapper, false);
-      } else {
-        element.attachEvent("on" + name, wrapper);
-      }
+      addEvent(element, eventName, wrapper);
       return element;
     },
   
     stopObserving: function(element, eventName, handler) {
       element = $(element);
       eventName = Object.isString(eventName) ? eventName : null;
-      var id = getEventID(element), c = Event.cache[id];
+      var id = getEventID(element), c = Event.cache[id],
        enc = getCacheForEventName(id, eventName);
       
       if (!c)
@@ -294,66 +304,61 @@ Object.extend(Event, (function() {
         handler : findWrapper(id, eventName, handler);
       if (!found.wrapper) return element;
       
-      var name = getDOMEventName(eventName);
-      if (element.removeEventListener) {
-        element.removeEventListener(name, found.wrapper, false);
-      } else {
-        element.detachEvent("on" + name, found.wrapper);
-      }
-      
       destroyWrapper(id, eventName, found.index);
+      removeEvent(element, eventName, found.wrapper);
       return element;
     },
   
     fire: function(element, eventName, memo) {
       element = $(element);
-      if (element === document && document.createEvent && !element.dispatchEvent)
-        element = document.documentElement;
-        
+      if (element === doc && doc.createEvent && !element.dispatchEvent)
+        element = docEl;
+      
       var event;
-      if (document.createEvent) {
-        event = document.createEvent("HTMLEvents");
+      if (doc.createEvent) {
+        event = doc.createEvent("HTMLEvents");
         event.initEvent("dataavailable", true, true);
       } else {
-        event = document.createEventObject();
+        event = doc.createEventObject();
         event.eventType = "ondataavailable";
       }
 
       event.eventName = eventName;
       event.memo = memo || { };
 
-      if (document.createEvent) {
+      if (doc.createEvent) {
         element.dispatchEvent(event);
       } else {
         element.fireEvent(event.eventType, event);
       }
       return Event.extend(event);
     }
-  };
-})());
+  });
 
-Object.extend(Event, Event.Methods);
+  Element.addMethods({
+    fire:          Event.fire,
+    getEventID:    Event.getEventID,
+    observe:       Event.observe,
+    stopObserving: Event.stopObserving
+  });
 
-Element.addMethods({
-  fire:          Event.fire,
-  getEventID:    Event.getEventID,
-  observe:       Event.observe,
-  stopObserving: Event.stopObserving
-});
+  Object.extend(document, {
+    fire:          Element.Methods.fire.methodize(),
+    getEventID:    Element.Methods.getEventID.methodize(),
+    observe:       Element.Methods.observe.methodize(),
+    stopObserving: Element.Methods.stopObserving.methodize(),
+    loaded:        false
+  });
 
-Object.extend(document, {
-  fire:          Element.Methods.fire.methodize(),
-  getEventID:    Element.Methods.getEventID.methodize(),
-  observe:       Element.Methods.observe.methodize(),
-  stopObserving: Element.Methods.stopObserving.methodize(),
-  loaded:        false
-});
+  // Safari has a dummy event handler on page unload so that it won't
+  // use its bfcache. Safari <= 3.1 has an issue with restoring the "document"
+  // object when page is returned to via the back button using its bfcache.
+  if (Prototype.Browser.WebKit)
+    window.addEventListener("unload", Prototype.emptyFunction, false);
 
-(function() {
-  /* Support for the DOMContentLoaded event is based on work by Dan Webb, 
-     Matthias Miller, Dean Edwards, John Resig and Diego Perini. */
-  
-  var timer, global = this, doc = document;
+
+  // Support for the DOMContentLoaded event is based on work by Dan Webb, 
+  // Matthias Miller, Dean Edwards, John Resig and Diego Perini.
   
   function clearTimer() {
     timer && global.clearInterval(timer);
@@ -483,12 +488,12 @@ Object.extend(document, {
   };
   
   // IE
-  if ('attachEvent' in doc && !('addEventListener' in doc)) {
+  if (!followsSpec) {
     if (global == top) {
       // doScroll() does not error when the document
       // is in an iframe. Fallback on document readyState.
       checkDomLoadedState = function() {
-        try { doc.documentElement.doScroll("left") } catch(e) { return }
+        try { docEl.doScroll("left") } catch(e) { return }
         fireDomLoadedEvent();
       };
     }

@@ -1,3 +1,5 @@
+* Optimized Event observe/stopObserving and consolidated closures in event.js. [jddalton]
+
 * Ensure all stylesheets have loaded before firing dom:loaded event. [#328 state:resolved] [Diego Perini, jddalton, zichzach]
 
 * Implement Diego Perini's "doScroll" technique for DOMContentLoaded event support in IE. [Diego Perini, jddalton]
