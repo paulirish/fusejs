@@ -264,6 +264,16 @@ new Test.Unit.Runner({
       this.assertUndefined(object._prototypeEventID);
       Event.stopObserving(object, "test:somethingHappened");
     }, this);
+  },
+  
+  testObserverExecutionOrder: function() {
+    var span = $("span"), count = 0;
+    (2).times(function(n) {
+      span.observe("test:somethingHappened", function() { count = n })
+    });
+    span.fire("test:somethingHappened");
+    span.stopObserving("test:somethingHappened");
+    this.assertEqual(1, count);
   }
 });
 

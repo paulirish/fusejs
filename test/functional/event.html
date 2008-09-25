@@ -263,5 +263,19 @@
       log(e);
     })
   </script>
+  
+  <p id="observer_order">Observer Execution Order (First-in-first-out) - <strong>click here</strong></p>
+  
+  <script type="text/javascript">
+    (function() {
+      var el = $('observer_order'), count = 0;
+      (2).times(function(n) {
+        el.observe("click", function(evt) { count = n; log(evt); })
+      });
+      el.observe("click", function() {
+        (function() { (count == 1) ? el.passed() : el.failed() }).defer();
+      });
+    })();
+  </script>
 </body>
 </html>

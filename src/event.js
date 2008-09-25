@@ -148,6 +148,7 @@ Event.extend = (function() {
 (function() {
   
   var timer, global = this,
+   simulateFIFO = false, domLoadedDone = false,
    doc = document, docEl = doc.documentElement,
    followsSpec = !('attachEvent' in doc && !('addEventListener' in doc));
   
@@ -189,7 +190,7 @@ Event.extend = (function() {
   
   function getCacheForEventName(id, eventName) {
     var c = Event.cache[id];
-    return c && c.events[eventName] || { wrappers:[], handlers:[] };
+    return c && c.events[eventName] || { wrappers:[], handlers:[], dispatcher:false };
   }
   
   function findWrapper(id, eventName, handler) {
@@ -210,9 +211,19 @@ Event.extend = (function() {
       event.eventName && event.eventName === eventName);
   }
   
+  function isUsingDispatcher(id, eventName) {
+    return !!(simulateFIFO || getCacheForEventName(id, eventName).dispatcher);
+  }
+  
   function cacheEvent(element, eventName, handler) {
     var id = getEventID(element),
      enc = createCacheForEvent(element, eventName);
+    
+    if (isUsingDispatcher(id, eventName)) {
+      createAndCacheWrapper(id, eventName, handler);
+      if (enc.dispatcher) return false;
+      return enc.dispatcher = createDispatcher(id, eventName);
+    }
     return createAndCacheWrapper(id, eventName, handler);
   }
   
@@ -236,9 +247,20 @@ Event.extend = (function() {
   }
   
   function createWrapper(id, eventName, handler) {
+    return isUsingDispatcher(id, eventName) ? handler :
+     function(event) {
+       if (!isEventValid(event, eventName)) return false;
+       handler.call(Event.cache[id].element, Event.extend(event));
+     };
+  }
+  
+  function createDispatcher(id, eventName) {
     return function(event) {
       if (!isEventValid(event, eventName)) return false;
-      handler.call(Event.cache[id].element, Event.extend(event));
+      var enc = getCacheForEventName(id, eventName),
+       length = enc.handlers.length, element = Event.cache[id].element;
+      event = Event.extend(event);
+      while (length--) enc.handlers[length].call(element, event);
     };
   }
   
@@ -304,7 +326,12 @@ Event.extend = (function() {
         handler : findWrapper(id, eventName, handler);
       if (!found.wrapper) return element;
       
+      var dispatcher = enc.dispatcher;
       destroyWrapper(id, eventName, found.index);
+      
+      if (dispatcher && (!Event.cache[id] || !Event.cache[id][eventName])) 
+        found.wrapper = dispatcher;
+      
       removeEvent(element, eventName, found.wrapper);
       return element;
     },
@@ -355,6 +382,33 @@ Event.extend = (function() {
   // object when page is returned to via the back button using its bfcache.
   if (Prototype.Browser.WebKit)
     window.addEventListener("unload", Prototype.emptyFunction, false);
+
+  // Check for first-in-first-out event order,
+  // if not FIFO then use the event dispatchers
+  ['a', 'b', 'c', 'd']._each(function(n) {
+    doc.observe('eventOrder:checked', function() { simulateFIFO += n });
+  });
+  simulateFIFO = '';
+  doc.fire("eventOrder:checked");
+  doc.stopObserving("eventOrder:checked");
+  simulateFIFO = (simulateFIFO !== 'abcd');
+
+  // Ensure that the dom:loaded event has finished
+  // executing its observers before allowing the
+  // window onload event to proceed.
+  addEvent(window, "load", 
+   createCacheForEvent(window, "load").dispatcher = 
+    createDispatcher(1, "load").wrap(function(proceed, event) {
+      if (!domLoadedDone) arguments.callee.defer(proceed, event);
+      proceed(event);
+  }));
+  
+  addEvent(doc, "dom:loaded",
+   createCacheForEvent(doc, "dom:loaded").dispatcher = 
+    createDispatcher(2, "dom:loaded").wrap(function(proceed, event) {
+      proceed(event);
+      domLoadedDone = true;
+  }));
 
 
   // Support for the DOMContentLoaded event is based on work by Dan Webb, 

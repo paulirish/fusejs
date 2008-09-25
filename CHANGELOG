@@ -1,3 +1,6 @@
+* Stop window "onload" observers from firing before the "dom:loaded" observers.
+  Enforce first-in-first-out observer execution order if the browser doesn't. Closes #9394. [jddalton, Samuel Lebeau]
+
 * Optimized Event observe/stopObserving and consolidated closures in event.js. [jddalton]
 
 * Ensure all stylesheets have loaded before firing dom:loaded event. [#328 state:resolved] [Diego Perini, jddalton, zichzach]
