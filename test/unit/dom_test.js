@@ -977,6 +977,9 @@ new Test.Unit.Runner({
     // should return an empty string when the attribute is not found
     this.assertEqual('', $(document.documentElement).readAttribute('class'));
     this.assertEqual('', $('attributes_with_issues_1').readAttribute('onmouseover'));
+    
+    $('attributes_with_issues_1').onmousedown = function() { return 'testing' };
+    this.assertEqual('', $('attributes_with_issues_1').readAttribute('onmousedown'));
 
     var table = $('write_attribute_table');
     this.assertEqual('4', table.readAttribute('cellspacing'));

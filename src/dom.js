@@ -861,7 +861,9 @@ else if (Prototype.Browser.IE) {
         },
         _getEv: function(element, attribute) {
           attribute = element.getAttribute(attribute);
-          return attribute ? attribute.toString().slice(23, -2) : null;
+          if (!Object.isFunction(attribute)) return "";
+          var source = attribute.toString();
+          return source.indexOf('function anonymous()\n{\n') === 0 ? source.slice(23, -2) : "";
         },
         _flag: function(element, attribute) {
           return $(element).hasAttribute(attribute) ? attribute : null;
