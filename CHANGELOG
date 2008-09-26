@@ -1,3 +1,5 @@
+* Implement Diego Perini's "doScroll" technique for DOMContentLoaded event support in IE. [Diego Perini, jddalton]
+
 * unit test: Added ability to append the query param delay=n to any resource URI to delay its loading by "n" seconds. [jddalton]
 
 * Add Event#getEventID to fix issues with event IDs on elements created by Element#cloneNode. [jddalton]

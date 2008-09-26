@@ -351,38 +351,53 @@ Object.extend(document, {
 
 (function() {
   /* Support for the DOMContentLoaded event is based on work by Dan Webb, 
-     Matthias Miller, Dean Edwards and John Resig. */
-
-  var timer;
+     Matthias Miller, Dean Edwards, John Resig and Diego Perini. */
   
-  function fireContentLoadedEvent() {
-    if (timer) window.clearInterval(timer);
-    if (document.loaded) return;
-    document.loaded = true;
-    document.fire("dom:loaded");
+  var timer, global = this, doc = document;
+  
+  function clearTimer() {
+    timer && global.clearInterval(timer);
   }
   
-  if (document.addEventListener) {
-    if (Prototype.Browser.WebKit) {
-      timer = window.setInterval(function() {
-        if (/loaded|complete/.test(document.readyState))
-          fireContentLoadedEvent();
-      }, 0);
-      
-      Event.observe(window, "load", fireContentLoadedEvent);
-      
-    } else {
-      document.addEventListener("DOMContentLoaded", 
-        fireContentLoadedEvent, false);
+  function fireDomLoadedEvent() {
+    clearTimer();
+    if (doc.loaded) return;
+    doc.loaded = true;
+    return doc.fire("dom:loaded");
+  }
+  
+  var respondToReadyState = function(event) {
+    clearTimer();
+    checkDomLoadedState(event);
+  };
+  
+  var checkDomLoadedState = function(event) {
+    if (event && event.type === 'DOMContentLoaded' ||
+        /loaded|complete/.test(doc.readyState)) {
+      doc.stopObserving("readystatechange", respondToReadyState);
+      fireDomLoadedEvent();
     }
-    
-  } else {
-    document.write("<script id=__onDOMContentLoaded defer src=//:><\/script>");
-    $("__onDOMContentLoaded").onreadystatechange = function() { 
-      if (this.readyState == "complete") {
-        this.onreadystatechange = null; 
-        fireContentLoadedEvent();
-      }
-    }; 
+  };
+  
+  // IE
+  if ('attachEvent' in doc && !('addEventListener' in doc)) {
+    if (global === top) {
+      // doScroll() does not error when the document
+      // is in an iframe. Fallback on document readyState.
+      checkDomLoadedState = function() {
+        try { doc.documentElement.doScroll("left") } catch(e) { return }
+        fireDomLoadedEvent();
+      };
+    }
+    respondToReadyState = checkDomLoadedState;
   }
+  
+  // worst case fallbacks... 
+  timer = setInterval(checkDomLoadedState, 10);
+  Event.observe(window, "load", fireDomLoadedEvent);
+  
+  // remove timer if other options are available
+  $w('DOMContentLoaded readystatechange')._each(function(eventName) {
+    doc.observe(eventName, respondToReadyState);
+  });
 })();
