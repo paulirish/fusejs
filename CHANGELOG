@@ -1,3 +1,5 @@
+* Ensure Element#getStyle returns values in px unit, regardless of how they are set. [Andrew Dupont, jddalton]
+
 * Refactor Element#getStyle to remove browser sniffs and move forked versions closer together in the code. [jddalton]
 
 * Make Element._attributeTranslations.read.values._getEv only return a value for code wrapped in an anonymous function. [#184 state:resolved] [Garrett Smith, jddalton]

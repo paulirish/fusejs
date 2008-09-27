@@ -933,6 +933,70 @@ new Test.Unit.Runner({
     div.style.height = 'auto';
     this.assertNotNull(div.getStyle('height'));
     div.style.height = backup;
+    
+    // ensure units convert to px correctly
+    var tests = {
+      unit_px_test_1: [
+        $w('width 192'),
+        $w('height 76'),
+        $w('margin-top 64'),
+        $w('margin-bottom 8'),
+        $w('margin-left 96'),
+        $w('margin-right 39'),
+        $w('border-left-width 13'),
+        $w('border-bottom-width 19'),
+        $w('padding-top 13'),
+        $w('padding-left 64'),
+        $w('padding-bottom 102'),
+        $w('padding-right 64')
+      ],
+      
+      unit_px_test_1_1: [
+        $w('width 115'),
+        $w('height 77'),
+        $w('font-size 38'),
+        $w('line-height 77'),
+        $w('border-left-width 1')
+      ],
+      
+      unit_px_test_2: [
+        $w('font-size 32')
+      ],
+      
+      unit_px_test_2_1: [
+        $w('font-size 16')
+      ],
+      
+      unit_px_test_2_1_1: [
+        $w('font-size 16')
+      ]
+    };
+    
+    // check percent values for height and width
+    this.assertEqual(10, Math.round(parseFloat($('unit_px_test_2_1').getStyle('height'))),
+      'unit_px_test_2_1: px value is not 20% of height (50px).');
+    
+    this.assertEqual(40, Math.round(parseFloat($('unit_px_test_2_1').getStyle('width'))),
+      'unit_px_test_2_1: px value is not 40% of width (100px).');
+    
+    // plus or minus 5 from the correct answer because IE, Firefox, and Opera, are sometimes off 
+    // by a little (the values are still correct)
+    var pad = 5;
+    
+    // check the other styles
+    for(element in tests) {
+      var test = tests[element];
+      element = $(element);
+      test.each(function(test) {
+        var answer = parseInt(test[1]),
+         strValue  = element.getStyle(test[0]),
+         numValue  = parseFloat(strValue),
+         msg   = element.id + ': ' + test[0];
+        
+        this.assert(strValue.slice(-2) === 'px', msg + ' is not in px.');
+        this.assert(numValue >= (answer - pad) && numValue <= (answer + pad), msg + '; expected: ' + answer + '; got: ' + numValue);
+      }, this);
+    }
   },
   
   testElementGetOpacity: function() {

@@ -28,6 +28,51 @@ div.style-test { margin-left: 1px }
   top: 10px;
 }
 
+#unit_px_test {
+  width: 500px;
+  height: 400px;
+  background-color:red;
+}
+
+#unit_px_test_1 {
+  width: 5.08cm;
+  height: 20mm;
+  margin: 5em 3em 2mm 1in;
+  border: 1em solid #181818;
+  border-bottom: 1.5em solid #02A;
+  padding: 1em 5em 8em;
+  color: #2f5;
+  background-color:blue;
+  overflow:auto;
+}
+
+#unit_px_test_1_1 {
+  width: 3em;
+  height: 2em;
+  font-size: 3em;
+  line-height: 2em;
+  border: 1px solid #030;
+  background-color:green;
+}
+
+#unit_px_test_2 {
+  width: 100px;
+  height: 50px;
+  font-size: 2pc;
+  background-color:yellow;
+}
+
+#unit_px_test_2_1 {
+  height: 20%;
+  width: 40%;
+  font-size: 12pt;
+  background-color:brown;
+}
+
+#unit_px_test_2_1_1 {
+  font-size: 2ex;	
+}
+
 #dimensions-visible,
 #dimensions-display-none,
 #dimensions-visible-pos-rel,

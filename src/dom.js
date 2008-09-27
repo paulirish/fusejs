@@ -395,8 +395,17 @@ Element.Methods = {
   },
   
   getStyle: (function() {
-    var div = document.createElement('div'),
+    var RELATIVE_CSS_UNITS = {
+      'em' : true,
+      'ex' : true
+    };
+    
+    var span = document.createElement('span'),
      hasComputedStyle = !!(document.defaultView && document.defaultView.getComputedStyle);
+    
+    // setup the span for testing font-size
+    span.style.cssText = 'position:absolute;visibility:hidden;height:1em;lineHeight:0;padding:0;margin:0;border:0;';
+    span.innerHTML = 'M';
     
     var getComputedStyle = function(element, styleName) {
       styleName = getStyleName(styleName);
@@ -433,6 +442,40 @@ Element.Methods = {
           return element['offset' + styleName.capitalize()] + 'px';
         return null;
       }
+      
+      // If the unit is something other than a pixel (em, pt, %),
+      // set it on something we can grab a pixel value from.
+      // Inspired by Dean Edwards' comment
+      // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
+      if (/^\d+(\.\d+)?(?!px)[%a-z]+$/i.test(value)) {
+        if (styleName === 'fontSize') {
+          // We need to insert a span with the M character in it.  The offsetHeight
+          // will give us the font size as this is the definition of the CSS font-size
+          // attribute.
+          // Inspired by Google Doctype:
+          // http://code.google.com/p/doctype/source/browse/trunk/goog/style/style.js#1146
+          var unit = value.match(/\D+$/)[0];
+          if (unit === '%') {
+            var size = element.appendChild(span).offsetHeight;
+            element.removeChild(span);
+            return Math.round(size) + 'px';
+          } else if (unit in RELATIVE_CSS_UNITS)
+            element = element.parentNode;
+        }
+        
+        // backup values
+        var pos = (styleName === 'height') ? 'top' : 'left',
+         stylePos = element.style[pos], runtimePos = element.runtimeStyle[pos];
+        
+        // set runtimeStyle so no visible shift is seen
+        element.runtimeStyle[pos] = element.currentStyle[pos];
+        element.style[pos] = value;
+        value = element.style['pixel' + pos.capitalize()] + 'px';
+        
+        // revert changes
+        element.style[pos] = stylePos;
+        element.runtimeStyle[pos] = runtimePos;
+      }
       return value;
     }
     
@@ -465,7 +508,7 @@ Element.Methods = {
       }
     }
     // IE
-    if ('currentStyle' in div && !hasComputedStyle) {
+    if ('currentStyle' in span && !hasComputedStyle) {
       getComputedStyle = function(element, styleName) {
         styleName = (styleName === 'float' || styleName === 'cssFloat') ? 'styleFloat' : styleName;
         var currentStyle = element.currentStyle;
@@ -476,8 +519,8 @@ Element.Methods = {
     
     if (hasComputedStyle) {
       // Opera
-      div.style.cssText = 'height:1px;display:none;';
-      if (!document.defaultView.getComputedStyle(div, null).height) return getStyleOpera;
+      span.style.display = 'none';
+      if (!document.defaultView.getComputedStyle(span, null).height) return getStyleOpera;
       
       // Firefox, Safari, etc...
       return function(element, styleName) {
