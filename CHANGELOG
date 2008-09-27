@@ -1,3 +1,5 @@
+* Refactor Element#getStyle to remove browser sniffs and move forked versions closer together in the code. [jddalton]
+
 * Make Element._attributeTranslations.read.values._getEv only return a value for code wrapped in an anonymous function. [#184 state:resolved] [Garrett Smith, jddalton]
 
 * Stop window "onload" observers from firing before the "dom:loaded" observers.
