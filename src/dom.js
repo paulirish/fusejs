@@ -48,9 +48,11 @@ if (!Node.ELEMENT_NODE) {
     attributes = attributes || { };
     tagName = tagName.toLowerCase();
     var cache = Element.cache;
-    if (Prototype.Browser.IE && attributes.name) {
-      tagName = '<' + tagName + ' name="' + attributes.name + '">';
-      delete attributes.name;
+    if (Prototype.Browser.IE && (attributes.name || attributes.type)) {
+      tagName = '<' + tagName +
+        (attributes.name ? ' name="' + attributes.name + '"' : '') +
+          (attributes.type ? ' type="' + attributes.type + '"' : '') + '>';
+      delete attributes.name; delete attributes.type;
       return Element.writeAttribute(document.createElement(tagName), attributes);
     }
     if (!cache[tagName]) cache[tagName] = Element.extend(document.createElement(tagName));

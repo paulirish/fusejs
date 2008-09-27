@@ -1192,6 +1192,25 @@ new Test.Unit.Runner({
       Element.prototype.fooBar = Prototype.emptyFunction
       this.assertRespondsTo('fooBar', new Element('div'));
     }
+    
+    // test IE setting "type" property of newly created button/input elements
+    var form  = $('write_attribute_form'),
+     input = $('write_attribute_input');
+     
+    $w('button input').each(function(tagName) {
+      var button = new Element(tagName, {type: 'reset'});
+      form.insert(button);
+      input.value = 'something';
+      
+	  try {
+        button.click();
+      this.assertEqual('', input.value);
+	  } catch(e) {
+	    this.info('The "' + tagName +'" element does not support the click() method.');
+	  }
+      
+      button.remove();
+    }, this);
   },
 
   testElementGetHeight: function() {
