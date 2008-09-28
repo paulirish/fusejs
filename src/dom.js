@@ -43,24 +43,33 @@ if (!Node.ELEMENT_NODE) {
 }
 
 (function() {
-  var element = this.Element;
-  this.Element = function(tagName, attributes) {
-    attributes = attributes || { };
+  var original = this.Element, canCreateWithHTML = true;
+  try { document.createElement('<div>') } catch(e) {
+    canCreateWithHTML = false;
+  }
+  
+  function createElement(tagName, attributes) {
     tagName = tagName.toLowerCase();
-    var cache = Element.cache;
-    if (Prototype.Browser.IE && (attributes.name || attributes.type)) {
-      tagName = '<' + tagName +
-        (attributes.name ? ' name="' + attributes.name + '"' : '') +
+    if (!Element.cache[tagName]) Element.cache[tagName] = Element.extend(document.createElement(tagName));
+    return Element.writeAttribute(Element.cache[tagName].cloneNode(false), attributes || { });
+  }
+  
+  this.Element = createElement;
+  if (canCreateWithHTML) {
+    this.Element = function(tagName, attributes) {
+      if (attributes && (attributes.name || attributes.type)) {
+        tagName = '<' + tagName +
+         (attributes.name ? ' name="' + attributes.name + '"' : '') +
           (attributes.type ? ' type="' + attributes.type + '"' : '') + '>';
-      delete attributes.name; delete attributes.type;
-      return Element.writeAttribute(document.createElement(tagName), attributes);
-    }
-    if (!cache[tagName]) cache[tagName] = Element.extend(document.createElement(tagName));
-    return Element.writeAttribute(cache[tagName].cloneNode(false), attributes);
-  };
-  Object.extend(this.Element, element || { });
-  if (element) this.Element.prototype = element.prototype;
-}).call(window);
+        delete attributes.name; delete attributes.type;
+      }
+      return createElement(tagName, attributes);
+    };
+  }
+  
+  Object.extend(this.Element, original || { });
+  if (original) this.Element.prototype = original.prototype;
+})();
 
 Element.cache = { };
 
