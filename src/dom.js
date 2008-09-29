@@ -1100,9 +1100,7 @@ if (Prototype.Browser.IE || Prototype.Browser.Opera) {
     content.evalScripts.bind(content).defer();
     return element;
   };
-}
-
-if ('outerHTML' in document.createElement('div')) {
+  
   Element.Methods.replace = function(element, content) {
     element = $(element);
     
@@ -1113,19 +1111,14 @@ if ('outerHTML' in document.createElement('div')) {
     }
 
     content = Object.toHTML(content);
-    var parent = element.parentNode, tagName = parent.tagName.toUpperCase();
     
-    if (Element._insertionTranslations.tags[tagName]) {
-      var nextSibling = element.next();
-      var fragments = Element._getContentFromAnonymousElement(tagName, content.stripScripts());
-      parent.removeChild(element);
-      if (nextSibling)
-        fragments.each(function(node) { parent.insertBefore(node, nextSibling) });
-      else 
-        fragments.each(function(node) { parent.appendChild(node) });
-    }
-    else element.outerHTML = content.stripScripts();
-    
+    var parent = element.parentNode,
+     tagName = parent.tagName.toUpperCase(),
+     nextSibling = element.nextSibling,
+     fragments = Element._getContentFromAnonymousElement(tagName, content.stripScripts());
+
+    parent.removeChild(element);
+    fragments._each(function(node) { parent.insertBefore(node, nextSibling) });
     content.evalScripts.bind(content).defer();
     return element;
   };

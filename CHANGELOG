@@ -1,3 +1,5 @@
+* Fix IE issue with Element#replace removing childNodes of the returned element. Closes #11225. [Rukawa, jddalton]
+
 * Refactor the Element constructor to remove browser sniffs. [jddalton]
 
 * Ensure setting type attribute for button/input elements works in IE when using the Element constructor. Closes #10548. [jddalton, sakarit]
