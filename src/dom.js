@@ -596,12 +596,65 @@ Element.Methods = {
     return element;
   },
   
-  setOpacity: function(element, value) {
-    element = $(element);
-    element.style.opacity = (value == 1 || value === '') ? '' : 
+  setOpacity: (function() {
+    
+    function stripAlpha(filter){
+      return filter.replace(/alpha\([^\)]*\)/gi,'');
+    }
+    
+    function setOpacity(element, value) {
+      element = $(element);
+      element.style.opacity = (value == 1 || value === '') ? '' : 
       (value < 0.00001) ? 0 : value;
-    return element;
-  },
+      return element;
+    }
+    
+    if ('filters' in document.documentElement &&
+        'filter' in document.documentElement.style) {
+      return function(element, value) {
+        element = $(element);
+        var currentStyle = element.currentStyle;
+        if ((currentStyle && !currentStyle.hasLayout) ||
+          (!currentStyle && element.style.zoom == 'normal'))
+            element.style.zoom = 1;
+        
+        var filter = element.getStyle('filter'), style = element.style;
+        if (value == 1 || value === '') {
+          (filter = stripAlpha(filter)) ?
+            style.filter = filter : style.removeAttribute('filter');
+          return element;
+        } else if (value < 0.00001) value = 0;
+        style.filter = stripAlpha(filter) +
+          'alpha(opacity=' + (value * 100) + ')';
+        return element;   
+      };
+    }
+    if (Prototype.Browser.WebKit &&
+       (navigator.userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
+      return function(element, value) {
+        element = setOpacity(element, value);
+        if (value == 1)
+          if (element.tagName.toUpperCase() == 'IMG' && element.width) {
+            element.width++; element.width--;
+          } else try {
+            var n = document.createTextNode(' ');
+            element.removeChild(element.appendChild(n));
+          } catch (e) { }
+        
+        return element;
+      };
+    }
+    if (Prototype.Browser.Gecko && /rv:1\.8\.0/.test(navigator.userAgent)) {
+      return function(element, value) {
+        element = $(element);
+        element.style.opacity = (value == 1) ? 0.999999 : 
+          (value === '') ? '' : (value < 0.00001) ? 0 : value;
+        return element;
+      };
+    }
+    
+    return setOpacity;
+  })(),
   
   getDimensions: function(element) {
     element = $(element);
@@ -937,27 +990,6 @@ else if (Prototype.Browser.IE) {
       }
     );
   });
-  
-  Element.Methods.setOpacity = function(element, value) {
-    function stripAlpha(filter){
-      return filter.replace(/alpha\([^\)]*\)/gi,'');
-    }
-    element = $(element);
-    var currentStyle = element.currentStyle;
-    if ((currentStyle && !currentStyle.hasLayout) ||
-      (!currentStyle && element.style.zoom == 'normal'))
-        element.style.zoom = 1;
-    
-    var filter = element.getStyle('filter'), style = element.style;
-    if (value == 1 || value === '') {
-      (filter = stripAlpha(filter)) ?
-        style.filter = filter : style.removeAttribute('filter');
-      return element;
-    } else if (value < 0.00001) value = 0;
-    style.filter = stripAlpha(filter) +
-      'alpha(opacity=' + (value * 100) + ')';
-    return element;   
-  };
 
   Element._attributeTranslations = {
     read: {
@@ -1065,33 +1097,7 @@ else if (Prototype.Browser.IE) {
   })(Element._attributeTranslations.write.values);
 }
 
-else if (Prototype.Browser.Gecko && /rv:1\.8\.0/.test(navigator.userAgent)) {
-  Element.Methods.setOpacity = function(element, value) {
-    element = $(element);
-    element.style.opacity = (value == 1) ? 0.999999 : 
-      (value === '') ? '' : (value < 0.00001) ? 0 : value;
-    return element;
-  };
-}
-
 else if (Prototype.Browser.WebKit) {
-  Element.Methods.setOpacity = function(element, value) {
-    element = $(element);
-    element.style.opacity = (value == 1 || value === '') ? '' :
-      (value < 0.00001) ? 0 : value;
-    
-    if (value == 1)
-      if (element.tagName.toUpperCase() == 'IMG' && element.width) {
-        element.width++; element.width--;
-      } else try {
-        var n = document.createTextNode(' ');
-        element.appendChild(n);
-        element.removeChild(n);
-      } catch (e) { }
-    
-    return element;
-  };
-  
   // Safari returns margins on body which is incorrect if the child is absolutely
   // positioned.  For performance reasons, redefine Element#cumulativeOffset for
   // KHTML/WebKit only.

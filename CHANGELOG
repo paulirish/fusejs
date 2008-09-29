@@ -1,3 +1,5 @@
+* Refactor Element#setOpacity to refine browser sniffs and move forked versions closer together. [jddalton]
+
 * Refactor Element#update to remove browser sniffs. [jddalton]
 
 * Optimize Element#(insert|update|replace) using a document fragment. [jddalton]
