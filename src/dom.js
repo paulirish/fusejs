@@ -141,12 +141,12 @@ Element.Methods = {
         Object.isElement(insertions) || (insertions && (insertions.toElement || insertions.toHTML)))
           insertions = {bottom:insertions};
     
-    var content, insert, tagName, childNodes;
+    var content, fragment, insert, tagName;
     
     for (var position in insertions) {
       content  = insertions[position];
       position = position.toLowerCase();
-      insert = Element._insertionTranslations[position];
+      insert   = Element._insertionTranslations[position];
 
       if (content && content.toElement) content = content.toElement();
       if (Object.isElement(content)) {
@@ -155,15 +155,11 @@ Element.Methods = {
       }
     
       content = Object.toHTML(content);
-      
       tagName = ((position == 'before' || position == 'after')
         ? element.parentNode : element).tagName.toUpperCase();
       
-      childNodes = Element._getContentFromAnonymousElement(tagName, content.stripScripts());
-      
-      if (position == 'top' || position == 'after') childNodes.reverse();
-      childNodes.each(insert.curry(element));
-      
+      fragment = Element._getContentFromAnonymousElement(tagName, content.stripScripts());
+      insert(element, fragment);
       content.evalScripts.bind(content).defer();
     }
     
@@ -1098,14 +1094,15 @@ if (Prototype.Browser.IE || Prototype.Browser.Opera) {
     if (Object.isElement(content)) return element.update().insert(content);
     
     content = Object.toHTML(content);
-    var tagName = element.tagName.toUpperCase();
+    var tagName = element.tagName.toUpperCase(),
+     stripped = content.stripScripts();
     
     if (tagName in Element._insertionTranslations.tags) {
-      $A(element.childNodes).each(function(node) { element.removeChild(node) });
-      Element._getContentFromAnonymousElement(tagName, content.stripScripts())
-        .each(function(node) { element.appendChild(node) });
+      var children = element.childNodes, length = children.length;
+      while (length--) element.removeChild(children[length]);
+      element.appendChild(Element._getContentFromAnonymousElement(tagName, stripped));
     }
-    else element.innerHTML = content.stripScripts();
+    else element.innerHTML = stripped;
     
     content.evalScripts.bind(content).defer();
     return element;
@@ -1119,14 +1116,43 @@ Element._returnOffset = function(l, t) {
   return result;
 };
 
-Element._getContentFromAnonymousElement = function(tagName, html) {
-  var div = new Element('div'), t = Element._insertionTranslations.tags[tagName];
-  if (t) {
-    div.innerHTML = t[0] + html + t[1];
-    t[2].times(function() { div = div.firstChild });
-  } else div.innerHTML = html;
-  return $A(div.childNodes);
-};
+Element._getContentFromAnonymousElement = (function() {
+  var div = document.createElement('div'),
+   fragment = document.createDocumentFragment();
+  
+  var getContentAsFragment = (function() {
+    if ('removeNode' in div) {
+      return function(container) {
+        // shortcut for IE: removes the parent but keeping the children
+        fragment.appendChild(container).removeNode();
+        return fragment;
+      };
+    } else if ('createRange' in document) {
+      var range = document.createRange();
+      return function(container) {
+        range.selectNodeContents(container);
+        fragment.appendChild(range.extractContents());
+        return fragment;
+      };
+    } else {
+      return function(container) {
+        var length = container.childNodes.length;
+        while (length--) fragment.insertBefore(container.childNodes[length], fragment.firstChild);
+        return fragment;
+      };
+    }
+  })();
+  
+  return function(tagName, html) {
+    var node = div, t = Element._insertionTranslations.tags[tagName];
+    if (t) {
+      node.innerHTML= t[0] + html + t[1];
+      t[2].times(function() { node = node.firstChild });
+    } else node.innerHTML = html;
+    
+    return getContentAsFragment(node);
+  }
+})();
 
 Element._insertionTranslations = {
   before: function(element, node) {

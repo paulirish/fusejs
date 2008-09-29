@@ -1,3 +1,5 @@
+* Optimize Element#(insert|update|replace) using a document fragment. [jddalton]
+
 * Refactor Element#replace to remove browser sniffs. [jddalton]
 
 * Fix IE issue with Element#replace removing childNodes of the returned element. Closes #11225. [Rukawa, jddalton]
