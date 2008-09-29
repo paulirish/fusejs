@@ -110,19 +110,29 @@ Element.Methods = {
     return element;
   },
   
-  replace: function(element, content) {
-    element = $(element);
-    if (content && content.toElement) content = content.toElement();
-    else if (!Object.isElement(content)) {
-      content = Object.toHTML(content);
-      var range = element.ownerDocument.createRange();
-      range.selectNode(element);
-      content.evalScripts.bind(content).defer();
-      content = range.createContextualFragment(content.stripScripts());
-    }
-    element.parentNode.replaceChild(content, element);
-    return element;
-  },
+  replace: (function() {
+    var createFragment = ('createRange' in document) ?
+      function(element, content) {
+        var range = element.ownerDocument.createRange();
+        range.selectNode(element);
+        return range.createContextualFragment(content);
+      } :
+      function(element, content) {
+        return Element._getContentFromAnonymousElement(element.parentNode.tagName.toUpperCase(), content);
+      };
+    
+    return function(element, content) {
+      element = $(element);
+      if (content && content.toElement)
+        content = content.toElement();
+      else if (!Object.isElement(content)) {
+        content = Object.toHTML(content);
+        content.evalScripts.bind(content).defer();
+        content = createFragment(element, content.stripScripts());
+      }
+      return element.parentNode.replaceChild(content, element);
+    };
+  })(),
   
   insert: function(element, insertions) {
     element = $(element);
@@ -1097,28 +1107,6 @@ if (Prototype.Browser.IE || Prototype.Browser.Opera) {
     }
     else element.innerHTML = content.stripScripts();
     
-    content.evalScripts.bind(content).defer();
-    return element;
-  };
-  
-  Element.Methods.replace = function(element, content) {
-    element = $(element);
-    
-    if (content && content.toElement) content = content.toElement();
-    if (Object.isElement(content)) {
-      element.parentNode.replaceChild(content, element);
-      return element;
-    }
-
-    content = Object.toHTML(content);
-    
-    var parent = element.parentNode,
-     tagName = parent.tagName.toUpperCase(),
-     nextSibling = element.nextSibling,
-     fragments = Element._getContentFromAnonymousElement(tagName, content.stripScripts());
-
-    parent.removeChild(element);
-    fragments._each(function(node) { parent.insertBefore(node, nextSibling) });
     content.evalScripts.bind(content).defer();
     return element;
   };
