@@ -1,3 +1,5 @@
+* unit test: Add support for the Chrome browser in jstest.rb. [Andrew Dupont]
+
 * Refactor Element#setOpacity to refine browser sniffs and move forked versions closer together. [jddalton]
 
 * Refactor Element#update to remove browser sniffs. [jddalton]
