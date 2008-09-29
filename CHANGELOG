@@ -1,3 +1,5 @@
+* Refactor Element#update to remove browser sniffs. [jddalton]
+
 * Optimize Element#(insert|update|replace) using a document fragment. [jddalton]
 
 * Refactor Element#replace to remove browser sniffs. [jddalton]

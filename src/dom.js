@@ -100,15 +100,41 @@ Element.Methods = {
     return element;
   },
 
-  update: function(element, content) {
-    element = $(element);
-    if (content && content.toElement) content = content.toElement();
-    if (Object.isElement(content)) return element.update().insert(content);
-    content = Object.toHTML(content);
-    element.innerHTML = content.stripScripts();
-    content.evalScripts.bind(content).defer();
-    return element;
-  },
+  update: (function() {
+    var setInnerHTML = function(element, content) {
+      element.innerHTML = content;
+    };
+    
+    try {
+      var tests = {
+        table:  '<tbody><tr><td>test</td></tr></tbody>',
+        select: '<option>test<option>'
+      };
+      for (var tagName in tests) {
+        var el = document.createElement(tagName);
+        if ((el.innerHTML = tests[tagName]) &&
+          el.innerHTML.toLowerCase() !== tests[tagName]) throw 'error';
+      }
+    } catch(e) {
+      setInnerHTML = function(element, content) {
+        var tagName = element.tagName.toUpperCase();
+        if (tagName in Element._insertionTranslations.tags) {
+          var children = element.childNodes, length = children.length;
+          while (length--) element.removeChild(children[length]);
+          element.appendChild(Element._getContentFromAnonymousElement(tagName, content));
+        } else element.innerHTML = content;
+      };
+    }
+    return function(element, content) {
+      element = $(element);
+      if (content && content.toElement) content = content.toElement();
+      if (Object.isElement(content)) return element.update().insert(content);
+      content = Object.toHTML(content);
+      setInnerHTML(element, content.stripScripts());
+      content.evalScripts.bind(content).defer();
+      return element;
+    };
+  })(),
   
   replace: (function() {
     var createFragment = ('createRange' in document) ?
@@ -1082,30 +1108,6 @@ else if (Prototype.Browser.WebKit) {
     } while (element);
     
     return Element._returnOffset(valueL, valueT);
-  };
-}
-
-if (Prototype.Browser.IE || Prototype.Browser.Opera) {
-  // IE and Opera are missing .innerHTML support for TABLE-related and SELECT elements
-  Element.Methods.update = function(element, content) {
-    element = $(element);
-    
-    if (content && content.toElement) content = content.toElement();
-    if (Object.isElement(content)) return element.update().insert(content);
-    
-    content = Object.toHTML(content);
-    var tagName = element.tagName.toUpperCase(),
-     stripped = content.stripScripts();
-    
-    if (tagName in Element._insertionTranslations.tags) {
-      var children = element.childNodes, length = children.length;
-      while (length--) element.removeChild(children[length]);
-      element.appendChild(Element._getContentFromAnonymousElement(tagName, stripped));
-    }
-    else element.innerHTML = stripped;
-    
-    content.evalScripts.bind(content).defer();
-    return element;
   };
 }
 
