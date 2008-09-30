@@ -1,3 +1,5 @@
+* Ensure Element#readAttribute works properly when accessing the invalid "type" attribute of an iframe. [#118 state:resolved] [Zekid, kangax]
+
 * unit test: Add support for the Chrome browser in jstest.rb. [Andrew Dupont]
 
 * Refactor Element#setOpacity to refine browser sniffs and move forked versions closer together. [jddalton]

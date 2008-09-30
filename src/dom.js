@@ -322,12 +322,15 @@ Element.Methods = {
       if (t.names[name]) name = t.names[name];
       // If we're reading from a form, avoid a conflict between an attribute
       // and a child name.
-      if (element.tagName.toUpperCase() == 'FORM' &&
+      var tagName = element.tagName.toUpperCase();
+      if (tagName === 'FORM' &&
         !/^((child|parent)Node|(next|previous)Sibling)$/.test(name) &&
           element.children[name]){
         element = element.cloneNode(false); // don't extend here
       }
-      if (t.values[name])
+      if (tagName === 'IFRAME' && name === 'type')
+        result = element.getAttribute(name, 1);
+      else if (t.values[name])
         result = t.values[name](element, name);
       else if (name.include(':')) {
         result = (!element.attributes || !element.attributes[name]) ? '' : 

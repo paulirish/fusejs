@@ -1045,7 +1045,13 @@ new Test.Unit.Runner({
     
     $('attributes_with_issues_1').onmousedown = function() { return 'testing' };
     this.assertEqual('', $('attributes_with_issues_1').readAttribute('onmousedown'));
-
+    
+    // test IE issue with readAttribute and invalid 'type' attribute of iframes
+    this.assertNothingRaised(function() { $('attributes_with_issues_iframe').readAttribute('type') });
+    this.assertEqual('', $('attributes_with_issues_iframe').readAttribute('type'));
+    $('attributes_with_issues_iframe').writeAttribute('type', 'foo');
+    this.assertEqual('foo', $('attributes_with_issues_iframe').readAttribute('type'));
+    
     var table = $('write_attribute_table');
     this.assertEqual('4', table.readAttribute('cellspacing'));
     this.assertEqual('6', table.readAttribute('cellpadding'));
