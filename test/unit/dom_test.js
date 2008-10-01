@@ -1461,6 +1461,12 @@ new Test.Unit.Runner({
     this.assertEqual('absolute_relative', $('inline').getOffsetParent().id);
     this.assertEqual('absolute_relative', $('absolute_relative_undefined').getOffsetParent().id);
     
+    // Ensure IE doesn't error when requesting offsetParent from an not attached to the document.
+    this.assertNothingRaised(function() { new Element('div').getOffsetParent() });
+    
+    // Make sure it doesn't error when passing document
+    this.assertNothingRaised(function() { Element.getOffsetParent(document) });
+    
     // IE with strict doctype may try to return documentElement as offsetParent on relatively positioned elements.  
     this.assertEqual(document.body, $('body_relative').getOffsetParent());
     

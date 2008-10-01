@@ -843,9 +843,11 @@ Element.Methods = {
   
   getOffsetParent: function(element) {
     element = $(element);
-    if (!element.offsetParent)
-      return $(document.body);
     
+    // IE throws an error if the element is not in the document.
+    if (element.currentStyle === null || !element.offsetParent)
+      return $(document.body);
+
     while ((element = element.offsetParent) &&
      !/^(html|body)$/i.test(element.tagName)) {
       if (Element.getStyle(element, 'position') !== 'static')

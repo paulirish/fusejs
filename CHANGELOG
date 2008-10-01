@@ -1,3 +1,5 @@
+* Stop Element#getOffsetParent from erroring in IE if the element isn't attached to the document. [jddalton, Tobie Langel]
+
 * Fix IE issue with Element#getOffsetParent returning documentElement on some relatively positioned elements when using a strict doctype. [#90 state:resolved] [jddalton, Nick Stakenburg]
 
 * Ensure Element#readAttribute works properly when accessing the invalid "type" attribute of an iframe. [#118 state:resolved] [Zekid, kangax]
