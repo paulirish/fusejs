@@ -1460,6 +1460,12 @@ new Test.Unit.Runner({
     this.assertEqual('body_absolute', $('absolute_relative').getOffsetParent().id);
     this.assertEqual('absolute_relative', $('inline').getOffsetParent().id);
     this.assertEqual('absolute_relative', $('absolute_relative_undefined').getOffsetParent().id);
+    
+    // IE with strict doctype may try to return documentElement as offsetParent on relatively positioned elements.  
+    this.assertEqual(document.body, $('body_relative').getOffsetParent());
+    
+    // Ensure document.body is returned even when using document.documentElement.
+    this.assertEqual(document.body, $(document.documentElement).getOffsetParent());
   },
 
   testAbsolutize: function() {

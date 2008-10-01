@@ -842,14 +842,15 @@ Element.Methods = {
   },
   
   getOffsetParent: function(element) {
-  	element = $(element);
-    if (element.offsetParent) return $(element.offsetParent);
-    if (element == document.body) return $(element);
+    element = $(element);
+    if (!element.offsetParent)
+      return $(document.body);
     
-    while ((element = element.parentNode) && element != document.body)
-      if (Element.getStyle(element, 'position') != 'static')
+    while ((element = element.offsetParent) &&
+     !/^(html|body)$/i.test(element.tagName)) {
+      if (Element.getStyle(element, 'position') !== 'static')
         return $(element);
-
+    }
     return $(document.body);
   },
 
