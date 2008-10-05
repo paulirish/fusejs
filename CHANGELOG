@@ -1,3 +1,5 @@
+* Optimize Element#getWidth and Element#getHeight to calculate one dimension instead of both. [jddalton]
+
 * Add helper methods Element.(_getCssDimensions|_getCssWidth|_getCssWidth) to reduce repeated code. [jddalton]
 
 * Add helper method Element._hasLayout to reduce repeated code. [jddalton]

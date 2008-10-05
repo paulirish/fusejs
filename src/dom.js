@@ -362,14 +362,6 @@ Element.Methods = {
     return element;
   },
   
-  getHeight: function(element) {
-    return $(element).getDimensions().height; 
-  },
-  
-  getWidth: function(element) {
-    return $(element).getDimensions().width; 
-  },
-  
   classNames: function(element) {
     return new Element.ClassNames(element);
   },
@@ -650,30 +642,7 @@ Element.Methods = {
   })(),
   
   getDimensions: function(element) {
-    element = $(element);
-    var display = element.getStyle('display'),
-     dimensions = { width: element.offsetWidth, height: element.offsetHeight };
-    
-    // All width and height properties return 0 on elements with display:none,
-    // so show the element temporarily
-    if (display === "none" || display === null ||
-        dimensions.width === 0 || dimensions.height === 0) {
-      var els = element.style,
-       originalVisibility = els.visibility,
-       originalPosition   = els.position,
-       originalDisplay    = els.display;
-
-      els.visibility = 'hidden';
-      els.position = 'absolute';
-      els.display = 'block';
-      
-      dimensions = { width: element.offsetWidth, height: element.offsetHeight };
-
-      els.display = originalDisplay;
-      els.position = originalPosition;
-      els.visibility = originalVisibility;
-    }
-    return dimensions;
+    return { width: Element.getWidth(element), height: Element.getHeight(element) };
   },
   
   makePositioned: function(element) {
@@ -914,6 +883,25 @@ Element.Methods.identify.counter = 1;
 Object.extend(Element.Methods, {
   getElementsBySelector: Element.Methods.select,
   childElements: Element.Methods.immediateDescendants
+});
+
+// Define Element#getWidth and Element#getHeight
+$w('Width Height')._each(function(D) {
+  Element.Methods['get' + D] = function(element) {
+    element = $(element);
+    var result = element['offset' + D],
+     display = Element.getStyle(element, 'display');
+    
+    // All width and height properties return 0 on elements with display:none,
+    // so show the element temporarily
+    if (display === 'none' || display === null || result === 0) {
+      var backup = element.style.cssText;
+      element.style.cssText += ';position:absolute;display:block;visibility:hidden;';
+      result = element['offset' + D];
+      element.style.cssText = backup;
+    }
+    return result;
+  };
 });
 
 Element._attributeTranslations = {
