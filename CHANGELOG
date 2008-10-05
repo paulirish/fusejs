@@ -1,3 +1,5 @@
+* Add helper method Element._hasLayout to reduce repeated code. [jddalton]
+
 * Add helper method Element._getRealOffsetParent to ensure offsetParent is accurate and prevent errors in Element#(cumulativeOffset|positionedOffset|viewportOffset). Closes #9416, #10192, #10248. [jddalton, kangax, psiborg, ronstoney]
 
 * Stop Element#getOffsetParent from erroring in IE if the element isn't attached to the document. [jddalton, Tobie Langel]

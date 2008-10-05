@@ -616,10 +616,8 @@ Element.Methods = {
         'filter' in document.documentElement.style) {
       return function(element, value) {
         element = $(element);
-        var currentStyle = element.currentStyle;
-        if ((currentStyle && !currentStyle.hasLayout) ||
-          (!currentStyle && element.style.zoom == 'normal'))
-            element.style.zoom = 1;
+        if (!Element._hasLayout(element))
+          element.style.zoom = 1;
         
         var filter = element.getStyle('filter'), style = element.style;
         if (value == 1 || value === '') {
@@ -627,8 +625,8 @@ Element.Methods = {
             style.filter = filter : style.removeAttribute('filter');
           return element;
         } else if (value < 0.00001) value = 0;
-        style.filter = stripAlpha(filter) +
-          'alpha(opacity=' + (value * 100) + ')';
+
+        style.filter = stripAlpha(filter) + 'alpha(opacity=' + (value * 100) + ')';
         return element;   
       };
     }
@@ -970,16 +968,20 @@ else if (Prototype.Browser.IE) {
     Element.Methods[method] = Element.Methods[method].wrap(
       function(proceed, element) {
         element = $(element);
-        var position = element.getStyle('position');
-        if (position !== 'static') return proceed(element);
+        var s = element.style, position = s.position;
+        if (Element.getStyle(element, 'position') !== 'static')
+          return proceed(element);
+        
         // Trigger hasLayout on the offset parent so that IE6 reports
         // accurate offsetTop and offsetLeft values for position: fixed.
-        var offsetParent = element.getOffsetParent();
-        if (offsetParent && offsetParent.getStyle('position') === 'fixed')
-          offsetParent.setStyle({ zoom: 1 });
-        element.setStyle({ position: 'relative' });
-        var value = proceed(element);
-        element.setStyle({ position: position });
+        var offsetParent = Element.getOffsetParent(element);
+        if (Element.getStyle(offsetParent, 'position') === 'fixed' &&
+         !Element._hasLayout(offsetParent))
+          s.zoom = '1';
+        
+        s.position = 'relative';
+        var value  = proceed(element);
+        s.position = position;
         return value;
       }
     );
@@ -1122,6 +1124,12 @@ Element._getRealOffsetParent = function(element) {
   return (element.currentStyle === null || !element.offsetParent) ? false :
    element.offsetParent === document.documentElement ?
      element.offsetParent : Element.getOffsetParent(element);
+};
+
+Element._hasLayout = function(element) {
+  var currentStyle = element.currentStyle;
+  return (currentStyle && currentStyle.hasLayout) ||
+   (!currentStyle && element.style.zoom && element.style.zoom != 'normal')
 };
 
 Element._getContentFromAnonymousElement = (function() {
