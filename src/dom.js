@@ -738,7 +738,7 @@ Element.Methods = {
     do {
       valueT += element.offsetTop  || 0;
       valueL += element.offsetLeft || 0;
-    } while (element = element.offsetParent);
+    } while (element = Element._getRealOffsetParent(element));
     return Element._returnOffset(valueL, valueT);
   },
 
@@ -748,7 +748,7 @@ Element.Methods = {
     do {
       valueT += element.offsetTop  || 0;
       valueL += element.offsetLeft || 0;
-      element = element.offsetParent;
+      element = Element._getRealOffsetParent(element);
     } while (element && element !== document.body &&
       Element.getStyle(element, 'position') === 'static');
     
@@ -858,7 +858,7 @@ Element.Methods = {
 
   viewportOffset: function(forElement) {
     forElement = $(forElement);
-    var element = forElement, valueT = 0, valueL = 0,
+    var offsetParent, element = forElement, valueT = 0, valueL = 0,
      scrollOffset = Element.cumulativeScrollOffset(element);
 
     do {
@@ -866,10 +866,10 @@ Element.Methods = {
       valueL += element.offsetLeft || 0;
 
       // Safari fix
-      if (element.offsetParent === document.body &&
-        Element.getStyle(element, 'position') === 'absolute') break;
-
-    } while (element = element.offsetParent);
+      offsetParent = Element._getRealOffsetParent(element);
+      if (offsetParent === document.body && Element.getStyle(element,
+       'position') === 'absolute') break;
+    } while (element = offsetParent);
 
     // Subtract the scrollOffets of forElement from the scrollOffset totals
     // (cumulativeScrollOffset includes them).
@@ -965,19 +965,7 @@ if (Prototype.Browser.Opera) {
 
 else if (Prototype.Browser.IE) {
   // IE doesn't report offsets correctly for static elements, so we change them
-  // to "relative" to get the values, then change them back.  
-  Element.Methods.getOffsetParent = Element.Methods.getOffsetParent.wrap(
-    function(proceed, element) {
-      element = $(element);
-      var position = element.getStyle('position');
-      if (position !== 'static') return proceed(element);
-      element.setStyle({ position: 'relative' });
-      var value = proceed(element);
-      element.setStyle({ position: position });
-      return value;
-    }
-  );
-  
+  // to "relative" to get the values, then change them back.
   $w('positionedOffset viewportOffset').each(function(method) {
     Element.Methods[method] = Element.Methods[method].wrap(
       function(proceed, element) {
@@ -1128,6 +1116,12 @@ Element._returnOffset = function(l, t) {
   result.left = l;
   result.top = t;
   return result;
+};
+
+Element._getRealOffsetParent = function(element) {
+  return (element.currentStyle === null || !element.offsetParent) ? false :
+   element.offsetParent === document.documentElement ?
+     element.offsetParent : Element.getOffsetParent(element);
 };
 
 Element._getContentFromAnonymousElement = (function() {

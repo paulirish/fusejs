@@ -1434,9 +1434,24 @@ new Test.Unit.Runner({
     var afu = $('absolute_fixed_undefined');
     this.assertEnumEqual([afu.offsetLeft, afu.offsetTop],
       afu.positionedOffset());
+      
+    var offset = [], element = new Element('div');
+    this.assertNothingRaised(function() { offset = element.positionedOffset() });
+    this.assertEnumEqual([0,0], offset);
+    this.assertIdentical(0, offset.top);
+    this.assertIdentical(0, offset.left);
+  },
+  
+  testCumulativeOffset: function() {
+    var offset = [], element = new Element('div');
+    this.assertNothingRaised(function() { offset = element.cumulativeOffset() });
+    this.assertEnumEqual([0,0], offset);
+    this.assertIdentical(0, offset.top);
+    this.assertIdentical(0, offset.left);
   },
   
   testViewportOffset: function() {
+    window.scrollTo(0, 0);
     this.assertEnumEqual([10,10],
       $('body_absolute').viewportOffset());
     this.assertEnumEqual([20,20],
@@ -1453,6 +1468,12 @@ new Test.Unit.Runner({
     window.scrollTo(0, 0);
     $('absolute_fixed').scrollTop = 0;
     this.assertEnumEqual([10, 10], $('absolute_fixed').viewportOffset());
+    
+    var offset = [], element = new Element('div');
+    this.assertNothingRaised(function() { offset = element.viewportOffset() });
+    this.assertEnumEqual([0,0], offset);
+    this.assertIdentical(0, offset.top);
+    this.assertIdentical(0, offset.left);
   },
   
   testOffsetParent: function() {
