@@ -83,28 +83,32 @@ Event.Methods = (function() {
       return Selector.findElement(elements, expression, 0);
     },
 
-    pointer: function(event) {
-      var docElement = document.documentElement,
-       body = document.body || { scrollLeft: 0, scrollTop: 0 };
-      return {
-        x: event.pageX || (event.clientX + 
-          (docElement.scrollLeft || body.scrollLeft) -
-          (docElement.clientLeft || 0)),
-        y: event.pageY || (event.clientY + 
-          (docElement.scrollTop || body.scrollTop) -
-          (docElement.clientTop || 0))
-      };
-    },
-
-    pointerX: function(event) { return Event.pointer(event).x },
-    pointerY: function(event) { return Event.pointer(event).y },
-
     stop: function(event) {
       Event.extend(event);
       event.preventDefault();
       event.stopPropagation();
       event.stopped = true;
     }
+  };
+})();
+
+// Mouse pointer
+(function() {
+  var docEl = document.documentElement,
+   map = { X: 'Left', Y: 'Top' },
+   fakeBody = { scrollLeft: 0, scrollTop: 0 };
+
+  $w('X Y')._each(function(C) {
+    var Pos = map[C];
+    Event.Methods['pointer' + C] = function(event) {
+      return event['page' + C] || (event['client' + C] +
+       (docEl['scroll' + Pos] || (document.body || fakeBody)['scroll' + Pos]) -
+       (docEl['client' + Pos] || 0));
+    };
+  });
+
+  Event.Methods.pointer = function(event) {
+    return { x: Event.pointerX(event), y: Event.pointerY(event) };
   };
 })();
 
