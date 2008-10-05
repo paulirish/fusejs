@@ -537,18 +537,10 @@ Element.Methods = {
           
           // returns the border-box dimensions rather than the content-box
           // dimensions, so we subtract padding and borders from the value
-          var dim = parseFloat(getComputedStyle(element, styleName)) || 0;
-          if (dim !== element['offset' + styleName.capitalize()])
-            return dim + 'px';
-          
-          var subtract = {
-            width:  ['borderLeftWidth', 'paddingLeft', 'borderRightWidth',  'paddingRight'],
-            height: ['borderTopWidth',  'paddingTop',  'borderBottomWidth', 'paddingBottom']
-          };
-          return Math.max(0, subtract[styleName]
-           .inject(dim, function(value, s) {
-             return value -= parseFloat(getComputedStyle(element, s)) || 0;
-          })) + 'px';
+          var D = styleName.capitalize(),
+           dim = parseFloat(getComputedStyle(element, styleName)) || 0;
+          if (dim !== element['offset' + D]) return dim + 'px';
+          return Element['_getCss' + D](element) + 'px';
         
         default: return getComputedStyle(element, styleName);
       }
@@ -760,20 +752,10 @@ Element.Methods = {
     // Position.prepare(); // To be done manually by Scripty when it needs it.
 
     var s = element.style,
+     cssWidth = Element._getCssWidth(element),
+     cssHeight = Element._getCssHeight(element),
      offsets = Element.positionedOffset(element),
      before = Element.getDimensions(element);
-
-    var styles = {
-      width:  ['borderLeftWidth', 'paddingLeft', 'borderRightWidth',  'paddingRight'],
-      height: ['borderTopWidth',  'paddingTop',  'borderBottomWidth', 'paddingBottom']
-    };
-    // calculate css dimensions of the element
-    var cssDimensions = { };
-    for (var i in before) {
-      cssDimensions[i] = Math.max(0, styles[i].inject(before[i], function(value, styleName) {
-        return value -= parseFloat(Element.getStyle(element, styleName)) || 0;
-      }));
-    }
 
     element._originalLeft       = s.left;
     element._originalTop        = s.top;
@@ -787,12 +769,12 @@ Element.Methods = {
     s.marginLeft = '0px';
     s.top        = offsets.top  + 'px';
     s.left       = offsets.left + 'px';
-    s.width      = cssDimensions.width  + 'px';
-    s.height     = cssDimensions.height + 'px';
+    s.width      = cssWidth  + 'px';
+    s.height     = cssHeight + 'px';
 
     var after = Element.getDimensions(element);
-    s.width   = Math.max(0, cssDimensions.width  + (before.width  - after.width))  + 'px';
-    s.height  = Math.max(0, cssDimensions.height + (before.height - after.height)) + 'px';
+    s.width   = Math.max(0, cssWidth  + (before.width  - after.width))  + 'px';
+    s.height  = Math.max(0, cssHeight + (before.height - after.height)) + 'px';
 
     return element;
   },
@@ -891,19 +873,11 @@ Element.Methods = {
       offsetLeft: 0
     }, arguments[2] || { });
 
-    if (options.setHeight || options.setWidth) {
-      var subtract = { },
-       dims = Element.getDimensions(source);
-      if (options.setHeight)
-        subtract.height = ['paddingTop',  'paddingBottom', 'borderTopWidth',  'borderBottomWidth'];
-      if (options.setWidth)
-        subtract.width  = ['paddingLeft', 'paddingRight',  'borderLeftWidth', 'borderRightWidth'];
-      for (var i in subtract) {
-        s[i] = Math.max(0, subtract[i].inject(dims[i], function(value, styleName) {
-          return value -= parseFloat(Element.getStyle(element, styleName)) || 0;
-        })) + 'px';
-      }
-    }
+    if (options.setHeight)
+      s.height = Element._getCssHeight(element) + 'px';
+    if (options.setWidth)
+      s.width = Element._getCssWidth(element) + 'px';
+    
     // bail if skipping setLeft and setTop
     if (!options.setLeft && !options.setTop)
       return element;
@@ -1131,6 +1105,25 @@ Element._hasLayout = function(element) {
   return (currentStyle && currentStyle.hasLayout) ||
    (!currentStyle && element.style.zoom && element.style.zoom != 'normal')
 };
+
+Element._getCssDimensions = function(element) {
+  return { width: this._getCssWidth(element), height: this._getCssHeight(element) };
+};
+
+// Define Element._getCssWidth() and Element._getCssHeight()
+(function() {
+  var Subtract = {
+    Width:  $w('borderLeftWidth paddingLeft borderRightWidth paddingRight'),
+    Height: $w('borderTopWidth paddingTop borderBottomWidth paddingBottom')
+  };
+  $w('Width Height')._each(function(D) {
+    Element['_getCss' + D] = function(element) {
+      return Math.max(0, Subtract[D].inject(Element['get' + D](element), function(value, styleName) {
+        return value -= parseFloat(Element.getStyle(element, styleName)) || 0;
+      }));
+    };
+  });
+})();
 
 Element._getContentFromAnonymousElement = (function() {
   var div = document.createElement('div'),
