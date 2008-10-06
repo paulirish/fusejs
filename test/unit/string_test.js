@@ -44,6 +44,11 @@ new Test.Unit.Runner({
       'ウィメンズ2007\nクルーズコレクション'.gsub(/\n/,'<br/>'));
     this.assertEqual('ウィメンズ2007<br/>クルーズコレクション', 
       'ウィメンズ2007\nクルーズコレクション'.gsub('\n','<br/>'));
+      
+    this.assertEqual('happy Smyle',
+      'happy :-)'.gsub(':-)', 'Smyle'));
+    this.assertEqual('sad Frwne',
+      'sad >:($'.gsub('>:($', 'Frwne'));
   },
   
   testGsubWithReplacementTemplateString: function() {

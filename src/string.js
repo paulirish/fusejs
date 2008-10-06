@@ -16,6 +16,7 @@ Object.extend(String.prototype, {
   gsub: function(pattern, replacement) {
     var result = '', source = this, match;
     replacement = arguments.callee.prepareReplacement(replacement);
+    if (Object.isString(pattern)) pattern = RegExp.escape(pattern);
     
     while (source.length > 0) {
       if (match = source.match(pattern)) {
@@ -285,7 +286,7 @@ var Template = Class.create({
       if (match == null) return before;
 
       while (match != null) {
-        var comp = match[1].startsWith('[') ? match[2].gsub('\\\\]', ']') : match[1];
+        var comp = match[1].startsWith('[') ? match[2].replace(/\\]/g, ']') : match[1];
         ctx = ctx[comp];
         if (null == ctx || '' == match[3]) break;
         expr = expr.substring('[' == match[3] ? match[1].length : match[0].length);
