@@ -1,3 +1,5 @@
+* Ensure Enumerable#grep escapes special characters if regex is a string. [#257 state:resolved] [jddalton, Marton Kiss-Albert]
+
 * Ensure Element#adjacent matches the css expression against siblings and not children of siblings. [#244 state:resolved] [jddalton, Jean-Philippe]
 
 * Ensure Element#descendants always returns an array. [#373 state:resolved] [kangax]

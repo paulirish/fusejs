@@ -128,14 +128,17 @@ new Test.Unit.Runner({
   testGrep: function() {
     this.assertEqual('noradio, htonl', 
       Fixtures.Nicknames.grep(/o/).join(", "));
-      
+    
     this.assertEqual('NORADIO, HTONL', 
       Fixtures.Nicknames.grep(/o/, function(nickname) {
         return nickname.toUpperCase();
-      }).join(", "))
+      }).join(", "));
 
     this.assertEnumEqual($('grepHeader', 'grepCell'),
       $('grepTable', 'grepTBody', 'grepRow', 'grepHeader', 'grepCell').grep(new Selector('.cell')));
+    
+    this.assertEqual(';-), :-)',
+      Fixtures.Emoticons.grep('-)').join(", "));
   },
   
   testInclude: function() {

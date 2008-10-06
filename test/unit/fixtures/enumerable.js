@@ -8,6 +8,8 @@ var Fixtures = {
   
   Nicknames: $w('sam- noradio htonl Ulysses'),
   
+  Emoticons: $w(';-) ;-( :-) :-P'),
+  
   Basic: [1, 2, 3],
   
   Primes: [
