@@ -116,7 +116,7 @@ var Enumerable = {
   invoke: function(method) {
     var args = $A(arguments).slice(1);
     return this.map(function(value) {
-      return value[method].apply(value, args);
+      return Function.prototype.apply.call(value[method], value, args);
     });
   },
   

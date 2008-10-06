@@ -197,6 +197,21 @@ new Test.Unit.Runner({
     this.assertEqual('100, 101, 110', result[1].join(', '));
   },
   
+  testInvokeOfNativeElementMethods: function() {
+    var elements = [
+      new Element('div', { title: 'foo' }),
+      new Element('span', { title: 'bar' }),
+      new Element('a', { title: 'baz' })
+    ];
+
+    this.assertEnumEqual(['foo', 'bar', 'baz'], elements.invoke('getAttribute', 'title'));
+
+    elements = [ new Element('input', { type: 'text' }) ];
+    // must attach input element to document before calling focus()
+    document.body.appendChild(elements[0]);
+    this.assert(Object.isArray(elements.invoke('focus')));
+  },
+  
   testMax: function() {
     this.assertEqual(100, Fixtures.Z.max());
     this.assertEqual(97, Fixtures.Primes.max());
