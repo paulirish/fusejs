@@ -1,3 +1,5 @@
+* Ensure Element#descendants always returns an array. [#373 state:resolved] [kangax]
+
 * Optimize Event.pointerX() and Event.pointerY() to calculate one coordinate instead of both. [#403 state:resolved] [jddalton, Nick Stakenburg]
 
 * Optimize Element#getWidth and Element#getHeight to calculate one dimension instead of both. [jddalton]

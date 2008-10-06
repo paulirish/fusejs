@@ -511,6 +511,9 @@ new Test.Unit.Runner({
     var dummy = $(document.createElement('DIV'));
     dummy.innerHTML = '<div></div>'.times(3);
     this.assert(typeof dummy.descendants()[0].setStyle == 'function');
+    
+    var input = new Element('input', { type: 'text' });
+    this.assert(Object.isArray(input.descendants()), 'Did not return an array.');
   },
   
   testElementFirstDescendant: function() {

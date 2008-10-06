@@ -229,7 +229,7 @@ Element.Methods = {
   },
   
   descendants: function(element) {
-    return $(element).select("*");
+    return Element.select(element,'*');
   },
   
   firstDescendant: function(element) {
