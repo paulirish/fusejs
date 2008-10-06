@@ -301,8 +301,14 @@ Element.Methods = {
   },
   
   adjacent: function() {
-    var args = $A(arguments), element = $(args.shift());
-    return Selector.findChildElements(element.parentNode, args).without(element);
+    var args = $A(arguments), element = $(args.shift()),
+     parent = $(element.parentNode), oldId = parent.id, newId = parent.identify();
+    
+    // ensure match against siblings and not children of siblings
+    args = args.map(function(a) { return '#' + newId + '>' + a });
+    var matches = Selector.matchElements(parent.childNodes, args).without(element);
+    parent.id = oldId;
+    return matches;
   },
   
   identify: function(element) {

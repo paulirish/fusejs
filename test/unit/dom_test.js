@@ -466,6 +466,8 @@ new Test.Unit.Runner({
     elements.each(function(element){
       this.assert(element != $('intended'));
     }, this);
+    
+    this.assertEqual(null, $('test-adjacent').adjacent('div a')[0]);
   },
   
   testElementIdentify: function() {
