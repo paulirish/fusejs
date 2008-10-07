@@ -1,3 +1,5 @@
+* Ensure Form.reset() returns a reference to the form element. [#309 state:resolved] [Phil, kangax]
+
 * Give Enumerable#invoke support for invoking host objects' methods that don't have apply(). [#278 state:resolved] [Garrett Smith, jddalton, kangax]
 
 * Ensure String#gsub escapes special characters if pattern is a string. [#252 state:resolved] [jddalton, Marton Kiss-Albert]

@@ -35,6 +35,12 @@ new Test.Unit.Runner({
     this.assertEqual(null, $F('bork'));
   },
   
+  testFormReset: function() {
+    $('input_enabled').value = 'something else';
+    Form.reset('form');
+    this.assertEqual(4, $F('input_enabled'));
+  },
+  
   testFormElementEventObserver: function(){
     var callbackCounter = 0;
     var observer = new Form.Element.EventObserver('input_enabled', function(){
@@ -468,5 +474,13 @@ new Test.Unit.Runner({
       'multiple select options improperly set');
     input.setValue(['1', '3']);
     this.assertEnumEqual(['1', '3'], input.getValue());
+  },
+  
+  testFormMethodsReturnElement: function() {
+    element = $('form');
+    $w('disable enable focusFirstElement reset').each(function(method) {
+      this.assert(element === Form[method]('form'),
+        'Form.' + method + ' returned a non element value.');
+    }, this);
   }
 });
