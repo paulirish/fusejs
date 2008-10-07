@@ -89,6 +89,11 @@ new Test.Unit.Runner({
     this.assertEnumEqual($$('#troubleForm *[type]'), $$('#troubleForm [type]'));
   },
   
+  testSelectorWithAttributeContainingDash: function() {
+    this.assertEnumEqual([$('attr_with_dash')], $$('[dashed-id]'));
+    this.assertEnumEqual([$('attr_with_dash')], $$('[dashed-id="something"]'));
+  },
+  
   testSelectorWithUniversalAndHyphenTokenizedAttributeValue: function() {
     this.assertEnumEqual([$('item_3')], $$('*[xml:lang|="es"]'));
     this.assertEnumEqual([$('item_3')], $$('*[xml:lang|="ES"]'));

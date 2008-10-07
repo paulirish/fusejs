@@ -1,3 +1,5 @@
+* Correct inconsistencies in Selector.patterns "attrPresence" and "attr" which allow attributes with dashes to be matched. [#285 state:resolved] [leiyou, jddalton, kangax]
+
 * Ensure Form.reset() returns a reference to the form element. [#309 state:resolved] [Phil, kangax]
 
 * Give Enumerable#invoke support for invoking host objects' methods that don't have apply(). [#278 state:resolved] [Garrett Smith, jddalton, kangax]

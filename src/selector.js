@@ -321,8 +321,8 @@ Object.extend(Selector, {
     className:    /^\.([\w\-\*]+)(\b|$)/,
     pseudo:      
 /^:((first|last|nth|nth-last|only)(-child|-of-type)|empty|checked|(en|dis)abled|not)(\((.*?)\))?(\b|$|(?=\s|[:+~>]))/,
-    attrPresence: /^\[((?:[\w]+:)?[\w]+)\]/,
-    attr:         /\[((?:[\w-]*:)?[\w-]+)\s*(?:([!^$*~|]?=)\s*((['"])([^\4]*?)\4|([^'"][^\]]*?)))?\]/
+    attrPresence: /^\[((?:[\w-]+:)?[\w-]+)\]/,
+    attr:         /\[((?:[\w-]+:)?[\w-]+)\s*(?:([!^$*~|]?=)\s*((['"])([^\4]*?)\4|([^'"][^\]]*?)))?\]/
   },
   
   // for Selector.match and Element#match
