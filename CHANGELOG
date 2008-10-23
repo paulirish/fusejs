@@ -1,3 +1,5 @@
+* For consistency, add additional optional parameter "context" to Number#times. Closes #9252. [rmm5t, Samuel Lebeau]
+
 * Selector.patterns should be represented as an ordered structure. [#315 state:resolved] [ADO, kangax]
 
 * Correct inconsistencies in Selector.patterns "attrPresence" and "attr" which allow attributes with dashes to be matched. [#285 state:resolved] [leiyou, jddalton, kangax]
