@@ -291,6 +291,22 @@
 <div id="notInlineAbsoluted"></div>
 <div id="inlineAbsoluted" style="position: absolute"></div>
 
+<div id='absolutize_dimensions_test'>
+  <div>position:relative</div>
+  <div class='addMargin'>position:relative, margin</div>
+  <div class='addPadding'>position:relative, padding</div>
+  <div class='addBorders'>position:relative, borders</div>
+  <div class='addMargin addPadding'>position:relative, margin, padding</div>
+  <div class='addMargin addBorders'>position:relative, margin, borders</div>
+  <div class='addPadding addBorders'>position:relative, padding, borders</div>
+  <div class='addMargin addPadding addBorders'>position:relative, margin, padding, borders</div>
+  <span class='addMargin addPadding addBorders'>position:relative, margin, padding, borders</span>
+  <img class='addMargin' src='../fixtures/logo.gif'/>
+  <img class='addPadding' src='../fixtures/logo.gif'/>
+  <img class='addBorders' src='../fixtures/logo.gif'/>
+  <img class='addMargin addPadding addBorders' src='../fixtures/logo.gif'/>
+</div>
+
 <div id="unextended"></div>
 <div id="identification">
   <div id="predefined_id"></div>

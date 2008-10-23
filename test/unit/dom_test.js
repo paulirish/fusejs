@@ -1367,13 +1367,13 @@ new Test.Unit.Runner({
   },
   
   testElementScrollTo: function() {
-    var elem = $('scroll_test_2');
     Element.scrollTo('scroll_test_2');
-    this.assertEqual(Position.page(elem)[1], 0);
+    this.assertEqual(0, Element.viewportOffset('scroll_test_2')[1]);
     window.scrollTo(0, 0);
     
+    var elem = $('scroll_test_2');
     elem.scrollTo();
-    this.assertEqual(Position.page(elem)[1], 0);      
+    this.assertEqual(0, elem.viewportOffset()[1]);
     window.scrollTo(0, 0);
   },
   
@@ -1479,6 +1479,14 @@ new Test.Unit.Runner({
     this.assertEnumEqual([0,0], offset);
     this.assertIdentical(0, offset.top);
     this.assertIdentical(0, offset.left);
+    
+    var offset = $('absolute_fixed').viewportOffset();
+    this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());  
+    window.scrollTo(0,30);
+    this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());  
+    window.scrollTo(0,80);
+    this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());  
+    window.scrollTo(0,0);
   },
   
   testOffsetParent: function() {
@@ -1533,6 +1541,21 @@ new Test.Unit.Runner({
       var passed = true;
       try { $(id).relativize() } catch(e) { passed = false }
       this.assertEqual(false, passed);
+    }, this);
+  },
+  
+  testAbsolutizeRelativizeNotAffectElementDimensions: function() {
+    $('absolutize_dimensions_test').childElements().each(function(element) {
+      var original = element.getDimensions();
+      element.absolutize();
+      var absolute = element.getDimensions();
+      element.relativize();
+      var relative = element.getDimensions();
+      
+      this.assert(original.width == absolute.width && absolute.width == relative.width,
+        element.tagName + ' ' + element.className);
+      this.assert(original.height == absolute.height && absolute.height == relative.height,
+        element.tagName + ' ' + element.className);
     }, this);
   },
   

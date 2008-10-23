@@ -156,6 +156,18 @@ div.style-test { margin-left: 1px }
   z-index: 1;
 }
 
+#absolutize_dimensions_test div,
+#absolutize_dimensions_test span,
+#absolutize_dimensions_test img {
+  position: relative;
+  width: 105px;
+  height: 48px;
+}
+
+#absolutize_dimensions_test .addMargin { margin: 3px; }
+#absolutize_dimensions_test .addPadding { padding: 10px; }
+#absolutize_dimensions_test .addBorders { border: 5px solid #cccccc; }
+
 #notInlineAbsoluted { position: absolute; }
 
 #elementToViewportDimensions {

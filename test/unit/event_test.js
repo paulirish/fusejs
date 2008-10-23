@@ -186,6 +186,38 @@ new Test.Unit.Runner({
     span.stopObserving();
   },
 
+  testObserveInsideHandlers: function() {
+    var fired = false, observer = function(event) { fired = true };
+    
+    document.observe("test:somethingHappened", function() {
+      document.observe("test:somethingHappened", observer);
+    });
+    
+    document.fire("test:somethingHappened");
+    this.assert(!fired);
+    
+    document.fire("test:somethingHappened");
+    this.assert(fired);
+    document.stopObserving("test:somethingHappened");
+  },
+
+  testStopObservingInsideHandlers: function() {
+    var fired = false, observer = function(event) { fired = true };
+    
+    document.observe("test:somethingHappened", observer);
+    document.observe("test:somethingHappened", function() {
+      document.stopObserving("test:somethingHappened", observer);
+    });
+    
+    document.fire("test:somethingHappened");
+    this.assert(fired);
+    
+    fired = false;
+    document.fire("test:somethingHappened");
+    document.stopObserving("test:somethingHappened");
+    this.assert(!fired);
+  },
+
   testDocumentLoaded: function() {
     this.assert(!documentLoaded);
     this.assert(document.loaded);

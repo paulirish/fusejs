@@ -1,3 +1,5 @@
+* unit test: Add/modify unit tests for Event observe/stopObserving and Element#(absolutize|relativize|scrollTo|viewportOffset). [jddalton, Nick Stakenburg]
+
 * For consistency, add additional optional parameter "context" to Number#times. Closes #9252. [rmm5t, Samuel Lebeau]
 
 * Selector.patterns should be represented as an ordered structure. [#315 state:resolved] [ADO, kangax]
