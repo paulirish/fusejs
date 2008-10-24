@@ -811,29 +811,54 @@ Element.Methods = {
     return $(document.body);
   },
 
-  viewportOffset: function(forElement) {
-    forElement = $(forElement);
-    var offsetParent, element = forElement, valueT = 0, valueL = 0,
-     scrollOffset = Element.cumulativeScrollOffset(element);
+  viewportOffset: (function(forElement) {
+    var docEl = document.documentElement;
+    if (docEl.getBoundingClientRect) {
+      var backup = docEl.style.cssText;
+      docEl.style.cssText += ';margin:0';
+      
+      // IE window's upper-left is at 2,2 (pixels) with respect
+      // to the true client, so its pad.left and pad.top will be 2.
+      var rect = docEl.getBoundingClientRect(), pad = { left: 0, top: 0 };
+      if ('clientLeft' in docEl)
+        pad = { left: docEl.clientLeft, top: docEl.clientTop };
+      docEl.style.cssText = backup;
+      
+      return function(forElement) {
+        forElement = $(forElement);
+        var d, valueT = 0, valueL = 0;
+        if (forElement.currentStyle !== null) {
+          d = forElement.getBoundingClientRect();
+          valueT = Math.round(d.top)  - pad.top;
+          valueL = Math.round(d.left) - pad.left;
+        }
+        return Element._returnOffset(valueL, valueT);
+      };
+    }
+    
+    return function(forElement) {
+      forElement = $(forElement);
+      var offsetParent, element = forElement, valueT = 0, valueL = 0,
+       scrollOffset = Element.cumulativeScrollOffset(element);
+      
+      do {
+        valueT += element.offsetTop  || 0;
+        valueL += element.offsetLeft || 0;
+      
+        // Safari fix
+        offsetParent = Element._getRealOffsetParent(element);
+        if (offsetParent === document.body && Element.getStyle(element,
+         'position') === 'absolute') break;
+      } while (element = offsetParent);
 
-    do {
-      valueT += element.offsetTop  || 0;
-      valueL += element.offsetLeft || 0;
-
-      // Safari fix
-      offsetParent = Element._getRealOffsetParent(element);
-      if (offsetParent === document.body && Element.getStyle(element,
-       'position') === 'absolute') break;
-    } while (element = offsetParent);
-
-    // Subtract the scrollOffets of forElement from the scrollOffset totals
-    // (cumulativeScrollOffset includes them).
-    // Then subtract the the scrollOffset totals from the element offset totals.
-    valueT -= scrollOffset.top  - (forElement.scrollTop  || 0);
-    valueL -= scrollOffset.left - (forElement.scrollLeft || 0);
-
-    return Element._returnOffset(valueL, valueT);
-  },
+      // Subtract the scrollOffets of forElement from the scrollOffset totals
+      // (cumulativeScrollOffset includes them).
+      // Then subtract the the scrollOffset totals from the element offset totals.
+      valueT -= scrollOffset.top  - (forElement.scrollTop  || 0);
+      valueL -= scrollOffset.left - (forElement.scrollLeft || 0);
+      return Element._returnOffset(valueL, valueT);
+    };
+  })(),
 
   clonePosition: function(element, source) {
     element = $(element);
