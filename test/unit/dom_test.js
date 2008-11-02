@@ -305,13 +305,37 @@ new Test.Unit.Runner({
     this.assert(!$('test-hide-visible').visible());
     this.assert(Object.isElement(Element.hide('test-hide-hidden')));
     this.assert(!$('test-hide-hidden').visible());
-  }, 
+    this.assertUndefined($('test-hide-visible')._originalDisplay);
+  },
+  
+  testHideAndShowWithInlineDisplay: function() {
+    $('test-visible-inline').hide();
+    this.assert(!$('test-visible-inline').visible());
+    this.assertEqual('inline', $('test-visible-inline')._originalDisplay);
+    
+    $('test-visible-inline').show();
+    this.assert($('test-visible-inline').visible());
+    this.assertEqual('inline', $('test-visible-inline').style.display);
+    this.assertNull($('test-visible-inline')._originalDisplay);
+    
+    $('test-visible-inline').style.display = 'block';
+    $('test-visible-inline').hide();
+    this.assert(!$('test-visible-inline').visible());
+    this.assertEqual('block', $('test-visible-inline')._originalDisplay);
+    
+    $('test-visible-inline').show();
+    this.assert($('test-visible-inline').visible());
+    this.assertEqual('block', $('test-visible-inline').style.display);
+    this.assertNull($('test-visible-inline')._originalDisplay);
+    
+    $('test-visible-inline').style.display = 'inline';
+  },
   
   testElementRemove: function(){
     $('removable').remove();
     this.assert($('removable-container').empty());
-  },  
-   
+  },
+  
   testElementUpdate: function() {
     $('testdiv').update('hello from div!');
     this.assertEqual('hello from div!', $('testdiv').innerHTML);
