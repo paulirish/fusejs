@@ -17,7 +17,7 @@ var Enumerable = {
     var index = -number, slices = [], array = this.toArray();
     if (number < 1) return array;
     while ((index += number) < array.length)
-      slices.push(array.slice(index, index+number));
+      slices[slices.length] = array.slice(index, index + number);
     return slices.collect(iterator, context);
   },
 
@@ -181,10 +181,6 @@ var Enumerable = {
     }).pluck('value');
   },
   
-  toArray: function() {
-    return this.map();
-  },
-  
   zip: function() {
     var iterator = Prototype.K, args = $A(arguments);
     if (Object.isFunction(args.last()))
@@ -207,6 +203,7 @@ var Enumerable = {
 
 Object.extend(Enumerable, {
   map:     Enumerable.collect,
+  toArray: Enumerable.collect,
   find:    Enumerable.detect,
   select:  Enumerable.findAll,
   filter:  Enumerable.findAll,

@@ -110,8 +110,157 @@ Object.extend(Array.prototype, {
       if (!Object.isUndefined(value)) results.push(value);
     });
     return '[' + results.join(', ') + ']';
+  },
+  
+  /* Overwrite methods assigned by Enumerable with optimized equivalents */
+  
+  all: function(iterator, context) {
+    iterator = iterator || Prototype.K;
+    for (var i = 0, length = this.length; i < length; i++)
+      if (!iterator.call(context, this[i], i))
+        return false;
+    return true;
+  },
+  
+  any: function(iterator, context) {
+    iterator = iterator || Prototype.K;
+    for (var i = 0, length = this.length; i < length; i++)
+      if (!!iterator.call(context, this[i], i))
+        return true;
+    return false;
+  },
+  
+  collect: function(iterator, context) {
+    iterator = iterator || Prototype.K;
+    var results = [];
+    for (var i = 0, length = this.length; i < length; i++)
+      results[i] = iterator.call(context, this[i], i);
+    return results;
+  },
+  
+  detect: function(iterator, context) {
+    for (var i = 0, length = this.length; i < length; i++)
+      if (iterator.call(context, this[i], i))
+        return this[i];
+  },
+  
+  findAll: function(iterator, context) {
+    var results = [];
+    for (var i = 0, length = this.length; i < length; i++)
+      if (iterator.call(context, this[i], i))
+        results[results.length] = this[i];
+    return results;
+  },
+  
+  grep: function(filter, iterator, context) {
+    iterator = iterator || Prototype.K;
+    var results = [];
+
+    if (Object.isString(filter))
+      filter = new RegExp(RegExp.escape(filter));
+
+    for (var i = 0, length = this.length; i < length; i++)
+      if (filter.match(this[i]))
+        results[results.length] = iterator.call(context, this[i], i);
+    return results;
+  },
+  
+  include: function(object) {
+    if (Object.isFunction(this.indexOf))
+      if (this.indexOf(object) != -1) return true;
+    
+    for (var i = 0, length = this.length; i < length; i++)
+      if (this[i] == object) return true;
+    return false;
+  },
+  
+  inject: function(memo, iterator, context) {
+    for (var i = 0, length = this.length; i < length; i++)
+      memo = iterator.call(context, memo, this[i], i);
+    return memo;
+  },
+  
+  max: function(iterator, context) {
+    iterator = iterator || Prototype.K;
+    var result;
+    for (var i = 0, length = this.length, value; i < length; i++) {
+      value = iterator.call(context, this[i], i);
+      if (result == null || value >= result)
+        result = value;
+    }
+    return result;
+  },
+  
+  min: function(iterator, context) {
+    iterator = iterator || Prototype.K;
+    var result;
+    for (var i = 0, length = this.length, value; i < length; i++) {
+      value = iterator.call(context, this[i], i);
+      if (result == null || value < result)
+        result = value;
+    }
+    return result;
+  },
+  
+  partition: function(iterator, context) {
+    iterator = iterator || Prototype.K;
+    var trues = [], falses = [];
+    for (var i = 0, length = this.length; i < length; i++)
+      (iterator.call(context, this[i], i) ?
+        trues : falses).push(this[i]);
+    return [trues, falses];
+  },
+  
+  pluck: function(property) {
+    var results = [];
+    for (var i = 0, length = this.length; i < length; i++)
+      results[i] = this[i][property];
+    return results;
+  },
+  
+  reject: function(iterator, context) {
+    var results = [];
+    for (var i = 0, length = this.length; i < length; i++)
+      if (!iterator.call(context, this[i], i))
+        results[results.length] = this[i];
+    return results;
+  },
+  
+  sortBy: function(iterator, context) {
+    var results = [];
+    for (var i = 0, length = this.length; i < length;
+      results[i] = { value: this[i], criteria: iterator.call(context, this[i], i++) });
+    return results.sort(function(left, right) {
+      var a = left.criteria, b = right.criteria;
+      return a < b ? -1 : a > b ? 1 : 0;
+    }).pluck('value');
+  },
+  
+  zip: function() {
+    var iterator = Prototype.K, args = $A(arguments);
+    if (Object.isFunction(args.last()))
+      iterator = args.pop();
+
+    var results = [], collections = [this].concat(args).map($A);
+    for (var i = 0, length = this.length; i < length; i++)
+      results[i] = iterator(collections.pluck(i));
+    return results;
   }
 });
+
+(function(AP) {
+  Object.extend(AP, {
+    map:     AP.collect,
+    toArray: AP.clone,
+    find:    AP.detect,
+    select:  AP.findAll,
+    filter:  AP.findAll,
+    member:  AP.include,
+    entries: AP.toArray,
+    every:   AP.all,
+    some:    AP.any
+  });
+})(Array.prototype);
 
 // use native browser JS 1.6 implementation if available
 if (Object.isFunction(Array.prototype.forEach))
@@ -131,8 +280,6 @@ if (!Array.prototype.lastIndexOf) Array.prototype.lastIndexOf = function(item, i
   var n = this.slice(0, i).reverse().indexOf(item);
   return (n < 0) ? n : i - n - 1;
 };
-
-Array.prototype.toArray = Array.prototype.clone;
 
 function $w(string) {
   if (!Object.isString(string)) return [];
