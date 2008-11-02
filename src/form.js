@@ -7,7 +7,7 @@ var Form = {
   
   serializeElements: function(elements, options) {
     if (typeof options !== 'object') options = { hash: !!options };
-    else if (Object.isUndefined(options.hash)) options.hash = true;
+    else if (typeof options.hash === 'undefined') options.hash = true;
     
     var key, value, type, isImageType, isSubmitButton,
      submitSerialized, submit = options.submit;
@@ -132,7 +132,7 @@ Form.Methods = {
     options.parameters = form.serialize({ submit:submit, hash:true });
     
     if (params) {
-      if (Object.isString(params)) params = params.toQueryParams();
+      if (typeof params === 'string') params = params.toQueryParams();
       Object.extend(options.parameters, params);
     }
     
@@ -245,22 +245,22 @@ Form.Element.Serializers = {
   },
 
   inputSelector: function(element, value) {
-    if (Object.isUndefined(value)) return element.checked ? element.value : null;
+    if (typeof value === 'undefined') return element.checked ? element.value : null;
     else element.checked = !!value;
   },
 
   button: function(element, value){
-    if (Object.isUndefined(value)) return Element.readAttribute(element, 'value');
+    if (typeof value === 'undefined') return Element.readAttribute(element, 'value');
     else Element.writeAttribute(element, 'value', value);
   },
 
   textarea: function(element, value) {
-    if (Object.isUndefined(value)) return element.value;
+    if (typeof value === 'undefined') return element.value;
     else element.value = value || '';
   },
   
   select: function(element, value) {
-    if (Object.isUndefined(value))
+    if (typeof value === 'undefined')
       return this[element.type == 'select-one' ? 
         'selectOne' : 'selectMany'](element);
     else {
@@ -316,7 +316,7 @@ Abstract.TimedObserver = Class.create(PeriodicalExecuter, {
   
   execute: function() {
     var value = this.getValue();
-    if (Object.isString(this.lastValue) && Object.isString(value) ?
+    if ((typeof this.lastValue === 'string' && typeof value === 'string') ?
         this.lastValue != value : String(this.lastValue) != String(value)) {
       this.callback(this.element, value);
       this.lastValue = value;

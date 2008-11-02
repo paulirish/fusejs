@@ -16,7 +16,7 @@ Object.extend(String.prototype, {
   gsub: function(pattern, replacement) {
     var result = '', source = this, match;
     replacement = arguments.callee.prepareReplacement(replacement);
-    if (Object.isString(pattern)) pattern = RegExp.escape(pattern);
+    if (typeof pattern === 'string') pattern = RegExp.escape(pattern);
     
     while (source.length > 0) {
       if (match = source.match(pattern)) {
@@ -32,7 +32,7 @@ Object.extend(String.prototype, {
   
   sub: function(pattern, replacement, count) {
     replacement = this.gsub.prepareReplacement(replacement);
-    count = Object.isUndefined(count) ? 1 : count;
+    count = (typeof count === 'undefined') ? 1 : count;
     
     return this.gsub(pattern, function(match) {
       if (--count < 0) return match[0];
@@ -47,7 +47,7 @@ Object.extend(String.prototype, {
   
   truncate: function(length, truncation) {
     length = length || 30;
-    truncation = Object.isUndefined(truncation) ? '...' : truncation;
+    truncation = (typeof truncation === 'undefined') ? '...' : truncation;
     return this.length > length ? 
       this.slice(0, length - truncation.length) + truncation : String(this);
   },
@@ -257,7 +257,7 @@ Object.extend(String.prototype, {
 })(String.prototype);
 
 String.prototype.gsub.prepareReplacement = function(replacement) {
-  if (Object.isFunction(replacement)) return replacement;
+  if (typeof replacement === 'function') return replacement;
   var template = new Template(replacement);
   return function(match) { return template.evaluate(match) };
 };
@@ -271,7 +271,7 @@ var Template = Class.create({
   },
   
   evaluate: function(object) {
-    if (Object.isFunction(object.toTemplateReplacements))
+    if (typeof object.toTemplateReplacements === 'function')
       object = object.toTemplateReplacements();
 
     return this.template.gsub(this.pattern, function(match) {

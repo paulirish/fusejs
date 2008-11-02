@@ -107,7 +107,7 @@ Object.extend(Array.prototype, {
     var results = [];
     this._each(function(object) {
       var value = Object.toJSON(object);
-      if (!Object.isUndefined(value)) results.push(value);
+      if (typeof value !== 'undefined') results.push(value);
     });
     return '[' + results.join(', ') + ']';
   },
@@ -156,7 +156,7 @@ Object.extend(Array.prototype, {
     iterator = iterator || Prototype.K;
     var results = [];
 
-    if (Object.isString(filter))
+    if (typeof filter === 'string')
       filter = new RegExp(RegExp.escape(filter));
 
     for (var i = 0, length = this.length; i < length; i++)
@@ -166,7 +166,7 @@ Object.extend(Array.prototype, {
   },
   
   include: function(object) {
-    if (Object.isFunction(this.indexOf))
+    if (typeof this.indexOf === 'function')
       if (this.indexOf(object) != -1) return true;
     
     for (var i = 0, length = this.length; i < length; i++)
@@ -238,7 +238,7 @@ Object.extend(Array.prototype, {
   
   zip: function() {
     var iterator = Prototype.K, args = $A(arguments);
-    if (Object.isFunction(args.last()))
+    if (typeof args.last() === 'function')
       iterator = args.pop();
 
     var results = [], collections = [this].concat(args).map($A);
@@ -263,7 +263,7 @@ Object.extend(Array.prototype, {
 })(Array.prototype);
 
 // use native browser JS 1.6 implementation if available
-if (Object.isFunction(Array.prototype.forEach))
+if (typeof Array.prototype.forEach === 'function')
   Array.prototype._each = Array.prototype.forEach;
 
 if (!Array.prototype.indexOf) Array.prototype.indexOf = function(item, i) {
@@ -282,7 +282,7 @@ if (!Array.prototype.lastIndexOf) Array.prototype.lastIndexOf = function(item, i
 };
 
 function $w(string) {
-  if (!Object.isString(string)) return [];
+  if (typeof string !== 'string') return [];
   string = string.strip();
   return string ? string.split(/\s+/) : [];
 }

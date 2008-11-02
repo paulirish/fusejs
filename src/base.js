@@ -2,7 +2,7 @@
 var Class = {
   create: function() {
     var parent = null, properties = $A(arguments);
-    if (Object.isFunction(properties[0]))
+    if (typeof properties[0] === 'function')
       parent = properties.shift();
     
     function klass() {
@@ -42,8 +42,8 @@ Class.Methods = {
     
     for (var i = 0, length = properties.length; i < length; i++) {
       var property = properties[i], value = source[property];
-      if (ancestor && Object.isFunction(value) &&
-          value.argumentNames().first() == "$super") {
+      if (ancestor && typeof value === 'function' &&
+          value.argumentNames()[0] === '$super') {
         var method = value, value =(function(m) {
           return function() { return ancestor[m].apply(this, arguments) };
         })(property).wrap(method);
@@ -69,7 +69,7 @@ Object.extend = function(destination, source) {
 Object.extend(Object, {
   inspect: function(object) {
     try {
-      if (Object.isUndefined(object)) return 'undefined';
+      if (typeof object === 'undefined') return 'undefined';
       if (object === null) return 'null';
       return object.inspect ? object.inspect() : String(object);
     } catch (e) {
@@ -94,7 +94,7 @@ Object.extend(Object, {
     var results = [];
     for (var property in object) {
       var value = Object.toJSON(object[property]);
-      if (!Object.isUndefined(value))
+      if (typeof value !== 'undefined')
         results.push(property.toJSON() + ': ' + value);
     }
     
@@ -166,7 +166,7 @@ Object.extend(Function.prototype, {
   },
   
   bind: function() {
-    if (arguments.length < 2 && Object.isUndefined(arguments[0])) return this;
+    if (arguments.length < 2 && typeof arguments[0] === 'undefined') return this;
     var __method = this, args = $A(arguments), object = args.shift();
     return function() {
       return __method.apply(object, args.concat($A(arguments)));

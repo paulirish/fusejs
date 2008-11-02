@@ -4,7 +4,7 @@ function $(element) {
       elements.push($(arguments[i]));
     return elements;
   }
-  if (Object.isString(element))
+  if (typeof element === 'string')
     element = document.getElementById(element);
   return Element.extend(element);
 }
@@ -171,7 +171,7 @@ Element.Methods = {
   insert: function(element, insertions) {
     element = $(element);
     
-    if (Object.isString(insertions) || Object.isNumber(insertions) ||
+    if (typeof insertions === 'string' || typeof insertions === 'number' ||
         Object.isElement(insertions) || (insertions && (insertions.toElement || insertions.toHTML)))
           insertions = {bottom:insertions};
     
@@ -204,7 +204,8 @@ Element.Methods = {
     element = $(element);
     if (Object.isElement(wrapper))
       $(wrapper).writeAttribute(attributes || { });
-    else if (Object.isString(wrapper)) wrapper = new Element(wrapper, attributes);
+    else if (typeof wrapper === 'string')
+      wrapper = new Element(wrapper, attributes);
     else wrapper = new Element('div', wrapper);
     if (element.parentNode)
       element.parentNode.replaceChild(wrapper, element);
@@ -267,7 +268,7 @@ Element.Methods = {
   },
   
   match: function(element, selector) {
-    if (Object.isString(selector))
+    if (typeof selector === 'string')
       selector = new Selector(selector);
     return selector.match($(element));
   },
@@ -276,14 +277,14 @@ Element.Methods = {
     element = $(element);
     if (arguments.length == 1) return $(element.parentNode);
     var ancestors = element.ancestors();
-    return Object.isNumber(expression) ? ancestors[expression] :
+    return typeof expression === 'number' ? ancestors[expression] :
       Selector.findElement(ancestors, expression, index);
   },
   
   down: function(element, expression, index) {
     element = $(element);
     if (arguments.length == 1) return element.firstDescendant();
-    return Object.isNumber(expression) ? element.descendants()[expression] :
+    return typeof expression === 'number' ? element.descendants()[expression] :
       Element.select(element, expression)[index || 0];
   },
 
@@ -291,7 +292,7 @@ Element.Methods = {
     element = $(element);
     if (arguments.length == 1) return $(Selector.handlers.previousElementSibling(element));
     var previousSiblings = element.previousSiblings();
-    return Object.isNumber(expression) ? previousSiblings[expression] :
+    return typeof expression === 'number' ? previousSiblings[expression] :
       Selector.findElement(previousSiblings, expression, index);   
   },
   
@@ -299,7 +300,7 @@ Element.Methods = {
     element = $(element);
     if (arguments.length == 1) return $(Selector.handlers.nextElementSibling(element));
     var nextSiblings = element.nextSiblings();
-    return Object.isNumber(expression) ? nextSiblings[expression] :
+    return typeof expression === 'number' ? nextSiblings[expression] :
       Selector.findElement(nextSiblings, expression, index);
   },
   
@@ -351,7 +352,7 @@ Element.Methods = {
          element.attributes[name].value;
       }
     }
-    if (Object.isUndefined(result))
+    if (typeof result === 'undefined')
       result = element.getAttribute(name);
     return result !== null ? result : '';
   },
@@ -361,7 +362,7 @@ Element.Methods = {
     var attributes = { }, t = Element._attributeTranslations.write;
     
     if (typeof name == 'object') attributes = name;
-    else attributes[name] = Object.isUndefined(value) ? true : value;
+    else attributes[name] = (typeof value === 'undefined') ? true : value;
     
     for (var attr in attributes) {
       name = t.names[attr] || attr;
@@ -582,7 +583,7 @@ Element.Methods = {
   setStyle: function(element, styles) {
     element = $(element);
     var elementStyle = element.style, match;
-    if (Object.isString(styles)) {
+    if (typeof styles === 'string') {
       element.style.cssText += ';' + styles;
       return styles.include('opacity') ?
         element.setOpacity(styles.match(/opacity:\s*(\d?\.?\d*)/)[1]) : element;
@@ -591,7 +592,7 @@ Element.Methods = {
       if (property == 'opacity') element.setOpacity(styles[property]);
       else 
         elementStyle[(property == 'float' || property == 'cssFloat') ?
-          (Object.isUndefined(elementStyle.styleFloat) ? 'cssFloat' : 'styleFloat') : 
+          (typeof elementStyle.styleFloat === 'undefined' ? 'cssFloat' : 'styleFloat') : 
             property] = styles[property];
 
     return element;
@@ -768,7 +769,7 @@ Element.Methods = {
       return element;
     // Position.prepare(); // To be done manually by Scripty when it needs it.
 
-    if (Object.isUndefined(element._originalTop))
+    if (typeof element._originalTop === 'undefined')
       throw new Error("Element#absolutize must be called first.");
 
     var s = element.style;
@@ -781,7 +782,7 @@ Element.Methods = {
     s.height     = element._originalWidth;
 
     element.removeAttribute('_originalTop');
-    if (!Object.isUndefined(element._originalTop))
+    if (typeof element._originalTop !== 'undefined')
       delete element._originalTop;
     return element;
   },
@@ -1004,7 +1005,7 @@ else if (Prototype.Browser.IE) {
         },
         _getEv: function(element, attribute) {
           attribute = element.getAttribute(attribute);
-          if (!Object.isFunction(attribute)) return "";
+          if (typeof attribute !== 'function') return "";
           var source = attribute.toString();
           return source.indexOf('function anonymous()\n{\n') === 0 ? source.slice(23, -2) : "";
         },
@@ -1262,7 +1263,7 @@ Element.extend = (function() {
     
     for (property in methods) {
       value = methods[property];
-      if (Object.isFunction(value) && !(property in element))
+      if (typeof value === 'function' && !(property in element))
         element[property] = value.methodize();
     }
     
@@ -1327,7 +1328,7 @@ Element.addMethods = function(methods) {
     onlyIfAbsent = onlyIfAbsent || false;
     for (var property in methods) {
       var value = methods[property];
-      if (!Object.isFunction(value)) continue;
+      if (typeof value !== 'function') continue;
       if (!onlyIfAbsent || !(property in destination))
         destination[property] = value.methodize();
     }
@@ -1366,7 +1367,7 @@ Element.addMethods = function(methods) {
   if (F.SpecificElementExtensions) {
     for (var tag in Element.Methods.ByTag) {
       var klass = findDOMClass(tag);
-      if (Object.isUndefined(klass)) continue;
+      if (typeof klass === 'undefined') continue;
       copy(T[tag], klass.prototype);
     }
   }  

@@ -1,3 +1,5 @@
+* Remove Object.is(Function|Number|String) from internal use in favor of simple "typeof" operators. [jddalton]
+
 * Overwrite Array.prototype methods assigned by Enumerable with optimized equivalents. [jddalton]
 
 * Optimize by using "_each" instead of "each" where applicable. Closes #9092. [jddalton, sylvainzimmer]

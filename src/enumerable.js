@@ -74,7 +74,7 @@ var Enumerable = {
     iterator = iterator || Prototype.K;
     var results = [];
 
-    if (Object.isString(filter))
+    if (typeof filter === 'string')
       filter = new RegExp(RegExp.escape(filter));
       
     this.each(function(value, index) {
@@ -85,7 +85,7 @@ var Enumerable = {
   },
   
   include: function(object) {
-    if (Object.isFunction(this.indexOf))
+    if (typeof this.indexOf === 'function')
       if (this.indexOf(object) != -1) return true;
 
     var found = false;
@@ -99,7 +99,7 @@ var Enumerable = {
   },
   
   inGroupsOf: function(number, fillWith) {
-    fillWith = Object.isUndefined(fillWith) ? null : fillWith;
+    fillWith = (typeof fillWith === 'undefined') ? null : fillWith;
     return this.eachSlice(number, function(slice) {
       while (slice.length < number) slice.push(fillWith);
       return slice;
@@ -183,7 +183,7 @@ var Enumerable = {
   
   zip: function() {
     var iterator = Prototype.K, args = $A(arguments);
-    if (Object.isFunction(args.last()))
+    if (typeof args.last() === 'function')
       iterator = args.pop();
 
     var collections = [this].concat(args).map($A);

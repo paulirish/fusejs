@@ -28,7 +28,7 @@ Ajax.Responders = {
   
   dispatch: function(callback, request, transport, json) {
     this.each(function(responder) {
-      if (Object.isFunction(responder[callback])) {
+      if (typeof responder[callback] === 'function') {
         try {
           responder[callback].apply(responder, [request, transport, json]);
         } catch (e) { }
@@ -59,7 +59,7 @@ Ajax.Base = Class.create({
     
     this.options.method = this.options.method.toLowerCase();
     
-    if (Object.isString(this.options.parameters)) 
+    if (typeof this.options.parameters === 'string') 
       this.options.parameters = this.options.parameters.toQueryParams();
     else if (Object.isHash(this.options.parameters))
       this.options.parameters = this.options.parameters.toObject();
@@ -152,7 +152,7 @@ Ajax.Request = Class.create(Ajax.Base, {
     if (typeof this.options.requestHeaders == 'object') {
       var extras = this.options.requestHeaders;
 
-      if (Object.isFunction(extras.push))
+      if (typeof extras.push === 'function')
         for (var i = 0, length = extras.length; i < length; i += 2) 
           headers[extras[i]] = extras[i+1];
       else
@@ -254,7 +254,7 @@ Ajax.Response = Class.create({
     
     if (readyState == 4) {
       var xml = transport.responseXML;
-      this.responseXML  = Object.isUndefined(xml) ? null : xml;
+      this.responseXML  = (typeof xml === 'undefined') ? null : xml;
       this.responseJSON = this._getResponseJSON();
     }
   },
@@ -324,7 +324,7 @@ Ajax.Updater = Class.create(Ajax.Request, {
     var onComplete = options.onComplete;
     options.onComplete = (function(response, json) {
       this.updateContent(response.responseText);
-      if (Object.isFunction(onComplete)) onComplete(response, json);
+      if (typeof onComplete === 'function') onComplete(response, json);
     }).bind(this);
 
     $super(url, options);
@@ -338,7 +338,7 @@ Ajax.Updater = Class.create(Ajax.Request, {
     
     if (receiver = $(receiver)) {
       if (options.insertion) {
-        if (Object.isString(options.insertion)) {
+        if (typeof options.insertion === 'string') {
           var insertion = { }; insertion[options.insertion] = responseText;
           receiver.insert(insertion);
         }

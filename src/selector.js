@@ -74,7 +74,7 @@ var Selector = Class.create({
       le = e;
       for (var i = 0, m, p; p = ps[i++]; ) {
         if (m = e.match(p.regexp)) {
-          this.matcher.push(Object.isFunction(c[p.name]) ? c[p.name](m) :
+          this.matcher.push(typeof c[p.name] === 'function' ? c[p.name](m) :
             new Template(c[p.name]).evaluate(m));
           e = e.replace(m[0], '');
           break;
@@ -100,7 +100,7 @@ var Selector = Class.create({
       le = e;
       for (var i = 0, m, p; p = ps[i++]; ) {
         if (m = e.match(p.regexp)) {
-          this.matcher.push(Object.isFunction(x[p.name]) ? x[p.name](m) : 
+          this.matcher.push(typeof x[p.name] === 'function' ? x[p.name](m) : 
             new Template(x[p.name]).evaluate(m));
           e = e.replace(m[0], '');
           break;
@@ -208,7 +208,7 @@ Object.extend(Selector, {
     pseudo: function(m) {
       var h = Selector.xpath.pseudos[m[1]];
       if (!h) return '';
-      if (Object.isFunction(h)) return h(m);
+      if (typeof h === 'function') return h(m);
       return new Template(Selector.xpath.pseudos[m[1]]).evaluate(m);
     },
     operators: {
@@ -237,7 +237,7 @@ Object.extend(Selector, {
           le = e;
           for (var i = 0, p, v; p = ps[i++]; ) {
             if (m = e.match(p.regexp)) {
-              v = Object.isFunction(x[p.name]) ? x[p.name](m) : new Template(x[p.name]).evaluate(m);
+              v = typeof x[p.name] === 'function' ? x[p.name](m) : new Template(x[p.name]).evaluate(m);
               exclusion.push("(" + v.substring(1, v.length - 1) + ")");
               e = e.replace(m[0], '');
               break;
@@ -696,7 +696,7 @@ Object.extend(Selector, {
   },
   
   findElement: function(elements, expression, index) {
-    if (Object.isNumber(expression)) { 
+    if (typeof expression === 'number') { 
       index = expression; expression = false;
     }
     return Selector.matchElements(elements, expression || '*')[index || 0];

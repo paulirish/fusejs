@@ -5,7 +5,7 @@ function $H(object) {
 var Hash = Class.create(Enumerable, (function() {
 
   function toQueryPair(key, value) {
-    if (Object.isUndefined(value)) return key;
+    if (typeof value === 'undefined') return key;
     return key + '=' + encodeURIComponent(String.interpret(value));
   }
 
