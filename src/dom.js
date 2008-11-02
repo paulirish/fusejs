@@ -707,7 +707,7 @@ Element.Methods = {
   },
 
   cumulativeOffset: function(element) {
-    element = $(element);
+    element = Element._ensureLayout(element);
     var valueT = 0, valueL = 0;
     do {
       valueT += element.offsetTop  || 0;
@@ -717,7 +717,7 @@ Element.Methods = {
   },
 
   positionedOffset: function(element) {
-    element = $(element);
+    element = Element._ensureLayout(element);
     var valueT = 0, valueL = 0;
     do {
       valueT += element.offsetTop  || 0;
@@ -964,31 +964,6 @@ if (Prototype.Browser.Opera) {
 }
 
 else if (Prototype.Browser.IE) {
-  // IE doesn't report offsets correctly for static elements, so we change them
-  // to "relative" to get the values, then change them back.
-  $w('positionedOffset viewportOffset')._each(function(method) {
-    Element.Methods[method] = Element.Methods[method].wrap(
-      function(proceed, element) {
-        element = $(element);
-        var s = element.style, position = s.position;
-        if (Element.getStyle(element, 'position') !== 'static')
-          return proceed(element);
-        
-        // Trigger hasLayout on the offset parent so that IE6 reports
-        // accurate offsetTop and offsetLeft values for position: fixed.
-        var offsetParent = Element.getOffsetParent(element);
-        if (Element.getStyle(offsetParent, 'position') === 'fixed' &&
-         !Element._hasLayout(offsetParent))
-          s.zoom = '1';
-        
-        s.position = 'relative';
-        var value  = proceed(element);
-        s.position = position;
-        return value;
-      }
-    );
-  });
-
   Element._attributeTranslations = {
     read: {
       names: {
@@ -1132,6 +1107,13 @@ Element._hasLayout = function(element) {
   var currentStyle = element.currentStyle;
   return (currentStyle && currentStyle.hasLayout) ||
    (!currentStyle && element.style.zoom && element.style.zoom != 'normal')
+};
+
+Element._ensureLayout = function(element) {
+  element = $(element);
+  if (Element.getStyle(element, 'position') === 'static' &&
+    !Element._hasLayout(element)) element.style.zoom = 1;
+  return element;
 };
 
 Element._getCssDimensions = function(element) {

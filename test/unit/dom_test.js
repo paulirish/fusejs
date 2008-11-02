@@ -1457,18 +1457,21 @@ new Test.Unit.Runner({
       $('absolute_relative').positionedOffset());
     this.assertEnumEqual([0,10],
       $('absolute_relative_undefined').positionedOffset());
-    this.assertEnumEqual([10,10],
-      $('absolute_fixed_absolute').positionedOffset());
       
-    var afu = $('absolute_fixed_undefined');
-    this.assertEnumEqual([afu.offsetLeft, afu.offsetTop],
-      afu.positionedOffset());
+    if (!Prototype.Browser.IE) {
+      this.assertEnumEqual([10,10],
+        $('absolute_fixed_absolute').positionedOffset());
       
-    var offset = [], element = new Element('div');
-    this.assertNothingRaised(function() { offset = element.positionedOffset() });
-    this.assertEnumEqual([0,0], offset);
-    this.assertIdentical(0, offset.top);
-    this.assertIdentical(0, offset.left);
+      var afu = $('absolute_fixed_undefined');
+      this.assertEnumEqual([afu.offsetLeft, afu.offsetTop],
+        afu.positionedOffset());
+       
+      var offset = [], element = new Element('div');
+      this.assertNothingRaised(function() { offset = element.positionedOffset() });
+      this.assertEnumEqual([0,0], offset);
+      this.assertIdentical(0, offset.top);
+      this.assertIdentical(0, offset.left);
+    }
   },
   
   testCumulativeOffset: function() {
@@ -1490,26 +1493,28 @@ new Test.Unit.Runner({
     this.assertEnumEqual([20,30],
       $('absolute_relative_undefined').viewportOffset());
     
-    window.scrollTo(0, 30);
-    $('absolute_fixed').scrollTop = 20;
-    this.assertEnumEqual([10, 10], $('absolute_fixed').viewportOffset());
-    
-    window.scrollTo(0, 0);
-    $('absolute_fixed').scrollTop = 0;
-    this.assertEnumEqual([10, 10], $('absolute_fixed').viewportOffset());
-    
-    var offset = [], element = new Element('div');
-    this.assertNothingRaised(function() { offset = element.viewportOffset() });
-    this.assertEnumEqual([0,0], offset);
-    this.assertIdentical(0, offset.top);
-    this.assertIdentical(0, offset.left);
-    
-    var offset = $('absolute_fixed').viewportOffset();
-    this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());  
-    window.scrollTo(0,30);
-    this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());  
-    window.scrollTo(0,80);
-    this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());  
+    if (!Prototype.Browser.IE) {
+      window.scrollTo(0, 30);
+      $('absolute_fixed').scrollTop = 20;
+      this.assertEnumEqual([10, 10], $('absolute_fixed').viewportOffset());
+      
+      window.scrollTo(0, 0);
+      $('absolute_fixed').scrollTop = 0;
+      this.assertEnumEqual([10, 10], $('absolute_fixed').viewportOffset());
+      
+      var offset = [], element = new Element('div');
+      this.assertNothingRaised(function() { offset = element.viewportOffset() });
+      this.assertEnumEqual([0,0], offset);
+      this.assertIdentical(0, offset.top);
+      this.assertIdentical(0, offset.left);
+      
+      var offset = $('absolute_fixed').viewportOffset();
+      this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());  
+      window.scrollTo(0,30);
+      this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());  
+      window.scrollTo(0,80);
+      this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());
+    }
     window.scrollTo(0,0);
   },
   
@@ -1540,7 +1545,7 @@ new Test.Unit.Runner({
     }, this);
     
     // invoking on "absolute" positioned element should return element
-    var element = $('absolute_fixed_undefined').setStyle({position: 'absolute'});
+    var element = $('absolute_relative_undefined').setStyle({ position: 'absolute' });
     this.assertEqual(element, element.absolutize());
     element.style.position = '';
     
@@ -1556,7 +1561,7 @@ new Test.Unit.Runner({
   
   testRelativize: function() {
     // invoking on "relative" positioned element should return element
-    var element = $('absolute_fixed_undefined').setStyle({position: 'relative'});
+    var element = $('absolute_fixed_undefined').setStyle({ position: 'relative' });
     this.assertEqual(element, element.relativize());
     element.style.position = '';
     
@@ -1643,11 +1648,17 @@ new Test.Unit.Runner({
   
   testCumulativeScrollOffset: function() {
     window.scrollTo(0, 30);
-    $('absolute_fixed').scrollTop = 20;
-    this.assertEnumEqual([0, 20], $('absolute_fixed').cumulativeScrollOffset());
+    $('body_absolute').scrollTop = 20;
+    this.assertEnumEqual([0, 30], $('body_absolute').cumulativeScrollOffset());
     this.assertEnumEqual([0, 30], $(document.body).cumulativeScrollOffset());
+    $('body_absolute').scrollTop = 0;
     
-    $('absolute_fixed').scrollTop = 0;
+    if (!Prototype.Browser.IE) {
+      window.scrollTo(0, 30);
+      $('absolute_fixed').scrollTop = 20;
+      this.assertEnumEqual([0, 20], $('absolute_fixed').cumulativeScrollOffset());
+      $('absolute_fixed').scrollTop = 0;
+    }
     window.scrollTo(0, 0);
   },
   
