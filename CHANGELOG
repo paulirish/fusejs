@@ -1,3 +1,5 @@
+* Optimize by using "_each" instead of "each" where applicable. Closes #9092. [jddalton, sylvainzimmer]
+
 * Preserve inline display style when using Element#show and Element#hide. Closes #3868. [anonymous, Tobie Langel]
 
 * Fix issue where Function#argumentNames returned incorrect results in IE when comments were intermixed with argument names. [#397 state:resolved] [Christophe Porteneuve, T.J. Crowder]

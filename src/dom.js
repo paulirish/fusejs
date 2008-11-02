@@ -215,7 +215,7 @@ Element.Methods = {
   inspect: function(element) {
     element = $(element);
     var result = '<' + element.tagName.toLowerCase();
-    $H({'id': 'id', 'className': 'class'}).each(function(pair) {
+    $H({'id': 'id', 'className': 'class'})._each(function(pair) {
       var property = pair.first(), attribute = pair.last();
       var value = (element[property] || '').toString();
       if (value) result += ' ' + attribute + '=' + value.inspect(true);
@@ -965,7 +965,7 @@ if (Prototype.Browser.Opera) {
 else if (Prototype.Browser.IE) {
   // IE doesn't report offsets correctly for static elements, so we change them
   // to "relative" to get the values, then change them back.
-  $w('positionedOffset viewportOffset').each(function(method) {
+  $w('positionedOffset viewportOffset')._each(function(method) {
     Element.Methods[method] = Element.Methods[method].wrap(
       function(proceed, element) {
         element = $(element);
@@ -1048,7 +1048,7 @@ else if (Prototype.Browser.IE) {
   Element._attributeTranslations.has = {};
     
   $w('colSpan rowSpan vAlign dateTime accessKey tabIndex ' +
-      'encType maxLength readOnly longDesc frameBorder').each(function(attr) {
+      'encType maxLength readOnly longDesc frameBorder')._each(function(attr) {
     Element._attributeTranslations.write.names[attr.toLowerCase()] = attr;
     Element._attributeTranslations.has[attr.toLowerCase()] = attr;
   });
@@ -1312,7 +1312,7 @@ Element.addMethods = function(methods) {
   
   if (!tagName) Object.extend(Element.Methods, methods || { });  
   else {
-    if (Object.isArray(tagName)) tagName.each(extend);
+    if (Object.isArray(tagName)) tagName._each(extend);
     else extend(tagName);
   }
   
