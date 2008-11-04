@@ -7,6 +7,21 @@
    dummy = doc.createElement('div'),
    slice = Array.prototype.slice;
 
+  // IE will throw an error when attempting to
+  // pass a nodeList to slice.call() AND
+  // Safari 2 will return a full array with undefined values
+  var nodeListSlice = slice;
+  (function() {
+    var result;
+    try { result = nodeListSlice.call(docEl.childNodes, 0) } catch(e) { }
+	if (result && result[0] && result[0].nodeType === 1) return;
+
+	nodeListSlice = function(begin, end) {
+      return !begin && arguments.length < 2 ?
+        $A(this) : $A(this).slice(begin, end);
+    };
+  })();
+
   var P = Prototype = {
     Version: '<%= PROTOTYPE_VERSION %>',
 

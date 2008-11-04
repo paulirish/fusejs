@@ -1,3 +1,5 @@
+* Add private helper method nodeListSlice() to complement slice(). [jddalton]
+
 * Cleanup whitespace in source files. [jddalton]
 
 * Wrap Prototype in a closure to take advantage of private variables and methods. [jddalton]

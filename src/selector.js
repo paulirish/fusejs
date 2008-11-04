@@ -124,7 +124,7 @@
             e = "#" + id + " " + e;
           }
 
-          results = slice.call(root.querySelectorAll(e), 0).map(Element.extend);
+          results = nodeListSlice.call(root.querySelectorAll(e), 0).map(Element.extend);
           root.id = oldId;
 
           return results;
