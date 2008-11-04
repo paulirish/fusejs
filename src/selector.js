@@ -349,11 +349,24 @@ Object.extend(Selector, {
   handlers: {
     // UTILITY FUNCTIONS
     // joins two collections
-    concat: function(a, b) {
-      for (var i = 0, node; node = b[i]; i++)
-        a.push(node);
-      return a;
-    },
+    concat: (function(){
+      // IE returns comment nodes on getElementsByTagName("*").
+      // Filter them out.
+      var div = document.createElement('div');
+      div.innerHTML = '<span>a</span><!--b-->';
+      if (div.childNodes.length === 2) {
+        return function(a, b) {
+          for (var i = 0, node; node = b[i]; i++)
+            if (node.nodeType !== 8) a.push(node);
+          return a;
+        };
+      }
+      return function(a, b) {
+        var pad = a.length, length = b.length;
+        while (length--) a[pad + length] = b[length];
+        return a;
+      };
+    })(),
     
     // marks an array of nodes for counting
     mark: function(nodes) {
@@ -363,11 +376,23 @@ Object.extend(Selector, {
       return nodes;
     },
     
-    unmark: function(nodes) {
-      for (var i = 0, node; node = nodes[i]; i++)
-        node._countedByPrototype = undefined;    
-      return nodes;  
-    },
+    unmark: (function() {
+      // IE improperly serializes _countedByPrototype in (inner|outer)HTML.
+      var div = document.createElement('div'), _true = Prototype.emptyFunction;
+      div.__checkPropertiesAreAttributes = _true;
+      if (div.getAttribute('__checkPropertiesAreAttributes') === _true) {
+        return function(nodes) {
+          for (var i = 0, node; node = nodes[i++]; )
+            node.removeAttribute('_countedByPrototype');
+          return nodes;
+        };
+      }
+      return function(nodes) {
+        for (var i = 0, node; node = nodes[i++]; )
+          node._countedByPrototype = undefined;
+        return nodes;
+      };
+    })(),
 
     // mark each child node with its position (for nth calls)
     // "ofType" flag indicates whether we're indexing for nth-of-type
@@ -712,25 +737,6 @@ Object.extend(Selector, {
     return (l > 1) ? h.unique(results) : results;
   }
 });
-
-if (Prototype.Browser.IE) {
-  Object.extend(Selector.handlers, {
-    // IE returns comment nodes on getElementsByTagName("*").
-    // Filter them out.
-    concat: function(a, b) {
-      for (var i = 0, node; node = b[i]; i++)
-        if (node.tagName !== "!") a.push(node);
-      return a;
-    },
-    
-    // IE improperly serializes _countedByPrototype in (inner|outer)HTML.
-    unmark: function(nodes) {
-      for (var i = 0, node; node = nodes[i]; i++)
-        node.removeAttribute('_countedByPrototype');
-      return nodes;  
-    }
-  });  
-}
 
 function $$() {
   return Selector.findChildElements(document, $A(arguments));
