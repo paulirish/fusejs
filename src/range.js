@@ -1,27 +1,27 @@
-ObjectRange = Class.create(Enumerable, {
-  initialize: function(start, end, exclusive) {
-    this.start = start;
-    this.end = end;
-    this.exclusive = exclusive;
-  },
-  
-  _each: function(iterator) {
-    var value = this.start;
-    while (this.include(value)) {
-      iterator(value);
-      value = value.succ();
-    }
-  },
-  
-  include: function(value) {
-    if (value < this.start) 
-      return false;
-    if (this.exclusive)
-      return value < this.end;
-    return value <= this.end;
-  }
-});
+  ObjectRange = Class.create(Enumerable, {
+    initialize: function(start, end, exclusive) {
+      this.start = start;
+      this.end = end;
+      this.exclusive = exclusive;
+    },
 
-$R = function(start, end, exclusive) {
-  return new ObjectRange(start, end, exclusive);
-};
+    _each: function(iterator) {
+      var value = this.start;
+      while (this.include(value)) {
+        iterator(value);
+        value = value.succ();
+      }
+    },
+
+    include: function(value) {
+      if (value < this.start) 
+        return false;
+      if (this.exclusive)
+        return value < this.end;
+      return value <= this.end;
+    }
+  });
+
+  $R = function(start, end, exclusive) {
+    return new ObjectRange(start, end, exclusive);
+  };
