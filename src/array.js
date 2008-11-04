@@ -6,7 +6,8 @@ function $A(iterable) {
   return results;
 }
 
-if (Prototype.Browser.WebKit) {
+// Safari returns 'function' for HTMLCollection `typeof`
+if (typeof document.documentElement.childNodes === 'function') {
   $A = function(iterable) {
     if (!iterable) return [];    
     // In Safari, only use the `toArray` method if it's not a NodeList.
@@ -287,10 +288,12 @@ function $w(string) {
   return string ? string.split(/\s+/) : [];
 }
 
-if (Prototype.Browser.Opera){
+// Opera's implementation of Array.prototype.concat treats a functions arguments
+// object as an array. We overwrite concat to fix this.
+(function() {
+  if ([].concat(arguments) === 1) return;
   Array.prototype.concat = function() {
-    var array = [];
-    for (var i = 0, length = this.length; i < length; i++) array.push(this[i]);
+    var array = Array.prototype.slice.call(this, 0);
     for (var i = 0, length = arguments.length; i < length; i++) {
       if (Object.isArray(arguments[i])) {
         for (var j = 0, arrayLength = arguments[i].length; j < arrayLength; j++) 
@@ -301,4 +304,4 @@ if (Prototype.Browser.Opera){
     }
     return array;
   };
-}
+})(1, 2);

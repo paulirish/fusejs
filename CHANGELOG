@@ -1,3 +1,5 @@
+* Remove browser sniffs for Safari's $A() and Opera's Array#concat redeclaration. [jddalton, kangax]
+
 * Remove IE code related to "fixed" positioned elements because IE doesn't support "fixed" elements. [jddalton]
 
 * Remove Object.is(Function|Number|String) from internal use in favor of simple "typeof" operators. [jddalton]
