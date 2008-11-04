@@ -1,4 +1,4 @@
-var Form = {
+Form = {
   reset: function(form) {
     form = $(form);
     form.reset();
@@ -128,7 +128,7 @@ Form.Methods = {
      action = form.readAttribute('action') || '';
     delete options.submit;
     
-    if (action.blank()) action = window.location.href;
+    if (action.blank()) action = global.location.href;
     options.parameters = form.serialize({ submit:submit, hash:true });
     
     if (params) {
@@ -222,14 +222,14 @@ Form.Element.Methods = {
 
 /*--------------------------------------------------------------------------*/
 
-var Field = Form.Element;
+Field = Form.Element;
 
-function $F(element) {
+$F = function(element) {
   element = $(element);
   var s = Form.Element.Serializers,
    method = element && element.tagName.toLowerCase();
   return s[method] ? s[method](element) : null;
-}
+};
 
 /*--------------------------------------------------------------------------*/
 

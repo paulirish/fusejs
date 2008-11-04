@@ -1,4 +1,4 @@
-var Ajax = {
+Ajax = {
   getTransport: function() {
     return Try.these(
       function() {return new ActiveXObject('Msxml2.XMLHTTP')},
@@ -92,7 +92,7 @@ Ajax.Request = Class.create(Ajax.Base, {
       // when GET, append parameters to URL
       if (this.method == 'get')
         this.url += (this.url.include('?') ? '&' : '?') + params;
-      else if (/Konqueror|Safari|KHTML/.test(navigator.userAgent))
+      else if (/Konqueror|Safari|KHTML/.test(userAgent))
         params += '&_=';
     }
       
@@ -131,7 +131,7 @@ Ajax.Request = Class.create(Ajax.Base, {
   setRequestHeaders: function() {
     var headers = {
       'X-Requested-With': 'XMLHttpRequest',
-      'X-Prototype-Version': Prototype.Version,
+      'X-Prototype-Version': P.Version,
       'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
     };
 
@@ -144,7 +144,7 @@ Ajax.Request = Class.create(Ajax.Base, {
        * Content-length header. See Mozilla Bugzilla #246651. 
        */
       if (this.transport.overrideMimeType &&
-          (navigator.userAgent.match(/Gecko\/(\d{4})/) || [0,2005])[1] < 2005)
+          (userAgent.match(/Gecko\/(\d{4})/) || [0,2005])[1] < 2005)
             headers['Connection'] = 'close';
     }
     
@@ -182,7 +182,7 @@ Ajax.Request = Class.create(Ajax.Base, {
         this._complete = true;
         (this.options['on' + response.status]
          || this.options['on' + (this.success() ? 'Success' : 'Failure')]
-         || Prototype.emptyFunction)(response, response.headerJSON);
+         || P.emptyFunction)(response, response.headerJSON);
       } catch (e) {
         this.dispatchException(e);
       }
@@ -195,7 +195,7 @@ Ajax.Request = Class.create(Ajax.Base, {
     }
 
     try {
-      (this.options['on' + state] || Prototype.emptyFunction)(response, response.headerJSON);
+      (this.options['on' + state] || P.emptyFunction)(response, response.headerJSON);
       Ajax.Responders.dispatch('on' + state, this, response, response.headerJSON);
     } catch (e) {
       this.dispatchException(e);
@@ -203,7 +203,7 @@ Ajax.Request = Class.create(Ajax.Base, {
     
     if (state == 'Complete') {
       // avoid memory leak in MSIE: clean up
-      this.transport.onreadystatechange = Prototype.emptyFunction;
+      this.transport.onreadystatechange = P.emptyFunction;
     }
   },
   
@@ -211,7 +211,7 @@ Ajax.Request = Class.create(Ajax.Base, {
     var m = this.url.match(/^\s*https?:\/\/[^\/]*/);
     return !m || (m[0] == '#{protocol}//#{domain}#{port}'.interpolate({
       protocol: location.protocol,
-      domain: document.domain,
+      domain: doc.domain,
       port: location.port ? ':' + location.port : ''
     }));
   },
@@ -231,7 +231,7 @@ Ajax.Request = Class.create(Ajax.Base, {
   },
 
   dispatchException: function(exception) {
-    (this.options.onException || Prototype.emptyFunction)(this, exception);
+    (this.options.onException || P.emptyFunction)(this, exception);
     Ajax.Responders.dispatch('onException', this, exception);
   }
 });
@@ -245,7 +245,7 @@ Ajax.Response = Class.create({
     var transport  = this.transport  = request.transport,
         readyState = this.readyState = transport.readyState;
     
-    if ((readyState > 2 && !Prototype.Browser.IE) || readyState == 4) {
+    if ((readyState > 2 && !P.Browser.IE) || readyState == 4) {
       this.status       = this.getStatus();
       this.statusText   = this.getStatusText();
       this.responseText = String.interpret(transport.responseText);
@@ -372,7 +372,7 @@ Ajax.PeriodicalUpdater = Class.create(Ajax.Base, {
   stop: function() {
     this.updater.options.onComplete = undefined;
     clearTimeout(this.timer);
-    (this.onComplete || Prototype.emptyFunction).apply(this, arguments);
+    (this.onComplete || P.emptyFunction).apply(this, arguments);
   },
 
   updateComplete: function(response) {

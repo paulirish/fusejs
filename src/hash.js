@@ -1,8 +1,8 @@
-function $H(object) {
+$H = function(object) {
   return new Hash(object);
 };
 
-var Hash = Class.create(Enumerable, (function() {
+Hash = Class.create(Enumerable, (function() {
 
   function toQueryPair(key, value) {
     if (typeof value === 'undefined') return key;

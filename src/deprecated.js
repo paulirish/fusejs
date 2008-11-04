@@ -6,7 +6,7 @@ var Toggle = { display: Element.toggle };
 
 Element.Methods.childOf = Element.Methods.descendantOf;
 
-var Insertion = {
+Insertion = {
   Before: function(element, content) {
     return Element.insert(element, {before:content});
   },
@@ -24,11 +24,11 @@ var Insertion = {
   }
 };
 
-var $continue = new Error('"throw $continue" is deprecated, use "return" instead');
+$continue = new Error('"throw $continue" is deprecated, use "return" instead');
 
 // This should be moved to script.aculo.us; notice the deprecated methods
 // further below, that map to the newer Element methods.
-var Position = {
+Position = {
   // set to true if needed, warning: firefox performance problems
   // NOT neeeded for page scrolling, only if draggable contained in
   // scrollable elements
@@ -37,13 +37,13 @@ var Position = {
   // must be called before calling withinIncludingScrolloffset, every time the
   // page is scrolled
   prepare: function() {
-    this.deltaX =  window.pageXOffset 
-                || document.documentElement.scrollLeft 
-                || document.body.scrollLeft 
+    this.deltaX =  global.pageXOffset 
+                || docEl.scrollLeft 
+                || body.scrollLeft 
                 || 0;
-    this.deltaY =  window.pageYOffset 
-                || document.documentElement.scrollTop 
-                || document.body.scrollTop 
+    this.deltaY =  global.pageYOffset 
+                || docEl.scrollTop 
+                || body.scrollTop 
                 || 0;
   },
   
@@ -115,16 +115,16 @@ var Position = {
 
 /*--------------------------------------------------------------------------*/
 
-if (!document.getElementsByClassName) document.getElementsByClassName = function(instanceMethods){
+if (!doc.getElementsByClassName) doc.getElementsByClassName = function(instanceMethods){
   function iter(name) {
     return name.blank() ? null : "[contains(concat(' ', @class, ' '), ' " + name + " ')]";
   }
 
-  instanceMethods.getElementsByClassName = Prototype.BrowserFeatures.XPath ?
+  instanceMethods.getElementsByClassName = P.BrowserFeatures.XPath ?
   function(element, className) {
     className = className.toString().strip();
     var cond = /\s/.test(className) ? $w(className).map(iter).join('') : iter(className);
-    return cond ? document._getElementsByXPath('.//*' + cond, element) : [];
+    return cond ? doc._getElementsByXPath('.//*' + cond, element) : [];
   } : function(element, className) {
     className = className.toString().strip();
     var elements = [], classNames = (/\s/.test(className) ? $w(className) : null);
@@ -144,7 +144,7 @@ if (!document.getElementsByClassName) document.getElementsByClassName = function
   };
 
   return function(className, parentElement) {
-    return $(parentElement || document.body).getElementsByClassName(className);
+    return $(parentElement || body).getElementsByClassName(className);
   };
 }(Element.Methods);
 
@@ -168,16 +168,16 @@ Element.ClassNames.prototype = {
   
   add: function(classNameToAdd) {
     if (this.include(classNameToAdd)) return;
-    this.set($A(this).concat(classNameToAdd).join(' '));
+    this.set(this.toArray().concat(classNameToAdd).join(' '));
   },
   
   remove: function(classNameToRemove) {
     if (!this.include(classNameToRemove)) return;
-    this.set($A(this).without(classNameToRemove).join(' '));
+    this.set(this.toArray().without(classNameToRemove).join(' '));
   },
   
   toString: function() {
-    return $A(this).join(' ');
+    return this.toArray().join(' ');
   }
 };
 

@@ -1,7 +1,7 @@
 /* Based on Alex Arnell's inheritance implementation. */
-var Class = {
+Class = {
   create: function() {
-    var parent = null, properties = $A(arguments);
+    var parent = null, properties = slice.call(arguments, 0);
     if (typeof properties[0] === 'function')
       parent = properties.shift();
     
@@ -24,7 +24,7 @@ var Class = {
       klass.addMethods(properties[i]);
       
     if (!klass.prototype.initialize)
-      klass.prototype.initialize = Prototype.emptyFunction;
+      klass.prototype.initialize = P.emptyFunction;
     
     klass.prototype.constructor = klass;
     
@@ -58,7 +58,7 @@ Class.Methods = {
   }
 };
 
-var Abstract = { };
+Abstract = { };
 
 Object.extend = function(destination, source) {
   for (var property in source)
@@ -165,45 +165,46 @@ Object.extend(Function.prototype, {
     return names.length == 1 && !names[0] ? [] : names;
   },
   
-  bind: function() {
+  bind: function(object) {
     if (arguments.length < 2 && typeof arguments[0] === 'undefined') return this;
-    var __method = this, args = $A(arguments), object = args.shift();
+    var __method = this, args = slice.call(arguments, 1);
     return function() {
-      return __method.apply(object, args.concat($A(arguments)));
+      return __method.apply(object, args.concat(slice.call(arguments, 0)));
     }
   },
   
-  bindAsEventListener: function() {
-    var __method = this, args = $A(arguments), object = args.shift();
+  bindAsEventListener: function(object) {
+    var __method = this, args = slice.call(arguments, 1);
     return function(event) {
-      return __method.apply(object, [event || window.event].concat(args));
+      return __method.apply(object, [event || global.event].concat(args));
     }
   },
   
   curry: function() {
     if (!arguments.length) return this;
-    var __method = this, args = $A(arguments);
+    var __method = this, args = slice.call(arguments, 0);
     return function() {
-      return __method.apply(this, args.concat($A(arguments)));
+      return __method.apply(this, args.concat(slice.call(arguments, 0)));
     }
   },
 
-  delay: function() { 
-    var __method = this, args = $A(arguments), timeout = args.shift() * 1000; 
-    return window.setTimeout(function() {
+  delay: function(timeout) { 
+    timeout *= 1000;
+    var __method = this, args = slice.call(arguments, 1); 
+    return global.setTimeout(function() {
       return __method.apply(__method, args);
     }, timeout);
   },
   
   defer: function() {
-    var args = [0.01].concat($A(arguments));
+    var args = [0.01].concat(slice.call(arguments, 0));
     return this.delay.apply(this, args);
   },
   
   wrap: function(wrapper) {
     var __method = this;
     return function() {
-      return wrapper.apply(this, [__method.bind(this)].concat($A(arguments))); 
+      return wrapper.apply(this, [__method.bind(this)].concat(slice.call(arguments, 0))); 
     }
   },
   
@@ -211,7 +212,7 @@ Object.extend(Function.prototype, {
     if (this._methodized) return this._methodized;
     var __method = this;
     return this._methodized = function() {
-      return __method.apply(null, [this].concat($A(arguments)));
+      return __method.apply(null, [this].concat(slice.call(arguments, 0)));
     };
   }
 });
@@ -225,7 +226,7 @@ Date.prototype.toJSON = function() {
     this.getUTCSeconds().toPaddedString(2) + 'Z"';
 };
 
-var Try = {
+Try = {
   these: function() {
     var returnValue;
 
@@ -249,7 +250,7 @@ RegExp.escape = function(str) {
 
 /*--------------------------------------------------------------------------*/
 
-var PeriodicalExecuter = Class.create({
+PeriodicalExecuter = Class.create({
   initialize: function(callback, frequency) {
     this.callback = callback;
     this.frequency = frequency;
@@ -259,7 +260,7 @@ var PeriodicalExecuter = Class.create({
   },
 
   registerCallback: function() {
-    this.timer = setInterval(this.onTimerEvent.bind(this), this.frequency * 1000);
+    this.timer = global.setInterval(this.onTimerEvent.bind(this), this.frequency * 1000);
   },
 
   execute: function() {
@@ -268,7 +269,7 @@ var PeriodicalExecuter = Class.create({
   
   stop: function() {
     if (!this.timer) return;
-    clearInterval(this.timer);
+    global.clearInterval(this.timer);
     this.timer = null;
   },
 

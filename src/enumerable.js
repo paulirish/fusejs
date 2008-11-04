@@ -1,6 +1,6 @@
-var $break = { };
+$break = { };
 
-var Enumerable = {
+Enumerable = {
   each: function(iterator, context) {
     var index = 0;
     try {
@@ -22,7 +22,7 @@ var Enumerable = {
   },
 
   all: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var result = true;
     this.each(function(value, index) {
       result = result && !!iterator.call(context, value, index);
@@ -32,7 +32,7 @@ var Enumerable = {
   },
 
   any: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var result = false;
     this.each(function(value, index) {
       if (result = !!iterator.call(context, value, index))
@@ -42,7 +42,7 @@ var Enumerable = {
   },
 
   collect: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var results = [];
     this.each(function(value, index) {
       results.push(iterator.call(context, value, index));
@@ -71,7 +71,7 @@ var Enumerable = {
   },
   
   grep: function(filter, iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var results = [];
 
     if (typeof filter === 'string')
@@ -114,14 +114,14 @@ var Enumerable = {
   },
   
   invoke: function(method) {
-    var args = $A(arguments).slice(1);
+    var args = slice.call(arguments, 1);
     return this.map(function(value) {
       return Function.prototype.apply.call(value[method], value, args);
     });
   },
   
   max: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var result;
     this.each(function(value, index) {
       value = iterator.call(context, value, index);
@@ -132,7 +132,7 @@ var Enumerable = {
   },
   
   min: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var result;
     this.each(function(value, index) {
       value = iterator.call(context, value, index);
@@ -143,7 +143,7 @@ var Enumerable = {
   },
   
   partition: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var trues = [], falses = [];
     this.each(function(value, index) {
       (iterator.call(context, value, index) ?
@@ -182,7 +182,7 @@ var Enumerable = {
   },
   
   zip: function() {
-    var iterator = Prototype.K, args = $A(arguments);
+    var iterator = P.K, args = slice.call(arguments, 0);
     if (typeof args.last() === 'function')
       iterator = args.pop();
 

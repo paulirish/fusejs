@@ -1,4 +1,4 @@
-if (!window.Event) var Event = { };
+if (!global.Event) Event = { };
 
 Object.extend(Event, {
   KEY_BACKSPACE: 8,
@@ -32,13 +32,13 @@ Object.extend(Event, {
 Event.Methods = (function() {
   var isButton;
 
-  if (Prototype.Browser.IE) {
+  if (P.Browser.IE) {
     var buttonMap = { 0: 1, 1: 4, 2: 2 };
     isButton = function(event, code) {
       return event.button == buttonMap[code];
     };
     
-  } else if (Prototype.Browser.WebKit) {
+  } else if (P.Browser.WebKit) {
     isButton = function(event, code) {
       switch (code) {
         case 0: return event.which == 1 && !event.metaKey;
@@ -94,15 +94,14 @@ Event.Methods = (function() {
 
 // Mouse pointer
 (function() {
-  var docEl = document.documentElement,
-   map = { X: 'Left', Y: 'Top' },
+  var map = { X: 'Left', Y: 'Top' },
    fakeBody = { scrollLeft: 0, scrollTop: 0 };
 
   $w('X Y')._each(function(C) {
     var Pos = map[C];
     Event.Methods['pointer' + C] = function(event) {
       return event['page' + C] || (event['client' + C] +
-       (docEl['scroll' + Pos] || (document.body || fakeBody)['scroll' + Pos]) -
+       (docEl['scroll' + Pos] || (body || fakeBody)['scroll' + Pos]) -
        (docEl['client' + Pos] || 0));
     };
   });
@@ -120,7 +119,7 @@ Event.extend = (function() {
     return m;
   });
   
-  if (Prototype.Browser.IE) {
+  if (P.Browser.IE) {
     Object.extend(methods, {
       stopPropagation: function() { this.cancelBubble = true },
       preventDefault:  function() { this.returnValue = false },
@@ -131,7 +130,7 @@ Event.extend = (function() {
       if (!event) return false;
       if (event._extendedByPrototype) return event;
       
-      event._extendedByPrototype = Prototype.emptyFunction;
+      event._extendedByPrototype = P.emptyFunction;
       var pointer = Event.pointer(event);
       Object.extend(event, {
         target: event.srcElement,
@@ -143,17 +142,15 @@ Event.extend = (function() {
     };
     
   } else {
-    Event.prototype = Event.prototype || document.createEvent("HTMLEvents").__proto__;
+    Event.prototype = Event.prototype || doc.createEvent("HTMLEvents").__proto__;
     Object.extend(Event.prototype, methods);
-    return Prototype.K;
+    return P.K;
   }
 })();
 
 (function() {
   
-  var timer, global = this,
-   simulateFIFO = false, domLoadedDone = false,
-   doc = document, docEl = doc.documentElement,
+  var timer, simulateFIFO = false, domLoadedDone = false,
    followsSpec = !('attachEvent' in doc && !('addEventListener' in doc));
   
   var addEvent = function(element, eventName, handler) {
@@ -373,7 +370,7 @@ Event.extend = (function() {
     stopObserving: Event.stopObserving
   });
 
-  Object.extend(document, {
+  Object.extend(doc, {
     fire:          Element.Methods.fire.methodize(),
     getEventID:    Element.Methods.getEventID.methodize(),
     observe:       Element.Methods.observe.methodize(),
@@ -384,8 +381,8 @@ Event.extend = (function() {
   // Safari has a dummy event handler on page unload so that it won't
   // use its bfcache. Safari <= 3.1 has an issue with restoring the "document"
   // object when page is returned to via the back button using its bfcache.
-  if (Prototype.Browser.WebKit)
-    window.addEventListener("unload", Prototype.emptyFunction, false);
+  if (P.Browser.WebKit)
+    global.addEventListener("unload", P.emptyFunction, false);
 
   // Check for first-in-first-out event order,
   // if not FIFO then use the event dispatchers
@@ -400,8 +397,8 @@ Event.extend = (function() {
   // Ensure that the dom:loaded event has finished
   // executing its observers before allowing the
   // window onload event to proceed.
-  addEvent(window, "load", 
-   createCacheForEvent(window, "load").dispatcher = 
+  addEvent(global, "load", 
+   createCacheForEvent(global, "load").dispatcher = 
     createDispatcher(1, "load").wrap(function(proceed, event) {
       if (!domLoadedDone) arguments.callee.defer(proceed, event);
       proceed(event);
@@ -560,11 +557,14 @@ Event.extend = (function() {
   }
   
   // worst case fallbacks... 
-  timer = setInterval(checkDomLoadedState, 10);
-  Event.observe(window, "load", fireDomLoadedEvent);
+  timer = global.setInterval(checkDomLoadedState, 10);
+  Event.observe(global, "load", fireDomLoadedEvent);
   
   // remove timer if other options are available
   $w('DOMContentLoaded readystatechange')._each(function(eventName) {
     doc.observe(eventName, respondToReadyState);
   });
 })();
+
+// define body variable
+doc.observe('dom:loaded', function() { body = Element.extend(doc.body) });

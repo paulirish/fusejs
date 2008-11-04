@@ -1,13 +1,13 @@
-function $A(iterable) {
+$A = function(iterable) {
   if (!iterable) return [];
   if (iterable.toArray) return iterable.toArray();
   var length = iterable.length || 0, results = new Array(length);
   while (length--) results[length] = iterable[length];
   return results;
-}
+};
 
 // Safari returns 'function' for HTMLCollection `typeof`
-if (typeof document.documentElement.childNodes === 'function') {
+if (typeof docEl.childNodes === 'function') {
   $A = function(iterable) {
     if (!iterable) return [];    
     // In Safari, only use the `toArray` method if it's not a NodeList.
@@ -61,7 +61,7 @@ Object.extend(Array.prototype, {
   },
   
   without: function() {
-    var values = $A(arguments);
+    var values = slice.call(arguments, 0);
     return this.select(function(value) {
       return !values.include(value);
     });
@@ -116,7 +116,7 @@ Object.extend(Array.prototype, {
   /* Overwrite methods assigned by Enumerable with optimized equivalents */
   
   all: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     for (var i = 0, length = this.length; i < length; i++)
       if (!iterator.call(context, this[i], i))
         return false;
@@ -124,7 +124,7 @@ Object.extend(Array.prototype, {
   },
   
   any: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     for (var i = 0, length = this.length; i < length; i++)
       if (!!iterator.call(context, this[i], i))
         return true;
@@ -132,7 +132,7 @@ Object.extend(Array.prototype, {
   },
   
   collect: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var results = [];
     for (var i = 0, length = this.length; i < length; i++)
       results[i] = iterator.call(context, this[i], i);
@@ -154,7 +154,7 @@ Object.extend(Array.prototype, {
   },
   
   grep: function(filter, iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var results = [];
 
     if (typeof filter === 'string')
@@ -182,7 +182,7 @@ Object.extend(Array.prototype, {
   },
   
   max: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var result;
     for (var i = 0, length = this.length, value; i < length; i++) {
       value = iterator.call(context, this[i], i);
@@ -193,7 +193,7 @@ Object.extend(Array.prototype, {
   },
   
   min: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var result;
     for (var i = 0, length = this.length, value; i < length; i++) {
       value = iterator.call(context, this[i], i);
@@ -204,7 +204,7 @@ Object.extend(Array.prototype, {
   },
   
   partition: function(iterator, context) {
-    iterator = iterator || Prototype.K;
+    iterator = iterator || P.K;
     var trues = [], falses = [];
     for (var i = 0, length = this.length; i < length; i++)
       (iterator.call(context, this[i], i) ?
@@ -238,7 +238,7 @@ Object.extend(Array.prototype, {
   },
   
   zip: function() {
-    var iterator = Prototype.K, args = $A(arguments);
+    var iterator = P.K, args = slice.call(arguments, 0);
     if (typeof args.last() === 'function')
       iterator = args.pop();
 
@@ -282,11 +282,11 @@ if (!Array.prototype.lastIndexOf) Array.prototype.lastIndexOf = function(item, i
   return (n < 0) ? n : i - n - 1;
 };
 
-function $w(string) {
-  if (typeof string !== 'string') return [];
+$w = function(string) {
+  if (!Object.isString(string)) return [];
   string = string.strip();
   return string ? string.split(/\s+/) : [];
-}
+};
 
 // Opera's implementation of Array.prototype.concat treats a functions arguments
 // object as an array. We overwrite concat to fix this.

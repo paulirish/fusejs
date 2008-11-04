@@ -1,4 +1,4 @@
-function $(element) {
+$ = function(element) {
   if (arguments.length > 1) {
     for (var i = 0, elements = [], length = arguments.length; i < length; i++)
       elements.push($(arguments[i]));
@@ -7,12 +7,12 @@ function $(element) {
   if (typeof element === 'string')
     element = document.getElementById(element);
   return Element.extend(element);
-}
+};
 
-if (Prototype.BrowserFeatures.XPath) {
-  document._getElementsByXPath = function(expression, parentElement) {
+if (P.BrowserFeatures.XPath) {
+  doc._getElementsByXPath = function(expression, parentElement) {
     var results = [];
-    var query = document.evaluate(expression, $(parentElement) || document,
+    var query = doc.evaluate(expression, $(parentElement) || doc,
       null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
     for (var i = 0, length = query.snapshotLength; i < length; i++)
       results.push(Element.extend(query.snapshotItem(i)));
@@ -22,7 +22,7 @@ if (Prototype.BrowserFeatures.XPath) {
 
 /*--------------------------------------------------------------------------*/
 
-if (!window.Node) var Node = { };
+if (!global.Node) Node = { };
 
 if (!Node.ELEMENT_NODE) {
   // DOM level 2 ECMAScript Language Binding
@@ -44,13 +44,13 @@ if (!Node.ELEMENT_NODE) {
 
 (function() {
   var original = this.Element, canCreateWithHTML = true;
-  try { document.createElement('<div>') } catch(e) {
+  try { doc.createElement('<div>') } catch(e) {
     canCreateWithHTML = false;
   }
   
   function createElement(tagName, attributes) {
     tagName = tagName.toLowerCase();
-    if (!Element.cache[tagName]) Element.cache[tagName] = Element.extend(document.createElement(tagName));
+    if (!Element.cache[tagName]) Element.cache[tagName] = Element.extend(doc.createElement(tagName));
     return Element.writeAttribute(Element.cache[tagName].cloneNode(false), attributes || { });
   }
   
@@ -119,7 +119,7 @@ Element.Methods = {
         select: '<option>test<option>'
       };
       for (var tagName in tests) {
-        var el = document.createElement(tagName);
+        var el = doc.createElement(tagName);
         if ((el.innerHTML = tests[tagName]) &&
           el.innerHTML.toLowerCase() !== tests[tagName]) throw 'error';
       }
@@ -145,7 +145,7 @@ Element.Methods = {
   })(),
   
   replace: (function() {
-    var createFragment = ('createRange' in document) ?
+    var createFragment = ('createRange' in doc) ?
       function(element, content) {
         var range = element.ownerDocument.createRange();
         range.selectNode(element);
@@ -304,14 +304,16 @@ Element.Methods = {
       Selector.findElement(nextSiblings, expression, index);
   },
   
-  select: function() {
-    var args = $A(arguments), element = $(args.shift());
-    return Selector.findChildElements(element, args);
+  select: function(element) {
+    var args = slice.call(arguments, 1);
+    return Selector.findChildElements($(element), args);
   },
   
-  adjacent: function() {
-    var args = $A(arguments), element = $(args.shift()),
-     parent = $(element.parentNode), oldId = parent.id, newId = parent.identify();
+  adjacent: function(element) {
+    element = $(element);
+    var args = slice.call(arguments, 1),
+     parent = $(element.parentNode),
+     oldId = parent.id, newId = parent.identify();
     
     // ensure match against siblings and not children of siblings
     args = args.map(function(a) { return '#' + newId + '>' + a });
@@ -332,7 +334,7 @@ Element.Methods = {
   readAttribute: function(element, name) {
     element = $(element);
     var result;
-    if (Prototype.Browser.IE) {
+    if (P.Browser.IE) {
       var t = Element._attributeTranslations.read;
       if (t.names[name]) name = t.names[name];
       // If we're reading from a form, avoid a conflict between an attribute
@@ -443,7 +445,7 @@ Element.Methods = {
   scrollTo: function(element) {
     element = $(element);
     var pos = element.cumulativeOffset();
-    window.scrollTo(pos[0], pos[1]);
+    global.scrollTo(pos[0], pos[1]);
     return element;
   },
   
@@ -453,8 +455,8 @@ Element.Methods = {
       'ex' : true
     };
     
-    var span = document.createElement('span'),
-     hasComputedStyle = !!(document.defaultView && document.defaultView.getComputedStyle);
+    var span = doc.createElement('span'),
+     hasComputedStyle = !!(doc.defaultView && doc.defaultView.getComputedStyle);
     
     // setup the span for testing font-size
     span.style.cssText = 'position:absolute;visibility:hidden;height:1em;lineHeight:0;padding:0;margin:0;border:0;';
@@ -462,7 +464,7 @@ Element.Methods = {
     
     var getComputedStyle = function(element, styleName) {
       styleName = getStyleName(styleName);
-      var css = document.defaultView.getComputedStyle(element, null);
+      var css = doc.defaultView.getComputedStyle(element, null);
       if (css) return getResult(styleName, css[styleName]);
       return getStyle(element, styleName);
     };
@@ -565,7 +567,7 @@ Element.Methods = {
     if (hasComputedStyle) {
       // Opera
       span.style.display = 'none';
-      if (!document.defaultView.getComputedStyle(span, null).height) return getStyleOpera;
+      if (!doc.defaultView.getComputedStyle(span, null).height) return getStyleOpera;
       
       // Firefox, Safari, etc...
       return function(element, styleName) {
@@ -611,8 +613,8 @@ Element.Methods = {
       return element;
     }
     
-    if ('filters' in document.documentElement &&
-        'filter' in document.documentElement.style) {
+    if ('filters' in docEl &&
+        'filter' in docEl.style) {
       return function(element, value) {
         element = $(element);
         if (!Element._hasLayout(element))
@@ -629,22 +631,22 @@ Element.Methods = {
         return element;   
       };
     }
-    if (Prototype.Browser.WebKit &&
-       (navigator.userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
+    if (P.Browser.WebKit &&
+       (userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
       return function(element, value) {
         element = setOpacity(element, value);
         if (value == 1)
           if (element.tagName.toUpperCase() == 'IMG' && element.width) {
             element.width++; element.width--;
           } else try {
-            var n = document.createTextNode(' ');
+            var n = doc.createTextNode(' ');
             element.removeChild(element.appendChild(n));
           } catch (e) { }
         
         return element;
       };
     }
-    if (Prototype.Browser.Gecko && /rv:1\.8\.0/.test(navigator.userAgent)) {
+    if (P.Browser.Gecko && /rv:1\.8\.0/.test(userAgent)) {
       return function(element, value) {
         element = $(element);
         element.style.opacity = (value == 1) ? 0.999999 : 
@@ -668,7 +670,7 @@ Element.Methods = {
       element.style.position = 'relative';
       // Opera returns the offset relative to the positioning context, when an
       // element is position relative but top and left have not been defined
-      if (Prototype.Browser.Opera) {
+      if (P.Browser.Opera) {
         element.style.top = 0;
         element.style.left = 0;
       }  
@@ -723,7 +725,7 @@ Element.Methods = {
       valueT += element.offsetTop  || 0;
       valueL += element.offsetLeft || 0;
       element = Element._getRealOffsetParent(element);
-    } while (element && element !== document.body &&
+    } while (element && element !== body &&
       Element.getStyle(element, 'position') === 'static');
     
     return Element._returnOffset(valueL, valueT);
@@ -793,7 +795,7 @@ Element.Methods = {
     do {
       // Skip body if documentElement has
       // scroll values as well (i.e. Opera 9.2x)
-      if (element === document.body && ((element.scrollTop && 
+      if (element === body && ((element.scrollTop && 
        element.parentNode.scrollTop) || (element.scrollLeft && 
         element.parentNode.scrollLeft))) continue;
 
@@ -810,18 +812,17 @@ Element.Methods = {
     
     // IE throws an error if the element is not in the document.
     if (element.currentStyle === null || !element.offsetParent)
-      return $(document.body);
+      return $(body);
 
     while ((element = element.offsetParent) &&
      !/^(html|body)$/i.test(element.tagName)) {
       if (Element.getStyle(element, 'position') !== 'static')
         return $(element);
     }
-    return $(document.body);
+    return $(body);
   },
 
   viewportOffset: (function(forElement) {
-    var docEl = document.documentElement;
     if (docEl.getBoundingClientRect) {
       var backup = docEl.style.cssText;
       docEl.style.cssText += ';margin:0';
@@ -856,7 +857,7 @@ Element.Methods = {
       
         // Safari fix
         offsetParent = Element._getRealOffsetParent(element);
-        if (offsetParent === document.body && Element.getStyle(element,
+        if (offsetParent === body && Element.getStyle(element,
          'position') === 'absolute') break;
       } while (element = offsetParent);
 
@@ -954,7 +955,7 @@ Element._attributeTranslations = {
   }
 };
 
-if (Prototype.Browser.Opera) { 
+if (P.Browser.Opera) { 
   Element.Methods.readAttribute = Element.Methods.readAttribute.wrap(
     function(proceed, element, attribute) {
       if (attribute === 'title') return $(element).title;
@@ -963,7 +964,7 @@ if (Prototype.Browser.Opera) {
   );  
 }
 
-else if (Prototype.Browser.IE) {
+else if (P.Browser.IE) {
   Element._attributeTranslations = {
     read: {
       names: {
@@ -1006,7 +1007,7 @@ else if (Prototype.Browser.IE) {
       _setAttrNode: function(name) {
         return function(element, value) {
           var attr = element.getAttributeNode(name);
-          if (!attr) element.setAttributeNode(attr = document.createAttribute(name));
+          if (!attr) element.setAttributeNode(attr = doc.createAttribute(name));
           attr.value = value;
         };
       },
@@ -1070,7 +1071,7 @@ else if (Prototype.Browser.IE) {
   })(Element._attributeTranslations.write.values);
 }
 
-else if (Prototype.Browser.WebKit) {
+else if (P.Browser.WebKit) {
   // Safari returns margins on body which is incorrect if the child is absolutely
   // positioned.  For performance reasons, redefine Element#cumulativeOffset for
   // KHTML/WebKit only.
@@ -1080,7 +1081,7 @@ else if (Prototype.Browser.WebKit) {
     do {
       valueT += element.offsetTop  || 0;
       valueL += element.offsetLeft || 0;
-      if (element.offsetParent == document.body)
+      if (element.offsetParent == body)
         if (Element.getStyle(element, 'position') == 'absolute') break;
         
       element = element.offsetParent;
@@ -1099,7 +1100,7 @@ Element._returnOffset = function(l, t) {
 
 Element._getRealOffsetParent = function(element) {
   return (element.currentStyle === null || !element.offsetParent) ? false :
-   element.offsetParent === document.documentElement ?
+   element.offsetParent === docEl ?
      element.offsetParent : Element.getOffsetParent(element);
 };
 
@@ -1136,18 +1137,16 @@ Element._getCssDimensions = function(element) {
 })();
 
 Element._getContentFromAnonymousElement = (function() {
-  var div = document.createElement('div'),
-   fragment = document.createDocumentFragment();
-  
+  var fragment = doc.createDocumentFragment();
   var getContentAsFragment = (function() {
-    if ('removeNode' in div) {
+    if ('removeNode' in docEl) {
       return function(container) {
         // shortcut for IE: removes the parent but keeping the children
         fragment.appendChild(container).removeNode();
         return fragment;
       };
-    } else if ('createRange' in document) {
-      var range = document.createRange();
+    } else if ('createRange' in doc) {
+      var range = doc.createRange();
       return function(container) {
         range.selectNodeContents(container);
         fragment.appendChild(range.extractContents());
@@ -1163,7 +1162,7 @@ Element._getContentFromAnonymousElement = (function() {
   })();
   
   return function(tagName, html) {
-    var node = div, t = Element._insertionTranslations.tags[tagName];
+    var node = dummy, t = Element._insertionTranslations.tags[tagName];
     if (t) {
       node.innerHTML= t[0] + html + t[1];
       t[2].times(function() { node = node.firstChild });
@@ -1217,22 +1216,21 @@ Element.Methods.ByTag = { };
 
 Object.extend(Element, Element.Methods);
 
-if (!Prototype.BrowserFeatures.ElementExtensions && 
-    document.createElement('div').__proto__) {
-  window.HTMLElement = { };
-  window.HTMLElement.prototype = document.createElement('div').__proto__;
-  Prototype.BrowserFeatures.ElementExtensions = true;
+if (!P.BrowserFeatures.ElementExtensions && dummy.__proto__) {
+  global.HTMLElement = { };
+  global.HTMLElement.prototype = dummy.__proto__;
+  P.BrowserFeatures.ElementExtensions = true;
 }
 
 Element.extend = (function() {
-  if (Prototype.BrowserFeatures.SpecificElementExtensions)
-    return Prototype.K;
+  if (P.BrowserFeatures.SpecificElementExtensions)
+    return P.K;
 
   var Methods = { }, ByTag = Element.Methods.ByTag;
   
   var extend = Object.extend(function(element) {
     if (!element || element._extendedByPrototype || 
-        element.nodeType != 1 || element === window) return element;
+        element.nodeType != 1 || element === global) return element;
 
     // Filter out XML nodes because IE errors on them.
     if (!('write' in element.ownerDocument)) return element;
@@ -1249,13 +1247,13 @@ Element.extend = (function() {
         element[property] = value.methodize();
     }
     
-    element._extendedByPrototype = Prototype.emptyFunction;
+    element._extendedByPrototype = P.emptyFunction;
     return element;
     
   }, { 
     refresh: function() {
       // extend methods for all tags (Safari doesn't need this)
-      if (!Prototype.BrowserFeatures.ElementExtensions) {
+      if (!P.BrowserFeatures.ElementExtensions) {
         Object.extend(Methods, Element.Methods);
         Object.extend(Methods, Element.Methods.Simulated);
       }
@@ -1274,7 +1272,7 @@ Element.hasAttribute = function(element, attribute) {
 };
 
 Element.addMethods = function(methods) {
-  var F = Prototype.BrowserFeatures, T = Element.Methods.ByTag;
+  var F = P.BrowserFeatures, T = Element.Methods.ByTag;
   
   if (!methods) {
     Object.extend(Form, Form.Methods);
@@ -1330,15 +1328,15 @@ Element.addMethods = function(methods) {
       "FrameSet", "IFRAME": "IFrame"
     };
     if (trans[tagName]) klass = 'HTML' + trans[tagName] + 'Element';
-    if (window[klass]) return window[klass];
+    if (global[klass]) return global[klass];
     klass = 'HTML' + tagName + 'Element';
-    if (window[klass]) return window[klass];
+    if (global[klass]) return global[klass];
     klass = 'HTML' + tagName.capitalize() + 'Element';
-    if (window[klass]) return window[klass];
+    if (global[klass]) return global[klass];
     
-    window[klass] = { };
-    window[klass].prototype = document.createElement(tagName).__proto__;
-    return window[klass];
+    global[klass] = { };
+    global[klass].prototype = doc.createElement(tagName).__proto__;
+    return global[klass];
   }
   
   if (F.ElementExtensions) {
@@ -1361,22 +1359,21 @@ Element.addMethods = function(methods) {
   Element.cache = { };
 };
 
-document.viewport = {
+doc.viewport = {
   getDimensions: function() {
     return { width: this.getWidth(), height: this.getHeight() };
   },
   
   getScrollOffsets: function() {
     return Element._returnOffset(
-      window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft,
-      window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop);
+      global.pageXOffset || docEl.scrollLeft || body.scrollLeft,
+      global.pageYOffset || docEl.scrollTop  || body.scrollTop);
   }
 };
 
 // Define document.viewport.getWidth() and document.viewport.getHeight()
 (function(v) {
-  var element, backup = { }, doc = document,
-   docEl = doc.documentElement;
+  var element, backup = { };
 
   function isBodyActingAsRoot() {
     if (docEl.clientWidth === 0) return true;
@@ -1384,20 +1381,20 @@ document.viewport = {
        backup[name] = doc[name].style.cssText;
        doc[name].style.cssText += ';margin:0;height:auto;';
     });
-    Element.insert(doc.body, { top: '<div style="display:block;height:8500px;"></div>' });
+    Element.insert(body, { top: '<div style="display:block;height:8500px;"></div>' });
     var result = docEl.clientHeight >= 8500;
-    doc.body.down().remove();
+    body.removeChild(body.firstChild);
 
     for (name in backup) doc[name].style.cssText = backup[name];
     return result;
   }
 
   function define(D) {
-    element = element || (isBodyActingAsRoot() ? doc.body : // Opera < 9.5, Quirks mode
+    element = element || (isBodyActingAsRoot() ? body : // Opera < 9.5, Quirks mode
       ('clientWidth' in doc) ? doc : docEl); // Safari < 3 : Others
     v['get' + D] = function() { return element['client' + D] };
     return v['get' + D]();
   }
   v.getHeight = define.curry('Height');
   v.getWidth  = define.curry('Width');
-})(document.viewport);
+})(doc.viewport);

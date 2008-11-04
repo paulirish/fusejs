@@ -1,3 +1,5 @@
+* Wrap Prototype in a closure to take advantage of private variables and methods. [jddalton]
+
 * Remove browser sniffs in Selector.handlers "mark" and "concat". [jddalton, kangax]
 
 * Remove browser sniffs for Safari's $A() and Opera's Array#concat redeclaration. [jddalton, kangax]

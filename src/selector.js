@@ -2,7 +2,7 @@
  * part of YUI-Ext version 0.40, distributed under the terms of an MIT-style
  * license.  Please see http://www.yui-ext.com/ for more information. */
 
-var Selector = Class.create({
+Selector = Class.create({
   initialize: function(expression) {
     this.expression = expression.strip();
     
@@ -19,18 +19,18 @@ var Selector = Class.create({
   },
   
   shouldUseXPath: function() {
-    if (!Prototype.BrowserFeatures.XPath) return false;
+    if (!P.BrowserFeatures.XPath) return false;
     
     var e = this.expression;
 
     // Opera's XPath engine breaks down when selectors are too complex
     // (a regression in version 9.5)
-    if (Prototype.Browser.Opera &&
-     parseFloat(window.opera.version()) === 9.5)
+    if (P.Browser.Opera &&
+     parseFloat(global.opera.version()) === 9.5)
       return false;
 
     // Safari 3 chokes on :*-of-type and :empty
-    if (Prototype.Browser.WebKit && 
+    if (P.Browser.WebKit && 
      (e.include("-of-type") || e.include(":empty")))
       return false;
     
@@ -43,14 +43,12 @@ var Selector = Class.create({
   },
   
   shouldUseSelectorsAPI: function() {
-    if (!Prototype.BrowserFeatures.SelectorsAPI) return false;
+    if (!P.BrowserFeatures.SelectorsAPI) return false;
     
-    if (!Selector._div) Selector._div = new Element('div');
-
     // Make sure the browser treats the selector as valid. Test on an 
     // isolated element to minimize cost of this check.    
     try {
-      Selector._div.querySelector(this.expression);
+      dummy.querySelector(this.expression);
     } catch(e) {
       return false;
     }
@@ -113,7 +111,7 @@ var Selector = Class.create({
   },
   
   findElements: function(root) {
-    root = root || document;
+    root = root || doc;
     var e = this.expression, results;
     
     switch (this.mode) {
@@ -121,17 +119,17 @@ var Selector = Class.create({
         // querySelectorAll queries document-wide, then filters to descendants
         // of the context element. That's not what we want.
         // Add an explicit context to the selector if necessary.
-        if (root !== document) {
+        if (root !== doc) {
           var oldId = root.id, id = $(root).identify();
           e = "#" + id + " " + e;
         }
 
-        results = $A(root.querySelectorAll(e)).map(Element.extend);
+        results = slice.call(root.querySelectorAll(e), 0).map(Element.extend);
         root.id = oldId;
 
         return results;
       case 'xpath':
-        return document._getElementsByXPath(this.xpath, root);
+        return doc._getElementsByXPath(this.xpath, root);
       default:
        return this.matcher(root);
     }
@@ -155,7 +153,7 @@ var Selector = Class.create({
           } else {
             // reluctantly do a document-wide search
             // and look for a match in the array
-            return this.findElements(document).include(element);
+            return this.findElements(doc).include(element);
           }
         }
       }
@@ -352,9 +350,8 @@ Object.extend(Selector, {
     concat: (function(){
       // IE returns comment nodes on getElementsByTagName("*").
       // Filter them out.
-      var div = document.createElement('div');
-      div.innerHTML = '<span>a</span><!--b-->';
-      if (div.childNodes.length === 2) {
+      dummy.innerHTML = '<span>a</span><!--b-->';
+      if (dummy.childNodes.length === 2) {
         return function(a, b) {
           for (var i = 0, node; node = b[i]; i++)
             if (node.nodeType !== 8) a.push(node);
@@ -370,7 +367,7 @@ Object.extend(Selector, {
     
     // marks an array of nodes for counting
     mark: function(nodes) {
-      var _true = Prototype.emptyFunction;
+      var _true = P.emptyFunction;
       for (var i = 0, node; node = nodes[i]; i++)
         node._countedByPrototype = _true;
       return nodes;
@@ -378,9 +375,9 @@ Object.extend(Selector, {
     
     unmark: (function() {
       // IE improperly serializes _countedByPrototype in (inner|outer)HTML.
-      var div = document.createElement('div'), _true = Prototype.emptyFunction;
-      div.__checkPropertiesAreAttributes = _true;
-      if (div.getAttribute('__checkPropertiesAreAttributes') === _true) {
+      var _true = P.emptyFunction;
+      dummy.__checkPropertiesAreAttributes = _true;
+      if (dummy.getAttribute('__checkPropertiesAreAttributes') === _true) {
         return function(nodes) {
           for (var i = 0, node; node = nodes[i++]; )
             node.removeAttribute('_countedByPrototype');
@@ -398,7 +395,7 @@ Object.extend(Selector, {
     // "ofType" flag indicates whether we're indexing for nth-of-type
     // rather than nth-child
     index: function(parentNode, reverse, ofType) {
-      parentNode._countedByPrototype = Prototype.emptyFunction;
+      parentNode._countedByPrototype = P.emptyFunction;
       if (reverse) {
         for (var nodes = parentNode.childNodes, i = nodes.length - 1, j = 1; i >= 0; i--) {
           var node = nodes[i];
@@ -416,7 +413,7 @@ Object.extend(Selector, {
       var results = [], n;
       for (var i = 0, l = nodes.length; i < l; i++)
         if (!(n = nodes[i])._countedByPrototype) {
-          n._countedByPrototype = Prototype.emptyFunction;
+          n._countedByPrototype = P.emptyFunction;
           results.push(Element.extend(n));
         }
       return Selector.handlers.unmark(results);
@@ -501,7 +498,7 @@ Object.extend(Selector, {
       } else targetNode = $(id);
  
       if (!targetNode) return [];
-      if (!nodes && root === document) return [targetNode];
+      if (!nodes && root === doc) return [targetNode];
       if (nodes) {
         if (combinator) {
           if (combinator == 'child') {
@@ -738,6 +735,6 @@ Object.extend(Selector, {
   }
 });
 
-function $$() {
-  return Selector.findChildElements(document, $A(arguments));
-}
+$$ = function() {
+  return Selector.findChildElements(doc, slice.call(arguments, 0));
+};

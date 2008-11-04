@@ -61,14 +61,14 @@ Object.extend(String.prototype, {
   },
 
   stripScripts: function() {
-    return this.replace(new RegExp(Prototype.ScriptFragment, 'gi'), '');
+    return this.replace(new RegExp(P.ScriptFragment, 'gi'), '');
   },
   
   extractScripts: (function() {
     var matchOpenTag = /<script/i,
-     matchAll = new RegExp(Prototype.ScriptFragment, 'gi'),
-     matchOne = new RegExp(Prototype.ScriptFragment, 'i'),
-     matchComments = new RegExp('<!--\\s*' + Prototype.ScriptFragment + '\\s*-->', 'gi');
+     matchAll = new RegExp(P.ScriptFragment, 'gi'),
+     matchOne = new RegExp(P.ScriptFragment, 'i'),
+     matchComments = new RegExp('<!--\\s*' + P.ScriptFragment + '\\s*-->', 'gi');
 
     return function() {
       if (!matchOpenTag.test(this)) return [];
@@ -158,7 +158,7 @@ Object.extend(String.prototype, {
   },
 
   unfilterJSON: function(filter) {
-    return this.sub(filter || Prototype.JSONFilter, '#{1}');
+    return this.sub(filter || P.JSONFilter, '#{1}');
   },
 
   isJSON: function() {
@@ -203,15 +203,14 @@ Object.extend(String.prototype, {
 });
 
 (function(SP) {
-  var container = document.createElement('pre'),
-   textNode = container.appendChild(document.createTextNode('')),
-   div = document.createElement('div');
+  var container = doc.createElement('pre'),
+   textNode = container.appendChild(doc.createTextNode(''));
 
   // Safari 2.x has issues with escaping html inside a "pre"
   // element so we use the deprecated "xmp" element instead.
   if ((textNode.data = '&') && container.innerHTML !== '&amp;') {
-    container = document.createElement('xmp');
-    textNode = container.appendChild(document.createTextNode(''));
+    container = doc.createElement('xmp');
+    textNode = container.appendChild(doc.createTextNode(''));
   }
 
   SP.escapeHTML = function() {
@@ -220,8 +219,8 @@ Object.extend(String.prototype, {
   };
 
   SP.unescapeHTML = function() {
-    div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-    return div.textContent;
+    dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+    return dummy.textContent;
   };
 
   // Safari 3.x has issues with escaping the ">" character
@@ -232,25 +231,25 @@ Object.extend(String.prototype, {
     };
   }
 
-  if (!('textContent' in div)) {
-    div.innerHTML = '<pre>&lt;span&gt;test&lt;/span&gt;</pre>';
-    if ('innerText' in div && div.firstChild.innerText === '<span>test</span>') {
+  if (!('textContent' in dummy)) {
+    dummy.innerHTML = '<pre>&lt;span&gt;test&lt;/span&gt;</pre>';
+    if ('innerText' in dummy && dummy.firstChild.innerText === '<span>test</span>') {
       SP.unescapeHTML = function() {
-        div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-        return div.firstChild.innerText.replace(/\r/g, '');
+        dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+        return dummy.firstChild.innerText.replace(/\r/g, '');
       };
     }
-	else if (div.firstChild.innerHTML === '<span>test</span>') {
+	else if (dummy.firstChild.innerHTML === '<span>test</span>') {
 	  SP.unescapeHTML = function() {
-        div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-        return div.firstChild.innerHTML;
+        dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+        return dummy.firstChild.innerHTML;
       };
 	} else {
 	  SP.unescapeHTML = function() {
-        div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-        return div.firstChild.childNodes[0] ? (div.firstChild.childNodes.length > 1 ?
-          $A(div.firstChild.childNodes).inject('', function(memo, node) { return memo + node.nodeValue }) :
-          div.firstChild.childNodes[0].nodeValue) : '';
+        dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+        return dummy.firstChild.childNodes[0] ? (dummy.firstChild.childNodes.length > 1 ?
+          $A(dummy.firstChild.childNodes).inject('', function(memo, node) { return memo + node.nodeValue }) :
+          dummy.firstChild.childNodes[0].nodeValue) : '';
       };
     }
   }
@@ -264,7 +263,7 @@ String.prototype.gsub.prepareReplacement = function(replacement) {
 
 String.prototype.parseQuery = String.prototype.toQueryParams;
 
-var Template = Class.create({
+Template = Class.create({
   initialize: function(template, pattern) {
     this.template = template.toString();
     this.pattern = pattern || Template.Pattern;

@@ -1,4 +1,4 @@
-var ObjectRange = Class.create(Enumerable, {
+ObjectRange = Class.create(Enumerable, {
   initialize: function(start, end, exclusive) {
     this.start = start;
     this.end = end;
@@ -22,6 +22,6 @@ var ObjectRange = Class.create(Enumerable, {
   }
 });
 
-var $R = function(start, end, exclusive) {
+$R = function(start, end, exclusive) {
   return new ObjectRange(start, end, exclusive);
 };
