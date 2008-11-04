@@ -168,23 +168,39 @@
     bind: function(object) {
       if (arguments.length < 2 && typeof arguments[0] === 'undefined') return this;
       var __method = this, args = slice.call(arguments, 1);
-      return function() {
-        return __method.apply(object, args.concat(slice.call(arguments, 0)));
+
+      // Avoid using Array#concat when only the context argument is given.
+      if (args.length) {
+        return function() {
+          return __method.apply(object, args.concat(slice.call(arguments, 0)));
+        };
       }
+      return function() {
+        return __method.apply(object, arguments);
+      };
     },
 
     bindAsEventListener: function(object) {
       var __method = this, args = slice.call(arguments, 1);
-      return function(event) {
-        return __method.apply(object, [event || global.event].concat(args));
+
+      // Avoid using Array#concat when only the context argument is given.
+      if (args.length) {
+        return function(event) {
+          return __method.apply(object, [event || window.event].concat(args));
+        };
       }
+      return function(event) {
+        return __method.call(object, event || window.event);
+      };
     },
 
     curry: function() {
       if (!arguments.length) return this;
       var __method = this, args = slice.call(arguments, 0);
       return function() {
-        return __method.apply(this, args.concat(slice.call(arguments, 0)));
+        return arguments.length
+          ? __method.apply(this, args.concat(slice.call(arguments, 0)))
+          : __method.apply(this, args);
       }
     },
 
@@ -204,7 +220,9 @@
     wrap: function(wrapper) {
       var __method = this;
       return function() {
-        return wrapper.apply(this, [__method.bind(this)].concat(slice.call(arguments, 0))); 
+        return arguments.length
+          ? wrapper.apply(this, [__method.bind(this)].concat(slice.call(arguments, 0)))
+          : wrapper.call(this, __method.bind(this));
       }
     },
 
@@ -212,7 +230,9 @@
       if (this._methodized) return this._methodized;
       var __method = this;
       return this._methodized = function() {
-        return __method.apply(null, [this].concat(slice.call(arguments, 0)));
+        return arguments.length
+           ? __method.apply(null, [this].concat(slice.call(arguments, 0)))
+           : __method.call(null, this);
       };
     }
   });

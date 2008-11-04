@@ -1,3 +1,5 @@
+* Optimize Function bind, bindAsEventListener, curry, methodize and wrap to avoid Array#concat and Function#apply when not needed. [#215 state:resolved]  [kangax, Tobie Langel]
+
 * Add private helper method nodeListSlice() to complement slice(). [jddalton]
 
 * Cleanup whitespace in source files. [jddalton]
