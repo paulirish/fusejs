@@ -75,7 +75,7 @@
 
           if (values && typeof values == 'object') {
             if (Object.isArray(values))
-              return results.concat(values.map(toQueryPair.curry(key)));
+              return mergeList(results, values.map(toQueryPair.curry(key)));
           } else results.push(toQueryPair(key, values));
           return results;
         }).join('&');

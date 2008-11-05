@@ -55,8 +55,9 @@
 
     flatten: function() {
       return this.inject([], function(array, value) {
-        return array.concat(Object.isArray(value) ?
-          value.flatten() : [value]);
+        if (Object.isArray(value))
+          return mergeList(array, value.flatten());
+        return array.push(value) && array;
       });
     },
 
@@ -242,7 +243,7 @@
       if (typeof args.last() === 'function')
         iterator = args.pop();
 
-      var results = [], collections = [this].concat(args).map($A);
+      var results = [], collections = prependList(args.map($A), this);
       for (var i = 0, length = this.length; i < length; i++)
         results[i] = iterator(collections.pluck(i));
       return results;

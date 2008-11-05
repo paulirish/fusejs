@@ -22,6 +22,18 @@
     };
   })();
 
+  function mergeList(list, other) {
+    list = slice.call(list, 0); // quick shallow clone
+    var pad = list.length, length = other.length;
+    while (length--) list[pad + length] = other[length];
+    return list;
+  }
+
+  function prependList(list, value) {
+    (list = slice.call(list, 0)).unshift(value);
+    return list;
+  }
+
   var P = Prototype = {
     Version: '<%= PROTOTYPE_VERSION %>',
 

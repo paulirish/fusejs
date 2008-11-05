@@ -186,7 +186,7 @@
       if (typeof args.last() === 'function')
         iterator = args.pop();
 
-      var collections = [this].concat(args).map($A);
+      var collections = prependList(args.map($A), this);
       return this.map(function(value, index) {
         return iterator(collections.pluck(index));
       });

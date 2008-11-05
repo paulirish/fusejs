@@ -249,7 +249,7 @@
     immediateDescendants: function(element) {
       if (!(element = $(element).firstChild)) return [];
       while (element && element.nodeType != 1) element = element.nextSibling;
-      if (element) return [element].concat($(element).nextSiblings());
+      if (element) return prependList($(element).nextSiblings(), element);
       return [];
     },
 
@@ -263,7 +263,7 @@
 
     siblings: function(element) {
       element = $(element);
-      return element.previousSiblings().reverse().concat(element.nextSiblings());
+      return mergeList(element.previousSiblings().reverse(), element.nextSiblings());
     },
 
     match: function(element, selector) {

@@ -79,7 +79,7 @@
       findElement: function(event, expression) {
         var element = Event.element(event);
         if (!expression) return element;
-        var elements = [element].concat(element.ancestors());
+        var elements = prependList(element.ancestors(), element);
         return Selector.findElement(elements, expression, 0);
       },
 

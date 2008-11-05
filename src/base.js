@@ -172,7 +172,7 @@
       // Avoid using Array#concat when only the context argument is given.
       if (args.length) {
         return function() {
-          return __method.apply(object, args.concat(slice.call(arguments, 0)));
+          return __method.apply(object, mergeList(args, arguments));
         };
       }
       return function() {
@@ -186,7 +186,8 @@
       // Avoid using Array#concat when only the context argument is given.
       if (args.length) {
         return function(event) {
-          return __method.apply(object, [event || window.event].concat(args));
+          args.unshift(event || window.event);
+          return __method.apply(object, args);
         };
       }
       return function(event) {
@@ -199,7 +200,7 @@
       var __method = this, args = slice.call(arguments, 0);
       return function() {
         return arguments.length
-          ? __method.apply(this, args.concat(slice.call(arguments, 0)))
+          ? __method.apply(this, mergeList(args, arguments))
           : __method.apply(this, args);
       }
     },
@@ -213,7 +214,7 @@
     },
 
     defer: function() {
-      var args = [0.01].concat(slice.call(arguments, 0));
+      var args = prependList(arguments, 0.01);
       return this.delay.apply(this, args);
     },
 
@@ -221,7 +222,7 @@
       var __method = this;
       return function() {
         return arguments.length
-          ? wrapper.apply(this, [__method.bind(this)].concat(slice.call(arguments, 0)))
+          ? wrapper.apply(this, prependList(arguments, __method.bind(this)))
           : wrapper.call(this, __method.bind(this));
       }
     },
@@ -231,7 +232,7 @@
       var __method = this;
       return this._methodized = function() {
         return arguments.length
-           ? __method.apply(null, [this].concat(slice.call(arguments, 0)))
+           ? __method.apply(null, prependList(arguments, this))
            : __method.call(null, this);
       };
     }
