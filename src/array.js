@@ -94,7 +94,7 @@
     },
 
     clone: function() {
-      return [].concat(this);
+      return slice.call(this, 0);
     },
 
     size: function() {
