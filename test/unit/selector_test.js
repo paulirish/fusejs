@@ -390,5 +390,14 @@ new Test.Unit.Runner({
     this.assertNotNullOrUndefined(wrapper.select('td')[0], 'td');
     this.assertNotNullOrUndefined(wrapper.select('#myTD')[0], '#myTD');
     this.assertNotNullOrUndefined(wrapper.down().select('[id=myTD]')[0], '[id=myTD] on wrapper child');
+  },
+  
+  testSelectorSpit: function() {
+    this.assertEnumEqual(['.group', 'div[class~="expand"]', 'a'], Selector.split('.group, div[class~="expand"], a'));
+    
+    // currently there is no support for namespace selectors
+    // http://www.w3.org/TR/css3-selectors/#univnmsp
+    // but it should NOT freeze Firefox
+    this.assertEnumEqual(['h2'], Selector.split('.foo li:not(.selected) *|h2'));
   }
 });
