@@ -120,7 +120,7 @@
           // of the context element. That's not what we want.
           // Add an explicit context to the selector if necessary.
           if (root !== doc) {
-            var oldId = root.id, id = $(root).identify();
+            var oldId = root.id, id = Element.identify(root);
             e = "#" + id + " " + e;
           }
 

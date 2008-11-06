@@ -79,9 +79,7 @@
     },
 
     toggle: function(element) {
-      element = $(element);
-      Element[Element.visible(element) ? 'hide' : 'show'](element);
-      return element;
+      return Element[Element.visible(element) ? 'hide' : 'show'](element);
     },
 
     hide: function(element) {
@@ -135,8 +133,13 @@
       }
       return function(element, content) {
         element = $(element);
-        if (content && content.toElement) content = content.toElement();
-        if (Object.isElement(content)) return element.update().insert(content);
+        if (content && content.toElement)
+          content = content.toElement();
+        if (Object.isElement(content)) {
+          element.innerHTML = '';
+          element.appendChild(content);
+          return element;
+        }
         content = Object.toHTML(content);
         setInnerHTML(element, content.stripScripts());
         content.evalScripts.bind(content).defer();
@@ -215,9 +218,10 @@
     inspect: function(element) {
       element = $(element);
       var result = '<' + element.tagName.toLowerCase();
-      $H({'id': 'id', 'className': 'class'})._each(function(pair) {
-        var property = pair.first(), attribute = pair.last();
-        var value = (element[property] || '').toString();
+
+      $H({ 'id': 'id', 'className': 'class' })._each(function(pair) {
+        var property = pair.first(), attribute = pair.last(),
+         value = (element[property] || '').toString();
         if (value) result += ' ' + attribute + '=' + value.inspect(true);
       });
       return result + '>';
@@ -233,37 +237,36 @@
     },
 
     ancestors: function(element) {
-      return $(element).recursivelyCollect('parentNode');
+      return Element.recursivelyCollect(element, 'parentNode');
     },
 
     descendants: function(element) {
-      return Element.select(element,'*');
+      return Element.select(element, '*');
     },
 
     firstDescendant: function(element) {
       element = $(element).firstChild;
       while (element && element.nodeType != 1) element = element.nextSibling;
-      return $(element);
+      return Element.extend(element);
     },
 
     immediateDescendants: function(element) {
       if (!(element = $(element).firstChild)) return [];
       while (element && element.nodeType != 1) element = element.nextSibling;
-      if (element) return prependList($(element).nextSiblings(), element);
+      if (element) return prependList(Element.nextSiblings(element), element);
       return [];
     },
 
     previousSiblings: function(element) {
-      return $(element).recursivelyCollect('previousSibling');
+      return Element.recursivelyCollect(element, 'previousSibling');
     },
 
     nextSiblings: function(element) {
-      return $(element).recursivelyCollect('nextSibling');
+      return Element.recursivelyCollect(element, 'nextSibling');
     },
 
     siblings: function(element) {
-      element = $(element);
-      return mergeList(element.previousSiblings().reverse(), element.nextSiblings());
+      return mergeList(Element.previousSiblings(element).reverse(), Element.nextSiblings(element));
     },
 
     match: function(element, selector) {
@@ -273,32 +276,28 @@
     },
 
     up: function(element, expression, index) {
-      element = $(element);
-      if (arguments.length == 1) return $(element.parentNode);
-      var ancestors = element.ancestors();
+      if (arguments.length == 1) return Element.extend($(element).parentNode);
+      var ancestors = Element.ancestors(element);
       return typeof expression === 'number' ? ancestors[expression] :
         Selector.findElement(ancestors, expression, index);
     },
 
     down: function(element, expression, index) {
-      element = $(element);
-      if (arguments.length == 1) return element.firstDescendant();
-      return typeof expression === 'number' ? element.descendants()[expression] :
+      if (arguments.length == 1) return Element.firstDescendant(element);
+      return typeof expression === 'number' ? Element.descendants(element)[expression] :
         Element.select(element, expression)[index || 0];
     },
 
     previous: function(element, expression, index) {
-      element = $(element);
-      if (arguments.length == 1) return $(Selector.handlers.previousElementSibling(element));
-      var previousSiblings = element.previousSiblings();
+      if (arguments.length == 1) return Element.extend(Selector.handlers.previousElementSibling(element));
+      var previousSiblings = Element.previousSiblings(element);
       return typeof expression === 'number' ? previousSiblings[expression] :
         Selector.findElement(previousSiblings, expression, index);   
     },
 
     next: function(element, expression, index) {
-      element = $(element);
-      if (arguments.length == 1) return $(Selector.handlers.nextElementSibling(element));
-      var nextSiblings = element.nextSiblings();
+      if (arguments.length == 1) return Element.extend(Selector.handlers.nextElementSibling(element));
+      var nextSiblings = Element.nextSiblings(element);
       return typeof expression === 'number' ? nextSiblings[expression] :
         Selector.findElement(nextSiblings, expression, index);
     },
@@ -311,7 +310,7 @@
     adjacent: function(element) {
       element = $(element);
       var args = slice.call(arguments, 1),
-       parent = $(element.parentNode),
+       parent = Element.extend(element.parentNode),
        oldId = parent.id, newId = parent.identify();
 
       // ensure match against siblings and not children of siblings
@@ -322,11 +321,11 @@
     },
 
     identify: function(element) {
-      element = $(element);
-      var id = element.readAttribute('id'), self = arguments.callee;
+      var self = arguments.callee,
+       id = Element.readAttribute(element, 'id');
       if (id) return id;
-      do { id = 'anonymous_element_' + self.counter++ } while ($(id));
-      element.writeAttribute('id', id);
+      do { id = 'anonymous_element_' + self.counter++ } while (doc.getElementById(id));
+      Element.writeAttribute(element, 'id', id);
       return id;
     },
 
@@ -383,30 +382,29 @@
     },
 
     hasClassName: function(element, className) {
-      if (!(element = $(element))) return;
+      element = $(element);
       var elementClassName = element.className;
       return (elementClassName.length > 0 && (elementClassName == className || 
         new RegExp("(^|\\s)" + className + "(\\s|$)").test(elementClassName)));
     },
 
     addClassName: function(element, className) {
-      if (!(element = $(element))) return;
-      if (!element.hasClassName(className))
+      element = $(element);
+      if (!Element.hasClassName(element, className))
         element.className += (element.className ? ' ' : '') + className;
       return element;
     },
 
     removeClassName: function(element, className) {
-      if (!(element = $(element))) return;
+      element = $(element);
       element.className = element.className.replace(
         new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ').strip();
       return element;
     },
 
     toggleClassName: function(element, className) {
-      if (!(element = $(element))) return;
-      return element[element.hasClassName(className) ?
-        'removeClassName' : 'addClassName'](className);
+      return Element[Element.hasClassName(element, className) ?
+        'removeClassName' : 'addClassName'](element, className);
     },
 
     // removes whitespace-only text node children
@@ -443,7 +441,7 @@
 
     scrollTo: function(element) {
       element = $(element);
-      var pos = element.cumulativeOffset();
+      var pos = Element.cumulativeOffset(element);
       global.scrollTo(pos[0], pos[1]);
       return element;
     },
@@ -578,7 +576,7 @@
     })(),
 
     getOpacity: function(element) {
-      return $(element).getStyle('opacity');
+      return Element.getStyle(element, 'opacity');
     },
 
     setStyle: function(element, styles) {
@@ -587,10 +585,10 @@
       if (typeof styles === 'string') {
         element.style.cssText += ';' + styles;
         return styles.include('opacity') ?
-          element.setOpacity(styles.match(/opacity:\s*(\d?\.?\d*)/)[1]) : element;
+          Element.setOpacity(element, styles.match(/opacity:\s*(\d?\.?\d*)/)[1]) : element;
       }
       for (var property in styles)
-        if (property == 'opacity') element.setOpacity(styles[property]);
+        if (property == 'opacity') Element.setOpacity(element, styles[property]);
         else 
           elementStyle[(property == 'float' || property == 'cssFloat') ?
             (typeof elementStyle.styleFloat === 'undefined' ? 'cssFloat' : 'styleFloat') : 
@@ -811,14 +809,14 @@
 
       // IE throws an error if the element is not in the document.
       if (element.currentStyle === null || !element.offsetParent)
-        return $(body);
+        return body;
 
       while ((element = element.offsetParent) &&
        !/^(html|body)$/i.test(element.tagName)) {
         if (Element.getStyle(element, 'position') !== 'static')
-          return $(element);
+          return Element.extend(element);
       }
-      return $(body);
+      return body;
     },
 
     viewportOffset: (function(forElement) {
@@ -985,7 +983,7 @@
             return source.indexOf('function anonymous()\n{\n') === 0 ? source.slice(23, -2) : "";
           },
           _flag: function(element, attribute) {
-            return $(element).hasAttribute(attribute) ? attribute : null;
+            return Element.hasAttribute(element, attribute) ? attribute : null;
           },
           style: function(element) {
             return element.style.cssText.toLowerCase();

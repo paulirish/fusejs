@@ -1,3 +1,5 @@
+* Optimize method execution speed by using the static Element methods instead of the DOM element methods. [jddalton]
+
 * Optimize Array#clone by using slice() helper method. [jddalton]
 
 * Add private helper methods mergeList and prependList to replace Array#concat usage. [jddalton, Tobie Langel]

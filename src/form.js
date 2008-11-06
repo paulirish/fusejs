@@ -15,7 +15,7 @@
       var data = elements.inject({ }, function(result, element) {
         element = $(element);
         key     = element.name;
-        value   = element.getValue();
+        value   = Form.Element.getValue(element);
         type    = element.type;
 
         isImageType = type === 'image';
@@ -107,7 +107,7 @@
         return 'hidden' != element.type && !element.disabled;
       });
       var firstByIndex = elements.findAll(function(element) {
-        return element.hasAttribute('tabIndex') && element.tabIndex >= 0;
+        return Element.hasAttribute(element, 'tabIndex') && element.tabIndex >= 0;
       }).sortBy(function(element) { return element.tabIndex }).first();
 
       return firstByIndex ? firstByIndex : elements.find(function(element) {
@@ -162,7 +162,7 @@
     serialize: function(element) {
       element = $(element);
       if (!element.disabled && element.name) {
-        var value = element.getValue();
+        var value = Form.Element.getValue(element);
         if (value != null) {
           var pair = { };
           pair[element.name] = value;
