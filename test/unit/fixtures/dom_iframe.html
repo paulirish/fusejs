@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>IFrame</title>
+  </head>
+<body>
+
+<div>
+  <table>
+    <tbody id="table">
+      <tr>
+        <td>Data</td>
+      </tr>
+      <tr>
+        <td id="a_cell">First Row</td>
+      </tr>
+      <tr id="second_row">
+        <td>Second Row</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div id="table-container-to-replace">
+  <table>
+    <tbody id="table-to-replace">
+      <tr>
+        <td>Data</td>
+      </tr>
+      <tr>
+        <td id="a_cell-to-replace">First Row</td>
+      </tr>
+      <tr id="second_row-to-replace">
+        <td>Second Row</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="test">Test paragraph outside of container</p>
+
+<div id="container">
+  <p class="test" id="intended">Test paragraph 1 inside of container</p>
+  <p class="test">Test paragraph 2 inside of container</p>
+  <p class="test">Test paragraph 3 inside of container</p>
+  <p class="test">Test paragraph 4 inside of container</p>
+</div>
+
+<div>
+  <div><a href="test1.html">some text 1</a></div>
+  <div id="test-adjacent"><a href="test2.html">some text 2</a></div>
+  <div><a href="test3.html">some text 3</a></div>
+</div>
+
+<div id="testdiv">to be updated</div>
+<div id="testdiv-replace-container-1"><div id="testdiv-replace-1"></div></div>
+<div id="testdiv-replace-container-2"><div id="testdiv-replace-2"></div></div>
+<div id="testdiv-replace-container-3"><div id="testdiv-replace-3"></div></div>
+<div id="testdiv-replace-container-4"><div id="testdiv-replace-4"></div></div>
+<div id="testdiv-replace-container-5"><div id="testdiv-replace-5"></div></div>
+<div id="testdiv-replace-container-element"><div id="testdiv-replace-element"></div></div>
+<div id="testdiv-replace-container-toelement"><div id="testdiv-replace-toelement"></div></div>
+<div id="testdiv-replace-container-tohtml"><div id="testdiv-replace-tohtml"></div></div>
+<div id="testtable-replace-container"><table id="testtable-replace"></table></div>
+<table id="testrow-replace-container"><tr id="testrow-replace"></tr></table>
+<select id="testoption-replace-container"><option id="testoption-replace"></option><option>stays</option></select>
+<div id="testform-replace-container"><p>some text</p><form id="testform-replace"><input id="testinput-replace" type="text" /></form><p>some text</p></div>
+
+<div id="ancestor">
+  <div id="child">
+    <div id="grand-child">
+      <div id="great-grand-child"></div>
+    </div></div><!-- intentional formatting; don't change this line -->
+  <div id="sibling"><div id="grand-sibling"></div></div>
+</div>
+<div id="not-in-the-family"></div>
+
+<div id="insertions-container"><div id="insertions-main"><p>some content.</p></div></div>
+<div id="insertions-node-container"><div id="insertions-node-main"><p>some content.</p></div></div>
+<div id="element-insertions-container"><div id="element-insertions-main"><p>some content.</p></div></div>
+<div id="element-insertions-multiple-container"><div id="element-insertions-multiple-main"><p>some content.</p></div></div>
+<table id="table_for_insertions"></table>
+<table id="table_for_row_insertions"><tr id="row_1"></tr></table>
+
+</body>
+</html>

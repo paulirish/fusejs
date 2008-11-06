@@ -1,10 +1,36 @@
 var getInnerHTML = function(id) {
   return $(id).innerHTML.toString().toLowerCase().gsub(/[\r\n\t]/, '');
 };
-var createParagraph = function(text) {
-  var p = document.createElement('p');
-  p.appendChild(document.createTextNode(text));
+
+var createParagraph = function(text, context) {
+  context = context || document;
+  var p = context.createElement('p');
+  p.appendChild(context.createTextNode(text));
   return p;
+};
+
+var getIframeDocument = function() {
+  var element = $('iframe');
+  return element.contentDocument || element.contentWindow && element.contentWindow.document;
+};
+
+var isIframeDocument = function(doc) {
+  return (doc.parentWindow || doc.defaultView).frameElement != null;
+};
+
+var isIframeAccessible = function() {
+  try {
+    return !!getIframeDocument().body;
+  } catch(e) {
+    return false;
+  }
+};
+
+var getElement = function(element, context) {
+  if (typeof element !== 'string') return element;
+  return Element.extend((context || document).getElementById(element));
+};
+
 // Parsing and serializing XML
 // http://developer.mozilla.org/En/Parsing_and_serializing_XML
 // http://www.van-steenbeek.net/?q=explorer_domparser_parsefromstring
@@ -72,6 +98,10 @@ new Test.Unit.Runner({
     };
   },
 
+  testIframeAccess: function() {
+    this.assert(isIframeAccessible(), 'Iframe failed. You MUST run the tests from Rake and not the local file system.');
+  },
+  
   testDollarFunction: function() {
     this.assertUndefined($());
     
@@ -94,7 +124,6 @@ new Test.Unit.Runner({
       return;
     } 
 
-    
     var div = $('class_names'), list = $('class_names_ul');
     
     this.assertElementsMatch(document.getElementsByClassName('A'), 'p.A', 'ul#class_names_ul.A', 'li.A.C');
@@ -125,59 +154,133 @@ new Test.Unit.Runner({
   },
 
   testElementInsertWithHTML: function() {
-    Element.insert('insertions-main', {before:'<p><em>before</em> text</p><p>more testing</p>'});
-    this.assert(getInnerHTML('insertions-container').startsWith('<p><em>before</em> text</p><p>more testing</p>'));
-    Element.insert('insertions-main', {after:'<p><em>after</em> text</p><p>more testing</p>'});
-    this.assert(getInnerHTML('insertions-container').endsWith('<p><em>after</em> text</p><p>more testing</p>'));
-    Element.insert('insertions-main', {top:'<p><em>top</em> text.</p><p>more testing</p>'});
-    this.assert(getInnerHTML('insertions-main').startsWith('<p><em>top</em> text.</p><p>more testing</p>'));
-    Element.insert('insertions-main', {bottom:'<p><em>bottom</em> text.</p><p>more testing</p>'});
-    this.assert(getInnerHTML('insertions-main').endsWith('<p><em>bottom</em> text.</p><p>more testing</p>'));
+    var container, main, msg,
+     documents = [document, getIframeDocument()];
+    
+    if (!isIframeAccessible()) documents.pop();
+    
+    documents.each(function(context) {
+      msg = isIframeDocument(context) ? 'On iframe' : 'On document';
+      main = getElement('insertions-main', context);
+      container = getElement('insertions-container', context);
+
+      main.insert({ before:'<p><em>before</em> text</p><p>more testing</p>' });
+      this.assert(getInnerHTML(container).startsWith('<p><em>before</em> text</p><p>more testing</p>'), 'Insert "before". ' + msg);
+      
+      main.insert({ after:'<p><em>after</em> text</p><p>more testing</p>' });
+      this.assert(getInnerHTML(container).endsWith('<p><em>after</em> text</p><p>more testing</p>'), 'Insert "after". ' + msg);
+      
+      main.insert({ top:'<p><em>top</em> text.</p><p>more testing</p>' });
+      this.assert(getInnerHTML(main).startsWith('<p><em>top</em> text.</p><p>more testing</p>'), 'Insert "top". ' + msg);
+      
+      Element.insert(main, { bottom:'<p><em>bottom</em> text.</p><p>more testing</p>' });
+      this.assert(getInnerHTML(main).endsWith('<p><em>bottom</em> text.</p><p>more testing</p>'), 'Insert "bottom". ' + msg);
+    }, this);
   },
 
   testElementInsertWithDOMNode: function() {
-    Element.insert('insertions-node-main', {before: createParagraph('node before')});
-    this.assert(getInnerHTML('insertions-node-container').startsWith('<p>node before</p>'));
-    Element.insert('insertions-node-main', {after: createParagraph('node after')});
-    this.assert(getInnerHTML('insertions-node-container').endsWith('<p>node after</p>'));
-    Element.insert('insertions-node-main', {top:createParagraph('node top')});
-    this.assert(getInnerHTML('insertions-node-main').startsWith('<p>node top</p>'));
-    Element.insert('insertions-node-main', {bottom:createParagraph('node bottom')});
-    this.assert(getInnerHTML('insertions-node-main').endsWith('<p>node bottom</p>'));
-    this.assertEqual($('insertions-node-main'), $('insertions-node-main').insert(document.createElement('p')));
+    var container, main, msg,
+     documents = [document, getIframeDocument()];
+    
+    if (!isIframeAccessible()) documents.pop();
+    
+    documents.each(function(context) {
+      msg = isIframeDocument(context) ? 'On iframe' : 'On document';
+      main = getElement('insertions-node-main', context);
+      container = getElement('insertions-node-container', context);
+      
+      main.insert({ before: createParagraph('node before', context) });
+      this.assert(getInnerHTML(container).startsWith('<p>node before</p>'), 'Insert "before". ' + msg);
+      
+      main.insert({ after: createParagraph('node after', context) });
+      this.assert(getInnerHTML(container).endsWith('<p>node after</p>'), 'Insert "after". ' + msg);
+      
+      Element.insert(main, { top:createParagraph('node top', context) });
+      this.assert(getInnerHTML(main).startsWith('<p>node top</p>'), 'Insert "top". ' + msg);
+      
+      Element.insert(main, { bottom:createParagraph('node bottom', context) });
+      this.assert(getInnerHTML(main).endsWith('<p>node bottom</p>'), 'Insert "bottom". ' + msg);
+      this.assertEqual(main, main.insert(context.createElement('p')),'Insert returns correct element. ' +  msg);
+    }, this);
   },
   
   testElementInsertWithToElementMethod: function() {
-    Element.insert('insertions-node-main', {toElement: createParagraph.curry('toElement') });
-    this.assert(getInnerHTML('insertions-node-main').endsWith('<p>toelement</p>'));
-    Element.insert('insertions-node-main', {bottom: {toElement: createParagraph.curry('bottom toElement') }});
-    this.assert(getInnerHTML('insertions-node-main').endsWith('<p>bottom toelement</p>'));
+    var main, msg, documents = [document, getIframeDocument()];
+    if (!isIframeAccessible()) documents.pop();
+    
+    documents.each(function(context) {
+      msg = isIframeDocument(context) ? 'On iframe' : 'On document';
+      main = getElement('insertions-node-main', context);
+      
+      Element.insert(main, { toElement: createParagraph.curry('toElement', context) });
+      this.assert(getInnerHTML(main).endsWith('<p>toelement</p>'),
+        'Insert with toElement() and no position specified. ' + msg);
+      
+      main.insert({ bottom: { toElement: createParagraph.curry('bottom toElement', context) } });
+      this.assert(getInnerHTML(main).endsWith('<p>bottom toelement</p>'),
+        'Insert with toElement() and position "bottom" specified. ' + msg);
+    }, this);
   },
   
   testElementInsertWithToHTMLMethod: function() {
-    Element.insert('insertions-node-main', {toHTML: function() { return '<p>toHTML</p>'} });
-    this.assert(getInnerHTML('insertions-node-main').endsWith('<p>tohtml</p>'));
-    Element.insert('insertions-node-main', {bottom: {toHTML: function() { return '<p>bottom toHTML</p>'} }});
-    this.assert(getInnerHTML('insertions-node-main').endsWith('<p>bottom tohtml</p>'));
+    var main, msg, documents = [document, getIframeDocument()];
+    if (!isIframeAccessible()) documents.pop();
+    
+    documents.each(function(context) {
+      msg = isIframeDocument(context) ? 'On iframe' : 'On document';
+      main = getElement('insertions-node-main', context);
+
+      main.insert({ toHTML: function() { return '<p>toHTML</p>'} });
+      this.assert(getInnerHTML(main).endsWith('<p>tohtml</p>'),
+        'Insert with toHTML() and no position specified. ' + msg);
+
+      Element.insert(main, { bottom: { toHTML: function() { return '<p>bottom toHTML</p>'} } });
+      this.assert(getInnerHTML(main).endsWith('<p>bottom tohtml</p>'),
+        'Insert with toHTML() and position "bottom" specified. ' + msg);
+    }, this);
   },
   
   testElementInsertWithNonString: function() {
-    Element.insert('insertions-main', {bottom:3});
-    this.assert(getInnerHTML('insertions-main').endsWith('3'));
+    var main, msg, documents = [document, getIframeDocument()];
+    if (!isIframeAccessible()) documents.pop();
+    
+    documents.each(function(context) {
+      msg = isIframeDocument(context) ? 'On iframe' : 'On document';
+      main = getElement('insertions-main', context);
+      
+      Element.insert(main, { bottom:3 });
+      this.assert(getInnerHTML(main).endsWith('3'), msg);
+    }, this);
   },
 
   testElementInsertInTables: function() {
-    Element.insert('second_row', {after:'<tr id="third_row"><td>Third Row</td></tr>'});
-    this.assert($('second_row').descendantOf('table'));
+    var element, cell, msg,
+     documents = [document, getIframeDocument()];
     
-    $('a_cell').insert({top:'hello world'});
-    this.assert($('a_cell').innerHTML.startsWith('hello world'));
-    $('a_cell').insert({after:'<td>hi planet</td>'});
-    this.assertEqual('hi planet', $('a_cell').next().innerHTML);
-    $('table_for_insertions').insert('<tr><td>a cell!</td></tr>');
-    this.assert($('table_for_insertions').innerHTML.gsub('\r\n', '').toLowerCase().include('<tr><td>a cell!</td></tr>'));
-    $('row_1').insert({after:'<tr></tr><tr></tr><tr><td>last</td></tr>'});
-    this.assertEqual('last', $A($('table_for_row_insertions').getElementsByTagName('tr')).last().lastChild.innerHTML);
+    if (!isIframeAccessible()) documents.pop();
+    
+    documents.each(function(context) {
+      msg  = isIframeDocument(context) ? 'On iframe' : 'On document';
+      cell = getElement('a_cell', context);
+
+      element = getElement('second_row', context);
+      element.insert({ after:'<tr id="third_row"><td>Third Row</td></tr>' });
+      this.assert(element.descendantOf(getElement('table', context)), msg);
+
+      cell.insert({ top:'hello world' });
+      this.assert(cell.innerHTML.startsWith('hello world'), msg);
+
+      cell.insert({ after:'<td>hi planet</td>' });
+      this.assertEqual('hi planet', cell.next().innerHTML, msg);
+
+      element = getElement('table_for_insertions', context);
+      element.insert('<tr><td>a cell!</td></tr>');
+      this.assert(getInnerHTML(element).include('<tr><td>a cell!</td></tr>'), msg);
+
+      getElement('row_1', context).insert({ after:'<tr></tr><tr></tr><tr><td>last</td></tr>' });
+      this.assertEqual('last', $A(getElement('table_for_row_insertions')
+        .getElementsByTagName('tr')).last().lastChild.innerHTML, msg);
+    }, this);
   },
   
   testElementInsertInSelect: function() {

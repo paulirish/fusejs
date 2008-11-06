@@ -119,7 +119,7 @@
           // querySelectorAll queries document-wide, then filters to descendants
           // of the context element. That's not what we want.
           // Add an explicit context to the selector if necessary.
-          if (root !== doc) {
+          if (root.nodeType !== 9) {
             var oldId = root.id, id = Element.identify(root);
             e = "#" + id + " " + e;
           }
@@ -153,7 +153,7 @@
             } else {
               // reluctantly do a document-wide search
               // and look for a match in the array
-              return this.findElements(doc).include(element);
+              return this.findElements(element.ownerDocument).include(element);
             }
           }
         }
@@ -495,10 +495,10 @@
               targetNode = $(el); break;
             }
           }
-        } else targetNode = $(id);
+        } else targetNode = getOwnerDoc(root).getElementById(id);
 
         if (!targetNode) return [];
-        if (!nodes && root === doc) return [targetNode];
+        if (!nodes && root.nodeType === 9) return [targetNode];
         if (nodes) {
           if (combinator) {
             if (combinator == 'child') {

@@ -339,12 +339,12 @@
 
       fire: function(element, eventName, memo) {
         element = $(element);
-        if (element === doc && doc.createEvent && !element.dispatchEvent)
-          element = docEl;
+        if (element.nodeType === 9 && doc.createEvent && !element.dispatchEvent)
+          element = element.documentElement;
 
         var event;
         if (doc.createEvent) {
-          event = doc.createEvent("HTMLEvents");
+          event = getOwnerDoc(element).createEvent("HTMLEvents");
           event.initEvent("dataavailable", true, true);
         } else {
           event = doc.createEventObject();

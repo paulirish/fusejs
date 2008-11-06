@@ -11,8 +11,9 @@
 
   if (P.BrowserFeatures.XPath) {
     doc._getElementsByXPath = function(expression, parentElement) {
-      var results = [];
-      var query = doc.evaluate(expression, $(parentElement) || doc,
+      parentElement = $(parentElement);
+      var results = [], ownerDoc = getOwnerDoc(parentElement);
+      var query = ownerDoc.evaluate(expression, parentElement || ownerDoc,
         null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
       for (var i = 0, length = query.snapshotLength; i < length; i++)
         results.push(Element.extend(query.snapshotItem(i)));
@@ -127,7 +128,7 @@
           if (tagName in Element._insertionTranslations.tags) {
             var children = element.childNodes, length = children.length;
             while (length--) element.removeChild(children[length]);
-            element.appendChild(Element._getContentFromAnonymousElement(tagName, content));
+            element.appendChild(Element._getContentFromAnonymousElement(element.ownerDocument, tagName, content));
           } else element.innerHTML = content;
         };
       }
@@ -155,7 +156,7 @@
           return range.createContextualFragment(content);
         } :
         function(element, content) {
-          return Element._getContentFromAnonymousElement(element.parentNode.tagName.toUpperCase(), content);
+          return Element._getContentFromAnonymousElement(element.ownerDocument, element.parentNode.tagName.toUpperCase(), content);
         };
 
       return function(element, content) {
@@ -195,7 +196,7 @@
         tagName = ((position == 'before' || position == 'after')
           ? element.parentNode : element).tagName.toUpperCase();
 
-        fragment = Element._getContentFromAnonymousElement(tagName, content.stripScripts());
+        fragment = Element._getContentFromAnonymousElement(element.ownerDocument, tagName, content.stripScripts());
         insert(element, fragment);
         content.evalScripts.bind(content).defer();
       }
@@ -324,7 +325,10 @@
       var self = arguments.callee,
        id = Element.readAttribute(element, 'id');
       if (id) return id;
-      do { id = 'anonymous_element_' + self.counter++ } while (doc.getElementById(id));
+
+      var ownerDoc = element.ownerDocument;
+      do { id = 'anonymous_element_' + self.counter++ }
+      while (ownerDoc.getElementById(id));
       Element.writeAttribute(element, 'id', id);
       return id;
     },
@@ -461,7 +465,7 @@
 
       var getComputedStyle = function(element, styleName) {
         styleName = getStyleName(styleName);
-        var css = doc.defaultView.getComputedStyle(element, null);
+        var css = element.ownerDocument.defaultView.getComputedStyle(element, null);
         if (css) return getResult(styleName, css[styleName]);
         return getStyle(element, styleName);
       };
@@ -636,7 +640,7 @@
             if (element.tagName.toUpperCase() == 'IMG' && element.width) {
               element.width++; element.width--;
             } else try {
-              var n = doc.createTextNode(' ');
+              var n = element.ownerDocument.createTextNode(' ');
               element.removeChild(element.appendChild(n));
             } catch (e) { }
 
@@ -722,7 +726,7 @@
         valueT += element.offsetTop  || 0;
         valueL += element.offsetLeft || 0;
         element = Element._getRealOffsetParent(element);
-      } while (element && element !== body &&
+      } while (element && element.tagName.toUpperCase() !== 'BODY' &&
         Element.getStyle(element, 'position') === 'static');
 
       return Element._returnOffset(valueL, valueT);
@@ -792,9 +796,9 @@
       do {
         // Skip body if documentElement has
         // scroll values as well (i.e. Opera 9.2x)
-        if (element === body && ((element.scrollTop && 
-         element.parentNode.scrollTop) || (element.scrollLeft && 
-          element.parentNode.scrollLeft))) continue;
+        if (element.tagName.toUpperCase() === 'BODY' &&
+          ((element.scrollTop && element.parentNode.scrollTop) ||
+          (element.scrollLeft && element.parentNode.scrollLeft))) continue;
 
         valueT += element.scrollTop  || 0;
         valueL += element.scrollLeft || 0;
@@ -809,14 +813,14 @@
 
       // IE throws an error if the element is not in the document.
       if (element.currentStyle === null || !element.offsetParent)
-        return body;
+        return Element.extend(getOwnerDoc(element).body);
 
       while ((element = element.offsetParent) &&
        !/^(html|body)$/i.test(element.tagName)) {
         if (Element.getStyle(element, 'position') !== 'static')
           return Element.extend(element);
       }
-      return body;
+      return Element.extend(getOwnerDoc(element).body);
     },
 
     viewportOffset: (function(forElement) {
@@ -854,8 +858,8 @@
 
           // Safari fix
           offsetParent = Element._getRealOffsetParent(element);
-          if (offsetParent === body && Element.getStyle(element,
-           'position') === 'absolute') break;
+          if (offsetParent && offsetParent.tagName.toUpperCase === 'BODY' &&
+            Element.getStyle(element, 'position') === 'absolute') break;
         } while (element = offsetParent);
 
         // Subtract the scrollOffets of forElement from the scrollOffset totals
@@ -1004,7 +1008,10 @@
         _setAttrNode: function(name) {
           return function(element, value) {
             var attr = element.getAttributeNode(name);
-            if (!attr) element.setAttributeNode(attr = doc.createAttribute(name));
+            if (!attr) {
+              attr = element.ownerDocument.createAttribute(name);
+              element.setAttributeNode(attr);
+            }
             attr.value = value;
           };
         },
@@ -1074,14 +1081,15 @@
     // KHTML/WebKit only.
     Element.Methods.cumulativeOffset = function(element) {
       element = $(element);
-      var valueT = 0, valueL = 0;
+      var valueT = 0, valueL = 0, offsetParent;
       do {
         valueT += element.offsetTop  || 0;
         valueL += element.offsetLeft || 0;
-        if (element.offsetParent == body)
+        offsetParent = element.offsetParent;
+        if (offsetParent && offsetParent.tagName.toUpperCase() === 'BODY')
           if (Element.getStyle(element, 'position') == 'absolute') break;
 
-        element = element.offsetParent;
+        element = offsetParent;
       } while (element);
 
       return Element._returnOffset(valueL, valueT);
@@ -1097,7 +1105,7 @@
 
   Element._getRealOffsetParent = function(element) {
     return (element.currentStyle === null || !element.offsetParent) ? false :
-     element.offsetParent === docEl ?
+     (element.offsetParent && element.offsetParent.tagName.toUpperCase() === 'HTML') ?
        element.offsetParent : Element.getOffsetParent(element);
   };
 
@@ -1134,38 +1142,57 @@
   })();
 
   Element._getContentFromAnonymousElement = (function() {
-    var fragment = doc.createDocumentFragment();
-    var getContentAsFragment = (function() {
-      if ('removeNode' in docEl) {
-        return function(container) {
-          // shortcut for IE: removes the parent but keeping the children
-          fragment.appendChild(container).removeNode();
-          return fragment;
-        };
-      } else if ('createRange' in doc) {
-        var range = doc.createRange();
-        return function(container) {
-          range.selectNodeContents(container);
-          fragment.appendChild(range.extractContents());
-          return fragment;
-        };
-      } else {
-        return function(container) {
-          var length = container.childNodes.length;
-          while (length--) fragment.insertBefore(container.childNodes[length], fragment.firstChild);
-          return fragment;
+    function getCache(ownerDoc) {
+      if (ownerDoc === doc)
+        return getCache.cache[0];
+      var id = ownerDoc.frameID;
+      if (!id) {
+        id = getCache.id++;
+        ownerDoc.frameID = id;
+        getCache.cache[id] = {
+          node: ownerDoc.createElement('div'),
+          fragment: ownerDoc.createDocumentFragment()
         };
       }
+      return getCache.cache[id];
+    }
+    getCache.id = 1;
+    getCache.cache = { };
+    getCache.cache[0] = { node: dummy, fragment: doc.createDocumentFragment() };
+
+    var getContentAsFragment = (function() {
+      if ('removeNode' in docEl) {
+        return function(cache, container) {
+          // removeNode: removes the parent but keeps the children
+          cache.fragment.appendChild(container).removeNode();
+          return cache.fragment;
+        };
+      }
+      if ('createRange' in doc) {
+        return function(cache, container) {
+          cache.range = cache.range || cache.node.ownerDocument.createRange();
+          cache.range.selectNodeContents(container);
+          cache.fragment.appendChild(cache.range.extractContents());
+          return cache.fragment;
+        };
+      }
+      return function(cache, container) {
+        var length = container.childNodes.length;
+        while (length--)
+          cache.fragment.insertBefore(container.childNodes[length], cache.fragment.firstChild);
+        return cache.fragment;
+      };
     })();
 
-    return function(tagName, html) {
-      var node = dummy, t = Element._insertionTranslations.tags[tagName];
+    return function(ownerDoc, tagName, html) {
+      var cache = getCache(ownerDoc), node = cache.node,
+       t = Element._insertionTranslations.tags[tagName];
       if (t) {
         node.innerHTML= t[0] + html + t[1];
         t[2].times(function() { node = node.firstChild });
       } else node.innerHTML = html;
 
-      return getContentAsFragment(node);
+      return getContentAsFragment(cache, node);
     }
   })();
 
@@ -1210,7 +1237,6 @@
   };
 
   Element.Methods.ByTag = { };
-
   Object.extend(Element, Element.Methods);
 
   if (!P.BrowserFeatures.ElementExtensions && dummy.__proto__) {
@@ -1220,14 +1246,11 @@
   }
 
   Element.extend = (function() {
-    if (P.BrowserFeatures.SpecificElementExtensions)
-      return P.K;
-
     var Methods = { }, ByTag = Element.Methods.ByTag;
 
-    var extend = Object.extend(function(element) {
+    function extend(element) {
       if (!element || element._extendedByPrototype || 
-          element.nodeType != 1 || element === global) return element;
+        element.nodeType != 1 || element === global) return element;
 
       // Filter out XML nodes because IE errors on them.
       if (!('write' in element.ownerDocument)) return element;
@@ -1246,18 +1269,24 @@
 
       element._extendedByPrototype = P.emptyFunction;
       return element;
+    }
 
-    }, { 
-      refresh: function() {
-        // extend methods for all tags (Safari doesn't need this)
-        if (!P.BrowserFeatures.ElementExtensions) {
-          Object.extend(Methods, Element.Methods);
-          Object.extend(Methods, Element.Methods.Simulated);
-        }
-      }
-    });
+    function refresh() {
+      Object.extend(Methods, Element.Methods);
+      Object.extend(Methods, Element.Methods.Simulated);
+    }
 
-    extend.refresh();
+    // Browsers with specific element extensions
+  	// don't need their elements extended UNLESS
+  	// they belong to a different document
+	if (P.BrowserFeatures.SpecificElementExtensions) {
+	  return Object.extend(function(element) {
+	    return (element && element.ownerDocument &&
+	      element.ownerDocument !== doc) ? extend(element) : element;
+	  }, { 'refresh': refresh });
+	}
+
+    extend.refresh = refresh;
     return extend;
   })();
 
@@ -1339,6 +1368,7 @@
     if (F.ElementExtensions) {
       copy(Element.Methods, HTMLElement.prototype);
       copy(Element.Methods.Simulated, HTMLElement.prototype, true);
+      HTMLElement.prototype._extendedByPrototype = P.emptyFunction;
     }
 
     if (F.SpecificElementExtensions) {
@@ -1346,13 +1376,14 @@
         var klass = findDOMClass(tag);
         if (typeof klass === 'undefined') continue;
         copy(T[tag], klass.prototype);
+        klass.prototype._extendedByPrototype = P.emptyFunction;
       }
     }  
 
     Object.extend(Element, Element.Methods);
     delete Element.ByTag;
 
-    if (Element.extend.refresh) Element.extend.refresh();
+    Element.extend.refresh();
     Element.cache = { };
   };
 

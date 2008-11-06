@@ -1,3 +1,5 @@
+* Add private helper method getOwnerDoc() and utilize element.ownerDocument to allow CSS queries and DOM dom traversal against iframes. Closes #11475. [jddalton]
+
 * Fix regexp in Selector.split() that caused Firefox 3 to freeze. [#408 state:resolved] [jddalton, kangax, Shawazi, William Warby]
 
 * Ensure Form.Element#(select|focus) return an element. [jddalton]

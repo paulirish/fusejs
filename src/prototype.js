@@ -33,6 +33,10 @@
     (list = slice.call(list, 0)).unshift(value);
     return list;
   }
+  
+  function getOwnerDoc(element) { // assume element is not null
+    return element.ownerDocument || (element.nodeType === 9  ? element : doc);
+  }
 
   var P = Prototype = {
     Version: '<%= PROTOTYPE_VERSION %>',
