@@ -148,12 +148,12 @@
 
   Form.Element = {
     focus: function(element) {
-      $(element).focus();
+      (element = $(element)).focus();
       return element;
     },
 
     select: function(element) {
-      $(element).select();
+      (element = $(element)).select();
       return element;
     }
   };

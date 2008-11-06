@@ -482,5 +482,13 @@ new Test.Unit.Runner({
       this.assert(element === Form[method]('form'),
         'Form.' + method + ' returned a non element value.');
     }, this);
+  },
+
+  testFormElementMethodsReturnElement: function() {
+    element = $('focus_text');
+    $w('activate clear disable enable focus select').each(function(method) {
+      this.assert(element === Form.Element[method]('focus_text'),
+        'Form.Element.' + method + ' returned a non element value.');
+    }, this);
   }
 });
