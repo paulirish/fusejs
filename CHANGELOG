@@ -1,3 +1,5 @@
+* Fix Java applet "java.lang.NosuchFieldException" error, in JRE v1.6.0_10, when accessing undefined element properties like "_extendedByPrototype". [#354 state:resolved] [Hilberty, jddalton, kangax, Matt McKeon, Prasad]
+
 * Optimize Element.extend() by reducing the number of "for loops" in the method. [jddalton]
 
 * Implement a revision system in Element.extend() so that elements extended before a Element.addMethods() call will be re-extended when run through Element.extend() again. Closes #9812. [jddalton, vectoroc]

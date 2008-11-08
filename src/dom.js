@@ -1251,7 +1251,7 @@
     function extend(element) {
       // Bail on elements that don't need extending, 
       // XML nodes (IE errors on them), document, window objects
-      if (!element || (element._extendedByPrototype && 
+      if (!element || (typeof element._extendedByPrototype !== 'undefined' && 
         element._extendedByPrototype() >= revision) ||
         element.nodeType !== 1 || element === global ||
         !('write' in element.ownerDocument)) return element;

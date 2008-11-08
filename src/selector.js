@@ -399,11 +399,13 @@
         if (reverse) {
           for (var nodes = parentNode.childNodes, i = nodes.length - 1, j = 1; i >= 0; i--) {
             var node = nodes[i];
-            if (node.nodeType == 1 && (!ofType || node._countedByPrototype)) node.nodeIndex = j++;
+            if (node.nodeType == 1 && (!ofType || typeof node._countedByPrototype !== 'undefined'))
+              node.nodeIndex = j++;
           }
         } else {
           for (var i = 0, j = 1, nodes = parentNode.childNodes; node = nodes[i]; i++)
-            if (node.nodeType == 1 && (!ofType || node._countedByPrototype)) node.nodeIndex = j++;
+            if (node.nodeType == 1 && (!ofType || typeof node._countedByPrototype !== 'undefined'))
+              node.nodeIndex = j++;
         }
       },
 
@@ -412,7 +414,7 @@
         if (nodes.length == 0) return nodes;
         var results = [], n;
         for (var i = 0, l = nodes.length; i < l; i++)
-          if (!(n = nodes[i])._countedByPrototype) {
+          if (typeof (n = nodes[i])._countedByPrototype === 'undefined') {
             n._countedByPrototype = P.emptyFunction;
             results.push(Element.extend(n));
           }
@@ -626,7 +628,7 @@
         var h = Selector.handlers, results = [], indexed = [], m;
         h.mark(nodes);
         for (var i = 0, node; node = nodes[i]; i++) {
-          if (!node.parentNode._countedByPrototype) {
+          if (typeof node.parentNode._countedByPrototype === 'undefined') {
             h.index(node.parentNode, reverse, ofType);
             indexed.push(node.parentNode);
           }
@@ -664,7 +666,8 @@
         var exclusions = new Selector(selector).findElements(root);
         h.mark(exclusions);
         for (var i = 0, results = [], node; node = nodes[i]; i++)
-          if (!node._countedByPrototype) results.push(node);
+          if (typeof node._countedByPrototype === 'undefined')
+            results.push(node);
         h.unmark(exclusions);
         return results;
       },
@@ -712,7 +715,8 @@
       var matches = $$(expression), h = Selector.handlers;
       h.mark(matches);
       for (var i = 0, results = [], element; element = elements[i]; i++)
-        if (element._countedByPrototype) results.push(element);
+        if (typeof element._countedByPrototype !== 'undefined')
+          results.push(element);
       h.unmark(matches);
       return results;
     },
