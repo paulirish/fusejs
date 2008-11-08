@@ -1246,7 +1246,7 @@
   }
 
   Element.extend = (function() {
-    var Methods = { }, ByTag = Element.Methods.ByTag, revision = 0;
+    var Methods, ByTag, revision = 0;
 
     function extend(element) {
       // Bail on elements that don't need extending, 
@@ -1256,17 +1256,13 @@
         element.nodeType !== 1 || element === global ||
         !('write' in element.ownerDocument)) return element;
 
-      var methods = Object.clone(Methods),
-        tagName = element.tagName.toUpperCase(), property, value;
+      var property,
+       tagName = element.tagName.toUpperCase(), 
+       methods = ByTag[tagName] || Methods;
 
-      // extend methods for specific tags
-      if (ByTag[tagName]) Object.extend(methods, ByTag[tagName]);
-
-      for (property in methods) {
-        value = methods[property];
-        if (typeof value === 'function' && !(property in element))
-          element[property] = value.methodize();
-      }
+      for (property in methods)
+        if (!(property in element))
+          element[property] = methods[property].methodize();
 
       // avoid using Prototype.K.curry(revision) for speed
       element._extendedByPrototype = (function(r) {
@@ -1277,8 +1273,13 @@
     }
 
     function refresh() {
-      Object.extend(Methods, Element.Methods);
+      Methods = Object.clone(Element.Methods); ByTag = { };
+      delete Methods.Simulated; delete Methods.ByTag;
+
       Object.extend(Methods, Element.Methods.Simulated);
+      for(var i in Element.Methods.ByTag)
+        ByTag[i] = Object.extend(Object.clone(Methods),
+          Element.Methods.ByTag[i]);
       revision++;
     }
 
@@ -1323,10 +1324,11 @@
       methods = arguments[1];
     }
 
-    if (!tagName) Object.extend(Element.Methods, methods || { });  
+    if (!tagName)
+      Object.extend(Element.Methods, methods || { });  
     else {
-      if (Object.isArray(tagName)) tagName._each(extend);
-      else extend(tagName);
+      Object.isArray(tagName) ?
+        tagName._each(extend) : extend(tagName);
     }
 
     function extend(tagName) {
