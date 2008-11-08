@@ -160,7 +160,7 @@
       }
 
       var match = true, name, matches;
-      for (var i = 0, token; token = this.tokens[i]; i++) {
+      for (var i = 0, token; token = this.tokens[i++]; ) {
         name = token[0], matches = token[1];
         if (!Selector.assertions[name](element, matches)) {
           match = false; break;
@@ -354,7 +354,7 @@
         if (dummy.childNodes.length === 2) {
           return function(a, b) {
             for (var i = 0, node; node = b[i]; i++)
-              if (node.nodeType !== 8) a.push(node);
+              if (node.nodeType === 1) a.push(node);
             return a;
           };
         }
@@ -368,7 +368,7 @@
       // marks an array of nodes for counting
       mark: function(nodes) {
         var _true = P.emptyFunction;
-        for (var i = 0, node; node = nodes[i]; i++)
+        for (var i = 0, node; node = nodes[i++]; )
           node._countedByPrototype = _true;
         return nodes;
       },
@@ -396,58 +396,71 @@
       // rather than nth-child
       index: function(parentNode, reverse, ofType) {
         parentNode._countedByPrototype = P.emptyFunction;
+        var node, nodes = parentNode.childNodes, index = 1;
         if (reverse) {
-          for (var nodes = parentNode.childNodes, i = nodes.length - 1, j = 1; i >= 0; i--) {
-            var node = nodes[i];
+          var length = nodes.length;
+          while (length--) {
+            node = nodes[length];
             if (node.nodeType == 1 && (!ofType || typeof node._countedByPrototype !== 'undefined'))
-              node.nodeIndex = j++;
+              node.nodeIndex = index++;
           }
         } else {
-          for (var i = 0, j = 1, nodes = parentNode.childNodes; node = nodes[i]; i++)
+          for (var i = 0; node = nodes[i++]; )
             if (node.nodeType == 1 && (!ofType || typeof node._countedByPrototype !== 'undefined'))
-              node.nodeIndex = j++;
+              node.nodeIndex = index++;
         }
       },
 
       // filters out duplicates and extends all nodes
       unique: function(nodes) {
         if (nodes.length == 0) return nodes;
-        var results = [], n;
-        for (var i = 0, l = nodes.length; i < l; i++)
-          if (typeof (n = nodes[i])._countedByPrototype === 'undefined') {
-            n._countedByPrototype = P.emptyFunction;
-            results.push(Element.extend(n));
+        for (var i = 0, results = [], node; node = nodes[i++]; )
+          if (typeof node._countedByPrototype === 'undefined') {
+            node._countedByPrototype = P.emptyFunction;
+            results.push(Element.extend(node));
           }
         return Selector.handlers.unmark(results);
       },
 
       // COMBINATOR FUNCTIONS
       descendant: function(nodes) {
-        var h = Selector.handlers;
-        for (var i = 0, results = [], node; node = nodes[i]; i++)
+        var results = [], h = Selector.handlers;
+        for (var i = 0, node; node = nodes[i++]; )
           h.concat(results, node.getElementsByTagName('*'));
         return results;
       },
 
-      child: function(nodes) {
-        for (var i = 0, results = [], node; node = nodes[i]; i++) {
-          for (var j = 0, child; child = node.childNodes[j]; j++)
-            if (child.nodeType == 1 && child.tagName != '!') results.push(child);
+      child: (function() {
+        // if comments are NOT returned in nodeLists and has children collection
+        if (dummy.childNodes.length === 1 && 'children' in dummy) {
+          return function(nodes) {
+            for (var i = 0, results = [], node; node = nodes[i++]; ) {
+              for (var j = 0, child; child = node.children[j++]; )
+                results.push(child);
+            }
+            return results;
+          };
         }
-        return results;
-      },
+        return function(nodes) {
+          for (var i = 0, results = [], node; node = nodes[i++]; ) {
+            for (var j = 0, child; child = node.childNodes[j++]; )
+              if (child.nodeType === 1) results.push(child);
+          }
+          return results;
+        };
+      })(),
 
       adjacent: function(nodes) {
-        for (var i = 0, results = [], node; node = nodes[i]; i++) {
-          var next = this.nextElementSibling(node);
+        for (var i = 0, results = [], next, node; node = nodes[i++]; ) {
+          next = this.nextElementSibling(node);
           if (next) results.push(next);
         }
         return results;
       },
 
       laterSibling: function(nodes) {
-        var h = Selector.handlers;
-        for (var i = 0, results = [], node; node = nodes[i]; i++)
+        var results = [], h = Selector.handlers;
+        for (var i = 0, node; node = nodes[i++]; )
           h.concat(results, Element.nextSiblings(node));
         return results;
       },
@@ -472,13 +485,13 @@
           if (combinator) {
             // fastlane for ordinary descendant combinators
             if (combinator == "descendant") {
-              for (var i = 0, node; node = nodes[i]; i++)
+              for (var i = 0, node; node = nodes[i++]; )
                 h.concat(results, node.getElementsByTagName(tagName));
               return results;
             } else nodes = this[combinator](nodes);
             if (tagName == "*") return nodes;
           }
-          for (var i = 0, node; node = nodes[i]; i++)
+          for (var i = 0, node; node = nodes[i++]; )
             if (node.tagName.toUpperCase() === uTagName) results.push(node);
           return results;
         } else return root.getElementsByTagName(tagName);
@@ -492,7 +505,7 @@
         if (root.currentStyle === null || (root.ownerDocument &&
            !Element.descendantOf(root, root.ownerDocument))) {
           var els = root.getElementsByTagName('*');
-          for (var i = 0, el; el = els[i]; i++) {
+          for (var i = 0, el; el = els[i++]; ) {
             if (el.id === id) {
               targetNode = $(el); break;
             }
@@ -504,18 +517,18 @@
         if (nodes) {
           if (combinator) {
             if (combinator == 'child') {
-              for (var i = 0, node; node = nodes[i]; i++)
+              for (var i = 0, node; node = nodes[i++]; )
                 if (targetNode.parentNode == node) return [targetNode];
             } else if (combinator == 'descendant') {
-              for (var i = 0, node; node = nodes[i]; i++)
+              for (var i = 0, node; node = nodes[i++]; )
                 if (Element.descendantOf(targetNode, node)) return [targetNode];
             } else if (combinator == 'adjacent') {
-              for (var i = 0, node; node = nodes[i]; i++)
+              for (var i = 0, node; node = nodes[i++]; )
                 if (Selector.handlers.previousElementSibling(targetNode) == node)
                   return [targetNode];
             } else nodes = h[combinator](nodes);
           } 
-          for (var i = 0, node; node = nodes[i]; i++)
+          for (var i = 0, node; node = nodes[i++]; )
             if (node == targetNode) return [targetNode];
           return [];
         }
@@ -529,8 +542,8 @@
 
       byClassName: function(nodes, root, className) {
         if (!nodes) nodes = Selector.handlers.descendant([root]);
-        var needle = ' ' + className + ' ';
-        for (var i = 0, results = [], node, nodeClassName; node = nodes[i]; i++) {
+        var results = [], needle = ' ' + className + ' ';
+        for (var i = 0, node, nodeClassName; node = nodes[i++]; ) {
           nodeClassName = node.className;
           if (nodeClassName.length == 0) continue;
           if (nodeClassName == className || (' ' + nodeClassName + ' ').include(needle))
@@ -542,8 +555,7 @@
       attrPresence: function(nodes, root, attr, combinator) {
         if (!nodes) nodes = root.getElementsByTagName("*");
         if (nodes && combinator) nodes = this[combinator](nodes);
-        var results = [];
-        for (var i = 0, node; node = nodes[i]; i++)
+        for (var i = 0, results = [], node; node = nodes[i++]; )
           if (Element.hasAttribute(node, attr)) results.push(node);
         return results;      
       },
@@ -552,7 +564,7 @@
         if (!nodes) nodes = root.getElementsByTagName("*");
         if (nodes && combinator) nodes = this[combinator](nodes);
         var handler = Selector.operators[operator], results = [];
-        for (var i = 0, node; node = nodes[i]; i++) {
+        for (var i = 0, node; node = nodes[i++]; ) {
           if (handler(Element.readAttribute(node, attr), value))
             results.push(node);
         }
@@ -568,22 +580,22 @@
 
     pseudos: {
       'first-child': function(nodes, value, root) {
-        for (var i = 0, results = [], node; node = nodes[i]; i++) {
+        for (var i = 0, results = [], node; node = nodes[i++]; ) {
           if (Selector.handlers.previousElementSibling(node)) continue;
             results.push(node);
         }
         return results;
       },
       'last-child': function(nodes, value, root) {
-        for (var i = 0, results = [], node; node = nodes[i]; i++) {
+        for (var i = 0, results = [], node; node = nodes[i++]; ) {
           if (Selector.handlers.nextElementSibling(node)) continue;
             results.push(node);
         }
         return results;
       },
       'only-child': function(nodes, value, root) {
-        var h = Selector.handlers;
-        for (var i = 0, results = [], node; node = nodes[i]; i++)
+        var results = [], h = Selector.handlers;
+        for (var i = 0, node; node = nodes[i++]; )
           if (!h.previousElementSibling(node) && !h.nextElementSibling(node))
             results.push(node);  
         return results;
@@ -625,9 +637,9 @@
         if (nodes.length == 0) return [];
         if (formula == 'even') formula = '2n+0';
         if (formula == 'odd')  formula = '2n+1';
-        var h = Selector.handlers, results = [], indexed = [], m;
+        var results = [], indexed = [], h = Selector.handlers, m;
         h.mark(nodes);
-        for (var i = 0, node; node = nodes[i]; i++) {
+        for (var i = 0, node; node = nodes[i++]; ) {
           if (typeof node.parentNode._countedByPrototype === 'undefined') {
             h.index(node.parentNode, reverse, ofType);
             indexed.push(node.parentNode);
@@ -635,7 +647,7 @@
         }
         if (formula.match(/^\d+$/)) { // just a number
           formula = Number(formula);
-          for (var i = 0, node; node = nodes[i]; i++)
+          for (var i = 0, node; node = nodes[i++]; )
             if (node.nodeIndex == formula) results.push(node);
         } else if (m = formula.match(/^(-?\d*)?n(([+-])(\d+))?/)) { // an+b
           if (m[1] == "-") m[1] = -1;
@@ -653,7 +665,7 @@
       },
 
       'empty': function(nodes, value, root) {
-        for (var i = 0, results = [], node; node = nodes[i]; i++) {
+        for (var i = 0, results = [], node; node = nodes[i++]; ) {
           // IE treats comments as element nodes
           if (node.tagName == '!' || node.firstChild) continue;
           results.push(node);
@@ -662,10 +674,10 @@
       },
 
       'not': function(nodes, selector, root) {
-        var h = Selector.handlers, selectorType, m;
-        var exclusions = new Selector(selector).findElements(root);
+        var results = [], h = Selector.handlers,
+         exclusions = new Selector(selector).findElements(root);
         h.mark(exclusions);
-        for (var i = 0, results = [], node; node = nodes[i]; i++)
+        for (var i = 0, node; node = nodes[i++]; )
           if (typeof node._countedByPrototype === 'undefined')
             results.push(node);
         h.unmark(exclusions);
@@ -673,20 +685,20 @@
       },
 
       'enabled': function(nodes, value, root) {
-        for (var i = 0, results = [], node; node = nodes[i]; i++)
+        for (var i = 0, results = [], node; node = nodes[i++]; )
           if (!node.disabled && (!node.type || node.type !== 'hidden'))
             results.push(node);
         return results;
       },
 
       'disabled': function(nodes, value, root) {
-        for (var i = 0, results = [], node; node = nodes[i]; i++)
+        for (var i = 0, results = [], node; node = nodes[i++]; )
           if (node.disabled) results.push(node);
         return results;
       },
 
       'checked': function(nodes, value, root) {
-        for (var i = 0, results = [], node; node = nodes[i]; i++)
+        for (var i = 0, results = [], node; node = nodes[i++]; )
           if (node.checked) results.push(node);
         return results;
       }
@@ -712,9 +724,9 @@
     },
 
     matchElements: function(elements, expression) {
-      var matches = $$(expression), h = Selector.handlers;
+      var results = [], matches = $$(expression), h = Selector.handlers;
       h.mark(matches);
-      for (var i = 0, results = [], element; element = elements[i]; i++)
+      for (var i = 0, element; element = elements[i++]; )
         if (typeof element._countedByPrototype !== 'undefined')
           results.push(element);
       h.unmark(matches);
@@ -731,11 +743,9 @@
     findChildElements: function(element, expressions) {
       expressions = Selector.split(expressions.join(','));
       var results = [], h = Selector.handlers;    
-      for (var i = 0, l = expressions.length, selector; i < l; i++) {
-        selector = new Selector(expressions[i].strip());
-        h.concat(results, selector.findElements(element));
-      }
-      return (l > 1) ? h.unique(results) : results;
+      for (var i = 0, exp; exp = expressions[i++]; )
+        h.concat(results, new Selector(exp.strip()).findElements(element));
+      return (expressions.length > 1) ? h.unique(results) : results;
     }
   });
 
