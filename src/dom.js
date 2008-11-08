@@ -1246,14 +1246,15 @@
   }
 
   Element.extend = (function() {
-    var Methods = { }, ByTag = Element.Methods.ByTag;
+    var Methods = { }, ByTag = Element.Methods.ByTag, revision = 0;
 
     function extend(element) {
-      if (!element || element._extendedByPrototype || 
-        element.nodeType != 1 || element === global) return element;
-
-      // Filter out XML nodes because IE errors on them.
-      if (!('write' in element.ownerDocument)) return element;
+      // Bail on elements that don't need extending, 
+      // XML nodes (IE errors on them), document, window objects
+      if (!element || (element._extendedByPrototype && 
+        element._extendedByPrototype() >= revision) ||
+        element.nodeType !== 1 || element === global ||
+        !('write' in element.ownerDocument)) return element;
 
       var methods = Object.clone(Methods),
         tagName = element.tagName.toUpperCase(), property, value;
@@ -1267,13 +1268,18 @@
           element[property] = value.methodize();
       }
 
-      element._extendedByPrototype = P.emptyFunction;
+      // avoid using Prototype.K.curry(revision) for speed
+      element._extendedByPrototype = (function(r) {
+        return function() { return r };
+      })(revision);
+
       return element;
     }
 
     function refresh() {
       Object.extend(Methods, Element.Methods);
       Object.extend(Methods, Element.Methods.Simulated);
+      revision++;
     }
 
     // Browsers with specific element extensions
@@ -1368,16 +1374,17 @@
     if (F.ElementExtensions) {
       copy(Element.Methods, HTMLElement.prototype);
       copy(Element.Methods.Simulated, HTMLElement.prototype, true);
-      HTMLElement.prototype._extendedByPrototype = P.emptyFunction;
     }
 
     if (F.SpecificElementExtensions) {
+      var infiniteRevision = function() { return Infinity };
       for (var tag in Element.Methods.ByTag) {
         var klass = findDOMClass(tag);
         if (typeof klass === 'undefined') continue;
         copy(T[tag], klass.prototype);
-        klass.prototype._extendedByPrototype = P.emptyFunction;
+        klass.prototype._extendedByPrototype = infiniteRevision;
       }
+      HTMLElement.prototype._extendedByPrototype = infiniteRevision;
     }  
 
     Object.extend(Element, Element.Methods);

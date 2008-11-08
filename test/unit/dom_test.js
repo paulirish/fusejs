@@ -825,6 +825,12 @@ new Test.Unit.Runner({
     this.assertRespondsTo('show', $('discard_1'));
   },
   
+  testExtendingAfterAddMethods: function() {
+    var span = new Element('span');
+	Element.addMethods({ testMethod: Prototype.K });
+	this.assertRespondsTo('testMethod', Element.extend(span));
+  },
+  
   testElementCleanWhitespace: function() {
     Element.cleanWhitespace("test_whitespace");
     this.assertEqual(3, $("test_whitespace").childNodes.length);
