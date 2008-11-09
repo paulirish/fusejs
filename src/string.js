@@ -60,27 +60,6 @@
       return this.replace(/<\/?[^>]+>/gi, '');
     },
 
-    stripScripts: function() {
-      return this.replace(new RegExp(P.ScriptFragment, 'gi'), '');
-    },
-  
-    extractScripts: (function() {
-      var matchOpenTag = /<script/i,
-       matchAll = new RegExp(P.ScriptFragment, 'gi'),
-       matchOne = new RegExp(P.ScriptFragment, 'i'),
-       matchComments = new RegExp('<!--\\s*' + P.ScriptFragment + '\\s*-->', 'gi');
-
-      return function() {
-        if (!matchOpenTag.test(this)) return [];
-        var results = [], scriptTags = (this.replace(matchComments, '').match(matchAll) || []);
-        for(var i = 0, code, scriptTag; scriptTag = scriptTags[i]; i++) {
-          if (code = (scriptTag.match(matchOne) || ['', ''])[1])
-            results.push(code);
-        }
-        return results;
-      };
-    })(),
-
     evalScripts: function() {
       return this.extractScripts().map(function(script) { return eval(script) });
     },
@@ -201,6 +180,26 @@
       return new Template(this, pattern).evaluate(object);
     }
   });
+
+  (function() {
+    var matchOpenTag = /<script/i,
+     matchScripts = new RegExp(P.ScriptFragment, 'gi'),
+     matchComments = new RegExp('<!--\\s*' + P.ScriptFragment + '\\s*-->', 'gi');
+
+    Object.extend(String.prototype, {
+      stripScripts: function() {
+        return this.replace(matchScripts, '');
+      },
+
+      extractScripts: function() {
+        if (!matchOpenTag.test(this)) return [];
+        var match, results = [], scriptTags = this.replace(matchComments, '');
+        while ((match = matchScripts.exec(scriptTags)) !== null)
+          if (match[1]) results.push(match[1]);
+        return results;
+      }
+    });
+  })();
 
   (function(SP) {
     var container = doc.createElement('pre'),

@@ -219,6 +219,9 @@ new Test.Unit.Runner({
     
     this.assertEnumEqual(['moo();'], ('baz<!--\n<script>foo();<'+'/script>\n--><script type="text/javascript">moo();<'+
       '/script><!--\n<script>boo();<'+'/script>\n-->buz').extractScripts());
+
+    var str = 'foo <script>boo();<'+'/script>blub\nblub<script type="text/javascript">boo();\nmoo();<'+'/script>bar';
+    this.benchmark(function() { str.extractScripts() }, 1000);
   },
   
   testEvalScripts: function() {

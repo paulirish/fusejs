@@ -1,3 +1,5 @@
+* Optimize String#(extractScripts|stripScripts) by minimizing use and caching regular expressions. [#431 state:resolved] [jddalton, MIYAMUKO Katsuyuki]
+
 * Optimize Selector class by removing unused variables, speeding up loops, and taking advantage of the element.children collection. [jddalton]
 
 * Fix Java applet "java.lang.NosuchFieldException" error, in JRE v1.6.0_10, when accessing undefined element properties like "_extendedByPrototype". [#354 state:resolved] [Hilberty, jddalton, kangax, Matt McKeon, Prasad]
