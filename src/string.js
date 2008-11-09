@@ -273,10 +273,9 @@
         object = object.toTemplateReplacements();
 
       return this.template.gsub(this.pattern, function(match) {
-        if (object == null) return '';
-
         var before = match[1] || '';
-        if (before == '\\') return match[2];
+        if (before === '\\') return match[2];
+        if (object == null) return before;
 
         var ctx = object, expr = match[3];
         var pattern = /^([^.[]+|\[((?:.*?[^\\])?)\])(\.|\[|$)/;

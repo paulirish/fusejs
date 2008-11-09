@@ -343,6 +343,14 @@ new Test.Unit.Runner({
       toTemplateReplacements: function() { return { name: this.name, job: this.getJob() } }
     };
     this.assertEqual('My name is Stephan, my job is Web developer', new Template(source).evaluate(subject));
+    
+    // test null return value of toTemplateReplacements()
+    source = 'My name is "#{name}", my job is "#{job}"';
+    subject = { toTemplateReplacements: Prototype.K };
+    this.assertEqual('My name is "", my job is ""', new Template(source).evaluate(subject));
+    
+    source = 'My name is "\\#{name}", my job is "\\#{job}"';
+    this.assertEqual('My name is "#{name}", my job is "#{job}"', new Template(source).evaluate(subject));
   },
 
   testTemplateEvaluationCombined: function() {
