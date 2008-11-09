@@ -309,6 +309,18 @@ new Test.Unit.Runner({
     });
   },
 
+  testPeriodicalExecuterException: function() {
+    function peEventFired(pe) {
+      pe.stop();
+      throw "error";
+    }
+    
+    var pe = new PeriodicalExecuter(peEventFired, 0.05);
+    this.wait(100, function() {
+      this.assertEqual(false, pe.currentlyExecuting);
+    });
+  },
+  
   testBindAsEventListener: function() {
     for ( var i = 0; i < 10; ++i ) {
       var div = document.createElement('div');

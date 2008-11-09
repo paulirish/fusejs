@@ -296,12 +296,9 @@
 
     onTimerEvent: function() {
       if (!this.currentlyExecuting) {
-        try {
-          this.currentlyExecuting = true;
-          this.execute();
-        } finally {
-          this.currentlyExecuting = false;
-        }
+        this.currentlyExecuting = true;
+        try { this.execute() } catch (e) { }
+        this.currentlyExecuting = false;
       }
     }
   });

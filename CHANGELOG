@@ -1,3 +1,5 @@
+* Remove "finally" block from PeriodicalExecuter.onTimerEvent() because it's not needed and fails in IE without a "catch" block. [#421 state:resolved] [jddalton, Ville Koshinen]
+
 * Optimize String#(extractScripts|stripScripts) by minimizing use and caching regular expressions. [#431 state:resolved] [jddalton, MIYAMUKO Katsuyuki]
 
 * Optimize Selector class by removing unused variables, speeding up loops, and taking advantage of the element.children collection. [jddalton]
