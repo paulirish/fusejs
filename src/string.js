@@ -295,4 +295,4 @@
     }
   });
 
-  Template.Pattern = /(^|.|\r|\n)(#\{(.*?)\})/;
+  Template.Pattern = /(\\)?(#\{([^}]*)\})/;

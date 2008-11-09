@@ -1,3 +1,5 @@
+* Simplify the Template.Pattern RegExp. [jddalton]
+
 * Fix Template#evaluate stripping the "before" match when passing an object.toTemplateReplacements() that returns a null/undefined value. [#237 state:resolved] [jddalton, Nir]
 
 * Remove "finally" block from PeriodicalExecuter.onTimerEvent() because it's not needed and fails in IE without a "catch" block. [#421 state:resolved] [jddalton, Ville Koshinen]
