@@ -248,24 +248,32 @@ new Test.Unit.Runner({
   },
   
   testObjectIsString: function() {
-    this.assert(!Object.isString(function() { }));
     this.assert(Object.isString("a string"));
+    this.assert(Object.isString(new String("a string")));
+    this.assert(!Object.isString(alert));
+    this.assert(!Object.isString(function() { }));
     this.assert(!Object.isString(0));
-    this.assert(!Object.isString([]));
-    this.assert(!Object.isString({}));
+    this.assert(!Object.isString([ ]));
+    this.assert(!Object.isString({ }));
+    this.assert(!Object.isString({ valueOf: null }));
+    this.assert(!Object.isString({ valueOf: 3.1415926535 }));
     this.assert(!Object.isString(false));
     this.assert(!Object.isString(undefined));
   },
   
   testObjectIsNumber: function() {
     this.assert(Object.isNumber(0));
-    this.assert(Object.isNumber(1.0));
+    this.assert(Object.isNumber(1.2));
+    this.assert(Object.isNumber(new Number(5)));
+    this.assert(!Object.isNumber(alert));
     this.assert(!Object.isNumber(2.5E+345));
     this.assert(!Object.isNumber(0/0));
     this.assert(!Object.isNumber(function() { }));
     this.assert(!Object.isNumber("a string"));
-    this.assert(!Object.isNumber([]));
-    this.assert(!Object.isNumber({}));
+    this.assert(!Object.isNumber([ ]));
+    this.assert(!Object.isNumber({ }));
+    this.assert(!Object.isNumber({ valueOf: null }));
+    this.assert(!Object.isNumber({ valueOf: 3.1415926535 }));
     this.assert(!Object.isNumber(false));
     this.assert(!Object.isNumber(undefined));
   },

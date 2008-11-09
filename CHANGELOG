@@ -1,3 +1,5 @@
+* Make Object.isString() and Object.isNumber() work with values created by the Number/String constructor. [#375 state:resolved] [Andrew Dupont, atrepp, jddalton, kangax]
+
 * Simplify the Template.Pattern RegExp. [jddalton]
 
 * Fix Template#evaluate stripping the "before" match when passing an object.toTemplateReplacements() that returns a null/undefined value. [#237 state:resolved] [jddalton, Nir]

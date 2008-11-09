@@ -145,11 +145,13 @@
     },
 
     isString: function(object) {
-      return typeof object == "string";
+      return object != null && typeof object.valueOf === "function" &&
+        typeof object.valueOf() === "string";
     },
 
     isNumber: function(object) {
-      return typeof object == "number" && isFinite(object);
+      return object != null && typeof object.valueOf === "function" && 
+        typeof object.valueOf() == "number" && isFinite(object);
     },
 
     isUndefined: function(object) {
