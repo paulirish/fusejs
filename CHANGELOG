@@ -1,3 +1,5 @@
+* Reduce code duplication in Element#viewportOffset by using Element#cumulativeOffset. [jddalton]
+
 * Make Object.isString() and Object.isNumber() work with values created by the Number/String constructor. [#375 state:resolved] [Andrew Dupont, atrepp, jddalton, kangax]
 
 * Simplify the Template.Pattern RegExp. [jddalton]

@@ -847,26 +847,17 @@
         };
       }
 
-      return function(forElement) {
-        forElement = $(forElement);
-        var offsetParent, element = forElement, valueT = 0, valueL = 0,
-         scrollOffset = Element.cumulativeScrollOffset(element);
-
-        do {
-          valueT += element.offsetTop  || 0;
-          valueL += element.offsetLeft || 0;
-
-          // Safari fix
-          offsetParent = Element._getRealOffsetParent(element);
-          if (offsetParent && offsetParent.tagName.toUpperCase === 'BODY' &&
-            Element.getStyle(element, 'position') === 'absolute') break;
-        } while (element = offsetParent);
+      return function(element) {
+        element = $(element);
+        var scrollOffset = Element.cumulativeScrollOffset(element),
+         cumulativeOffset = Element.cumulativeOffset(element),
+         valueT = cumulativeOffset.top, valueL = cumulativeOffset.left;
 
         // Subtract the scrollOffets of forElement from the scrollOffset totals
         // (cumulativeScrollOffset includes them).
         // Then subtract the the scrollOffset totals from the element offset totals.
-        valueT -= scrollOffset.top  - (forElement.scrollTop  || 0);
-        valueL -= scrollOffset.left - (forElement.scrollLeft || 0);
+        valueT -= scrollOffset.top  - (element.scrollTop  || 0);
+        valueL -= scrollOffset.left - (element.scrollLeft || 0);
         return Element._returnOffset(valueL, valueT);
       };
     })(),
