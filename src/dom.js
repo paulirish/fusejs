@@ -710,12 +710,26 @@
     },
 
     cumulativeOffset: function(element) {
+      // TODO: overhaul with a thorough solution for finding the correct
+      // offsetLeft and offsetTop values
       element = Element._ensureLayout(element);
-      var valueT = 0, valueL = 0;
+      var offsetParent, position, valueT = 0, valueL = 0;
+      
       do {
+        offsetParent = Element._getRealOffsetParent(element);
+        position     = Element.getStyle(element, 'position');
+
         valueT += element.offsetTop  || 0;
         valueL += element.offsetLeft || 0;
-      } while (element = Element._getRealOffsetParent(element));
+
+        // Safari returns margins on body which is incorrect
+        // if the child is absolutely positioned.
+        if (position === 'fixed' || (Prototype.Browser.WebKit &&
+		    position === 'absolute' && offsetParent &&
+		    offsetParent.tagName.toUpperCase() === 'BODY')) {
+		  break;
+		}
+      } while (element = offsetParent);
       return Element._returnOffset(valueL, valueT);
     },
 
@@ -1064,27 +1078,6 @@
         value:   v._setAttrNode('value')
       });
     })(Element._attributeTranslations.write.values);
-  }
-
-  else if (P.Browser.WebKit) {
-    // Safari returns margins on body which is incorrect if the child is absolutely
-    // positioned.  For performance reasons, redefine Element#cumulativeOffset for
-    // KHTML/WebKit only.
-    Element.Methods.cumulativeOffset = function(element) {
-      element = $(element);
-      var valueT = 0, valueL = 0, offsetParent;
-      do {
-        valueT += element.offsetTop  || 0;
-        valueL += element.offsetLeft || 0;
-        offsetParent = element.offsetParent;
-        if (offsetParent && offsetParent.tagName.toUpperCase() === 'BODY')
-          if (Element.getStyle(element, 'position') == 'absolute') break;
-
-        element = offsetParent;
-      } while (element);
-
-      return Element._returnOffset(valueL, valueT);
-    };
   }
 
   Element._returnOffset = function(l, t) {
