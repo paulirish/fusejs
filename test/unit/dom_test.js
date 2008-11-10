@@ -1081,7 +1081,6 @@ new Test.Unit.Runner({
         $w('margin-top 64'),
         $w('margin-bottom 8'),
         $w('margin-left 96'),
-        $w('margin-right 39'),
         $w('border-left-width 13'),
         $w('border-bottom-width 19'),
         $w('padding-top 13'),
@@ -1117,6 +1116,16 @@ new Test.Unit.Runner({
     
     this.assertEqual(40, Math.round(parseFloat($('unit_px_test_2_1').getStyle('width'))),
       'unit_px_test_2_1: px value is not 40% of width (100px).');
+    
+    // WebKit has a bug effecting the style marginRight
+    // https://bugs.webkit.org/show_bug.cgi?id=13343
+    if (!Prototype.Browser.WebKit) {
+      tests.unit_px_test_1.push($w('margin-right 39'));
+    } else {
+      this.assertEqual(39, $('unit_px_test_1').getStyle('marginRight'),
+        'WebKit Bug 13343 getComputedStyle returns wrong value for margin-right\n' +
+        'https://bugs.webkit.org/show_bug.cgi?id=13343');
+    }
     
     // plus or minus 5 from the correct answer because IE, Firefox, and Opera, are sometimes off 
     // by a little (the values are still correct)

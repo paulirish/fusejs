@@ -1,3 +1,5 @@
+* unit test: Add check for WebKit marginRight bug #13343 to Element#getStyle tests. [jddalton]
+
 * Consolidate WebKit fork of Element#cumulativeOffset and make cumulativeOffset handle "fixed" positioned elements. [jddalton]
 
 * Reduce code duplication in Element#viewportOffset by using Element#cumulativeOffset. [jddalton]
