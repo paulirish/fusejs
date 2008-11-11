@@ -24,16 +24,10 @@
 
   Array.from = $A;
 
-  Object.extend(Array.prototype, Enumerable);
-
-  if (!Array.prototype._reverse) Array.prototype._reverse = Array.prototype.reverse;
+  if (!Array.prototype._reverse)
+    Array.prototype._reverse = Array.prototype.reverse;
 
   Object.extend(Array.prototype, {
-    _each: function(iterator) {
-      for (var i = 0, length = this.length; i < length; i++)
-        iterator(this[i]);
-    },
-
     clear: function() {
       this.length = 0;
       return this;
@@ -110,44 +104,11 @@
       return '[' + results.join(', ') + ']';
     },
 
-    /* Overwrite methods assigned by Enumerable with optimized equivalents */
-
-    all: function(iterator, context) {
-      iterator = iterator || P.K;
-      for (var i = 0, length = this.length; i < length; i++)
-        if (!iterator.call(context, this[i], i))
-          return false;
-      return true;
-    },
-
-    any: function(iterator, context) {
-      iterator = iterator || P.K;
-      for (var i = 0, length = this.length; i < length; i++)
-        if (!!iterator.call(context, this[i], i))
-          return true;
-      return false;
-    },
-
-    collect: function(iterator, context) {
-      iterator = iterator || P.K;
-      var results = [];
-      for (var i = 0, length = this.length; i < length; i++)
-        results[i] = iterator.call(context, this[i], i);
-      return results;
-    },
-
+    /* create optimized Enumerable equivalents */
     detect: function(iterator, context) {
       for (var i = 0, length = this.length; i < length; i++)
         if (iterator.call(context, this[i], i))
           return this[i];
-    },
-
-    findAll: function(iterator, context) {
-      var results = [];
-      for (var i = 0, length = this.length; i < length; i++)
-        if (iterator.call(context, this[i], i))
-          results[results.length] = this[i];
-      return results;
     },
 
     grep: function(filter, iterator, context) {
@@ -247,37 +208,80 @@
   });
 
   (function(AP) {
+    // use native browser JS 1.6 implementations if available
+    if (!AP.forEach) {
+      AP._each = function(iterator) {
+        for (var i = 0, length = this.length; i < length; i++)
+          iterator(this[i]);
+      };
+    } else AP._each = AP.forEach; 
+
+    if (!AP.every) AP.every = function(iterator, context) {
+      iterator = iterator || P.K;
+      for (var i = 0, length = this.length; i < length; i++)
+        if (!iterator.call(context, this[i], i))
+          return false;
+      return true;
+    };
+
+    if (!AP.filter) AP.filter = function(iterator, context) {
+      var results = [];
+      for (var i = 0, length = this.length; i < length; i++)
+        if (iterator.call(context, this[i], i))
+          results[results.length] = this[i];
+      return results;
+    };
+
+    if (!AP.indexOf) AP.indexOf = function(item, i) {
+      i || (i = 0);
+      var length = this.length;
+      if (i < 0) i = length + i;
+      for (; i < length; i++)
+        if (this[i] === item) return i;
+      return -1;
+    };
+
+    if (!AP.lastIndexOf) AP.lastIndexOf = function(item, i) {
+      i = isNaN(i) ? this.length : (i < 0 ? this.length + i : i) + 1;
+      var n = this.slice(0, i).reverse().indexOf(item);
+      return (n < 0) ? n : i - n - 1;
+    };
+
+    if (!AP.map) AP.map = function(iterator, context) {
+      iterator = iterator || P.K;
+      var results = [];
+      for (var i = 0, length = this.length; i < length; i++)
+        results[i] = iterator.call(context, this[i], i);
+      return results;
+    };
+
+    if (!AP.some) AP.some = function(iterator, context) {
+      iterator = iterator || P.K;
+      for (var i = 0, length = this.length; i < length; i++)
+        if (!!iterator.call(context, this[i], i))
+          return true;
+      return false;
+    };
+
+    // assign aliases
     Object.extend(AP, {
-      map:     AP.collect,
-      toArray: AP.clone,
+      all:     AP.every,
+      any:     AP.some,
+      collect: AP.map,
+      entries: AP.clone,
       find:    AP.detect,
-      select:  AP.findAll,
-      filter:  AP.findAll,
+      findAll: AP.filter,
       member:  AP.include,
-      entries: AP.toArray,
-      every:   AP.all,
-      some:    AP.any
+      select:  AP.filter,
+      toArray: AP.clone
     });
+    
+    // assign any missing Enumerable methods
+    for (var i in Enumerable) {
+      if (typeof AP[i] !== 'function')
+        AP[i] = Enumerable[i];
+    }
   })(Array.prototype);
-
-  // use native browser JS 1.6 implementation if available
-  if (typeof Array.prototype.forEach === 'function')
-    Array.prototype._each = Array.prototype.forEach;
-
-  if (!Array.prototype.indexOf) Array.prototype.indexOf = function(item, i) {
-    i || (i = 0);
-    var length = this.length;
-    if (i < 0) i = length + i;
-    for (; i < length; i++)
-      if (this[i] === item) return i;
-    return -1;
-  };
-
-  if (!Array.prototype.lastIndexOf) Array.prototype.lastIndexOf = function(item, i) {
-    i = isNaN(i) ? this.length : (i < 0 ? this.length + i : i) + 1;
-    var n = this.slice(0, i).reverse().indexOf(item);
-    return (n < 0) ? n : i - n - 1;
-  };
 
   $w = function(string) {
     if (typeof string !== 'string') return [];
