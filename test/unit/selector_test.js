@@ -196,12 +196,12 @@ new Test.Unit.Runner({
   testSelectorWithAdjacence: function() {
     this.assertEnumEqual([$('uncle')], $$('div.brothers + div.brothers'));
     this.assertEnumEqual([$('uncle')], $$('div.brothers + div'));      
-    this.assertEqual($('level2_2'), $$('#level2_1+span').reduce());
-    this.assertEqual($('level2_2'), $$('#level2_1 + span').reduce());
-    this.assertEqual($('level2_2'), $$('#level2_1 + *').reduce());
+    this.assertEqual($('level2_2'), $$('#level2_1+span').first());
+    this.assertEqual($('level2_2'), $$('#level2_1 + span').first());
+    this.assertEqual($('level2_2'), $$('#level2_1 + *').first());
     this.assertEnumEqual([], $$('#level2_2 + span'));
-    this.assertEqual($('level3_2'), $$('#level3_1 + span').reduce());
-    this.assertEqual($('level3_2'), $$('#level3_1 + *').reduce());
+    this.assertEqual($('level3_2'), $$('#level3_1 + span').first());
+    this.assertEqual($('level3_2'), $$('#level3_1 + *').first());
     this.assertEnumEqual([], $$('#level3_2 + *'));
     this.assertEnumEqual([], $$('#level3_1 + em'));
     $RunBenchmarks && this.wait(500, function() {
@@ -211,8 +211,8 @@ new Test.Unit.Runner({
 
   testSelectorWithLaterSibling: function() {
     this.assertEnumEqual([$('list')], $$('h1 ~ ul'));
-    this.assertEqual($('level2_2'), $$('#level2_1 ~ span').reduce());
-    this.assertEnumEqual($('level2_2', 'level2_3'), $$('#level2_1 ~ *').reduce());
+    this.assertEqual($('level2_2'), $$('#level2_1 ~ span').first());
+    this.assertEnumEqual($('level2_2', 'level2_3'), $$('#level2_1 ~ *'));
     this.assertEnumEqual([], $$('#level2_2 ~ span'));
     this.assertEnumEqual([], $$('#level3_2 ~ *'));
     this.assertEnumEqual([], $$('#level3_1 ~ em'));

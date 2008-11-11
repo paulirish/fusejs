@@ -1,3 +1,6 @@
+* Drop support for Prototype created Array#reduce because it conflicts with the JavaScript 1.8 definition. [jddalton]
+  Note: Backwards compatibility warning.
+
 * unit test: Add check for WebKit marginRight bug #13343 to Element#getStyle tests. [jddalton]
 
 * Consolidate WebKit fork of Element#cumulativeOffset and make cumulativeOffset handle "fixed" positioned elements. [jddalton]

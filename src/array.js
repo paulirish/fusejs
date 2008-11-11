@@ -72,10 +72,6 @@
       return (inline !== false ? this : this.toArray())._reverse();
     },
 
-    reduce: function() {
-      return this.length > 1 ? this : this[0];
-    },
-
     uniq: function(sorted) {
       return this.inject([], function(array, value, index) {
         if (0 == index || (sorted ? array.last() != value : !array.include(value)))
