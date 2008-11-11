@@ -19,7 +19,7 @@
     },
 
     shouldUseXPath: function() {
-      if (!P.BrowserFeatures.XPath) return false;
+      if (!Feature('XPATH')) return false;
 
       var e = this.expression;
 
@@ -43,7 +43,7 @@
     },
 
     shouldUseSelectorsAPI: function() {
-      if (!P.BrowserFeatures.SelectorsAPI) return false;
+      if (!Feature('SELECTORS_API')) return false;
 
       // Make sure the browser treats the selector as valid. Test on an 
       // isolated element to minimize cost of this check.    
@@ -347,11 +347,10 @@
     handlers: {
       // UTILITY FUNCTIONS
       // joins two collections
-      concat: (function(){
+      concat: (function() {
         // IE returns comment nodes on getElementsByTagName("*").
         // Filter them out.
-        dummy.innerHTML = '<span>a</span><!--b-->';
-        if (dummy.childNodes.length === 2) {
+        if (Bug('GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES')) {
           return function(a, b) {
             for (var i = 0, node; node = b[i]; i++)
               if (node.nodeType === 1) a.push(node);
@@ -375,9 +374,7 @@
 
       unmark: (function() {
         // IE improperly serializes _countedByPrototype in (inner|outer)HTML.
-        var _true = P.emptyFunction;
-        dummy.__checkPropertiesAreAttributes = _true;
-        if (dummy.getAttribute('__checkPropertiesAreAttributes') === _true) {
+        if (Bug('ELEMENT_PROPERTIES_ARE_ATTRIBUTES')) {
           return function(nodes) {
             for (var i = 0, node; node = nodes[i++]; )
               node.removeAttribute('_countedByPrototype');
@@ -432,7 +429,7 @@
 
       child: (function() {
         // if comments are NOT returned in nodeLists and has children collection
-        if (dummy.childNodes.length === 1 && 'children' in dummy) {
+        if (Feature('ELEMENT_CHILDREN_NODELIST') && !Bug('COMMENT_NODES_IN_CHILDREN_NODELIST')) {
           return function(nodes) {
             for (var i = 0, results = [], node; node = nodes[i++]; ) {
               for (var j = 0, child; child = node.children[j++]; )

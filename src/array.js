@@ -7,7 +7,7 @@
   };
 
   // Safari returns 'function' for HTMLCollection `typeof`
-  if (typeof docEl.childNodes === 'function') {
+  if (Feature('TYPEOF_NODELIST_IS_FUNCTION')) {
     $A = function(iterable) {
       if (!iterable) return [];    
       // In Safari, only use the `toArray` method if it's not a NodeList.
@@ -291,8 +291,7 @@
 
   // Opera's implementation of Array.prototype.concat treats a functions arguments
   // object as an array. We overwrite concat to fix this.
-  (function() {
-    if ([].concat(arguments) === 1) return;
+  if (Bug('ARRAY_CONCAT_ARGUMENTS_BUGGY')) {
     Array.prototype.concat = function() {
       var array = Array.prototype.slice.call(this, 0);
       for (var i = 0, length = arguments.length; i < length; i++) {
@@ -305,4 +304,4 @@
       }
       return array;
     };
-  })(1, 2);
+  }

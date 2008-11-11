@@ -1,3 +1,5 @@
+* Moved browser feature/bug tests to private methods "Feature" and "Bug". [jddalton, kangax, Nick Stakenburg]
+
 * Make use of native Array methods "every", "filter", "map" and "some" if available. [#317 state:resolved] [jddalton, fearphage]
 
 * Drop support for Prototype created Array#reduce because it conflicts with the JavaScript 1.8 definition. [jddalton]

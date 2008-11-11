@@ -120,7 +120,7 @@
       return name.blank() ? null : "[contains(concat(' ', @class, ' '), ' " + name + " ')]";
     }
 
-    instanceMethods.getElementsByClassName = P.BrowserFeatures.XPath ?
+    instanceMethods.getElementsByClassName = Feature('XPATH') ?
     function(element, className) {
       className = className.toString().strip();
       var cond = /\s/.test(className) ? $w(className).map(iter).join('') : iter(className);

@@ -232,7 +232,7 @@
 
     if (!('textContent' in dummy)) {
       dummy.innerHTML = '<pre>&lt;span&gt;test&lt;/span&gt;</pre>';
-      if ('innerText' in dummy && dummy.firstChild.innerText === '<span>test</span>') {
+      if (Feature('ELEMENT_INNER_TEXT') && dummy.firstChild.innerText === '<span>test</span>') {
         SP.unescapeHTML = function() {
           dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
           return dummy.firstChild.innerText.replace(/\r/g, '');

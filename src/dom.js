@@ -9,7 +9,7 @@
     return Element.extend(element);
   };
 
-  if (P.BrowserFeatures.XPath) {
+  if (Feature('XPATH')) {
     doc._getElementsByXPath = function(expression, parentElement) {
       parentElement = $(parentElement);
       var results = [], ownerDoc = getOwnerDoc(parentElement);
@@ -44,10 +44,7 @@
   }
 
   (function() {
-    var original = this.Element, canCreateWithHTML = true;
-    try { doc.createElement('<div>') } catch(e) {
-      canCreateWithHTML = false;
-    }
+    var original = this.Element;
 
     function createElement(tagName, attributes) {
       tagName = tagName.toLowerCase();
@@ -56,7 +53,7 @@
     }
 
     this.Element = createElement;
-    if (canCreateWithHTML) {
+    if (Feature('CREATE_ELEMENT_WITH_HTML')) {
       this.Element = function(tagName, attributes) {
         if (attributes && (attributes.name || attributes.type)) {
           tagName = '<' + tagName +
@@ -108,30 +105,19 @@
     },
 
     update: (function() {
-      var setInnerHTML = function(element, content) {
-        element.innerHTML = content;
-      };
-
-      try {
-        var tests = {
-          table:  '<tbody><tr><td>test</td></tr></tbody>',
-          select: '<option>test<option>'
-        };
-        for (var tagName in tests) {
-          var el = doc.createElement(tagName);
-          if ((el.innerHTML = tests[tagName]) &&
-            el.innerHTML.toLowerCase() !== tests[tagName]) throw 'error';
-        }
-      } catch(e) {
-        setInnerHTML = function(element, content) {
+      var setInnerHTML = Bug('ELEMENT_SELECT_INNERHTML_BUGGY') || Bug('ELEMENT_TABLE_INNERHTML_BUGGY') ?
+        function(element, content) {
           var tagName = element.tagName.toUpperCase();
           if (tagName in Element._insertionTranslations.tags) {
             var children = element.childNodes, length = children.length;
             while (length--) element.removeChild(children[length]);
             element.appendChild(Element._getContentFromAnonymousElement(element.ownerDocument, tagName, content));
           } else element.innerHTML = content;
+        } :
+        function(element, content) {
+          element.innerHTML = content;
         };
-      }
+
       return function(element, content) {
         element = $(element);
         if (content && content.toElement)
@@ -149,7 +135,7 @@
     })(),
 
     replace: (function() {
-      var createFragment = ('createRange' in doc) ?
+      var createFragment = Feature('DOCUMENT_RANGE') ?
         function(element, content) {
           var range = element.ownerDocument.createRange();
           range.selectNode(element);
@@ -456,10 +442,8 @@
         'ex' : true
       };
 
-      var span = doc.createElement('span'),
-       hasComputedStyle = !!(doc.defaultView && doc.defaultView.getComputedStyle);
-
       // setup the span for testing font-size
+      var span = doc.createElement('span');
       span.style.cssText = 'position:absolute;visibility:hidden;height:1em;lineHeight:0;padding:0;margin:0;border:0;';
       span.innerHTML = 'M';
 
@@ -555,25 +539,24 @@
           default: return getComputedStyle(element, styleName);
         }
       }
-      // IE
-      if ('currentStyle' in span && !hasComputedStyle) {
+
+      if (Feature('ELEMENT_COMPUTED_STYLE')) {
+        // Opera
+        if (Bug('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN'))
+          return getStyleOpera;
+        // Firefox, Safari, etc...
+        return function(element, styleName) {
+          return getComputedStyle($(element), styleName);
+        };
+      }
+      else if (Feature('ELEMENT_CURRENT_STYLE')) {
+        // IE
         getComputedStyle = function(element, styleName) {
           styleName = (styleName === 'float' || styleName === 'cssFloat') ? 'styleFloat' : styleName;
           var currentStyle = element.currentStyle;
           return element[element.currentStyle ? 'currentStyle' : 'style'][styleName];
         };
         return getStyleIE;
-      }
-
-      if (hasComputedStyle) {
-        // Opera
-        span.style.display = 'none';
-        if (!doc.defaultView.getComputedStyle(span, null).height) return getStyleOpera;
-
-        // Firefox, Safari, etc...
-        return function(element, styleName) {
-          return getComputedStyle($(element), styleName);
-        };
       }
 
       return getStyle;
@@ -614,24 +597,6 @@
         return element;
       }
 
-      if ('filters' in docEl &&
-          'filter' in docEl.style) {
-        return function(element, value) {
-          element = $(element);
-          if (!Element._hasLayout(element))
-            element.style.zoom = 1;
-
-          var filter = element.getStyle('filter'), style = element.style;
-          if (value == 1 || value === '') {
-            (filter = stripAlpha(filter)) ?
-              style.filter = filter : style.removeAttribute('filter');
-            return element;
-          } else if (value < 0.00001) value = 0;
-
-          style.filter = stripAlpha(filter) + 'alpha(opacity=' + (value * 100) + ')';
-          return element;   
-        };
-      }
       if (P.Browser.WebKit &&
          (userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
         return function(element, value) {
@@ -647,12 +612,29 @@
           return element;
         };
       }
-      if (P.Browser.Gecko && /rv:1\.8\.0/.test(userAgent)) {
+      else if (P.Browser.Gecko && /rv:1\.8\.0/.test(userAgent)) {
         return function(element, value) {
           element = $(element);
           element.style.opacity = (value == 1) ? 0.999999 : 
             (value === '') ? '' : (value < 0.00001) ? 0 : value;
           return element;
+        };
+      }
+      else if (Feature('ELEMENT_MS_CSS_FILTERS')) {
+        return function(element, value) {
+          element = $(element);
+          if (!Element._hasLayout(element))
+            element.style.zoom = 1;
+
+          var filter = element.getStyle('filter'), style = element.style;
+          if (value == 1 || value === '') {
+            (filter = stripAlpha(filter)) ?
+              style.filter = filter : style.removeAttribute('filter');
+            return element;
+          } else if (value < 0.00001) value = 0;
+
+          style.filter = stripAlpha(filter) + 'alpha(opacity=' + (value * 100) + ')';
+          return element;   
         };
       }
 
@@ -713,7 +695,8 @@
       // TODO: overhaul with a thorough solution for finding the correct
       // offsetLeft and offsetTop values
       element = Element._ensureLayout(element);
-      var offsetParent, position, valueT = 0, valueL = 0;
+      var offsetParent, position, valueT = 0, valueL = 0,
+       BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS');
       
       do {
         offsetParent = Element._getRealOffsetParent(element);
@@ -724,7 +707,7 @@
 
         // Safari returns margins on body which is incorrect
         // if the child is absolutely positioned.
-        if (position === 'fixed' || (Prototype.Browser.WebKit &&
+        if (position === 'fixed' || (BODY_OFFSETS_INHERIT_ITS_MARGINS &&
 		    position === 'absolute' && offsetParent &&
 		    offsetParent.tagName.toUpperCase() === 'BODY')) {
 		  break;
@@ -838,14 +821,14 @@
     },
 
     viewportOffset: (function(forElement) {
-      if (docEl.getBoundingClientRect) {
+      if (Feature('ELEMENT_BOUNDING_CLIENT_RECT')) {
         var backup = docEl.style.cssText;
         docEl.style.cssText += ';margin:0';
 
         // IE window's upper-left is at 2,2 (pixels) with respect
         // to the true client, so its pad.left and pad.top will be 2.
         var rect = docEl.getBoundingClientRect(), pad = { left: 0, top: 0 };
-        if ('clientLeft' in docEl)
+        if (Feature('ELEMENT_CLIENT_COORDS'))
           pad = { left: docEl.clientLeft, top: docEl.clientTop };
         docEl.style.cssText = backup;
 
@@ -1145,14 +1128,14 @@
     getCache.cache[0] = { node: dummy, fragment: doc.createDocumentFragment() };
 
     var getContentAsFragment = (function() {
-      if ('removeNode' in docEl) {
+      if (Feature('ELEMENT_REMOVE_NODE')) {
         return function(cache, container) {
           // removeNode: removes the parent but keeps the children
           cache.fragment.appendChild(container).removeNode();
           return cache.fragment;
         };
       }
-      if ('createRange' in doc) {
+      if (Feature('DOCUMENT_RANGE')) {
         return function(cache, container) {
           cache.range = cache.range || cache.node.ownerDocument.createRange();
           cache.range.selectNodeContents(container);
@@ -1223,12 +1206,6 @@
   Element.Methods.ByTag = { };
   Object.extend(Element, Element.Methods);
 
-  if (!P.BrowserFeatures.ElementExtensions && dummy.__proto__) {
-    global.HTMLElement = { };
-    global.HTMLElement.prototype = dummy.__proto__;
-    P.BrowserFeatures.ElementExtensions = true;
-  }
-
   Element.extend = (function() {
     var Methods, ByTag, revision = 0;
 
@@ -1270,7 +1247,7 @@
     // Browsers with specific element extensions
   	// don't need their elements extended UNLESS
   	// they belong to a different document
-	if (P.BrowserFeatures.SpecificElementExtensions) {
+	if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
 	  return Object.extend(function(element) {
 	    return (element && element.ownerDocument &&
 	      element.ownerDocument !== doc) ? extend(element) : element;
@@ -1289,7 +1266,7 @@
   };
 
   Element.addMethods = function(methods) {
-    var F = P.BrowserFeatures, T = Element.Methods.ByTag;
+    var T = Element.Methods.ByTag;
 
     if (!methods) {
       Object.extend(Form, Form.Methods);
@@ -1357,12 +1334,12 @@
       return global[klass];
     }
 
-    if (F.ElementExtensions) {
+    if (Feature('ELEMENT_EXTENSIONS')) {
       copy(Element.Methods, HTMLElement.prototype);
       copy(Element.Methods.Simulated, HTMLElement.prototype, true);
     }
 
-    if (F.SpecificElementExtensions) {
+    if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
       var infiniteRevision = function() { return Infinity };
       for (var tag in Element.Methods.ByTag) {
         var klass = findDOMClass(tag);
@@ -1394,24 +1371,9 @@
 
   // Define document.viewport.getWidth() and document.viewport.getHeight()
   (function(v) {
-    var element, backup = { };
-
-    function isBodyActingAsRoot() {
-      if (docEl.clientWidth === 0) return true;
-      ['body', 'documentElement']._each(function(name) {
-         backup[name] = doc[name].style.cssText;
-         doc[name].style.cssText += ';margin:0;height:auto;';
-      });
-      Element.insert(body, { top: '<div style="display:block;height:8500px;"></div>' });
-      var result = docEl.clientHeight >= 8500;
-      body.removeChild(body.firstChild);
-
-      for (name in backup) doc[name].style.cssText = backup[name];
-      return result;
-    }
-
+    var element;
     function define(D) {
-      element = element || (isBodyActingAsRoot() ? body : // Opera < 9.5, Quirks mode
+      element = element || (Bug('BODY_ACTING_AS_ROOT') ? body : // Opera < 9.5, Quirks mode
         ('clientWidth' in doc) ? doc : docEl); // Safari < 3 : Others
       v['get' + D] = function() { return element['client' + D] };
       return v['get' + D]();

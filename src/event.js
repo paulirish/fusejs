@@ -150,8 +150,8 @@
 
   (function() {
 
-    var timer, simulateFIFO = false, domLoadedDone = false,
-     followsSpec = !('attachEvent' in doc && !('addEventListener' in doc));
+    var timer, domLoadedDone = false,
+     EVENT_OBSERVER_ORDER_NOT_FIFO = false;
 
     var addEvent = function(element, eventName, handler) {
       element.addEventListener(getDOMEventName(eventName), handler, false);
@@ -162,7 +162,7 @@
     };
 
     // redefine for IE
-    if (!followsSpec) {
+    if (Feature('EVENT_USES_ATTACH')) {
       addEvent = function(element, eventName, handler) {
         element.attachEvent("on" + getDOMEventName(eventName), handler);
       };
@@ -213,7 +213,8 @@
     }
 
     function isUsingDispatcher(id, eventName) {
-      return !!(simulateFIFO || getCacheForEventName(id, eventName).dispatcher);
+      return EVENT_OBSERVER_ORDER_NOT_FIFO ||
+        !!getCacheForEventName(id, eventName).dispatcher;
     }
 
     function cacheEvent(element, eventName, handler) {
@@ -378,21 +379,14 @@
       loaded:        false
     });
 
+    // set constant after Event methods defined
+    EVENT_OBSERVER_ORDER_NOT_FIFO = Bug('EVENT_OBSERVER_ORDER_NOT_FIFO');
+
     // Safari has a dummy event handler on page unload so that it won't
     // use its bfcache. Safari <= 3.1 has an issue with restoring the "document"
     // object when page is returned to via the back button using its bfcache.
     if (P.Browser.WebKit)
       global.addEventListener("unload", P.emptyFunction, false);
-
-    // Check for first-in-first-out event order,
-    // if not FIFO then use the event dispatchers
-    ['a', 'b', 'c', 'd']._each(function(n) {
-      doc.observe('eventOrder:checked', function() { simulateFIFO += n });
-    });
-    simulateFIFO = '';
-    doc.fire("eventOrder:checked");
-    doc.stopObserving("eventOrder:checked");
-    simulateFIFO = (simulateFIFO !== 'abcd');
 
     // Ensure that the dom:loaded event has finished
     // executing its observers before allowing the
@@ -543,7 +537,7 @@
     };
 
     // IE
-    if (!followsSpec) {
+    if (Feature('EVENT_USES_ATTACH')) {
       if (global == top) {
         // doScroll() does not error when the document
         // is in an iframe. Fallback on document readyState.
@@ -566,5 +560,5 @@
     });
   })();
 
-  // define body variable
+    // define body variable
   doc.observe('dom:loaded', function() { body = Element.extend(doc.body) });
