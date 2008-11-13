@@ -46,7 +46,7 @@
       Opera:  userAgent.indexOf('Opera') > -1,
       WebKit: userAgent.indexOf('AppleWebKit/') > -1,
       Gecko:  userAgent.indexOf('Gecko') > -1 && userAgent.indexOf('KHTML') === -1,
-      MobileSafari: !!userAgent.match(/Apple.*Mobile.*Safari/)
+      MobileSafari: !!userAgent.match(/AppleWebKit.*Mobile/)
     },
 
     BrowserFeatures: {
