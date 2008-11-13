@@ -321,6 +321,13 @@ new Test.Unit.Runner({
     // test form elements names matching Object.prototype properties
     expected = { length: 'foo', toString: ['bar' , 'baz'], valueOf: 'boo' };
     this.assertHashEqual(expected,  $('form_with_object_prototypes').serialize(true));  
+    
+    // test selectboxes with no selected value
+    expected = { 'vm[]':3 };
+    $('selects_wrapper').select('select')._each(function(element) { element.selectedIndex = -1 });
+    $('multiSel1').selectedIndex = 2;
+    this.assertEqual('vm%5B%5D=3', Form.serialize('selects_wrapper'));
+    this.assertHashEqual(expected, Form.serialize('selects_wrapper', true));
   },
   
   testFormMethodsOnExtendedElements: function() {

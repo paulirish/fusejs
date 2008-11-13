@@ -21,6 +21,9 @@
         isImageType = type === 'image';
         isSubmitButton = type === 'submit' || isImageType;
 
+        // reduce array value
+        if (Object.isArray(value) && value.length < 2)
+          value = value[0];
         // null/undefined values don't get serialized
         if (value == null) return result;
         // disabled elements don't get serialized
@@ -163,6 +166,8 @@
       element = $(element);
       if (!element.disabled && element.name) {
         var value = Form.Element.getValue(element);
+        if (Object.isArray(value) && value.length < 2)
+          value = value[0];
         if (value != null) {
           var pair = { };
           pair[element.name] = value;

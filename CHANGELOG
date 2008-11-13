@@ -1,3 +1,5 @@
+* Make Form.serializeElements() and Form.Element.Methods.serialize() skip type="select-multiple" select elements that have no selected value. [#440 state:resolved] [jddalton, Shanrong Zhao]
+
 * Moved browser feature/bug tests to private methods "Feature" and "Bug". [jddalton, kangax, Nick Stakenburg]
 
 * Make use of native Array methods "every", "filter", "map" and "some" if available. [#317 state:resolved] [jddalton, fearphage]
