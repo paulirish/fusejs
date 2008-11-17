@@ -934,6 +934,15 @@
     };
   });
 
+  if (P.Browser.Opera) { 
+    Element.Methods.readAttribute = Element.Methods.readAttribute.wrap(
+      function(proceed, element, attribute) {
+        if (attribute === 'title') return $(element).title;
+        return proceed(element, attribute);
+      }
+    );  
+  }
+
   Element._attributeTranslations = {
     write: {
       names: {
@@ -944,17 +953,9 @@
     }
   };
 
-  if (P.Browser.Opera) { 
-    Element.Methods.readAttribute = Element.Methods.readAttribute.wrap(
-      function(proceed, element, attribute) {
-        if (attribute === 'title') return $(element).title;
-        return proceed(element, attribute);
-      }
-    );  
-  }
-
-  else if (P.Browser.IE) {
+  if (P.Browser.IE) {
     Element._attributeTranslations = {
+      has: { },
       read: {
         names: {
           'class': 'className',
@@ -984,83 +985,56 @@
             return element.title;
           }
         }
-      }
-    };
+      },
+      write: {
+        values: {
+          _setAttrNode: function(name) {
+            return function(element, value) {
+              var attr = element.getAttributeNode(name);
+              if (!attr) {
+                attr = element.ownerDocument.createAttribute(name);
+                element.setAttributeNode(attr);
+              }
+              attr.value = value;
+            };
+          },
 
-    Element._attributeTranslations.write = {
-      names: Object.extend({
-        cellpadding: 'cellPadding',
-        cellspacing: 'cellSpacing'
-      }, Element._attributeTranslations.read.names),
-      values: {
-        _setAttrNode: function(name) {
-          return function(element, value) {
-            var attr = element.getAttributeNode(name);
-            if (!attr) {
-              attr = element.ownerDocument.createAttribute(name);
-              element.setAttributeNode(attr);
-            }
-            attr.value = value;
-          };
-        },
+          checked: function(element, value) {
+            element.checked = !!value;
+          },
 
-        checked: function(element, value) {
-          element.checked = !!value;
-        },
-
-        style: function(element, value) {
-          element.style.cssText = value ? value : '';
+          style: function(element, value) {
+            element.style.cssText = value ? value : '';
+          }
         }
       }
     };
 
-    Element._attributeTranslations.has = {};
+    (function(t) {
+      var wv = t.write.values, rv = t.read.values;
 
-    $w('colSpan rowSpan vAlign dateTime accessKey tabIndex ' +
-        'encType maxLength readOnly longDesc frameBorder')._each(function(attr) {
-      Element._attributeTranslations.write.names[attr.toLowerCase()] = attr;
-      Element._attributeTranslations.has[attr.toLowerCase()] = attr;
-    });
+      // define attribute write names
+      t.write.names = Object.clone(t.read.names);
 
-    (function(v) {
-      Object.extend(v, {
-        href:        v._getAttr,
-        src:         v._getAttr,
-        type:        v._getAttr,
-        action:      v._getAttrNode,
-        encType:     v._getAttrNode,
-        value:       v._getAttrNode,
-        disabled:    v._flag,
-        checked:     v._flag,
-        readonly:    v._flag,
-        multiple:    v._flag,
-        onload:      v._getEv,
-        onunload:    v._getEv,
-        onclick:     v._getEv,
-        ondblclick:  v._getEv,
-        onmousedown: v._getEv,
-        onmouseup:   v._getEv,
-        onmouseover: v._getEv,
-        onmousemove: v._getEv,
-        onmouseout:  v._getEv,
-        onfocus:     v._getEv,
-        onblur:      v._getEv,
-        onkeypress:  v._getEv,
-        onkeydown:   v._getEv,
-        onkeyup:     v._getEv,
-        onsubmit:    v._getEv,
-        onreset:     v._getEv,
-        onselect:    v._getEv,
-        onchange:    v._getEv
+      // attribute write name translations
+      $w('cellPadding cellSpacing colSpan rowSpan vAlign dateTime accessKey ' +
+         'tabIndex encType maxLength readOnly longDesc frameBorder')._each(function(attr) {
+        t.write.names[attr.toLowerCase()] = attr;
+        t.has[attr.toLowerCase()] = attr;
       });
-    })(Element._attributeTranslations.read.values);
 
-    (function(v) {
-      Object.extend(v, {
-        encType: v._setAttrNode('encType'),
-        value:   v._setAttrNode('value')
+      // attribute write value translations
+      $w('encType value')._each(function(attr) { wv[attr] = wv._setAttrNode(attr) });
+
+      // attribute read value translations
+      $w('href src type')._each(function(attr) { rv[attr] = rv._getAttr });
+      $w('action encType value')._each(function(attr) { rv[attr] = rv._getAttrNode });
+      $w('disabled checked readonly multiple')._each(function(attr) { rv[attr] = rv._flag });
+      $w('load unload click dblclick mousedown mouseup mouseover mousemove mouseout ' +
+         'focus blur keypress keydown keyup submit reset select change')._each(function(attr) {
+        rv['on' + attr] = rv._getEv;
       });
-    })(Element._attributeTranslations.write.values);
+    })(Element._attributeTranslations);
   }
 
   Element._returnOffset = function(l, t) {
