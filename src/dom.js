@@ -1151,11 +1151,13 @@
       element.parentNode.insertBefore(node, element.nextSibling);
     },
     tags: {
-      TABLE:  ['<table>',                '</table>',                   1],
-      TBODY:  ['<table><tbody>',         '</tbody></table>',           2],
-      TR:     ['<table><tbody><tr>',     '</tr></tbody></table>',      3],
-      TD:     ['<table><tbody><tr><td>', '</td></tr></tbody></table>', 4],
-      SELECT: ['<select>',               '</select>',                  1]
+      TABLE:    ['<table>',                '</table>',                           1],
+      TBODY:    ['<table><tbody>',         '</tbody></table>',                   2],
+      TR:       ['<table><tbody><tr>',     '</tr></tbody></table>',              3],
+      TD:       ['<table><tbody><tr><td>', '</td></tr></tbody></table>',         4],
+      SELECT:   ['<select>',               '</select>',                          1],
+      COLGROUP: ['<table><colgroup>',      '</colgroup><tbody></tbody></table>', 2],
+      OPTGROUP: ['<select><optgroup>',     '</optgroup></select>',               2]
     }
   };
 

@@ -1,3 +1,5 @@
+* Fix Element#insert on colgroup and optgroup elements by adding entries to Element._insertionTranslations.tags. [jddalton]
+
 * Rewrite the Element._attributeTranslations object to reduce its code size. [jddalton]
 
 * Modify Prototype.Browser.MobileSafari to return true for iPod Touch. [#439 state:resolved] [jddalton, Olek Poplavsky]

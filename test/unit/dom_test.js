@@ -254,18 +254,19 @@ new Test.Unit.Runner({
   },
 
   testElementInsertInTables: function() {
-    var element, cell, msg,
+    var element, table, cell, msg,
      documents = [document, getIframeDocument()];
     
     if (!isIframeAccessible()) documents.pop();
     
     documents.each(function(context) {
-      msg  = isIframeDocument(context) ? 'On iframe' : 'On document';
-      cell = getElement('a_cell', context);
+      msg   = isIframeDocument(context) ? 'On iframe' : 'On document';
+      table = getElement('table', context);
+      cell  = getElement('a_cell', context);
 
-      element = getElement('second_row', context);
-      element.insert({ after:'<tr id="third_row"><td>Third Row</td></tr>' });
-      this.assert(element.descendantOf(getElement('table', context)), msg);
+      element = getElement('third_row', context);
+      element.insert({ after:'<tr id="forth_row"><td>Forth Row</td></tr>' });
+      this.assert(element.descendantOf(table), msg);
 
       cell.insert({ top:'hello world' });
       this.assert(cell.innerHTML.startsWith('hello world'), msg);
@@ -280,17 +281,33 @@ new Test.Unit.Runner({
       getElement('row_1', context).insert({ after:'<tr></tr><tr></tr><tr><td>last</td></tr>' });
       this.assertEqual('last', $A(getElement('table_for_row_insertions')
         .getElementsByTagName('tr')).last().lastChild.innerHTML, msg);
+
+      // test colgroup elements
+      element = table.down('colgroup');
+      element.insert('<col style="background-color:green;" />');
+      this.assertEqual(2, element.childElements().length, msg);
     }, this);
   },
   
   testElementInsertInSelect: function() {
-    var selectTop = $('select_for_insert_top'), selectBottom = $('select_for_insert_bottom');
-    selectBottom.insert('<option value="33">option 33</option><option selected="selected">option 45</option>');
-    this.assertEqual('option 45', selectBottom.getValue());
-    selectTop.insert({top:'<option value="A">option A</option><option value="B" selected="selected">option B</option>'});
-    this.assertEqual(4, selectTop.options.length);
+    var selectTop = $('select_for_insert_top'),
+     selectBottom = $('select_for_insert_bottom');
+    
+    selectBottom.insert('<option value="3">option 3</option><option selected="selected">option 4</option>');
+    this.assertEqual('option 4', selectBottom.getValue());
+    
+    // TODO: fix selected options for optgroups
+    selectBottom.selectedIndex = -1;
+    selectBottom.down('optgroup').insert('<option value="C">option C</option><option value="D" selected="selected">option D</option>');
+    this.assertEqual('D', selectBottom.getValue());
+    
+    selectTop.insert({ top:'<option value="1">option 1</option><option value="2" selected="selected">option 2</option>' });
+    this.assertEqual(6, selectTop.options.length);
+    
+    selectTop.down('optgroup').insert({ top:'<option value="A">option A</option><option value="B" selected="selected">option B</option>' });
+    this.assertEqual(8, selectTop.options.length);
   },
-      
+
   testElementMethodInsert: function() {
     $('element-insertions-main').insert({before:'some text before'});
     this.assert(getInnerHTML('element-insertions-container').startsWith('some text before'));
@@ -485,10 +502,10 @@ new Test.Unit.Runner({
   },
   
   testElementUpdateInTableRow: function() {
-    $('second_row').update('<td id="i_am_a_td">test</td>');
+    $('third_row').update('<td id="i_am_a_td">test</td>');
     this.assertEqual('test',$('i_am_a_td').innerHTML);
 
-    Element.update('second_row','<td id="i_am_a_td">another <span>test</span></td>');
+    Element.update('third_row','<td id="i_am_a_td">another <span>test</span></td>');
     this.assertEqual('another <span>test</span>',$('i_am_a_td').innerHTML.toLowerCase());
   },
   
@@ -497,9 +514,23 @@ new Test.Unit.Runner({
     this.assertEqual('another <span>test</span>',$('a_cell').innerHTML.toLowerCase());
   },
   
+  testElementUpdateInTableColGroup: function() {
+    var colgroup = $('table').down('colgroup');
+    colgroup.update('<col class="foo" /><col class="bar" />');
+    var children = colgroup.childElements();
+    this.assertEnumEqual(['foo', 'bar'], [children[0].className, children[1].className]);
+  },
+  
   testElementUpdateInTable: function() {
     Element.update('table','<tr><td>boo!</td></tr>');
-    this.assertMatch(/^<tr>\s*<td>boo!<\/td><\/tr>$/,$('table').innerHTML.toLowerCase());
+    this.assertMatch(/^<tr>\s*<td>boo!<\/td>\s*<\/tr>$/, $('table').innerHTML.toLowerCase());
+  },
+  
+  testElementUpdateInSelectOptGroup: function() {
+    // must run before testElementUpdateInSelect
+    var select = $('select_for_update');
+    select.down('optgroup').update('<option value="C" selected="selected">option C</option><option value="D">option D</option>');
+    this.assertEqual('C', select.getValue());
   },
   
   testElementUpdateInSelect: function() {
