@@ -266,6 +266,17 @@ var prototypeUpdateHelper = new UpdateHelper([
     message: 'The class API has been fully revised and now allows for mixins and inheritance.\n' + 
       'You can find more about it here: http://prototypejs.org/learn/class-inheritance',
     condition: function() { return !arguments.length }
+  },
+  
+  {
+    methodName: 'register',
+    namespace: Ajax.Responders,
+    message: 'The Ajax.Responders.responders property is no longer an Array object.\n' +
+      'It is now an Object object with callback names as properties.\n' +
+      'These properties are arrays containing the responders for the respective callback.\n\n' +
+      'For example, the following will access the first responder of the "onComplete" callback:\n' +
+      '  Ajax.Responders.responders.onComplete[0]',
+    type: 'warn'
   }
 ]);
 

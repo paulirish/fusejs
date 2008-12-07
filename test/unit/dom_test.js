@@ -633,11 +633,11 @@ new Test.Unit.Runner({
     this.assertEqual(parent.down().identify(), 'predefined_id');
     
     this.assertEqual(parent.down(1).identify(), 'anonymous_element_' +
-      (Element.Methods.identify.counter - 1));
+      (Element.idCounter - 1));
     this.assertEqual(parent.down(2).identify(), 'anonymous_element_' +
-      (Element.Methods.identify.counter - 1));
+      (Element.idCounter - 1));
     this.assertEqual(parent.down(3).identify(), 'anonymous_element_' +
-      (Element.Methods.identify.counter - 1));
+      (Element.idCounter - 1));
     
     this.assert(parent.down(3).id !== parent.down(2).id);
   },
@@ -1226,7 +1226,6 @@ new Test.Unit.Runner({
     
     // test IE issue with readAttribute and invalid 'type' attribute of iframes
     this.assertNothingRaised(function() { $('attributes_with_issues_iframe').readAttribute('type') });
-    this.assertEqual('', $('attributes_with_issues_iframe').readAttribute('type'));
     $('attributes_with_issues_iframe').writeAttribute('type', 'foo');
     this.assertEqual('foo', $('attributes_with_issues_iframe').readAttribute('type'));
     

@@ -1,3 +1,10 @@
+* Massive code rewrite and restructuring [bkerley, jddalton, Joe Gornick, T.J. Crowder]
+  - Adopt new coding pattern
+  - Restructure file system to accommodate custom builds
+  - Backwards compatibility change for Ajax.Responders.responders property
+  - Update .gitignore files to ingore raked and temporary files
+  - Adjust edge case unit tests
+
 * unit test: Make Ajax unit tests work in Safari 2, stop Dom unit tests from crashing Opera 9.2x on OS X, and perform minor cleanup on Form and Dom unit tests. [jddalton]
 
 * Fix Element#insert on colgroup and optgroup elements by adding entries to Element._insertionTranslations.tags. [jddalton]

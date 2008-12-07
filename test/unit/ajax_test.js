@@ -14,7 +14,10 @@ new Test.Unit.Runner({
   
   teardown: function() {
     // hack to cleanup responders
-    Ajax.Responders.responders = [Ajax.Responders.responders[0]];
+    Ajax.Responders.responders = {
+      'onCreate':   [ function() { Ajax.activeRequestCount++ } ],
+      'onComplete': [ function() { Ajax.activeRequestCount-- } ]
+    };
   },
   
   testSynchronousRequest: function() {
@@ -102,21 +105,23 @@ new Test.Unit.Runner({
   
   testResponders: function(){
     // check for internal responder
-    this.assertEqual(1, Ajax.Responders.responders.length);
+    var count = 0;
+    for (var i in Ajax.Responders.responders) count++;
+    this.assertEqual(2, count);
     
     var dummyResponder = {
       onComplete: function(req) { /* dummy */ }
     };
     
     Ajax.Responders.register(dummyResponder);
-    this.assertEqual(2, Ajax.Responders.responders.length);
+    this.assertEqual(2, Ajax.Responders.responders['onComplete'].length);
     
     // don't add twice
     Ajax.Responders.register(dummyResponder);
-    this.assertEqual(2, Ajax.Responders.responders.length);
+    this.assertEqual(2, Ajax.Responders.responders['onComplete'].length);
     
     Ajax.Responders.unregister(dummyResponder);
-    this.assertEqual(1, Ajax.Responders.responders.length);
+    this.assertEqual(1, Ajax.Responders.responders['onComplete'].length);
     
     var responder = {
       onCreate:   function(req){ responderCounter++ },

@@ -26,7 +26,7 @@ module Protodoc
     end
     
     def to_s
-      @template.result(binding).strip_whitespace_at_line_ends
+      @template.result(binding).strip_whitespace_at_line_ends + "\n"
     end
   end  
 end
