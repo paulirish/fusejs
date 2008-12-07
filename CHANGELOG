@@ -1,3 +1,5 @@
+*FuseJS Alpha* (December 6, 2008)
+
 * Add private helper method isHostObject() to correctly detect host methods and properties. [David Mark, jddalton]
 
 * Massive code rewrite and restructuring [bkerley, jddalton, Joe Gornick, T.J. Crowder]

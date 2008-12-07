@@ -49,7 +49,7 @@
   /*---------------------------- PROTOTYPE OBJECT ----------------------------*/
 
   var P = Prototype = {
-    Version: '<%= PROTOTYPE_VERSION %>',
+    Version: '<%= FUSEJS_VERSION %>',
 
     Browser: {
       'IE':     isHostObject(global, 'attachEvent') && userAgent.indexOf('Opera') === -1,

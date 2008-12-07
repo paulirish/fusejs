@@ -1,7 +1,7 @@
-/*  Prototype JavaScript framework, version <%= PROTOTYPE_VERSION %>
- *  (c) 2005-2008 Sam Stephenson
+/*  Fuse JavaScript framework, version <%= FUSEJS_VERSION %>
+ *  (c) 2008-2009 John-David Dalton
  *
- *  Prototype is freely distributable under the terms of an MIT-style license.
- *  For details, see the Prototype web site: http://www.prototypejs.org/
+ *  FuseJS is freely distributable under the terms of an MIT-style license.
+ *  For details, see the FuseJS web site: http://www.fusejs.com/
  *
  *--------------------------------------------------------------------------*/
