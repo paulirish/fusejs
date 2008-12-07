@@ -153,7 +153,8 @@
     /* TEXT SUBSTITUTION FUNCTIONS */
 
     function gsub(pattern, replacement) {
-      var result = '', source = this, match;
+      var match, result = '', source = this;
+      if (!pattern) return source;
       replacement = prepareReplacement(replacement);
       if (typeof pattern === 'string') pattern = RegExp.escape(pattern);
 

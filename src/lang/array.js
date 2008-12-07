@@ -198,15 +198,16 @@
       return memo;
     }
 
-    function grep(filter, iterator, context) {
+    function grep(pattern, iterator, context) {
+      if (!pattern) this.toArray();
       iterator = iterator || K;
       var results = [];
 
-      if (typeof filter === 'string')
-        filter = new RegExp(RegExp.escape(filter));
+      if (typeof pattern === 'string')
+        pattern = new RegExp(RegExp.escape(pattern));
 
       for (var i = 0, length = this.length; i < length; i++)
-        if (filter.match(this[i]))
+        if (pattern.match(this[i]))
           results[results.length] = iterator.call(context, this[i], i);
       return results;
     }

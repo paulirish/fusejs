@@ -72,15 +72,16 @@
       return results;
     }
 
-    function grep(filter, iterator, context) {
+    function grep(pattern, iterator, context) {
+      if (!pattern) this.toArray();
       iterator = iterator || K;
       var results = [];
 
-      if (typeof filter === 'string')
-        filter = new RegExp(RegExp.escape(filter));
+      if (typeof pattern === 'string')
+        pattern = new RegExp(RegExp.escape(pattern));
 
       this.each(function(value, index) {
-        if (filter.match(value))
+        if (pattern.match(value))
           results.push(iterator.call(context, value, index));
       });
       return results;

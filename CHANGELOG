@@ -1,3 +1,5 @@
+* Stop Enumerable#grep, Array#grep, and String#gsub from freezing when passed an empty string as a pattern. [jddalton, kangax]
+
 *FuseJS Alpha* (December 6, 2008)
 
 * Add private helper method isHostObject() to correctly detect host methods and properties. [David Mark, jddalton]

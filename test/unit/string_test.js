@@ -44,11 +44,8 @@ new Test.Unit.Runner({
       'ウィメンズ2007\nクルーズコレクション'.gsub(/\n/,'<br/>'));
     this.assertEqual('ウィメンズ2007<br/>クルーズコレクション', 
       'ウィメンズ2007\nクルーズコレクション'.gsub('\n','<br/>'));
-      
-    this.assertEqual('happy Smyle',
-      'happy :-)'.gsub(':-)', 'Smyle'));
-    this.assertEqual('sad Frwne',
-      'sad >:($'.gsub('>:($', 'Frwne'));
+
+    this.assertEqual('ab', 'ab'.gsub('', ''));
   },
   
   testGsubWithReplacementTemplateString: function() {
@@ -63,7 +60,24 @@ new Test.Unit.Runner({
     this.assertEqual('  z',
       source.gsub(/(.)(o+)/, '#{3}'));      
   },
-  
+
+  testGsubEscapesRegExpSpecialCharacters: function() {
+    this.assertEqual('happy Smyle',
+      'happy :-)'.gsub(':-)', 'Smyle'));
+    this.assertEqual('sad Frwne',
+      'sad >:($'.gsub('>:($', 'Frwne'));
+
+    this.assertEqual('ab', 'a|b'.gsub('|', ''));
+    this.assertEqual('ab', 'ab(?:)'.gsub('(?:)', ''));
+    this.assertEqual('ab', 'ab()'.gsub('()', ''));
+    this.assertEqual('ab', 'ab'.gsub('^', ''));
+    this.assertEqual('ab', 'a?b'.gsub('?', ''));
+    this.assertEqual('ab', 'a+b'.gsub('+', ''));
+    this.assertEqual('ab', 'a*b'.gsub('*', ''));
+    this.assertEqual('ab', 'a{1}b'.gsub('{1}', ''));
+    this.assertEqual('ab', 'a.b'.gsub('.', ''));
+  },
+
   testSubWithReplacementFunction: function() {
     var source = 'foo boo boz';
 
