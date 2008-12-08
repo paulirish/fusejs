@@ -359,6 +359,24 @@
           .replace(/\s+/, '').length;
       }
 
+      function SELECTORS_API_CASE_INSENSITIVE_CLASSNAME() {
+        // Safari 3 before 3.1.2 treat class names 
+        // case-insensitively in quirks mode.
+        var result = false;
+        if (Feature('SELECTORS_API')) {
+          var span = document.createElement('span');
+          dummy.id = 'fusejs_test_id';
+          span.className = 'Test';
+          dummy.appendChild(span);
+          result = dummy.querySelector('#fusejs_test_id .test') !== null;
+
+          // cleanup dummy
+          dummy.id = '';
+          dummy.removeChild(span);
+        }
+        return result;
+      }
+
       var COMMENT_NODES_IN_CHILDREN_NODELIST = createCommentTest(function(element) {
         // true for IE
         return Feature('ELEMENT_CHILDREN_NODELIST') && element.children.length === 2;
@@ -394,6 +412,7 @@
         'EVENT_OBSERVER_ORDER_NOT_FIFO':                      EVENT_OBSERVER_ORDER_NOT_FIFO,
         'FORM_CHILDNODES_ARE_ATTRIBUTES':                     FORM_CHILDNODES_ARE_ATTRIBUTES,
         'GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES':     GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES,
+        'SELECTORS_API_CASE_SENSITIVE_CLASSNAME':             SELECTORS_API_CASE_INSENSITIVE_CLASSNAME,
         'REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY':            REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY
       };
     })());

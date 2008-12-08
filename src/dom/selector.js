@@ -36,7 +36,10 @@
     }
 
     function shouldUseSelectorsAPI() {
-      if (!Feature('SELECTORS_API')) return false;
+      if (!Feature('SELECTORS_API') ||
+          Bug('SELECTORS_API_CASE_INSENSITIVE_CLASSNAME')) {
+        return false;
+      }
 
       // Make sure the browser treats the selector as valid. Test on an 
       // isolated element to minimize cost of this check.    
