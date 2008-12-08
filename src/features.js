@@ -354,6 +354,11 @@
         return typeof form.getAttribute('method') !== 'string';
       }
 
+      function REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY() {
+        return !!'\x09\x0B\x0C\x20\xA0\x0A\x0D\u2028\u2029\u1680\u180e\u2000-\u200a\u202f\u205f\u3000'
+          .replace(/\s+/, '').length;
+      }
+
       var COMMENT_NODES_IN_CHILDREN_NODELIST = createCommentTest(function(element) {
         // true for IE
         return Feature('ELEMENT_CHILDREN_NODELIST') && element.children.length === 2;
@@ -388,7 +393,8 @@
         'ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR':              ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR,
         'EVENT_OBSERVER_ORDER_NOT_FIFO':                      EVENT_OBSERVER_ORDER_NOT_FIFO,
         'FORM_CHILDNODES_ARE_ATTRIBUTES':                     FORM_CHILDNODES_ARE_ATTRIBUTES,
-        'GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES':     GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES
+        'GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES':     GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES,
+        'REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY':            REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY
       };
     })());
   })();

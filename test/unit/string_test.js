@@ -201,6 +201,10 @@ new Test.Unit.Runner({
     this.assertEqual('hello world', 'hello world'.strip());
     this.assertEqual('hello  \n  world', '  hello  \n  world  '.strip());
     this.assertEqual('', ' '.strip());
+
+    // Ensure strip removes all whitespace and line terminators
+    // IE doesn't understand '\v' so replace it with '\x0B'
+    this.assertEqual('hello', ' \n\r\t\x0B\f\xA0 hello \xA0\n \r\t\f\x0B'.strip());
   },
   
   testStripTags: function() {

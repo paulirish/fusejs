@@ -190,10 +190,6 @@
       });
     }
 
-    function strip() {
-      return this.replace(/^\s+/, '').replace(/\s+$/, '');
-    }
-
     /*--------------------------------------------------------------------------*/
 
     return {
@@ -212,7 +208,6 @@
       'parseQuery':    toQueryParams,
       'scan':          scan,
       'startsWith':    startsWith,
-      'strip':         strip,
       'sub':           sub,
       'succ':          succ,
       'times':         times, 
@@ -226,9 +221,12 @@
   })());
 
   Object.extend(String.prototype, (function() {
-    var matchOpenTag = /<script/i,
-     matchScripts    = new RegExp(P.ScriptFragment, 'gi'),
-     matchComments   = new RegExp('<!--\\s*' + P.ScriptFragment + '\\s*-->', 'gi');
+    var s = RegExp.specialChar.s,
+     matchTrimLeft  = new RegExp('^' + s +'+'),
+     matchTrimRight = new RegExp(s +'+$'),
+     matchScripts   = new RegExp(P.ScriptFragment, 'gi'),
+     matchComments  = new RegExp('<!--\\s*' + P.ScriptFragment + '\\s*-->', 'gi'),
+     matchOpenTag   = /<script/i;
 
     function evalScripts() {
       return this.extractScripts().map(function(script) { return eval(script) });
@@ -242,6 +240,10 @@
       return results;
     }
 
+    function strip() {
+      return this.replace(matchTrimLeft, '').replace(matchTrimRight, '');
+    }
+
     function stripScripts() {
       return this.replace(matchScripts, '');
     }
@@ -253,6 +255,7 @@
     return {
       'evalScripts':    evalScripts,
       'extractScripts': extractScripts,
+      'strip':          String.prototype.trim || strip,
       'stripScripts':   stripScripts,
       'stripTags':      stripTags
     };

@@ -1,3 +1,6 @@
+* Make String#strip use custom whitespace character class for browsers missing full support. [dimik, doug, jddalton, kangax]
+  Originally reported on http://dev.jquery.com/ticket/2690.
+
 * Enhance Selector#match to support a "group" (comma-separated) selector. [#318 state:resolved] [Andrew Dupont, jddalton, wiktor]
 
 * Make String#stripTags work properly with tags that contain closing brackets in their attributes. [jddalton, kangax]
