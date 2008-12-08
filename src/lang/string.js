@@ -247,7 +247,7 @@
     }
 
     function stripTags() {
-      return this.replace(/<\/?[^>]+>/gi, '');
+      return this.replace(/<("[^"]*"|'[^']*'|[^'">])+>/g, '');
     }
 
     return {
