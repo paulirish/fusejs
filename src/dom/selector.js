@@ -156,8 +156,20 @@
     }
 
     function match(element) {
-      var e = this.expression, ps = Selector.patterns,
-       as = Selector.assertions, le;
+      var le, e = this.expression, ps = Selector.patterns,
+       as = Selector.assertions;
+
+      if (e.include(',')) {
+        // If the expression includes a comma, it might be a union of several
+        // selectors. Split and check each one.
+        var expressions = Selector.split(e);
+        if (expressions.length > 1) {
+          for (var i = 0, expression; expression = expressions[i++]; ) {
+            if (new Selector(expression).match(element)) return true;
+          }
+          return false;
+        }
+      }
 
       this.tokens = [];
       while (e && le !== e && (/\S/).test(e)) {

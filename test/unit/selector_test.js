@@ -162,6 +162,11 @@ new Test.Unit.Runner({
     
     this.assert(span.match({ match: function(element) { return true }}), 'custom selector');
     this.assert(!span.match({ match: function(element) { return false }}), 'custom selector');
+    
+    this.assert(span.match('div, span'), 'comma-joined selector');
+    this.assert(span.match('span, div'), 'comma-joined selector');
+    this.assert(!span.match('span span, div'), 'comma-joined selector with one complex selector');
+    this.assert(span.match("span span, div span"), 'comma-joined selector with two complex selector');
   },
 
   testSelectorWithSpaceInAttributeValue: function() {
