@@ -38,13 +38,21 @@
     return element.ownerDocument || (element.nodeType === 9  ? element : doc);
   }
 
+  function isHostObject(object, property) {
+    // Host objects have a range of typeof values. For example:
+    // doc.createElement('div').offsetParent -> unknown
+    // doc.createElement -> object
+    var type = typeof object[property];
+    return type === 'function' || type === 'object' || type === 'unknown';
+  }
+
   /*---------------------------- PROTOTYPE OBJECT ----------------------------*/
 
   var P = Prototype = {
     Version: '<%= PROTOTYPE_VERSION %>',
 
     Browser: {
-      'IE':     !!(global.attachEvent && userAgent.indexOf('Opera') === -1),
+      'IE':     isHostObject(global, 'attachEvent') && userAgent.indexOf('Opera') === -1,
       'Opera':  userAgent.indexOf('Opera') > -1,
       'WebKit': userAgent.indexOf('AppleWebKit/') > -1,
       'Gecko':  userAgent.indexOf('Gecko') > -1 && userAgent.indexOf('KHTML') === -1,
@@ -52,10 +60,10 @@
     },
 
     BrowserFeatures: {
-      'XPath': !!doc.evaluate,
-      'SelectorsAPI': !!doc.querySelector,
-      'ElementExtensions': !!global.HTMLElement,
-      'SpecificElementExtensions': dummy['__proto__'] &&
+      'XPath': isHostObject(doc, 'evaluate'),
+      'SelectorsAPI': isHostObject(doc, 'querySelector'),
+      'ElementExtensions': isHostObject(global,'HTMLElement'),
+      'SpecificElementExtensions': isHostObject(dummy, '__proto__') &&
         dummy['__proto__'] !== document.createElement('form')['__proto__']
     },
 

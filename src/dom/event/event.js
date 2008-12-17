@@ -147,7 +147,7 @@
       if (!EP) return;
       Event.prototype = EP;
       Object.extend(Event.prototype, Methods);
-    })(Event.prototype || (doc.createEvent && doc.createEvent('HTMLEvents')['__proto__']));
+    })(Event.prototype || (isHostObject(doc, 'createEvent') && doc.createEvent('HTMLEvents')['__proto__']));
 
     if (Event.prototype) return K;
 
@@ -328,8 +328,9 @@
         if (element.nodeType === 9 && doc.createEvent && !element.dispatchEvent)
           element = element.documentElement;
 
-        var event;
-        if (doc.createEvent) {
+        var event, usesCreateEvent = isHostObject(doc, 'createEvent');
+
+        if (usesCreateEvent) {
           event = getOwnerDoc(element).createEvent('HTMLEvents');
           event.initEvent('dataavailable', true, true);
         } else {
@@ -340,7 +341,7 @@
         event.eventName = eventName;
         event.memo = memo || { };
 
-        if (doc.createEvent) {
+        if (usesCreateEvent) {
           element.dispatchEvent(event);
         } else {
           element.fireEvent(event.eventType, event);

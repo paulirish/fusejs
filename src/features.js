@@ -35,33 +35,33 @@
 
       function DOCUMENT_CREATE_EVENT() {
         // true for all but IE
-        return !!doc.createEvent;
+        return isHostObject(doc, 'createEvent');
       }
 
       function DOCUMENT_RANGE(){
         // true for all but IE
-        return !!doc.createRange;
+        return isHostObject(doc, 'createRange');
       }
 
       function DOCUMENT_STYLE_SHEETS_COLLECTION() {
         // true for all so far
-        return !!doc.styleSheets;
+        return isHostObject(doc, 'styleSheets');
       }
 
       function ELEMENT_ADD_EVENT_LISTENER() {
         // true for all but IE
-        return !!doc.addEventListener;
+        return isHostObject(doc, 'addEventListener');
       }
 
       function ELEMENT_ATTACH_EVENT() {
         // true for IE
-        return !!doc.attachEvent &&
+        return isHostObject(doc, 'attachEvent') &&
           !Feature('ELEMENT_ADD_EVENT_LISTENER');
       }
 
       function ELEMENT_BOUNDING_CLIENT_RECT() {
         // true for IE, Firefox 3
-        return !!docEl.getBoundingClientRect;
+        return isHostObject(docEl, 'getBoundingClientRect');
       }
 
       function ELEMENT_CLIENT_COORDS() {
@@ -71,27 +71,27 @@
 
       function ELEMENT_COMPUTED_STYLE() {
         // true for all but IE
-        return !!(doc.defaultView && doc.defaultView.getComputedStyle);
+        return isHostObject(doc, 'defaultView') && isHostObject(doc.defaultView, 'getComputedStyle');
       }
 
       function ELEMENT_COMPARE_DOCUMENT_POSITION() {
         // true for Firefox and Opera 9.5+
-        return !!docEl.compareDocumentPosition;
+        return isHostObject(docEl, 'compareDocumentPosition');
       }
 
       function ELEMENT_CURRENT_STYLE() {
         // true for IE
-        return docEl.currentStyle && !Feature('ELEMENT_COMPUTED_STYLE');
+        return isHostObject(docEl, 'currentStyle') && !Feature('ELEMENT_COMPUTED_STYLE');
       }
 
       function ELEMENT_DO_SCROLL() {
         // true for IE
-        return !!docEl.doScroll;
+        return isHostObject(docEl, 'doScroll');
       }
 
       function ELEMENT_EXTENSIONS() {
         // true for Firefox, WebKit
-        if (!P.BrowserFeatures.ElementExtensions && dummy['__proto__']) {
+        if (!P.BrowserFeatures.ElementExtensions && isHostObject(dummy, '__proto__')) {
           global.HTMLElement = { };
           global.HTMLElement.prototype = dummy.__proto__;
           P.BrowserFeatures.ElementExtensions = true;
@@ -121,13 +121,13 @@
 
       function ELEMENT_MS_CSS_FILTERS() {
         // true for IE
-        return docEl.filters &&
+        return isHostObject(docEl, 'filters') &&
           typeof docEl.style.filter === 'string';
       }
 
       function ELEMENT_REMOVE_NODE() {
         // true for IE
-        return !!docEl.removeNode;
+        return isHostObject(docEl, 'removeNode');
       }
 
       function ELEMENT_SPECIFIC_EXTENSIONS() {
@@ -159,11 +159,11 @@
       var ELEMENT_CHILDREN_NODELIST, ELEMENT_CONTAINS;
       (function() {
         // true for IE, Safari 3, Opera, Firefox 3+
-		if (!docEl.children)
+		if (!isHostObject(docEl, 'children'))
 		  ELEMENT_CHILDREN_NODELIST = false;
 
         // true for all but IE and Safari 2
-		if (!docEl.contains)
+		if (!isHostObject(docEl, 'contains'))
 		  ELEMENT_CONTAINS = false;
 
         // no need to test further is both failed

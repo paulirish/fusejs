@@ -58,19 +58,19 @@
       docEl.insertBefore(styleElement, docEl.firstChild);
 
       // translate "sheet"
-      if (!!styleElement.styleSheet)
+      if (isHostObject(styleElement, 'styleSheet'))
         prop.sheet = 'styleSheet';
 
       var styleSheet = styleElement[prop.sheet];
       if (styleSheet) {
-        HAS_IMPORTS_COLLECTION = ('imports' in styleSheet);
+        HAS_IMPORTS_COLLECTION = isHostObject(styleSheet, 'imports');
 
         // translate "ownerNode"
-        if (!!styleSheet.owningElement)
+        if (isHostObject(styleSheet, 'owningElement'))
           prop.ownerNode = 'owningElement';
 
         // translate "rules"
-        if (!!styleSheet.rules)
+        if (isHostObject(styleSheet, 'rules'))
           prop.cssRules = 'rules';
       }
       
