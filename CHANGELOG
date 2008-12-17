@@ -243,9 +243,9 @@
 
 * Ensure Selector.handlers.id finds the proper element even when it's not attached to the document. [#198, #271 state:resolved] [jddalton]
 
-* Ensure Element#getDimensions only unhides elements that are hidden. [Andrew Dupont, Nick Stackenburg, jddalton]
+* Ensure Element#getDimensions only unhides elements that are hidden. [Andrew Dupont, Nick Stakenburg, jddalton]
 
-* Make Element#getDimensions use offset(Height|Width) rather than client(Height|Width). Closes #10122. [demian85, jddalton, Nick Stackenburg]
+* Make Element#getDimensions use offset(Height|Width) rather than client(Height|Width). Closes #10122. [demian85, jddalton, Nick Stakenburg]
 
 * Fix for IE7 to access local files via Ajax.Request. Closes #8259. [Andrew Dupont, hagen.seifert, jddalton]
 
@@ -328,7 +328,7 @@
 
 * Refactor String#escapeHTML to avoid using the `with` statement. [Tobie Langel]
 
-* Make Element#writeAttribute handle frameborder attribute in IE. Closes #11068. [Nick Stackenburg, Tobie Langel]
+* Make Element#writeAttribute handle frameborder attribute in IE. Closes #11068. [Nick Stakenburg, Tobie Langel]
 
 * Minor clean-up of selector.js. Closes #10844. [Richard Quadling]
 
@@ -442,13 +442,13 @@
 
 * Fix the way Selector handles [pseudoclass + combinator] with no space in between. Closes #9696. [kangax, fearphage, Andrew Dupont]
 
-* Optimize Element#up/down/next/previous. Closes #10353. [Dylan Bruzenak, Nick Stackenburg, Andrew Dupont]
+* Optimize Element#up/down/next/previous. Closes #10353. [Dylan Bruzenak, Nick Stakenburg, Andrew Dupont]
 
 * Handle case-sensitivity in Selector tag names better. Closes #5052. [mexx, Andrew Dupont]
 
 *1.6.0.1* (December 4, 2007)
 
-* Change document.viewport.getDimensions to exclude scrollbars in all cases. Closes #10148, #9288. [Nick Stackenburg]
+* Change document.viewport.getDimensions to exclude scrollbars in all cases. Closes #10148, #9288. [Nick Stakenburg]
 
 * Add logic to Element#getStyle in Opera that fixes inaccurate reporting of computed 'width' and 'height' properties. [Andrew Dupont]
 
