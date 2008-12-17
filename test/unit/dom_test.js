@@ -1320,7 +1320,7 @@ new Test.Unit.Runner({
   },
   
   testNewElement: function() {
-    this.assert(new Element('h1'));
+    var self = this;
     
     var XHTML_TAGS = $w(
       'a abbr acronym address area '+
@@ -1331,23 +1331,32 @@ new Test.Unit.Runner({
       'map object ol optgroup option p param pre q samp '+
       'script select small span strong style sub sup '+
       'table tbody td textarea tfoot th thead tr tt ul var');
-      
-    XHTML_TAGS.each(function(tag, index) {
-      var id = tag + '_' + index, element = document.body.appendChild(new Element(tag, {id: id}));
-      this.assertEqual(tag, element.tagName.toLowerCase());
-      this.assertEqual(element, document.body.lastChild);
-      this.assertEqual(id, element.id);
-    }, this);
-    
-    
-    this.assertRespondsTo('update', new Element('div'));
-    Element.addMethods({
-      cheeseCake: function(){
-        return 'Cheese cake';
-      }
-    });
-    
-    this.assertRespondsTo('cheeseCake', new Element('div'));
+
+    function testTags() {
+      var tag = XHTML_TAGS.pop(),
+       index = XHTML_TAGS.length;
+      if (!tag) return false;
+
+      var id = tag + '_' + index,
+       element = document.body.appendChild(new Element(tag, { 'id': id }));
+
+      self.assertEqual(tag, element.tagName.toLowerCase());
+      self.assertEqual(element, document.body.lastChild);
+      self.assertEqual(id, element.id);
+      document.body.removeChild(element);
+      return true;
+    }
+
+    function recursiveTestTags() {
+      self.wait(10, function() { testTags() && recursiveTestTags() });
+    }
+
+    // The delayed execution of the tests
+    // helps prevent a crash in some OSX
+    // versions of Opera 9.2x
+    if (Prototype.Browser.Opera)
+      recursiveTestTags();
+    else while (testTags()) { };
     
     /* window.ElementOld = function(tagName, attributes) { 
       if (Prototype.Browser.IE && attributes && attributes.name) { 
@@ -1364,12 +1373,24 @@ new Test.Unit.Runner({
     this.benchmark(function(){
       XHTML_TAGS.each(function(tagName) { new ElementOld(tagName) });
     }, 5); */
+
+    this.assert(new Element('h1'));
+
+    Element.addMethods({
+      cheeseCake: function() { return 'Cheese cake' }
+    });
     
+    this.assertRespondsTo('cheeseCake', new Element('div'));
+    
+    this.assertRespondsTo('update', new Element('div'));
+
     this.assertEqual('foobar', new Element('a', {custom: 'foobar'}).readAttribute('custom'));
+    
     var input = document.body.appendChild(new Element('input', 
       {id: 'my_input_field_id', name: 'my_input_field'}));
     this.assertEqual(input, document.body.lastChild);
     this.assertEqual('my_input_field', $(document.body.lastChild).name);
+    
     if (Prototype.Browser.IE)
       this.assertMatch(/name=["']?my_input_field["']?/, $('my_input_field').outerHTML);
     
@@ -1389,7 +1410,7 @@ new Test.Unit.Runner({
       
 	  try {
         button.click();
-      this.assertEqual('', input.value);
+        this.assertEqual('', input.value);
 	  } catch(e) {
 	    this.info('The "' + tagName +'" element does not support the click() method.');
 	  }
@@ -1471,15 +1492,15 @@ new Test.Unit.Runner({
 
        var srcOffset = source.cumulativeOffset(),
         targOffset = target.cumulativeOffset();
-       this.assertIdentical(targOffset.top  + 25, srcOffset.top);
-       this.assertIdentical(targOffset.left + 35, srcOffset.left);
+       this.assertIdentical(targOffset.top  + 25, srcOffset.top, 'top');
+       this.assertIdentical(targOffset.left + 35, srcOffset.left, 'left');
 
        source.clonePosition(target);
 
        var srcDims = source.cumulativeOffset(),
         targDims = target.cumulativeOffset();
-       this.assertIdentical(targDims.height, srcDims.height);
-       this.assertIdentical(targDims.width, srcDims.width);
+       this.assertIdentical(targDims.height, srcDims.height, 'height');
+       this.assertIdentical(targDims.width, srcDims.width, 'width');
      }, this);
   },
   

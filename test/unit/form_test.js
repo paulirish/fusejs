@@ -135,7 +135,7 @@ new Test.Unit.Runner({
   },
   
   testFormEnabling: function(){
-    var form = $('bigform')
+    var form = $('bigform');
     var input1 = $('dummy_disabled');
     var input2 = $('focus_text');
     
@@ -211,7 +211,7 @@ new Test.Unit.Runner({
     
     // Form.Element.activate should select text on text input elements
     element = $('focus_text');
-    this.assertEqual('Hello', getSelection(element.activate()));
+    this.assertEqual('Hello', getSelection(element.activate()), 'The browser may not be able to retreave selected text');
 
     // Form.Element.activate shouldn't raise an exception when the form or field is hidden
     this.assertNothingRaised(function() {
@@ -493,9 +493,12 @@ new Test.Unit.Runner({
 
   testFormElementMethodsReturnElement: function() {
     element = $('focus_text');
+    var backup = element.value;
+    
     $w('activate clear disable enable focus select').each(function(method) {
       this.assert(element === Form.Element[method]('focus_text'),
         'Form.Element.' + method + ' returned a non element value.');
     }, this);
+    element.value = backup;
   }
 });

@@ -2,7 +2,7 @@ var extendDefault = function(options) {
   return Object.extend({
     asynchronous: false,
     method: 'get',
-    onException: function(e) { throw e }
+    onException: function(e) { throw e; }
   }, options);
 };
 
