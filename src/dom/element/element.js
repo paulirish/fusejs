@@ -245,7 +245,7 @@
       element = $(element);
 
       // IE throws an error if the element is not in the document.
-      if (element.currentStyle === null || !element.offsetParent)
+      if (Element.isFragment(element) || !element.offsetParent)
         return Element.extend(getOwnerDoc(element).body);
 
       while ((element = element.offsetParent) &&
@@ -365,6 +365,22 @@
       return wrapper;
     }
 
+    var isFragment = (function() {
+      return Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION') ?
+        function (element) {
+          element = $(element);
+          var nodeType = element.nodeType;
+          return nodeType === 11 || (nodeType === 1 &&
+            element.ownerDocument.all[element.sourceIndex] !== element);
+        } :
+        function (element) {
+          element = $(element);
+          var nodeType = element.nodeType;
+          return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
+            Element.descendantOf(element, element.ownerDocument)));
+        };
+    })();
+
     var update = (function() {
       var setInnerHTML = Bug('ELEMENT_SELECT_INNERHTML_BUGGY') || Bug('ELEMENT_TABLE_INNERHTML_BUGGY') || Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY') ?
         function(element, content) {
@@ -430,6 +446,7 @@
       'identify':        identify,
       'inspect':         inspect,
       'insert':          insert,
+      'isFragment':      isFragment,
       'remove':          remove,
       'replace':         replace,
       'scrollTo':        scrollTo,

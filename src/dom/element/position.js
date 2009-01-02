@@ -218,7 +218,7 @@
         return function(element) {
           element = $(element);
           var d, valueT = 0, valueL = 0;
-          if (element.currentStyle !== null) {
+          if (!Element.isFragment(element)) {
             d = element.getBoundingClientRect();
             valueT = Math.round(d.top)  - pad.top;
             valueL = Math.round(d.left) - pad.left;

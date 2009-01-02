@@ -1,3 +1,5 @@
+* Add Element#isFragment to detect if an element is an unattached fragment or a child of one. [jddalton]
+
 * Fix issue, in quirks mode, where versions of Safari, before 3.1.2, treat class names case-insensitively in Selector/$$ queries. [#390 state:resolved] [Andrew Dupont, Brice, kangax]
 
 * Make String#strip use custom whitespace character class for browsers missing full support. [dimik, doug, jddalton, kangax]

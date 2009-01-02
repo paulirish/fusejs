@@ -397,6 +397,24 @@ new Test.Unit.Runner({
     this.assertEqual(element.up(), wrapper);
   },
   
+  testElementIsFragment: function() {
+    var div   = document.createElement('div'),
+     fragment = document.createDocumentFragment(),
+     clone    = $('testdiv').cloneNode(true);
+
+    this.assert(Element.isFragment(div), 'new div element');
+    this.assert(Element.isFragment(clone), 'clone of "testdiv"');
+
+    div.appendChild(clone);
+    this.assert(clone.isFragment(), 'child of a detached element');
+
+    fragment.appendChild(div);
+    this.assert(Element.isFragment(fragment), 'document fragment');
+    this.assert(Element.isFragment(fragment.firstChild), 'child of a document fragment');
+
+    this.assert(!Element.isFragment(document), 'document object is not a fragment');
+  },
+  
   testElementVisible: function(){
     this.assertNotEqual('none', $('test-visible').style.display);
     this.assertEqual('none', $('test-hidden').style.display);

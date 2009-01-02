@@ -13,8 +13,8 @@
     }
 
     function getRealOffsetParent(element) {
-      return (element.currentStyle === null || !element.offsetParent) ? null :
-       (element.offsetParent && element.offsetParent.tagName.toUpperCase() === 'HTML') ?
+      return (typeof element.offsetParent !== 'object' || !element.offsetParent) ? null :
+       element.offsetParent.tagName.toUpperCase() === 'HTML' ?
          element.offsetParent : Element.getOffsetParent(element);
     }
 

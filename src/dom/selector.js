@@ -651,8 +651,7 @@
 
         // check if the root is detached from the document
         // (works with detached clones of attached elements too)
-        if (root.currentStyle === null || (root.ownerDocument &&
-           !Element.descendantOf(root, root.ownerDocument))) {
+        if (Element.isFragment(root)) {
           var els = root.getElementsByTagName('*');
           for (var i = 0, el; el = els[i++]; ) {
             if (el.id === id) {

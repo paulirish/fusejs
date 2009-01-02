@@ -33,6 +33,11 @@
         }
       }
 
+      function DOCUMENT_ALL_COLLECTION() {
+        // true for all but Firefox
+        return isHostObject(doc, 'all');
+      }
+
       function DOCUMENT_CREATE_EVENT() {
         // true for all but IE
         return isHostObject(doc, 'createEvent');
@@ -130,6 +135,11 @@
         return isHostObject(docEl, 'removeNode');
       }
 
+      function ELEMENT_SOURCE_INDEX() {
+        // true for IE and Opera
+        return typeof docEl.sourceIndex === 'number';
+      }
+
       function ELEMENT_SPECIFIC_EXTENSIONS() {
         if (P.Browser.MobileSafari)
           P.BrowserFeatures.SpecificElementExtensions = false;
@@ -189,6 +199,7 @@
       return {
         'ARGUMENTS_INSTANCEOF_ARRAY':        ARGUMENTS_INSTANCEOF_ARRAY,
         'CREATE_ELEMENT_WITH_HTML':          CREATE_ELEMENT_WITH_HTML,
+        'DOCUMENT_ALL_COLLECTION':           DOCUMENT_ALL_COLLECTION,
         'DOCUMENT_CREATE_EVENT':             DOCUMENT_CREATE_EVENT,
         'DOCUMENT_RANGE':                    DOCUMENT_RANGE,
         'DOCUMENT_STYLE_SHEETS_COLLECTION':  DOCUMENT_STYLE_SHEETS_COLLECTION,
@@ -207,6 +218,7 @@
         'ELEMENT_INNER_TEXT':                ELEMENT_INNER_TEXT,
         'ELEMENT_MS_CSS_FILTERS':            ELEMENT_MS_CSS_FILTERS,
         'ELEMENT_REMOVE_NODE':               ELEMENT_REMOVE_NODE,
+        'ELEMENT_SOURCE_INDEX':              ELEMENT_SOURCE_INDEX,
         'ELEMENT_SPECIFIC_EXTENSIONS':       ELEMENT_SPECIFIC_EXTENSIONS,
         'ELEMENT_TEXT_CONTENT':              ELEMENT_TEXT_CONTENT,
         'SELECTORS_API':                     SELECTORS_API,

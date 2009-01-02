@@ -395,6 +395,9 @@ new Test.Unit.Runner({
     this.assertNotNullOrUndefined(wrapper.select('td')[0], 'td');
     this.assertNotNullOrUndefined(wrapper.select('#myTD')[0], '#myTD');
     this.assertNotNullOrUndefined(wrapper.down().select('[id=myTD]')[0], '[id=myTD] on wrapper child');
+
+    var clone = $('list').cloneNode(true);
+    this.assert(Element.select(clone, '#item_1')[0] == Element.down(clone));
   },
   
   testSelectorSpit: function() {
