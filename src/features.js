@@ -151,6 +151,13 @@
         return typeof dummy.textContent === 'string';
       }
 
+      function FUNCTION_TO_STRING_RETURNS_SOURCE() {
+        // true for all but Mobile WebKit
+        function toStringTest(param1, param2) { var number = 1234 }
+        var source = toStringTest.toString();
+        return source.indexOf('param1') > -1 && source.indexOf('number = 1234') > -1;
+      }
+
       function SELECTORS_API() {
         // true for WebKit (Safari 3, Chrome)
         return P.BrowserFeatures.SelectorsAPI;
@@ -221,6 +228,7 @@
         'ELEMENT_SOURCE_INDEX':              ELEMENT_SOURCE_INDEX,
         'ELEMENT_SPECIFIC_EXTENSIONS':       ELEMENT_SPECIFIC_EXTENSIONS,
         'ELEMENT_TEXT_CONTENT':              ELEMENT_TEXT_CONTENT,
+        'FUNCTION_TO_STRING_RETURNS_SOURCE': FUNCTION_TO_STRING_RETURNS_SOURCE,
         'SELECTORS_API':                     SELECTORS_API,
         'TYPEOF_NODELIST_IS_FUNCTION':       TYPEOF_NODELIST_IS_FUNCTION,
         'XPATH':                             XPATH
