@@ -658,7 +658,7 @@
               targetNode = $(el); break;
             }
           }
-        } else targetNode = getOwnerDoc(root).getElementById(id);
+        } else targetNode = getOwnerDoc(root).getElementById(id || '');
 
         if (!targetNode) return [];
         if (!nodes && root.nodeType === 9) return [targetNode];
@@ -690,8 +690,10 @@
       }
 
       function tagName(nodes, root, tagName, combinator) {
+        tagName = tagName || '';
         var uTagName = tagName.toUpperCase();
         var results = [], h = Selector.handlers;
+
         if (nodes) {
           if (combinator) {
             // fastlane for ordinary descendant combinators

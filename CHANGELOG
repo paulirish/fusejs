@@ -1,3 +1,5 @@
+* Fix IE error when passing a malformed string to document.getElementById()/document.getElementByTagName(). Closes #11568. [gryn, jddalton, kangax]
+
 * Add Feature test FUNCTION_TO_STRING_RETURNS_SOURCE in preparation for Class rewrite. [jddalton]
 
 * Add Element#isFragment to detect if an element is an unattached fragment or a child of one. [jddalton]

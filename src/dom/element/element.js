@@ -7,7 +7,7 @@
       return elements;
     }
     if (typeof element === 'string')
-      element = doc.getElementById(element);
+      element = doc.getElementById(element || '');
     return Element.extend(element);
   };
 

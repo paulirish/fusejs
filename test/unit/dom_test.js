@@ -112,10 +112,16 @@ new Test.Unit.Runner({
     this.assertEnumEqual([ $('testdiv'), $('container') ], $('testdiv', 'container'));
     this.assertEnumEqual([ $('testdiv'), undefined, $('container') ],
       $('testdiv', 'noWayThisIDExists', 'container'));
+
     var elt = $('testdiv');
     this.assertIdentical(elt, $(elt));
     this.assertRespondsTo('hide', elt);
     this.assertRespondsTo('childOf', elt);
+
+    // test passing a malformed string
+    this.assertNothingRaised(function() { $( $('normal-target-string').target ) }, 'malformed on normal test, something is wrong');
+    this.assertNothingRaised(function() { $( $('malformed-target-string').target ) }, 'malformed direct access to "target"');
+    this.assertNothingRaised(function() { $( $('malformed-target-string').readAttribute('target') ) }, 'malformed using Element#readAttribute');
   },
   
   testGetElementsByClassName: function() {

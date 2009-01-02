@@ -29,9 +29,9 @@
         result = t.read[name](element, name);
       else if (ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR && name.include(':')) {
         result = getNamespacedAttribute(element, name);
-      } else result = element.getAttribute(name) || '';
+      } else result = element.getAttribute(name);
 
-      return result;
+      return result || '';
     }
 
     function writeAttribute(element, name, value) {
@@ -97,12 +97,12 @@
     }
 
     function getAttr(element, attribute) {
-      return element.getAttribute(attribute, 2) || '';
+      return element.getAttribute(attribute, 2);
     }
 
     function getAttrNode(element, attribute) {
       var node = element.getAttributeNode(attribute);
-      return node && node.value || '';
+      return node && node.value;
     }
 
     function getEv(element, attribute) {
@@ -187,11 +187,11 @@
       }
 
       function getStyleAttribute(element) {
-        return element.style.cssText.toLowerCase();
+        return (element.style.cssText || '').toLowerCase();
       }
 
       function setStyleAttribute(element, value) {
-        element.style.cssText = value ? value : '';
+        element.style.cssText = value || '';
       }
 
       // translate "className"
