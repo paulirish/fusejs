@@ -57,13 +57,16 @@
         element.nodeType !== 1 || element === global ||
         !('write' in element.ownerDocument)) return element;
 
-      var property,
+      var pair,
        tagName = element.tagName.toUpperCase(), 
-       methods = ByTag[tagName] || Methods;
+       methods = ByTag[tagName] || Methods,
+       length  = methods.length;
 
-      for (property in methods)
-        if (!(property in element))
-          element[property] = methods[property].methodize();
+      while (length--) {
+        pair = methods[length];
+        if (!(pair[0] in element))
+          element[pair[0]] = pair[1];
+      }
 
       // avoid using Prototype.K.curry(revision) for speed
       element._extendedByPrototype = (function(r) {
@@ -74,13 +77,21 @@
     }
 
     function refresh() {
-      Methods = Object.clone(Element.Methods); ByTag = { };
-      delete Methods.Simulated; delete Methods.ByTag;
+      Methods = []; ByTag = { };
+      var name, tagName;
 
-      Object.extend(Methods, Element.Methods.Simulated);
-      for(var i in Element.Methods.ByTag)
-        ByTag[i] = Object.extend(Object.clone(Methods),
-          Element.Methods.ByTag[i]);
+      for (name in Element.Methods)
+        if (name !== 'Simulated' && name !== 'ByTag')
+          Methods.push([name, Element.Methods[name].methodize()]);
+
+      for (name in Element.Methods.Simulated)
+        Methods.push([name, Element.Methods.Simulated[name].methodize()]);
+
+      for (tagName in Element.Methods.ByTag) {
+        ByTag[tagName] = slice.call(Methods, 0);
+        for (name in Element.Methods.ByTag[tagName])
+          ByTag[tagName].push([name, Element.Methods.ByTag[tagName][name].methodize()]);
+      }
       revision++;
     }
 
