@@ -198,6 +198,19 @@
       return memo;
     }
 
+    function invoke(method) {
+      var args, results = [], length = this.length;
+      if (arguments.length < 2) {
+        while (length--) results[length] = Function.prototype.call
+          .call(this[length][method], this[length]);
+      } else {
+        args = slice.call(arguments, 1);
+        while (length--) results[length] = Function.prototype.apply
+          .call(this[length][method], this[length], args);
+      }
+      return results;
+    }
+
     function grep(pattern, iterator, context) {
       if (!pattern) this.toArray();
       iterator = iterator || K;
@@ -330,6 +343,7 @@
       'inject':    inject,
       'intersect': intersect,
       'inspect':   inspect,
+      'invoke':    invoke,
       'last':      last,
       'max':       max,
       'member':    include,

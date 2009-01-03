@@ -1,3 +1,5 @@
+* Create an optimized Array#invoke that avoids Array#map and uses reverse while-loops. [jddalton]
+
 * Optimize Function#(bind|bindAsEventListener) by avoiding mergeList() when no arguments are passed. [Garrett Smith, jddalton]
 
 * Make the Event dispatcher create a clone of its handlers before executing to avoid issues with nested observe/stopObserving calls. [Diego Perini, jddalton]
