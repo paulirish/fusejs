@@ -1,3 +1,5 @@
+* Optimize Function#(bind|bindAsEventListener) by avoiding mergeList() when no arguments are passed. [Garrett Smith, jddalton]
+
 * Make the Event dispatcher create a clone of its handlers before executing to avoid issues with nested observe/stopObserving calls. [Diego Perini, jddalton]
   Note: This update exposes a bug in Gecko/WebKit browsers when dealing with nested stopObserving calls.
 

@@ -8,33 +8,40 @@
       return names.length == 1 && !names[0] ? [] : names;
     }
 
-    function bind(object) {
-      if (arguments.length < 2 && typeof arguments[0] === 'undefined') return this;
-      var __method = this, args = slice.call(arguments, 1);
+    function bind(context) {
+      var args, __method = this;
+      // simple bind
+      if (arguments.length < 2 ) {
+        if (typeof arguments[0] === 'undefined')
+          return this;
 
-      // Avoid using Array#concat when only the context argument is given.
-      if (args.length) {
         return function() {
-          return __method.apply(object, mergeList(args, arguments));
+          return arguments.length
+            ? __method.apply(context, arguments)
+            : __method.call(context);
         };
       }
+      // bind with partial apply
+      args = slice.call(arguments, 1);
       return function() {
-        return __method.apply(object, arguments);
+        return __method.apply(context, arguments.length ?
+          mergeList(args, arguments) : args);
       };
     }
 
-    function bindAsEventListener(object) {
-      var __method = this, args = slice.call(arguments, 1);
-
-      // Avoid using Array#concat when only the context argument is given.
-      if (args.length) {
+    function bindAsEventListener(context) {
+      var args, __method = this;
+      // simple bind
+      if (arguments.length < 2 ) {
         return function(event) {
-          args.unshift(event || global.event);
-          return __method.apply(object, args);
+          return __method.call(context, event || global.event);
         };
       }
+      // bind with partial apply
+      args = slice.call(arguments, 1);
       return function(event) {
-        return __method.call(object, event || global.event);
+        args.unshift(event || global.event);
+        return __method.apply(context, args);
       };
     }
 
