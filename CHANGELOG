@@ -1,3 +1,6 @@
+* Make the Event dispatcher create a clone of its handlers before executing to avoid issues with nested observe/stopObserving calls. [Diego Perini, jddalton]
+  Note: This update exposes a bug in Gecko/WebKit browsers when dealing with nested stopObserving calls.
+
 * Optimize Element.extend() further by replacing for-in loops with reverse while-loops. [jddalton]
 
 * Fix IE error when passing a malformed string to document.getElementById()/document.getElementByTagName(). Closes #11568. [gryn, jddalton, kangax]

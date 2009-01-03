@@ -284,8 +284,12 @@
     function createDispatcher(id, eventName) {
       return function(event) {
         if (!isEventValid(event, eventName)) return false;
-        var c = Event.cache[id], ec = c.events[eventName], length = ec.handlers.length;
-        while (length--) ec.handlers[length].call(c.element, Event.extend(event));
+        // Make a shallow copy of the handlers array so 
+        // changes made by other observers won't effect
+        // iterating over the handlers.
+        var c = Event.cache[id], ec = c.events[eventName],
+         handlers = slice.call(ec.handlers, 0), length = handlers.length;
+        while (length--) handlers[length].call(c.element, Event.extend(event));
       };
     }
 

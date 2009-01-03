@@ -188,34 +188,42 @@ new Test.Unit.Runner({
 
   testObserveInsideHandlers: function() {
     var fired = false, observer = function(event) { fired = true };
-    
-    document.observe("test:somethingHappened", function() {
-      document.observe("test:somethingHappened", observer);
+
+    // first observer should execute and attach a new observer
+    // the added observer should not be executed this time around.
+    document.observe('test:somethingHappened', function() {
+      document.observe('test:somethingHappened', observer);
     });
-    
-    document.fire("test:somethingHappened");
-    this.assert(!fired);
-    
-    document.fire("test:somethingHappened");
-    this.assert(fired);
-    document.stopObserving("test:somethingHappened");
+
+    // if there is a bug then this observer will be skipped
+    document.observe('test:somethingHappened', Prototype.emptyFunction);
+
+    document.fire('test:somethingHappened');
+    this.assert(!fired, 'observer should NOT have fired');
+
+    document.fire('test:somethingHappened');
+    this.assert(fired, 'observer should have fired');
+    document.stopObserving('test:somethingHappened');
   },
 
   testStopObservingInsideHandlers: function() {
     var fired = false, observer = function(event) { fired = true };
-    
-    document.observe("test:somethingHappened", observer);
-    document.observe("test:somethingHappened", function() {
-      document.stopObserving("test:somethingHappened", observer);
+
+    // first observer should execute and stopObserving should not
+    // effect this round of execution.
+    document.observe('test:somethingHappened', function() {
+      document.stopObserving('test:somethingHappened', observer);
     });
-    
-    document.fire("test:somethingHappened");
-    this.assert(fired);
-    
+    document.observe('test:somethingHappened', observer);
+
+    // Gecko and WebKit will fail this test at the moment (1.02.09)
+    document.fire('test:somethingHappened');
+    this.assert(fired, 'observer should NOT have been stopped');
+
     fired = false;
-    document.fire("test:somethingHappened");
-    document.stopObserving("test:somethingHappened");
-    this.assert(!fired);
+    document.fire('test:somethingHappened');
+    document.stopObserving('test:somethingHappened');
+    this.assert(!fired, 'observer should have been stopped');
   },
 
   testDocumentLoaded: function() {
