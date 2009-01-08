@@ -307,13 +307,14 @@ new Test.Unit.Runner({
   },
   
   testObserverExecutionOrder: function() {
-    var span = $("span"), count = 0;
-    (2).times(function(n) {
-      span.observe("test:somethingHappened", function() { count = n })
+    var span = $("span"), result = '';
+    ['a', 'b', 'c', 'd']._each(function(n) {
+      span.observe("test:somethingHappened", function() { result += n })
     });
+    
     span.fire("test:somethingHappened");
     span.stopObserving("test:somethingHappened");
-    this.assertEqual(1, count);
+    this.assertEqual('abcd', result);
   }
 });
 

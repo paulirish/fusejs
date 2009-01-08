@@ -24,23 +24,23 @@
 
   Event.Methods = (function() {
     var isButton = (function() {
-    if (P.Browser.IE) {
+      if (P.Browser.IE) {
         // IE doesn't map left/right/middle the same way.
-      var buttonMap = { 0: 1, 1: 4, 2: 2 };
+        var buttonMap = { '0': 1, '1': 4, '2': 2 };
         return function(event, code) {
-        return event.button == buttonMap[code];
-      };
+          return event.button == buttonMap[code];
+        };
       }
       if (P.Browser.WebKit) {
         // In Safari we have to account for when the user
         // holds down the "meta" key.
         return function(event, code) {
-        switch (code) {
-          case 0: return event.which == 1 && !event.metaKey;
-          case 1: return event.which == 1 && event.metaKey;
-          default: return false;
-        }
-      };
+          switch (code) {
+            case 0:  return event.which == 1 && !event.metaKey;
+            case 1:  return event.which == 1 && event.metaKey;
+            default: return false;
+          }
+        };
       }
       return function(event, code) {
         return event.which ? (event.which === code + 1) : (event.button === code);
@@ -60,30 +60,30 @@
     }
 
     function element(event) {
-        event = Event.extend(event);
-        var node = event.target, type = event.type,
-         currentTarget = event.currentTarget;
+      event = Event.extend(event);
+      var node = event.target, type = event.type,
+       currentTarget = event.currentTarget;
 
-        if (currentTarget && currentTarget.tagName) {
-          // Firefox screws up the "click" event when moving between radio buttons
-          // via arrow keys. It also screws up the "load" and "error" events on images,
-          // reporting the document as the target instead of the original image.
-          if (['load', 'error'].include(type) || (currentTarget.tagName.toUpperCase() === 'INPUT' &&
-            currentTarget.type === 'radio' && type === 'click')) {
-            node = currentTarget;
+      if (currentTarget && currentTarget.tagName) {
+        // Firefox screws up the "click" event when moving between radio buttons
+        // via arrow keys. It also screws up the "load" and "error" events on images,
+        // reporting the document as the target instead of the original image.
+        if (['load', 'error'].include(type) || (currentTarget.tagName.toUpperCase() === 'INPUT' &&
+          currentTarget.type === 'radio' && type === 'click')) {
+          node = currentTarget;
         }
       }
       // Fix a Safari bug where a text node gets passed as the target of an
       // anchor click rather than the anchor itself.
-        return Element.extend(node && node.nodeType == Node.TEXT_NODE ?
-         node.parentNode : node);
+      return Element.extend(node && node.nodeType == Node.TEXT_NODE ?
+        node.parentNode : node);
     }
 
     function findElement(event, expression) {
-        var element = Event.element(event);
-        if (!expression) return element;
-        var elements = prependList(Element.ancestors(element), element);
-        return Selector.findElement(elements, expression, 0);
+      var element = Event.element(event);
+      if (!expression) return element;
+      var elements = prependList(Element.ancestors(element), element);
+      return Selector.findElement(elements, expression, 0);
     }
 
     function pointer(event) {
@@ -95,9 +95,9 @@
       // after the fact to determine whether or not it was stopped.
       event = Event.extend(event);
       event.stopped = true;
-        event.preventDefault();
-        event.stopPropagation();
-      }
+      event.preventDefault();
+      event.stopPropagation();
+    }
 
     return {
       'element':       element,
@@ -159,14 +159,12 @@
       this.returnValue = false;
     };
 
-    var relatedTarget = function (event) {
-      var element;
-      switch(event.type) {
-        case 'mouseover': element = event.fromElement; break;
-        case 'mouseout':  element = event.toElement;   break;
-        default: return null;
+    var relatedTarget = function(event) {
+      switch (event.type) {
+        case 'mouseover': return Element.extend(event.fromElement);
+        case 'mouseout':  return Element.extend(event.toElement);
+        default:          return null;
       }
-      return Element.extend(element);
     };
 
     var stopPropagation = function() {

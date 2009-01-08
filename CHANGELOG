@@ -1,3 +1,5 @@
+* Cleanup minor whitespace/formatting in helpers.js and event.js as well as rewrite the "testObserverExecutionOrder" event unit test. [jddalton]
+
 * Create an optimized Array#invoke that avoids Array#map and uses reverse while-loops. [jddalton]
 
 * Optimize Function#(bind|bindAsEventListener) by avoiding mergeList() when no arguments are passed. [Garrett Smith, jddalton]

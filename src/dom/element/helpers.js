@@ -161,8 +161,8 @@
     Object.extend(this.tags, {
       // TODO: Opera fails to render optgroups when set with innerHTML
       'OPTGROUP': this.tags.SELECT,
-      'TFOOT': this.tags.TBODY,
-      'TH':    this.tags.TD,
-      'THEAD': this.tags.TBODY
+      'TFOOT':    this.tags.TBODY,
+      'TH':       this.tags.TD,
+      'THEAD':    this.tags.TBODY
     });
   }).call(Element._insertionTranslations);
