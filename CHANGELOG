@@ -1,3 +1,5 @@
+* Add bgColor, vLink, and aLink to the Element._attributeTranslations.names mapping object. [jddalton, Thomas Lahn]
+
 * Make Element#getOffsetParent follow the W3C specifications and treat TD, TH, and TABLE elements as valid offset parents. [jddalton]
 
 * Make Element#cumulativeScrollOffset induce "onlyAncestors" on input fields and textareas. [#512 state:resolved] [Alex Farrill, jddalton]

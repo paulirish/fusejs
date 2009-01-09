@@ -217,9 +217,9 @@
       dummy.setAttribute('accesskey', 1);
       if (dummy.accessKey !== 1) {
         // add camel-cased attributes to the name translations
-        $w('codeBase codeType cellPadding cellSpacing colSpan rowSpan vAlign dateTime accessKey ' +
-           'tabIndex encType maxLength readOnly longDesc frameBorder isMap useMap' +
-           'noHref noResize noShade noWrap marginWidth marginHeight')._each(function(attr) {
+        $w('bgColor codeBase codeType cellPadding cellSpacing colSpan rowSpan vAlign vLink aLink ' +
+           'dateTime accessKey tabIndex encType maxLength readOnly longDesc frameBorder isMap ' +
+           'useMap noHref noResize noShade noWrap marginWidth marginHeight')._each(function(attr) {
           var lower = attr.toLowerCase();
           Has[lower] = Names[lower] = attr;
         });
