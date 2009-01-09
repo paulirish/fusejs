@@ -171,11 +171,12 @@
       return Element._returnOffset(valueL, valueT);
     }
 
-    function cumulativeScrollOffset(element) {
+    function cumulativeScrollOffset(element, onlyAncestors) {
       element = $(element);
-      var valueT = 0, valueL = 0,
+      var original = element, valueT = 0, valueL = 0,
+       tagName = element.tagName.toUpperCase();
        rootTag = root.tagName.toUpperCase();
-       
+
       do {
         valueT += element.scrollTop  || 0;
         valueL += element.scrollLeft || 0;
@@ -186,6 +187,11 @@
 		}
 		element = element.parentNode;
       } while (element && element.nodeType === 1);
+
+      if (onlyAncestors || (tagName === 'TEXTAREA' || tagName === 'INPUT')) {
+        valueT -= original.scrollTop  || 0;
+        valueL -= original.scrollLeft || 0;
+      }
 
       return Element._returnOffset(valueL, valueT);
     }
@@ -217,27 +223,25 @@
 
         return function(element) {
           element = $(element);
-          var d, valueT = 0, valueL = 0;
+          var r, valueT = 0, valueL = 0;
           if (!Element.isFragment(element)) {
-            d = element.getBoundingClientRect();
-            valueT = Math.round(d.top)  - pad.top;
-            valueL = Math.round(d.left) - pad.left;
-          }
+            r = element.getBoundingClientRect();
+            valueT = Math.round(r.top)  - pad.top;
+            valueL = Math.round(r.left) - pad.left;
+         }
           return Element._returnOffset(valueL, valueT);
         };
       }
 
       return function(element) {
         element = $(element);
-        var scrollOffset = Element.cumulativeScrollOffset(element),
+        var scrollOffset = Element.cumulativeScrollOffset(element, /*onlyAncestors*/ true),
          cumulativeOffset = Element.cumulativeOffset(element),
          valueT = cumulativeOffset.top, valueL = cumulativeOffset.left;
 
-        // Subtract the scrollOffets of forElement from the scrollOffset totals
-        // (cumulativeScrollOffset includes them).
-        // Then subtract the the scrollOffset totals from the element offset totals.
-        valueT -= scrollOffset.top  - (element.scrollTop  || 0);
-        valueL -= scrollOffset.left - (element.scrollLeft || 0);
+        // Subtract the the scrollOffset totals from the element offset totals.
+        valueT -= scrollOffset.top;
+        valueL -= scrollOffset.left;
         return Element._returnOffset(valueL, valueT);
       };
     })();

@@ -1,3 +1,5 @@
+* Make Element#cumulativeScrollOffset induce "onlyAncestors" on input fields and textareas. [#512 state:resolved] [Alex Farrill, jddalton]
+
 * Add optional boolean second parameter, "onlyAncestors", to Element#cumulativeScrollOffset.
   When "onlyAncestors" is true only the element's ancestors scroll offsets are totaled. [jddalton]
 
