@@ -1,3 +1,6 @@
+* Add optional boolean second parameter, "onlyAncestors", to Element#cumulativeScrollOffset.
+  When "onlyAncestors" is true only the element's ancestors scroll offsets are totaled. [jddalton]
+
 * Cleanup minor whitespace/formatting in helpers.js and event.js as well as rewrite the "testObserverExecutionOrder" event unit test. [jddalton]
 
 * Create an optimized Array#invoke that avoids Array#map and uses reverse while-loops. [jddalton]

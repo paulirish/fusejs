@@ -1685,7 +1685,27 @@ new Test.Unit.Runner({
       $('absolute_relative').viewportOffset());
     this.assertEnumEqual([20,30],
       $('absolute_relative_undefined').viewportOffset());
-    
+ 
+    // Element.viewportOffset is forked for element.getBoundingClientRect usage.
+    // Ensure each fork produces the same output when dealing with scroll offsets
+    // on form fields
+    var offsets = [
+      $('scrollOffset_input').viewportOffset(),
+      $('scrollOffset_textarea').viewportOffset()
+    ];
+
+    $('scrollOffset_input').scrollLeft    =
+    $('scrollOffset_textarea').scrollLeft =
+    $('scrollOffset_textarea').scrollTop  = 25;
+
+    this.assertEnumEqual(offsets.first(), $('scrollOffset_input').viewportOffset(), 'With scroll offsets on input field'); 
+    this.assertEnumEqual(offsets.last(),  $('scrollOffset_textarea').viewportOffset(), 'With scroll offsets on textarea'); 
+
+    $('scrollOffset_input').scrollLeft    = 
+    $('scrollOffset_textarea').scrollLeft = 
+    $('scrollOffset_textarea').scrollTop  = 0;
+
+    /* fixed position tests (IE doesn't support position:fixed) */
     if (!Prototype.Browser.IE) {
       window.scrollTo(0, 30);
       $('absolute_fixed').scrollTop = 20;
@@ -1841,15 +1861,35 @@ new Test.Unit.Runner({
   
   testCumulativeScrollOffset: function() {
     window.scrollTo(0, 30);
+
     $('body_absolute').scrollTop = 20;
     this.assertEnumEqual([0, 30], $('body_absolute').cumulativeScrollOffset());
     this.assertEnumEqual([0, 30], $(document.body).cumulativeScrollOffset());
     $('body_absolute').scrollTop = 0;
-    
+
+    /* scrollOffsets on input fields */    
+    var offsets = [
+      $('scrollOffset_input').cumulativeScrollOffset(),
+      $('scrollOffset_textarea').cumulativeScrollOffset()
+    ];
+
+    $('scrollOffset_input').scrollLeft    =
+    $('scrollOffset_textarea').scrollLeft =
+    $('scrollOffset_textarea').scrollTop  = 25;
+
+    this.assertEnumEqual(offsets.first(), $('scrollOffset_input').cumulativeScrollOffset(), 'With scroll offsets on input field'); 
+    this.assertEnumEqual(offsets.last(),  $('scrollOffset_textarea').cumulativeScrollOffset(), 'With scroll offsets on textarea'); 
+
+    $('scrollOffset_input').scrollLeft    = 
+    $('scrollOffset_textarea').scrollLeft = 
+    $('scrollOffset_textarea').scrollTop  = 0;
+
+    /* fixed position tests (IE doesn't support position:fixed) */
     if (!Prototype.Browser.IE) {
       window.scrollTo(0, 30);
       $('absolute_fixed').scrollTop = 20;
       this.assertEnumEqual([0, 20], $('absolute_fixed').cumulativeScrollOffset());
+      this.assertEnumEqual([0, 0],  $('absolute_fixed').cumulativeScrollOffset(/*onlyAncestors*/ true));
       $('absolute_fixed').scrollTop = 0;
     }
     window.scrollTo(0, 0);
