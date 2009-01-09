@@ -259,9 +259,13 @@
       if (Element.isFragment(element) || !element.offsetParent)
         return Element.extend(getOwnerDoc(element).body);
 
-      while ((element = element.offsetParent) &&
-       !/^(html|body)$/i.test(element.tagName)) {
-        if (Element.getStyle(element, 'position') !== 'static')
+      var tagName;
+      while (element = element.offsetParent) {
+        tagName = element.tagName.toUpperCase();
+        /* http://www.w3.org/TR/cssom-view/#offset-attributes */
+        if (/^(HTML|BODY)$/.test(tagName)) break;
+        if (/^(TABLE|TD|TH)$/.test(tagName) ||
+            Element.getStyle(element, 'position') !== 'static')
           return Element.extend(element);
       }
       return Element.extend(getOwnerDoc(element).body);

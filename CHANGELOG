@@ -1,3 +1,5 @@
+* Make Element#getOffsetParent follow the W3C specifications and treat TD, TH, and TABLE elements as valid offset parents. [jddalton]
+
 * Make Element#cumulativeScrollOffset induce "onlyAncestors" on input fields and textareas. [#512 state:resolved] [Alex Farrill, jddalton]
 
 * Add optional boolean second parameter, "onlyAncestors", to Element#cumulativeScrollOffset.

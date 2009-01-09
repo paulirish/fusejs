@@ -1748,6 +1748,11 @@ new Test.Unit.Runner({
     
     // Ensure document.body is returned even when using document.documentElement.
     this.assertEqual(document.body, $(document.documentElement).getOffsetParent());
+    
+    // Make sure TD, TH, or TABLE is returned
+    this.assertEqual('TABLE', $('tr_offset_parent_test').getOffsetParent().tagName.toUpperCase(), 'offsetParent should be TABLE');
+    this.assertEqual('TH', $('th_offset_parent_test').getOffsetParent().tagName.toUpperCase(), 'offsetParent should be TH');
+    this.assertEqual('TD', $('td_offset_parent_test').getOffsetParent().tagName.toUpperCase(), 'offsetParent should be TD');
   },
 
   testAbsolutize: function() {
