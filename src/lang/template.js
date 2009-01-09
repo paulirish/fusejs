@@ -7,7 +7,7 @@
     }
 
     function evaluate(object) {
-      if (typeof object.toTemplateReplacements === 'function')
+      if (object && typeof object.toTemplateReplacements === 'function')
         object = object.toTemplateReplacements();
 
       return this.template.gsub(this.pattern, function(match) {

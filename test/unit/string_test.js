@@ -309,6 +309,8 @@ new Test.Unit.Runner({
 
   testTemplateEvaluationWithEmptyReplacement: function() {
     var template = new Template('##{}');
+    this.assertEqual('#', template.evaluate());
+    this.assertEqual('#', template.evaluate(null));
     this.assertEqual('#', template.evaluate({}));
     this.assertEqual('#', template.evaluate({foo: 'bar'}));
 

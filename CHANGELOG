@@ -1,3 +1,5 @@
+* Ensure Template#evaluate does not error when the evaluation object is null/undefined. [jddalton, Jürgen Hörmann]
+
 * Add bgColor, vLink, and aLink to the Element._attributeTranslations.names mapping object. [jddalton, Thomas Lahn]
 
 * Make Element#getOffsetParent follow the W3C specifications and treat TD, TH, and TABLE elements as valid offset parents. [jddalton]
