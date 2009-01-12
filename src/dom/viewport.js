@@ -10,9 +10,8 @@
           return Element._returnOffset(global.pageXOffset, global.pageYOffset);
         };
       } else {
-        var node = Bug('BODY_ACTING_AS_ROOT') ? body : docEl;
         this.getScrollOffsets = function() {
-          return Element._returnOffset(node.scrollLeft, node.scrollTop);
+          return Element._returnOffset(root.scrollLeft, root.scrollTop);
         };
       }
       return this.getScrollOffsets();
@@ -28,9 +27,10 @@
   (function(v) {
     var node;
     function define(D) {
-      node = node ||
-        (Bug('BODY_ACTING_AS_ROOT') ? body :     // Opera < 9.5, Quirks mode
-          ('clientWidth' in doc) ? doc : docEl); // Safari < 3 : Others
+      // Safari < 3 -> doc
+      // Opera < 9.5, Quirks mode -> body
+      // Others -> docEl
+      node = node || ('clientWidth' in doc ? doc : root);
       v['get' + D] = function() { return node['client' + D] };
       return v['get' + D]();
     }
