@@ -1,3 +1,5 @@
+* Optimize private helper method prependList() and cleanup nodeListSlice(). [jddalton]
+
 * Make document.viewport methods take advantage of the "root" private variable. [jddalton]
 
 * Ensure Template#evaluate does not error when the evaluation object is null/undefined. [jddalton, Jürgen Hörmann]

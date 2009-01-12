@@ -40,8 +40,8 @@
       // bind with partial apply
       args = slice.call(arguments, 1);
       return function(event) {
-        args.unshift(event || global.event);
-        return __method.apply(context, args);
+        return __method.apply(context,
+          prependList(args, event || global.event));
       };
     }
 
@@ -64,8 +64,8 @@
     }
 
     function defer() {
-      var args = prependList(arguments, 0.01);
-      return this.delay.apply(this, args);
+      return this.delay.apply(this,
+        prependList(arguments, 0.01));
     }
 
     function methodize() {

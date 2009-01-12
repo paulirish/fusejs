@@ -10,32 +10,28 @@
   // IE will throw an error when attempting to
   // pass a nodeList to slice.call() AND
   // Safari 2 will return a full array with undefined values
-  var nodeListSlice = slice;
-  (function() {
-    var result;
-    try { result = nodeListSlice.call(docEl.childNodes, 0) } catch(e) { }
-	if (result && result[0] && result[0].nodeType === 1) return;
-
-	nodeListSlice = function(begin, end) {
-      return !begin && arguments.length < 2 ?
-        $A(this) : $A(this).slice(begin, end);
-    };
-  })();
+  var nodeListSlice =
+    (function() { try { return !!slice.call(docEl.childNodes, 0)[0] } catch(e) { return false } })()
+      ? slice
+      : function(begin, end) {
+          return !begin && arguments.length < 2 ?
+            $A(this) : $A(this).slice(begin, end);
+        };
 
   function mergeList(list, other) {
-    list = slice.call(list, 0); // quick shallow clone
-    var pad = list.length, length = other.length;
-    while (length--) list[pad + length] = other[length];
-    return list;
+    var result = slice.call(list, 0), pad = list.length, length = other.length;
+    while (length--) result[pad + length] = other[length];
+    return result;
   }
 
   function prependList(list, value) {
-    (list = slice.call(list, 0)).unshift(value);
-    return list;
+    var result = [value], length = list.length;
+    while (length--) result[1 + length] = list[length];
+    return result;
   }
 
   function getOwnerDoc(element) { // assume element is not null
-    return element.ownerDocument || (element.nodeType === 9  ? element : doc);
+    return element.ownerDocument || (element.nodeType === 9 ? element : doc);
   }
 
   function isHostObject(object, property) {
