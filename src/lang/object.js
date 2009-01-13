@@ -1,6 +1,9 @@
   /*------------------------------ LANG: OBJECT ------------------------------*/
 
   (function() {
+    // used to access the an object's internal [[Class]] property
+    var toString = Object.prototype.toString;
+
     function clone(object) {
       return Object.extend({ }, object);
     }
@@ -12,23 +15,24 @@
     }
 
     function inspect(object) {
+      if (typeof object === 'undefined') return 'undefined';
+      if (object === null) return 'null';
+      if (typeof object.inspect === 'function') return object.inspect();
+
       try {
-        if (typeof object === 'undefined') return 'undefined';
-        if (object === null) return 'null';
-        return object.inspect ? object.inspect() : String(object);
+        return String(object);
       } catch (e) {
-        if (e instanceof RangeError) return '...';
+        if (e.constructor === RangeError) return '...';
         throw e;
       }
     }
 
     function isArray(object) {
-      return object != null && typeof object === 'object' &&
-        'splice' in object && 'join' in object;
+      return toString.call(object) === '[object Array]';
     }
 
     function isElement(object) {
-      return !!(object && object.nodeType == 1);
+      return !!object && object.nodeType === 1;
     }
 
     function isFunction(object) {
@@ -36,25 +40,25 @@
     }
 
     function isHash(object) {
-      return !!(object && object instanceof Hash);
+      return !!object && object.constructor === Hash;
     }
 
     function isNumber(object) {
-      return object != null && typeof object.valueOf === 'function' && 
-        typeof object.valueOf() === 'number' && isFinite(object);
+      return toString.call(object) === '[object Number]' && isFinite(object);
     }
 
     function isString(object) {
-      return object != null && typeof object.valueOf === 'function' &&
-        typeof object.valueOf() === 'string';
+      return toString.call(object) === '[object String]';
     }
 
     function isUndefined(object) {
-      return typeof object == 'undefined';
+      return typeof object === 'undefined';
     }
 
     function toHTML(object) {
-      return object && object.toHTML ? object.toHTML() : String.interpret(object);
+      return object && typeof object.toHTML === 'function'
+        ? object.toHTML()
+        : String.interpret(object);
     }
 
     function toJSON(object) {
@@ -67,7 +71,7 @@
       }
 
       if (object === null) return 'null';
-      if (object.toJSON) return object.toJSON();
+      if (typeof object.toJSON === 'function') return object.toJSON();
       if (Object.isElement(object)) return;
 
       var results = [];

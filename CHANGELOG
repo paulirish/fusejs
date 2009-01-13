@@ -1,3 +1,5 @@
+* Cleanup Object data type detection methods and utilize Object.prototype.toString.call() to access an objects ineternal [[Class]] property. [jddalton, kangax]
+
 * unit test: Change all occurrences of window.location.toString() to window.location.href. [jddalton]
 
 * Minor cleanup of Function#bind methods. [jddalton]
