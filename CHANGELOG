@@ -1,3 +1,5 @@
+* Optimize private method nodeListSlice() by replacing $A() calls with a while-loop and remove its dependency on the nodeList "length" property. [Diego Perini, jddalton]
+
 * Optimize Hash#toJSON by using a direct reference of this._object instead of a clone. [jddalton]
 
 * Remove dependency of Array#inject in Object.toQueryString, Hash#toQueryString and String#toQueryParams. [jddalton,  Joe Gornick]

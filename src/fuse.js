@@ -14,8 +14,13 @@
     (function() { try { return !!slice.call(docEl.childNodes, 0)[0] } catch(e) { return false } })()
       ? slice
       : function(begin, end) {
+          // Avoid the nodeList length property because,
+          // in IE for example, it might be an element with an ID of "length"
+          var i = 0, results = [];
+          while ((results[i] = this[i++])) { }
+          results.length--;
           return !begin && arguments.length < 2 ?
-            $A(this) : $A(this).slice(begin, end);
+            results : results.slice(begin, end);
         };
 
   function mergeList(list, other) {
