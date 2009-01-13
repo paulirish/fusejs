@@ -12,7 +12,7 @@
       var args, __method = this;
       // simple bind
       if (arguments.length < 2 ) {
-        if (typeof arguments[0] === 'undefined')
+        if (typeof context === 'undefined')
           return this;
 
         return function() {
@@ -21,7 +21,7 @@
             : __method.call(context);
         };
       }
-      // bind with partial apply
+      // bind with curry
       args = slice.call(arguments, 1);
       return function() {
         return __method.apply(context, arguments.length ?
@@ -37,7 +37,7 @@
           return __method.call(context, event || global.event);
         };
       }
-      // bind with partial apply
+      // bind with curry
       args = slice.call(arguments, 1);
       return function(event) {
         return __method.apply(context,

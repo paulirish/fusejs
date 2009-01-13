@@ -1,3 +1,5 @@
+* Minor cleanup of Function#bind methods. [jddalton]
+
 * Optimize private helper method prependList() and cleanup nodeListSlice(). [jddalton]
 
 * Make document.viewport methods take advantage of the "root" private variable. [jddalton]
