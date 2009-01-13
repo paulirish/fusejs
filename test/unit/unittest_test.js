@@ -10,7 +10,7 @@ var testObj = {
 new Test.Unit.Runner({
   
   testIsRunningFromRake:  function() {
-    if (window.location.toString().startsWith('http')) {
+    if (window.location.href.startsWith('http')) {
       this.assert(this.isRunningFromRake);
       this.info('These tests are running from rake.')
     } else {

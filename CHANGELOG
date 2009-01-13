@@ -1,3 +1,5 @@
+* unit test: Change all occurrences of window.location.toString() to window.location.href. [jddalton]
+
 * Minor cleanup of Function#bind methods. [jddalton]
 
 * Optimize private helper method prependList() and cleanup nodeListSlice(). [jddalton]

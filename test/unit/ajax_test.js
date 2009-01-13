@@ -346,7 +346,7 @@ new Test.Unit.Runner({
   testIsSameOriginMethod: function() {
     var isSameOrigin = Ajax.Request.prototype.isSameOrigin;
     this.assert(isSameOrigin.call({ url: '/foo/bar.html' }), '/foo/bar.html');
-    this.assert(isSameOrigin.call({ url: window.location.toString() }), window.location);
+    this.assert(isSameOrigin.call({ url: window.location.href }), window.location.href);
     this.assert(!isSameOrigin.call({ url: 'http://example.com' }), 'http://example.com');
 
     if (this.isRunningFromRake) {
