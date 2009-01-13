@@ -55,12 +55,12 @@
 
 * Add private helper method isHostObject() to correctly detect host methods and properties. [David Mark, jddalton]
 
-* Massive code rewrite and restructuring [bkerley, jddalton, Joe Gornick, T.J. Crowder]
-  - Adopt new coding pattern
-  - Restructure file system to accommodate custom builds
-  - Backwards compatibility change for Ajax.Responders.responders property
-  - Update .gitignore files to ingore raked and temporary files
-  - Adjust edge case unit tests
+* Massive code rewrite and restructuring
+  - Adopt new coding pattern [jddalton, kangax, Tobie Langel]
+  - Restructure file system to accommodate custom builds [jddalton, T.J Crowder, Tobie Langel]
+  - Backwards compatibility change for Ajax.Responders.responders property [jddalton]
+  - Update .gitignore files to ingore raked and temporary files [bkerley] 
+  - Adjust edge case unit tests [jddalton]
 
 * unit test: Make Ajax unit tests work in Safari 2, stop Dom unit tests from crashing Opera 9.2x on OS X, and perform minor cleanup on Form and Dom unit tests. [jddalton]
 
