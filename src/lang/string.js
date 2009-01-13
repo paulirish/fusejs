@@ -33,23 +33,25 @@
     }
 
     function toQueryParams(separator) {
-      var match = this.strip().match(/([^?#]*)(#.*)?$/);
-      if (!match) return { };
+      var hash = { }, match = this.strip().match(/([^?#]*)(#.*)?$/);
+      if (!match) return hash;
 
-      return match[1].split(separator || '&').inject({ }, function(hash, pair) {
-        if ((pair = pair.split('='))[0]) {
-          var key = decodeURIComponent(pair.shift());
-          var value = pair.length > 1 ? pair.join('=') : pair[0];
-          if (value != undefined) value = decodeURIComponent(value);
+      var pair, key, value, i = 0,
+       pairs = match[1].split(separator || '&'), length = pairs.length;
 
-          if (key in hash) {
-            if (!Object.isArray(hash[key])) hash[key] = [hash[key]];
-            hash[key].push(value);
-          }
-          else hash[key] = value;
+      for ( ; i < length; i++) {
+        if (!(pair = pairs[i].split('='))[0]) continue
+        key = decodeURIComponent(pair.shift());
+        value = pair.length > 1 ? pair.join('=') : pair[0];
+        if (value != null) value = decodeURIComponent(value);
+
+        if (key in hash) {
+          if (!Object.isArray(hash[key])) hash[key] = [hash[key]];
+          hash[key].push(value);
         }
-        return hash;
-      });
+        else hash[key] = value;
+      }
+      return hash;
     }
 
     /* FORMAT FUNCTIONS */

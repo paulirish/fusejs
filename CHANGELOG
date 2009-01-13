@@ -1,3 +1,5 @@
+* Remove dependency of Array#inject in Object.toQueryString, Hash#toQueryString and String#toQueryParams. [jddalton,  Joe Gornick]
+
 * Cleanup Object data type detection methods and utilize Object.prototype.toString.call() to access an objects ineternal [[Class]] property. [jddalton, kangax]
 
 * unit test: Change all occurrences of window.location.toString() to window.location.href. [jddalton]

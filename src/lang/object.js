@@ -84,8 +84,21 @@
       return '{' + results.join(', ') + '}';
     }
 
+    function toQueryPair(key, value) {
+      if (typeof value === 'undefined') return key;
+      return key + '=' + encodeURIComponent(String.interpret(value));
+    }
+
     function toQueryString(object) {
-      return $H(object).toQueryString();
+      var key, results = [];
+      for (key in object) {
+        value = object[key], key = encodeURIComponent(key);
+        if (value && typeof value === 'object') {
+          if (Object.isArray(value))
+            results = mergeList(results, value.map(toQueryPair.curry(key)));
+        } else results.push(toQueryPair(key, value));
+      }
+      return results.join('&');
     }
 
     function keys(object) {

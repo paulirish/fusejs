@@ -54,21 +54,8 @@
       return Object.clone(this._object);
     }
 
-    function toQueryPair(key, value) {
-      if (typeof value === 'undefined') return key;
-      return key + '=' + encodeURIComponent(String.interpret(value));
-    }
-
     function toQueryString() {
-      return this.inject([], function(results, pair) {
-        var key = encodeURIComponent(pair.key), values = pair.value;
-
-        if (values && typeof values == 'object') {
-          if (Object.isArray(values))
-            return mergeList(results, values.map(toQueryPair.curry(key)));
-        } else results.push(toQueryPair(key, values));
-        return results;
-      }).join('&');
+      return Object.toQueryString(this._object);
     }
 
     function get(key) {
