@@ -1,3 +1,5 @@
+* Optimize Hash#toJSON by using a direct reference of this._object instead of a clone. [jddalton]
+
 * Remove dependency of Array#inject in Object.toQueryString, Hash#toQueryString and String#toQueryParams. [jddalton,  Joe Gornick]
 
 * Cleanup Object data type detection methods and utilize Object.prototype.toString.call() to access an objects ineternal [[Class]] property. [jddalton, kangax]

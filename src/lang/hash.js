@@ -47,7 +47,7 @@
     }
 
     function toJSON() {
-      return Object.toJSON(this.toObject());
+      return Object.toJSON(this._object);
     }
 
     function toObject() {
