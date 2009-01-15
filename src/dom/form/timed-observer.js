@@ -1,10 +1,11 @@
   /*-------------------------- FORM: TIMED OBSERVER --------------------------*/
 
-  Abstract.TimedObserver = Class.create(PeriodicalExecuter, (function() {
-    function initialize($super, element, frequency, callback) {
-      $super(callback, frequency);
+  Abstract.TimedObserver = Class.create(Timer, (function() {
+    function initialize($super, element, interval, callback) {
+      $super(callback, interval);
       this.element   = $(element);
       this.lastValue = this.getValue();
+      this.start();
     }
 
     function execute() {

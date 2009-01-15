@@ -88,7 +88,7 @@
    'lang/abstract.js',
    'lang/date.js',
    'lang/regexp.js',
-   'lang/periodical-executer.js',
+   'lang/timer.js',
    'lang/string.js',
    'lang/template.js',
    'lang/enumerable.js',

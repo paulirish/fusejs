@@ -303,29 +303,29 @@ new Test.Unit.Runner({
     this.assert(iterations > 3);
   },
   
-  testPeriodicalExecuterStop: function() {
-    var peEventCount = 0;
-    function peEventFired(pe) {
-      if (++peEventCount > 2) pe.stop();
+  testTimerStop: function() {
+    var timerEventCount = 0;
+    function timerEventFired(timer) {
+      if (++timerEventCount > 2) timer.stop();
     }
     
-    // peEventFired will stop the PeriodicalExecuter after 3 callbacks
-    new PeriodicalExecuter(peEventFired, 0.05);
+    // timerEventFired will stop the Timer after 3 callbacks
+    new Timer(timerEventFired, 0.05).start();
     
     this.wait(600, function() {
-      this.assertEqual(3, peEventCount);
+      this.assertEqual(3, timerEventCount);
     });
   },
 
-  testPeriodicalExecuterException: function() {
-    function peEventFired(pe) {
-      pe.stop();
+  testTimerException: function() {
+    function timerEventFired(timer) {
+      timer.stop();
       throw "error";
     }
     
-    var pe = new PeriodicalExecuter(peEventFired, 0.05);
+    var timer = new Timer(timerEventFired, 0.05).start();
     this.wait(100, function() {
-      this.assertEqual(false, pe.currentlyExecuting);
+      this.assertEqual(false, timer.executing);
     });
   },
   
