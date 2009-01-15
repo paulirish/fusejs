@@ -3,8 +3,6 @@
   // Support for the "dom:loaded" event is based on work by Dan Webb, 
   // Matthias Miller, Dean Edwards, John Resig and Diego Perini.
   (function() {
-    var pollerID, sheetLength, sheetElements = [];
-
     function createPoller(method) {
       var callback = function() {
         if (!method()) pollerID = callback.defer();
@@ -14,11 +12,10 @@
     }
 
     function clearPoller() {
-      pollerID && global.clearTimeout(pollerID);
+      pollerID != null && global.clearTimeout(pollerID);
     }
 
     function cssDoneLoading() {
-      sheetElements = null;
       return (isCssLoaded = function() { return true })();
     }
 
@@ -33,169 +30,174 @@
       return !!(isCssLoaded() && fireDomLoadedEvent());
     }
 
-    var checkDomLoadedState = function(event) {
+    function getSheetElements() {
+      var i = 0, link, links = doc.getElementsByTagName('LINK'),
+       results = nodeListSlice(doc.getElementsByTagName('STYLE'));
+      while (link = links[i++]) results.push(link);
+      return results;
+    }
+    
+    function getSheetObjects(elements) {
+      for (var i = 0, results = [], element, sheet; element = elements[i++]; ) {
+        sheet = getSheet(element);
+        if (sheet === null) return false;
+        if (isSheetAccessible(sheet)) {
+          results.push(sheet);
+          if (!addImports(results, sheet))
+            return false;
+        }
+      }
+      return results;
+    }
+    
+    function isSheetAccessible(sheet) {
+      try { return !!getRules(sheet) } catch(e) {
+        return !/(security|denied)/i.test(e.message);
+      }
+    }
+
+    var pollerID,
+
+    checkDomLoadedState = function(event) {
       if (event && event.type === 'DOMContentLoaded' ||
           /loaded|complete/.test(doc.readyState)) {
         doc.stopObserving('readystatechange', respondToReadyState);
         if (!checkCssAndFire()) createPoller(checkCssAndFire);
       }
-    };
+    },
 
-    var respondToReadyState = function(event) {
+    respondToReadyState = function(event) {
       clearPoller();
       checkDomLoadedState(event);
-    };
+    },
 
-   /*--------------------------------------------------------------------------*/
-
-   var HAS_IMPORTS_COLLECTION,
-    cache = { },
-    prop = { 'cssRules':'cssRules', 'ownerNode':'ownerNode', 'sheet':'sheet' };
-
-   // stylesheet property tests
-   (function() {
-      var styleElement = doc.createElement('style');
-      docEl.insertBefore(styleElement, docEl.firstChild);
-
-      // translate "sheet"
-      if (isHostObject(styleElement, 'styleSheet'))
-        prop.sheet = 'styleSheet';
-
-      var styleSheet = styleElement[prop.sheet];
-      if (styleSheet) {
-        HAS_IMPORTS_COLLECTION = isHostObject(styleSheet, 'imports');
-
-        // translate "ownerNode"
-        if (isHostObject(styleSheet, 'owningElement'))
-          prop.ownerNode = 'owningElement';
-
-        // translate "rules"
-        if (isHostObject(styleSheet, 'rules'))
-          prop.cssRules = 'rules';
-      }
-      
-      docEl.removeChild(styleElement);
-      styleElement = styleSheet = null;
-    })();
-
-    // allSheetsEnabled() will cache its current position in the style elements
-    // and css rules so that the next time its called it will resume where
-    // it left off and not re-iterate over already tested elements/rules.
-    function allSheetsEnabled() {
-      // Safari 2 will bail on each loop because "sheet" is always null
-      cache.sheetIndex = cache.sheetIndex || sheetLength;
-
-      elementloop: while (cache.sheetIndex--) {
-        cache.styleSheet = cache.styleSheet || sheetElements[cache.sheetIndex][prop.sheet];
-        cache.itemList   = getItemList();
-        cache.indexList  = cache.indexList  || [cache.itemList.length];
-
-        // sheets that are not loaded will not have rules,
-        // so we always refresh the last ruleIndexes if it is 0
-        if (!cache.indexList.last())
-          cache.indexList.splice(-1, 1, cache.itemList.length);
-
-        sheetloop: while (cache.styleSheet) {
-          // if sheet is disabled, but not the element attribute,
-          // then increment sheetIndex so the next time allSheetsEnabled()
-          // is called it will begin at the same element.
-          if (cache.styleSheet.disabled && (!cache.styleSheet[prop.ownerNode] ||
-              cache.styleSheet[prop.ownerNode].disabled) && ++cache.sheetIndex) {
-            return false;
-          }
-
-          // each iteration decrements the last index in the stack
-          itemloop: while (cache.indexList[cache.indexList.length - 1]--) {
-            var result = checkImports();
-            if (result === true)  continue sheetloop;
-            if (result === false) continue itemloop;
-          }
-
-          // walk back down the stack
-          cache.styleSheet = cache.styleSheet.parentStyleSheet;
-          cache.indexList.pop();
-        }
-
-        // clear cached variables and exit sheetloop
-        cache = { };
-      }
-      return true;
-    }
-
-    function getCssRules(styleSheet) {
-      try { return styleSheet[prop.cssRules] }
-      catch(e) { return [] }
-    }
-
-    var getItemList = (function() {
-      return HAS_IMPORTS_COLLECTION
-        ? function() { return cache.itemList || cache.styleSheet.imports }
-        : function() { return cache.itemList || getCssRules(cache.styleSheet) };
-    })();
-
-    var checkImports = (function() {
-      return HAS_IMPORTS_COLLECTION ?
-        function() {
-          cache.styleSheet = cache.styleSheet.imports[cache.indexList.last()][sheet];
-          cache.itemList   = cache.styleSheet.imports;
-          cache.indexList.push(cache.itemList.length);
-          return true;
-        } :
-        function() {
-          // skip if not an @import rule
-          var rule = cache.itemList[cache.indexList.last()];
-          if (!rule.styleSheet) return false;
-
-          // update cache and add new rules length to the stack
-          cache.styleSheet = rule.styleSheet;
-          cache.itemList   = getCssRules(cache.styleSheet);
-          cache.indexList.push(cache.itemList.length);
-          return true;
-        };
-    })();
-
-    var isCssLoaded = function() {
-      // one time call to collect the style elements
-      sheetElements = $$('style,link[rel="stylesheet"]');
-      sheetLength   = sheetElements.length;
-
-      // if no sheet elements, then always return true
-      if (!sheetLength) return cssDoneLoading();
-
-      // Firefox > 2
-      try {
-        // Safari 2 has the "sheet" property but it's always null 
-        var sheet = sheetElements[0][prop.sheet];
-        sheet && sheet.cssRules;
-      } catch(e) {
-        isCssLoaded = function() {
-          // Firefox will throw an error if you try to
-          // access the cssRules when the stylesheet isn't loaded
-          while (sheetLength--) {
-            try { sheetElements[sheetLength][prop.sheet][prop.cssRules] } catch(e) {
-              if (e.message.indexOf('Security') < 0 && sheetLength++) return false;
+    addImports = function(collection, sheet) {
+      return (addImports = isHostObject(sheet, 'imports')
+        ? function(collection, sheet) {
+            var length = sheet.imports.length;
+            while (length--) {
+              if (isSheetAccessible(sheet.imports[length])) {
+                collection.push(sheet.imports[length]);
+                addImports(collection, sheet.imports[length])
+              }
             }
+            return collection;
           }
-          return cssDoneLoading();
-        };
+        : function(collection, sheet) {
+            var ss, rules = getRules(sheet), length = rules.length;
+            while (length--) {
+              ss = rules[length].styleSheet;
+              if (ss === null) return false;
+              if (ss && isSheetAccessible(ss)) {
+                collection.push(ss);
+                if (!addImports(collection, ss))
+                  return false;
+              }
+            }
+            return collection;
+          }
+      )(collection, sheet);
+    },
 
-        return false;
-      }
-      // Opera
-      if (!allSheetsEnabled()) {
-        isCssLoaded = function () { return allSheetsEnabled() && cssDoneLoading() };
-        return false;
-      }
-      // Default and Safari < 3
-      if (Feature('DOCUMENT_STYLE_SHEETS_COLLECTION')) {
-        return (isCssLoaded = function() {
-          return doc.styleSheets.length >= sheetLength })();
-      }
-      // skip css check as fallback
-      return cssDoneLoading();
+    getStyle = function(element, styleName) {
+      return (getStyle = Feature('ELEMENT_CURRENT_STYLE')
+        ? function(element, styleName) { return element.currentStyle[styleName] }
+        : function(element, styleName) { return element.ownerDocument.defaultView
+            .getComputedStyle(element, null)[styleName] }
+      )(element, styleName);
+    },
+
+    getSheet = function(element) {
+      return (getSheet = isHostObject(element, 'styleSheet')
+        ? function(element) { return element.styleSheet }
+        : function(element) { return element.sheet }
+      )(element);
+    },
+
+    getRules = function(sheet) {
+      return (getRules = isHostObject(sheet, 'rules')
+        ? function(sheet) { return sheet.rules }
+        : function(sheet) { return sheet.cssRules }
+      )(sheet);
+    },
+
+    addRule = function(sheet, selector, cssText) {
+      return (addRule = isHostObject(sheet, 'addRule')
+        ? function(sheet, selector, cssText) { return sheet.addRule(selector, cssText) }
+        : function(sheet, selector, cssText) { return sheet.insertRule(selector +
+            '{' + cssText + '}', getRules(sheet).length) }
+      )(sheet, selector, cssText);
+    },
+
+    removeRule = function(sheet, index) {
+      return (removeRule = isHostObject(sheet, 'removeRule')
+        ? function(sheet, index) { return sheet.removeRule(index) }
+        : function(sheet, index) { return sheet.deleteRule(index) }
+      )(sheet, index);
+    },
+
+    isCssLoaded = function() {
+      var sheetElements = getSheetElements();
+      return !sheetElements.length
+        ? cssDoneLoading()
+        : (isCssLoaded = function() {
+            var cache = [];
+            return !(function() {
+              var sheets = getSheetObjects(sheetElements);
+              if (!sheets) return false;
+
+              var className, length = sheets.length;
+              while (length--) {
+                className = 'fuse_css_loaded_' + cache.length;
+                cache.push({ 'className': className, 'sheet': sheets[length] });
+                addRule(sheets[length], '.' + className, 'margin-top: -1234px!important;');
+              }
+              return true;
+            })()
+              ? false
+              : (isCssLoaded = function() {
+                  var c, lastIndex, rules, length = cache.length, done = true;
+                  while (length--) {
+                    c = cache[length];
+                    rules = getRules(c.sheet);
+                    lastIndex = rules.length && rules.length - 1;
+
+                    // if styleSheet was still loading when test rule
+                    // was added it will have removed the rule.
+                    if (rules[lastIndex].cssText.indexOf(c.className) > -1) {
+                      done = false;
+
+                      // if the styleSheet has only the test rule then skip
+                      if (rules.length === 1) continue;
+
+                      if (!c.div) {
+                        c.div = doc.createElement('div');
+                        c.div.className = c.className;
+                        c.div.style.cssText = 'position:absolute;visibility:hidden;';
+                      }
+
+                      doc.body.appendChild(c.div);
+
+                      // when loaded clear cache entry
+                      if (getStyle(c.div, 'marginTop') === '-1234px')
+                        cache.splice(length, 1);
+
+                      // cleanup
+                      removeRule(c.sheet, lastIndex);
+                      doc.body.removeChild(c.div);
+                    }
+                  }
+
+                  if (done) {
+                    cache = null;
+                    return cssDoneLoading();
+                  }
+                  return done;
+                })();
+          })();
     };
 
-   /*--------------------------------------------------------------------------*/
+    /*--------------------------------------------------------------------------*/
 
     // IE
     // Ensure the document is not in a frame because
@@ -209,14 +211,25 @@
       };
     }
 
-    // worst case fallbacks... 
-    createPoller(checkDomLoadedState);
-    Event.observe(global, 'load', fireDomLoadedEvent);
-
-    // remove poller if other options are available
+    // Firefox, Opera, Webkit, others.
+    // Remove poller if other options are available
     $w('DOMContentLoaded readystatechange')._each(function(eventName) {
       doc.observe(eventName, respondToReadyState);
     });
+    
+    // worst case create poller and window onload observer
+    createPoller(checkDomLoadedState);
+
+    if (Feature('ELEMENT_ADD_EVENT_LISTENER'))
+      global.addEventListener('load', fireDomLoadedEvent, false);
+    else if (Feature('ELEMENT_ATTACH_EVENT'))
+      global.attachEvent('onload', fireDomLoadedEvent);
+    else {
+      var __onload = global.onload;
+      if (typeof __onload === 'function')
+        global.onload = function() { fireDomLoadedEvent(); __onload() };
+      else global.onload = fireDomLoadedEvent;
+    }
   })();
 
   /*--------------------------------------------------------------------------*/
@@ -224,5 +237,5 @@
   // define private body and root variables
   doc.observe('dom:loaded', function() {
     body = Element.extend(doc.body);
-    root = Bug('BODY_ACTING_AS_ROOT') ? body : docEl;
+    root = Bug('BODY_ACTING_AS_ROOT') ? body : Element.extend(docEl);
   });
