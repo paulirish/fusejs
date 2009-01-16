@@ -215,6 +215,10 @@ new Test.Unit.Runner({
 
     // Form.Element.activate shouldn't raise an exception when the form or field is hidden
     this.assertNothingRaised(function() {
+      Field.focus('form_focus_hidden');
+    });
+
+    this.assertNothingRaised(function() {
       $('form_focus_hidden').focusFirstElement();
     });
     

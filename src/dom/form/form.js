@@ -178,7 +178,10 @@
 
   Field = Form.Element = (function() {
     function focus(element) {
-      (element = $(element)).focus();
+      element = $(element);
+      // avoid IE errors when element
+      // or ancestors are not visible
+      try { element.focus() } catch(e) { }
       return element;
     }
 
@@ -198,12 +201,10 @@
   Form.Element.Methods = (function() {
     function activate(element) {
       element = $(element);
-      try {
-        element.focus();
-        if (element.select && element.tagName.toUpperCase() !== 'BUTTON' &&
-            !['button', 'reset', 'submit'].include(element.type))
-          element.select();
-      } catch (e) { }
+      try { element.focus() } catch(e) { }
+      if (element.select && element.tagName.toUpperCase() !== 'BUTTON' &&
+          !['button', 'reset', 'submit'].include(element.type))
+        element.select();
       return element;
     }
 
