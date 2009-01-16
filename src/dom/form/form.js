@@ -105,7 +105,7 @@
     function focusFirstElement(form) {
       form = $(form); 
       var element = Form.findFirstElement(form); 
-      element && Form.Element.activate(element); 
+      element && Field.focus(element); 
       return form;
     }
 
