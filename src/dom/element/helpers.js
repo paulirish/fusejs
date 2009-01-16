@@ -64,8 +64,8 @@
           return function(cache, container) {
             cache.range = cache.range || cache.node.ownerDocument.createRange();
             cache.range.selectNodeContents(container);
-			var extracted = cache.range.extractContents();
-			extracted && cache.fragment.appendChild(extracted);
+            var extracted = cache.range.extractContents();
+            extracted && cache.fragment.appendChild(extracted);
             return cache.fragment;
           };
         }

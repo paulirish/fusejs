@@ -469,11 +469,11 @@
       }
 
       return {
-        attr:         attr,
-        attrPresence: attrPresence,
-        className:    className,
-        id:           id,
-        tagName:      tagName
+        'attr':         attr,
+        'attrPresence': attrPresence,
+        'className':    className,
+        'id':           id,
+        'tagName':      tagName
       };
     })(),
 
@@ -495,9 +495,9 @@
           while (length--) a[pad + length] = b[length];
           return a;
         };
-      })();
+      })(),
 
-      var unmark = (function() {
+      unmark = (function() {
         // IE improperly serializes _countedByPrototype in (inner|outer)HTML.
         if (Bug('ELEMENT_PROPERTIES_ARE_ATTRIBUTES')) {
           return function(nodes) {

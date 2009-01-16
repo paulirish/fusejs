@@ -1,27 +1,17 @@
 <%= include 'HEADER' %>
 (function(global) {
-  var body, root,
-   doc       = document,
-   docEl     = doc.documentElement,
-   userAgent = navigator.userAgent,
-   dummy     = doc.createElement('div'),
-   slice     = Array.prototype.slice;
 
-  // IE will throw an error when attempting to
-  // pass a nodeList to slice.call() AND
-  // Safari 2 will return a full array with undefined values
-  var nodeListSlice =
-    (function() { try { return !!slice.call(docEl.childNodes, 0)[0] } catch(e) { return false } })()
-      ? slice
-      : function(begin, end) {
-          // Avoid the nodeList length property because,
-          // in IE for example, it might be an element with an ID of "length"
-          var i = 0, results = [];
-          while ((results[i] = this[i++])) { }
-          results.length--;
-          return !begin && arguments.length < 2 ?
-            results : results.slice(begin, end);
-        };
+  // Host objects have a range of typeof values. For example:
+  // doc.createElement('div').offsetParent -> unknown
+  // doc.createElement -> object
+  function isHostObject(object, property) {
+    var type = typeof object[property];
+    return type === 'function' || type === 'object' || type === 'unknown';
+  }
+
+  function getOwnerDoc(element) { // assume element is not null
+    return element.ownerDocument || (element.nodeType === 9 ? element : doc);
+  }
 
   function mergeList(list, other) {
     var result = slice.call(list, 0), pad = list.length, length = other.length;
@@ -35,21 +25,32 @@
     return result;
   }
 
-  function getOwnerDoc(element) { // assume element is not null
-    return element.ownerDocument || (element.nodeType === 9 ? element : doc);
-  }
+  var body, root,
+   doc       = document,
+   docEl     = doc.documentElement,
+   userAgent = navigator.userAgent,
+   dummy     = doc.createElement('div'),
+   slice     = Array.prototype.slice,
 
-  function isHostObject(object, property) {
-    // Host objects have a range of typeof values. For example:
-    // doc.createElement('div').offsetParent -> unknown
-    // doc.createElement -> object
-    var type = typeof object[property];
-    return type === 'function' || type === 'object' || type === 'unknown';
-  }
+  // IE will throw an error when attempting to
+  // pass a nodeList to slice.call() AND
+  // Safari 2 will return a full array with undefined values
+  nodeListSlice =
+    (function() { try { return !!slice.call(docEl.childNodes, 0)[0] } catch(e) { return false } })()
+      ? slice
+      : function(begin, end) {
+          // Avoid the nodeList length property because,
+          // in IE for example, it might be an element with an ID of "length"
+          var i = 0, results = [];
+          while ((results[i] = this[i++])) { }
+          results.length--;
+          return !begin && arguments.length < 2 ?
+            results : results.slice(begin, end);
+        },
 
   /*---------------------------- PROTOTYPE OBJECT ----------------------------*/
 
-  var P = Prototype = {
+  P = Prototype = {
     Version: '<%= FUSEJS_VERSION %>',
 
     Browser: {
@@ -73,9 +74,9 @@
 
     emptyFunction: function() { },
     K: function(x) { return x }
-  };
+  },
 
-  var K = P.K;
+  K = P.K;
 
 <%= include(
    'features.js',

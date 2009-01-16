@@ -90,8 +90,8 @@
     }
 
     function select(element) {
-      var args = slice.call(arguments, 1);
-      return Selector.findChildElements($(element), args);
+      return Selector.findChildElements($(element),
+        slice.call(arguments, 1));
     }
 
     var descendantOf = (function() {

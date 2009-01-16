@@ -8,11 +8,12 @@
       };
 
       options = Object.clone(options);
-      var onComplete = options.onComplete;
-      options.onComplete = (function(response, json) {
-        this.updateContent(response.responseText);
+      var updater = this, onComplete = options.onComplete;
+      
+      options.onComplete = function(response, json) {
+        updater.updateContent(response.responseText);
         if (typeof onComplete === 'function') onComplete(response, json);
-      }).bind(this);
+      };
 
       $super(url, options);
     }

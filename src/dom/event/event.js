@@ -172,9 +172,9 @@
     };
 
     Object.extend(Methods, {
-      stopPropagation: stopPropagation,
-      preventDefault:  preventDefault,
-      inspect:         inspect
+      'stopPropagation': stopPropagation,
+      'preventDefault':  preventDefault,
+      'inspect':         inspect
     });
 
     return function(event) {
@@ -197,13 +197,13 @@
   Object.extend(Event, Event.Methods);
 
   (function() {
-    var EVENT_OBSERVER_ORDER_NOT_FIFO = false;
+    var EVENT_OBSERVER_ORDER_NOT_FIFO = false,
 
-    var addEvent = function(element, eventName, handler) {
+    addEvent = function(element, eventName, handler) {
       element.addEventListener(getDOMEventName(eventName), handler, false);
-    };
+    },
 
-    var removeEvent = function(element, eventName, handler) {
+    removeEvent = function(element, eventName, handler) {
       element.removeEventListener(getDOMEventName(eventName), handler, false);
     };
 
@@ -414,7 +414,7 @@
         } else removeEvent(element, eventName, found.responder);
 
         return element;
-        }
+      }
 
       return {
         'fire':          fire,

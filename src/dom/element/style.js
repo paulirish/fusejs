@@ -63,10 +63,10 @@
       return function (element) {
         return Element.getStyle(element, 'opacity');
       };
-    })();
+    })(),
 
     /* SET OPACITY */
-    var setOpacity = (function() {
+    setOpacity = (function() {
       function stripAlpha(filter) {
         return filter.replace(/alpha\([^\)]*\)/gi,'');
       }
@@ -121,10 +121,10 @@
       }
       // else default
       return setStyleOpacity;
-    })();
+    })(),
 
     /* GET STYLE */
-    var getStyle = (function() {
+    getStyle = (function() {
       function getStyleValue(element, styleName) {
         return getResult(getStyleName(styleName), element.style[styleName]);
       }
@@ -148,7 +148,7 @@
 
       function getResult(styleName, value) {
         if (styleName === 'opacity')
-		  return value ? parseFloat(value) : 1.0;
+		      return value ? parseFloat(value) : 1.0;
         return value === 'auto' || value === '' ? null : value;
       }
 

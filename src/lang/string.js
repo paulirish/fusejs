@@ -277,9 +277,9 @@
     var escapeHTML = function() {
       textNode.data = this;
       return container.innerHTML.replace(/"/g, '&quot;');
-    };
+    },
 
-    var unescapeHTML = function() {
+    unescapeHTML = function() {
       dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
       return dummy.textContent;
     };

@@ -171,7 +171,7 @@
       'getInputs':         getInputs,
       'request':           request,
       'serialize':         serialize
-  };
+    };
   })();
 
   /*--------------------------------------------------------------------------*/
@@ -190,7 +190,7 @@
     return {
       'focus':  focus,
       'select': select
-  };
+    };
   })();
 
   /*--------------------------------------------------------------------------*/
@@ -200,7 +200,7 @@
       element = $(element);
       try {
         element.focus();
-        if (element.select && element.tagName.toUpperCase() != 'BUTTON' &&
+        if (element.select && element.tagName.toUpperCase() !== 'BUTTON' &&
             !['button', 'reset', 'submit'].include(element.type))
           element.select();
       } catch (e) { }
@@ -209,7 +209,7 @@
 
     function clear(element) {
       element = $(element);
-      if (element.tagName.toUpperCase() != 'BUTTON' &&
+      if (element.tagName.toUpperCase() !== 'BUTTON' &&
           !['button', 'image', 'reset', 'submit'].include(element.type))
         Form.Element.setValue(element, null);
       return element;
@@ -268,7 +268,7 @@
       'present':   present,
       'serialize': serialize,
       'setValue':  setValue
-  };
+    };
   })();
 
   /*--------------------------------------------------------------------------*/

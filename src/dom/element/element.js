@@ -96,14 +96,14 @@
     }
 
     // Browsers with specific element extensions
-  	// don't need their elements extended UNLESS
-  	// they belong to a different document
-	if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
-	  return Object.extend(function(element) {
-	    return (element && element.ownerDocument &&
-	      element.ownerDocument !== doc) ? extend(element) : element;
-	  }, { 'refresh': refresh });
-	}
+    // don't need their elements extended UNLESS
+    // they belong to a different document
+    if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
+      return Object.extend(function(element) {
+        return (element && element.ownerDocument &&
+          element.ownerDocument !== doc) ? extend(element) : element;
+      }, { 'refresh': refresh });
+    }
 
     extend.refresh = refresh;
     return extend;
@@ -394,9 +394,9 @@
           return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
             Element.descendantOf(element, element.ownerDocument)));
         };
-    })();
+    })(),
 
-    var update = (function() {
+    update = (function() {
       var setInnerHTML = Bug('ELEMENT_SELECT_INNERHTML_BUGGY') || Bug('ELEMENT_TABLE_INNERHTML_BUGGY') || Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY') ?
         function(element, content) {
           var tagName = element.tagName.toUpperCase();
@@ -424,9 +424,9 @@
         content.evalScripts.bind(content).defer();
         return element;
       };
-    })()
+    })(),
 
-    var replace = (function() {
+    replace = (function() {
       var createFragment = Feature('DOCUMENT_RANGE') ?
         function(element, content) {
           var range = element.ownerDocument.createRange();

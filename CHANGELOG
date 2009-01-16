@@ -1,3 +1,5 @@
+* Minor source and whitespace cleanup. [jddalton]
+
 * Cleanup stylesheet load detection in dom-loaded.js and implement a better detection scheme. [Diego Perini, jddalton]
 
 * Optimize private method nodeListSlice() by replacing $A() calls with a while-loop and remove its dependency on the nodeList "length" property. [Diego Perini, jddalton]
