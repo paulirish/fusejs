@@ -49,6 +49,10 @@
   Element.extend = (function() {
     var Methods, ByTag, revision = 0;
 
+    function createRevisionGetter(r) {
+      return function() { return r };
+    }
+
     function extend(element) {
       // Bail on elements that don't need extending, 
       // XML nodes (IE errors on them), document, window objects
@@ -69,9 +73,7 @@
       }
 
       // avoid using Prototype.K.curry(revision) for speed
-      element._extendedByPrototype = (function(r) {
-        return function() { return r };
-      })(revision);
+      element._extendedByPrototype = createRevisionGetter(revision);
 
       return element;
     }

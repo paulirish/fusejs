@@ -456,13 +456,27 @@
         else proceed(event);
       }
 
+      function winUnloadWrapper(proceed, event) {
+        proceed(event);
+        // to avoid memory leaks we clear
+        // private body and root variables
+        doc = dummy = body = docEl = root = null;
+      }
+
       function domLoadWrapper(proceed, event) {
+        // define private body and root variables
+        body = Element.extend(doc.body);
+        root = Bug('BODY_ACTING_AS_ROOT') ? body : Element.extend(docEl);
+
         proceed(event);
         DOM_LOADED_EXECUTED = true;
       }
 
       addEvent(global, 'load', createEventCache(global, 'load').dispatcher = 
         createDispatcher(1 /* window ID */, 'load').wrap(winLoadWrapper));
+
+      addEvent(global, 'unload', createEventCache(global, 'unload').dispatcher = 
+        createDispatcher(1 /* window ID */, 'unload').wrap(winUnloadWrapper));
 
       addEvent(doc, 'dom:loaded', createEventCache(doc, 'dom:loaded').dispatcher = 
         createDispatcher(2 /* document ID */, 'dom:loaded').wrap(domLoadWrapper));

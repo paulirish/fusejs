@@ -216,7 +216,10 @@
     $w('DOMContentLoaded readystatechange')._each(function(eventName) {
       doc.observe(eventName, respondToReadyState);
     });
-    
+
+    // stop poller onunload because it may reference cleared variables
+    Event.observe(global, 'unload', clearPoller);
+
     // worst case create poller and window onload observer
     createPoller(checkDomLoadedState);
 
@@ -231,11 +234,3 @@
       else global.onload = fireDomLoadedEvent;
     }
   })();
-
-  /*--------------------------------------------------------------------------*/
-
-  // define private body and root variables
-  doc.observe('dom:loaded', function() {
-    body = Element.extend(doc.body);
-    root = Bug('BODY_ACTING_AS_ROOT') ? body : Element.extend(docEl);
-  });

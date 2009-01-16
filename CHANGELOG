@@ -1,3 +1,5 @@
+* Minimize IE6 memory leak caused by Element.extend() and private variables "body", "docEl", and "root". [jddalton]
+
 * Make Form.focusFirstElement() focus the first element instead of activating it. [#473 state:resolved] [jddalton, Robert Sosinski]
 
 * Ensure Field.focus() doesn't throw an error when the element or its ancestors are not visible. [#521 state:resolved] [jddalton, Stefan Esterer]

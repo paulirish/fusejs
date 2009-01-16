@@ -28,9 +28,9 @@
   var body, root,
    doc       = document,
    docEl     = doc.documentElement,
-   userAgent = navigator.userAgent,
    dummy     = doc.createElement('div'),
    slice     = Array.prototype.slice,
+   userAgent = navigator.userAgent,
 
   // IE will throw an error when attempting to
   // pass a nodeList to slice.call() AND
@@ -65,8 +65,8 @@
       'XPath': isHostObject(doc, 'evaluate'),
       'SelectorsAPI': isHostObject(doc, 'querySelector'),
       'ElementExtensions': isHostObject(global,'HTMLElement'),
-      'SpecificElementExtensions': isHostObject(dummy, '__proto__') &&
-        dummy['__proto__'] !== document.createElement('form')['__proto__']
+      'SpecificElementExtensions': isHostObject(docEl, '__proto__') &&
+        docEl['__proto__'] !== document.createElement('form')['__proto__']
     },
 
     ScriptFragment: '<script[^>]*>([^\\x00]*?)<\/script>',
