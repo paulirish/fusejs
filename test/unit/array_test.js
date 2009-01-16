@@ -58,7 +58,9 @@ new Test.Unit.Runner({
   },
   
   testLast: function(){
-    this.assertUndefined([].last());
+    var array = [];
+    array[-1] = 'blah';
+    this.assertUndefined(array.last());
     this.assertEqual(1, [1].last());
     this.assertEqual(2, [1,2].last());
   },

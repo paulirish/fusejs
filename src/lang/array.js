@@ -118,7 +118,8 @@
     }
 
     function last() {
-      return this[this.length - 1];
+      var length = this.length;
+      return this[length && length - 1];
     }
 
     function lastIndexOf(item, i) {

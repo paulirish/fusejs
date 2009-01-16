@@ -1,3 +1,5 @@
+* Ensure Array#last won't attempt a -1 index with zero length arrays. [#236 state:resolved] [jddalton, kangax]
+
 * Minor source and whitespace cleanup. [jddalton]
 
 * Cleanup stylesheet load detection in dom-loaded.js and implement a better detection scheme. [Diego Perini, jddalton]
