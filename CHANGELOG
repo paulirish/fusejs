@@ -1,3 +1,5 @@
+* Change the way Element.extend() detects XML nodes by testing for the existence of element.ownerDocument.body. [Diego Perini, jddalton]
+
 * Minimize IE6 memory leak caused by Element.extend() and private variables "body", "docEl", and "root". [jddalton]
 
 * Make Form.focusFirstElement() focus the first element instead of activating it. [#473 state:resolved] [jddalton, Robert Sosinski]

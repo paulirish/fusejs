@@ -59,7 +59,7 @@
       if (!element || (typeof element._extendedByPrototype !== 'undefined' && 
         element._extendedByPrototype() >= revision) ||
         element.nodeType !== 1 || element === global ||
-        !('write' in element.ownerDocument)) return element;
+        !element.ownerDocument.body) return element;
 
       var pair,
        tagName = element.tagName.toUpperCase(), 
