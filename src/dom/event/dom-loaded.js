@@ -40,7 +40,8 @@
     function getSheetObjects(elements) {
       for (var i = 0, results = [], element, sheet; element = elements[i++]; ) {
         sheet = getSheet(element);
-        if (sheet === null) return false;
+        // bail when sheet is null/undefined on elements
+        if (sheet == null) return false;
         if (isSheetAccessible(sheet)) {
           results.push(sheet);
           if (!addImports(results, sheet))
@@ -87,6 +88,7 @@
             var ss, rules = getRules(sheet), length = rules.length;
             while (length--) {
               ss = rules[length].styleSheet;
+              // bail when sheet is null on rules
               if (ss === null) return false;
               if (ss && isSheetAccessible(ss)) {
                 collection.push(ss);
