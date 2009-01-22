@@ -8,7 +8,7 @@
         parent = properties.shift();
 
       function klass() {
-        this.initialize.apply(this, arguments);
+        return this.initialize.apply(this, arguments);
       }
 
       Object.extend(klass, Class.Methods);

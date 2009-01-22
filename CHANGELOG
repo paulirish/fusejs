@@ -1,3 +1,5 @@
+* Make Class constructors return the "initialize" method's return value. Closes #11481 [cch1]
+
 * Make Event's private method isCssLoaded() fail when the "sheet" object of an element is null or undefined. [jddalton]
 
 * Change the way Element.extend() detects XML nodes by testing for the existence of element.ownerDocument.body. [Diego Perini, jddalton]

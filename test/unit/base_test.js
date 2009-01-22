@@ -456,6 +456,23 @@ new Test.Unit.Runner({
     this.assert('object', typeof new Empty);
   },
 
+  testConstructorExplicitReturn: function() {
+    var $decorator = Class.create({
+      initialize: function(element) {
+        if (element.constructor === $decorator)
+          return element;
+        this.id = 'decorator_id_' + $decorator.idCounter++;
+        this._element = $(element);
+      }
+    });
+
+    $decorator.idCounter = 0;
+
+    var decorated = new $decorator('test');
+    this.assertEqual('decorator_id_0', decorated.id);
+    this.assertEqual('decorator_id_0', new $decorator(decorated).id, 'Constructor is not returning a value.');
+  },
+
   testInheritance: function() {
     var tom = new Cat('Tom');
     this.assertEqual(Cat, tom.constructor, "bad constructor reference");
