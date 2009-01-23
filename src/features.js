@@ -269,18 +269,21 @@
         // true for IE Quirks, Opera 9.25
         if (docEl.clientWidth === 0) return true;
 
-        var backup = { };
-        ['body', 'documentElement']._each(function(name) {
-          backup[name] = doc[name].style.cssText || '';
-          doc[name].style.cssText += ';margin:0;height:auto;';
-        });
+        var dms = dummy.style, bs = body.style, des = docEl.style,
+         bsBackup = bs.cssText, desBackup = des.cssText;
 
-        Element.insert(body, { top: '<div style="display:block;height:8500px;"></div>' });
+        bs.margin   = des.margin = '0';
+        bs.height   = des.height = 'auto';
+        dms.cssText = 'display:block;height:8500px;';
+
+        body.insertBefore(dummy, body.firstChild);
         var result = docEl.clientHeight >= 8500;
-        body.removeChild(body.firstChild);
+        body.removeChild(dummy);
 
-        for (name in backup)
-          doc[name].style.cssText = backup[name];
+        bs.cssText  = bsBackup;
+        des.cssText = desBackup;
+        dms.cssText = '';
+
         return result;
       }
 

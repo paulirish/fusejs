@@ -187,7 +187,7 @@
       }
 
       function getStyleAttribute(element) {
-        return (element.style.cssText || '').toLowerCase();
+        return element.style.cssText.toLowerCase();
       }
 
       function setStyleAttribute(element, value) {

@@ -479,8 +479,7 @@
   $w('Width Height')._each(function(D) {
     Element.Methods['get' + D] = function(element) {
       element = $(element);
-      var result = element['offset' + D],
-       display = Element.getStyle(element, 'display');
+      var result, display = Element.getStyle(element, 'display');
 
       // width and height properties return 0 on elements with display:none,
       // so show the element temporarily
@@ -490,6 +489,8 @@
         result = element['offset' + D];
         element.style.cssText = backup;
       }
+      else result = element['offset' + D];
+
       return result;
     };
   });
