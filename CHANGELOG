@@ -1,3 +1,5 @@
+* Cleanup Element._attributeTranslations.read.getEv(). [Andrew Dupont, jddalton]
+
 * Renamed the PeriodicalExecuter class to Timer. [jddalton, Joe Gornick]
   - Changed "currentlyExecuting" property to "executing"
   - Changed "timer" property to "timerID"

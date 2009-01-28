@@ -77,7 +77,7 @@
       return !!(node && node.specified);
     }
 
-    Object.extend(Element.Methods.Simulated, { 'hasAttribute': simulatedHasAttribute });
+    Element.Methods.Simulated.hasAttribute = simulatedHasAttribute;
     Element.hasAttribute = hasAttribute;
   })();
 
@@ -109,8 +109,8 @@
       attribute = element.getAttribute(attribute);
       if (typeof attribute !== 'function') return '';
       var source = attribute.toString();
-      return source.indexOf('function anonymous()\n{\n') === 0 ?
-        source.slice(23, -2) : '';
+      return source.indexOf('function anonymous()') === 0 ?
+        source.split('{')[1].split('}')[0].strip() : '';
     }
  
     return {
