@@ -2,61 +2,35 @@
 
   if (!global.Event) Event = { };
 
-  Object.extend(Event, {
-    'cache':         { },
-    'KEY_BACKSPACE': 8,
-    'KEY_DELETE':    46,
-    'KEY_DOWN':      40,
-    'KEY_END':       35,
-    'KEY_ESC':       27,
-    'KEY_HOME':      36,
-    'KEY_INSERT':    45,
-    'KEY_LEFT':      37,
-    'KEY_PAGEDOWN':  34,
-    'KEY_PAGEUP':    33,
-    'KEY_RETURN':    13,
-    'KEY_RIGHT':     39,
-    'KEY_TAB':       9,
-    'KEY_UP':        38
-  });
-
-  /*--------------------------------------------------------------------------*/
+  Event.cache = { };
 
   Event.Methods = (function() {
-    var isButton = (function() {
-      if (P.Browser.IE) {
-        // IE doesn't map left/right/middle the same way.
-        var buttonMap = { '0': 1, '1': 4, '2': 2 };
-        return function(event, code) {
-          return event.button == buttonMap[code];
-        };
-      }
-      if (P.Browser.WebKit) {
-        // In Safari we have to account for when the user
-        // holds down the "meta" key.
-        return function(event, code) {
-          switch (code) {
-            case 0:  return event.which == 1 && !event.metaKey;
-            case 1:  return event.which == 1 && event.metaKey;
-            default: return false;
-          }
-        };
-      }
-      return function(event, code) {
-        return event.which ? (event.which === code + 1) : (event.button === code);
-      };
-    })();
+
+    var isButton = function(event, mouseButton) {
+      var property = (typeof event.which === 'number')
+       ? 'which' : (typeof event.button === 'number')
+         ? 'button' : false;
+
+      var buttonMap = (property === 'button')
+        ? { 'left': 1, 'middle': 4, 'right': 2 }
+        : { 'left': 1, 'middle': 2, 'right': 3 };
+
+      return (isButton = (property === false)
+        ? function() { return false }
+        : function(event, mouseButton) { return event[property] === buttonMap[mouseButton] }
+      )(event, mouseButton);
+    };
 
     function isLeftClick(event) {
-      return isButton(event, 0);
+      return isButton(event, 'left');
     }
 
     function isMiddleClick(event) {
-      return isButton(event, 1);
+      return isButton(event, 'middle');
     }
 
     function isRightClick(event) {
-      return isButton(event, 2);
+      return isButton(event, 'right');
     }
 
     function element(event) {
@@ -75,7 +49,7 @@
       }
       // Fix a Safari bug where a text node gets passed as the target of an
       // anchor click rather than the anchor itself.
-      return Element.extend(node && node.nodeType == Node.TEXT_NODE ?
+      return node && Element.extend(node.nodeType === 3 ?
         node.parentNode : node);
     }
 
@@ -111,16 +85,15 @@
   })();
 
   // lazy define Event.pointerX() and Event.pointerY()
- (function(m) {
+  (function(m) {
     function define(methodName, event) {
       if (!body) return 0;
-      if ('pageXOffset' in global) {
+      if (typeof global.pageXOffset === 'number') {
         m.pointerX = function() { return global.pageXOffset };
         m.pointerY = function() { return global.pageYOffset };
       } else {
-        var node = Bug('BODY_ACTING_AS_ROOT') ? body : docEl;
-        m.pointerX = function(event) { return event.clientX + (node.scrollLeft - docEl.clientLeft) };
-        m.pointerY = function(event) { return event.clientY + (node.scrollTop  - docEl.clientTop)  };
+        m.pointerX = function(event) { return event.clientX + (root.scrollLeft - docEl.clientLeft) };
+        m.pointerY = function(event) { return event.clientY + (root.scrollTop  - docEl.clientTop)  };
       }
       return m[methodName](event);
     }
@@ -130,97 +103,188 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Event.extend = (function() {
-    // Compile the list of methods that get extended onto Events.
-    var Methods = Object.keys(Event.Methods).inject({ }, function(m, name) {
-      // use custom "methodize" to allow lazy defined Event methods
-      Event.Methods[name]._methodized = m[name] = function() {
-        return arguments.length
-          ? Event.Methods[name].apply(null, prependList(arguments, this))
-          : Event.Methods[name].call(null, this);
+  Object.extend(Event, (function() {
+
+    var addEvent, removeEvent, createEvent, fireEvent,
+     CUSTOM_EVENT_NAME = 'keyup';
+
+    // Event dispatchers manage several handlers and ensure
+    // FIFO execution order. They are attached as the event
+    // listener and execute all the handlers they manage.
+    var createDispatcher =  function(id, eventName) {
+      return function(event) {
+        // Prevent a Firefox bug from throwing errors on page load/unload (#5393, #9421).
+        // When firing a custom event all the CUSTOM_EVENT_NAME observers for that element will fire.
+        // Before executing, make sure the event.eventName matches the eventName.
+        if (!Event || !Event.extend || (event.eventName &&
+            event.eventName !== eventName)) return false;
+        event = Event.extend(event || global.event);
+
+        // shallow copy handlers to avoid issues with nested observe/stopObserving
+        var c = Event.cache[id], ec = c.events[eventName],
+         handlers = slice.call(ec.handlers, 0), length = handlers.length;
+        while (length--) handlers[length].call(c.element, event);
       };
-      return m;
-    });
-
-    // populate Event.prototype if needed
-    (function(EP) {
-      if (!EP) return;
-      Event.prototype = EP;
-      Object.extend(Event.prototype, Methods);
-    })(Event.prototype || (isHostObject(doc, 'createEvent') && doc.createEvent('HTMLEvents')['__proto__']));
-
-    if (Event.prototype) return K;
-
-    var inspect = function() {
-      return '[object Event]';
     };
 
-    var preventDefault = function() {
-      this.returnValue = false;
-    };
+    if (Feature('ELEMENT_ADD_EVENT_LISTENER')) {
+      CUSTOM_EVENT_NAME = 'dataavailable';
 
-    var relatedTarget = function(event) {
-      switch (event.type) {
-        case 'mouseover': return Element.extend(event.fromElement);
-        case 'mouseout':  return Element.extend(event.toElement);
-        default:          return null;
-      }
-    };
+      addEvent = function(element, eventName, handler) {
+        element.addEventListener(getDOMEventName(eventName), handler, false);
+      };
 
-    var stopPropagation = function() {
-      this.cancelBubble = true;
-    };
+      removeEvent = function(element, eventName, handler) {
+        element.removeEventListener(getDOMEventName(eventName), handler, false);
+      };
+    }
+    else if (Feature('ELEMENT_ATTACH_EVENT')) {
+      CUSTOM_EVENT_NAME = 'beforeupdate';
 
-    Object.extend(Methods, {
-      'stopPropagation': stopPropagation,
-      'preventDefault':  preventDefault,
-      'inspect':         inspect
-    });
-
-    return function(event) {
-      if (!event) return false;
-      if (event._extendedByPrototype) return event;
-
-      Object.extend(event, {
-        '_extendedByPrototype': P.emptyFunction,
-        'pageX':                Event.pointerX(event),
-        'pageY':                Event.pointerY(event),
-        'relatedTarget':        relatedTarget(event),
-        'target':               event.srcElement
-      });
-      return Object.extend(event, Methods);
-    };
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  Object.extend(Event, Event.Methods);
-
-  (function() {
-    var EVENT_OBSERVER_ORDER_NOT_FIFO = false,
-
-    addEvent = function(element, eventName, handler) {
-      element.addEventListener(getDOMEventName(eventName), handler, false);
-    },
-
-    removeEvent = function(element, eventName, handler) {
-      element.removeEventListener(getDOMEventName(eventName), handler, false);
-    };
-
-    // redefine for IE
-    if (Feature('ELEMENT_ATTACH_EVENT')) {
       addEvent = function(element, eventName, handler) {
         element.attachEvent('on' + getDOMEventName(eventName), handler);
       };
+
       removeEvent = function(element, eventName, handler) {
         element.detachEvent('on' + getDOMEventName(eventName), handler);
       };
+    } 
+    else {
+      // DOM Level 0
+      addEvent = function(element, eventName, handler) {
+        var domEventName = getDOMEventName(eventName),
+         attrName = 'on' + domEventName, oldHandler = element[attrName];
+
+        if (oldHandler) {
+          if (oldHandler.isDispatcher) return false;
+          addCache(element, eventName, element[attrName]);
+        }
+        element[attrName] = Event.cache[getCacheID(element)].events[eventName].dispatcher;
+      };
+
+      removeEvent = function(element, eventName, handler) {
+        var domEventName = getDOMEventName(eventName),
+         attrName = 'on' + domEventName;
+        if (!eventName.include(':') && element[attrName] === handler)
+          element[attrName] = null;
+      };
+
+      createDispatcher = function(id, eventName) {
+        var dispatcher = function(event) {
+          if (!Event || !Event.extend) return false;
+          event = Event.extend(event || global.event);
+          var c = Event.cache[id], ec = c && c.events && c.events[event.eventName || eventName];
+          if (!ec) return false;
+          var handlers = slice.call(ec.handlers, 0), length = handlers.length;
+          while (length--) handlers[length].call(this, event);
+        };
+        dispatcher.isDispatcher = true;
+        return dispatcher;
+      };
     }
+
+    if (Feature('DOCUMENT_CREATE_EVENT')) {
+      createEvent = function(context, eventType) {
+        var event = getOwnerDoc(context).createEvent('HTMLEvents');
+        eventType && event.initEvent(eventType, true, true);
+        return event;
+      };
+    }
+    else if (Feature('DOCUMENT_CREATE_EVENT_OBJECT')) {
+      createEvent = function(context, eventType) {
+        var event = getOwnerDoc(context).createEventObject();
+        eventType && (event.eventType = 'on' + eventType);
+        return event;
+      };
+    } else createEvent = function() { return false };
+
+    if (Feature('ELEMENT_DISPATCH_EVENT')) {
+      fireEvent = function(element, event) {
+        // In the W3C system, all calls to document.fire should treat
+        // document.documentElement as the target
+        if (element.nodeType === 9)
+          element = element.documentElement;
+        element.dispatchEvent(event);
+      };
+    }
+    else if (Feature('ELEMENT_FIRE_EVENT')) {
+      fireEvent = function(element, event) {
+        element.fireEvent(event.eventType, event);
+      };
+    } else fireEvent = function() { return false };
+
+    /*--------------------------------------------------------------------------*/
+
+    (function() {
+      // compile list of methods using use custom "methodize" 
+      // to allow lazy defined Event methods
+      var name, Methods = { };
+      for (name in Event.Methods) (function(n) {
+        Event.Methods[n]._methodized = Methods[n] = function() {
+          return arguments.length
+              ? Event.Methods[n].apply(null, prependList(arguments, this))
+              : Event.Methods[n].call(null, this);
+        };
+      })(name);
+
+      // supports Event.prototype extensions; no need to extend
+      if (function() {
+        var e = createEvent(doc), EP = Event.prototype || e && e['__proto__'];
+        return EP && Object.extend(Event.prototype = EP, Methods);
+      }()) Event.extend = K;
+
+      delete name; delete Methods.pointer; delete Methods.pointerX; delete Methods.pointerY;
+
+      // manual event object extensions
+      Event.extend = Event.extend || (function() {
+ 
+        function inspect() {
+          return '[object Event]';
+        }
+
+        function preventDefault() {
+          this.returnValue = false;
+        }
+
+        function relatedTarget(event) {
+          switch (event.type) {
+            case 'mouseover': return Element.extend(event.fromElement);
+            case 'mouseout':  return Element.extend(event.toElement);
+            default:          return null;
+          }
+        }
+
+        function stopPropagation() {
+          this.cancelBubble = true;
+        }
+
+        return function(event) {
+          if (!event || event._extendedByFuse) return event;
+
+          // avoid unnecessary Object.extend() usage
+          event._extendedByFuse = P.emptyFunction;
+          event.inspect         = inspect;
+          event.pageX           = Event.pointerX(event);
+          event.pageY           = Event.pointerY(event);
+          event.preventDefault  = preventDefault;
+          event.relatedTarget   = relatedTarget(event);
+          event.stopPropagation = stopPropagation;
+          event.target          = event.srcElement;
+
+          // optimize by re-defining with resolved values
+          event.pointer  = function() { return { 'x': this.pageX, 'y': this.pageY } };
+          event.pointerX = function() { return this.pageX };
+          event.pointerY = function() { return this.pageY };
+
+          return Object.extend(event, Methods);
+        };
+      })();
+    })();
 
     /*--------------------------------------------------------------------------*/
 
     function getDOMEventName(eventName) {
-      if (eventName && eventName.include(':')) return 'dataavailable';
+      if (eventName && eventName.include(':')) return CUSTOM_EVENT_NAME;
       return eventName;
     }
 
@@ -237,255 +301,205 @@
       return id;
     }
 
-    function getEventCache(id, eventName) {
-      var c = Event.cache[id];
-      return c && c.events[eventName] || { 'responders':[], 'handlers':[], 'dispatcher':false };
-    }
-
-    function cacheEvent(element, eventName, handler) {
+    function addCache(element, eventName, handler) {
       var id = getCacheID(element),
-       ec = createEventCache(element, eventName);
+       ec = getOrCreateCache(id, element, eventName);
 
-      var hasHandler = ec.handlers.include(handler),
-       useDispatcher = EVENT_OBSERVER_ORDER_NOT_FIFO || ec.dispatcher;
+      // bail if handler is already exists
+      if (ec.handlers.indexOf(handler) !== -1)
+        return false;
 
-      // add to beginning of the array (unshift) 
-      // because we iterate with a reverse while loop
-      if (!useDispatcher) {
-        if (hasHandler) return false;
-        ec.handlers.unshift(handler);
-        ec.responders.unshift(createResponder(id, eventName, handler));
-        return ec.responders[0];
-      }
-      if (!hasHandler) {
-        ec.handlers.unshift(handler);
-        ec.responders.unshift(null);
-      }
+      ec.handlers.unshift(handler);
       if (ec.dispatcher) return false;
       return ec.dispatcher = createDispatcher(id, eventName);
     }
 
-    function createEventCache(element, eventName, handler) {
-      var id = getCacheID(element),
-       c = Event.cache[id] = Event.cache[id] || { 'events': { } };
+    function getOrCreateCache(id, element, eventName) {
+      var c = Event.cache[id] = Event.cache[id] || { 'events': { } };
       c.element = c.element || element;
-      return Event.cache[id].events[eventName] = getEventCache(id, eventName);
+      return c.events[eventName] = c.events[eventName] || { 'handlers': [ ], 'dispatcher': false };
     }
 
-    function createResponder(id, eventName, handler) {
-      return function(event) {
-         if (!isEventValid(event, eventName)) return false;
-         handler.call(Event.cache[id].element, Event.extend(event));
-       };
-    }
-
-    function createDispatcher(id, eventName) {
-      return function(event) {
-        if (!isEventValid(event, eventName)) return false;
-        // Make a shallow copy of the handlers array so 
-        // changes made by other observers won't effect
-        // iterating over the handlers.
-        var c = Event.cache[id], ec = c.events[eventName],
-         handlers = slice.call(ec.handlers, 0), length = handlers.length;
-        while (length--) handlers[length].call(c.element, Event.extend(event));
-      };
-    }
-
-    function destroyCacheAtIndex(id, eventName, index) {
+    function removeCacheAtIndex(id, eventName, index) {
+      // remove responders and handlers at the given index
       var c = Event.cache[id], ec = c.events[eventName];
-      ec.responders.splice(index, 1);
       ec.handlers.splice(index, 1);
 
-      // clean-up cache
+      // if no more handlers/responders then
+      // remove the eventName cache
       if (!ec.handlers.length) delete c.events[eventName];
+
+      // if no more events cached remove the
+      // cache for the element
       for (var i in c.events) return;
       delete Event.cache[id];
     }
 
-    function findResponder(id, eventName, handler) {
-      var ec = getEventCache(id, eventName),
-       length = ec.handlers.length;
-      while (length--) {
-        if (ec.handlers[length] === handler)
-          return { 'responder': ec.responders[length], 'index': length };
+    /*--------------------------------------------------------------------------*/
+
+    function fire(element, eventName, memo) {
+      element = $(element);
+      var event = createEvent(element, CUSTOM_EVENT_NAME);
+      if (event) {
+        event.eventName = eventName;
+        event.memo = memo || { };
+        fireEvent(element, event);
+        return Event.extend(event);
       }
       return false;
     }
 
-    function isEventValid(event, eventName) {
-      // Prevent a Firefox bug from throwing errors on page load/unload (#5393, #9421).
-      // When firing a custom event all "dataavailable" observers for that element will fire.
-      // Before executing, make sure the event.eventName matches the eventName.
-      return Event && Event.extend && (!event.eventName ||
-        event.eventName && event.eventName === eventName);
+    function getEventID() {
+      // handle calls from Event object
+      if (this !== global)
+        return $(arguments[0]).getEventID();
+      // private id variable
+      var id = getNewCacheID(arguments[0]);
+      // overwrite element.getEventID and execute
+      return (arguments[0].getEventID = function() {
+        // if cache doesn't match, request a new id
+        var c = Event.cache[id];
+        if (c && c.element !== this)
+          id = getNewCacheID(this);
+        return id;
+      })();
     }
 
-    /*--------------------------------------------------------------------------*/
+    function observe(element, eventName, handler) {
+      element = $(element);
+      var dispatcher = addCache(element, eventName, handler);
+      if (!dispatcher) return element;
+      addEvent(element, eventName, dispatcher);
+      return element;
+    }
 
-    Object.extend(Event, (function() {
-      function fire(element, eventName, memo) {
-        // In the W3C system, all calls to document.fire should treat
-        // document.documentElement as the target
-        element = $(element);
-        if (element.nodeType === 9 && doc.createEvent && !element.dispatchEvent)
-          element = element.documentElement;
+    function stopObserving(element, eventName, handler) {
+      element = $(element);
+      eventName = (typeof eventName === 'string') ? eventName : null;
+      var id = getCacheID(element), c = Event.cache[id];
 
-        var event, usesCreateEvent = isHostObject(doc, 'createEvent');
+      if (!c || !c.events) return element;
+      var ec = c.events[eventName];
 
-        if (usesCreateEvent) {
-          event = getOwnerDoc(element).createEvent('HTMLEvents');
-          event.initEvent('dataavailable', true, true);
-        } else {
-          event = doc.createEventObject();
-          event.eventType = 'ondataavailable';
-        }
-
-        event.eventName = eventName;
-        event.memo = memo || { };
-
-        if (usesCreateEvent) {
-          element.dispatchEvent(event);
-        } else {
-          element.fireEvent(event.eventType, event);
-        }
-        return Event.extend(event);
+      if (ec && handler == null) {
+        // If an event name is passed without a handler,
+        // we stop observing all handlers of that type.
+        var length = ec.handlers.length;
+        while (length--) Event.stopObserving(element, eventName, length);
+        return element;
       }
-
-      function observe(element, eventName, handler) {
-        element = $(element);
-        var responder = cacheEvent(element, eventName, handler);
-        if (!responder) return element;
-        addEvent(element, eventName, responder);
+      else if (!eventName) {
+        // If both the event name and the handler are omitted,
+        // we stop observing _all_ handlers on the element.
+        for (var eventName in c.events)
+          Event.stopObserving(element, eventName);
         return element;
       }
 
-      function getEventID() {
-        arguments[0] = $(arguments[0]);
-        // handle calls from Event object
-        if (this !== global)
-          return arguments[0].getEventID();
-        // private id variable
-        var id = getNewCacheID(arguments[0]);
-        var method = function(element) {
-          // if cache doesn't match, request a new id
-          var c = Event.cache[id];
-          if (c && c.element !== element)
-            id = getNewCacheID(element);
-          return id;
-        };
-        // overwrite element.getEventID and execute
-        return (arguments[0].getEventID = method.methodize())();
-      }
+      var dispatcher = ec.dispatcher,
+       foundAt = (typeof handler === 'number') ?
+        handler : ec.handlers.indexOf(handler);
 
-      function stopObserving(element, eventName, handler) {
-        element = $(element);
-        eventName = (typeof eventName === 'string') ? eventName : null;
-        var id = getCacheID(element), c = Event.cache[id],
-         ec = getEventCache(id, eventName);
+      if (foundAt === -1) return element;
+      removeCacheAtIndex(id, eventName, foundAt);
 
-        if (!c)
-          return element;
-        else if (!handler && eventName) {
-          // If an event name is passed without a handler,
-          // we stop observing all handlers of that type.
-          var length = ec.responders.length;
-          while (length--) Event.stopObserving(element, eventName,
-            { 'responder': ec.responders[length], 'index':length });
-          return element;
-        }
-        else if (!eventName) {
-          // If both the event name and the handler are omitted,
-          // we stop observing _all_ handlers on the element.
-          for (var eventName in c.events)
-            Event.stopObserving(element, eventName);
-          return element;
-        }
+      if (!Event.cache[id] || !Event.cache[id].events[eventName])
+        removeEvent(element, eventName, dispatcher);
 
-        var dispatcher = ec.dispatcher;
-        var found = (typeof handler === 'object') ? 
-          handler : findResponder(id, eventName, handler);
-
-        if (!found && !dispatcher) return element;
-        destroyCacheAtIndex(id, eventName, found.index);
-
-        if (dispatcher) {
-          if (!Event.cache[id] || !Event.cache[id][eventName])
-            removeEvent(element, eventName, dispatcher);
-        } else removeEvent(element, eventName, found.responder);
-
-        return element;
-      }
-
-      return {
-        'fire':          fire,
-        'getEventID':    getEventID,
-        'observe':       observe,
-        'stopObserving': stopObserving
-      };
-    })());
-
-    Object.extend(Element.Methods, {
-      'fire':          Event.fire,
-      'getEventID':    Event.getEventID,
-      'observe':       Event.observe,
-      'stopObserving': Event.stopObserving
-    });
-
-    Object.extend(doc, {
-      'loaded':        false,
-      'fire':          Element.Methods.fire.methodize(),
-      'getEventID':    Element.Methods.getEventID.methodize(),
-      'observe':       Element.Methods.observe.methodize(),
-      'stopObserving': Element.Methods.stopObserving.methodize()
-    });
-
-    /*--------------------------------------------------------------------------*/
-
-    // set constant after Event methods defined
-    EVENT_OBSERVER_ORDER_NOT_FIFO = Bug('EVENT_OBSERVER_ORDER_NOT_FIFO');
+      return element;
+    }
 
     // Ensure that the dom:loaded event has finished
     // executing its observers before allowing the
     // window onload event to proceed.
     (function() {
-      var DOM_LOADED_EXECUTED = false;
+      var WIN_ID = 1, DOC_ID = 2,
+       domLoadDispatcher   = createDispatcher(DOC_ID, 'dom:loaded'),
+       winLoadDispatcher   = createDispatcher(WIN_ID, 'load'),
+       winUnloadDispatcher = createDispatcher(WIN_ID, 'unload');
 
-      function winLoadWrapper(proceed, event) {
-        if (!DOM_LOADED_EXECUTED)
-          winLoadWrapper.defer(proceed, event);
-        else proceed(event);
+      function domLoadWrapper(event) {
+        if (!doc.loaded) {
+          event = event || global.event;
+          event.eventName = 'dom:loaded';
+
+          // define private body and root variables
+          body = Element.extend(doc.body);
+          root = Bug('BODY_ACTING_AS_ROOT') ? body : Element.extend(docEl);
+
+          doc.loaded = true;
+          domLoadDispatcher(event);
+          Event.stopObserving(doc, 'dom:loaded');
+        }
+      }
+ 
+      function winLoadWrapper(event) {
+        event = event || global.event;
+        if (!doc.loaded)
+          domLoadWrapper(event);
+        else if (Event.cache['1'].events['dom:loaded'])
+          return winLoadWrapper.defer(event);
+        event.eventName = null;
+        winLoadDispatcher(event);
+        Event.stopObserving(global, 'load');
       }
 
-      function winUnloadWrapper(proceed, event) {
-        proceed(event);
+      function winUnloadWrapper(event) {
         // to avoid memory leaks we clear
         // private body and root variables
+        winUnloadDispatcher(event || global.event);
         doc = dummy = body = docEl = root = null;
       }
 
-      function domLoadWrapper(proceed, event) {
-        // define private body and root variables
-        body = Element.extend(doc.body);
-        root = Bug('BODY_ACTING_AS_ROOT') ? body : Element.extend(docEl);
+      addEvent(doc, 'dom:loaded',
+        getOrCreateCache(DOC_ID, doc, 'dom:loaded').dispatcher = domLoadWrapper);
 
-        proceed(event);
-        DOM_LOADED_EXECUTED = true;
-      }
+      // avoid Function#wrap for better performance esp.
+      // in winLoadWrapper which could be called every 10ms
+      addEvent(global, 'load',
+        getOrCreateCache(WIN_ID, global, 'load').dispatcher = winLoadWrapper);
 
-      addEvent(global, 'load', createEventCache(global, 'load').dispatcher = 
-        createDispatcher(1 /* window ID */, 'load').wrap(winLoadWrapper));
-
-      addEvent(global, 'unload', createEventCache(global, 'unload').dispatcher = 
-        createDispatcher(1 /* window ID */, 'unload').wrap(winUnloadWrapper));
-
-      addEvent(doc, 'dom:loaded', createEventCache(doc, 'dom:loaded').dispatcher = 
-        createDispatcher(2 /* document ID */, 'dom:loaded').wrap(domLoadWrapper));
+      // Warning: Disables bfcache for all browsers.
+      // Safari <= 3.1 has an issue with restoring the "document"
+      // object when page is returned to via the back button using its bfcache.
+      addEvent(global, 'unload',
+        getOrCreateCache(WIN_ID, global, 'unload').dispatcher = winUnloadWrapper);
     })();
 
-    // Safari has a dummy event handler on page unload so that it won't
-    // use its bfcache. Safari <= 3.1 has an issue with restoring the "document"
-    // object when page is returned to via the back button using its bfcache.
-    if (P.Browser.WebKit) {
-      global.addEventListener('unload', P.emptyFunction, false);
-    }
-  })();
+    return {
+      'KEY_BACKSPACE': 8,
+      'KEY_DELETE':    46,
+      'KEY_DOWN':      40,
+      'KEY_END':       35,
+      'KEY_ESC':       27,
+      'KEY_HOME':      36,
+      'KEY_INSERT':    45,
+      'KEY_LEFT':      37,
+      'KEY_PAGEDOWN':  34,
+      'KEY_PAGEUP':    33,
+      'KEY_RETURN':    13,
+      'KEY_RIGHT':     39,
+      'KEY_TAB':       9,
+      'KEY_UP':        38,
+      'fire':          fire,
+      'getEventID':    getEventID,
+      'observe':       observe,
+      'stopObserving': stopObserving
+    };
+  })());
+
+  Object.extend(Event, Event.Methods);
+
+  Object.extend(Element.Methods, {
+    'fire':          Event.fire,
+    'getEventID':    Event.getEventID,
+    'observe':       Event.observe,
+    'stopObserving': Event.stopObserving
+  });
+
+  Object.extend(doc, {
+    'loaded':        false,
+    'fire':          Element.Methods.fire.methodize(),
+    'observe':       Element.Methods.observe.methodize(),
+    'stopObserving': Element.Methods.stopObserving.methodize()
+  });

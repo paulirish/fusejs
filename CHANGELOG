@@ -1,3 +1,11 @@
+* Cleanup and optimize the event system. [jddalton]
+  - Reduce event cache complexity
+  - Take more advantage of lazy defined methods
+  - Add support for DOM Level 0 event management
+  - Remove browser sniffs in mouse button detection
+  - Auto clear window:load and dom:loaded event cache
+  - Minor cleanup to the functional event.html
+
 * Avoid IE element.style.cssText bug effecting hidden elements. [jddalton]
   Note: Accessing a hidden element's client/offset<dimension> properties before appending cssText will make the client/offset<dimension> values unchanged by the new style.
 

@@ -43,6 +43,11 @@
         return isHostObject(doc, 'createEvent');
       }
 
+      function DOCUMENT_CREATE_EVENT_OBJECT() {
+        // true for IE
+        return isHostObject(doc, 'createEventObject')
+      }
+
       function DOCUMENT_RANGE(){
         // true for all but IE
         return isHostObject(doc, 'createRange');
@@ -89,6 +94,11 @@
         return isHostObject(docEl, 'currentStyle') && !Feature('ELEMENT_COMPUTED_STYLE');
       }
 
+      function ELEMENT_DISPATCH_EVENT() {
+        // true for all but IE
+        return isHostObject(docEl, 'dispatchEvent');
+      }
+
       function ELEMENT_DO_SCROLL() {
         // true for IE
         return isHostObject(docEl, 'doScroll');
@@ -102,6 +112,11 @@
           P.BrowserFeatures.ElementExtensions = true;
         }
         return P.BrowserFeatures.ElementExtensions;
+      }
+
+      function ELEMENT_FIRE_EVENT() {
+        // true for IE
+        return isHostObject(docEl, 'fireEvent');
       }
 
       function ELEMENT_GET_ATTRIBUTE_IFLAG() {
@@ -208,6 +223,7 @@
         'CREATE_ELEMENT_WITH_HTML':          CREATE_ELEMENT_WITH_HTML,
         'DOCUMENT_ALL_COLLECTION':           DOCUMENT_ALL_COLLECTION,
         'DOCUMENT_CREATE_EVENT':             DOCUMENT_CREATE_EVENT,
+        'DOCUMENT_CREATE_EVENT_OBJECT':      DOCUMENT_CREATE_EVENT_OBJECT,
         'DOCUMENT_RANGE':                    DOCUMENT_RANGE,
         'DOCUMENT_STYLE_SHEETS_COLLECTION':  DOCUMENT_STYLE_SHEETS_COLLECTION,
         'ELEMENT_ADD_EVENT_LISTENER':        ELEMENT_ADD_EVENT_LISTENER,
@@ -219,8 +235,10 @@
         'ELEMENT_COMPUTED_STYLE':            ELEMENT_COMPUTED_STYLE,
         'ELEMENT_CONTAINS':                  ELEMENT_CONTAINS,
         'ELEMENT_CURRENT_STYLE':             ELEMENT_CURRENT_STYLE,
+        'ELEMENT_DISPATCH_EVENT':            ELEMENT_DISPATCH_EVENT,
         'ELEMENT_DO_SCROLL':                 ELEMENT_DO_SCROLL,
         'ELEMENT_EXTENSIONS':                ELEMENT_EXTENSIONS,
+        'ELEMENT_FIRE_EVENT':                ELEMENT_FIRE_EVENT,
         'ELEMENT_GET_ATTRIBUTE_IFLAG':       ELEMENT_GET_ATTRIBUTE_IFLAG,
         'ELEMENT_INNER_TEXT':                ELEMENT_INNER_TEXT,
         'ELEMENT_MS_CSS_FILTERS':            ELEMENT_MS_CSS_FILTERS,
@@ -359,17 +377,6 @@
         return false;
       }
 
-      function EVENT_OBSERVER_ORDER_NOT_FIFO() {
-        // true for all but IE
-        var result = '';
-        ['a', 'b', 'c', 'd']._each(function(n) {
-          doc.observe('eventOrder:checked', function() { result += n });
-        });
-        doc.fire('eventOrder:checked');
-        doc.stopObserving('eventOrder:checked');
-        return result !== 'abcd';
-      }
-
       function FORM_CHILDNODES_ARE_ATTRIBUTES() {
         var form = doc.createElement('form');
         form.appendChild(doc.createElement('input'));
@@ -432,7 +439,6 @@
         'ELEMENT_TABLE_INNERHTML_BUGGY':                      ELEMENT_TABLE_INNERHTML_BUGGY,
         'ELEMENT_TABLE_INNERHTML_INSERTS_TBODY':              ELEMENT_TABLE_INNERHTML_INSERTS_TBODY,
         'ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR':              ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR,
-        'EVENT_OBSERVER_ORDER_NOT_FIFO':                      EVENT_OBSERVER_ORDER_NOT_FIFO,
         'FORM_CHILDNODES_ARE_ATTRIBUTES':                     FORM_CHILDNODES_ARE_ATTRIBUTES,
         'GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES':     GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES,
         'SELECTORS_API_CASE_SENSITIVE_CLASSNAME':             SELECTORS_API_CASE_INSENSITIVE_CLASSNAME,

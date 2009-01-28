@@ -38,7 +38,7 @@
         (el.down('span') || el).update(message || 'Test failed');
       }
     });
-    
+
     function log(obj) {
       var line, all = [];
       for (prop in obj) {
@@ -123,9 +123,10 @@
   <script type="text/javascript">
     $w('left middle right').each(function(button) {
       Event.observe(button, 'mousedown', function(e) {
-	  if (Event['is' + this.id.capitalize() + 'Click'](e)) this.passed('Squeak!')
-	  else this.failed('OH NO!');
-	  log(e);
+        if (Event['is' + this.id.capitalize() + 'Click'](e))
+          this.passed('Squeak!')
+        else this.failed('OH NO!');
+        log(e);
       });
     });
   </script>

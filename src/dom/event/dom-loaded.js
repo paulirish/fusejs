@@ -22,8 +22,7 @@
     function fireDomLoadedEvent() {
       clearPoller();
       if (doc.loaded) return;
-      doc.loaded = true;
-      return doc.fire('dom:loaded');
+      return Event.fire(doc, 'dom:loaded');
     }
 
     function checkCssAndFire() {
@@ -60,7 +59,8 @@
     var pollerID,
 
     checkDomLoadedState = function(event) {
-      if (event && event.type === 'DOMContentLoaded' ||
+      if (doc.loaded) clearPoller();
+      else if (event && event.type === 'DOMContentLoaded' ||
           /loaded|complete/.test(doc.readyState)) {
         doc.stopObserving('readystatechange', respondToReadyState);
         if (!checkCssAndFire()) createPoller(checkCssAndFire);
@@ -201,38 +201,27 @@
 
     /*--------------------------------------------------------------------------*/
 
-    // IE
     // Ensure the document is not in a frame because
     // doScroll() will not throw an error when the document
     // is framed. Fallback on document readyState.
     if (!Feature('ELEMENT_ADD_EVENT_LISTENER') &&
         Feature('ELEMENT_DO_SCROLL') && global == global.top) {
+      // Diego Perini's IEContentLoaded
+      // http://javascript.nwbox.com/IEContentLoaded/
       checkDomLoadedState = function() {
         try { docEl.doScroll('left') } catch(e) { return }
         fireDomLoadedEvent();
       };
     }
+    else if (Feature('ELEMENT_ADD_EVENT_LISTENER'))
+      doc.observe('DOMContentLoaded', respondToReadyState);
 
-    // Firefox, Opera, Webkit, others.
-    // Remove poller if other options are available
-    $w('DOMContentLoaded readystatechange')._each(function(eventName) {
-      doc.observe(eventName, respondToReadyState);
-    });
+    // remove poller if other options are available
+    doc.observe('readystatechange', respondToReadyState);
 
     // stop poller onunload because it may reference cleared variables
     Event.observe(global, 'unload', clearPoller);
 
     // worst case create poller and window onload observer
     createPoller(checkDomLoadedState);
-
-    if (Feature('ELEMENT_ADD_EVENT_LISTENER'))
-      global.addEventListener('load', fireDomLoadedEvent, false);
-    else if (Feature('ELEMENT_ATTACH_EVENT'))
-      global.attachEvent('onload', fireDomLoadedEvent);
-    else {
-      var __onload = global.onload;
-      if (typeof __onload === 'function')
-        global.onload = function() { fireDomLoadedEvent(); __onload() };
-      else global.onload = fireDomLoadedEvent;
-    }
   })();
