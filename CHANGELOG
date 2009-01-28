@@ -1,3 +1,5 @@
+* Cleanup String#unescapeHTML and String#extractScripts' HTML comment matching regular expression. [jddalton]
+
 * Cleanup Element._attributeTranslations.read.getEv(). [Andrew Dupont, jddalton]
 
 * Renamed the PeriodicalExecuter class to Timer. [jddalton, Joe Gornick]

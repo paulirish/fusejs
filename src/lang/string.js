@@ -224,11 +224,11 @@
 
   Object.extend(String.prototype, (function() {
     var s = RegExp.specialChar.s,
-     matchTrimLeft  = new RegExp('^' + s +'+'),
-     matchTrimRight = new RegExp(s +'+$'),
-     matchScripts   = new RegExp(P.ScriptFragment, 'gi'),
-     matchComments  = new RegExp('<!--\\s*' + P.ScriptFragment + '\\s*-->', 'gi'),
-     matchOpenTag   = /<script/i;
+     matchTrimLeft     = new RegExp('^' + s + '+'),
+     matchTrimRight    = new RegExp(s + '+$'),
+     matchScripts      = new RegExp(P.ScriptFragment, 'gi'),
+     matchHTMLComments = new RegExp('<!--' + s + '*' + P.ScriptFragment + s + '*-->', 'gi'),
+     matchOpenTag      = /<script/i;
 
     function evalScripts() {
       return this.extractScripts().map(function(script) { return eval(script) });
@@ -236,7 +236,7 @@
 
     function extractScripts() {
       if (!matchOpenTag.test(this)) return [];
-      var match, results = [], scriptTags = this.replace(matchComments, '');
+      var match, results = [], scriptTags = this.replace(matchHTMLComments, '');
       while ((match = matchScripts.exec(scriptTags)) !== null)
         if (match[1]) results.push(match[1]);
       return results;
@@ -300,17 +300,18 @@
           return dummy.firstChild.innerText.replace(/\r/g, '');
         };
       }
-	  else if (dummy.firstChild.innerHTML === '<span>test</span>') {
-	    unescapeHTML = function() {
+      else if (dummy.firstChild.innerHTML === '<span>test</span>') {
+        unescapeHTML = function() {
           dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
           return dummy.firstChild.innerHTML;
         };
-	  } else {
-	    unescapeHTML = function() {
+      } else {
+        unescapeHTML = function() {
           dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-          return dummy.firstChild.childNodes[0] ? (dummy.firstChild.childNodes.length > 1 ?
-            $A(dummy.firstChild.childNodes).inject('', function(memo, node) { return memo + node.nodeValue }) :
-            dummy.firstChild.childNodes[0].nodeValue) : '';
+          var node, i = 0, results = [];
+          while (node = dummy.firstChild.childNodes[i++])
+            results.push(node.nodeValue);
+          return results.join('');
         };
       }
       // cleanup dummy
