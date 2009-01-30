@@ -1,3 +1,5 @@
+* Optimize Element#getOffsetParent by using the regexp case-insensitive flag instead of tagName.toLowerCase(). [jddalton]
+
 * unit test: Add test to ensure Element#getOffsetParent doesn't raise an exception when called from the children of a document fragment. [jddalton]
 
 * Simplify String#extractScripts and add a unit test to ensure empty scripts are not returned. [jddalton]

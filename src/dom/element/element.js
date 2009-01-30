@@ -263,10 +263,10 @@
 
       var tagName;
       while (element = element.offsetParent) {
-        tagName = element.tagName.toUpperCase();
         /* http://www.w3.org/TR/cssom-view/#offset-attributes */
-        if (/^(HTML|BODY)$/.test(tagName)) break;
-        if (/^(TABLE|TD|TH)$/.test(tagName) ||
+        tagName = element.tagName;
+        if (/^(html|body)$/i.test(tagName)) break;
+        if (/^(table|td|th)$/i.test(tagName) ||
             Element.getStyle(element, 'position') !== 'static')
           return Element.extend(element);
       }
