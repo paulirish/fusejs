@@ -1737,23 +1737,30 @@ new Test.Unit.Runner({
     this.assertEqual('body_absolute', $('absolute_relative').getOffsetParent().id);
     this.assertEqual('absolute_relative', $('inline').getOffsetParent().id);
     this.assertEqual('absolute_relative', $('absolute_relative_undefined').getOffsetParent().id);
-    
+
     // Ensure IE doesn't error when requesting offsetParent from an not attached to the document.
     this.assertNothingRaised(function() { new Element('div').getOffsetParent() });
-    
+
     // Make sure it doesn't error when passing document
     this.assertNothingRaised(function() { Element.getOffsetParent(document) });
-    
+
     // IE with strict doctype may try to return documentElement as offsetParent on relatively positioned elements.  
     this.assertEqual(document.body, $('body_relative').getOffsetParent());
-    
+
     // Ensure document.body is returned even when using document.documentElement.
     this.assertEqual(document.body, $(document.documentElement).getOffsetParent());
-    
+
     // Make sure TD, TH, or TABLE is returned
     this.assertEqual('TABLE', $('tr_offset_parent_test').getOffsetParent().tagName.toUpperCase(), 'offsetParent should be TABLE');
     this.assertEqual('TH', $('th_offset_parent_test').getOffsetParent().tagName.toUpperCase(), 'offsetParent should be TH');
     this.assertEqual('TD', $('td_offset_parent_test').getOffsetParent().tagName.toUpperCase(), 'offsetParent should be TD');
+
+    // Ensure no errors are raised on document fragments
+    var offsetParent, div = new Element('div'), fragment = document.createDocumentFragment();
+    div.appendChild(div.cloneNode(false));
+    Element.getOffsetParent(div.firstChild);
+    this.assertNothingRaised(function() { offsetParent = Element.getOffsetParent(div.firstChild) });
+    this.assertEqual(document.body, offsetParent);
   },
 
   testAbsolutize: function() {

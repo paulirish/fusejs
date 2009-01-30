@@ -1,3 +1,5 @@
+* unit test: Add test to ensure Element#getOffsetParent doesn't raise an exception when called from the children of a document fragment. [jddalton]
+
 * Simplify String#extractScripts and add a unit test to ensure empty scripts are not returned. [jddalton]
 
 * Optimize Form/Field methods by replacing complex method calls with simple while-loops. [jddalton]
