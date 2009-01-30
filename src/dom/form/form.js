@@ -2,7 +2,7 @@
 
   $F = function(element) {
     element = $(element);
-    var s = Form.Element.Serializers,
+    var s = Field.Serializers,
      method = element && element.tagName.toLowerCase();
     return s[method] ? s[method](element) : null;
   };
@@ -15,16 +15,20 @@
     }
 
     function serializeElements(elements, options) {
-      if (typeof options !== 'object') options = { hash: !!options };
-      else if (typeof options.hash === 'undefined') options.hash = true;
+      if (typeof options !== 'object')
+        options = { 'hash': !!options };
+      else if (typeof options.hash === 'undefined')
+        options.hash = true;
 
-      var key, value, type, isImageType, isSubmitButton,
-       submitSerialized, submit = options.submit;
+      var element, key, value, type,
+       isImageType, isSubmitButton, submitSerialized,
+       i = 0, result = { }, submit = options.submit;
 
-      var data = elements.inject({ }, function(result, element) {
+      /* http://www.w3.org/TR/html401/interact/forms.html#successful-controls */
+      while (element = elements[i++]) {
         element = $(element);
         key     = element.name;
-        value   = Form.Element.getValue(element);
+        value   = Field.getValue(element);
         type    = element.type;
 
         isImageType = type === 'image';
@@ -33,18 +37,16 @@
         // reduce array value
         if (Object.isArray(value) && value.length < 2)
           value = value[0];
-        // null/undefined values don't get serialized
-        if (value == null) return result;
-        // disabled elements don't get serialized
-        if (element.disabled) return result;
-        // <input type="file|reset" /> don't get serialized
-        if (type === 'file' || type === 'reset') return result;
-        // non-active submit buttons don't get serialized
-        if (isSubmitButton &&
-         (submit === false || submitSerialized ||
-         (submit && !(key === submit || element === submit))))
-          return result;
 
+        if (value == null    || // controls with null/undefined values are unsuccessful
+            element.disabled || // disabled elements are unsuccessful
+            type === 'file'  || // skip file inputs; 
+            type === 'reset' || // reset buttons are unsuccessful
+            (isSubmitButton &&  // non-active submit buttons are unsuccessful
+            (submit === false || submitSerialized ||
+            (submit && !(key === submit || element === submit))))) {
+          continue;
+        }
         if (isSubmitButton) {
           submitSerialized = true;
           if (isImageType) {
@@ -54,18 +56,19 @@
             result[prefix + 'y'] = y;
           }
         }
-        if (!key) return result;
+        if (!key) continue;
+
         // property exists and and belongs to result
         if (key in result && result[key] !== Object.prototype[key]) {
           // a key is already present; construct an array of values
           if (!Object.isArray(result[key])) result[key] = [result[key]];
           result[key].push(value);
-        } else result[key] = value;
+        }
+        else result[key] = value;
+      }
 
-        return result;
-      });
-
-      return options.hash ? data : Object.toQueryString(data);
+      return options.hash ?
+        result : Object.toQueryString(result);
     }
 
     return {
@@ -79,27 +82,32 @@
   Form.Methods = (function() {
     function disable(form) {
       form = $(form);
-      Form.getElements(form).invoke('disable');
+      var node, nodes = Form.getElements(form), i = 0;
+      while (node = nodes[i++]) Field.disable(node);
       return form;
     }
 
     function enable(form) {
       form = $(form);
-      Form.getElements(form).invoke('enable');
+      var node, nodes = Form.getElements(form), i = 0;
+      while (node = nodes[i++]) Field.enable(node);
       return form;
     }
 
     function findFirstElement(form) {
-      var elements = $(form).getElements().findAll(function(element) {
-        return 'hidden' != element.type && !element.disabled;
-      });
-      var firstByIndex = elements.findAll(function(element) {
-        return Element.hasAttribute(element, 'tabIndex') && element.tabIndex >= 0;
-      }).sortBy(function(element) { return element.tabIndex }).first();
+      var firstByIndex, firstNode, node,
+       nodes = $(form).getElements(), minTabIndex = Infinity, i = 0;
 
-      return firstByIndex ? firstByIndex : elements.find(function(element) {
-        return ['button', 'input', 'select', 'textarea'].include(element.tagName.toLowerCase());
-      });
+      while (node = nodes[i++]) {
+        if (node.type !== 'hidden' && !node.disabled && !firstNode)
+          firstNode = node;
+        if (Element.hasAttribute(node, 'tabIndex') && node.tabIndex > -1 &&
+            node.tabIndex < minTabIndex) {
+          minTabIndex = node.tabIndex;
+          firstByIndex = node;
+        }
+      }
+      return firstByIndex || firstNode;
     }
 
     function focusFirstElement(form) {
@@ -110,49 +118,46 @@
     }
 
     function getElements(form) {
-      var elements = [], nodes = $(form).getElementsByTagName('*');
-      for (var i = 0, node; node = nodes[i++]; ) {
-        if (node.nodeType === 1 && 
-            Form.Element.Serializers[node.tagName.toLowerCase()]) {
-          elements.push(Element.extend(node));
-        }
-      }
-      return elements;
+      form = $(form);
+      var node, results = [], i = 0,
+       nodes = $(form).getElementsByTagName('*');
+      while (node = nodes[i++])
+        if (node.nodeType === 1 &&
+            Field.Serializers[node.tagName.toLowerCase()])
+          results.push(Element.extend(node));
+      return results;
     }
 
     function getInputs(form, typeName, name) {
       form = $(form);
       var inputs = form.getElementsByTagName('input');
-
       if (!typeName && !name)
         return nodeListSlice.call(inputs, 0).map(Element.extend);
 
-      for (var i = 0, matchingInputs = [], length = inputs.length; i < length; i++) {
-        var input = inputs[i];
-        if ((typeName && input.type != typeName) || (name && input.name != name))
-          continue;
-        matchingInputs.push(Element.extend(input));
-      }
+      var input, results = [], i = 0;
+      while (input = inputs[i++])
+        if ((!typeName || typeName === input.type) && (!name || name === input.name))
+          results.push(Element.extend(input));
 
-      return matchingInputs;
+      return results;
     }
 
     function request(form, options) {
       form = $(form), options = Object.clone(options || { });
 
       var params = options.parameters, submit = options.submit,
-       action = form.readAttribute('action') || '';
+       action = Element.readAttribute(form, 'action') || '';
       delete options.submit;
 
       if (action.blank()) action = global.location.href;
-      options.parameters = form.serialize({ submit:submit, hash:true });
+      options.parameters = Form.serialize(form, { 'submit':submit, 'hash':true });
 
       if (params) {
         if (typeof params === 'string') params = params.toQueryParams();
         Object.extend(options.parameters, params);
       }
 
-      if (form.hasAttribute('method') && !options.method)
+      if (Element.hasAttribute(form, 'method') && !options.method)
         options.method = form.method;
 
       return new Ajax.Request(action, options);
@@ -198,12 +203,14 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Form.Element.Methods = (function() {
+  Field.Methods = (function() {
+    var matchInputButtons = /^(button|image|reset|submit)$/;
+
     function activate(element) {
       element = $(element);
       try { element.focus() } catch(e) { }
       if (element.select && element.tagName.toUpperCase() !== 'BUTTON' &&
-          !['button', 'reset', 'submit'].include(element.type))
+          !matchInputButtons.test(element.type))
         element.select();
       return element;
     }
@@ -211,8 +218,8 @@
     function clear(element) {
       element = $(element);
       if (element.tagName.toUpperCase() !== 'BUTTON' &&
-          !['button', 'image', 'reset', 'submit'].include(element.type))
-        Form.Element.setValue(element, null);
+          !matchInputButtons.test(element.type))
+        Field.setValue(element, null);
       return element;
     }
 
@@ -229,13 +236,13 @@
     }
 
     function present(element) {
-      return $(element).value != '';
+      return !!$(element).value;
     }
 
     function serialize(element) {
       element = $(element);
       if (!element.disabled && element.name) {
-        var value = Form.Element.getValue(element);
+        var value = Field.getValue(element);
         if (Object.isArray(value) && value.length < 2)
           value = value[0];
         if (value != null) {
@@ -250,13 +257,13 @@
     function getValue(element) {
       element = $(element);
       var method = element.tagName.toLowerCase();
-      return Form.Element.Serializers[method](element);
+      return Field.Serializers[method](element);
     }
 
     function setValue(element, value) {
       element = $(element);
       var method = element.tagName.toLowerCase();
-      Form.Element.Serializers[method](element, value || null);
+      Field.Serializers[method](element, value || null);
       return element;
     }
 
@@ -274,71 +281,62 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Form.Element.Serializers = (function() {
+  Field.Serializers = (function() {
     function button(element, value){
-      if (typeof value === 'undefined') return Element.readAttribute(element, 'value');
+      if (typeof value === 'undefined')
+        return Element.readAttribute(element, 'value');
       else Element.writeAttribute(element, 'value', value);
     }
 
     function input(element, value) {
-      switch (element.type.toLowerCase()) {
-        case 'checkbox':  
-        case 'radio':
-          return Form.Element.Serializers.inputSelector(element, value);
-        default:
-          return Form.Element.Serializers.textarea(element, value);
-      }
+      var type = element.type.toLowerCase(),
+       method = (type === 'checkbox' || type === 'radio')
+        ? 'inputSelector' : 'textarea';
+      return Field.Serializers[method](element, value);
     }
 
     function inputSelector(element, value) {
-      if (typeof value === 'undefined') return element.checked ? element.value : null;
+      if (typeof value === 'undefined')
+        return element.checked ? element.value : null;
       else element.checked = !!value;
     }
 
-    function optionValue(opt) {
-      // extend element because hasAttribute may not be native
-      return Element.extend(opt).hasAttribute('value') ? opt.value : opt.text;
+    function optionValue(element) {
+      return element[Element.hasAttribute(element, 'value') ? 'value' : 'text'];
     }
 
     function select(element, value) {
       if (typeof value === 'undefined')
-        return this[element.type == 'select-one' ? 
+        return this[element.type === 'select-one' ? 
           'selectOne' : 'selectMany'](element);
-      else {
-        var opt, currentValue, single = !Object.isArray(value);
-        if (value === null) {
-          element.selectedIndex = -1;
-          return;
-        }
-        for (var i = 0, length = element.length; i < length; i++) {
-          opt = element.options[i];
-          currentValue = this.optionValue(opt);
-          if (single) {
-            if (currentValue == value) {
-              opt.selected = true;
-              return;
-            }
-          }
-          else opt.selected = value.include(currentValue);
-        }
+
+      if (value === null)
+        return element.selectedIndex = -1;
+
+      var node, results = [], i = 0;
+      if (Object.isArray(value)) {
+        while (node = element.options[i++])
+          node.selected = value.include(this.optionValue(node));
+      } else {
+        while (node = element.options[i++])
+          if (this.optionValue(node) === value)
+            return node.selected = true;
       }
     }
 
     function selectOne(element) {
       var index = element.selectedIndex;
-      return index >= 0 ? this.optionValue(element.options[index]) : null;
+      return index > -1 ? this.optionValue(element.options[index]) : null;
     }
 
     function selectMany(element) {
-      var values, length = element.length;
-      if (!length) return null;
+      var node, results = [], i = 0;
+      if (!element.options.length) return null;
 
-      for (var i = 0, values = []; i < length; i++) {
-        var opt = element.options[i];
-        if (opt.selected) values.push(this.optionValue(opt));
-      }
-      return values;
-      }
+      while (node = element.options[i++])
+        if (node.selected) results.push(this.optionValue(node));
+      return results;
+    }
 
     function textarea(element, value) {
       if (typeof value === 'undefined') return element.value;

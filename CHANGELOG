@@ -1,3 +1,5 @@
+* Optimize Form/Field methods by replacing complex method calls with simple while-loops. [jddalton]
+
 * Cleanup String#unescapeHTML and String#extractScripts' HTML comment matching regular expression. [jddalton]
 
 * Cleanup Element._attributeTranslations.read.getEv(). [Andrew Dupont, jddalton]
