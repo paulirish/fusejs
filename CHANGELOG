@@ -1,3 +1,5 @@
+* Simplify String#extractScripts and add a unit test to ensure empty scripts are not returned. [jddalton]
+
 * Optimize Form/Field methods by replacing complex method calls with simple while-loops. [jddalton]
 
 * Cleanup String#unescapeHTML and String#extractScripts' HTML comment matching regular expression. [jddalton]

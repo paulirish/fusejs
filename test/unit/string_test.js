@@ -226,19 +226,23 @@ new Test.Unit.Runner({
   testExtractScripts: function() {
     this.assertEnumEqual([], 'foo bar'.extractScripts());
     this.assertEnumEqual(['boo();'], ('foo <script>boo();<'+'/script>bar').extractScripts());
+    
     this.assertEnumEqual(['boo();','boo();\nmoo();'], 
       ('foo <script>boo();<'+'/script><script type="text/javascript">boo();\nmoo();<'+'/script>bar').extractScripts());
+      
     this.assertEnumEqual(['boo();','boo();\nmoo();'], 
       ('foo <script>boo();<'+'/script>blub\nblub<script type="text/javascript">boo();\nmoo();<'+'/script>bar').extractScripts());
-    
-    var russianChars = '//ÐºÐŸÐŒÐµÐœÑÐ°ÑÐžÐ¹\n';
-    var longComment  = '//' + Array(7000).join('.') + '\n';
-    var longScript   = '\nvar foo = 1;\n' + russianChars + longComment;
-    var longString   = 'foo <script type="text/javascript">'+ longScript + '<'+'/script> bar';
+
+    this.assertEnumEqual(['methodA();', 'methodB();','methodC();'], ('blah<!--\n<script>removedA();<' +
+      '/script>\n--><script type="text/javascript">methodA();<' + '/script><!--\n<script>removedB();<' +
+      '/script>\n--><script><' + '/script>blah<script>methodB();<' + '/script>blah<!--\n<script type="text/javascript">removedC();<' +
+      '/script>\n--><script>methodC();<' + '/script>').extractScripts());
+      
+    var russianChars = '//�?º�?Ÿ�?Œ�?µ�?œÑ�?°Ñ�?ž�?¹\n',
+     longComment  = '//' + Array(7000).join('.') + '\n',
+     longScript   = '\nvar foo = 1;\n' + russianChars + longComment,
+     longString   = 'foo <script type="text/javascript">'+ longScript + '<'+'/script> bar';
     this.assertEnumEqual([longScript], longString.extractScripts());
-    
-    this.assertEnumEqual(['moo();'], ('baz<!--\n<script>foo();<'+'/script>\n--><script type="text/javascript">moo();<'+
-      '/script><!--\n<script>boo();<'+'/script>\n-->buz').extractScripts());
 
     var str = 'foo <script>boo();<'+'/script>blub\nblub<script type="text/javascript">boo();\nmoo();<'+'/script>bar';
     this.benchmark(function() { str.extractScripts() }, 1000);

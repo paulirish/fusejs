@@ -237,8 +237,8 @@
     function extractScripts() {
       if (!matchOpenTag.test(this)) return [];
       var match, results = [], scriptTags = this.replace(matchHTMLComments, '');
-      while ((match = matchScripts.exec(scriptTags)) !== null)
-        if (match[1]) results.push(match[1]);
+      while (match = matchScripts.exec(scriptTags))
+        match[1] && results.push(match[1]);
       return results;
     }
 
