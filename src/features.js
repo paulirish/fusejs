@@ -280,7 +280,8 @@
 
       function ARRAY_CONCAT_ARGUMENTS_BUGGY() {
         // true for Opera
-        return (function() { return Array.prototype.concat && [].concat(arguments) === 1 })(1, 2);
+        return (function() { return Array.prototype.concat &&
+          [].concat(arguments).length === 2 })(1, 2);
       }
 
       function BODY_ACTING_AS_ROOT() {

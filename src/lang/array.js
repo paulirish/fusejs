@@ -56,15 +56,16 @@
     }
 
     function concat() {
-      var array = Array.prototype.slice.call(this, 0);
-      for (var i = 0, length = arguments.length; i < length; i++) {
-        if (Object.isArray(arguments[i])) {
-          for (var j = 0, arrayLength = arguments[i].length; j < arrayLength; j++) 
-            array.push(arguments[i][j]);
-        } else { 
-          array.push(arguments[i]);
+      var item, subItem, j, i = 0, results = slice.call(this, 0);
+      while (item = arguments[i++]) {
+        if (Object.isArray(item)) {
+          j = 0;
+          while (subItem = item[j++])
+            results.push(subItem);
         }
+        else results.push(item);
       }
+      return results;
     }
 
     function every(iterator, context) {

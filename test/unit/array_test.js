@@ -50,6 +50,18 @@ new Test.Unit.Runner({
     b = a.clone();
     this.assertNotIdentical(a, b);
   },
+
+  testConcat: function() {
+    // test passing an arguments object to concat
+     var self = this;
+    (function() {
+      self.assertEqual(1, [].concat(arguments).length, 'treats arguments as an array');
+    })(1, 2);
+    
+    var list = ['a', 'b', 'c'];
+    this.assertEnumEqual($w('a b c d e f g h i'),
+      list.concat(['d', 'e'], 'f', ['g', 'h'], ['i']), 'failed basic concat test');
+  },
   
   testFirst: function(){
     this.assertUndefined([].first());
