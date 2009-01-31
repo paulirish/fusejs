@@ -43,14 +43,25 @@ new Test.Unit.Runner({
   
   testFormElementEventObserver: function(){
     var callbackCounter = 0;
-    var observer = new Form.Element.EventObserver('input_enabled', function(){
+    var observerA = new Form.Element.EventObserver('input_enabled', function(){
       callbackCounter++;
     });
-    
+
     this.assertEqual(0, callbackCounter);
     $('input_enabled').value = 'boo!';
-    observer.onElementEvent(); // can't test the event directly, simulating
+    observerA.onElementEvent(); // can't test the event directly, simulating
     this.assertEqual(1, callbackCounter);
+
+    // test control groups
+    var self = this, container = $('form_with_control_groups'),
+     radios = [container.down(), container.down(1), container.down(2)];
+
+    var observerB = new Form.Element.EventObserver(radios[0], function(element){
+      self.assertEqual(radios[0], '2r');
+    });
+
+    this.assertEqual('2r', observerB.getValue());
+    this.assertEnumEqual(radios, observerB.group);
   },
 
   testFormElementObserver: function(){

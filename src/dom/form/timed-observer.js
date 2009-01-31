@@ -23,12 +23,11 @@
     };
   })());
 
-  Form.Element.Observer = 
-  Form.Element.TimedObserver = Class.create(Abstract.TimedObserver, (function() {
+  Field.Observer = 
+  Field.TimedObserver = Class.create(Abstract.TimedObserver, (function() {
     function getValue() {
       return Form.Element.getValue(this.element);
     }
-
     return {
       'getValue': getValue
     };
@@ -39,7 +38,6 @@
     function getValue() {
       return Form.serialize(this.element);
     }
-
     return {
       'getValue': getValue
     };

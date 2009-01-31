@@ -1,3 +1,5 @@
+* Add support for control groups to Form.Element.EventObserver() and cleanup Form.Element.Observer(). [jddalton]
+
 * Fix Bug('ARRAY_CONCAT_ARGUMENTS_BUGGY') detection and ensure Array#concat's replacement returns an array. [jddalton]
 
 * Optimize Element#getOffsetParent by using the regexp case-insensitive flag instead of tagName.toLowerCase(). [jddalton]

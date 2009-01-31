@@ -278,5 +278,49 @@
       });
     })();
   </script>
+
+  <form action="blah">
+     <p id="field_event_observer_single">
+       Test Field.EventObserver (single): Type input then <strong>click here</strong>
+       <input type="text" value="" />
+     </p>
+  </form>
+  
+  <script type="text/javascript">
+    (function() {
+      var count = 0,
+       el = $('field_event_observer_single'),
+       input = el.down('input');
+
+      new Field.EventObserver(input, function(){ count++ });
+      input.observe('change', function() {
+        this.stopObserving('change', arguments.callee);
+        (function() { el[count ? 'passed' : 'failed']() }).defer();
+      });
+    })();
+  </script>
+  
+  <form action="blah">
+     <p id="field_event_observer_group">
+       Test Field.EventObserver (group): Click a radio button
+       <input type="radio" name="group_radio"  value="1r" />
+       <input type="radio" name="group_radio"  value="2r" />
+       <input type="radio" name="group_radio"  value="3r" />
+     </p>
+  </form>
+  
+  <script type="text/javascript">
+    (function() {
+      var count = 0,
+       el = $('field_event_observer_group'),
+       radios = el.select('input[type="radio"]');
+
+      new Field.EventObserver(radios[1], function(){ count++ });
+      radios.invoke('observe', 'click', function() {
+        radios.invoke('stopObserving', 'click', arguments.callee);
+        (function() { el[count ? 'passed' : 'failed']() }).defer();
+      });
+    })();
+  </script>
 </body>
 </html>

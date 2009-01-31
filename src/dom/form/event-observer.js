@@ -2,40 +2,41 @@
 
   Abstract.EventObserver = Class.create((function() {
     function initialize(element, callback) {
-      this.element   = $(element);
-      this.callback  = callback;
-      this.lastValue = this.getValue();
+      this.element = $(element);
+      this.onElementEvent = this.onElementEvent.bind(this);
 
       if (this.element.tagName.toUpperCase() === 'FORM')
-        this.registerFormCallbacks();
-      else
-        this.registerCallback(this.element);
+        return this.registerFormCallbacks();
+
+      var member, name = element.name, i = 0;
+      this.group = (name && $$(element.tagName +
+        '[name="' + name + '"]')) || [element];
+
+      this.callback = callback;
+      this.lastValue = this.getValue();
+
+      while (member = this.group[i++])
+        this.registerCallback(member);
     }
 
     function onElementEvent() {
       var value = this.getValue();
-      if (this.lastValue != value) {
-        this.callback(this.element, value);
-        this.lastValue = value;
-      }
+      if (this.lastValue === value) return;
+      this.callback(this.element, value);
+      this.lastValue = value;
     }
 
     function registerCallback(element) {
-      if (element.type) {
-        switch (element.type.toLowerCase()) {
-          case 'checkbox':  
-          case 'radio':
-            Event.observe(element, 'click', this.onElementEvent.bind(this));
-            break;
-          default:
-            Event.observe(element, 'change', this.onElementEvent.bind(this));
-            break;
-        }
-      }    
+      if (!element.type) return;
+      var eventName = 'change', type = element.type;
+      if (type === 'checkbox' || type === 'radio')
+        eventName = 'click';
+      Event.observe(element, eventName, this.onElementEvent);
     }
 
     function registerFormCallbacks() {
-      Form.getElements(this.element).each(this.registerCallback, this);
+      var element, elements = Form.getElements(this.element), i= 0;
+      while (element = elements[i++]) this.registerCallback(element);
     }
 
     return {
@@ -46,11 +47,15 @@
     };
   })());
 
-  Form.Element.EventObserver = Class.create(Abstract.EventObserver, (function() {
+  Field.EventObserver = Class.create(Abstract.EventObserver, (function() {
     function getValue() {
-      return Form.Element.getValue(this.element);
+      if (this.group.length === 1)
+        return Form.Element.getValue(this.element);
+      var member, value, i = 0;
+      while (member = this.group[i++])
+        if (value = Form.Element.getValue(member))
+          return value;
     }
-
     return {
       'getValue': getValue
     };
@@ -60,7 +65,6 @@
     function getValue() {
       return Form.serialize(this.element);
     }
-
     return {
       'getValue': getValue
     };
