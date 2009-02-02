@@ -81,6 +81,7 @@ new Test.Unit.Runner({
     this.assertEnumEqual([],      [].compact());
     this.assertEnumEqual([1,2,3], [1,2,3].compact());
     this.assertEnumEqual([0,1,2,3], [0,null,1,2,undefined,3].compact());
+    this.assertEnumEqual([1,2,3], [0,null,1,'',2,undefined,3].compact(true));
     this.assertEnumEqual([1,2,3], [null,1,2,3,null].compact());
   },
   
@@ -170,7 +171,6 @@ new Test.Unit.Runner({
     this.assertEnumEqual([1], [1].uniq());
     this.assertEnumEqual([], [].uniq());
     this.assertEnumEqual([0, 1, 2, 3], [0, 1, 2, 2, 3, 0, 2].uniq());
-    this.assertEnumEqual([0, 1, 2, 3], [0, 0, 1, 1, 2, 3, 3, 3].uniq(true));
   },
   
   testWithout: function(){
@@ -178,6 +178,7 @@ new Test.Unit.Runner({
     this.assertEnumEqual([], [0].without(0));
     this.assertEnumEqual([1], [0,1].without(0));
     this.assertEnumEqual([1,2], [0,1,2].without(0));
+    this.assertEnumEqual(['test1','test3'], ['test1','test2','test3'].without('test2'));
   },
   
   test$w: function(){

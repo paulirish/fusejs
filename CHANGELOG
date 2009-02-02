@@ -1,3 +1,17 @@
+* Array optimizations. [jddalton, Joe Gornick, John Resig]
+ - Array#compact - Removed use of Array#select and added an option to remove "falsy" values
+ - Array#flatten - Removed use of Array#inject
+ - Array#include - Only use Array#indexOf
+ - Array#indexOf - Renamed parameter from i to fromIndex
+ - Array#inject  - Renamed parameter memo to accumulator
+ - Array#map     - If iterator isn't specified return cloned array
+ - Array#max|min - Use Math.max|min for non-sparse arrays when no iterator is given
+ - Array#toJSON  - Removed use of Array#_each
+ - Array#uniq    - Remove use of Array#inject and parameter sorted
+ - Array#without - Removed use of Array#select
+ - Array#intersect   - Removed use of Array#_each and renamed parameter other to array
+ - Array#lastIndexOf - Renamed param i to fromIndex
+
 * Remove unused feature test "ARGUMENTS_INSTANCEOF_ARRAY". [jddalton]
 
 * Optimize ObjectRange by caching its range values on the first use of "_each". [jddalton]

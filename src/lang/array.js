@@ -49,10 +49,11 @@
       return slice.call(this, 0);
     }
 
-    function compact() {
-      return this.select(function(value) {
-        return value != null;
-      });
+    function compact(falsy) {
+      for (var i = 0, results = [], length = this.length; i < length; i++)
+        if (!(this[i] == null || falsy && !this[i]))
+          results.push(this[i]);
+      return results;
     }
 
     function concat() {
@@ -77,8 +78,7 @@
     }
 
     function filter(iterator, context) {
-      var results = [];
-      for (var i = 0, length = this.length; i < length; i++)
+      for (var i = 0, results = [], length = this.length; i < length; i++)
         if (iterator.call(context, this[i], i))
           results[results.length] = this[i];
       return results;
@@ -89,19 +89,20 @@
     }
 
     function flatten() {
-      return this.inject([], function(array, value) {
-        if (Object.isArray(value))
-          return mergeList(array, value.flatten());
-        return array.push(value) && array;
-      });
+      for (var i = 0, results = [], length = this.length; i < length; i++) {
+        if (Object.isArray(this[i])) 
+          results = mergeList(results, this[i].flatten());
+        else results.push(this[i]);
+      }
+      return results;
     }
 
-    function indexOf(item, i) {
-      i || (i = 0);
+    function indexOf(item, fromIndex) {
+      fromIndex || (fromIndex = 0);
       var length = this.length;
-      if (i < 0) i = length + i;
-      for (; i < length; i++)
-        if (this[i] === item) return i;
+      if (fromIndex < 0) fromIndex = length + fromIndex;
+      for ( ; fromIndex < length; fromIndex++)
+        if (this[fromIndex] === item) return fromIndex;
       return -1;
     }
 
@@ -109,13 +110,11 @@
       return '[' + this.map(Object.inspect).join(', ') + ']';
     }
 
-    function intersect(other) {
-      var arr = this, result = [];
-      other._each(function(item) {
-        if (arr.indexOf(item) !== -1 && result.indexOf(item) === -1)
-          result.push(item);
-      });
-      return result;
+    function intersect(array) {
+      for (var i = 0, results = [], length = array.length; i < length; i++)
+        if (this.indexOf(array[i]) !== -1 && results.indexOf(array[i]) === -1)
+          results.push(array[i]);
+      return results;
     }
 
     function last() {
@@ -123,14 +122,15 @@
       return this[length && length - 1];
     }
 
-    function lastIndexOf(item, i) {
-      i = isNaN(i) ? this.length : (i < 0 ? this.length + i : i) + 1;
-      var n = this.slice(0, i).reverse().indexOf(item);
-      return (n < 0) ? n : i - n - 1;
+    function lastIndexOf(item, fromIndex) {
+      fromIndex = isNaN(fromIndex) ? this.length :
+        (fromIndex < 0 ? this.length + fromIndex : fromIndex) + 1;
+      var n = this.slice(0, fromIndex).reverse().indexOf(item);
+      return (n < 0) ? n : fromIndex - n - 1;
     }
 
     function map(iterator, context) {
-      iterator = iterator || K;
+      if (!iterator) return slice.call(this, 0);
       var results = [];
       for (var i = 0, length = this.length; i < length; i++)
         results[i] = iterator.call(context, this[i], i);
@@ -154,27 +154,25 @@
     }
 
     function toJSON() {
-      var results = [];
-      this._each(function(object) {
-        var value = Object.toJSON(object);
+      for (var value, i = 0, results = [], length = this.length; i < length; i++) {
+        value = Object.toJSON(this[i]);
         if (typeof value !== 'undefined') results.push(value);
-      });
+      }
       return '[' + results.join(', ') + ']';
     }
 
-    function uniq(sorted) {
-      return this.inject([], function(array, value, index) {
-        if (0 == index || (sorted ? array.last() != value : !array.include(value)))
-          array.push(value);
-        return array;
-      });
+    function uniq() {
+      for (var i = 0, results = [], length = this.length; i < length; i++)
+        if (results.indexOf(this[i]) < 0) results.push(this[i]);
+      return results.length && results || this;
     }
 
     function without() {
-      var values = slice.call(arguments, 0);
-      return this.select(function(value) {
-        return !values.include(value);
-      });
+      var results = [], i = 0, length = this.length;
+       values = slice.call(arguments, 0);
+      for ( ; i < length; i++)
+        if (values.indexOf(this[i]) < 0) results.push(this[i]);
+      return results;
     }
 
     /* Create optimized Enumerable equivalents */
@@ -186,18 +184,17 @@
     }
 
     function include(object) {
-      if (typeof this.indexOf === 'function')
-        if (this.indexOf(object) != -1) return true;
-
+      var result = this.indexOf(object);
+      if (result > -1) return true;
       for (var i = 0, length = this.length; i < length; i++)
         if (this[i] == object) return true;
       return false;
     }
 
-    function inject(memo, iterator, context) {
+    function inject(accumulator, iterator, context) {
       for (var i = 0, length = this.length; i < length; i++)
-        memo = iterator.call(context, memo, this[i], i);
-      return memo;
+        accumulator = iterator.call(context, accumulator, this[i], i);
+      return accumulator;
     }
 
     function invoke(method) {
@@ -228,8 +225,14 @@
     }
 
     function max(iterator, context) {
-      iterator = iterator || K;
       var result;
+      if (!iterator) {
+        // John Resig's fast Array max|min:
+        // http://ejohn.org/blog/fast-javascript-maxmin
+        result = Math.max.apply(Math, this);
+        if (!isNaN(result)) return result;
+      }
+      result = null; iterator = K;
       for (var i = 0, length = this.length, value; i < length; i++) {
         value = iterator.call(context, this[i], i);
         if (result == null || value >= result)
@@ -239,8 +242,12 @@
     }
 
     function min(iterator, context) {
-      iterator = iterator || K;
       var result;
+      if (!iterator) {
+        result = Math.min.apply(Math, this);
+        if (!isNaN(result)) return result;
+      }
+      result = null; iterator = K;
       for (var i = 0, length = this.length, value; i < length; i++) {
         value = iterator.call(context, this[i], i);
         if (result == null || value < result)
@@ -266,17 +273,15 @@
     }
 
     function reject(iterator, context) {
-      var results = [];
-      for (var i = 0, length = this.length; i < length; i++)
+      for (var i = 0, results = [], length = this.length; i < length; i++)
         if (!iterator.call(context, this[i], i))
           results[results.length] = this[i];
       return results;
     }
 
     function sortBy(iterator, context) {
-      var results = [];
-      for (var i = 0, length = this.length; i < length;
-        results[i] = { value: this[i], criteria: iterator.call(context, this[i], i++) });
+      for (var i = 0, results = [], length = this.length; i < length; i++)
+        results[i] = { 'value': this[i], 'criteria': iterator.call(context, this[i], i) };
       return results.sort(function(left, right) {
         var a = left.criteria, b = right.criteria;
         return a < b ? -1 : a > b ? 1 : 0;
