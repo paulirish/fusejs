@@ -44,8 +44,6 @@ new Test.Unit.Runner({
       'ウィメンズ2007\nクルーズコレクション'.gsub(/\n/,'<br/>'));
     this.assertEqual('ウィメンズ2007<br/>クルーズコレクション', 
       'ウィメンズ2007\nクルーズコレクション'.gsub('\n','<br/>'));
-
-    this.assertEqual('ab', 'ab'.gsub('', ''));
   },
   
   testGsubWithReplacementTemplateString: function() {
@@ -78,6 +76,12 @@ new Test.Unit.Runner({
     this.assertEqual('ab', 'a.b'.gsub('.', ''));
   },
 
+  testSubsWithEmptyPattern: function() {
+    // test with empty pattern (String#gsub is used by String#sub)
+    this.assertEqual('ab', 'ab'.gsub('', 'xyz'));
+    this.assertEqual('ab', 'ab'.sub('', 'xyz'));
+  },
+  
   testSubWithReplacementFunction: function() {
     var source = 'foo boo boz';
 
