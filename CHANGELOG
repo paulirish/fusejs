@@ -1,3 +1,5 @@
+* Optimize Enumerable methods by replacing calls to "each" with "_each" and change aliases to mimic ones set by the Array extensions. [jddalton]
+
 * unit test: Enusre String#sub does not freeze when passed an empty pattern. [jddalton]
 
 * Add support for control groups to Form.Element.EventObserver() and cleanup Form.Element.Observer(). [jddalton]
