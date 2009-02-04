@@ -12,24 +12,41 @@
     }
 
     function _each(iterator) {
-      var value = this.start;
-      while (this.include(value)) {
-        iterator(value);
-        value = value.succ();
+      var i = 0, c = this.cache, value = this.start;
+      if (!c || this.start !== c.start || this.end !== c.end) {
+        c = this.cache = [];
+        c.start = this.start;
+        c.end = this.end;
+        c.exclusive = this.exclusive;
+
+        while (include(this, value)) {
+          iterator(value);
+          c.push(value);
+          value = value.succ();
+        }
+      }
+      else {
+        if (this.exclusive !== c.exclusive) {
+          c.exclusive = this.exclusive;
+          if (this.exclusive)
+            c.pop();
+          else c.push(c.last().succ());
+        }
+        while (value = c[i++])
+          iterator(value);
       }
     }
 
-    function include(value) {
-      if (value < this.start) 
+    function include(context, value) {
+      if (value < context.start)
         return false;
-      if (this.exclusive)
-        return value < this.end;
-      return value <= this.end;
+      if (context.exclusive)
+        return value < context.end;
+      return value <= context.end;
     }
 
     return {
       'initialize': initialize,
-      '_each':      _each,
-      'include':    include
+      '_each':      _each
     };
   })());

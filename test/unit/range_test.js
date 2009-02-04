@@ -50,9 +50,24 @@ new Test.Unit.Runner({
     this.assertEnumEqual([0, 1], $R(0, 1, false).toArray());
     this.assertEnumEqual([-3, -2, -1, 0, 1, 2], $R(-3, 3, true).toArray());
     this.assertEnumEqual([-3, -2, -1, 0, 1, 2, 3], $R(-3, 3, false).toArray());
+    this.assertEnumEqual(['a', 'b', 'c', 'd', 'e'], $R('a', 'e').toArray());
   },
   
   testDefaultsToNotExclusive: function() {
     this.assertEnumEqual($R(-3,3), $R(-3,3,false));
+  },
+  
+  testRangeCache: function() {
+    var range = $R(1, 4);
+    range.toArray();
+    this.assertEnumEqual([1, 2, 3, 4], range.toArray());
+
+    range.exclusive = true;
+    this.assertEnumEqual([1, 2, 3], range.toArray());
+
+    range.start = 3;
+    range.end   = 6;
+    range.exclusive = false;
+    this.assertEnumEqual([3, 4, 5, 6], range.toArray());
   }
 });
