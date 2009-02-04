@@ -1,3 +1,5 @@
+* Remove unused feature test "ARGUMENTS_INSTANCEOF_ARRAY". [jddalton]
+
 * Optimize ObjectRange by caching its range values on the first use of "_each". [jddalton]
 
 * Optimize Enumerable methods by replacing calls to "each" with "_each" and change aliases to mimic ones set by the Array extensions. [jddalton]

@@ -19,11 +19,6 @@
     }
 
     Feature = Test((function() {
-      function ARGUMENTS_INSTANCEOF_ARRAY() {
-        // true for Opera
-        return (function() { return arguments instanceof Array })();
-      }
-
       function CREATE_ELEMENT_WITH_HTML() {
         try { // true for IE
           var div = doc.createElement('<div id="test">');
@@ -219,7 +214,6 @@
       })();
 
       return {
-        'ARGUMENTS_INSTANCEOF_ARRAY':        ARGUMENTS_INSTANCEOF_ARRAY,
         'CREATE_ELEMENT_WITH_HTML':          CREATE_ELEMENT_WITH_HTML,
         'DOCUMENT_ALL_COLLECTION':           DOCUMENT_ALL_COLLECTION,
         'DOCUMENT_CREATE_EVENT':             DOCUMENT_CREATE_EVENT,
