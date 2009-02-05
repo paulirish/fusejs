@@ -247,6 +247,21 @@ new Test.Unit.Runner({
     this.assert(!Object.isFunction(undefined));
   },
   
+  testObjectIsRegExp: function() {
+    this.assert(Object.isRegExp(/foo/));
+    this.assert(Object.isRegExp(new RegExp('foo')));
+    this.assert(!Object.isRegExp(alert));
+    this.assert(!Object.isRegExp(0));
+    this.assert(!Object.isRegExp(function() { }));
+    this.assert(!Object.isRegExp("a string"));
+    this.assert(!Object.isRegExp([ ]));
+    this.assert(!Object.isRegExp({ }));
+    this.assert(!Object.isRegExp({ valueOf: null }));
+    this.assert(!Object.isRegExp({ valueOf: /foo/ }));
+    this.assert(!Object.isRegExp(false));
+    this.assert(!Object.isRegExp(undefined));
+  },
+  
   testObjectIsString: function() {
     this.assert(Object.isString("a string"));
     this.assert(Object.isString(new String("a string")));

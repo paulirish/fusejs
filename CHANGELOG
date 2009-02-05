@@ -1,3 +1,5 @@
+* Add Object.isRegExp() data type detection method. [jddalton]
+
 * Ensure String#gsub returns the correct result when passed uncommon patterns. [jddalton, Samuel Lebeau]
 
 * Array optimizations. [jddalton, Joe Gornick, John Resig]

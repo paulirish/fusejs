@@ -156,7 +156,7 @@
 
     function gsub(pattern, replacement) {
       var match, result = '', source = this,
-       isRegExp = Object.prototype.toString.call(pattern) === '[object RegExp]';
+       isRegExp = Object.isRegExp(pattern);
       replacement = prepareReplacement(replacement);
 
       // see EMCA-262 15.5.4.11

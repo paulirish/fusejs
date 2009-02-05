@@ -47,6 +47,10 @@
       return toString.call(object) === '[object Number]' && isFinite(object);
     }
 
+    function isRegExp(object) {
+      return toString.call(object) === '[object RegExp]';
+    }
+
     function isString(object) {
       return toString.call(object) === '[object String]';
     }
@@ -124,6 +128,7 @@
       'isFunction':    isFunction,
       'isHash':        isHash,
       'isNumber':      isNumber,
+      'isRegExp':      isRegExp,
       'isString':      isString,
       'isUndefined':   isUndefined,
       'keys':          keys,
