@@ -84,15 +84,20 @@ new Test.Unit.Runner({
     this.assertEqual('xaxbx', 'ab'.sub('', 'x'));
 
     this.assertEqual('abc', 'anullc'.sub(null, 'b'));
-    this.assertEqual('abc', 'aundefinedc'.sub(window.undefined, 'b'));
+    this.assertEqual('abc', 'aundefinedc'.gsub(window.undefined, 'b'));
     this.assertEqual('abc', 'a0c'.sub(0, 'b'));
-    this.assertEqual('abc', 'atruec'.sub(true, 'b'));
+    this.assertEqual('abc', 'atruec'.gsub(true, 'b'));
     this.assertEqual('abc', 'afalsec'.sub(false, 'b'));
     
     this.assertEqual('---a---b---', 'ab'.gsub(empty, '-#{0}-#{1}-'));
     this.assertEqual('++a++b++', 'ab'.gsub('', function(match) {
       return '+' + match[0] + '+';
     }));
+
+    // test using the global flag (should not hang)
+    this.assertEqual('abc', 'axc'.sub(/x/g, 'b'));
+    this.assertEqual('abbacadabba', 'axxacadaxxa'.gsub(/x/g, 'b'));
+    this.assertEqual('abbacadabba', 'axxacadaxxa'.gsub(new RegExp('x','g'), 'b'));
   },
   
   testSubWithReplacementFunction: function() {

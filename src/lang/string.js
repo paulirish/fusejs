@@ -166,6 +166,11 @@
         replacement = replacement(['']);
         return replacement + source.split('').join(replacement) + replacement;
       }
+      // convert to non-global
+      if (isRegExp && pattern.global)
+        pattern = new RegExp(pattern.source,
+          (pattern.ignoreCase ? 'i' : '') +
+          (pattern.multiline  ? 'm' : ''));
 
       while (source.length > 0) {
         if (match = source.match(pattern)) {
