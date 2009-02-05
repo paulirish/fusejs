@@ -1,3 +1,5 @@
+* Ensure String#gsub returns the correct result when passed uncommon patterns. [jddalton, Samuel Lebeau]
+
 * Array optimizations. [jddalton, Joe Gornick, John Resig]
  - Array#compact - Removed use of Array#select and added an option to remove "falsy" values
  - Array#flatten - Removed use of Array#inject

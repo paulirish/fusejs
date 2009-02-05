@@ -155,10 +155,17 @@
     /* TEXT SUBSTITUTION FUNCTIONS */
 
     function gsub(pattern, replacement) {
-      var match, result = '', source = this;
-      if (!pattern) return source;
+      var match, result = '', source = this,
+       isRegExp = Object.prototype.toString.call(pattern) === '[object RegExp]';
       replacement = prepareReplacement(replacement);
-      if (typeof pattern === 'string') pattern = RegExp.escape(pattern);
+
+      // see EMCA-262 15.5.4.11
+      if (!isRegExp)
+        pattern = RegExp.escape(String(pattern));
+      if (pattern === '' || isRegExp && !pattern.source) {
+        replacement = replacement(['']);
+        return replacement + source.split('').join(replacement) + replacement;
+      }
 
       while (source.length > 0) {
         if (match = source.match(pattern)) {
