@@ -126,7 +126,9 @@ new Test.Unit.Runner({
   },
   
   testGrep: function() {
+    // test empty pattern
     this.assertEqual('abc', ['a', 'b', 'c'].grep('').join(''));
+    this.assertEqual('abc', ['a', 'b', 'c'].grep(new RegExp('')).join(''));
 
     this.assertEqual('noradio, htonl', 
       Fixtures.Nicknames.grep(/o/).join(", "));

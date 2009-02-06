@@ -211,10 +211,10 @@
     }
 
     function grep(pattern, iterator, context) {
-      if (!pattern) this.toArray();
+      if (!pattern || Object.isRegExp(pattern) &&
+         !pattern.source) this.toArray();
       iterator = iterator || K;
       var results = [];
-
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
 
