@@ -6,14 +6,16 @@
 
   Hash = Class.create(Enumerable, (function() {
     function initialize(object) {
-        this._object = Object.isHash(object) ? object.toObject() : Object.clone(object);
+      this._object = Object.isHash(object) ?
+        object.toObject() : Object.clone(object);
     }
 
     function _each(iterator) {
-      for (var key in this._object) {
-        var value = this._object[key], pair = [key, value];
+      var key, pair;
+      for (key in this._object) {
+        pair = [key, this._object[key]];
         pair.key = key;
-        pair.value = value;
+        pair.value = pair[1];
         iterator(pair);
       }
     }
@@ -22,28 +24,79 @@
       return new Hash(this);
     }
 
-    function index(value) {
-      var match = this.detect(function(pair) { 
-        return pair.value === value; 
-      });
-      return match && match.key;
+    function filter(iterator, context) {
+      var key, result = new Hash();
+      for (key in this._object)
+        if (iterator.call(context, this._object[key], key))
+          result.set(key, this._object[key]);
+      return result;
+    }
+
+    function include(value) {
+      var key;
+      for (key in this._object)
+        if (this._object[key] == value)
+          return true;
+      return false;
     }
 
     function inspect() {
-      return '#<Hash:{' + this.map(function(pair) {
-        return pair.map(Object.inspect).join(': ');
-      }).join(', ') + '}>';
+      var results = [];
+      for (key in this._object)
+        results.push(key.inspect() + ': ' + Object.inspect(this._object[key]));
+      return '#<Hash:{' + results.join(', ') + '}>';
+    }
+
+    function grep(pattern, iterator, context) {
+      if (!pattern || Object.isRegExp(pattern) &&
+         !pattern.source) this.clone();
+      iterator = iterator || K;
+      var key, value, result = new Hash();
+      if (typeof pattern === 'string')
+        pattern = new RegExp(RegExp.escape(pattern));
+
+      for (key in this._object) {
+        value = this._object[key];
+        if (pattern.match(value))
+          result.set(key, iterator.call(context, value,key));
+      }
+      return result;
+    }
+
+    function keyOf(value) {
+      var key;
+      for (key in this._object)
+        if (this._object[key] === value)
+          return key;
+      return -1;
     }
 
     function merge(object) {
       return this.clone().update(object);
     }
 
+    function partition(iterator, context) {
+      iterator = iterator || K;
+      var key, trues = new Hash(), falses = new Hash();
+      for (key in this._object)
+        (iterator.call(context, this._object[key], key) ?
+          trues : falses).set(key, this._object[key]);
+      return [trues, falses];
+    }
+
     function update(object) {
-      return new Hash(object).inject(this, function(result, pair) {
-        result.set(pair.key, pair.value);
-        return result;
-      });
+      var key, object = new Hash(object)._object;
+      for (key in object)
+        this.set(key, object[key]);
+      return this;
+    }
+
+    function reject(iterator, context) {
+      var result = new Hash();
+      for (key in this._object)
+        if (!iterator.call(context, this._object[key], key))
+          result.set(key, this._object[key]);
+      return result;
     }
 
     function toJSON() {
@@ -75,30 +128,57 @@
     }
 
     function keys() {
-      return this.pluck('key');
+      return Object.keys(this._object);
     }
 
     function values() {
-      return this.pluck('value');
+      return Object.values(this._object);
+    }
+
+    function zip() {
+      var iterator = K, args = slice.call(arguments, 0);
+      if (typeof args.last() === 'function')
+        iterator = args.pop();
+
+      var hash, value, values, j, i = 0, 
+       result = new Hash(), keys = this.keys(),
+       hashes = prependList(args.map($H), this);
+
+      while (key = keys[i++]) {
+        j = 0; values = [];
+        while (hash = hashes[j++])
+          values.push(hash._object[key]);
+        result.set(key, iterator(values));
+      }
+      return result;
     }
 
     return {
       'initialize':             initialize,
       '_each':                  _each,
       'clone':                  clone,
+      'findAll':                filter,
+      'filter':                 filter,
       'get':                    get,
+      'grep':                   grep,
       'keys':                   keys,
-      'index':                  index,
+      'keyOf':                  keyOf,
+      'include':                include,
+      'index':                  keyOf,
       'inspect':                inspect,
       'merge':                  merge,
+      'partition':              partition,
       'update':                 update,
+      'reject':                 reject,
+      'select':                 filter,
       'set':                    set,
       'toJSON':                 toJSON,
       'toObject':               toObject,
       'toQueryString':          toQueryString,
       'toTemplateReplacements': toObject,
       'unset':                  unset,
-      'values':                 values
+      'values':                 values,
+      'zip':                    zip
     };
   })());
 

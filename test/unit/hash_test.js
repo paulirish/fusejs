@@ -59,7 +59,14 @@ new Test.Unit.Runner({
     this.assertHashNotEqual(h, clone);
     this.assertIdentical($H, Hash.from);
   },
-  
+
+  testInclude: function() {
+    this.assert($H(Fixtures.one).include('A#'));
+    this.assert($H(Fixtures.many).include('A'));
+    this.assert(!$H(Fixtures.many).include('Z'));
+    this.assert(!$H().include('foo'));
+  },
+
   testKeys: function() {
     this.assertEnumEqual([],               $H({}).keys());
     this.assertEnumEqual(['a'],            $H(Fixtures.one).keys());
@@ -76,19 +83,37 @@ new Test.Unit.Runner({
     this.assertEqual(9, $H(Fixtures.functions).get('quad')(3));
     this.assertEqual(6, $H(Fixtures.functions).get('plus')(3));
   },
-  
-  testIndex: function() {
-    this.assertUndefined($H().index('foo'));
+
+  testKeyOf: function() {
+    this.assert('a', $H(Fixtures.one).keyOf('A#'));
+    this.assert('a', $H(Fixtures.many).keyOf('A'));
     
-    this.assert('a', $H(Fixtures.one).index('A#'));
-    this.assert('a', $H(Fixtures.many).index('A'));
-    this.assertUndefined($H(Fixtures.many).index('Z'))
-  
-    var hash = $H({a:1,b:'2',c:1});
-    this.assert(['a','c'].include(hash.index(1)));
-    this.assertUndefined(hash.index('1'));
+    this.assertIdentical(-1, $H().keyOf('foo'));
+    this.assertIdentical(-1, $H(Fixtures.many).keyOf('Z'));
+
+    var hash = $H({ 'a':1, 'b':'2', 'c':1});
+    this.assert(['a','c'].include(hash.keyOf(1)));
+    this.assertIdentical(-1, hash.keyOf('1'));
   },
+
+  testFilter: function() {
+    this.assertHashEqual({ 'a':'A', 'b':'B' },
+      $H(Fixtures.many).filter(function(value, key) {
+        return /[ab]/.test(key);
+      }));
+  },
+
+  testGrep: function() {
+    // test empty pattern
+    this.assertHashEqual(Fixtures.many, $H(Fixtures.many).grep(''));
+    this.assertHashEqual(Fixtures.many, $H(Fixtures.many).grep(new RegExp('')));
     
+    this.assert(/(ab|ba)/.test($H(Fixtures.many).grep(/[ab]/i).keys().join('')));
+    this.assert(/(CCD#D#|D#D#CC)/.test($H(Fixtures.many).grep(/[cd]/i, function(v) {
+      return v + v;
+    }).values().join('')));
+  },
+
   testMerge: function() {
     var h = $H(Fixtures.many);
     this.assertNotIdentical(h, h.merge());
@@ -101,7 +126,17 @@ new Test.Unit.Runner({
     this.assertHashEqual({a:'A',  b:'B', c:'C', d:'D#', aaa:'AAA' }, h.merge({aaa: 'AAA'}));
     this.assertHashEqual({a:'A#', b:'B', c:'C', d:'D#' }, h.merge(Fixtures.one));
   },
-  
+
+  testPartition: function() {
+    var result = $H(Fixtures.many).partition(function(value) {
+      return /[AB]/.test(value);
+    });
+
+    this.assertEqual(2, result.length);
+    this.assertHashEqual({ 'a':'A', 'b':'B' }, result[0]);
+    this.assertHashEqual({ 'c':'C', 'd':'D#' }, result[1]);
+  },
+
   testUpdate: function() {
     var h = $H(Fixtures.many);
     this.assertIdentical(h, h.update());
@@ -112,7 +147,14 @@ new Test.Unit.Runner({
     this.assertHashEqual({a:'A',  b:'B', c:'C', d:'D#', aaa:'AAA' }, h.update({aaa: 'AAA'}));
     this.assertHashEqual({a:'A#', b:'B', c:'C', d:'D#', aaa:'AAA' }, h.update(Fixtures.one));
   },
-  
+
+  testReject: function() {
+    this.assertHashEqual({ 'c':'C', 'd': 'D#' },
+      $H(Fixtures.many).reject(function(value) {
+        return !/[CD]/.test(value);
+      }));
+  },
+
   testToQueryString: function() {
     this.assertEqual('',                   $H({}).toQueryString());
     this.assertEqual('a%23=A',             $H({'a#': 'A'}).toQueryString());
@@ -149,7 +191,21 @@ new Test.Unit.Runner({
     this.assertEqual('{\"b\": [false, true], \"c\": {\"a\": \"hello!\"}}',
       $H({'b': [undefined, false, true, undefined], c: {a: 'hello!'}}).toJSON());
   },
-  
+
+  testZip: function() {
+    var jq = $H({ 'name':'jquery', 'size':'18kb' }),
+     proto = $H({ 'name':'prototype', 'size':'28kb' }),
+     fuse  = $H({ 'name': 'fusejs', 'size': '29kb' });
+ 
+    var result = jq.zip(proto, fuse);
+    this.assertHashEqual({ 'name':['jquery', 'prototype', 'fusejs'], 'size':['18kb', '28kb', '29kb'] }, result);
+    
+    result = jq.zip(proto, fuse, function(values) {
+      return values.join(', ');
+    })
+    this.assertHashEqual({ 'name':'jquery, prototype, fusejs', 'size':'18kb, 28kb, 29kb' }, result);
+  },
+
   testAbilityToContainAnyKey: function() {
     var h = $H({ _each: 'E', map: 'M', keys: 'K', pluck: 'P', unset: 'U' });
     this.assertEnumEqual($w('_each keys map pluck unset'), h.keys().sort());
