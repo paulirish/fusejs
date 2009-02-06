@@ -32,15 +32,6 @@
       } catch (e) { return 0 } 
     }
 
-    function isSameOrigin() {
-      var m = this.url.match(/^\s*https?:\/\/[^\/]*/);
-      return !m || (m[0] == '#{protocol}//#{domain}#{port}'.interpolate({
-        protocol: location.protocol,
-        domain: doc.domain,
-        port: location.port ? ':' + location.port : ''
-      }));
-    }
-
     function onStateChange() {
       var readyState = this.transport.readyState;
       if (readyState > 1 && !((readyState == 4) && this._complete))
@@ -109,7 +100,7 @@
 
         var contentType = response.getHeader('Content-type');
         if (this.options.evalJS == 'force'
-            || (this.options.evalJS && this.isSameOrigin() && contentType 
+            || (this.options.evalJS && Object.isSameOrigin(this.url) && contentType 
             && contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;.*)?\s*$/i)))
           this.evalResponse();
       }
@@ -174,7 +165,6 @@
       'evalResponse':        evalResponse,
       'getHeader':           getHeader,
       'getStatus':           getStatus,
-      'isSameOrigin':        isSameOrigin,
       'onStateChange':       onStateChange,
       'request':             request,
       'respondToReadyState': respondToReadyState,

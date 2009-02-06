@@ -1,3 +1,6 @@
+* Move Ajax.Request#isSameOrigin to Object.isSameOrigin() so the dom:loaded event check may make use of it. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Make Array#grep and Enumerable#grep exit early if the regexp pattern is empty. [jddalton]
 
 * Optimize Hash methods by replacing calls to "each" with for-in loops as well as change Hash aliases. [#539 state:resolved] [Brad Avogel, jddalton, Romain Dorgueil]

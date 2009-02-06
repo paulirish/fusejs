@@ -26,7 +26,7 @@
       json = decodeURIComponent(escape(json));
       try {
         return json.evalJSON(this.request.options.sanitizeJSON ||
-          !this.request.isSameOrigin());
+          !Object.isSameOrigin(this.request.url));
       } catch (e) {
         this.request.dispatchException(e);
       }
@@ -40,7 +40,7 @@
             return null;
       try {
         return this.responseText.evalJSON(options.sanitizeJSON ||
-          !this.request.isSameOrigin());
+          !Object.isSameOrigin(this.request.url));
       } catch (e) {
         this.request.dispatchException(e);
       }

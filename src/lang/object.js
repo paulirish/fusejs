@@ -51,6 +51,15 @@
       return toString.call(object) === '[object RegExp]';
     }
 
+    function isSameOrigin(url) {
+      var m = url.match(/^\s*https?:\/\/[^\/]*/);
+      return !m || (m[0] == '#{protocol}//#{domain}#{port}'.interpolate({
+        protocol: location.protocol,
+        domain: document.domain,
+        port: location.port ? ':' + location.port : ''
+      }));
+    }
+
     function isString(object) {
       return toString.call(object) === '[object String]';
     }
@@ -129,6 +138,7 @@
       'isHash':        isHash,
       'isNumber':      isNumber,
       'isRegExp':      isRegExp,
+      'isSameOrigin':  isSameOrigin,
       'isString':      isString,
       'isUndefined':   isUndefined,
       'keys':          keys,

@@ -343,16 +343,10 @@ new Test.Unit.Runner({
     }
   },
   
-  testIsSameOriginMethod: function() {
-    var isSameOrigin = Ajax.Request.prototype.isSameOrigin;
-    this.assert(isSameOrigin.call({ url: '/foo/bar.html' }), '/foo/bar.html');
-    this.assert(isSameOrigin.call({ url: window.location.href }), window.location.href);
-    this.assert(!isSameOrigin.call({ url: 'http://example.com' }), 'http://example.com');
-
+  testIsSameOrigin: function() {
     if (this.isRunningFromRake) {
-      Ajax.Request.prototype.isSameOrigin = function() {
-        return false
-      };
+      var isSameOrigin = Object.isSameOrigin;
+      Object.isSameOrigin = function() { return false };
 
       $("content").update('same origin policy');
       new Ajax.Request("/response", extendDefault({
@@ -376,9 +370,9 @@ new Test.Unit.Runner({
         }.bind(this)
       }));
 
-      Ajax.Request.prototype.isSameOrigin = isSameOrigin;
-    } else {
-      this.info(message);
+      // restore original method
+      Object.isSameOrigin = isSameOrigin;
     }
+    else this.info(message);
   }
 });

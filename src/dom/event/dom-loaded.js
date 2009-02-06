@@ -41,19 +41,13 @@
         sheet = getSheet(element);
         // bail when sheet is null/undefined on elements
         if (sheet == null) return false;
-        if (isSheetAccessible(sheet)) {
+        if (Object.isSameOrigin(sheet.href || '')) {
           results.push(sheet);
           if (!addImports(results, sheet))
             return false;
         }
       }
       return results;
-    }
-    
-    function isSheetAccessible(sheet) {
-      try { return !!getRules(sheet) } catch(e) {
-        return !/(security|denied)/i.test(e.message);
-      }
     }
 
     var pollerID,
@@ -77,7 +71,7 @@
         ? function(collection, sheet) {
             var length = sheet.imports.length;
             while (length--) {
-              if (isSheetAccessible(sheet.imports[length])) {
+              if (Object.isSameOrigin(sheet.imports[length].href || '')) {
                 collection.push(sheet.imports[length]);
                 addImports(collection, sheet.imports[length])
               }
@@ -85,12 +79,16 @@
             return collection;
           }
         : function(collection, sheet) {
-            var ss, rules = getRules(sheet), length = rules.length;
+            try {
+              var ss, rules = getRules(sheet), length = rules.length;
+            } catch(e) {
+              return false;
+            }
             while (length--) {
-              ss = rules[length].styleSheet;
               // bail when sheet is null on rules
+              ss = rules[length].styleSheet;
               if (ss === null) return false;
-              if (ss && isSheetAccessible(ss)) {
+              if (ss && Object.isSameOrigin(ss.href || '')) {
                 collection.push(ss);
                 if (!addImports(collection, ss))
                   return false;

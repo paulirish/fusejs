@@ -262,6 +262,14 @@ new Test.Unit.Runner({
     this.assert(!Object.isRegExp(undefined));
   },
   
+  testObjectIsSameOrigin: function() {
+    this.assert(Object.isSameOrigin('/foo/bar.html'), '/foo/bar.html');
+    this.assert(Object.isSameOrigin(window.location.href), window.location.href);
+    this.assert(!Object.isSameOrigin('http://example.com'), 'http://example.com');
+    
+    this.assertNothingRaised(function() { Object.isSameOrigin(window.location) }, 'Error converting url to a string');
+  },
+  
   testObjectIsString: function() {
     this.assert(Object.isString("a string"));
     this.assert(Object.isString(new String("a string")));
