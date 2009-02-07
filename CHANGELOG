@@ -1,3 +1,5 @@
+* Make Object.isSameOrigin() typecast the url as a string. [#251 state:resolved] [jddalton, mazengh]
+
 * Move Ajax.Request#isSameOrigin to Object.isSameOrigin() so the dom:loaded event check may make use of it. [jddalton]
   Note: Backwards compatibility warning.
 

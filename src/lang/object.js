@@ -52,7 +52,7 @@
     }
 
     function isSameOrigin(url) {
-      var m = url.match(/^\s*https?:\/\/[^\/]*/);
+      var m = String(url).match(/^\s*https?:\/\/[^\/]*/);
       return !m || (m[0] == '#{protocol}//#{domain}#{port}'.interpolate({
         protocol: location.protocol,
         domain: document.domain,

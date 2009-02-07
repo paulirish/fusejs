@@ -263,11 +263,17 @@ new Test.Unit.Runner({
   },
   
   testObjectIsSameOrigin: function() {
+    this.assert(Object.isSameOrigin(null), 'null');
+    this.assert(Object.isSameOrigin(), 'undefined');
+    this.assert(Object.isSameOrigin(''), 'empty string');
+
     this.assert(Object.isSameOrigin('/foo/bar.html'), '/foo/bar.html');
     this.assert(Object.isSameOrigin(window.location.href), window.location.href);
     this.assert(!Object.isSameOrigin('http://example.com'), 'http://example.com');
     
-    this.assertNothingRaised(function() { Object.isSameOrigin(window.location) }, 'Error converting url to a string');
+    // test typecasting the url argument as a string
+    this.assertNothingRaised(function() { Object.isSameOrigin(window.location) }, 'Error casting url as a string');
+    this.assert(Object.isSameOrigin({ 'toString': function() { return window.location.href } }), 'Error casting url as a string');
   },
   
   testObjectIsString: function() {
