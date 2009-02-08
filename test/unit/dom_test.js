@@ -1,32 +1,35 @@
-var getInnerHTML = function(id) {
-  return $(id).innerHTML.toString().toLowerCase().gsub(/[\r\n\t]/, '');
-};
 
-var createParagraph = function(text, context) {
+var isIE6AndLower = Prototype.Browser.IE && !window.XMLHttpRequest,
+
+getInnerHTML = function(id) {
+  return $(id).innerHTML.toString().toLowerCase().gsub(/[\r\n\t]/, '');
+},
+
+createParagraph = function(text, context) {
   context = context || document;
   var p = context.createElement('p');
   p.appendChild(context.createTextNode(text));
   return p;
-};
+},
 
-var getIframeDocument = function() {
+getIframeDocument = function() {
   var element = $('iframe');
   return element.contentDocument || element.contentWindow && element.contentWindow.document;
-};
+},
 
-var isIframeDocument = function(doc) {
+isIframeDocument = function(doc) {
   return (doc.parentWindow || doc.defaultView).frameElement != null;
-};
+},
 
-var isIframeAccessible = function() {
+isIframeAccessible = function() {
   try {
     return !!getIframeDocument().body;
   } catch(e) {
     return false;
   }
-};
+},
 
-var getElement = function(element, context) {
+getElement = function(element, context) {
   if (typeof element !== 'string') return element;
   return Element.extend((context || document).getElementById(element));
 };
@@ -1652,7 +1655,8 @@ new Test.Unit.Runner({
     this.assertEnumEqual([0,10],
       $('absolute_relative_undefined').positionedOffset());
       
-    if (!Prototype.Browser.IE) {
+    // IE6 and lower do not support "fixed" positioned elements
+    if (!isIE6AndLower) {
       this.assertEnumEqual([10,10],
         $('absolute_fixed_absolute').positionedOffset());
       
@@ -1706,8 +1710,8 @@ new Test.Unit.Runner({
     $('scrollOffset_textarea').scrollLeft = 
     $('scrollOffset_textarea').scrollTop  = 0;
 
-    /* fixed position tests (IE doesn't support position:fixed) */
-    if (!Prototype.Browser.IE) {
+    // IE6 and lower do not support "fixed" positioned elements
+    if (!isIE6AndLower) {
       window.scrollTo(0, 30);
       $('absolute_fixed').scrollTop = 20;
       this.assertEnumEqual([10, 10], $('absolute_fixed').viewportOffset());
@@ -1897,8 +1901,8 @@ new Test.Unit.Runner({
     $('scrollOffset_textarea').scrollLeft = 
     $('scrollOffset_textarea').scrollTop  = 0;
 
-    /* fixed position tests (IE doesn't support position:fixed) */
-    if (!Prototype.Browser.IE) {
+    // IE6 and lower do not support "fixed" positioned elements
+    if (!isIE6AndLower) {
       window.scrollTo(0, 30);
       $('absolute_fixed').scrollTop = 20;
       this.assertEnumEqual([0, 20], $('absolute_fixed').cumulativeScrollOffset());

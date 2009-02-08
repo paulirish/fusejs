@@ -1,3 +1,5 @@
+* unit test: Allow IE7+ to test "fixed" positioned elements and test String#endsWith with an empty/non-string pattern argument. [jddalton]
+
 * Allow Object.isSameOrigin() to return true if the url ends with the document.domain which could be a suffix of the current domain. [#67 state:resolved] [jddalton, Mark Caudill, Per Melin]
 
 * Make Object.isSameOrigin() allow urls containing default ports for http, https, and ftp protocols. [#301 state:resolved] [jddalton, Johan Gorter, Mark Caudill]

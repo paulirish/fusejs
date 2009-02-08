@@ -482,6 +482,10 @@ new Test.Unit.Runner({
     this.assert(!''.endsWith('planet'));
     this.assert('hello world world'.endsWith(' world'));
     this.assert(!'z'.endsWith('az'));
+
+    this.assert('hello world'.endsWith(''), 'failed empty string test');
+    this.assertRaise('TypeError', function() { 'hello world'.endsWith() },
+      'failed to raise error when passed a non string pattern');
   },
   
   testBlank: function() {
