@@ -51,13 +51,20 @@
       return toString.call(object) === '[object RegExp]';
     }
 
+    /* https://developer.mozilla.org/En/Same_origin_policy_for_JavaScript */
     function isSameOrigin(url) {
-      var m = String(url).match(/^\s*https?:\/\/[^\/]*/);
-      return !m || (m[0] == '#{protocol}//#{domain}#{port}'.interpolate({
-        protocol: location.protocol,
-        domain: document.domain,
-        port: location.port ? ':' + location.port : ''
-      }));
+      var domain = document.domain,
+       protocol = global.location.protocol,
+       // http://www.iana.org/assignments/port-numbers
+       defaultPort = (protocol === 'ftp:') ? 21 :
+         (protocol === 'https:') ? 443 : 80,
+       // #{protocol}//#{hostname}#{port}
+       parts = String(url)
+         .match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^/:$]+)(?:\:(\d+))?/) || [];
+
+      return !parts[0] || (parts[1] === protocol &&
+        parts[2].endsWith(domain) && (parts[3] || 
+          defaultPort) === (global.location.port || defaultPort));
     }
 
     function isString(object) {

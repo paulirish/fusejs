@@ -1,3 +1,7 @@
+* Allow Object.isSameOrigin() to return true if the url ends with the document.domain which could be a suffix of the current domain. [#67 state:resolved] [jddalton, Mark Caudill, Per Melin]
+
+* Make Object.isSameOrigin() allow urls containing default ports for http, https, and ftp protocols. [#301 state:resolved] [jddalton, Johan Gorter, Mark Caudill]
+
 * Make Object.isSameOrigin() typecast the url as a string. [#251 state:resolved] [jddalton, mazengh]
 
 * Move Ajax.Request#isSameOrigin to Object.isSameOrigin() so the dom:loaded event check may make use of it. [jddalton]

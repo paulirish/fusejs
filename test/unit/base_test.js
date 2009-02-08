@@ -263,6 +263,9 @@ new Test.Unit.Runner({
   },
   
   testObjectIsSameOrigin: function() {
+    var isSameOrigin = Object.isSameOrigin,
+     domain = 'www.example.com';
+
     this.assert(Object.isSameOrigin(null), 'null');
     this.assert(Object.isSameOrigin(), 'undefined');
     this.assert(Object.isSameOrigin(''), 'empty string');
@@ -270,10 +273,25 @@ new Test.Unit.Runner({
     this.assert(Object.isSameOrigin('/foo/bar.html'), '/foo/bar.html');
     this.assert(Object.isSameOrigin(window.location.href), window.location.href);
     this.assert(!Object.isSameOrigin('http://example.com'), 'http://example.com');
-    
+
     // test typecasting the url argument as a string
     this.assertNothingRaised(function() { Object.isSameOrigin(window.location) }, 'Error casting url as a string');
     this.assert(Object.isSameOrigin({ 'toString': function() { return window.location.href } }), 'Error casting url as a string');
+
+    // simulate document.domain changes
+    Object.isSameOrigin = function(url) {
+      return url.match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^/:$]+)(?:\:(\d+))?/)[2]
+        .endsWith(domain);
+    };
+
+    this.assert(!Object.isSameOrigin('http://sub.example.com'),
+      'domain www.example.com allows http://sub.example.com');
+
+    domain = 'example.com';
+    this.assert(Object.isSameOrigin('http://sub.example.com'),
+      'domain example.com won\'t allow http://sub.example.com');
+
+    Object.isSameOrigin = isSameOrigin;
   },
   
   testObjectIsString: function() {
