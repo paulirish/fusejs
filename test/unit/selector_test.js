@@ -248,7 +248,7 @@ new Test.Unit.Runner({
   },
 
   testSelectorWithDuplicates: function() {
-    this.assertEnumEqual($$('div div'), $$('div div').uniq());
+    this.assertEnumEqual($$('div div'), $$('div div').unique());
     this.assertEnumEqual($('dupL2', 'dupL3', 'dupL4', 'dupL5'), $$('#dupContainer span span'));
     $RunBenchmarks && this.wait(500, function() {
       this.benchmark(function() { $$('#dupContainer span span') }, 1000);

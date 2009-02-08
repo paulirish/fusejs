@@ -1,3 +1,20 @@
+* Updates to Array API [#15 state:resolved] [jddalton, Joe Gornick]
+  Note: Backwards compatibility warning.
+   - Added Array#insert method
+   - Renamed methods: include -> contains, uniq -> unique
+   - Removed methods: detect, reject, reverse
+   - Removed aliases: all, any, collect, entries, find, findAll, member, select
+   - Updated methods:
+     Array#contains: Added a strict paramter for strict only comparisons.
+
+     Array#first: Add optional parameters to accept a number/iterator.
+       * first(n): Returns an array containing the first n of the list.
+       * first(iterator, [context]): Returns first item when iterator returns true.
+
+     Array#last: Add optional parameters to accept a number/iterator.
+       * last(n): Returns an array containing the last n of the list.
+       * last(iterator, [context]): Returns last item when iterator returns true.
+
 * unit test: Allow IE7+ to test "fixed" positioned elements and test String#endsWith with an empty/non-string pattern argument. [jddalton]
 
 * Allow Object.isSameOrigin() to return true if the url ends with the document.domain which could be a suffix of the current domain. [#67 state:resolved] [jddalton, Mark Caudill, Per Melin]

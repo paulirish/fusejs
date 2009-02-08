@@ -84,8 +84,22 @@
       return results;
     }
 
-    function first() {
-      return this[0];
+    function first(iterator, context) {
+      var length = this.length;
+      if (arguments.length === 0) return this[0];
+      if (typeof iterator === 'function') {
+        for (var i = 0; i < length; i++)
+          if (iterator.call(context, this[i], i))
+            return this[i];
+        return;
+      }
+      // Fast numeric type conversion:
+      // http://www.jibbering.com/faq/faq_notes/type_convert.html#tcNumber
+      var count = +iterator;
+      if (!isNaN(count)) {
+        count = count < 1 ? 1 : count > length ? length : count;
+        return slice.call(this, 0, count);
+      } else return [];
     }
 
     function flatten() {
@@ -106,6 +120,15 @@
       return -1;
     }
 
+    function insert(index, value) {
+      if (this.length < index) this.length = index;
+      if (index < 0) index = this.length;
+      if (arguments.length > 2)
+        this.splice.apply(this, mergeList([index, 0], slice.call(arguments, 1)));
+      else this.splice(index, 0, value);
+      return this;
+    }
+
     function inspect() {
       return '[' + this.map(Object.inspect).join(', ') + ']';
     }
@@ -117,9 +140,21 @@
       return results;
     }
 
-    function last() {
+    function last(iterator, context) {
       var length = this.length;
-      return this[length && length - 1];
+      if (arguments.length === 0)
+        return this[length && length - 1];
+      if (typeof iterator === 'function') {
+        while (length--)
+          if (iterator.call(context, this[length], length))
+            return this[length];
+        return;        
+      }
+      var count = +arguments[0];
+      if (!isNaN(count)) {
+        count = count < 1 ? 1 : count > length ? length : count;
+        return slice.call(this, length - count);
+      } else return [];     
     }
 
     function lastIndexOf(item, fromIndex) {
@@ -135,10 +170,6 @@
       for (var i = 0, length = this.length; i < length; i++)
         results[i] = iterator.call(context, this[i], i);
       return results;
-    }
-
-    function reverse(inline) {
-      return (inline !== false ? this : this.toArray())._reverse();
     }
 
     function size() {
@@ -161,31 +192,25 @@
       return '[' + results.join(', ') + ']';
     }
 
-    function uniq() {
+    function unique() {
       for (var i = 0, results = [], length = this.length; i < length; i++)
         if (results.indexOf(this[i]) < 0) results.push(this[i]);
       return results.length && results || this;
     }
 
     function without() {
-      var results = [], i = 0, length = this.length;
-       values = slice.call(arguments, 0);
+      var results = [], i = 0, length = this.length, args = slice.call(arguments, 0);
       for ( ; i < length; i++)
-        if (values.indexOf(this[i]) < 0) results.push(this[i]);
+        if (args.indexOf(this[i]) === -1) results.push(this[i]);
       return results;
     }
 
     /* Create optimized Enumerable equivalents */
 
-    function detect(iterator, context) {
-      for (var i = 0, length = this.length; i < length; i++)
-        if (iterator.call(context, this[i], i))
-          return this[i];
-    }
-
-    function include(object) {
-      var result = this.indexOf(object);
-      if (result > -1) return true;
+    function contains(object, strict) {
+      // attempt a fast strict search first
+      var result = this.indexOf(object) > -1;
+      if (strict || result) return result;
       for (var i = 0, length = this.length; i < length; i++)
         if (this[i] == object) return true;
       return false;
@@ -301,14 +326,13 @@
 
     /* Use native browser JS 1.6 implementations if available */
 
-    if (!AP._reverse)
-      AP._reverse = AP.reverse;
-
     (function() {
       for (var i = 0, method; method = arguments[i++]; ) {
         if (!(AP[method] && !AP['_' + method])) continue;
         (function(m) {
+          // backup original
           AP['_' + m] = AP[m];
+          // overwrite allowing iterator || k
           AP[m] = function(iterator, context) {
             return this['_' + m](iterator || K, context);
           };
@@ -333,38 +357,28 @@
 
     Object.extend(AP, {
       '_each':     AP.forEach,
-      'all':       AP.every,
-      'any':       AP.some,
       'clear':     clear,
       'clone':     clone,
-      'collect':   AP.map,
       'compact':   compact,
-      'detect':    detect,
-      'entries':   clone,
-      'find':      detect,
-      'findAll':   AP.filter,
+      'contains':  contains,
       'first':     first,
       'flatten':   flatten,
       'grep':      grep,
-      'include':   include,
       'inject':    inject,
-      'intersect': intersect,
+      'insert':    insert,
       'inspect':   inspect,
+      'intersect': intersect,
       'invoke':    invoke,
       'last':      last,
       'max':       max,
-      'member':    include,
       'min':       min,
       'partition': partition,
       'pluck':     pluck,
-      'reject':    reject,
-      'reverse':   reverse,
-      'select':    AP.filter,
       'size':      size,
       'sortBy':    sortBy,
       'toArray':   clone,
       'toJSON':    toJSON,
-      'uniq':      uniq,
+      'unique':    unique,
       'without':   without,
       'zip':       zip
     });
