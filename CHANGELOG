@@ -1,4 +1,4 @@
-* Updates to Array API [#15 state:resolved] [jddalton, Joe Gornick]
+* Updates to Array API [FuseJS LH #15] [jddalton, Joe Gornick]
   Note: Backwards compatibility warning.
    - Added Array#insert method
    - Renamed methods: include -> contains, uniq -> unique
@@ -17,18 +17,18 @@
 
 * unit test: Allow IE7+ to test "fixed" positioned elements and test String#endsWith with an empty/non-string pattern argument. [jddalton]
 
-* Allow Object.isSameOrigin() to return true if the url ends with the document.domain which could be a suffix of the current domain. [#67 state:resolved] [jddalton, Mark Caudill, Per Melin]
+* Allow Object.isSameOrigin() to return true if the url ends with the document.domain which could be a suffix of the current domain. [Prototype LH #67] [jddalton, Mark Caudill, Per Melin]
 
-* Make Object.isSameOrigin() allow urls containing default ports for http, https, and ftp protocols. [#301 state:resolved] [jddalton, Johan Gorter, Mark Caudill]
+* Make Object.isSameOrigin() allow urls containing default ports for http, https, and ftp protocols. [Prototype LH #301] [jddalton, Johan Gorter, Mark Caudill]
 
-* Make Object.isSameOrigin() typecast the url as a string. [#251 state:resolved] [jddalton, mazengh]
+* Make Object.isSameOrigin() typecast the url as a string. [Prototype LH #251] [jddalton, mazengh]
 
 * Move Ajax.Request#isSameOrigin to Object.isSameOrigin() so the dom:loaded event check may make use of it. [jddalton]
   Note: Backwards compatibility warning.
 
 * Make Array#grep and Enumerable#grep exit early if the regexp pattern is empty. [jddalton]
 
-* Optimize Hash methods by replacing calls to "each" with for-in loops as well as change Hash aliases. [#539 state:resolved] [Brad Avogel, jddalton, Romain Dorgueil]
+* Optimize Hash methods by replacing calls to "each" with for-in loops as well as change Hash aliases. [Prototype LH #539] [Brad Avogel, jddalton, Romain Dorgueil]
   Note: Backwards compatibility warning.
    - Hash#index is alias of Hash#keyOf
    - Hash#keyOf returns -1 if no match is found
@@ -98,7 +98,7 @@
 * Avoid IE element.style.cssText bug effecting hidden elements. [jddalton]
   Note: Accessing a hidden element's client/offset<dimension> properties before appending cssText will make the client/offset<dimension> values unchanged by the new style.
 
-* Make Class constructors return the "initialize" method's return value. Closes #11481 [cch1]
+* Make Class constructors return the "initialize" method's return value. [Ruby Trac #11481] [cch1]
 
 * Make Event's private method isCssLoaded() fail when the "sheet" object of an element is null or undefined. [jddalton]
 
@@ -106,11 +106,11 @@
 
 * Minimize IE6 memory leak caused by Element.extend() and private variables "body", "docEl", and "root". [jddalton]
 
-* Make Form.focusFirstElement() focus the first element instead of activating it. [#473 state:resolved] [jddalton, Robert Sosinski]
+* Make Form.focusFirstElement() focus the first element instead of activating it. [Prototype LH #473] [jddalton, Robert Sosinski]
 
-* Ensure Field.focus() doesn't throw an error when the element or its ancestors are not visible. [#521 state:resolved] [jddalton, Stefan Esterer]
+* Ensure Field.focus() doesn't throw an error when the element or its ancestors are not visible. [Prototype LH #521] [jddalton, Stefan Esterer]
 
-* Ensure Array#last won't attempt a -1 index with zero length arrays. [#236 state:resolved] [jddalton, kangax]
+* Ensure Array#last won't attempt a -1 index with zero length arrays. [Prototype LH #236] [jddalton, kangax]
 
 * Minor source and whitespace cleanup. [jddalton]
 
@@ -138,7 +138,7 @@
 
 * Make Element#getOffsetParent follow the W3C specifications and treat TD, TH, and TABLE elements as valid offset parents. [jddalton]
 
-* Make Element#cumulativeScrollOffset induce "onlyAncestors" on input fields and textareas. [#512 state:resolved] [Alex Farrill, jddalton]
+* Make Element#cumulativeScrollOffset induce "onlyAncestors" on input fields and textareas. [Prototype LH #512] [Alex Farrill, jddalton]
 
 * Add optional boolean second parameter, "onlyAncestors", to Element#cumulativeScrollOffset.
   When "onlyAncestors" is true only the element's ancestors scroll offsets are totaled. [jddalton]
@@ -154,18 +154,18 @@
 
 * Optimize Element.extend() further by replacing for-in loops with reverse while-loops. [jddalton]
 
-* Fix IE error when passing a malformed string to document.getElementById()/document.getElementByTagName(). Closes #11568. [gryn, jddalton, kangax]
+* Fix IE error when passing a malformed string to document.getElementById()/document.getElementByTagName(). [Ruby Trac #11568] [gryn, jddalton, kangax]
 
 * Add Feature test FUNCTION_TO_STRING_RETURNS_SOURCE in preparation for Class rewrite. [jddalton]
 
 * Add Element#isFragment to detect if an element is an unattached fragment or a child of one. [jddalton]
 
-* Fix issue, in quirks mode, where versions of Safari, before 3.1.2, treat class names case-insensitively in Selector/$$ queries. [#390 state:resolved] [Andrew Dupont, Brice, kangax]
+* Fix issue, in quirks mode, where versions of Safari, before 3.1.2, treat class names case-insensitively in Selector/$$ queries. [Prototype LH #390] [Andrew Dupont, Brice, kangax]
 
 * Make String#strip use custom whitespace character class for browsers missing full support. [dimik, doug, jddalton, kangax]
   Originally reported on http://dev.jquery.com/ticket/2690.
 
-* Enhance Selector#match to support a "group" (comma-separated) selector. [#318 state:resolved] [Andrew Dupont, jddalton, wiktor]
+* Enhance Selector#match to support a "group" (comma-separated) selector. [Prototype LH #318] [Andrew Dupont, jddalton, wiktor]
 
 * Make String#stripTags work properly with tags that contain closing brackets in their attributes. [jddalton, kangax]
 
@@ -188,13 +188,13 @@
 
 * Rewrite the Element._attributeTranslations object to reduce its code size. [jddalton]
 
-* Modify Prototype.Browser.MobileSafari to return true for iPod Touch. [#439 state:resolved] [jddalton, Olek Poplavsky]
+* Modify Prototype.Browser.MobileSafari to return true for iPod Touch. [Prototype LH #439] [jddalton, Olek Poplavsky]
 
-* Make Form.serializeElements() and Form.Element.Methods.serialize() skip type="select-multiple" select elements that have no selected value. [#440 state:resolved] [jddalton, Shanrong Zhao]
+* Make Form.serializeElements() and Form.Element.Methods.serialize() skip type="select-multiple" select elements that have no selected value. [Prototype LH #440] [jddalton, Shanrong Zhao]
 
 * Moved browser feature/bug tests to private methods "Feature" and "Bug". [jddalton, kangax, Nick Stakenburg]
 
-* Make use of native Array methods "every", "filter", "map" and "some" if available. [#317 state:resolved] [jddalton, fearphage]
+* Make use of native Array methods "every", "filter", "map" and "some" if available. [Prototype LH #317] [jddalton, fearphage]
 
 * Drop support for Prototype created Array#reduce because it conflicts with the JavaScript 1.8 definition. [jddalton]
   Note: Backwards compatibility warning.
@@ -205,27 +205,27 @@
 
 * Reduce code duplication in Element#viewportOffset by using Element#cumulativeOffset. [jddalton]
 
-* Make Object.isString() and Object.isNumber() work with values created by the Number/String constructor. [#375 state:resolved] [Andrew Dupont, atrepp, jddalton, kangax]
+* Make Object.isString() and Object.isNumber() work with values created by the Number/String constructor. [Prototype LH #375] [Andrew Dupont, atrepp, jddalton, kangax]
 
 * Simplify the Template.Pattern RegExp. [jddalton]
 
-* Fix Template#evaluate stripping the "before" match when passing an object.toTemplateReplacements() that returns a null/undefined value. [#237 state:resolved] [jddalton, Nir]
+* Fix Template#evaluate stripping the "before" match when passing an object.toTemplateReplacements() that returns a null/undefined value. [Prototype LH #237] [jddalton, Nir]
 
-* Remove "finally" block from PeriodicalExecuter.onTimerEvent() because it's not needed and fails in IE without a "catch" block. [#421 state:resolved] [jddalton, Ville Koshinen]
+* Remove "finally" block from PeriodicalExecuter.onTimerEvent() because it's not needed and fails in IE without a "catch" block. [Prototype LH #421] [jddalton, Ville Koshinen]
 
-* Optimize String#(extractScripts|stripScripts) by minimizing use and caching regular expressions. [#431 state:resolved] [jddalton, MIYAMUKO Katsuyuki]
+* Optimize String#(extractScripts|stripScripts) by minimizing use and caching regular expressions. [Prototype LH #431] [jddalton, MIYAMUKO Katsuyuki]
 
 * Optimize Selector class by removing unused variables, speeding up loops, and taking advantage of the element.children collection. [jddalton]
 
-* Fix Java applet "java.lang.NosuchFieldException" error, in JRE v1.6.0_10, when accessing undefined element properties like "_extendedByPrototype". [#354 state:resolved] [Hilberty, jddalton, kangax, Matt McKeon, Prasad]
+* Fix Java applet "java.lang.NosuchFieldException" error, in JRE v1.6.0_10, when accessing undefined element properties like "_extendedByPrototype". [Prototype LH #354] [Hilberty, jddalton, kangax, Matt McKeon, Prasad]
 
 * Optimize Element.extend() by reducing the number of "for loops" in the method. [jddalton]
 
-* Implement a revision system in Element.extend() so that elements extended before a Element.addMethods() call will be re-extended when run through Element.extend() again. Closes #9812. [jddalton, vectoroc]
+* Implement a revision system in Element.extend() so that elements extended before a Element.addMethods() call will be re-extended when run through Element.extend() again. [Ruby Trac #9812] [jddalton, vectoroc]
 
-* Add private helper method getOwnerDoc() and utilize element.ownerDocument to allow CSS queries and DOM dom traversal against iframes. Closes #11475. [jddalton]
+* Add private helper method getOwnerDoc() and utilize element.ownerDocument to allow CSS queries and DOM dom traversal against iframes. [Ruby Trac #11475] [jddalton]
 
-* Fix regexp in Selector.split() that caused Firefox 3 to freeze. [#408 state:resolved] [jddalton, kangax, Shawazi, William Warby]
+* Fix regexp in Selector.split() that caused Firefox 3 to freeze. [Prototype LH #408] [jddalton, kangax, Shawazi, William Warby]
 
 * Ensure Form.Element#(select|focus) return an element. [jddalton]
 
@@ -235,7 +235,7 @@
 
 * Add private helper methods mergeList and prependList to replace Array#concat usage. [jddalton, Tobie Langel]
 
-* Optimize Function bind, bindAsEventListener, curry, methodize and wrap to avoid Array#concat and Function#apply when not needed. [#215 state:resolved]  [kangax, Tobie Langel]
+* Optimize Function bind, bindAsEventListener, curry, methodize and wrap to avoid Array#concat and Function#apply when not needed. [Prototype LH #215]  [kangax, Tobie Langel]
 
 * Add private helper method nodeListSlice() to complement slice(). [jddalton]
 
@@ -253,11 +253,11 @@
 
 * Overwrite Array.prototype methods assigned by Enumerable with optimized equivalents. [jddalton]
 
-* Optimize by using "_each" instead of "each" where applicable. Closes #9092. [jddalton, sylvainzimmer]
+* Optimize by using "_each" instead of "each" where applicable. [Ruby Trac #9092] [jddalton, sylvainzimmer]
 
-* Preserve inline display style when using Element#show and Element#hide. Closes #3868. [anonymous, Tobie Langel]
+* Preserve inline display style when using Element#show and Element#hide. [Ruby Trac #3868] [anonymous, Tobie Langel]
 
-* Fix issue where Function#argumentNames returned incorrect results in IE when comments were intermixed with argument names. [#397 state:resolved] [Christophe Porteneuve, T.J. Crowder]
+* Fix issue where Function#argumentNames returned incorrect results in IE when comments were intermixed with argument names. [Prototype LH #397] [Christophe Porteneuve, T.J. Crowder]
 
 * unit test: Reorganize the unit test lib. [Tobie Langel]
 
@@ -265,25 +265,25 @@
 
 * unit test: Add/modify unit tests for Event observe/stopObserving and Element#(absolutize|relativize|scrollTo|viewportOffset). [jddalton, Nick Stakenburg]
 
-* For consistency, add additional optional parameter "context" to Number#times. Closes #9252. [rmm5t, Samuel Lebeau]
+* For consistency, add additional optional parameter "context" to Number#times. [Ruby Trac #9252] [rmm5t, Samuel Lebeau]
 
-* Selector.patterns should be represented as an ordered structure. [#315 state:resolved] [ADO, kangax]
+* Selector.patterns should be represented as an ordered structure. [Prototype LH #315] [ADO, kangax]
 
-* Correct inconsistencies in Selector.patterns "attrPresence" and "attr" which allow attributes with dashes to be matched. [#285 state:resolved] [leiyou, jddalton, kangax]
+* Correct inconsistencies in Selector.patterns "attrPresence" and "attr" which allow attributes with dashes to be matched. [Prototype LH #285] [leiyou, jddalton, kangax]
 
-* Ensure Form.reset() returns a reference to the form element. [#309 state:resolved] [Phil, kangax]
+* Ensure Form.reset() returns a reference to the form element. [Prototype LH #309] [Phil, kangax]
 
-* Give Enumerable#invoke support for invoking host objects' methods that don't have apply(). [#278 state:resolved] [Garrett Smith, jddalton, kangax]
+* Give Enumerable#invoke support for invoking host objects' methods that don't have apply(). [Prototype LH #278] [Garrett Smith, jddalton, kangax]
 
-* Ensure String#gsub escapes special characters if pattern is a string. [#252 state:resolved] [jddalton, Marton Kiss-Albert]
+* Ensure String#gsub escapes special characters if pattern is a string. [Prototype LH #252] [jddalton, Marton Kiss-Albert]
 
-* Ensure Enumerable#grep escapes special characters if regex is a string. [#257 state:resolved] [jddalton, Marton Kiss-Albert]
+* Ensure Enumerable#grep escapes special characters if regex is a string. [Prototype LH #257] [jddalton, Marton Kiss-Albert]
 
-* Ensure Element#adjacent matches the css expression against siblings and not children of siblings. [#244 state:resolved] [jddalton, Jean-Philippe]
+* Ensure Element#adjacent matches the css expression against siblings and not children of siblings. [Prototype LH #244] [jddalton, Jean-Philippe]
 
-* Ensure Element#descendants always returns an array. [#373 state:resolved] [kangax]
+* Ensure Element#descendants always returns an array. [Prototype LH #373] [kangax]
 
-* Optimize Event.pointerX() and Event.pointerY() to calculate one coordinate instead of both. [#403 state:resolved] [jddalton, Nick Stakenburg]
+* Optimize Event.pointerX() and Event.pointerY() to calculate one coordinate instead of both. [Prototype LH #403] [jddalton, Nick Stakenburg]
 
 * Optimize Element#getWidth and Element#getHeight to calculate one dimension instead of both. [jddalton]
 
@@ -291,13 +291,13 @@
 
 * Add helper method Element._hasLayout to reduce repeated code. [jddalton]
 
-* Add helper method Element._getRealOffsetParent to ensure offsetParent is accurate and prevent errors in Element#(cumulativeOffset|positionedOffset|viewportOffset). Closes #9416, #10192, #10248. [jddalton, kangax, psiborg, ronstoney]
+* Add helper method Element._getRealOffsetParent to ensure offsetParent is accurate and prevent errors in Element#(cumulativeOffset|positionedOffset|viewportOffset). [Ruby Trac #9416, #10192, #10248] [jddalton, kangax, psiborg, ronstoney]
 
 * Stop Element#getOffsetParent from erroring in IE if the element isn't attached to the document. [jddalton, Tobie Langel]
 
-* Fix IE issue with Element#getOffsetParent returning documentElement on some relatively positioned elements when using a strict doctype. [#90 state:resolved] [jddalton, Nick Stakenburg]
+* Fix IE issue with Element#getOffsetParent returning documentElement on some relatively positioned elements when using a strict doctype. [Prototype LH #90] [jddalton, Nick Stakenburg]
 
-* Ensure Element#readAttribute works properly when accessing the invalid "type" attribute of an iframe. [#118 state:resolved] [Zekid, kangax]
+* Ensure Element#readAttribute works properly when accessing the invalid "type" attribute of an iframe. [Prototype LH #118] [Zekid, kangax]
 
 * unit test: Add support for the Chrome browser in jstest.rb. [Andrew Dupont]
 
@@ -309,24 +309,24 @@
 
 * Refactor Element#replace to remove browser sniffs. [jddalton]
 
-* Fix IE issue with Element#replace removing childNodes of the returned element. Closes #11225. [Rukawa, jddalton]
+* Fix IE issue with Element#replace removing childNodes of the returned element. [Ruby Trac #11225] [Rukawa, jddalton]
 
 * Refactor the Element constructor to remove browser sniffs. [jddalton]
 
-* Ensure setting type attribute for button/input elements works in IE when using the Element constructor. Closes #10548. [jddalton, sakarit]
+* Ensure setting type attribute for button/input elements works in IE when using the Element constructor. [Ruby Trac #10548] [jddalton, sakarit]
 
 * Ensure Element#getStyle returns values in px unit, regardless of how they are set. [Andrew Dupont, jddalton]
 
 * Refactor Element#getStyle to remove browser sniffs and move forked versions closer together in the code. [jddalton]
 
-* Make Element._attributeTranslations.read.values._getEv only return a value for code wrapped in an anonymous function. [#184 state:resolved] [Garrett Smith, jddalton]
+* Make Element._attributeTranslations.read.values._getEv only return a value for code wrapped in an anonymous function. [Prototype LH #184] [Garrett Smith, jddalton]
 
 * Stop window "onload" observers from firing before the "dom:loaded" observers.
-  Enforce first-in-first-out observer execution order if the browser doesn't. Closes #9394. [jddalton, Samuel Lebeau]
+  Enforce first-in-first-out observer execution order if the browser doesn't. [Ruby Trac #9394] [jddalton, Samuel Lebeau]
 
 * Optimized Event observe/stopObserving and consolidated closures in event.js. [jddalton]
 
-* Ensure all stylesheets have loaded before firing dom:loaded event. [#328 state:resolved] [Diego Perini, jddalton, zichzach]
+* Ensure all stylesheets have loaded before firing dom:loaded event. [Prototype LH #328] [Diego Perini, jddalton, zichzach]
 
 * Implement Diego Perini's "doScroll" technique for DOMContentLoaded event support in IE. [Diego Perini, jddalton]
 
@@ -334,58 +334,58 @@
 
 * Add Event#getEventID to fix issues with event IDs on elements created by Element#cloneNode. [jddalton]
 
-* Rewrite Event cache to avoid memory leaks in IE and unnecessary iterations. [#230 state:resolved] [jddalton]
+* Rewrite Event cache to avoid memory leaks in IE and unnecessary iterations. [Prototype LH #230] [jddalton]
 
-* Ensure dom:loaded timer is always cleared. [#346 state:resolved] [Mike Belshe]
+* Ensure dom:loaded timer is always cleared. [Prototype LH #346] [Mike Belshe]
 
-* Remove unused local variable "h" from Selector.handlers.child(). [#246 state:resolved] [jddalton]
+* Remove unused local variable "h" from Selector.handlers.child(). [Prototype LH #246] [jddalton]
 
-* Fix issue where Opera 9.5 gets confused by complex selectors in $$(). [#157 state:resolved] [Andre Dupont. Paulo Pereira, Andrea Baron, jddalton]
+* Fix issue where Opera 9.5 gets confused by complex selectors in $$(). [Prototype LH #157] [Andre Dupont. Paulo Pereira, Andrea Baron, jddalton]
 
 * Make Element#readAttribute follow W3C specifications for Element#getAttribute by returning an empty string if there is no specified/default value. [jddalton]
 
-* Ensure Form.serializeElements() does not return keys from the prototype chain (e.g., constructor, valueOf, toString). Closes #9609. [gryn, jddalton, kangax]
+* Ensure Form.serializeElements() does not return keys from the prototype chain (e.g., constructor, valueOf, toString). [Ruby Trac #9609] [gryn, jddalton, kangax]
 
-* Rewrite Form#serializeElements() making it more closely follow the W3C specifications. [#22, #85 state:resolved] [jddalton, kangax, Lonesome Boy]
+* Rewrite Form#serializeElements() making it more closely follow the W3C specifications. [Prototype LH #22, #85] [jddalton, kangax, Lonesome Boy]
   - Simulate input type=image coordinates with "x" and "y" options.
   - Make the "submit" option accept the element or element name.
   - Non-active submit buttons, disabled elements, input type=(file|reset), and null values are not serialized.
 
-* Make Form#request pass the "submit" option to Form#serialize. [#66 state:resolved] [Ben Sommerville, jddalton, jodosha]
+* Make Form#request pass the "submit" option to Form#serialize. [Prototype LH #66] [Ben Sommerville, jddalton, jodosha]
 
-* Make $F return null for unknown/unsupported elements. Closes #8381. [Christophe Porteneuve, jddalton, Michael Stillwell]
+* Make $F return null for unknown/unsupported elements. [Ruby Trac #8381] [Christophe Porteneuve, jddalton, Michael Stillwell]
 
 * Make Form.Element#clear uncheck checkboxes/radio buttons, clear text inputs, deselect dropdown lists options, and skip button elements. [jddalton]
 
-* Extend BUTTON elements with Form.Element.Methods. Closes #9708. [jddalton, mensler]
+* Extend BUTTON elements with Form.Element.Methods. [Ruby Trac #9708] [jddalton, mensler]
 
 * unit test: Cleaned up testFormActivating unit test. [jddalton]
 
 * Ensure Form#focusFirstElement skips Form.Element#activate if there is no first element. [Alexander Chernin, kangax]
 
-* Rename confusing variables in Form.Element.Serializers.select(). [#180 state:resolved] [jddalton]
+* Rename confusing variables in Form.Element.Serializers.select(). [Prototype LH #180] [jddalton]
 
-* Rewrite document.viewport methods getDimensions, getWidth, and getHeight to avoid browser sniffs, increase speed, and fix Opera 9.5 support. [#337 state:resolved] [jddalton, Nick Stakenburg]
+* Rewrite document.viewport methods getDimensions, getWidth, and getHeight to avoid browser sniffs, increase speed, and fix Opera 9.5 support. [Prototype LH #337] [jddalton, Nick Stakenburg]
 
-* Fix Element#clonePosition issues with element margins, borders, and padding. Closes #11613. [azazel, jddalton, Nick Stakenburg]
+* Fix Element#clonePosition issues with element margins, borders, and padding. [Ruby Trac #11613] [azazel, jddalton, Nick Stakenburg]
 
 * Minor clean-up to Element#cumulativeOffset and Element#positionedOffset. [jddalton]
 
-* Fix Element#cumulativeScrollOffset for Opera 9.25/9.5. Closes #10486. [jddalton, Nick Stakenburg]
+* Fix Element#cumulativeScrollOffset for Opera 9.25/9.5. [Ruby Trac #10486] [jddalton, Nick Stakenburg]
 
-* Make Element#cumulativeScrollOffset stop calculating scroll position after a "fixed" positioned element. Closes #10869. [jddalton, kangax, watersco]
+* Make Element#cumulativeScrollOffset stop calculating scroll position after a "fixed" positioned element. [Ruby Trac #10869] [jddalton, kangax, watersco]
 
 * Use Element#cumulativeScrollOffset in Element#viewportOffset to reduce code duplication. [jddalton]
 
-* Make Element#absolutize account for margins, padding, and borders. Closes #8024, #9918. [chiefcll, jddalton, pphilipp, Nick Stakenburg]
+* Make Element#absolutize account for margins, padding, and borders. [Ruby Trac #8024, #9918] [chiefcll, jddalton, pphilipp, Nick Stakenburg]
 
 * Make Element#relativize throw an error if Element#absolutize wasn't previously called. [Andrew Dupont, jddalton]
 
 * Remove overly complex position code from Element#relativize and Element#absolutize. [jddalton]
 
-* Make Element.extend() skip XML nodes to avoid errors in IE. Closes #9709. [jddalton, yanick.rochon]
+* Make Element.extend() skip XML nodes to avoid errors in IE. [Ruby Trac #9709] [jddalton, yanick.rochon]
 
-* Rewrite String#escapeHTML and String#unescapeHTML to ensure more consistent output across browsers. Closes #8452. [jddalton, slusarz, Tobie Langel)
+* Rewrite String#escapeHTML and String#unescapeHTML to ensure more consistent output across browsers. [Ruby Trac #8452] [jddalton, slusarz, Tobie Langel)
 
 * Make sure Event#stopObserving works when passed non-string value as an eventName. [kangax]
 
@@ -395,23 +395,23 @@
 
 * Prevent getEventID from assigning `window` and `document` an eventID. [jddalton]
 
-* Fix error when calling Event.stopObserving(window). [#30 state:resolved] [jddalton, kangax]
+* Fix error when calling Event.stopObserving(window). [Prototype LH #30] [jddalton, kangax]
 
-* Fix bug in getEventID where an array is returned instead of a number. [#228 state:resolved] [jddalton]
+* Fix bug in getEventID where an array is returned instead of a number. [Prototype LH #228] [jddalton]
 
-* Improve NodeList detection for Safari's $A function. [#187 state:resolved] [Garrett Smith, jddalton]
+* Improve NodeList detection for Safari's $A function. [Prototype LH #187] [Garrett Smith, jddalton]
 
-* Use different tactic to sniff for Opera in order to avoid false positives in IE. [#172 state:resolved] [Tobie Langel, jddalton]
+* Use different tactic to sniff for Opera in order to avoid false positives in IE. [Prototype LH #172] [Tobie Langel, jddalton]
 
-* Ensure Selector.handlers.id finds the proper element even when it's not attached to the document. [#198, #271 state:resolved] [jddalton]
+* Ensure Selector.handlers.id finds the proper element even when it's not attached to the document. [Prototype LH #198, #271] [jddalton]
 
 * Ensure Element#getDimensions only unhides elements that are hidden. [Andrew Dupont, Nick Stakenburg, jddalton]
 
-* Make Element#getDimensions use offset(Height|Width) rather than client(Height|Width). Closes #10122. [demian85, jddalton, Nick Stakenburg]
+* Make Element#getDimensions use offset(Height|Width) rather than client(Height|Width). [Ruby Trac #10122] [demian85, jddalton, Nick Stakenburg]
 
-* Fix for IE7 to access local files via Ajax.Request. Closes #8259. [Andrew Dupont, hagen.seifert, jddalton]
+* Fix for IE7 to access local files via Ajax.Request. [Ruby Trac #8259] [Andrew Dupont, hagen.seifert, jddalton]
 
-* Make Object.isNumber check that the number is finite (rather than NaN or +/-Infinity). Closes #10349. [mkim]
+* Make Object.isNumber check that the number is finite (rather than NaN or +/-Infinity). [Ruby Trac #10349] [mkim]
 
 * Ensure Object.isHash handles "falsy" values properly. [jddalton]
 
@@ -419,7 +419,7 @@
 
 * Ensure Hash does not return keys from the prototype chain (e.g., constructor, valueOf, toString). [kangax]
 
-* Fix toString/valueOf sharing same method reference via closure in Class#addMethods. Use plain property assignment, since Object.extend fails to enumerate over toString/valueOf. Closes #10841. [broofa, kangax]
+* Fix toString/valueOf sharing same method reference via closure in Class#addMethods. Use plain property assignment, since Object.extend fails to enumerate over toString/valueOf. [Ruby Trac #10841] [broofa, kangax]
 
 * unit test: Update DOM unit tests to avoid failing on Element#replace tests in Opera. [Andrew Dupont, jddalton]
 
@@ -429,41 +429,41 @@
 
 * Ensure Element#hide and Element#show return an element, even if passed an element ID. [jddalton]
 
-* Ensure IE $(form).readAttribute('id') behaves properly when child element has id='id' or name='id'. Closes #11092. [#89 state:resolved] [jddalton]
+* Ensure IE $(form).readAttribute('id') behaves properly when child element has id='id' or name='id'. [Ruby Trac #11092] [Prototype LH #89] [jddalton]
 
-* Stop Form.Element.disable from stealing focus. Closes #11214. [kangax, sjoekie]
+* Stop Form.Element.disable from stealing focus. [Ruby Trac #11214] [kangax, sjoekie]
 
-* Ensure String#escapeHTML escapes double quotes. Closes #10622. [kangax]
+* Ensure String#escapeHTML escapes double quotes. [Ruby Trac #10622] [kangax]
 
-* Make String#extractScripts remove commented out scripts and remove the "m" RegExp flag from String#(extractScripts|stripScripts). Closes #9599. [bubbatls, jddalton]
+* Make String#extractScripts remove commented out scripts and remove the "m" RegExp flag from String#(extractScripts|stripScripts). [Ruby Trac #9599] [bubbatls, jddalton]
 
-* Fix scriptFragment Safari bug with non-ASCII characters in scripts. Closes #9663. [Alexey Proskuryakov, jddalton]
+* Fix scriptFragment Safari bug with non-ASCII characters in scripts. [Ruby Trac #9663] [Alexey Proskuryakov, jddalton]
 
 * Remove the use of $() in Element#hasAttribute methods to keep Selector class speedy. [Andrew Dupont]
 
-* Ensure Element methods run the element argument through $(). Closes #11472. [jddalton]
+* Ensure Element methods run the element argument through $(). [Ruby Trac #11472] [jddalton]
 
-* Set document.loaded = true before firing dom:loaded custom event. Closes #11453. [choppsta, jddalton]
+* Set document.loaded = true before firing dom:loaded custom event. [Ruby Trac #11453] [choppsta, jddalton]
 
-* Avoid potential memory leaks in Firefox. [#12 state:resolved] [wpc, Tobie Langel]
+* Avoid potential memory leaks in Firefox. [Prototype LH #12] [wpc, Tobie Langel]
 
 * unit test: Add more unit tests for Object.isHash. [Tobie Langel]
 
-* Fix Element#getStyle returns null if value is "auto" in browsers supporting getComputedStyle(). Closes #10116. [kangax, ylucas]
+* Fix Element#getStyle returns null if value is "auto" in browsers supporting getComputedStyle(). [Ruby Trac #10116] [kangax, ylucas]
 
 * unit test: Add unit tests for #10150, no patch needed because issue is already resolved. [jddalton] 
 
-* Fix Element read/write attribute methods for the 'encType' form attribute in IE. Closes #11126. [kangax, NoiseEee]
+* Fix Element read/write attribute methods for the 'encType' form attribute in IE. [Ruby Trac #11126] [kangax, NoiseEee]
 
-* Element#down on an input element should not raise error. Closes #11102. [humeniuc, kangax]
+* Element#down on an input element should not raise error. [Ruby Trac #11102] [humeniuc, kangax]
 
-* Make Function#argumentNames handle multiple spaces and line breaks between arguments. [#63 state:resolved] [Geoff M. Granum, Tobie Langel]
+* Make Function#argumentNames handle multiple spaces and line breaks between arguments. [Prototype LH #63] [Geoff M. Granum, Tobie Langel]
 
 * Speed up Function#argumentNames. Avoid Enum dependency. [Samuel Lebeau, Tobie Langel]
 
 * unit test: Amended failing Element#identify test. [Andrew Dupont, jddalton]
 
-* Fix an issue with calling Event.pointer before the DOM is loaded. [kangax, jddalton] [#4 state:resolved]
+* Fix an issue with calling Event.pointer before the DOM is loaded. [kangax, jddalton] [Prototype LH #4]
 
 * Account for context to assure Element#down, et al., work properly with Selectors API. [Andrew Dupont]
 
@@ -471,42 +471,42 @@
 
 * Greatly simplify IE's implementation of Element#descendantOf. [Andrew Dupont]
 
-* Prevent exception when using Selector to search for an attribute that is not present. Closes #11395. [gryn, Andrew Dupont]
+* Prevent exception when using Selector to search for an attribute that is not present. [Ruby Trac #11395] [gryn, Andrew Dupont]
 
 * Fix Firefox Event.element() returning the wrong node for image onload/onerror events.
-  Also fixe Event.element() exception in IE when called from a window event observer. Closes #8652, #11296, #11259.  [dcrall, jddalton, kangax]
+  Also fixe Event.element() exception in IE when called from a window event observer. [Ruby Trac #8652, #11296, #11259]  [dcrall, jddalton, kangax]
 
-* Fix issue where Safari 3 deletes custom properties from the document object when the page is returned to via the back button. Closes #11430. [mzsanford, kangax, Andrew Dupont]
+* Fix issue where Safari 3 deletes custom properties from the document object when the page is returned to via the back button. [Ruby Trac #11430] [mzsanford, kangax, Andrew Dupont]
 
 * Integrate support for the W3C Selectors API into the Selector class.
   Will now use the API when possible (browser supports the API *and* recognizes the given selector).
-  Means minor changes to the semantics of :enabled, :disabled, and :empty in order to comply with CSS spec. [#1 state:resolved] [Andrew Dupont]
+  Means minor changes to the semantics of :enabled, :disabled, and :empty in order to comply with CSS spec. [Prototype LH #1] [Andrew Dupont]
 
 * Avoid re-extending element in Element#getDimensions. [kangax]
 
 * Prevent Hash#toQueryString from serializing objects. [kangax, Tobie Langel]
 
-* Fix Event#pointer in IE strict and quirks mode. Closes #9920. [ephogy, kangax, Tobie Langel]
+* Fix Event#pointer in IE strict and quirks mode. [Ruby Trac #9920] [ephogy, kangax, Tobie Langel]
 
 * Refactor String#escapeHTML to avoid using the `with` statement. [Tobie Langel]
 
-* Make Element#writeAttribute handle frameborder attribute in IE. Closes #11068. [Nick Stakenburg, Tobie Langel]
+* Make Element#writeAttribute handle frameborder attribute in IE. [Ruby Trac #11068] [Nick Stakenburg, Tobie Langel]
 
-* Minor clean-up of selector.js. Closes #10844. [Richard Quadling]
+* Minor clean-up of selector.js. [Ruby Trac #10844] [Richard Quadling]
 
-* Make String#unescapeHTML strip tags in IE. Closes #10173. [kangax]
+* Make String#unescapeHTML strip tags in IE. [Ruby Trac #10173] [kangax]
 
-* Performance improvements for Enumerables. Closes #11264. [Ben, Samuel Lebeau]
+* Performance improvements for Enumerables. [Ruby Trac #11264] [Ben, Samuel Lebeau]
 
-* Make tagName comparisons XHTML-compliant. Closes #11012, #11013, #11014. [cfis, Tobie Langel]
+* Make tagName comparisons XHTML-compliant. [Ruby Trac #11012, #11013, #11014] [cfis, Tobie Langel]
 
-* Avoid breaking Element.prototype in browsers which support it. Closes #11004. [cfis, Tobie Langel]
+* Avoid breaking Element.prototype in browsers which support it. [Ruby Trac #11004] [cfis, Tobie Langel]
 
-* Prevent Enumerable#eachSlice from entering into an endless loop if passed an argument smaller than 1. Closes #10665. [kangax, Tobie Langel]
+* Prevent Enumerable#eachSlice from entering into an endless loop if passed an argument smaller than 1. [Ruby Trac #10665] [kangax, Tobie Langel]
 
-* Allow Selector to correctly detect the presence of namespaced attributes. Closes #10987. [Samuel Lebeau, Tobie Langel]
+* Allow Selector to correctly detect the presence of namespaced attributes. [Ruby Trac #10987] [Samuel Lebeau, Tobie Langel]
 
-* Make Element#absolutize and Element#relativize always return element. Closes #10983. [kangax]
+* Make Element#absolutize and Element#relativize always return element. [Ruby Trac #10983] [kangax]
 
 * unit test: Fix local variables, stop observers, correct css/html and fix Test.Unit.Logger#getMessageCell. [jddalton]
 
@@ -520,7 +520,7 @@
 
 * unit test: Clean-up. [Tobie Langel]
 
-* unit test: Stop form observers in unit tests. Closes #10938. [kangax]
+* unit test: Stop form observers in unit tests. [Ruby Trac #10938] [kangax]
 
 * deprecation extension: Complete rewrite of the deprecation helper, now renamed UpdateHelper and useable by third-party libs. [Tobie Langel]
 
@@ -542,35 +542,35 @@
 
 * Add tests for Element#descendantOf that deal with dynamically-created elements. [Andrew Dupont]
 
-* Ensure positionedOffset properly considers "position: fixed" elements. Also ensures IE reports offsets correctly by triggering hasLayout when a "static" element has a "fixed" element as an offset parent. Closes #10644. [heygrady, kangax, Andrew Dupont]
+* Ensure positionedOffset properly considers "position: fixed" elements. Also ensures IE reports offsets correctly by triggering hasLayout when a "static" element has a "fixed" element as an offset parent. [Ruby Trac #10644] [heygrady, kangax, Andrew Dupont]
 
 * Roll back the fix for #9609, since it does not work in Opera. Instead, avoid using "valueOf" or "toString" as field names in forms.
 
-* Prevent DOM node expandos _countedByPrototype and _prototypeEventID from being serialized into (inner|outer)HTML in IE. Closes #10909. [dcpedit, Tobie Langel, Andrew Dupont]
+* Prevent DOM node expandos _countedByPrototype and _prototypeEventID from being serialized into (inner|outer)HTML in IE. [Ruby Trac #10909] [dcpedit, Tobie Langel, Andrew Dupont]
 
 * Make Ajax.Request#isSameOrigin JavaScript Lint compliant. [Andrew Dupont]
 
-* Properly serialize form fields with names that collide with built-in JS properties (like "length" or "toString"). Closes #9609. [gryn, kangax]
+* Properly serialize form fields with names that collide with built-in JS properties (like "length" or "toString"). [Ruby Trac #9609] [gryn, kangax]
 
-* Make Object.isArray correctly identify arrays created in another frame. Closes #10374. [pointy, Dean Edwards, Andrew Dupont, Tobie Langel]
+* Make Object.isArray correctly identify arrays created in another frame. [Ruby Trac #10374] [pointy, Dean Edwards, Andrew Dupont, Tobie Langel]
 
-* Fixed issue where Element#match failed on attribute selectors with single or double quotes. Closes #10067. [Cezary Okupski, Andrew Dupont]
+* Fixed issue where Element#match failed on attribute selectors with single or double quotes. [Ruby Trac #10067] [Cezary Okupski, Andrew Dupont]
 
 * Add tests for Element#match.  [Tobie Langel]
 
-* Fix Element#writeAttribute to work with 'cellspacing' and 'cellpadding' attributes in IE. Closes #9983. [/dev/urandom, Tobie Langel]
+* Fix Element#writeAttribute to work with 'cellspacing' and 'cellpadding' attributes in IE. [Ruby Trac #9983] [/dev/urandom, Tobie Langel]
 
 * Prevent a potential security issue for cross-site ajax requests. [Alexey Feldgendler, sam, Tobie Langel]
 
-* Test for attribute existence before applying more complex CSS3 selectors. Closes #10870. [arty, Tobie Langel]
+* Test for attribute existence before applying more complex CSS3 selectors. [Ruby Trac #10870] [arty, Tobie Langel]
 
-* Fix "function $A" declaration inside of a conditional (confuses IE). Closes #10882. [Jacco, Andrew Dupont]
+* Fix "function $A" declaration inside of a conditional (confuses IE). [Ruby Trac #10882] [Jacco, Andrew Dupont]
 
-* Fixed selector parsing so that "#foo [bar=baz]" is treated the same way as "#foo *[bar=baz]". Closes #10734. [jlukas, kangax, Andrew Dupont]
+* Fixed selector parsing so that "#foo [bar=baz]" is treated the same way as "#foo *[bar=baz]". [Ruby Trac #10734] [jlukas, kangax, Andrew Dupont]
 
-* Fix Element#descendantOf logic in IE. Closes #10413. [martymix, kamil.szot]
+* Fix Element#descendantOf logic in IE. [Ruby Trac #10413] [martymix, kamil.szot]
 
-* Fix missing "var" in Element#insert. Closes #10838. [Lantash]
+* Fix missing "var" in Element#insert. [Ruby Trac #10838] [Lantash]
 
 * Add Test.Unit.MessageTemplate class. Add flunk, buildMessage and assertBlock methods to Test.Unit.Assertions. Refactor accordingly. [Tobie Langel]
 
@@ -582,15 +582,15 @@
 
 * Fix Selector.matchElements to allow for coma-separated selectors in Element#up/next/previous and Event#findElement. [Samuel Lebeau, Tobie Langel]
 
-* Test.Unit refactoring. Allow running multiple instances of Test.Unit.Runner on the same page. Allow rake to run specific testcases (e.g.: rake test BROWSERS=firefox TESTS=array TESTCASES=testUniq,test$w). Closes #10704, #10705, #10706. [nicwilliams, Tobie Langel]
+* Test.Unit refactoring. Allow running multiple instances of Test.Unit.Runner on the same page. Allow rake to run specific testcases (e.g.: rake test BROWSERS=firefox TESTS=array TESTCASES=testUniq,test$w). [Ruby Trac #10704 #10705, #10706] [nicwilliams, Tobie Langel]
 
-* Optimize property detection of outerHTML. Avoids triggering FOUC in Safari 3.0.4. Closes #10702. [subimage, Tobie Langel]
+* Optimize property detection of outerHTML. Avoids triggering FOUC in Safari 3.0.4. [Ruby Trac #10702] [subimage, Tobie Langel]
 
 * Add document.loaded, a boolean that is set to true once dom:loaded is fired. Setting document.loaded to true before the document is loaded prevents dom:loaded from being fired. [Tobie Langel]
 
 * Make Element#insert standard-compliant. Fixes an issue in FF3b2 when inserting HTML or text inside DOM nodes which aren't (yet) appended to the document. [Tobie Langel]
 
-* Add some missing semicolons to the source tree.  Closes #10659.  [Richard Quadling]
+* Add some missing semicolons to the source tree.  [Ruby Trac #10659]  [Richard Quadling]
 
 * Ensure Ajax.Response#getHeader returns null for missing headers in Opera. [Tobie Langel]
 
@@ -598,35 +598,35 @@
 
 * Ensure Ajax.Response#getHeader returns null for missing headers. [Tobie Langel]
 
-* Ensure $A creates an empty array when its argument's length is undefined. Closes #10574. [henryju, Tobie Langel]
+* Ensure $A creates an empty array when its argument's length is undefined. [Ruby Trac #10574] [henryju, Tobie Langel]
 
-* Fix incorrect variable declaration in Event.fire. Closes #10329. [rubley]
+* Fix incorrect variable declaration in Event.fire. [Ruby Trac #10329] [rubley]
 
-* Fix the way Selector handles [pseudoclass + combinator] with no space in between. Closes #9696. [kangax, fearphage, Andrew Dupont]
+* Fix the way Selector handles [pseudoclass + combinator] with no space in between. [Ruby Trac #9696] [kangax, fearphage, Andrew Dupont]
 
-* Optimize Element#up/down/next/previous. Closes #10353. [Dylan Bruzenak, Nick Stakenburg, Andrew Dupont]
+* Optimize Element#up/down/next/previous. [Ruby Trac #10353] [Dylan Bruzenak, Nick Stakenburg, Andrew Dupont]
 
-* Handle case-sensitivity in Selector tag names better. Closes #5052. [mexx, Andrew Dupont]
+* Handle case-sensitivity in Selector tag names better. [Ruby Trac #5052] [mexx, Andrew Dupont]
 
 *1.6.0.1* (December 4, 2007)
 
-* Change document.viewport.getDimensions to exclude scrollbars in all cases. Closes #10148, #9288. [Nick Stakenburg]
+* Change document.viewport.getDimensions to exclude scrollbars in all cases. [Ruby Trac #10148, #9288] [Nick Stakenburg]
 
 * Add logic to Element#getStyle in Opera that fixes inaccurate reporting of computed 'width' and 'height' properties. [Andrew Dupont]
 
-* Ensure that an Ajax.Request's parameters option can be a Hash.  Closes #10172.  [kangax, sam] 
+* Ensure that an Ajax.Request's parameters option can be a Hash.  [Ruby Trac #10172]  [kangax, sam] 
 
-* Ensure no comment nodes are returned in Selector queries (IE improperly returns comment nodes on getElementsByTagName("*")). Change Element#descendants to use Element#getElementsBySelector in order to avoid this issue. Closes #10220. [Jeff Gobel, Andrew Dupont]
+* Ensure no comment nodes are returned in Selector queries (IE improperly returns comment nodes on getElementsByTagName("*")). Change Element#descendants to use Element#getElementsBySelector in order to avoid this issue. [Ruby Trac #10220] [Jeff Gobel, Andrew Dupont]
 
 * Re-enable the XPath approach in Selector for Safari 3. Falls back to the non-XPath version when it sees a problematic token. [Andrew Dupont]
 
 * Fix a bug in the IE-specific Element#descendantOf logic. [Nicholas, Andrew Dupont]
 
-* Make Ajax.Updater clone its options hash before modifying it. Prevents memory leaks in Ajax.PeriodicalUpdater. Closes #10049 [Mislav Marohnić, Tobie Langel].
+* Make Ajax.Updater clone its options hash before modifying it. Prevents memory leaks in Ajax.PeriodicalUpdater. [Ruby Trac #10049] [Mislav Marohnić, Tobie Langel].
 
-* Remove useless variable in Selector.handlers.child. Closes #10006 [kuriyama]
+* Remove useless variable in Selector.handlers.child. [Ruby Trac #10006] [kuriyama]
 
-* Don't redeclare previously declared variables. Closes #10007 [kuriyama]
+* Don't redeclare previously declared variables. [Ruby Trac #10007] [kuriyama]
 
 * For consistency: use Object.isUndefined where possible. [Tobie Langel]
 
@@ -642,13 +642,13 @@
 
 *1.6.0* (November 6, 2007)
 
-* Fix Class#addMethods for "toString" and "valueOf" methods in Internet Explorer.  Closes #9901.  [sam]
+* Fix Class#addMethods for "toString" and "valueOf" methods in Internet Explorer.  [Ruby Trac #9901]  [sam]
 
 * Exclude Opera from using the sourceIndex approach in Element#descendantOf. [Tobie Langel, Andrew Dupont]
 
-* Ensure Element#hasClassName always returns a boolean. Closes #10075. [ronnylovtangen, Tobie Langel]
+* Ensure Element#hasClassName always returns a boolean. [Ruby Trac #10075] [ronnylovtangen, Tobie Langel]
 
-* Ensure selectors of the form "[href]" (attribute token with no preceding tag name) work properly. Closes #8870. [chao, kangax, Andrew Dupont]
+* Ensure selectors of the form "[href]" (attribute token with no preceding tag name) work properly. [Ruby Trac #8870] [chao, kangax, Andrew Dupont]
 
 * Performance optimizations for Element#descendantOf. Costliness should no longer be dependent on the difference in depth between the parent and the child. [Andrew Dupont]
 
@@ -662,25 +662,25 @@
 
 * Use String#include wherever possible.
 
-* In IE, allow opacity to be set on elements not yet attached to the document. Closes #9904. [Thomas Fuchs, dcpedit, Tobie Langel]
+* In IE, allow opacity to be set on elements not yet attached to the document. [Ruby Trac #9904] [Thomas Fuchs, dcpedit, Tobie Langel]
 
 * Avoid the try..catch block in Ajax.Response#_getResponseJSON unless required. [Tobie Langel]
 
-* Add more tests to Element.update. Closes #9327. [Tobie Langel]
+* Add more tests to Element.update. [Ruby Trac #9327] [Tobie Langel]
 
-* Make the Ajax.Response#headerJSON property correctly decode unicode characters. Closes #9285. [Marius Feraru, Tobie Langel]
+* Make the Ajax.Response#headerJSON property correctly decode unicode characters. [Ruby Trac #9285] [Marius Feraru, Tobie Langel]
 
-* Make sure Event and Event.extend are defined before wrapping events and calling their handler. Prevents a known Firefox bug from throwing errors on page load/unload (cf.: https://bugzilla.mozilla.org/show_bug.cgi?id=361271). Closes #5393, #9421. [staaky, John Resig, sam, Tobie Langel]
+* Make sure Event and Event.extend are defined before wrapping events and calling their handler. Prevents a known Firefox bug from throwing errors on page load/unload (cf.: https://bugzilla.mozilla.org/show_bug.cgi?id=361271). [Ruby Trac #5393, #9421] [staaky, John Resig, sam, Tobie Langel]
 
 * Minor cosmetic changes to the display of unit tests in terminal. [Tobie Langel]
 
-* Make submitting forms work in Opera < 9.1. Closes #9917, #9463, #8260. [kangax]
+* Make submitting forms work in Opera < 9.1. [Ruby Trac #9917, #9463, #8260] [kangax]
 
-* Fix template evaluation with empty replacements.  Closes #9692.  [Ryan McGeary]
+* Fix template evaluation with empty replacements.  [Ruby Trac #9692]  [Ryan McGeary]
 
 * Hash#toTemplateReplacements is an alias for Hash#toObject so you can once again pass hashes to Template#evaluate and String#interpolate.  [sam]
 
-* Fix Event#is(Left|Middle|Right)Click in IE.  Closes #7520 (again).  [Mislav Marohnić]
+* Fix Event#is(Left|Middle|Right)Click in IE.  [Ruby Trac #7520] (again).  [Mislav Marohnić]
 
 *1.6.0_rc1* (October 16, 2007)
 
@@ -691,7 +691,7 @@
 
 * Changed Element#makeClipping to remember the original overflow value, even if it's a non-inline style. [Andrew Dupont]
 
-* Cross-browser Event#isLeftClick with the addition of is(Middle|Right)Click.  Closes #7520.  [Christophe Porteneuve, Richard Quadling, Mislav Marohnić]
+* Cross-browser Event#isLeftClick with the addition of is(Middle|Right)Click.  [Ruby Trac #7520]  [Christophe Porteneuve, Richard Quadling, Mislav Marohnić]
 
 * Changed Selector to use the non-XPath approach for Safari 3 because of bugs in its version of document.evaluate. [Andrew Dupont]
 
@@ -703,9 +703,9 @@
 
 * Add more tests to Hash. [Mislav Marohnić]
 
-* Performance enhancements to $A. Closes #9464. [Samuel Lebeau]
+* Performance enhancements to $A. [Ruby Trac #9464] [Samuel Lebeau]
 
-* Make Function#argumentNames work with named functions. Closes #9826. [Samuel Lebeau]
+* Make Function#argumentNames work with named functions. [Ruby Trac #9826] [Samuel Lebeau]
 
 * Add Object.isHash. [Tobie Langel]
 
@@ -753,16 +753,16 @@
   - Remove Class.extend and Class.mixin.  
   - Class.create now takes a variable number of arguments: if the first argument is a class, the newly created class inherits from that class; all other arguments are treated as successive calls to addMethods.
 
-* Fix contentloaded event initialization in IE.  Closes #9457, #9488, #9707.  [Mislav Marohnić]
+* Fix contentloaded event initialization in IE.  [Ruby Trac #9457, #9488, #9707]  [Mislav Marohnić]
 
 * Deprecate document.getElementsByClassName and Element#getElementsByClassName since native versions return a NodeList and we can only return an Array.  Please use $$ or Element#select instead.  [sam]
   For more information see https://bugzilla.mozilla.org/show_bug.cgi?id=390411
 
-* Fix missing "var" in selector.js.  Closes #9761.  [Tobie Langel]
+* Fix missing "var" in selector.js.  [Ruby Trac #9761]  [Tobie Langel]
 
-* Date#toJSON now returns times in UTC for better compatibility with json.js.  Closes #9332.  [Tobie Langel]
+* Date#toJSON now returns times in UTC for better compatibility with json.js.  [Ruby Trac #9332]  [Tobie Langel]
 
-* Ensure document._getElementsByXPath extends the elements it returns; fixes $$ not returning extended elements in Opera 9.2.  Closes #8843.  [jdalton]
+* Ensure document._getElementsByXPath extends the elements it returns; fixes $$ not returning extended elements in Opera 9.2.  [Ruby Trac #8843]  [jdalton]
 
 * Update Prototype.Browser.MobileSafari for iPod touch compatibility.  [sam]
 
@@ -772,25 +772,25 @@
 
 * Make sure setting opacity works on elements that have "no layout" in IE.  [Thomas Fuchs]
 
-* Simplify Class.create by establishing a prototype chain when subclassing.  Closes #9342.  [Ben Newman]
+* Simplify Class.create by establishing a prototype chain when subclassing.  [Ruby Trac #9342]  [Ben Newman]
 
-* Fix Ajax.PeriodicalUpdater for compatibility with Ajax.Response.  Closes #9321.  [kampers]
+* Fix Ajax.PeriodicalUpdater for compatibility with Ajax.Response.  [Ruby Trac #9321]  [kampers]
 
 * Ensure that classes always have an initialize method.  [Mislav Marohnić]
 
 * Update Template, Selector, Ajax.*, and ObjectRange classes to use the new class system.  [Mislav Marohnić]
 
-* Change Abstract.TimedObserver to subclass PeriodicalExecuter and tweak its subclasses to use new inheritance functionality.  TimedObserver can now be stopped the same way as PeriodicalExecuter.  Closes #8589.  [Mislav Marohnić]
+* Change Abstract.TimedObserver to subclass PeriodicalExecuter and tweak its subclasses to use new inheritance functionality.  TimedObserver can now be stopped the same way as PeriodicalExecuter.  [Ruby Trac #8589]  [Mislav Marohnić]
 
 * Fix Class.mixin to extend the class's prototype.  [Mislav Marohnić]
 
 * Fix superclass method call breakage from [7337].  [Mislav Marohnić, sam]
 
-* Change Class.extend to allow for superclass method resolution and remove Class.inherit.  Closes #9274.  [Samuel Lebeau]
+* Change Class.extend to allow for superclass method resolution and remove Class.inherit.  [Ruby Trac #9274]  [Samuel Lebeau]
 
 * Event handlers are now bound to the observed element, not the event's target element.  [Dan Webb]
 
-* Define Node constants conditionally after checking for Node.ELEMENT_NODE presence.  Add unit test to check the values of all constants.  Closes #7625.  [Mislav Marohnić]
+* Define Node constants conditionally after checking for Node.ELEMENT_NODE presence.  Add unit test to check the values of all constants.  [Ruby Trac #7625]  [Mislav Marohnić]
 
 * Make sure Enumerable#include doesn't do type comparision.  [Mislav Marohnić]
 
@@ -802,7 +802,7 @@
 
 * Fix failing dom.html and selector.html tests in IE.  [Tobie Langel, Andrew Dupont]
 
-* Make sure the WebKit redefinition of Element#cumulativeOffset uses Element._returnOffset.  Closes #9245.  [mdaines]
+* Make sure the WebKit redefinition of Element#cumulativeOffset uses Element._returnOffset.  [Ruby Trac #9245]  [mdaines]
 
 * Make sure Element#observe and Element#stopObserving are always chainable.  [sam]
 
@@ -816,7 +816,7 @@
 
 * Make sure event handlers and their wrappers are removed from the cache by Event.stopObserving.  [sam, Severin Heiniger]
 
-* Add line numbers to failures when unit testing in Firefox.  Closes #9231.  [John Resig]
+* Add line numbers to failures when unit testing in Firefox.  [Ruby Trac #9231]  [John Resig]
 
 * Fix Function#argumentNames for Opera and IE.  [Thomas Fuchs]
 
@@ -829,13 +829,13 @@
     document.viewport.getHeight()         // 923
     document.viewport.getScrollOffsets()  // { left: 0, top: 1592 }
 
-* Add support for brackets in quoted attribute value selectors.  Closes #9157.  [Ken Snyder]
+* Add support for brackets in quoted attribute value selectors.  [Ruby Trac #9157]  [Ken Snyder]
 
-* Add some missing semicolons to the source tree.  Closes #9140.  [jdalton]
+* Add some missing semicolons to the source tree.  [Ruby Trac #9140]  [jdalton]
 
 * Fix event extensions and custom events firing for Safari 2.0.  [Thomas Fuchs]
 
-* Add RegExp.escape for escaping regular expression strings.  Closes #9094.  [Ken Snyder]
+* Add RegExp.escape for escaping regular expression strings.  [Ruby Trac #9094]  [Ken Snyder]
 
 * Make the eventName and handler arguments to Event.stopObserving optional.  If no handler is specified, all handlers for the given event are unregistered.  If no event name is specified, all observed events on the element are unregistered.  [sam]
 
@@ -851,13 +851,13 @@
 
 * Remove support for observing the capturing phase of DOM events, since we can't support it in all browsers.  [sam]
 
-* Add Ajax.Response object which supports the following methods: responseJSON, headerJSON, getHeader, getAllHeaders and handles browser discrepancies in the other response methods. Add sanitizeJSON, evalJS and evalJSON to Ajax.Request. Closes #8122, #8006, #7295. [Tobie Langel]
+* Add Ajax.Response object which supports the following methods: responseJSON, headerJSON, getHeader, getAllHeaders and handles browser discrepancies in the other response methods. Add sanitizeJSON, evalJS and evalJSON to Ajax.Request. [Ruby Trac #8122, #8006, #7295] [Tobie Langel]
 
 * Add an isRunningFromRake property to unit tests. [Tobie Langel]
 
 * Add support for Opera browser in jstest.rb. [Tobie Langel]
 
-* Inheritance branch merged to trunk; robust inheritance support for Class.create. Closes #5459. [Dean Edwards, Alex Arnell, Andrew Dupont, Mislav Mahronic]
+* Inheritance branch merged to trunk; robust inheritance support for Class.create. [Ruby Trac #5459] [Dean Edwards, Alex Arnell, Andrew Dupont, Mislav Mahronic]
  - To access a method's superclass method, add "$super" as the first argument. (The naming is significant.) Works like Function#wrap.
  - Class.create now takes two optional arguments. The first is an existing class to subclass; the second is an object literal defining the instance properties/methods. Either can be omitted. Backwards-compatible with old Class.create.
  - Added Class.extend for dynamically adding methods to existing classes (while preserving inheritance chain). Can also be used for mixins.
@@ -866,17 +866,17 @@
  
 * Add Function#argumentNames, which returns an ordered array of the function's named arguments.  [sam]
 
-* Prevent a crash in Safari 1.3 on String#stripScripts and String#extractScripts. Closes #8332. [grant, Tobie Langel]
+* Prevent a crash in Safari 1.3 on String#stripScripts and String#extractScripts. [Ruby Trac #8332] [grant, Tobie Langel]
 
 * Add Prototype.Browser.MobileSafari which evaluates to true on the iPhone's browser.  [sam]
 
-* Optimize Selector#match and Element#match for simple selectors.  Closes #9082.  [Andrew Dupont]
+* Optimize Selector#match and Element#match for simple selectors.  [Ruby Trac #9082]  [Andrew Dupont]
 
-* Remove the dependency on Element.ClassNames from Element#addClassName/removeClassName/toggleClassName, and deprecate Element.ClassNames. Closes #9073. [Tobie Langel]
+* Remove the dependency on Element.ClassNames from Element#addClassName/removeClassName/toggleClassName, and deprecate Element.ClassNames. [Ruby Trac #9073] [Tobie Langel]
 
-* Make Element#wrap accept a second argument for setting attributes on the wrapper. Allow wrapping elements which are not part of the document. Closes #9071. [Tobie Langel]
+* Make Element#wrap accept a second argument for setting attributes on the wrapper. Allow wrapping elements which are not part of the document. [Ruby Trac #9071] [Tobie Langel]
 
-* Improvements for Element#replace, Element#update and Element#insert.  Closes #7429, #9060.  [Tobie Langel]
+* Improvements for Element#replace, Element#update and Element#insert.  [Ruby Trac #7429, #9060]  [Tobie Langel]
   - Element#replace/update/insert uses the argument's toElement or toHTML method if present (toElement has precedence if both are present).
   - Element#replace and Element#update now also accept DOM elements.
   - Element#replace better handles table-related elements in IE and Opera.
@@ -885,7 +885,7 @@
 
 * Add Object.toHTML (uses the object's toHTML method if present or else passes the object to String.interpret). [Tobie Langel]
 
-* Make Element#setStyle accept a string argument of CSS rules. Deprecate uncamelized style property names when setting styles using an object (for performance reasons).  Closes #9059.  [Tobie Langel]
+* Make Element#setStyle accept a string argument of CSS rules. Deprecate uncamelized style property names when setting styles using an object (for performance reasons).  [Ruby Trac #9059]  [Tobie Langel]
   Examples:
     $('id').setStyle('font-size: 12px; float: left; opacity: 0.5');
     $('id').setStyle({fontSize: '12px', cssFloat: 'left', opacity: 0.5});
@@ -898,11 +898,11 @@
     $('id').setStyle({fontSize: '12px'});
     $('id').setStyle('font-size: 12px;');
 
-* Add Element#identify, which returns the element's ID if it exists, or sets and returns a unique, auto-generated ID (of the form "anonymous_element_" + auto-incremented digit) otherwise.  Use this when you need to ensure an element has an ID.  Closes #9012.  [Jeff Watkins, sam, Tobie Langel]
+* Add Element#identify, which returns the element's ID if it exists, or sets and returns a unique, auto-generated ID (of the form "anonymous_element_" + auto-incremented digit) otherwise.  Use this when you need to ensure an element has an ID.  [Ruby Trac #9012]  [Jeff Watkins, sam, Tobie Langel]
 
-* Make Element#readAttribute work for cloned elements in IE. Closes #8481. [chem, Tobie Langel]
+* Make Element#readAttribute work for cloned elements in IE. [Ruby Trac #8481] [chem, Tobie Langel]
 
-* Template enhancements.  Closes #8166.  [Christophe Porteneuve]
+* Template enhancements.  [Ruby Trac #8166]  [Christophe Porteneuve]
   - Added String#interpolate as a shortcut for new Template(...).evaluate(...). 
   - If you pass String#interpolate or Template#evaluate an object with a toTemplateReplacements() method, the return value of that method will be used as the replacement object.
   - You can now substitute properties of template replacement values in template strings, using dot or bracket notation (or both).  Example:
@@ -910,9 +910,9 @@
       name: { first: "Christophe", last: "Porteneuve" }, location: "Paris"
     }) // "Porteneuve, C. (Paris)"
 
-* Extended grep semantics.  The first argument to Enumerable#grep is now a "filter" (an object with a match() method) so you can now e.g. filter an array of DOM nodes by CSS selector.  RegExp#match is now an alias to RegExp#test, so grep can still be used to filter an array of strings with a regular expression.  Closes #7596.  [Christophe Porteneuve, sam]
+* Extended grep semantics.  The first argument to Enumerable#grep is now a "filter" (an object with a match() method) so you can now e.g. filter an array of DOM nodes by CSS selector.  RegExp#match is now an alias to RegExp#test, so grep can still be used to filter an array of strings with a regular expression.  [Ruby Trac #7596]  [Christophe Porteneuve, sam]
 
-* Make String#scan explicitly return a string. This prevents possible issues with methods expecting input data that is typeof == 'string'. Closes #6350. [AndrewRev, Tobie Langel]
+* Make String#scan explicitly return a string. This prevents possible issues with methods expecting input data that is typeof == 'string'. [Ruby Trac #6350] [AndrewRev, Tobie Langel]
 
 * Add Array#intersect for set intersection. Returns a new array containing all items common to the array and the argument, with duplicates removed (clone of the Ruby & method).   [Thomas Fuchs]
   Example:
@@ -922,7 +922,7 @@
 
 * Add Element#adjacent as a shortcut to selecting all adjacent nodes (and their children) that match a CSS selector.  [Thomas Fuchs]
 
-* Enhance the Enumerable and Array APIs to more closely match those of JavaScript 1.6 as implemented in Firefox 1.5.  Closes #6650, #8409.  [Mislav Marohnić, Sylvain Zimmer]
+* Enhance the Enumerable and Array APIs to more closely match those of JavaScript 1.6 as implemented in Firefox 1.5.  [Ruby Trac #6650, #8409]  [Mislav Marohnić, Sylvain Zimmer]
   - Add Array#lastIndexOf, and change Array#indexOf not to overwrite the native method. 
   - Make Enumerable use Array.prototype.forEach instead of _each when possible (slight speed increase).
   - Add "filter", "entries", "every", and "some" Array aliases. 
@@ -938,27 +938,27 @@
     $('form').serialize({ submit: 'delete' })
     $('form').serialize({ hash: false }) //-> equivalent to $('form').serialize()
 
-* Form#findFirstElement respects HTML tabindexes.  Closes #7595.  [Christophe Porteneuve]
+* Form#findFirstElement respects HTML tabindexes.  [Ruby Trac #7595]  [Christophe Porteneuve]
 
-* Added Form.Element#setValue method for setting values on various form controls. Checkboxes and radio buttons respond to a boolean and multiple select boxes expect an array of values.  Closes #5902.  [Jonathan Viney, Mislav Marohnić]
+* Added Form.Element#setValue method for setting values on various form controls. Checkboxes and radio buttons respond to a boolean and multiple select boxes expect an array of values.  [Ruby Trac #5902]  [Jonathan Viney, Mislav Marohnić]
   Examples:
     $('text_input').setValue('hello world!')
     $('remember_me').setValue(true)
     $('attend_classes').setValue(['cheese rolling', 'evil chemistry'])
 
-* Make document.getElementsByClassName match a subset of the WHATWG Web Applications 1.0 specification which was adopted in Firefox 3 (http://www.whatwg.org/specs/web-apps/current-work/#getelementsbyclassname). It now supports multiple class names given as a whitespace-separated list in a string. Array argument is not supported. The method will only return the nodes that match all the class names. In browsers that implement the method natively it will not be overwritten.  Closes #8401.  [Mislav Marohnić]
+* Make document.getElementsByClassName match a subset of the WHATWG Web Applications 1.0 specification which was adopted in Firefox 3 (http://www.whatwg.org/specs/web-apps/current-work/#getelementsbyclassname). It now supports multiple class names given as a whitespace-separated list in a string. Array argument is not supported. The method will only return the nodes that match all the class names. In browsers that implement the method natively it will not be overwritten.  [Ruby Trac #8401]  [Mislav Marohnić]
   Example:
     document.getElementsByClassName('foo bar')
 
-* Fix a Safari rendering issue when floating elements could temporarily disappear when opacity was set to 1.  Closes #7063.  References #3044, #3813, #6706.  [Thomas Fuchs, davidjrice]
+* Fix a Safari rendering issue when floating elements could temporarily disappear when opacity was set to 1.  [Ruby Trac #7063]  References #3044, #3813, #6706.  [Thomas Fuchs, davidjrice]
 
-* Prevent a crash in Safari when calling String#evalJSON(true) on very large strings. Add String#isJSON.  Closes #7834.  [Tobie Langel]
+* Prevent a crash in Safari when calling String#evalJSON(true) on very large strings. Add String#isJSON.  [Ruby Trac #7834]  [Tobie Langel]
 
-* Prevent a crash in Safari 1.3 on String#stripScripts and String#extractScripts.  Closes #8332.  [grant, Tobie Langel]
+* Prevent a crash in Safari 1.3 on String#stripScripts and String#extractScripts.  [Ruby Trac #8332]  [grant, Tobie Langel]
 
-* Allow JSON data to contain line breaks.  Closes #8271.  [pijyster, Tobie Langel]
+* Allow JSON data to contain line breaks.  [Ruby Trac #8271]  [pijyster, Tobie Langel]
 
-* Add Hash.prototype.index which returns the first found property that has a specific value.  Closes #8528.  [Thomas Fuchs, slusarz, Mislav Marohnić]
+* Add Hash.prototype.index which returns the first found property that has a specific value.  [Ruby Trac #8528]  [Thomas Fuchs, slusarz, Mislav Marohnić]
   Examples:
     var hash = $H({a:1,b:'2'});
     hash.index(1)   // -> 'a'
@@ -968,9 +968,9 @@
 
 * Add Number.prototype.round/ceil/floor/abs as an aliases to the respective methods in Math. Refactor to seperate number extensions from base.js.  [Thomas Fuchs]
 
-* Make Element#absolutize and Element#relativize properly use Element#getStyle.  Closes #8580.  [Christophe Porteneuve]
+* Make Element#absolutize and Element#relativize properly use Element#getStyle.  [Ruby Trac #8580]  [Christophe Porteneuve]
 
-* Test library fixes: make rake dist work on Windows, only teardown if a browser is supported.  Closes #8463, #8498.  [Mislav Marohnić, grant]
+* Test library fixes: make rake dist work on Windows, only teardown if a browser is supported.  [Ruby Trac #8463, #8498]  [Mislav Marohnić, grant]
 
 * Change Element.insert syntax to allow multiple positions.  [Thomas Fuchs]
   Examples:
@@ -981,17 +981,17 @@
 
 * String.prototype.truncate now explicitly converts its return value into a string if no truncation takes place. This prevents possible issues with methods expecting input data that is typeof == 'string'.  [Thomas Fuchs, Tobie Langel, Sam Stephenson]
 
-* Event.findElement behaves as expected when the element passed matches the given selector.  Closes #8395.  [Mislav Marohnić, Tobie Langel]
+* Event.findElement behaves as expected when the element passed matches the given selector.  [Ruby Trac #8395]  [Mislav Marohnić, Tobie Langel]
 
-* Element.setOpacity now calls removeAttribute on the filter style on IE if no more filters remain, which makes Cleartype work properly.  Closes #8376.  [alexdemi, Thomas Fuchs]
+* Element.setOpacity now calls removeAttribute on the filter style on IE if no more filters remain, which makes Cleartype work properly.  [Ruby Trac #8376]  [alexdemi, Thomas Fuchs]
 
 * Event.findElement now uses Element#up (and as a result can take a CSS selector instead of just a tag name).  [Tobie Langel]
 
 * Minor cleanup of the position methods  [sam]
 
-* Fix Element#clonePosition to call viewportOffset.  Closes #8372.  [graemenelson, Christophe Porteneuve] 
+* Fix Element#clonePosition to call viewportOffset.  [Ruby Trac #8372]  [graemenelson, Christophe Porteneuve] 
 
-* Prevent an error being thrown by $$ when #id does not exist in $$("div #id").  Closes #8325.  [Tobie Langel, ecke]
+* Prevent an error being thrown by $$ when #id does not exist in $$("div #id").  [Ruby Trac #8325]  [Tobie Langel, ecke]
 
 * Make Prototype.ScriptFragment behave when including Prototype inline.  [Christophe Porteneuve]
 
@@ -999,25 +999,25 @@
 
 * Make Element#update and Element#insert work for SELECT tags in IE and Opera. [Tobie Langel]
 
-* Make Element#insert and Element#update better handle TABLE related elements in IE and Opera. Closes #7776, #8040, #7550, #7776, #7938. [Tobie Langel]
+* Make Element#insert and Element#update better handle TABLE related elements in IE and Opera. [Ruby Trac #7776, #8040, #7550, #7776, #7938] [Tobie Langel]
 
 * Make Element#readAttribute('title') work in Opera. [Tobie Langel]
 
-* Make Element#replace work with form elements in Firefox and Safari. Closes #8010, #7989. [dsl239, Tobie Langel]
+* Make Element#replace work with form elements in Firefox and Safari. [Ruby Trac #8010, #7989] [dsl239, Tobie Langel]
 
-* Add Element#wrap which wraps the element inside a new one. Closes #5732. [P. Vande, Tobie Langel]
+* Add Element#wrap which wraps the element inside a new one. [Ruby Trac #5732] [P. Vande, Tobie Langel]
 
-* Make Element into a constructor: new Element(tagName, attributes). Add Element#writeAttribute which accepts a hash of attributes or a name/value pair. Closes #7476. [Mislav Marohnić, haraldmartin, Tobie Langel]
+* Make Element into a constructor: new Element(tagName, attributes). Add Element#writeAttribute which accepts a hash of attributes or a name/value pair. [Ruby Trac #7476] [Mislav Marohnić, haraldmartin, Tobie Langel]
 
-* Insertion overhaul: Add Element.insert(content[, position = 'bottom']). Deprecate Insertion (kept for backwards compatibility). Make Ajax.Updater option.insertion accept both Insertion.Top or the now preferred 'top'. Closes #7907. [Tobie Langel]
+* Insertion overhaul: Add Element.insert(content[, position = 'bottom']). Deprecate Insertion (kept for backwards compatibility). Make Ajax.Updater option.insertion accept both Insertion.Top or the now preferred 'top'. [Ruby Trac #7907] [Tobie Langel]
 
 * Refactor Element.extend and eliminate Element.extend.cache.  [sam]
 
-* Add Function#curry, Function#delay, Function#defer, and Function#wrap.  Closes #8134.  [Andrew Dupont, Tobie Langel, sam]
+* Add Function#curry, Function#delay, Function#defer, and Function#wrap.  [Ruby Trac #8134]  [Andrew Dupont, Tobie Langel, sam]
 
 *1.5.1* (May 1, 2007)
 
-* Don't duplicate the event argument in Function#bindAsEventListener.  Closes #6497.  [wiktor]
+* Don't duplicate the event argument in Function#bindAsEventListener.  [Ruby Trac #6497]  [wiktor]
 
 * Fix Selector :not-clause chaining.  [Andrew Dupont]
 
@@ -1027,53 +1027,53 @@
 
 * Set window.$continue to an Error with a helpful message for anyone who may still be using "throw $continue".  [sam]
 
-* Fix jstest.rb IE support so you don't have to close the IE window after each test (yay!).  Closes #8207.  [Ryan Schuft]
+* Fix jstest.rb IE support so you don't have to close the IE window after each test (yay!).  [Ruby Trac #8207]  [Ryan Schuft]
 
-* Fix jstest.rb Konqueror support.  Closes #7140.  [Christophe Porteneuve]
+* Fix jstest.rb Konqueror support.  [Ruby Trac #7140]  [Christophe Porteneuve]
 
-* Fix regression in which no-argument calls to Element.addMethods() would not add the methods defined in Form.Methods and Form.Element.Methods.  Closes #8206.  [Tobie Langel, fwittekind]
+* Fix regression in which no-argument calls to Element.addMethods() would not add the methods defined in Form.Methods and Form.Element.Methods.  [Ruby Trac #8206]  [Tobie Langel, fwittekind]
 
-* Fix Element#readAttribute to work with the 'type' attribute in IE.  Closes #8160.  [Tobie Langel, Wiktor Ihárosi]
+* Fix Element#readAttribute to work with the 'type' attribute in IE.  [Ruby Trac #8160]  [Tobie Langel, Wiktor Ihárosi]
 
 *1.5.1_rc3* (April 24, 2007)
 
 * Add Element#childElements as an alias for Element#immediateDescendants.  [Tobie Langel]
 
-* Optimize DOM navigation methods (Element#up, Element#down, Element#previous, Element#next) for no-argument calls.  Closes #7848.  [haraldmartin, sam]
+* Optimize DOM navigation methods (Element#up, Element#down, Element#previous, Element#next) for no-argument calls.  [Ruby Trac #7848]  [haraldmartin, sam]
 
 * Add Element#firstDescendant to retrieve the first non-text child node of an element.  [sam]
 
-* Element.addMethods should add methods to Element as well as Element.Methods.  Closes #7888.  [Andrew Dupont]
+* Element.addMethods should add methods to Element as well as Element.Methods.  [Ruby Trac #7888]  [Andrew Dupont]
 
-* Add support for per-request onCreate callbacks to Ajax.Request.  Closes #8011.  [Andrew Dupont]
+* Add support for per-request onCreate callbacks to Ajax.Request.  [Ruby Trac #8011]  [Andrew Dupont]
 
-* Don't call evalResponse() when an Ajax response has no Content-type header.  Closes #7827.  [Tobie Langel]
+* Don't call evalResponse() when an Ajax response has no Content-type header.  [Ruby Trac #7827]  [Tobie Langel]
 
-* Automatically strip security delimiter comments from JSON strings before evaling them.  The default delimiter is '/*-secure- ... */' or you can specify your own with the Prototype.JSONFilter regular expression.  If you wrap your JSON response bodies in this delimiter on the server side, rogue external sites can't hijack potentially sensitive data via <script> tags.  Closes #7910.  [Tobie Langel]
+* Automatically strip security delimiter comments from JSON strings before evaling them.  The default delimiter is '/*-secure- ... */' or you can specify your own with the Prototype.JSONFilter regular expression.  If you wrap your JSON response bodies in this delimiter on the server side, rogue external sites can't hijack potentially sensitive data via <script> tags.  [Ruby Trac #7910]  [Tobie Langel]
   For more details on potential security problems, see: http://www.fortifysoftware.com/servlet/downloads/public/JavaScript_Hijacking.pdf
 
-* Add extra spacing so Array#toJSON and Hash#toJSON generate YAML-loadable JSON.  Closes #7883.  [Andrew Dupont]
+* Add extra spacing so Array#toJSON and Hash#toJSON generate YAML-loadable JSON.  [Ruby Trac #7883]  [Andrew Dupont]
 
-* Fix Form.request for forms containing an input element with name="action".  Closes #8063.  [Thomas Fuchs, Mislav Marohnić]
+* Fix Form.request for forms containing an input element with name="action".  [Ruby Trac #8063]  [Thomas Fuchs, Mislav Marohnić]
 
-* Make Event.element extend the returned element.  Closes #7870.  [Thomas Fuchs]
+* Make Event.element extend the returned element.  [Ruby Trac #7870]  [Thomas Fuchs]
 
 * Prevent a crash on Safari on String.prototype.stripScripts and extractScripts with large <script> tags.  [Thomas Fuchs]
 
 * Prevent linefeed normalisation in String.prototype.escapeHTML and unescapeHTML on IE for consistency with other browsers. Speed optimizations for Safari and IE.  [Thomas Fuchs]
 
-* Make Hash.toQueryString serialize undefined values. Ensure consistency with String.prototype.toQueryParams.  Closes #7806.  [Mislav Marohnić]
+* Make Hash.toQueryString serialize undefined values. Ensure consistency with String.prototype.toQueryParams.  [Ruby Trac #7806]  [Mislav Marohnić]
   Examples:
     $H({a:'b',c:undefined}).toQueryString()      -> 'a=b&c'
     $H({a:'b',c:null}).toQueryString()           -> 'a=b&c='
     $H('a=b&c'.toQueryParams()).toQueryString()  -> 'a=b&c'
     $H('a=b&c='.toQueryParams()).toQueryString() -> 'a=b&c='
     
-* Fix issues with Selector an+b logic, :not support, attribute selector double quotes, plus performance improvements.  Closes #7873, #7901.  [Andrew Dupont]
+* Fix issues with Selector an+b logic, :not support, attribute selector double quotes, plus performance improvements.  [Ruby Trac #7873, #7901].  [Andrew Dupont]
 
-* Fix Form.disable to work again on non-form elements.  Closes #6887.  [Mislav Marohnić]
+* Fix Form.disable to work again on non-form elements.  [Ruby Trac #6887]  [Mislav Marohnić]
 
-* Fix an issue with String.prototype.endsWith.  Closes #7822.  [altblue]
+* Fix an issue with String.prototype.endsWith.  [Ruby Trac #7822]  [altblue]
 
 *1.5.1_rc2* (March 12, 2007)
 
@@ -1081,7 +1081,7 @@
 
 * Add an attribution to YUI-Ext's DomQuery in selector.js.
 
-* Make Element.extend work on IE for Nodes with the same ID that where discarded.  Closes #7497.  [Mislav Marohnić, Thomas Fuchs]
+* Make Element.extend work on IE for Nodes with the same ID that where discarded.  [Ruby Trac #7497]  [Mislav Marohnić, Thomas Fuchs]
 
 * Make Selector correctly extend the first element it returns on IE.  [Thomas Fuchs]
 
@@ -1095,38 +1095,38 @@
 
 *1.5.1_rc0* (March 8, 2007)
 
-* Merge the selector branch into trunk, bringing vast performance improvements, bug fixes, and near-complete CSS3 compliance to $$ and Selector.  Closes #7568.  [Andrew Dupont]
+* Merge the selector branch into trunk, bringing vast performance improvements, bug fixes, and near-complete CSS3 compliance to $$ and Selector.  [Ruby Trac #7568]  [Andrew Dupont]
   Selector speed test: http://andrewdupont.net/test/double-dollar/
 
-* Add support for JSON encoding and decoding.  Closes #7427.  [Tobie Langel]
+* Add support for JSON encoding and decoding.  [Ruby Trac #7427]  [Tobie Langel]
 
-* Fix double escaping of query parameters in Hash.prototype.toQueryString, and prevent Safari from iterating over shadowed properties when creating hashes.  Closes #7421.  [Tobie Langel, Mislav Marohnić]
+* Fix double escaping of query parameters in Hash.prototype.toQueryString, and prevent Safari from iterating over shadowed properties when creating hashes.  [Ruby Trac #7421]  [Tobie Langel, Mislav Marohnić]
 
 * Fix simulated attribute reading for IE for "href", "src" and boolean attributes.  [Mislav Marohnić, Thomas Fuchs]
 
-* Form.Element.disable() will now call blur(), removed blur() call from Form.Element.enable().  Closes #6034.  [tdd]
+* Form.Element.disable() will now call blur(), removed blur() call from Form.Element.enable().  [Ruby Trac #6034]  [tdd]
 
-* Optimize document.getElementsByClassName and finalize DOM performance optimization refactoring.  Closes #6696.  [Mislav Marohnić]
+* Optimize document.getElementsByClassName and finalize DOM performance optimization refactoring.  [Ruby Trac #6696]  [Mislav Marohnić]
 
-* Fix an issue with serializing empty array inputs.  Closes #7516.  [stakadush, Mislav Marohnić]
+* Fix an issue with serializing empty array inputs.  [Ruby Trac #7516]  [stakadush, Mislav Marohnić]
 
 * Add optional third parameter "camelized" to Element.setStyle, for optimized performance if style names are known to be camelCased.  [Thomas Fuchs]
 
 * Fix a bug in the simulated hasAttribute for IE due to getAttributeNode sometimes returning null.  [sam]
 
-* Optimize Element.getStyle and add new Element.getOpacity method. Special case IE and Opera getStyle methods.  Closes #7648.  [Tobie Langel, Thomas Fuchs]
+* Optimize Element.getStyle and add new Element.getOpacity method. Special case IE and Opera getStyle methods.  [Ruby Trac #7648]  [Tobie Langel, Thomas Fuchs]
 
-* Optimize Element.setStyle and add new Element.setOpacity method, special case IE and Gecko opacity methods.  Closes #7585.  [savetheclocktower]
+* Optimize Element.setStyle and add new Element.setOpacity method, special case IE and Gecko opacity methods.  [Ruby Trac #7585]  [savetheclocktower]
 
-* Add unified Browser detection by providing Prototype.Browser.(IE|Gecko|WebKit|Opera) booleans.  Closes #6800.  [savetheclocktower]
+* Add unified Browser detection by providing Prototype.Browser.(IE|Gecko|WebKit|Opera) booleans.  [Ruby Trac #6800]  [savetheclocktower]
 
-* Add String.prototype.empty and String.prototype.blank (tests if empty or whitespace-only).  Closes #7016.  [Jonathan Viney, Thomas Fuchs]
+* Add String.prototype.empty and String.prototype.blank (tests if empty or whitespace-only).  [Ruby Trac #7016]  [Jonathan Viney, Thomas Fuchs]
 
-* Update README to reflect new URLs, update LICENSE copyright years.  Closes #7426.  [Tobie Langel]
+* Update README to reflect new URLs, update LICENSE copyright years.  [Ruby Trac #7426]  [Tobie Langel]
 
-* Array.prototype.uniq optimization.  Closes #7417.  [Christophe Porteneuve]
+* Array.prototype.uniq optimization.  [Ruby Trac #7417]  [Christophe Porteneuve]
 
-* String.prototype.endsWith should not fail on multiple occurrences.  Closes #7416.  [Christophe Porteneuve]
+* String.prototype.endsWith should not fail on multiple occurrences.  [Ruby Trac #7416]  [Christophe Porteneuve]
 
 * Add Form.Methods.request as a convenience method for serializing and submitting a form via Ajax.Request to the URL in the form's action attribute.  [sam]
 
@@ -1134,11 +1134,11 @@
   - If the form has a method attribute, its value is used for the Ajax.Request method option.  If a method option is passed to request(), it takes precedence over the form's method attribute.  If neither is specified, method defaults to "post".
   - Key/value pairs specified in the parameters option (either as a query string or as a hash) will be merged with (and take precedence over) the serialized form parameters.
 
-* Fix $(form).serialize() in Safari and add support for extending specific tags to Element.addMethods.  Closes #7358.  [Andrew Dupont]
+* Fix $(form).serialize() in Safari and add support for extending specific tags to Element.addMethods.  [Ruby Trac #7358]  [Andrew Dupont]
 
-* Add String.prototype.startsWith, String.prototype.endsWith, and String.prototype.include.  Closes #7075.  [Tobie Langel]
+* Add String.prototype.startsWith, String.prototype.endsWith, and String.prototype.include.  [Ruby Trac #7075]  [Tobie Langel]
 
-* Improve performance of String.prototype.escapeHTML by using a cached div and text node.  Closes #6937.  [altblue]
+* Improve performance of String.prototype.escapeHTML by using a cached div and text node.  [Ruby Trac #6937]  [altblue]
 
 * Make setStyle() with opacity: 0 in Internet Explorer work correctly.  [Thomas Fuchs]
 
@@ -1154,11 +1154,11 @@
 
 * Fix Content-Type header for HTTP methods simulated with POST not defaulting to application/x-www-form-urlencoded.  [Thomas Fuchs]
 
-* Simplify form serialization and add support for fields with the same name as Hash methods.  Closes #6649.  [Mislav Marohnić]
+* Simplify form serialization and add support for fields with the same name as Hash methods.  [Ruby Trac #6649]  [Mislav Marohnić]
 
-* Fix attribute selectors for IE.  Closes #5170.  [Tobie Langel, Andrew Dupont]
+* Fix attribute selectors for IE.  [Ruby Trac #5170]  [Tobie Langel, Andrew Dupont]
 
-* A slew of dom.js improvements.  Closes #4217, #6589, #7001.  [Tobie]
+* A slew of dom.js improvements.  [Ruby Trac #4217, #6589, #7001]  [Tobie]
   - Fix Element.getDimensions() for hidden elements, make Element.getHeight() use .getDimensions()
   - Add Element.getWidth()
   - Make Element.replace() call .toString() on the html argument (alike .update())
@@ -1167,15 +1167,15 @@
 
 * Fix an issue with Element.setStyle({opacity:''}) setting the opacity to 0 instead of removing the set inline opacity style.  [Thomas Fuchs]
 
-* Ensure Ajax.Request's evalResponse is called before onComplete so that onComplete can reference any elements created during the response.  Closes #6727.  [jonathan]
+* Ensure Ajax.Request's evalResponse is called before onComplete so that onComplete can reference any elements created during the response.  [Ruby Trac #6727]  [jonathan]
 
 * Ensure the WEBrick test runner sets the correct Content-Type for tests and fixtures. [sam]
 
-* Form.serialize once again works with non-form elements.  This is a temporary change to prevent the Rails link_to_remote regression described in #6898.  Prototype 1.5.1 will introduce an API for working with collections of arbitrary form elements.  References #6887.  Closes #6898.  [sam]
+* Form.serialize once again works with non-form elements.  This is a temporary change to prevent the Rails link_to_remote regression described in #6898.  Prototype 1.5.1 will introduce an API for working with collections of arbitrary form elements.  References #6887.  [Ruby Trac #6898]  [sam]
 
 * Make selectors match forms that have an element with name="id" correctly, fixes #5759 [mislav]
 
-* Remove support for HTTP authorization in Ajax calls introduced with #6366.  Closes #6638 [jmecham]
+* Remove support for HTTP authorization in Ajax calls introduced with #6366.  [Ruby Trac #6638] [jmecham]
 
 * Add Enumerable.size() to count elements in an enumerable and the corresponding Array.size() method, fixes #6710 [ZenCocoon]
 
@@ -1236,7 +1236,7 @@
 
 *1.5.0_rc2* (November 11, 2006)
 
-* Ensure that existing DOM properties take precedence over extended element methods in all browsers.  Closes #5115.  [Sean Kleinjung, sam]
+* Ensure that existing DOM properties take precedence over extended element methods in all browsers.  [Ruby Trac #5115]  [Sean Kleinjung, sam]
 
 * Add Element.Methods.readAttribute as a simple wrapper around getAttribute (which isn't a "real" function and doesn't have .apply or .call in Safari and IE).  Useful in conjunction with Enumerable.invoke for extracting the values of a custom attribute from a collection of elements.  [sam]
   Example:
@@ -1251,11 +1251,11 @@
 
 * Add Element.Methods.immediateDescendants, like $A($(element).childNodes) but without text nodes.  [sam]
 
-* More consistency.  Closes #6573.  [Bob Silva]
+* More consistency.  [Ruby Trac #6573]  [Bob Silva]
 
-* String.prototype.toQueryParams and Hash.prototype.toQueryString now properly serialize arrays as multiple values.  Closes #4436.  [mislav, altblue, L`OcuS]
+* String.prototype.toQueryParams and Hash.prototype.toQueryString now properly serialize arrays as multiple values.  [Ruby Trac #4436]  [mislav, altblue, L`OcuS]
 
-* Fix Form.serialize for options with empty values.  Closes #5033. [tdd, Thomas Fuchs, sam]
+* Fix Form.serialize for options with empty values.  [Ruby Trac #5033] [tdd, Thomas Fuchs, sam]
 
 * Add Element.Methods.Simulated for simulating HTMLElement methods in lesser browsers.  Add hasAttribute as the first simulated method.  [tdd, Thomas Fuchs, sam]
 
@@ -1274,7 +1274,7 @@
   - Enumerable-ize for loops where it makes sense
   - Make better use of Element.Methods and Form.Methods/Form.Element.Methods
 
-* A slew of Ajax improvements.  Closes #6366.  [mislav, sam]
+* A slew of Ajax improvements.  [Ruby Trac #6366]  [mislav, sam]
   
   Public-facing changes include:
   - HTTP method can be specified in either lowercase or uppercase, and uppercase is always used when opening the XHR connection
@@ -1286,7 +1286,7 @@
   - Fixed both String.toQueryParams and Hash.toQueryString when handling empty values
   - Request headers can now be specified as a hash with the 'requestHeaders' option
 
-* Improve performance of the common case where $ is called with a single argument. Closes #6347. [sam, rvermillion, mislav]
+* Improve performance of the common case where $ is called with a single argument. [Ruby Trac #6347] [sam, rvermillion, mislav]
 
 * Fix Object.inspect to correctly distinguish between null and undefined, fixes #5941 [tdd, mislav]
 
@@ -1342,7 +1342,7 @@
 
 *1.5.0_rc1* (September 4, 2006)
 
-* bindAsEventListener now passes along any provided arguments after the event argument.  Closes #5508.  [todd.fisher@revolution.com]
+* bindAsEventListener now passes along any provided arguments after the event argument.  [Ruby Trac #5508]  [todd.fisher@revolution.com]
 
 * Fix makeClipping and undoClipping with local overflow style values other than visible and hidden, fixes #3672  [Thomas Fuchs]
 
@@ -1399,23 +1399,23 @@
   You need to replace it with code like this:
     ['page', 'sidebar', 'content'].each(Element.show);
 
-* Mix in Form and Form.Element methods to forms and form field elements with $() and $$(). Closes #4448. [Dan Webb, sam]
+* Mix in Form and Form.Element methods to forms and form field elements with $() and $$(). [Ruby Trac #4448] [Dan Webb, sam]
 
 * Add Object.clone [sam]
 
-* Add Form.Element.disable and Form.Element.enable. Closes #4943. [jan@prima.de]
+* Add Form.Element.disable and Form.Element.enable. [Ruby Trac #4943] [jan@prima.de]
 
 * Field is now simply an alias for Form.Element. [sam]
 
-* Add Element.Methods.getElementsByClassName and Element.Methods.getElementsBySelector. Closes #4669. [Andrew Dupont, DHH, sam]
+* Add Element.Methods.getElementsByClassName and Element.Methods.getElementsBySelector. [Ruby Trac #4669] [Andrew Dupont, DHH, sam]
 
-* Avoid race condition when stopping an Ajax.PeriodicalUpdater. Closes #4809. [e98cuenc@gmail.com]
+* Avoid race condition when stopping an Ajax.PeriodicalUpdater. [Ruby Trac #4809] [e98cuenc@gmail.com]
 
-* Improve support for synchronous requests. Closes #5916. [sam, jthrom@gmail.com]
+* Improve support for synchronous requests. [Ruby Trac #5916] [sam, jthrom@gmail.com]
 
-* Add serialization and observation support for input type=search. Closes #4096. [rpnielsen@gmail.com]
+* Add serialization and observation support for input type=search. [Ruby Trac #4096] [rpnielsen@gmail.com]
 
-* Properly decode query components in String.prototype.toQueryParams. Closes #3487. [sam]
+* Properly decode query components in String.prototype.toQueryParams. [Ruby Trac #3487] [sam]
 
 * Add Array.prototype.reduce [sam]:
   [1, 2].reduce()   // [1, 2]
@@ -1436,37 +1436,37 @@
 
 *1.5.0_rc0* (April 5, 2006)
 
-* Modify HTMLElement.prototype and short-circuit Element.extend where possible. Closes #4477. [Thomas Fuchs]
+* Modify HTMLElement.prototype and short-circuit Element.extend where possible. [Ruby Trac #4477] [Thomas Fuchs]
 
-* Only observe window.onunload in IE for Mozilla bfcache support. Closes #3726. [Mike A. Owens]
+* Only observe window.onunload in IE for Mozilla bfcache support. [Ruby Trac #3726] [Mike A. Owens]
 
-* Don't redefine Array.prototype.shift. Closes #4138. [leeo]
+* Don't redefine Array.prototype.shift. [Ruby Trac #4138] [leeo]
 
-* Prevent redefining Array.prototype.reverse more than once. Closes #3951. [brettdgibson@gmail.com]
+* Prevent redefining Array.prototype.reverse more than once. [Ruby Trac #3951] [brettdgibson@gmail.com]
 
-* Fix Enumerable.min/Enumerable.max to recognize the value 0. Closes #3847, #4190. [rubyonrails@brainsick.com, Martin Bialasinski]
+* Fix Enumerable.min/Enumerable.max to recognize the value 0. [Ruby Trac #3847, #4190] [rubyonrails@brainsick.com, Martin Bialasinski]
 
-* Change Ajax.getTransport to prefer XMLHttpRequest in anticipation of IE 7. Closes #3688. [jschrab@malicstower.org, sam]
+* Change Ajax.getTransport to prefer XMLHttpRequest in anticipation of IE 7. [Ruby Trac #3688] [jschrab@malicstower.org, sam]
 
-* Make Array.prototype.flatten more robust. Closes #3453. [Martin Bialasinski, sam]
+* Make Array.prototype.flatten more robust. [Ruby Trac #3453] [Martin Bialasinski, sam]
 
-* Fix evalScripts from crashing Firefox if script includes 'var'. Closes #3288, #4165. [rahul@ntag.com, sam]
+* Fix evalScripts from crashing Firefox if script includes 'var'. [Ruby Trac #3288, #4165] [rahul@ntag.com, sam]
 
-* Scope iterators locally. Closes #4589. [sam]
+* Scope iterators locally. [Ruby Trac #4589] [sam]
 
-* Support Insertion.Before/Insertion.After for <tr> elements in IE. Closes #3925. [rails-venkatp@sneakemail.com]
+* Support Insertion.Before/Insertion.After for <tr> elements in IE. [Ruby Trac #3925] [rails-venkatp@sneakemail.com]
 
-* Add a contentType option for overriding application/x-www-form-urlencoded in Ajax.Request. Closes #3564. [avif@arc90.com, sam]
+* Add a contentType option for overriding application/x-www-form-urlencoded in Ajax.Request. [Ruby Trac #3564] [avif@arc90.com, sam]
 
-* Surround values in the X-JSON header in parenthesis for better compatibility with Firefox. Closes #4118. [bigsmoke@gmail.com]
+* Surround values in the X-JSON header in parenthesis for better compatibility with Firefox. [Ruby Trac #4118] [bigsmoke@gmail.com]
 
-* Fix Form.serialize to properly encode option values in multiple selects in IE. Closes #3291. [rubyonrails@brainsick.com]
+* Fix Form.serialize to properly encode option values in multiple selects in IE. [Ruby Trac #3291] [rubyonrails@brainsick.com]
 
-* Cache methods added to DOM elements with Element.extend to prevent memory leaks in IE. Closes #4465. [jaen@laborint.com, sam]
+* Cache methods added to DOM elements with Element.extend to prevent memory leaks in IE. [Ruby Trac #4465] [jaen@laborint.com, sam]
 
 * 1.5.0_pre1* (March 26, 2006)
 
-* Add attribute selector support for Selector (and $$). Closes #4368. [devslashnull@gmail.com]
+* Add attribute selector support for Selector (and $$). [Ruby Trac #4368] [devslashnull@gmail.com]
   Example:
     $$('form#foo input[type=text]').each(function(input) {
       input.setStyle({color: 'red'});
@@ -1474,7 +1474,7 @@
   
 * Send Accept header containing 'text/javascript, text/html, application/xml, text/xml */*'' to inform Rails that we prefer RJS, but we'll take HTML or XML or whatever if you can't deliver the goods [DHH]
 
-* Make $$ work in IE. Closes #3715. [rubyonrails@brainsick.com]
+* Make $$ work in IE. [Ruby Trac #3715] [rubyonrails@brainsick.com]
 
 * Add test/browser.html, which provides a simple object browser for the Prototype source (Firefox/Safari only). [sam]
 
