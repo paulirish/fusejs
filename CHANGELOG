@@ -1,3 +1,5 @@
+* Rename internal method "mergeList" to "concatList" to better express its functionality. [jddalton]
+
 * Updates to Array API [FuseJS LH #15] [jddalton, Joe Gornick]
   Note: Backwards compatibility warning.
    - Added Array#insert method

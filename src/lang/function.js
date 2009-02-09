@@ -25,7 +25,7 @@
       args = slice.call(arguments, 1);
       return function() {
         return __method.apply(context, arguments.length ?
-          mergeList(args, arguments) : args);
+          concatList(args, arguments) : args);
       };
     }
 
@@ -50,7 +50,7 @@
       var __method = this, args = slice.call(arguments, 0);
       return function() {
         return arguments.length
-          ? __method.apply(this, mergeList(args, arguments))
+          ? __method.apply(this, concatList(args, arguments))
           : __method.apply(this, args);
       }
     }

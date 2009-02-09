@@ -13,7 +13,7 @@
     return element.ownerDocument || (element.nodeType === 9 ? element : doc);
   }
 
-  function mergeList(list, other) {
+  function concatList(list, other) {
     var result = slice.call(list, 0), pad = list.length, length = other.length;
     while (length--) result[pad + length] = other[length];
     return result;

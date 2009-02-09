@@ -115,7 +115,7 @@
         value = object[key], key = encodeURIComponent(key);
         if (value && typeof value === 'object') {
           if (Object.isArray(value))
-            results = mergeList(results, value.map(toQueryPair.curry(key)));
+            results = concatList(results, value.map(toQueryPair.curry(key)));
         } else results.push(toQueryPair(key, value));
       }
       return results.join('&');

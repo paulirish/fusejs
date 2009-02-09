@@ -105,7 +105,7 @@
     function flatten() {
       for (var i = 0, results = [], length = this.length; i < length; i++) {
         if (Object.isArray(this[i])) 
-          results = mergeList(results, this[i].flatten());
+          results = concatList(results, this[i].flatten());
         else results.push(this[i]);
       }
       return results;
@@ -124,7 +124,7 @@
       if (this.length < index) this.length = index;
       if (index < 0) index = this.length;
       if (arguments.length > 2)
-        this.splice.apply(this, mergeList([index, 0], slice.call(arguments, 1)));
+        this.splice.apply(this, concatList([index, 0], slice.call(arguments, 1)));
       else this.splice(index, 0, value);
       return this;
     }

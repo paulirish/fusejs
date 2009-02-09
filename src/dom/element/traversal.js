@@ -67,7 +67,7 @@
     }
 
     function siblings(element) {
-      return mergeList(Element.previousSiblings(element).reverse(), Element.nextSiblings(element));
+      return concatList(Element.previousSiblings(element).reverse(), Element.nextSiblings(element));
     }
 
     function down(element, expression, index) {
