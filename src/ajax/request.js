@@ -8,7 +8,7 @@
     }
 
     function dispatchException(exception) {
-      (this.options.onException || P.emptyFunction)(this, exception);
+      (this.options.onException || Fuse.emptyFunction)(this, exception);
       Ajax.Responders.dispatch('onException', this, exception);
     }
 
@@ -93,7 +93,7 @@
           this._complete = true;
           (this.options['on' + response.status]
            || this.options['on' + (this.success() ? 'Success' : 'Failure')]
-           || P.emptyFunction)(response, response.headerJSON);
+           || Fuse.emptyFunction)(response, response.headerJSON);
         } catch (e) {
           this.dispatchException(e);
         }
@@ -106,7 +106,7 @@
       }
 
       try {
-        (this.options['on' + state] || P.emptyFunction)(response, response.headerJSON);
+        (this.options['on' + state] || Fuse.emptyFunction)(response, response.headerJSON);
         Ajax.Responders.dispatch('on' + state, this, response, response.headerJSON);
       } catch (e) {
         this.dispatchException(e);
@@ -114,15 +114,15 @@
 
       if (state == 'Complete') {
         // avoid memory leak in MSIE: clean up
-        this.transport.onreadystatechange = P.emptyFunction;
+        this.transport.onreadystatechange = Fuse.emptyFunction;
       }
     }
 
     function setRequestHeaders() {
       var headers = {
-        'Accept':              'text/javascript, text/html, application/xml, text/xml, */*',
-        'X-Prototype-Version': P.Version,
-        'X-Requested-With':    'XMLHttpRequest'
+        'Accept': 'text/javascript, text/html, application/xml, text/xml, */*',
+        'X-Fuse-Version': Fuse.Version,
+        'X-Requested-With': 'XMLHttpRequest'
       };
 
       if (this.method == 'post') {

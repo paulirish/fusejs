@@ -78,7 +78,7 @@
         return element;
       }
 
-      if (P.Browser.WebKit && (userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
+      if (Fuse.Browser.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
         return function(element, value) {
           element = setStyleOpacity(element, value);
           if (value == 1) {
@@ -92,7 +92,7 @@
           return element;
         };
       }
-      else if (P.Browser.Gecko && /rv:1\.8\.0/.test(userAgent)) {
+      else if (Fuse.Browser.Agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
         return function(element, value) {
           element = $(element);
           element.style.opacity = (value == 1) ? 0.999999 : 

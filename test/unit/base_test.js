@@ -30,7 +30,7 @@ new Test.Unit.Runner({
   testFunctionBind: function() {
     function methodWithoutArguments() { return this.hi };
     function methodWithArguments()    { return this.hi + ',' + $A(arguments).join(',') };
-    var func = Prototype.emptyFunction;
+    var func = Fuse.emptyFunction;
 
     this.assertIdentical(func, func.bind());
     this.assertIdentical(func, func.bind(undefined));
@@ -149,7 +149,7 @@ new Test.Unit.Runner({
   
   testObjectToJSON: function() {
     this.assertUndefined(Object.toJSON(undefined));
-    this.assertUndefined(Object.toJSON(Prototype.K));
+    this.assertUndefined(Object.toJSON(Fuse.K));
     this.assertEqual('\"\"', Object.toJSON(''));
     this.assertEqual('[]', Object.toJSON([]));
     this.assertEqual('[\"a\"]', Object.toJSON(['a']));
@@ -157,7 +157,7 @@ new Test.Unit.Runner({
     this.assertEqual('[\"a\", {\"b\": null}]', Object.toJSON(['a', {'b': null}]));
     this.assertEqual('{\"a\": \"hello!\"}', Object.toJSON({a: 'hello!'}));
     this.assertEqual('{}', Object.toJSON({}));
-    this.assertEqual('{}', Object.toJSON({a: undefined, b: undefined, c: Prototype.K}));
+    this.assertEqual('{}', Object.toJSON({a: undefined, b: undefined, c: Fuse.K}));
     this.assertEqual('{\"b\": [false, true], \"c\": {\"a\": \"hello!\"}}',
       Object.toJSON({'b': [undefined, false, true, undefined], c: {a: 'hello!'}}));
     this.assertEqual('{\"b\": [false, true], \"c\": {\"a\": \"hello!\"}}',
@@ -337,7 +337,7 @@ new Test.Unit.Runner({
   },
   
   // sanity check
-  testDoesntExtendObjectPrototype: function() {
+  testDoesntExtendObjectFuse: function() {
     // for-in is supported with objects
     var iterations = 0, obj = { a: 1, b: 2, c: 3 };
     for (property in obj) iterations++;
@@ -438,7 +438,7 @@ new Test.Unit.Runner({
   },
   
   testBrowserDetection: function() {
-    var results = Object.values(Prototype.Browser)
+    var results = Object.values(Fuse.Browser.Agent)
       .partition(function(agent){ return agent === true });
     var trues = results[0], falses = results[1];
     
@@ -458,22 +458,22 @@ new Test.Unit.Runner({
     
     if (navigator.userAgent.indexOf('AppleWebKit/') > -1) {
       this.info('Running on WebKit');
-      this.assert(Prototype.Browser.WebKit);
+      this.assert(Fuse.Browser.Agent.WebKit);
     }
 
     if (!!window.opera) {
       this.info('Running on Opera');
-      this.assert(Prototype.Browser.Opera);
+      this.assert(Fuse.Browser.Agent.Opera);
     }
     
     if (!!(window.attachEvent && !window.opera)) {
       this.info('Running on IE');
-      this.assert(Prototype.Browser.IE);
+      this.assert(Fuse.Browser.Agent.IE);
     }
     
     if (navigator.userAgent.indexOf('Gecko') > -1 && navigator.userAgent.indexOf('KHTML') == -1) {
       this.info('Running on Gecko');
-      this.assert(Prototype.Browser.Gecko);
+      this.assert(Fuse.Browser.Agent.Gecko);
     }
   },
   

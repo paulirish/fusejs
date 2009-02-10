@@ -70,7 +70,7 @@
     }
 
     function every(iterator, context) {
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       for (var i = 0, length = this.length; i < length; i++)
         if (!iterator.call(context, this[i], i))
           return false;
@@ -177,7 +177,7 @@
     }
 
     function some(iterator, context) {
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       for (var i = 0, length = this.length; i < length; i++)
         if (!!iterator.call(context, this[i], i))
           return true;
@@ -238,7 +238,7 @@
     function grep(pattern, iterator, context) {
       if (!pattern || Object.isRegExp(pattern) &&
          !pattern.source) this.toArray();
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       var results = [];
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
@@ -257,7 +257,7 @@
         result = Math.max.apply(Math, this);
         if (!isNaN(result)) return result;
       }
-      result = null; iterator = K;
+      result = null; iterator = Fuse.K;
       for (var i = 0, length = this.length, value; i < length; i++) {
         value = iterator.call(context, this[i], i);
         if (result == null || value >= result)
@@ -272,7 +272,7 @@
         result = Math.min.apply(Math, this);
         if (!isNaN(result)) return result;
       }
-      result = null; iterator = K;
+      result = null; iterator = Fuse.K;
       for (var i = 0, length = this.length, value; i < length; i++) {
         value = iterator.call(context, this[i], i);
         if (result == null || value < result)
@@ -282,7 +282,7 @@
     }
 
     function partition(iterator, context) {
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       var trues = [], falses = [];
       for (var i = 0, length = this.length; i < length; i++)
         (iterator.call(context, this[i], i) ?
@@ -314,7 +314,7 @@
     }
 
     function zip() {
-      var iterator = K, args = slice.call(arguments, 0);
+      var iterator = Fuse.K, args = slice.call(arguments, 0);
       if (typeof args.last() === 'function')
         iterator = args.pop();
 
@@ -334,7 +334,7 @@
           AP['_' + m] = AP[m];
           // overwrite allowing iterator || k
           AP[m] = function(iterator, context) {
-            return this['_' + m](iterator || K, context);
+            return this['_' + m](iterator || Fuse.K, context);
           };
         })(method);
       }

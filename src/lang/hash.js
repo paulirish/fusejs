@@ -50,7 +50,7 @@
     function grep(pattern, iterator, context) {
       if (!pattern || Object.isRegExp(pattern) &&
          !pattern.source) this.clone();
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       var key, value, result = new Hash();
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
@@ -76,7 +76,7 @@
     }
 
     function partition(iterator, context) {
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       var key, trues = new Hash(), falses = new Hash();
       for (key in this._object)
         (iterator.call(context, this._object[key], key) ?
@@ -136,7 +136,7 @@
     }
 
     function zip() {
-      var iterator = K, args = slice.call(arguments, 0);
+      var iterator = Fuse.K, args = slice.call(arguments, 0);
       if (typeof args.last() === 'function')
         iterator = args.pop();
 

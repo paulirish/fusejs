@@ -26,7 +26,7 @@
         klass.addMethods(properties[i]);
 
       if (!klass.prototype.initialize)
-        klass.prototype.initialize = P.emptyFunction;
+        klass.prototype.initialize = Fuse.emptyFunction;
 
       klass.prototype.constructor = klass;
 

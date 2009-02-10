@@ -11,7 +11,7 @@
           return element.getAttribute(name, 2) || '';
         };
       }
-      return K;
+      return Fuse.K;
     })();
 
     function readAttribute(element, name) {

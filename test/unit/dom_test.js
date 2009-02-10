@@ -1,5 +1,5 @@
 
-var isIE6AndLower = Prototype.Browser.IE && !window.XMLHttpRequest,
+var isIE6AndLower = Fuse.Browser.Agent.IE && !window.XMLHttpRequest,
 
 getInnerHTML = function(id) {
   return $(id).innerHTML.toString().toLowerCase().gsub(/[\r\n\t]/, '');
@@ -137,7 +137,7 @@ new Test.Unit.Runner({
     
     this.assertElementsMatch(document.getElementsByClassName('A'), 'p.A', 'ul#class_names_ul.A', 'li.A.C');
     
-    if (Prototype.Browser.IE)
+    if (Fuse.Browser.Agent.IE)
       this.assertUndefined(document.getElementById('unextended').show);
     
     this.assertElementsMatch(div.getElementsByClassName('B'), 'ul#class_names_ul.A.B', 'div.B.C.D');
@@ -159,7 +159,8 @@ new Test.Unit.Runner({
     this.assertElementsMatch(list.getElementsByClassName({}));
     
     // those lookups shouldn't have extended all nodes in document
-    if (Prototype.Browser.IE) this.assertUndefined(document.getElementById('unextended')['show']);
+    if (Fuse.Browser.Agent.IE)
+      this.assertUndefined(document.getElementById('unextended')['show']);
   },
 
   testElementInsertWithHTML: function() {
@@ -874,7 +875,7 @@ new Test.Unit.Runner({
     // Don't extend XML documents
     var xmlDoc = (new DOMParser()).parseFromString('<note><to>Sam</to></note>', 'text/xml');
     Element.extend(xmlDoc.firstChild);
-    this.assertUndefined(xmlDoc.firstChild._extendedByPrototype);
+    this.assertUndefined(xmlDoc.firstChild._extendedByFuse);
   },
   
   testElementExtendReextendsDiscardedNodes: function() {
@@ -885,7 +886,7 @@ new Test.Unit.Runner({
   
   testExtendingAfterAddMethods: function() {
     var span = new Element('span');
-	Element.addMethods({ testMethod: Prototype.K });
+	Element.addMethods({ testMethod: Fuse.K });
 	this.assertRespondsTo('testMethod', Element.extend(span));
   },
   
@@ -1039,7 +1040,7 @@ new Test.Unit.Runner({
     this.assert(
       $('style_test_3').setOpacity(0.9999999).getStyle('opacity') > 0.999
     );
-    if (Prototype.Browser.IE) {
+    if (Fuse.Browser.Agent.IE) {
       this.assert($('style_test_4').setOpacity(0.5).currentStyle.hasLayout);
       this.assert(2, $('style_test_5').setOpacity(0.5).getStyle('zoom'));
       this.assert(0.5, new Element('div').setOpacity(0.5).getOpacity());
@@ -1177,7 +1178,7 @@ new Test.Unit.Runner({
     
     // WebKit has a bug effecting the style marginRight
     // https://bugs.webkit.org/show_bug.cgi?id=13343
-    if (!Prototype.Browser.WebKit) {
+    if (!Fuse.Browser.Agent.WebKit) {
       tests.unit_px_test_1.push($w('margin-right 39'));
     } else {
       this.assertEqual(39, $('unit_px_test_1').getStyle('marginRight'),
@@ -1266,9 +1267,9 @@ new Test.Unit.Runner({
     this.assertRespondsTo('writeAttribute', element);
     this.assertEqual(element, element.writeAttribute('id', 'write_attribute_test'));
     this.assertEqual('write_attribute_test', element.id);
-    this.assertEqual('http://prototypejs.org/', $('write_attribute_link').
-      writeAttribute({href: 'http://prototypejs.org/', title: 'Home of Prototype'}).href);
-    this.assertEqual('Home of Prototype', $('write_attribute_link').title);
+    this.assertEqual('http://fusejs.com/', $('write_attribute_link').
+      writeAttribute({href: 'http://fusejs.com/', title: 'Home of Fuse'}).href);
+    this.assertEqual('Home of Fuse', $('write_attribute_link').title);
     
     var element2 = Element.extend(document.createElement('p'));
     element2.writeAttribute('id', 'write_attribute_without_hash');
@@ -1380,12 +1381,12 @@ new Test.Unit.Runner({
     // The delayed execution of the tests
     // helps prevent a crash in some OSX
     // versions of Opera 9.2x
-    if (Prototype.Browser.Opera)
+    if (Fuse.Browser.Agent.Opera)
       recursiveTestTags();
     else while (testTags()) { };
     
     /* window.ElementOld = function(tagName, attributes) { 
-      if (Prototype.Browser.IE && attributes && attributes.name) { 
+      if (Fuse.Browser.Agent.IE && attributes && attributes.name) { 
         tagName = '<' + tagName + ' name="' + attributes.name + '">'; 
         delete attributes.name; 
       } 
@@ -1417,11 +1418,11 @@ new Test.Unit.Runner({
     this.assertEqual(input, document.body.lastChild);
     this.assertEqual('my_input_field', $(document.body.lastChild).name);
     
-    if (Prototype.Browser.IE)
+    if (Fuse.Browser.Agent.IE)
       this.assertMatch(/name=["']?my_input_field["']?/, $('my_input_field').outerHTML);
     
-    if (originalElement && Prototype.BrowserFeatures.ElementExtensions) {
-      Element.prototype.fooBar = Prototype.emptyFunction
+    if (originalElement && Fuse.Browser.Feature('ELEMENT_EXTENSIONS')) {
+      Element.prototype.fooBar = Fuse.emptyFunction
       this.assertRespondsTo('fooBar', new Element('div'));
     }
     

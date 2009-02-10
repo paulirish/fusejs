@@ -58,12 +58,11 @@
 
       // Opera's XPath engine breaks down when selectors are too complex
       // (a regression in version 9.5)
-      if (P.Browser.Opera &&
-       parseFloat(global.opera.version()) === 9.5)
+      if (Fuse.Browser.Agent.Opera && parseFloat(global.opera.version()) === 9.5)
         return false;
 
       // Safari 3 chokes on :*-of-type and :empty
-      if (P.Browser.WebKit && 
+      if (Fuse.Browser.Agent.WebKit && 
        (e.include('-of-type') || e.include(':empty')))
         return false;
 
@@ -241,7 +240,7 @@
       var results = [], matches = $$(expression), h = Selector.handlers;
       h.mark(matches);
       for (var i = 0, element; element = elements[i++]; )
-        if (typeof element._countedByPrototype !== 'undefined')
+        if (typeof element._countedByFuse !== 'undefined')
           results.push(element);
       h.unmark(matches);
       return results;
@@ -498,26 +497,26 @@
       })(),
 
       unmark = (function() {
-        // IE improperly serializes _countedByPrototype in (inner|outer)HTML.
+        // IE improperly serializes _countedByFuse in (inner|outer)HTML.
         if (Bug('ELEMENT_PROPERTIES_ARE_ATTRIBUTES')) {
           return function(nodes) {
             for (var i = 0, node; node = nodes[i++]; )
-              node.removeAttribute('_countedByPrototype');
+              node.removeAttribute('_countedByFuse');
             return nodes;
           };
         }
         return function(nodes) {
           for (var i = 0, node; node = nodes[i++]; )
-            node._countedByPrototype = undefined;
+            node._countedByFuse = undefined;
           return nodes;
         };
       })();
 
       // marks an array of nodes for counting
       function mark(nodes) {
-        var _true = P.emptyFunction;
+        var _true = Fuse.emptyFunction;
         for (var i = 0, node; node = nodes[i++]; )
-          node._countedByPrototype = _true;
+          node._countedByFuse = _true;
         return nodes;
       }
 
@@ -525,18 +524,18 @@
       // "ofType" flag indicates whether we're indexing for nth-of-type
       // rather than nth-child
       function index(parentNode, reverse, ofType) {
-        parentNode._countedByPrototype = P.emptyFunction;
+        parentNode._countedByFuse = Fuse.emptyFunction;
         var node, nodes = parentNode.childNodes, index = 1;
         if (reverse) {
           var length = nodes.length;
           while (length--) {
             node = nodes[length];
-            if (node.nodeType == 1 && (!ofType || typeof node._countedByPrototype !== 'undefined'))
+            if (node.nodeType == 1 && (!ofType || typeof node._countedByFuse !== 'undefined'))
               node.nodeIndex = index++;
           }
         } else {
           for (var i = 0; node = nodes[i++]; )
-            if (node.nodeType == 1 && (!ofType || typeof node._countedByPrototype !== 'undefined'))
+            if (node.nodeType == 1 && (!ofType || typeof node._countedByFuse !== 'undefined'))
               node.nodeIndex = index++;
         }
       }
@@ -545,8 +544,8 @@
       function unique(nodes) {
         if (nodes.length == 0) return nodes;
         for (var i = 0, results = [], node; node = nodes[i++]; )
-          if (typeof node._countedByPrototype === 'undefined') {
-            node._countedByPrototype = P.emptyFunction;
+          if (typeof node._countedByFuse === 'undefined') {
+            node._countedByFuse = Fuse.emptyFunction;
             results.push(Element.extend(node));
           }
         return Selector.handlers.unmark(results);
@@ -842,7 +841,7 @@
          exclusions = new Selector(selector).findElements(root);
         h.mark(exclusions);
         for (var i = 0, node; node = nodes[i++]; )
-          if (typeof node._countedByPrototype === 'undefined')
+          if (typeof node._countedByFuse === 'undefined')
             results.push(node);
         h.unmark(exclusions);
         return results;
@@ -858,7 +857,7 @@
         h.mark(nodes);
 
         for (var i = 0, node; node = nodes[i++]; ) {
-          if (typeof node.parentNode._countedByPrototype === 'undefined') {
+          if (typeof node.parentNode._countedByFuse === 'undefined') {
             h.index(node.parentNode, reverse, ofType);
             indexed.push(node.parentNode);
           }

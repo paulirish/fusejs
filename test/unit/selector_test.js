@@ -176,7 +176,7 @@ new Test.Unit.Runner({
   // AND NOW COME THOSE NEW TESTS AFTER ANDREW'S REWRITE!
 
   testSelectorWithNamespacedAttributes: function() {
-    if (Prototype.BrowserFeatures.XPath) {
+    if (Fuse.Browser.Feature('XPATH')) {
       this.assertUndefined(new Selector('html[xml:lang]').xpath);
       this.assertUndefined(new Selector('body p[xml:lang]').xpath);
     } else

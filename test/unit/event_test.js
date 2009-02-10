@@ -196,7 +196,7 @@ new Test.Unit.Runner({
     });
 
     // if there is a bug then this observer will be skipped
-    document.observe('test:somethingHappened', Prototype.emptyFunction);
+    document.observe('test:somethingHappened', Fuse.emptyFunction);
 
     document.fire('test:somethingHappened');
     this.assert(!fired, 'observer should NOT have fired');
@@ -286,7 +286,7 @@ new Test.Unit.Runner({
   
   testEventIDDuplication: function() {
     var element = $('container').down();
-    element.observe("test:somethingHappened", Prototype.emptyFunction);
+    element.observe("test:somethingHappened", Fuse.emptyFunction);
     
     var elementID = element.getEventID(),
      clone = $(element.cloneNode(true));
@@ -300,7 +300,7 @@ new Test.Unit.Runner({
   
   testDocumentAndWindowEventID: function() {
     [document, window].each(function(object) {
-      Event.observe(object, "test:somethingHappened", Prototype.emptyFunction);
+      Event.observe(object, "test:somethingHappened", Fuse.emptyFunction);
       this.assertUndefined(object._prototypeEventID);
       Event.stopObserving(object, "test:somethingHappened");
     }, this);
@@ -344,7 +344,7 @@ document.observe("dom:loaded", function(event) {
   $('img_error_test').observe('error', function(e) {
     if (e.element() !== this) 
       eventResults.eventElement.imageOnErrorBug = true;
-  }).writeAttribute('src', 'http://www.prototypejs.org/xyz.gif');
+  }).writeAttribute('src', 'http://www.fusejs.com/xyz.gif');
   
   try { event.element() } catch(e) {
     eventResults.eventElement.contentLoadedBug = true;

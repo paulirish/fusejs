@@ -1,2 +1,2 @@
-Form.Element.Methods.coffee = Prototype.K;
+Form.Element.Methods.coffee = Fuse.K;
 Element.addMethods();

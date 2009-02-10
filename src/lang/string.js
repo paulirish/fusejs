@@ -112,7 +112,7 @@
     }
 
     function unfilterJSON(filter) {
-      return this.sub(filter || P.JSONFilter, '#{1}');
+      return this.sub(filter || Fuse.JSONFilter, '#{1}');
     }
 
     /* STRING QUERY FUNCTIONS */
@@ -238,8 +238,8 @@
     var s = RegExp.specialChar.s,
      matchTrimLeft     = new RegExp('^' + s + '+'),
      matchTrimRight    = new RegExp(s + '+$'),
-     matchScripts      = new RegExp(P.ScriptFragment, 'gi'),
-     matchHTMLComments = new RegExp('<!--' + s + '*' + P.ScriptFragment + s + '*-->', 'gi'),
+     matchScripts      = new RegExp(Fuse.ScriptFragment, 'gi'),
+     matchHTMLComments = new RegExp('<!--' + s + '*' + Fuse.ScriptFragment + s + '*-->', 'gi'),
      matchOpenTag      = /<script/i;
 
     function evalScripts() {

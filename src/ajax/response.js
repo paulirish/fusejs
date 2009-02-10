@@ -6,7 +6,7 @@
       var transport  = this.transport  = request.transport,
           readyState = this.readyState = transport.readyState;
 
-      if ((readyState > 2 && !P.Browser.IE) || readyState == 4) {
+      if ((readyState > 2 && !Fuse.Browser.Agent.IE) || readyState == 4) {
         this.status       = this.getStatus();
         this.statusText   = this.getStatusText();
         this.responseText = String.interpret(transport.responseText);

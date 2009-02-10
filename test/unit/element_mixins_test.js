@@ -6,8 +6,8 @@ new Test.Unit.Runner({
     this.assertRespondsTo('present', Form.Element);
     this.assertRespondsTo('present', Form.Element.Methods);
     this.assertRespondsTo('coffee', $('input'));
-    this.assertIdentical(Prototype.K, Form.Element.coffee);
-    this.assertIdentical(Prototype.K, Form.Element.Methods.coffee);
+    this.assertIdentical(Fuse.K, Form.Element.coffee);
+    this.assertIdentical(Fuse.K, Form.Element.Methods.coffee);
   },
   
   testForm: function() {

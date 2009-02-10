@@ -24,63 +24,51 @@
     while (length--) result[1 + length] = list[length];
     return result;
   }
-
-  var body, root,
-   doc       = document,
-   docEl     = doc.documentElement,
-   dummy     = doc.createElement('div'),
-   slice     = Array.prototype.slice,
-   userAgent = navigator.userAgent,
-
-  // IE will throw an error when attempting to
-  // pass a nodeList to slice.call() AND
-  // Safari 2 will return a full array with undefined values
-  nodeListSlice =
-    (function() { try { return !!slice.call(docEl.childNodes, 0)[0] } catch(e) { return false } })()
-      ? slice
-      : function(begin, end) {
-          // Avoid the nodeList length property because,
-          // in IE for example, it might be an element with an ID of "length"
-          var i = 0, results = [];
-          while ((results[i] = this[i++])) { }
-          results.length--;
-          return !begin && arguments.length < 2 ?
-            results : results.slice(begin, end);
-        },
+  
+  var Feature, Bug, body, root,
+   doc   = document,
+   docEl = doc.documentElement,
+   dummy = doc.createElement('div'),
+   slice = Array.prototype.slice,
+   userAgent = global.navigator.userAgent,
+   nodeListSlice = slice;
 
   /*---------------------------- PROTOTYPE OBJECT ----------------------------*/
 
-  P = Prototype = {
-    Version: '<%= FUSEJS_VERSION %>',
-
+  Fuse = {
     Browser: {
-      'IE':     isHostObject(global, 'attachEvent') && userAgent.indexOf('Opera') === -1,
-      'Opera':  userAgent.indexOf('Opera') > -1,
-      'WebKit': userAgent.indexOf('AppleWebKit/') > -1,
-      'Gecko':  userAgent.indexOf('Gecko') > -1 && userAgent.indexOf('KHTML') === -1,
-      'MobileSafari': !!userAgent.match(/AppleWebKit.*Mobile/)
+      Agent: {
+        'IE':     isHostObject(global, 'attachEvent') && userAgent.indexOf('Opera') === -1,
+        'Opera':  userAgent.indexOf('Opera') > -1,
+        'WebKit': userAgent.indexOf('AppleWebKit/') > -1,
+        'Gecko':  userAgent.indexOf('Gecko') > -1 && userAgent.indexOf('KHTML') === -1,
+        'MobileSafari': !!userAgent.match(/AppleWebKit.*Mobile/)
+      }
     },
-
-    BrowserFeatures: {
-      'XPath': isHostObject(doc, 'evaluate'),
-      'SelectorsAPI': isHostObject(doc, 'querySelector'),
-      'ElementExtensions': isHostObject(global,'HTMLElement'),
-      'SpecificElementExtensions': isHostObject(docEl, '__proto__') &&
-        docEl['__proto__'] !== document.createElement('form')['__proto__']
-    },
-
-    ScriptFragment: '<script[^>]*>([^\\x00]*?)<\/script>',
-    JSONFilter: /^\/\*-secure-([\s\S]*)\*\/\s*$/,  
-
     emptyFunction: function() { },
-    K: function(x) { return x }
-  },
+    JSONFilter: /^\/\*-secure-([\s\S]*)\*\/\s*$/,  
+    K: function(x) { return x },
+    ScriptFragment: '<script[^>]*>([^\\x00]*?)<\/script>',
+    Version: '<%= FUSEJS_VERSION %>'
+  };
 
-  K = P.K;
-
+<%= include('features.js') %>
+  // IE will throw an error when attempting to
+  // pass a nodeList to slice.call() AND
+  // Safari 2 will return a full array with undefined values
+  if (!Feature('ARRAY_SLICE_THIS_AS_NODELIST')) {
+    nodeListSlice = function(begin, end) {
+      // Avoid the nodeList length property because,
+      // in IE for example, it might be an element with an ID of "length"
+      var i = 0, results = [];
+      while ((results[i] = this[i++])) { }
+      results.length--;
+      return !begin && arguments.length < 2 ?
+        results : results.slice(begin, end);
+    };
+  }
+  
 <%= include(
-   'features.js',
-
    'lang/class.js',
    'lang/object.js',
    'lang/function.js',

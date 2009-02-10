@@ -1,8 +1,29 @@
   /*-------------------------------- FEATURES --------------------------------*/
 
-  var Feature, Bug;
   (function() {
-    function Test(testObject) {
+    function createCommentTest(conditional) {
+      return function() {
+        dummy.innerHTML = '<span>a</span><!--b-->';
+        var result = conditional(dummy);
+        dummy.innerHTML = '';
+        return result;
+      };
+    }
+
+    function createInnerHTMLTest(source, innerHTML, level) {
+      return function() {
+        dummy.innerHTML = source;
+        var result = true, element = dummy.firstChild;
+        try {
+          result = (element.innerHTML = innerHTML) &&
+            element.innerHTML.toLowerCase() !== innerHTML;
+        } catch(e) { }
+        dummy.innerHTML = '';
+        return result;
+      };
+    }
+
+    function createTester(testObject) {
       var Tester = function() {
         for (var i = 0, answer, name; name = arguments[i++]; ) {
           answer = name.charAt(0) !== '!';
@@ -18,7 +39,13 @@
       return Tester;
     }
 
-    Feature = Test((function() {
+    Feature = Fuse.Browser.Feature = createTester((function() {
+      function ARRAY_SLICE_THIS_AS_NODELIST() {
+        // true for all but IE
+        try { return !!slice.call(docEl.childNodes, 0)[0] }
+        catch(e) { return false }
+      }
+
       function CREATE_ELEMENT_WITH_HTML() {
         try { // true for IE
           var div = doc.createElement('<div id="test">');
@@ -101,12 +128,13 @@
 
       function ELEMENT_EXTENSIONS() {
         // true for Firefox, WebKit
-        if (!P.BrowserFeatures.ElementExtensions && isHostObject(dummy, '__proto__')) {
+        var result = isHostObject(global,'HTMLElement');
+        if (!result && isHostObject(dummy, '__proto__')) {
           global.HTMLElement = { };
           global.HTMLElement.prototype = dummy.__proto__;
-          P.BrowserFeatures.ElementExtensions = true;
+          result = true;
         }
-        return P.BrowserFeatures.ElementExtensions;
+        return result;
       }
 
       function ELEMENT_FIRE_EVENT() {
@@ -151,9 +179,9 @@
       }
 
       function ELEMENT_SPECIFIC_EXTENSIONS() {
-        if (P.Browser.MobileSafari)
-          P.BrowserFeatures.SpecificElementExtensions = false;
-        return P.BrowserFeatures.SpecificElementExtensions;
+        var result =  isHostObject(docEl, '__proto__') &&
+          dummy['__proto__'] !== docEl['__proto__'];
+        return Fuse.Browser.Agent.MobileSafari ? false : result;
       }
 
       function ELEMENT_TEXT_CONTENT() {
@@ -170,7 +198,7 @@
 
       function SELECTORS_API() {
         // true for WebKit (Safari 3, Chrome)
-        return P.BrowserFeatures.SelectorsAPI;
+        return isHostObject(doc, 'querySelector');
       }
 
       function TYPEOF_NODELIST_IS_FUNCTION() {
@@ -180,18 +208,18 @@
 
       function XPATH() {
         // true for all but IE
-        return P.BrowserFeatures.XPath;
+        return isHostObject(doc, 'evaluate');
       }
 
       var ELEMENT_CHILDREN_NODELIST, ELEMENT_CONTAINS;
       (function() {
         // true for IE, Safari 3, Opera, Firefox 3+
-		if (!isHostObject(docEl, 'children'))
-		  ELEMENT_CHILDREN_NODELIST = false;
+		    if (!isHostObject(docEl, 'children'))
+		      ELEMENT_CHILDREN_NODELIST = false;
 
         // true for all but IE and Safari 2
-		if (!isHostObject(docEl, 'contains'))
-		  ELEMENT_CONTAINS = false;
+		    if (!isHostObject(docEl, 'contains'))
+		      ELEMENT_CONTAINS = false;
 
         // no need to test further is both failed
         if (ELEMENT_CHILDREN_NODELIST === false &&
@@ -214,6 +242,7 @@
       })();
 
       return {
+        'ARRAY_SLICE_THIS_AS_NODELIST':      ARRAY_SLICE_THIS_AS_NODELIST,
         'CREATE_ELEMENT_WITH_HTML':          CREATE_ELEMENT_WITH_HTML,
         'DOCUMENT_ALL_COLLECTION':           DOCUMENT_ALL_COLLECTION,
         'DOCUMENT_CREATE_EVENT':             DOCUMENT_CREATE_EVENT,
@@ -249,29 +278,7 @@
 
     /*----------------------------------- BUGS ---------------------------------*/
 
-    Bug = Test((function() {
-      function createInnerHTMLTest(source, innerHTML, level) {
-        return function() {
-          dummy.innerHTML = source;
-          var result = true, element = dummy.firstChild;
-          try {
-            result = (element.innerHTML = innerHTML) &&
-              element.innerHTML.toLowerCase() !== innerHTML;
-          } catch(e) { }
-          dummy.innerHTML = '';
-          return result;
-        };
-      }
-
-      function createCommentTest(conditional) {
-        return function() {
-          dummy.innerHTML = '<span>a</span><!--b-->';
-          var result = conditional(dummy);
-          dummy.innerHTML = '';
-          return result;
-        };
-      }
-
+    Bug = Fuse.Browser.Bug = createTester((function() {
       function ARRAY_CONCAT_ARGUMENTS_BUGGY() {
         // true for Opera
         return (function() { return Array.prototype.concat &&
@@ -310,42 +317,42 @@
       }
 
       function ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO() {
-        if (!Feature('ELEMENT_COMPUTED_STYLE')) return false;
+        if (Feature('ELEMENT_COMPUTED_STYLE')) {
+          // true for Opera
+          var result, s = docEl.style, backup = s.cssText;
+          s.position = 'static';
+          s.top = s.left = '';
 
-        // true for Opera
-        var result, s = docEl.style, backup = s.cssText;
-        s.position = 'static';
-        s.top = s.left = '';
-
-        var style = doc.defaultView.getComputedStyle(docEl, null);
-        result = (style && style.top === '0px' && style.left === '0px');
-        docEl.style.cssText = backup;
-        return result;
+          var style = doc.defaultView.getComputedStyle(docEl, null);
+          result = (style && style.top === '0px' && style.left === '0px');
+          docEl.style.cssText = backup;
+          return result;
+        }
       }
 
       function ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX() {
-        if (!Feature('ELEMENT_COMPUTED_STYLE')) return false;
-
-        // true for Opera 9.2x
-        var backup = docEl.style.paddingBottom;
-        docEl.style.paddingBottom = '1px';
-        var style = doc.defaultView.getComputedStyle(docEl, null),
-         result = style && (parseInt(style.height) || 0) ===  docEl.offsetHeight;
-        docEl.style.paddingBottom = backup;
-        return result;
+        if (Feature('ELEMENT_COMPUTED_STYLE')) {
+          // true for Opera 9.2x
+          var backup = docEl.style.paddingBottom;
+          docEl.style.paddingBottom = '1px';
+          var style = doc.defaultView.getComputedStyle(docEl, null),
+           result = style && (parseInt(style.height) || 0) ===  docEl.offsetHeight;
+          docEl.style.paddingBottom = backup;
+          return result;
+        }
       }
 
       function ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN() {
-        if (!Feature('ELEMENT_COMPUTED_STYLE')) return false;
+        if (Feature('ELEMENT_COMPUTED_STYLE')) {
+          // true for Opera
+          var backup = docEl.style.display;
+          docEl.style.display = 'none';
+          var style = doc.defaultView.getComputedStyle(docEl, null),
+           result = style && style.height === '0px';
 
-        // true for Opera
-        var backup = docEl.style.display;
-        docEl.style.display = 'none';
-        var style = doc.defaultView.getComputedStyle(docEl, null),
-         result = style && style.height === '0px';
-
-        docEl.style.display = backup;
-        return result;
+          docEl.style.display = backup;
+          return result;
+        }
       }
 
       function ELEMENT_PROPERTIES_ARE_ATTRIBUTES() {

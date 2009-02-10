@@ -9,8 +9,8 @@
     RegExp.specialChar = { 's': '\\s' };
     RegExp.prototype.match = RegExp.prototype.test;
 
-    // Some browsers (e.g. early Safari and IE) have
-    // non-spec-conforming /\s/ so we emulate it (see: ECMA-262 15.10.2.12)
+    // Safari 2 and IE have non-spec-conforming /\s/ 
+    // so we emulate it (see: ECMA-262 15.10.2.12)
     // http://www.unicode.org/Public/UNIDATA/PropList.txt
     if (Bug('REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY')) {
       RegExp.specialChar.s = '[' + 
@@ -18,7 +18,7 @@
         '\x09\x0B\x0C\x20\xA0' +
         /* Line terminators */
         '\x0A\x0D\u2028\u2029' +
-        /* Unicode category “Zs” */
+        /* Unicode category "Zs" space separators */
         '\u1680\u180e\u2000-\u200a\u202f\u205f\u3000' +
       ']';
     }

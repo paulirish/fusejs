@@ -477,9 +477,9 @@ Test.Unit.Assertions = {
 Test.Unit.Testcase = Class.create(Test.Unit.Assertions, {
   initialize: function(name, test, setup, teardown) {
     this.name           = name;
-    this.test           = test     || Prototype.emptyFunction;
-    this.setup          = setup    || Prototype.emptyFunction;
-    this.teardown       = teardown || Prototype.emptyFunction;
+    this.test           = test     || Fuse.emptyFunction;
+    this.setup          = setup    || Fuse.emptyFunction;
+    this.teardown       = teardown || Fuse.emptyFunction;
     this.messages       = [];
     this.actions        = {};
   },

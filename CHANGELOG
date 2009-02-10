@@ -1,3 +1,9 @@
+* Change to initial Fuse namespace. [FuseJS LH #1] [jddalton]
+  Note: Backwards compatibility warning.
+   - Exposed Fuse.Browser.Bug() and Fuse.Browser.Feature()
+   - Moved browser user agent sniffs to Fuse.Browser.Agent
+   - Removed Fuse.BrowserFeatures
+
 * Rename internal method "mergeList" to "concatList" to better express its functionality. [jddalton]
 
 * Updates to Array API [FuseJS LH #15] [jddalton, Joe Gornick]

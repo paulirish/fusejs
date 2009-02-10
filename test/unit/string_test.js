@@ -394,7 +394,7 @@ new Test.Unit.Runner({
     
     // test null return value of toTemplateReplacements()
     source = 'My name is "#{name}", my job is "#{job}"';
-    subject = { toTemplateReplacements: Prototype.K };
+    subject = { toTemplateReplacements: Fuse.K };
     this.assertEqual('My name is "", my job is ""', new Template(source).evaluate(subject));
     
     source = 'My name is "\\#{name}", my job is "\\#{job}"';
@@ -590,10 +590,10 @@ new Test.Unit.Runner({
     this.assertEqual("Not scared!", attackTarget);
 
     this.assertEqual('hello world!', ('/*-secure- \r  \n ' + valid + ' \n  */').evalJSON().test);
-    var temp = Prototype.JSONFilter;
-    Prototype.JSONFilter = /^\/\*([\s\S]*)\*\/$/; // test custom delimiters.
+    var temp = Fuse.JSONFilter;
+    Fuse.JSONFilter = /^\/\*([\s\S]*)\*\/$/; // test custom delimiters.
     this.assertEqual('hello world!', ('/*' + valid + '*/').evalJSON().test);
-    Prototype.JSONFilter = temp;
+    Fuse.JSONFilter = temp;
     
     this.assertMatch(123, huge.evalJSON(true).last().test);
     

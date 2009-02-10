@@ -231,7 +231,7 @@
       if (function() {
         var e = createEvent(doc), EP = Event.prototype || e && e['__proto__'];
         return EP && Object.extend(Event.prototype = EP, Methods);
-      }()) Event.extend = K;
+      }()) Event.extend = Fuse.K;
 
       delete name; delete Methods.pointer; delete Methods.pointerX; delete Methods.pointerY;
 
@@ -262,7 +262,7 @@
           if (!event || event._extendedByFuse) return event;
 
           // avoid unnecessary Object.extend() usage
-          event._extendedByFuse = P.emptyFunction;
+          event._extendedByFuse = Fuse.emptyFunction;
           event.inspect         = inspect;
           event.pageX           = Event.pointerX(event);
           event.pageY           = Event.pointerY(event);

@@ -25,8 +25,8 @@ new Test.Unit.Runner({
   },
   
   testEachChaining: function() {
-    this.assertEqual(Fixtures.Primes, Fixtures.Primes.each(Prototype.emptyFunction));
-    this.assertEqual(3, Fixtures.Basic.each(Prototype.emptyFunction).length);
+    this.assertEqual(Fixtures.Primes, Fixtures.Primes.each(Fuse.emptyFunction));
+    this.assertEqual(3, Fixtures.Basic.each(Fuse.emptyFunction).length);
   },
 
   testEnumContext: function() {
@@ -255,7 +255,7 @@ new Test.Unit.Runner({
   
   testReject: function() {
     this.assertEqual(0, 
-      Fixtures.Nicknames.reject(Prototype.K).length);
+      Fixtures.Nicknames.reject(Fuse.K).length);
       
     this.assertEqual('sam-, noradio, htonl',
       Fixtures.Nicknames.reject(function(nickname) {

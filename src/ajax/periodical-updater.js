@@ -40,7 +40,7 @@
     function stop() {
       this.updater.options.onComplete = undefined;
       global.clearTimeout(this.timer);
-      (this.onStop || Prototype.emptyFunction).apply(this, arguments);
+      (this.onStop || Fuse.emptyFunction).apply(this, arguments);
     }
 
     return {

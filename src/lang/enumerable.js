@@ -43,7 +43,7 @@
     }
 
     function every(iterator, context) {
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       var result = true;
       this.each(function(value, index) {
         result = !!iterator.call(context, value, index);
@@ -66,7 +66,7 @@
     function grep(pattern, iterator, context) {
       if (!pattern || Object.isRegExp(pattern) &&
          !pattern.source) this.toArray();
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       var results = [], index = 0;
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
@@ -126,7 +126,7 @@
     }
 
     function max(iterator, context) {
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       var result, index = 0;
       this._each(function(value) {
         value = iterator.call(context, value, index++);
@@ -137,7 +137,7 @@
     }
 
     function min(iterator, context) {
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       var result, index = 0;
       this._each(function(value) {
         value = iterator.call(context, value, index++);
@@ -148,7 +148,7 @@
     }
 
     function partition(iterator, context) {
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       var trues = [], falses = [], index = 0;
       this._each(function(value) {
         (iterator.call(context, value, index++) ?
@@ -177,7 +177,7 @@
     }
 
     function some(iterator, context) {
-      iterator = iterator || K;
+      iterator = iterator || Fuse.K;
       var result = false;
       this.each(function(value, index) {
         if (result = !!iterator.call(context, value, index))
@@ -206,7 +206,7 @@
     }
 
     function zip() {
-      var index = 0, iterator = K, args = slice.call(arguments, 0);
+      var index = 0, iterator = Fuse.K, args = slice.call(arguments, 0);
       if (typeof args.last() === 'function')
         iterator = args.pop();
 

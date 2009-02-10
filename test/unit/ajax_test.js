@@ -96,11 +96,11 @@ new Test.Unit.Runner({
       method: 'get',
       asynchronous: false,
       evalJS: 'force',
-      onComplete: Prototype.emptyFunction
+      onComplete: Fuse.emptyFunction
     }
     var request = new Ajax.Updater("content", "../fixtures/hello.js", options);
     request.options.onComplete = function() {};
-    this.assertIdentical(Prototype.emptyFunction, options.onComplete);
+    this.assertIdentical(Fuse.emptyFunction, options.onComplete);
   },
   
   testResponders: function(){

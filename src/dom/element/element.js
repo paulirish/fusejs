@@ -56,8 +56,8 @@
     function extend(element) {
       // Bail on elements that don't need extending, 
       // XML nodes (IE errors on them), document, window objects
-      if (!element || (typeof element._extendedByPrototype !== 'undefined' && 
-        element._extendedByPrototype() >= revision) ||
+      if (!element || (typeof element._extendedByFuse !== 'undefined' && 
+        element._extendedByFuse() >= revision) ||
         element.nodeType !== 1 || element === global ||
         !element.ownerDocument.body) return element;
 
@@ -72,8 +72,8 @@
           element[pair[0]] = pair[1];
       }
 
-      // avoid using Prototype.K.curry(revision) for speed
-      element._extendedByPrototype = createRevisionGetter(revision);
+      // avoid using Fuse.K.curry(revision) for speed
+      element._extendedByFuse = createRevisionGetter(revision);
 
       return element;
     }
@@ -217,9 +217,9 @@
           klass = findDOMClass(tag);
           if (typeof klass === 'undefined') continue;
           copy(T[tag], klass.prototype);
-          klass.prototype._extendedByPrototype = infiniteRevision;
+          klass.prototype._extendedByFuse = infiniteRevision;
         }
-        HTMLElement.prototype._extendedByPrototype = infiniteRevision;
+        HTMLElement.prototype._extendedByFuse = infiniteRevision;
       }
 
       Object.extend(Element, Element.Methods);
@@ -399,7 +399,9 @@
     })(),
 
     update = (function() {
-      var setInnerHTML = Bug('ELEMENT_SELECT_INNERHTML_BUGGY') || Bug('ELEMENT_TABLE_INNERHTML_BUGGY') || Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY') ?
+      var setInnerHTML = Bug('ELEMENT_SELECT_INNERHTML_BUGGY') ||
+                         Bug('ELEMENT_TABLE_INNERHTML_BUGGY')  ||
+                         Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY') ?
         function(element, content) {
           var tagName = element.tagName.toUpperCase();
           if (tagName in Element._insertionTranslations.tags) {

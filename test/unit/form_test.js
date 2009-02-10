@@ -359,7 +359,7 @@ new Test.Unit.Runner({
 
     form = $('bigform');
     var input = form['tf_text'], select = form['tf_selectOne'];
-    input._extendedByPrototype = select._extendedByPrototype = function() { return 0 };
+    input._extendedByFuse = select._extendedByFuse = function() { return 0 };
 
     this.assert($(input).anInputMethod);
     this.assert(!input.aSelectMethod);
