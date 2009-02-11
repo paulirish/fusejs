@@ -483,11 +483,11 @@
       element = $(element);
       var result, display = Element.getStyle(element, 'display');
 
-      // width and height properties return 0 on elements with display:none,
-      // so show the element temporarily
-      if (display === 'none' || display === null || result === 0) {
+      // offsetHidth/offsetWidth properties return 0 on elements
+      // with display:none, so show the element temporarily
+      if (display === 'none' || display === null) {
         var backup = element.style.cssText;
-        element.style.cssText += ';position:absolute;display:block;visibility:hidden;';
+        element.style.cssText += ';display:block;visibility:hidden;';
         result = element['offset' + D];
         element.style.cssText = backup;
       }

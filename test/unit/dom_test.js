@@ -1472,8 +1472,8 @@ new Test.Unit.Runner({
     this.assertIdentical(100, $('dimensions-display-none-pos-abs').getDimensions().height);
     this.assertIdentical(200, $('dimensions-display-none-pos-abs').getDimensions().width);
     
-    // known failing issue
-    // this.assert($('dimensions-nestee').getDimensions().width <= 500, 'check for proper dimensions of hidden child elements');
+    this.assertEqual(500, $('dimensions-nestee').getWidth(),
+      'elements should not shrink-wrap when made temporarily visible');
     
     $('dimensions-td').hide();
     this.assertIdentical(100, $('dimensions-td').getDimensions().height);

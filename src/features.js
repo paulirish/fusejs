@@ -347,6 +347,9 @@
           // true for Opera
           var backup = docEl.style.display;
           docEl.style.display = 'none';
+          
+          // Safari 2: getComputedStyle() will return null
+          // for elements with style display:none
           var style = doc.defaultView.getComputedStyle(docEl, null),
            result = style && style.height === '0px';
 
