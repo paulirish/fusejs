@@ -1,3 +1,5 @@
+* Remove uneeded $R() and $H() calls so ObjectRange and Hash can be optional. [FuseJS LH #14] [jddalton]
+
 * Change to initial Fuse namespace. [FuseJS LH #1] [jddalton]
   Note: Backwards compatibility warning.
    - Exposed Fuse.Browser.Bug() and Fuse.Browser.Feature()

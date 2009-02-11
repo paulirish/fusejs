@@ -343,6 +343,29 @@ new Test.Unit.Runner({
     }
   },
   
+  testRequestHeaders: function() {
+    if (this.isRunningFromRake) {
+      this.assertNothingRaised(function() {
+        new Ajax.Request('/response', extendDefault({
+          'requestHeaders': ['X-Foo', 'foo', 'X-Bar', 'bar']
+        }));
+      });
+
+      this.assertNothingRaised(function() {
+        new Ajax.Request('/response', extendDefault({
+          'requestHeaders': { 'X-Foo':'foo', 'X-Bar':'bar' }
+        }));
+      });
+
+      this.assertNothingRaised(function() {
+        new Ajax.Request('/response', extendDefault({
+          'requestHeaders': $H({ 'X-Foo':'foo', 'X-Bar':'bar' })
+        }));
+      });
+    } 
+    else this.info(message);
+  },
+  
   testIsSameOrigin: function() {
     if (this.isRunningFromRake) {
       var isSameOrigin = Object.isSameOrigin;

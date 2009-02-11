@@ -804,10 +804,9 @@
       // handles the an+b logic
       function getIndices(a, b, total) {
         if (a == 0) return b > 0 ? [b] : [];
-        return $R(1, total).inject([], function(memo, i) {
-          if (0 == (i - b) % a && (i - b) / a >= 0) memo.push(i);
-          return memo;
-        });
+        for (var i = 1, results = []; i <= total; i++)
+          if (0 == (i - b) % a && (i - b) / a >= 0) results.push(i);
+        return results;
       }
 
       function firstChild(nodes, value, root) {

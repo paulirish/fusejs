@@ -120,12 +120,12 @@
 
     function setRequestHeaders() {
       var headers = {
-        'Accept': 'text/javascript, text/html, application/xml, text/xml, */*',
-        'X-Fuse-Version': Fuse.Version,
+        'Accept':           'text/javascript, text/html, application/xml, text/xml, */*',
+        'X-Fuse-Version':   Fuse.Version,
         'X-Requested-With': 'XMLHttpRequest'
       };
 
-      if (this.method == 'post') {
+      if (this.method === 'post') {
         headers['Content-type'] = this.options.contentType +
           (this.options.encoding ? '; charset=' + this.options.encoding : '');
 
@@ -139,18 +139,20 @@
       }
 
       // user-defined headers
-      if (typeof this.options.requestHeaders == 'object') {
-        var extras = this.options.requestHeaders;
-
-        if (typeof extras.push === 'function')
+      var key, extras = this.options.requestHeaders;
+      if (typeof extras === 'object') {
+        if (Object.isArray(extras))
           for (var i = 0, length = extras.length; i < length; i += 2) 
-            headers[extras[i]] = extras[i+1];
-        else
-          $H(extras).each(function(pair) { headers[pair.key] = pair.value });
+            headers[extras[i]] = extras[i + 1];
+        else {
+          // TODO: Fuse.isOwnProperty check for for-in
+          if (Object.isHash(extras)) extras = extras._object;
+          for (key in extras) headers[key] = extras[key];
+        }
       }
 
-      for (var name in headers) 
-        this.transport.setRequestHeader(name, headers[name]);
+      for (key in headers) 
+        this.transport.setRequestHeader(key, headers[key]);
     }
 
     function success() {
