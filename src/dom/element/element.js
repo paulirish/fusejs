@@ -332,19 +332,19 @@
 
     function hide(element) {
       element = $(element);
-      var originalDisplay = element.style.display;
-      if (originalDisplay && originalDisplay !== 'none')
-        element._originalDisplay = originalDisplay;
+      var display = element.style.display;
+      if (display && display !== 'none')
+        element._originalDisplay = display;
       element.style.display = 'none';
       return element;
     }
 
     function show(element) {
       element = $(element);
-      if (element._originalDisplay) {
-        element.style.display = element._originalDisplay;
-        element._originalDisplay = null;
-      } else element.style.display = '';
+      var display = element.style.display;
+      if (display === 'none')
+        element.style.display = element._originalDisplay || '';
+      element._originalDisplay = null;
       return element;
     }
 

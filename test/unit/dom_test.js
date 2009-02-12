@@ -457,26 +457,43 @@ new Test.Unit.Runner({
   },
   
   testHideAndShowWithInlineDisplay: function() {
-    $('test-visible-inline').hide();
-    this.assert(!$('test-visible-inline').visible());
-    this.assertEqual('inline', $('test-visible-inline')._originalDisplay);
-    
-    $('test-visible-inline').show();
-    this.assert($('test-visible-inline').visible());
-    this.assertEqual('inline', $('test-visible-inline').style.display);
-    this.assertNull($('test-visible-inline')._originalDisplay);
-    
-    $('test-visible-inline').style.display = 'block';
-    $('test-visible-inline').hide();
-    this.assert(!$('test-visible-inline').visible());
-    this.assertEqual('block', $('test-visible-inline')._originalDisplay);
-    
-    $('test-visible-inline').show();
-    this.assert($('test-visible-inline').visible());
-    this.assertEqual('block', $('test-visible-inline').style.display);
-    this.assertNull($('test-visible-inline')._originalDisplay);
-    
-    $('test-visible-inline').style.display = 'inline';
+    var element =  $('test-visible-inline');
+
+    element.show();
+    this.assertEqual('inline', element.style.display,
+      'Should only empty display when display is set to "none".');
+
+    element.hide();
+    this.assert(!element.visible(),
+      'Element should be hidden. (inline)');
+
+    this.assertEqual('inline', element._originalDisplay,
+      'display:inline did not get stored in _originalDisplay.');
+
+    element.show();
+    this.assert(element.visible(), 'Element should be visible');
+    this.assertEqual('inline', element.style.display,
+      'Element should have inline display.');
+
+    this.assertNull(element._originalDisplay,
+      '_originalDisplay should be null. (inline)');
+
+    element.style.display = 'block';
+    element.hide();
+    this.assert(!element.visible(),
+      'Element should be hidden. (block)');
+
+    this.assertEqual('block', element._originalDisplay,
+      'display:block did not get stored in _originalDisplay.');
+
+    element.show();
+    this.assertEqual('block', element.style.display,
+      'Element should have block display.');
+    this.assertNull(element._originalDisplay,
+      '_originalDisplay should be null. (block)');
+
+    // restore display
+    element.style.display = 'inline';
   },
   
   testElementRemove: function(){

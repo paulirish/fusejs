@@ -1,3 +1,5 @@
+* Stop Element#show clearing display values when called before Element#hide. [Prototype LH #177] [jddalton, quamis]
+
 * Stop Element#getHeight/Element#getWidth from setting an element's position to "absolute" because it causes shrink-wrapping. [Prototype LH #313] [datamagi, jddalton]
 
 * Remove uneeded $R() and $H() calls so ObjectRange and Hash can be optional. [FuseJS LH #14] [jddalton]
