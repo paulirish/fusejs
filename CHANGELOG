@@ -10,7 +10,7 @@
 
 * Rename internal method "mergeList" to "concatList" to better express its functionality. [jddalton]
 
-* Updates to Array API [FuseJS LH #15] [jddalton, Joe Gornick]
+* Updates to Array API [FuseJS LH #15] [Prototype LH #356] [jddalton, Joe Gornick, quamis]
   Note: Backwards compatibility warning.
    - Added Array#insert method
    - Renamed methods: include -> contains, uniq -> unique
@@ -40,7 +40,7 @@
 
 * Make Array#grep and Enumerable#grep exit early if the regexp pattern is empty. [jddalton]
 
-* Optimize Hash methods by replacing calls to "each" with for-in loops as well as change Hash aliases. [Prototype LH #539] [Brad Avogel, jddalton, Romain Dorgueil]
+* Optimize Hash methods by replacing calls to "each" with for-in loops as well as change Hash aliases. [Ruby Trac #3592] [Prototype LH #539] [aljoscha, Brad Avogel, jddalton, Romain Dorgueil]
   Note: Backwards compatibility warning.
    - Hash#index is alias of Hash#keyOf
    - Hash#keyOf returns -1 if no match is found
@@ -327,7 +327,7 @@
 
 * Ensure setting type attribute for button/input elements works in IE when using the Element constructor. [Ruby Trac #10548] [jddalton, sakarit]
 
-* Ensure Element#getStyle returns values in px unit, regardless of how they are set. [Andrew Dupont, jddalton]
+* Ensure Element#getStyle returns values in px unit, regardless of how they are set. [Andrew Dupont, jddalton, Joe Gornick]
 
 * Refactor Element#getStyle to remove browser sniffs and move forked versions closer together in the code. [jddalton]
 
