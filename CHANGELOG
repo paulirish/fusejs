@@ -1,3 +1,6 @@
+* Remove the "&_=" Safari 2 ajax bug workaround for the http PUT method. [Rails Trac #2258] [Prototype LH #327] [jddalton, Mark van Eijk, Shane Vitarana]
+  Fixed in Rails by changeset http://dev.rubyonrails.org/changeset/2106.
+
 * Stop Element#show clearing display values when called before Element#hide. [Prototype LH #177] [jddalton, quamis]
 
 * Stop Element#getHeight/Element#getWidth from setting an element's position to "absolute" because it causes shrink-wrapping. [Prototype LH #313] [datamagi, jddalton]

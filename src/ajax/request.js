@@ -54,9 +54,7 @@
       if (params = Object.toQueryString(params)) {
         // when GET, append parameters to URL
         if (this.method == 'get')
-          this.url += (this.url.include('?') ? '&' : '?') + params;
-        else if (/Konqueror|Safari|KHTML/.test(userAgent))
-          params += '&_=';
+          this.url += (this.url.include('?') ? '&' : '?') + params
       }
 
       try {
