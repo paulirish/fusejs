@@ -135,6 +135,35 @@
       return results;
     }
 
+    var isOwnProperty = function(object, property) {
+      // ECMA-3.1 15.2.4.5
+      if (object == null) throw new TypeError;
+      return Object.prototype.hasOwnProperty.call(object, property);
+    };
+
+    if (typeof Object.prototype.hasOwnProperty !== 'function') {
+      if (Feature('OBJECT_PROTO')) {
+        // Safari 2
+        isOwnProperty = function(object, property) {
+          if (object == null) throw new TypeError;
+          if (typeof object !== 'object' && !Object.isFunction(object))
+            object = new object.constructor(object);
+
+          var result, proto = object['__proto__'];
+          object['__proto__'] = null;
+          result = property in object;
+          object['__proto__'] = proto;
+          return result;
+        };
+      } else {
+        // Other
+        isOwnProperty = function(object, property) {
+          if (object == null) throw new TypeError;
+          return object[property] !== object.constructor.prototype[property];
+        };
+      }
+    }
+
     extend(Object, {
       'clone':         clone,
       'extend':        extend,
@@ -143,6 +172,7 @@
       'isElement':     isElement,
       'isFunction':    isFunction,
       'isHash':        isHash,
+      'isOwnProperty': isOwnProperty,
       'isNumber':      isNumber,
       'isRegExp':      isRegExp,
       'isSameOrigin':  isSameOrigin,

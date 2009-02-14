@@ -10,13 +10,19 @@ new Test.Unit.Runner({
   },
 
   testGet: function() {
-    var h = $H({a: 'A'});
+    var h = $H({ 'a': 'A' }), empty = $H({ }),
+     properties = ['constructor', 'hasOwnProperty', 'isPrototypeOf',
+       'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
+
     this.assertEqual('A', h.get('a'));
     this.assertUndefined(h.a);
-    this.assertUndefined($H({}).get('a'));
+    this.assertUndefined(empty.get('a'));
 
-    this.assertUndefined($H({}).get('toString'));
-    this.assertUndefined($H({}).get('constructor'));
+    // ensure Hash#get only returns the objects own properties
+    properties.each(function(property) {
+      this.assertUndefined(empty.get(property),
+        'Returned the "' + property + '" property of its prototype.');
+    }, this);
   },
   
   testUnset: function() {

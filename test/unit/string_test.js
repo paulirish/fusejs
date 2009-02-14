@@ -423,28 +423,31 @@ new Test.Unit.Runner({
 
   testToQueryParams: function() {
     // only the query part
-    var result = {a:undefined, b:'c'};
+    var undef, result = { 'a':undef, 'b':'c' };
     this.assertHashEqual({}, ''.toQueryParams(), 'empty query');
     this.assertHashEqual({}, 'foo?'.toQueryParams(), 'empty query with URL');
     this.assertHashEqual(result, 'foo?a&b=c'.toQueryParams(), 'query with URL');
     this.assertHashEqual(result, 'foo?a&b=c#fragment'.toQueryParams(), 'query with URL and fragment');
     this.assertHashEqual(result, 'a;b=c'.toQueryParams(';'), 'custom delimiter');
   
-    this.assertHashEqual({a:undefined}, 'a'.toQueryParams(), 'key without value');
-    this.assertHashEqual({a:'b'},  'a=b&=c'.toQueryParams(), 'empty key');
-    this.assertHashEqual({a:'b', c:''}, 'a=b&c='.toQueryParams(), 'empty value');
+    this.assertHashEqual({ 'a':undef }, 'a'.toQueryParams(), 'key without value');
+    this.assertHashEqual({ 'a':'b' },  'a=b&=c'.toQueryParams(), 'empty key');
+    this.assertHashEqual({ 'a':'b', 'c':'' }, 'a=b&c='.toQueryParams(), 'empty value');
     
-    this.assertHashEqual({'a b':'c', d:'e f', g:'h'},
+    this.assertHashEqual({'a b':'c', 'd':'e f', 'g':'h' },
       'a%20b=c&d=e%20f&g=h'.toQueryParams(), 'proper decoding');
-    this.assertHashEqual({a:'b=c=d'}, 'a=b=c=d'.toQueryParams(), 'multiple equal signs');
-    this.assertHashEqual({a:'b', c:'d'}, '&a=b&&&c=d'.toQueryParams(), 'proper splitting');
+    this.assertHashEqual({ 'a':'b=c=d' }, 'a=b=c=d'.toQueryParams(), 'multiple equal signs');
+    this.assertHashEqual({ 'a':'b', c:'d' }, '&a=b&&&c=d'.toQueryParams(), 'proper splitting');
     
     this.assertEnumEqual($w('r g b'), 'col=r&col=g&col=b'.toQueryParams()['col'],
       'collection without square brackets');
     var msg = 'empty values inside collection';
     this.assertEnumEqual(['r', '', 'b'], 'c=r&c=&c=b'.toQueryParams()['c'], msg);
-    this.assertEnumEqual(['', 'blue'],   'c=&c=blue'.toQueryParams()['c'], msg);
-    this.assertEnumEqual(['blue', ''],   'c=blue&c='.toQueryParams()['c'], msg);
+    this.assertEnumEqual(['', 'blue'],   'c=&c=blue'.toQueryParams()['c'],  msg);
+    this.assertEnumEqual(['blue', ''],   'c=blue&c='.toQueryParams()['c'],  msg);
+    
+    this.assertHashEqual(Fixtures.mixed_dont_enum, 'a=A&b=B&toString=bar&valueOf='.toQueryParams(),
+      'Should not iterate over inherited properties.');  
   },
   
   testInspect: function() {

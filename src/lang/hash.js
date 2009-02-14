@@ -112,8 +112,7 @@
     }
 
     function get(key) {
-      // simulating poorly supported hasOwnProperty
-      if (this._object[key] !== Object.prototype[key])
+      if (Object.isOwnProperty(this._object, key))
         return this._object[key];
     }
 

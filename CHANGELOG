@@ -1,3 +1,5 @@
+* Add Object.isOwnProperty() to aid in detecting "own" vs. "inherited" properties. [Rails Trac #9700, #11043] [Prototype LH #243] [FuseJS LH #8] [arandes, Ben, grey, jddalton]
+
 * Remove the "&_=" Safari 2 ajax bug workaround for the http PUT method. [Rails Trac #2258] [Prototype LH #327] [jddalton, Mark van Eijk, Shane Vitarana]
   Fixed in Rails by changeset http://dev.rubyonrails.org/changeset/2106.
 

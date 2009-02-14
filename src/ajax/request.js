@@ -143,7 +143,6 @@
           for (var i = 0, length = extras.length; i < length; i += 2) 
             headers[extras[i]] = extras[i + 1];
         else {
-          // TODO: Fuse.isOwnProperty check for for-in
           if (Object.isHash(extras)) extras = extras._object;
           for (key in extras) headers[key] = extras[key];
         }

@@ -196,6 +196,11 @@
         return source.indexOf('param1') > -1 && source.indexOf('number = 1234') > -1;
       }
 
+      function OBJECT_PROTO() {
+        // true for Webkit and Gecko
+        return []['__proto__'] === Array.prototype;
+      }
+
       function SELECTORS_API() {
         // true for WebKit (Safari 3, Chrome)
         return isHostObject(doc, 'querySelector');
@@ -270,6 +275,7 @@
         'ELEMENT_SPECIFIC_EXTENSIONS':       ELEMENT_SPECIFIC_EXTENSIONS,
         'ELEMENT_TEXT_CONTENT':              ELEMENT_TEXT_CONTENT,
         'FUNCTION_TO_STRING_RETURNS_SOURCE': FUNCTION_TO_STRING_RETURNS_SOURCE,
+        'OBJECT_PROTO':                      OBJECT_PROTO,
         'SELECTORS_API':                     SELECTORS_API,
         'TYPEOF_NODELIST_IS_FUNCTION':       TYPEOF_NODELIST_IS_FUNCTION,
         'XPATH':                             XPATH
@@ -390,6 +396,7 @@
       }
 
       function REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY() {
+        // true for Webkit and IE
         return !!'\x09\x0B\x0C\x20\xA0\x0A\x0D\u2028\u2029\u1680\u180e\u2000-\u200a\u202f\u205f\u3000'
           .replace(/\s+/, '').length;
       }

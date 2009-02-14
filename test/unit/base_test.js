@@ -247,6 +247,56 @@ new Test.Unit.Runner({
     this.assert(!Object.isFunction(undefined));
   },
   
+  testObjectIsOwnProperty: function() {
+    function A() { this.foo = 3 }
+    A.prototype = { 'foo': 4 };
+
+    function B() { this.foo = 2 }
+    B.prototype = new A;
+
+    function C() { this.foo = 1 }
+    C.prototype = new B;
+    
+    var undef, c = new C, empty = { },
+     properties = ['constructor', 'hasOwnProperty', 'isPrototypeOf',
+       'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
+
+    this.assert(Object.isOwnProperty(c, 'foo'), 'Expected c.foo as own property.');
+
+    delete c.foo;
+    this.assert(!Object.isOwnProperty(c, 'foo'), 'Expected c.foo as inherited property.');
+    this.assertEqual(2, c.foo, 'Expected c.foo to equal 2');
+
+    delete C.prototype.foo;
+    this.assertEqual(3, c.foo, 'Expected c.foo to equal 3 after deleting C.prototype.foo.');
+
+    c.foo = undef;
+    this.assert(Object.isOwnProperty(c, 'foo'), 'Expected c.foo, value set as undefined, as own property.');
+    this.assert(!Object.isOwnProperty(C.prototype, 'foo'), 'Expected C.prototype.foo as inherited property.');
+    this.assertEqual(3, C.prototype.foo, 'Expected C.prototype.foo to equal 3');
+
+    C.prototype.foo = undef;
+    this.assert(Object.isOwnProperty(A.prototype, 'foo', 'Expected A.prototype.foo as own property.'));
+
+    properties.each(function(property) {
+      this.assert(!Object.isOwnProperty(empty, property),
+        'Expected "' + property + '" as inherited property');
+      
+      // Safari 2 doesn't have many of the properties
+      if (Object.prototype[property]) {
+        this.assert(Object.isOwnProperty(Object.prototype, property),
+          'Expected "' + property + '" as own property');
+      }
+    }, this);
+
+    this.assert(!Object.isOwnProperty(0, 'toString'));
+    this.assert(!Object.isOwnProperty('testing', 'valueOf'));
+
+    // test null/undefined values
+    this.assertRaise('TypeError', function() { Object.isOwnProperty(null,  '') });
+    this.assertRaise('TypeError', function() { Object.isOwnProperty(undef, '') });
+  },
+  
   testObjectIsRegExp: function() {
     this.assert(Object.isRegExp(/foo/));
     this.assert(Object.isRegExp(new RegExp('foo')));

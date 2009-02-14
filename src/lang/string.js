@@ -45,7 +45,7 @@
         value = pair.length > 1 ? pair.join('=') : pair[0];
         if (value != null) value = decodeURIComponent(value);
 
-        if (key in hash) {
+        if (Object.isOwnProperty(hash, key)) {
           if (!Object.isArray(hash[key])) hash[key] = [hash[key]];
           hash[key].push(value);
         }
