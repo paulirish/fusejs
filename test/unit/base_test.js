@@ -386,6 +386,26 @@ new Test.Unit.Runner({
     this.assert(!Object.isUndefined({}));
   },
   
+  testObjectKeys: function() {
+    this.assertEnumEqual([],          Object.keys({ }));
+    this.assertEnumEqual([],          Object.keys([ ]));
+    this.assertEnumEqual(['a'],       Object.keys({ 'a': 'A' }));
+    this.assertEnumEqual($w('a b c'), Object.keys({ 'a':'A', 'b':'B', 'c':'C' }).sort());
+
+    this.assertRaise('TypeError', function() { Object.keys(null) });
+    this.assertRaise('TypeError', function() { Object.keys(3) });
+  },
+  
+  testObjectValues: function() {
+    this.assertEnumEqual([],          Object.values({ }));
+    this.assertEnumEqual([],          Object.values([ ]));
+    this.assertEnumEqual(['A'],       Object.values({ 'a': 'A' }));
+    this.assertEnumEqual($w('A B C'), Object.values({ 'a':'A', 'b':'B', 'c':'C' }).sort());
+    
+    this.assertRaise('TypeError', function() { Object.values(null) });
+    this.assertRaise('TypeError', function() { Object.values(3) });
+  },
+  
   // sanity check
   testDoesntExtendObjectFuse: function() {
     // for-in is supported with objects

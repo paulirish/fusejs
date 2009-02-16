@@ -122,16 +122,23 @@
     }
 
     function keys(object) {
-      var results = [];
-      for (var property in object)
-        results.push(property);
+      // ECMA 3.1 Draft: 15.2.3.14
+      if (!object || typeof object !== 'object')
+        throw new TypeError;
+      var property, results = [];
+      for (property in object)
+        if (Object.isOwnProperty(object, property))
+          results.push(property);
       return results;
     }
 
     function values(object) {
-      var results = [];
-      for (var property in object)
-        results.push(object[property]);
+      if (!object || typeof object !== 'object')
+        throw new TypeError;
+      var property, results = [];
+      for (property in object)
+        if (Object.isOwnProperty(object, property))
+          results.push(object[property]);
       return results;
     }
 
