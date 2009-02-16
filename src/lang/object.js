@@ -8,9 +8,21 @@
       return Object.extend({ }, object);
     }
 
-    function extend (destination, source) {
-      for (var property in source)
-        destination[property] = source[property];
+    function each(object, callback, context) {
+      try {
+        Object._each(object, function(value, key, object) {
+          callback.call(context, value, key, object);
+        });
+      } catch (e) {
+        if (e !== $break) throw e;
+      }
+      return object;
+    }
+
+    function extend(destination, source) {
+      Object._each(source || { }, function(value, key) { 
+         destination[key] = value; 
+      });
       return destination;
     }
 
@@ -95,12 +107,11 @@
       if (Object.isElement(object)) return;
 
       var results = [];
-      for (var property in object) {
-        var value = Object.toJSON(object[property]);
+      Object._each(object, function(value, key) {
+        value = Object.toJSON(value);
         if (typeof value !== 'undefined')
-          results.push(property.toJSON() + ': ' + value);
-      }
-
+          results.push(key.toJSON() + ': ' + value);
+      });
       return '{' + results.join(', ') + '}';
     }
 
@@ -110,14 +121,14 @@
     }
 
     function toQueryString(object) {
-      var key, results = [];
-      for (key in object) {
-        value = object[key], key = encodeURIComponent(key);
+      var results = [];
+      Object._each(object, function(value, key) {
+        key = encodeURIComponent(key);
         if (value && typeof value === 'object') {
           if (Object.isArray(value))
             results = concatList(results, value.map(toQueryPair.curry(key)));
         } else results.push(toQueryPair(key, value));
-      }
+      });
       return results.join('&');
     }
 
@@ -125,22 +136,73 @@
       // ECMA 3.1 Draft: 15.2.3.14
       if (!object || typeof object !== 'object')
         throw new TypeError;
-      var property, results = [];
-      for (property in object)
-        if (Object.isOwnProperty(object, property))
-          results.push(property);
+      var results = [];
+      Object._each(object, function(value, key) {
+        if (Object.isOwnProperty(object, key))
+          results.push(key);
+      });
       return results;
     }
 
     function values(object) {
       if (!object || typeof object !== 'object')
         throw new TypeError;
-      var property, results = [];
-      for (property in object)
-        if (Object.isOwnProperty(object, property))
-          results.push(object[property]);
+      var results = [];
+      Object._each(object, function(value, key) {
+        if (Object.isOwnProperty(object, key))
+          results.push(value);
+      });
       return results;
     }
+
+    var _each = (function() {
+      var iterations = (function() {
+        var key, count = 0, klass = function() { this.toString = 1 };
+        klass.prototype.toString = 0;
+        for (key in new klass()) count++;
+        return count;
+      })();
+
+      // IE
+      if (iterations === 0) {
+        var dontEnumProperties = ['constructor', 'hasOwnkey', 'isPrototypeOf',
+          'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
+        delete iterations;
+        return function(object, callback) {
+          if (object) {
+            var key, i = 0;
+            for (key in object)
+              callback(object[key], key, object);
+            while(key = dontEnumProperties[i++])
+              if (Object.isOwnProperty(object, key))
+                 callback(object[key], key, object);
+          }
+          return object;
+        };
+      }
+      // Tobie Langel: Safari 2 broken for-in loop
+      // http://tobielangel.com/2007/1/29/for-in-loop-broken-in-safari/
+      if (iterations === 2) {
+        delete iterations;
+        return function(object, callback) {
+          var key, keys = { };
+          for (key in object) {
+            if (!Object.isOwnProperty(keys, key)) {
+              keys[key] = true;
+              callback(object[key], key, object);
+            }
+          }
+          return object;
+        };
+      }
+      // Others
+      delete iterations;
+      return function(object, callback) {
+        for (var key in object)
+          callback(object[key], key, object);
+        return object;
+      };
+    })();
 
     var isOwnProperty = function(object, property) {
       // ECMA-3.1 15.2.4.5
@@ -171,15 +233,18 @@
       }
     }
 
+    Object._each = _each;
+    Object.isOwnProperty = isOwnProperty;
+
     extend(Object, {
       'clone':         clone,
+      'each':          each,
       'extend':        extend,
       'inspect':       inspect,
       'isArray':       isArray,
       'isElement':     isElement,
       'isFunction':    isFunction,
       'isHash':        isHash,
-      'isOwnProperty': isOwnProperty,
       'isNumber':      isNumber,
       'isRegExp':      isRegExp,
       'isSameOrigin':  isSameOrigin,

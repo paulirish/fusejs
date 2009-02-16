@@ -69,12 +69,14 @@ new Test.Unit.Runner({
   testInclude: function() {
     this.assert($H(Fixtures.one).include('A#'));
     this.assert($H(Fixtures.many).include('A'));
+    this.assert($H(Fixtures.mixed_dont_enum).include('bar'));
+    
     this.assert(!$H(Fixtures.many).include('Z'));
     this.assert(!$H().include('foo'));
   },
 
   testKeys: function() {
-    this.assertEnumEqual([],               $H({}).keys());
+    this.assertEnumEqual([],               $H({ }).keys());
     this.assertEnumEqual(['a'],            $H(Fixtures.one).keys());
     this.assertEnumEqual($w('a b c d'),    $H(Fixtures.many).keys().sort());
     this.assertEnumEqual($w('plus quad'),  $H(Fixtures.functions).keys().sort());
@@ -97,15 +99,23 @@ new Test.Unit.Runner({
     this.assertIdentical(-1, $H().keyOf('foo'));
     this.assertIdentical(-1, $H(Fixtures.many).keyOf('Z'));
 
-    var hash = $H({ 'a':1, 'b':'2', 'c':1});
+    var hash = $H({ 'a':1, 'b':'2', 'c':1, 'toString':'foo', 'valueOf':'' });
     this.assert(['a','c'].include(hash.keyOf(1)));
-    this.assertIdentical(-1, hash.keyOf('1'));
+    this.assertEqual('toString', hash.keyOf('foo'));
+    this.assertEqual('valueOf', hash.keyOf(''));
+    
+    this.assertEqual(-1, hash.keyOf('1'));
   },
 
   testFilter: function() {
     this.assertHashEqual({ 'a':'A', 'b':'B' },
       $H(Fixtures.many).filter(function(value, key) {
         return /[ab]/.test(key);
+      }));
+      
+    this.assertHashEqual({ 'toString':'bar', 'valueOf':'' },
+      $H(Fixtures.mixed_dont_enum).filter(function(value, key) {
+        return /^(bar|)$/.test(value);
       }));
   },
 
@@ -114,10 +124,14 @@ new Test.Unit.Runner({
     this.assertHashEqual(Fixtures.many, $H(Fixtures.many).grep(''));
     this.assertHashEqual(Fixtures.many, $H(Fixtures.many).grep(new RegExp('')));
     
-    this.assert(/(ab|ba)/.test($H(Fixtures.many).grep(/[ab]/i).keys().join('')));
-    this.assert(/(CCD#D#|D#D#CC)/.test($H(Fixtures.many).grep(/[cd]/i, function(v) {
+    this.assert(/(ab|ba)/.test($H(Fixtures.many).grep(/[AB]/).keys().join('')));
+    this.assert(/(CCD#D#|D#D#CC)/.test($H(Fixtures.many).grep(/[CD]/, function(v) {
       return v + v;
     }).values().join('')));
+    
+    this.assert('toString' === $H(Fixtures.mixed_dont_enum).grep(/bar/, function(v) {
+      return v;
+    }).keys().join(''));
   },
 
   testMerge: function() {
@@ -138,20 +152,30 @@ new Test.Unit.Runner({
       return /[AB]/.test(value);
     });
 
-    this.assertEqual(2, result.length);
     this.assertHashEqual({ 'a':'A', 'b':'B' }, result[0]);
     this.assertHashEqual({ 'c':'C', 'd':'D#' }, result[1]);
+    
+    result = $H(Fixtures.mixed_dont_enum).partition(function(value) {
+      return /[AB]/.test(value);
+    });
+    
+    this.assertHashEqual({ 'a':'A', 'b':'B' }, result[0]);
+    this.assertHashEqual({ 'toString':'bar', 'valueOf':'' }, result[1]);
   },
 
   testUpdate: function() {
     var h = $H(Fixtures.many);
     this.assertIdentical(h, h.update());
-    this.assertIdentical(h, h.update({}));
+    this.assertIdentical(h, h.update({ }));
     this.assertHashEqual(h, h.update());
-    this.assertHashEqual(h, h.update({}));
+    this.assertHashEqual(h, h.update({ }));
     this.assertHashEqual(h, h.update($H()));
-    this.assertHashEqual({a:'A',  b:'B', c:'C', d:'D#', aaa:'AAA' }, h.update({aaa: 'AAA'}));
-    this.assertHashEqual({a:'A#', b:'B', c:'C', d:'D#', aaa:'AAA' }, h.update(Fixtures.one));
+    
+    this.assertHashEqual({ 'a':'A',  'b':'B', 'c':'C', 'd':'D#', 'aaa':'AAA' }, h.update({ 'aaa':'AAA' }));
+    this.assertHashEqual({ 'a':'A#', 'b':'B', 'c':'C', 'd':'D#', 'aaa':'AAA' }, h.update(Fixtures.one));
+    
+    this.assertHashEqual({ 'a':'A',  'b':'B', 'c':'C', 'd':'D#', 'toString':'bar', 'valueOf':'' },
+      $H(Fixtures.many).update({ 'toString':'bar', 'valueOf':'' }));
   },
 
   testReject: function() {
@@ -159,31 +183,43 @@ new Test.Unit.Runner({
       $H(Fixtures.many).reject(function(value) {
         return !/[CD]/.test(value);
       }));
+      
+    this.assertHashEqual({ 'toString':'bar', 'valueOf':'' },
+      $H(Fixtures.mixed_dont_enum).reject(function(value) {
+        return /[AB]/.test(value);
+      }));
   },
 
   testToQueryString: function() {
-    this.assertEqual('',                   $H({}).toQueryString());
+    this.assertEqual('',                   $H( {}).toQueryString());
     this.assertEqual('a%23=A',             $H({'a#': 'A'}).toQueryString());
     this.assertEqual('a=A%23',             $H(Fixtures.one).toQueryString());
     this.assertEqual('a=A&b=B&c=C&d=D%23', $H(Fixtures.many).toQueryString());
-    this.assertEqual("a=b&c",              $H(Fixtures.value_undefined).toQueryString());
-    this.assertEqual("a=b&c",              $H("a=b&c".toQueryParams()).toQueryString());
-    this.assertEqual("a=b&c=",             $H(Fixtures.value_null).toQueryString());
-    this.assertEqual("a=b&c=0",            $H(Fixtures.value_zero).toQueryString());
-    this.assertEqual("color=r&color=g&color=b", $H(Fixtures.multiple).toQueryString());
-    this.assertEqual("color=r&color=&color=g&color&color=0", $H(Fixtures.multiple_nil).toQueryString());
-    this.assertEqual("color=&color",       $H(Fixtures.multiple_all_nil).toQueryString());
-    this.assertEqual("",                   $H(Fixtures.multiple_empty).toQueryString());
-    this.assertEqual("",                   $H({foo: {}, bar: {}}).toQueryString());
-    this.assertEqual("stuff%5B%5D=%24&stuff%5B%5D=a&stuff%5B%5D=%3B", $H(Fixtures.multiple_special).toQueryString());
+    this.assertEqual('a=b&c',              $H(Fixtures.value_undefined).toQueryString());
+    this.assertEqual('a=b&c',              $H('a=b&c'.toQueryParams()).toQueryString());
+    this.assertEqual('a=b&c=',             $H(Fixtures.value_null).toQueryString());
+    this.assertEqual('a=b&c=0',            $H(Fixtures.value_zero).toQueryString());
+
+    this.assertEqual('color=r&color=g&color=b', $H(Fixtures.multiple).toQueryString());
+    this.assertEqual('color=r&color=&color=g&color&color=0', $H(Fixtures.multiple_nil).toQueryString());
+    this.assertEqual('color=&color', $H(Fixtures.multiple_all_nil).toQueryString());
+
+    this.assertEqual('', $H(Fixtures.multiple_empty).toQueryString());
+    this.assertEqual('', $H({ 'foo':{ }, 'bar':{ } }).toQueryString());
+
+    this.assertEqual('stuff%5B%5D=%24&stuff%5B%5D=a&stuff%5B%5D=%3B', $H(Fixtures.multiple_special).toQueryString());
     this.assertHashEqual(Fixtures.multiple_special, $H(Fixtures.multiple_special).toQueryString().toQueryParams());
     this.assertIdentical(Object.toQueryString, Hash.toQueryString);
+    
+    this.assertEqual('a=A&b=B&toString=bar&valueOf=', 
+      $H(Fixtures.mixed_dont_enum).toQueryString());
   },
   
   testInspect: function() {
-    this.assertEqual('#<Hash:{}>',              $H({}).inspect());
-    this.assertEqual("#<Hash:{'a': 'A#'}>",     $H(Fixtures.one).inspect());
+    this.assertEqual('#<Hash:{}>', $H({}).inspect());
+    this.assertEqual("#<Hash:{'a': 'A#'}>", $H(Fixtures.one).inspect());
     this.assertEqual("#<Hash:{'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D#'}>", $H(Fixtures.many).inspect());
+    this.assertEqual("#<Hash:{'a': 'A', 'b': 'B', 'toString': 'bar', 'valueOf': ''}>", $H(Fixtures.mixed_dont_enum).inspect());
   },
 
   testClone: function() {

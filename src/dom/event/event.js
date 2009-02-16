@@ -222,8 +222,8 @@
       for (name in Event.Methods) (function(n) {
         Event.Methods[n]._methodized = Methods[n] = function() {
           return arguments.length
-              ? Event.Methods[n].apply(null, prependList(arguments, this))
-              : Event.Methods[n].call(null, this);
+            ? Event.Methods[n].apply(null, prependList(arguments, this))
+            : Event.Methods[n].call(null, this);
         };
       })(name);
 

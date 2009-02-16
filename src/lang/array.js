@@ -384,8 +384,8 @@
     });
 
     // Assign any missing Enumerable methods
-    for (var i in Enumerable) {
-      if (typeof AP[i] !== 'function')
-        AP[i] = Enumerable[i];
-    }
+    Object._each(Enumerable, function(value, key) {
+      if (typeof AP[key] !== 'function')
+        AP[key] = value;
+    });
   })(Array.prototype);

@@ -11,13 +11,13 @@
     }
 
     function _each(iterator) {
-      var key, pair;
-      for (key in this._object) {
-        pair = [key, this._object[key]];
+      var pair;
+      Object._each(this._object, function(value, key) {
+        pair = [key, value];
         pair.key = key;
         pair.value = pair[1];
         iterator(pair);
-      }
+      });
     }
 
     function clone() {
@@ -25,25 +25,30 @@
     }
 
     function filter(iterator, context) {
-      var key, result = new Hash();
-      for (key in this._object)
-        if (iterator.call(context, this._object[key], key))
-          result.set(key, this._object[key]);
+      var result = new Hash();
+      Object._each(this._object, function(value, key) {
+        if (iterator.call(context, value, key))
+          result.set(key, value);
+      });
       return result;
     }
 
     function include(value) {
-      var key;
-      for (key in this._object)
-        if (this._object[key] == value)
-          return true;
-      return false;
+      var result = false;
+      Object.each(this._object, function(objValue) {
+        if (value == objValue) {
+          result = true;
+          throw $break;
+        }
+      });
+      return result;
     }
 
     function inspect() {
       var results = [];
-      for (key in this._object)
-        results.push(key.inspect() + ': ' + Object.inspect(this._object[key]));
+      Object._each(this._object, function(value, key) {
+        results.push(key.inspect() + ': ' + Object.inspect(value));
+      });
       return '#<Hash:{' + results.join(', ') + '}>';
     }
 
@@ -51,24 +56,26 @@
       if (!pattern || Object.isRegExp(pattern) &&
          !pattern.source) this.clone();
       iterator = iterator || Fuse.K;
-      var key, value, result = new Hash();
+      var result = new Hash();
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
 
-      for (key in this._object) {
-        value = this._object[key];
+      Object._each(this._object, function(value, key) {
         if (pattern.match(value))
-          result.set(key, iterator.call(context, value,key));
-      }
+          result.set(key, iterator.call(context, value, key));
+      });
       return result;
     }
 
     function keyOf(value) {
-      var key;
-      for (key in this._object)
-        if (this._object[key] === value)
-          return key;
-      return -1;
+      var result = -1;
+      Object.each(this._object, function(objValue, key) {
+        if (value === objValue) {
+          result = key;
+          throw $break;
+        }
+      });
+      return result;
     }
 
     function merge(object) {
@@ -77,25 +84,28 @@
 
     function partition(iterator, context) {
       iterator = iterator || Fuse.K;
-      var key, trues = new Hash(), falses = new Hash();
-      for (key in this._object)
-        (iterator.call(context, this._object[key], key) ?
-          trues : falses).set(key, this._object[key]);
+      var trues = new Hash(), falses = new Hash();
+      Object._each(this._object, function(value, key) {
+        (iterator.call(context, value, key) ?
+          trues : falses).set(key, value);
+      });
       return [trues, falses];
     }
 
     function update(object) {
-      var key, object = new Hash(object)._object;
-      for (key in object)
-        this.set(key, object[key]);
-      return this;
+      var self = this, object = new Hash(object)._object;
+      Object._each(object, function(value, key) {
+        self.set(key, value);
+      });
+      return self;
     }
 
     function reject(iterator, context) {
       var result = new Hash();
-      for (key in this._object)
-        if (!iterator.call(context, this._object[key], key))
-          result.set(key, this._object[key]);
+      Object._each(this._object, function(value, key) {
+        if (!iterator.call(context, value, key))
+          result.set(key, value]);
+      });
       return result;
     }
 

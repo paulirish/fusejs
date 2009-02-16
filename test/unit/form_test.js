@@ -335,7 +335,8 @@ new Test.Unit.Runner({
     
     // test form elements names matching Object.prototype properties
     expected = { 'length':'', 'toString':'', 'valueOf':'' };
-    this.assertHashEqual(expected,  $('form_with_object_prototypes').serialize(true)); 
+    this.assertHashEqual(expected,  $('form_with_object_prototypes').serialize(true));
+    this.assertEqual('length=&toString=&valueOf=',  $('form_with_object_prototypes').serialize());
     
     // test selectboxes with no selected value
     expected = { 'vm[]':3 };

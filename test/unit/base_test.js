@@ -124,7 +124,9 @@ new Test.Unit.Runner({
   },
   
   testObjectToQueryString: function() {
-    this.assertEqual('a=A&b=B&c=C&d=D%23', Object.toQueryString({a: 'A', b: 'B', c: 'C', d: 'D#'}));
+    this.assertEqual('a=A&b=B&c=C&d=D%23', Object.toQueryString({ 'a':'A', 'b':'B', 'c':'C', 'd':'D#' }));
+    this.assertEqual('a=A&b=B&toString=bar&valueOf=', 
+      Object.toQueryString(Fixtures.mixed_dont_enum));
   },
   
   testObjectClone: function() {
@@ -148,30 +150,42 @@ new Test.Unit.Runner({
   },
   
   testObjectToJSON: function() {
-    this.assertUndefined(Object.toJSON(undefined));
+    var undef;
+    
+    this.assertUndefined(Object.toJSON(undef));
     this.assertUndefined(Object.toJSON(Fuse.K));
-    this.assertEqual('\"\"', Object.toJSON(''));
+    
+    this.assertEqual('""', Object.toJSON(''));
     this.assertEqual('[]', Object.toJSON([]));
-    this.assertEqual('[\"a\"]', Object.toJSON(['a']));
-    this.assertEqual('[\"a\", 1]', Object.toJSON(['a', 1]));
-    this.assertEqual('[\"a\", {\"b\": null}]', Object.toJSON(['a', {'b': null}]));
-    this.assertEqual('{\"a\": \"hello!\"}', Object.toJSON({a: 'hello!'}));
-    this.assertEqual('{}', Object.toJSON({}));
-    this.assertEqual('{}', Object.toJSON({a: undefined, b: undefined, c: Fuse.K}));
-    this.assertEqual('{\"b\": [false, true], \"c\": {\"a\": \"hello!\"}}',
-      Object.toJSON({'b': [undefined, false, true, undefined], c: {a: 'hello!'}}));
-    this.assertEqual('{\"b\": [false, true], \"c\": {\"a\": \"hello!\"}}',
-      Object.toJSON($H({'b': [undefined, false, true, undefined], c: {a: 'hello!'}})));
-    this.assertEqual('true', Object.toJSON(true));
+    this.assertEqual('["a"]', Object.toJSON(['a']));
+    this.assertEqual('["a", 1]', Object.toJSON(['a', 1]));
+    this.assertEqual('["a", {"b": null}]', Object.toJSON(['a', {'b': null}]));
+    this.assertEqual('{"a": "hello!"}', Object.toJSON({a: 'hello!'}));
+    this.assertEqual('{}', Object.toJSON({ }));
+    this.assertEqual('{}', Object.toJSON({ 'a':undef, 'b':undef, 'c':Fuse.K }));
+
+    this.assertEqual('{"b": [false, true], "c": {"a": "hello!"}}',
+      Object.toJSON({ 'b': [undef, false, true, undef], 'c': {'a':'hello!' } }));
+      
+    this.assertEqual('{"b": [false, true], "c": {"a": "hello!"}}',
+      Object.toJSON($H({ 'b': [undef, false, true, undef], 'c': { 'a': 'hello!' } })));
+      
+    this.assertEqual('true',  Object.toJSON(true));
     this.assertEqual('false', Object.toJSON(false));
-    this.assertEqual('null', Object.toJSON(null));
-    var sam = new Person('sam');
+    this.assertEqual('null',  Object.toJSON(null));
+    
+    var sam = new Fixtures.Person('sam');
     this.assertEqual('-sam', Object.toJSON(sam));
     this.assertEqual('-sam', sam.toJSON());
+    
     var element = $('test');
     this.assertUndefined(Object.toJSON(element));
-    element.toJSON = function(){return 'I\'m a div with id test'};
+    
+    element.toJSON = function(){ return 'I\'m a div with id test' };
     this.assertEqual('I\'m a div with id test', Object.toJSON(element));
+    
+    this.assertEqual('{"a": "A", "b": "B", "toString": "bar", "valueOf": ""}',
+      Object.toJSON(Fixtures.mixed_dont_enum));
   },
   
   testObjectToHTML: function() {
@@ -392,6 +406,9 @@ new Test.Unit.Runner({
     this.assertEnumEqual(['a'],       Object.keys({ 'a': 'A' }));
     this.assertEnumEqual($w('a b c'), Object.keys({ 'a':'A', 'b':'B', 'c':'C' }).sort());
 
+    this.assertEnumEqual($w('a b toString valueOf'),
+      Object.keys(Fixtures.mixed_dont_enum).sort());
+
     this.assertRaise('TypeError', function() { Object.keys(null) });
     this.assertRaise('TypeError', function() { Object.keys(3) });
   },
@@ -402,6 +419,9 @@ new Test.Unit.Runner({
     this.assertEnumEqual(['A'],       Object.values({ 'a': 'A' }));
     this.assertEnumEqual($w('A B C'), Object.values({ 'a':'A', 'b':'B', 'c':'C' }).sort());
     
+    var result = Object.values(Fixtures.mixed_dont_enum);
+    this.assert(result.length === 4 && result.sort().join('') === 'ABbar');
+
     this.assertRaise('TypeError', function() { Object.values(null) });
     this.assertRaise('TypeError', function() { Object.values(3) });
   },
@@ -548,23 +568,23 @@ new Test.Unit.Runner({
   },
   
   testClassCreate: function() { 
-    this.assert(Object.isFunction(Animal), 'Animal is not a constructor');
-    this.assertEnumEqual([Cat, Mouse, Dog, Ox], Animal.subclasses);
-    Animal.subclasses.each(function(subclass) {
-      this.assertEqual(Animal, subclass.superclass);
+    this.assert(Object.isFunction(Fixtures.Animal), 'Fixtures.Animal is not a constructor');
+    this.assertEnumEqual([Fixtures.Cat, Fixtures.Mouse, Fixtures.Dog, Fixtures.Ox], Fixtures.Animal.subclasses);
+    Fixtures.Animal.subclasses.each(function(subclass) {
+      this.assertEqual(Fixtures.Animal, subclass.superclass);
     }, this);
 
-    var Bird = Class.create(Animal);
-    this.assertEqual(Bird, Animal.subclasses.last());
+    var Bird = Class.create(Fixtures.Animal);
+    this.assertEqual(Bird, Fixtures.Animal.subclasses.last());
     // for..in loop (for some reason) doesn't iterate over the constructor property in top-level classes
-    this.assertEnumEqual(Object.keys(new Animal).sort(), Object.keys(new Bird).without('constructor').sort());
+    this.assertEnumEqual(Object.keys(new Fixtures.Animal).sort(), Object.keys(new Bird).without('constructor').sort());
   },
 
   testClassInstantiation: function() { 
-    var pet = new Animal("Nibbles");
+    var pet = new Fixtures.Animal("Nibbles");
     this.assertEqual("Nibbles", pet.name, "property not initialized");
     this.assertEqual('Nibbles: Hi!', pet.say('Hi!'));
-    this.assertEqual(Animal, pet.constructor, "bad constructor reference");
+    this.assertEqual(Fixtures.Animal, pet.constructor, "bad constructor reference");
     this.assertUndefined(pet.superclass);
 
     var Empty = Class.create();
@@ -589,20 +609,20 @@ new Test.Unit.Runner({
   },
 
   testInheritance: function() {
-    var tom = new Cat('Tom');
-    this.assertEqual(Cat, tom.constructor, "bad constructor reference");
-    this.assertEqual(Animal, tom.constructor.superclass, 'bad superclass reference');
+    var tom = new Fixtures.Cat('Tom');
+    this.assertEqual(Fixtures.Cat, tom.constructor, "bad constructor reference");
+    this.assertEqual(Fixtures.Animal, tom.constructor.superclass, 'bad superclass reference');
     this.assertEqual('Tom', tom.name);
     this.assertEqual('Tom: meow', tom.say('meow'));
-    this.assertEqual('Tom: Yuk! I only eat mice.', tom.eat(new Animal));
+    this.assertEqual('Tom: Yuk! I only eat mice.', tom.eat(new Fixtures.Animal));
   },
 
   testSuperclassMethodCall: function() {
-    var tom = new Cat('Tom');
-    this.assertEqual('Tom: Yum!', tom.eat(new Mouse));
+    var tom = new Fixtures.Cat('Tom');
+    this.assertEqual('Tom: Yum!', tom.eat(new Fixtures.Mouse));
 
     // augment the constructor and test
-    var Dodo = Class.create(Animal, {
+    var Dodo = Class.create(Fixtures.Animal, {
       initialize: function($super, name) {
         $super(name);
         this.extinct = true;
@@ -620,16 +640,16 @@ new Test.Unit.Runner({
   },
 
   testClassAddMethods: function() {
-    var tom   = new Cat('Tom');
-    var jerry = new Mouse('Jerry');
+    var tom   = new Fixtures.Cat('Tom');
+    var jerry = new Fixtures.Mouse('Jerry');
     
-    Animal.addMethods({
+    Fixtures.Animal.addMethods({
       sleep: function() {
         return this.say('ZZZ');
       }
     });
     
-    Mouse.addMethods({
+    Fixtures.Mouse.addMethods({
       sleep: function($super) {
         return $super() + " ... no, can't sleep! Gotta steal cheese!";
       },
@@ -643,9 +663,9 @@ new Test.Unit.Runner({
     this.assertEqual("Jerry: (from a mousehole) Take that, Tom!", jerry.escape(tom));
     // insure that a method has not propagated *up* the prototype chain:
     this.assertUndefined(tom.escape);
-    this.assertUndefined(new Animal().escape);
+    this.assertUndefined(new Fixtures.Animal().escape);
     
-    Animal.addMethods({
+    Fixtures.Animal.addMethods({
       sleep: function() {
         return this.say('zZzZ');
       }
@@ -655,18 +675,18 @@ new Test.Unit.Runner({
   },
   
   testBaseClassWithMixin: function() {
-    var grass = new Plant('grass', 3);
+    var grass = new Fixtures.Plant('grass', 3);
     this.assertRespondsTo('getValue', grass);      
     this.assertEqual('#<Plant: grass>', grass.inspect());
   },
   
   testSubclassWithMixin: function() {
-    var snoopy = new Dog('Snoopy', 12, 'male');
+    var snoopy = new Fixtures.Dog('Snoopy', 12, 'male');
     this.assertRespondsTo('reproduce', snoopy);      
   },
  
   testSubclassWithMixins: function() {
-    var cow = new Ox('cow', 400, 'female');
+    var cow = new Fixtures.Ox('cow', 400, 'female');
     this.assertEqual('#<Ox: cow>', cow.inspect());
     this.assertRespondsTo('reproduce', cow);
     this.assertRespondsTo('getValue', cow);
@@ -674,22 +694,22 @@ new Test.Unit.Runner({
  
   testClassWithToStringAndValueOfMethods: function() {
     var Foo = Class.create({
-      toString: function() { return "toString" },
-      valueOf: function() { return "valueOf" }
+      'toString': function() { return "toString" },
+      'valueOf': function() { return "valueOf" }
     });
     
     var Parent = Class.create({
-      m1: function(){ return 'm1' },
-      m2: function(){ return 'm2' }
+      'm1': function(){ return 'm1' },
+      'm2': function(){ return 'm2' }
     });
     var Child = Class.create(Parent, {
-      m1: function($super) { return 'm1 child' },
-      m2: function($super) { return 'm2 child' }
+      'm1': function($super) { return 'm1 child' },
+      'm2': function($super) { return 'm2 child' }
     });
     
     this.assert(new Child().m1.toString().indexOf('m1 child') > -1);
     
-    this.assertEqual("toString", new Foo().toString());
-    this.assertEqual("valueOf", new Foo().valueOf());
+    this.assertEqual('toString', new Foo().toString());
+    this.assertEqual('valueOf',  new Foo().valueOf());
   }
 });

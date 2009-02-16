@@ -1,3 +1,5 @@
+* Add Object._each() and Object.each() to correctly handle for-in loops. [Rails Trac #11584] [jddalton, kangax, Tobie Langel]
+
 * Make Object.keys() and Object.values() conform to the ECMA 3.1 draft. [jddalton]
 
 * Add Object.isOwnProperty() to aid in detecting "own" vs. "inherited" properties. [Rails Trac #9700, #11043] [Prototype LH #243] [FuseJS LH #8] [arandes, Ben, grey, jddalton]

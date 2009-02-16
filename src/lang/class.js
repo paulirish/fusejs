@@ -34,26 +34,23 @@
     }
 
     function addMethods(source) {
-      var ancestor   = this.superclass && this.superclass.prototype;
-      var properties = Object.keys(source);
+      var __method, method, key, i = 0, keys = Object.keys(source),
+       ancestor = this.superclass && this.superclass.prototype;
 
-      if (!Object.keys({ toString: true }).length)
-        properties.push('toString', 'valueOf');
-
-      for (var i = 0, length = properties.length; i < length; i++) {
-        var property = properties[i], value = source[property];
-        if (ancestor && typeof value === 'function' &&
-            value.argumentNames()[0] === '$super') {
-          var method = value, value =(function(m) {
+      while (key = keys[i++]) {
+        method = source[key];
+        if (ancestor && typeof method === 'function' &&
+            method.argumentNames()[0] === '$super') {
+          __method = method;
+          method = (function(m) {
             return function() { return ancestor[m].apply(this, arguments) };
-          })(property).wrap(method);
+          })(key).wrap(__method);
 
-          value.valueOf  = method.valueOf.bind(method);
-          value.toString = method.toString.bind(method);
+          method.valueOf  = __method.valueOf.bind(__method);
+          method.toString = __method.toString.bind(__method);
         }
-        this.prototype[property] = value;
+        this.prototype[key] = method;
       }
-
       return this;
     }
 
