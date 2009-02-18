@@ -36,7 +36,7 @@ new Test.Unit.Runner({
   
   testEachChaining: function() {
     this.assertEqual(Fixtures.Primes, Fixtures.Primes.each(Fuse.emptyFunction));
-    this.assertEqual(3, Fixtures.Basic.each(Fuse.emptyFunction).length);
+    this.assertEqual(3, Fixtures.Basic.each(Fuse.emptyFunction).size());
   },
 
   testEnumContext: function() {
@@ -89,12 +89,12 @@ new Test.Unit.Runner({
   },
   
   testCollect: function() {
-    this.assertEqual(Fixtures.Nicknames.join(', '), 
+    this.assertEqual(Fixtures.Nicknames.toArray().join(', '), 
       Fixtures.People.collect(function(person) {
         return person.nickname;
-      }).join(", "));
+      }).toArray().join(', '));
     
-    this.assertEqual(26,  Fixtures.Primes.map().length);
+    this.assertEqual(26,  Fixtures.Primes.map().size());
   },
   
   testDetect: function() {
@@ -125,14 +125,14 @@ new Test.Unit.Runner({
       indexes.push(index);
     });
     
-    this.assertEqual(Fixtures.Nicknames.join(', '), 
+    this.assertEqual(Fixtures.Nicknames.toArray().join(', '), 
       nicknames.join(', '));
     this.assertEqual('0, 1, 2, 3', indexes.join(', '));
   },
   
   testFindAll: function() {
-    this.assertEqual(Fixtures.Primes.join(', '),
-      Fixtures.Z.findAll(prime).join(', '));
+    this.assertEqual(Fixtures.Primes.toArray().join(', '),
+      Fixtures.Z.findAll(prime).toArray().join(', '));
   },
   
   testGrep: function() {
@@ -259,8 +259,8 @@ new Test.Unit.Runner({
   },
   
   testPluck: function() {
-    this.assertEqual(Fixtures.Nicknames.join(', '),
-      Fixtures.People.pluck('nickname').join(', '));
+    this.assertEqual(Fixtures.Nicknames.toArray().join(', '),
+      Fixtures.People.pluck('nickname').toArray().join(', '));
   },
   
   testReject: function() {
@@ -281,10 +281,11 @@ new Test.Unit.Runner({
   },
   
   testToArray: function() {
-    var result = Fixtures.People.toArray();
-    this.assert(result != Fixtures.People); // they're different objects...
-    this.assertEqual(Fixtures.Nicknames.join(', '),
-      result.pluck('nickname').join(', ')); // but the values are the same
+    var result = Fixtures.Nicknames.toArray();
+    // they're different objects...
+    this.assert(result != Fixtures.Nicknames);
+    // but the values are the same
+    this.assertEnumEqual(['sam-', 'noradio', 'htonl', 'Ulysses'], result);
   },
   
   testZip: function() {

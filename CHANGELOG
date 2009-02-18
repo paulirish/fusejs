@@ -1,3 +1,5 @@
+* unit test: Ensure Enumerable tests against Enumerable methods and not Array methods. [jddalton]
+
 * Make Array#each/Enumerable#each pass the object it's acting on as the third argument of the callback. [kangax]
 
 * Remove Array#each alais of Array#forEach to avoid potential use of forEach's "thisArg" parameter. [Prototype LH #554] [jddalton, kangax, Yaffle]
