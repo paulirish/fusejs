@@ -104,6 +104,20 @@ new Test.Unit.Runner({
     this.assert(!basic.contains('4'));    
   },
 
+ testEach: function() {
+   var self = this,
+    source = [1, 2, 3, 4, 5],
+    thisArg = { 'foo': 'bar' };
+
+   source.each(function(item, index, array) {
+     self.assertEqual(1, item);
+     self.assertEqual(0, index);
+     self.assertEqual(source, array);
+     self.assertEqual(thisArg, this);
+     throw $break;
+   }, thisArg);
+ },
+
   testEvery: function() {
     this.assert([].every());
     

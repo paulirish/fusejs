@@ -35,9 +35,11 @@
   Array.from = $A;
 
   (function(AP) {
-    function _each(iterator) {
+    function _each(callback) {
+      // avoid using Array#forEach because we only want
+      // to pass one argument to the callback
       for (var i = 0, length = this.length; i < length; i++)
-        iterator(this[i]);
+        callback(this[i]);
     }
 
     function clear() {
@@ -67,6 +69,15 @@
         else results.push(item);
       }
       return results;
+    }
+
+    function each(callback, thisArg) {
+      try {
+        this.forEach(callback, thisArg);
+      } catch (e) {
+        if (e !== $break) throw e;
+      }
+      return this;
     }
 
     function every(iterator, context) {
@@ -109,6 +120,12 @@
         else results.push(this[i]);
       }
       return results;
+    }
+
+    function forEach(callback, thisArg) {
+      // ECMA-3.1 15.4.4.18
+      for (var i = 0, length = this.length; i < length; i++)
+        callback.call(thisArg, this[i], i, this);
     }
 
     function indexOf(item, fromIndex) {
@@ -347,7 +364,7 @@
 
     if (!AP.every)       AP.every       = every;
     if (!AP.filter)      AP.filter      = filter;
-    if (!AP.forEach)     AP.forEach     = _each;
+    if (!AP.forEach)     AP.forEach     = forEach;
     if (!AP.indexOf)     AP.indexOf     = indexOf;
     if (!AP.lastIndexOf) AP.lastIndexOf = lastIndexOf;
     if (!AP.map)         AP.map         = map;
@@ -356,11 +373,12 @@
     /*--------------------------------------------------------------------------*/
 
     Object.extend(AP, {
-      '_each':     AP.forEach,
+      '_each':     _each,
       'clear':     clear,
       'clone':     clone,
       'compact':   compact,
       'contains':  contains,
+      'each':      each,
       'first':     first,
       'flatten':   flatten,
       'grep':      grep,

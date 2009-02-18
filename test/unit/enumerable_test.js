@@ -23,6 +23,16 @@ new Test.Unit.Runner({
     
     this.assertEqual('1, 3', results.join(', '));
   },
+
+  testEachCallbackArguments: function() {
+    var self = this;
+    Fixtures.Basic.each(function(item, index, array) {
+      self.assertEqual(1, item);
+      self.assertEqual(0, index);
+      self.assertEqual(Fixtures.Basic, array);
+      throw $break;
+    });
+  },
   
   testEachChaining: function() {
     this.assertEqual(Fixtures.Primes, Fixtures.Primes.each(Fuse.emptyFunction));

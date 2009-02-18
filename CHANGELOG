@@ -1,3 +1,7 @@
+* Make Array#each/Enumerable#each pass the object it's acting on as the third argument of the callback. [kangax]
+
+* Remove Array#each alais of Array#forEach to avoid potential use of forEach's "thisArg" parameter. [Prototype LH #554] [jddalton, kangax, Yaffle]
+
 * Cleanup unit test fixtures and source files. [jddalton]
 
 * Add Object._each() and Object.each() to correctly handle for-in loops. [Rails Trac #11584] [jddalton, kangax, Tobie Langel]

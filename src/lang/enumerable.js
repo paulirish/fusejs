@@ -22,11 +22,11 @@
       return result;
     }
 
-    function each(iterator, context) {
-      var index = 0;
+    function each(callback, thisArg) {
+      var self = this, index = 0;
       try {
         this._each(function(value) {
-          iterator.call(context, value, index++);
+          callback.call(thisArg, value, index++, self);
         });
       } catch (e) {
         if (e !== $break) throw e;
