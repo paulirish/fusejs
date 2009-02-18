@@ -1,67 +1,3 @@
-
-var isIE6AndLower = Fuse.Browser.Agent.IE && !window.XMLHttpRequest,
-
-getInnerHTML = function(id) {
-  return $(id).innerHTML.toString().toLowerCase().gsub(/[\r\n\t]/, '');
-},
-
-createParagraph = function(text, context) {
-  context = context || document;
-  var p = context.createElement('p');
-  p.appendChild(context.createTextNode(text));
-  return p;
-},
-
-getIframeDocument = function() {
-  var element = $('iframe');
-  return element.contentDocument || element.contentWindow && element.contentWindow.document;
-},
-
-isIframeDocument = function(doc) {
-  return (doc.parentWindow || doc.defaultView).frameElement != null;
-},
-
-isIframeAccessible = function() {
-  try {
-    return !!getIframeDocument().body;
-  } catch(e) {
-    return false;
-  }
-},
-
-getElement = function(element, context) {
-  if (typeof element !== 'string') return element;
-  return Element.extend((context || document).getElementById(element));
-};
-
-// Parsing and serializing XML
-// http://developer.mozilla.org/En/Parsing_and_serializing_XML
-// http://www.van-steenbeek.net/?q=explorer_domparser_parsefromstring
-if (typeof(DOMParser) === 'undefined') {
-  DOMParser = function() { };
-  DOMParser.prototype.parseFromString = (function() {
-    if (typeof(ActiveXObject) !== 'undefined') {
-      return function(str, contentType) {
-        var xmldata = new ActiveXObject('MSXML.DomDocument');
-        xmldata.async = false;
-        xmldata.loadXML(str);
-        return xmldata;
-      };
-    }
-    return function(str, contentType) {
-      var transport = Ajax.getTransport();
-      if (!contentType)
-        contentType = 'application/xml';
- 
-      transport.open('GET', 'data:' + contentType + ';charset=utf-8,' + encodeURIComponent(str), false);
-      if (typeof transport.overrideMimeType !== 'undefined')
-        transport.overrideMimeType(contentType);
-      transport.send(null);
-      return transport.responseXML;
-    };
-  })();
-}
-
 new Test.Unit.Runner({
   setup: function() {
     if (documentViewportProperties) return;
@@ -903,8 +839,8 @@ new Test.Unit.Runner({
   
   testExtendingAfterAddMethods: function() {
     var span = new Element('span');
-	Element.addMethods({ testMethod: Fuse.K });
-	this.assertRespondsTo('testMethod', Element.extend(span));
+    Element.addMethods({ 'testMethod': Fuse.K });
+    this.assertRespondsTo('testMethod', Element.extend(span));
   },
   
   testElementCleanWhitespace: function() {
@@ -1364,9 +1300,9 @@ new Test.Unit.Runner({
   },
   
   testNewElement: function() {
-    var self = this;
+    var self = this,
     
-    var XHTML_TAGS = $w(
+    XHTML_TAGS = $w(
       'a abbr acronym address area '+
       'b bdo big blockquote br button caption '+
       'cite code col colgroup dd del dfn div dl dt '+
@@ -1421,7 +1357,7 @@ new Test.Unit.Runner({
     this.assert(new Element('h1'));
 
     Element.addMethods({
-      cheeseCake: function() { return 'Cheese cake' }
+      'cheeseCake': function() { return 'Cheese cake' }
     });
     
     this.assertRespondsTo('cheeseCake', new Element('div'));
@@ -1620,7 +1556,7 @@ new Test.Unit.Runner({
     var elem = $('navigation_test_f');
     this.assertRespondsTo('hashBrowns', elem);
     this.assertEqual('hash browns', elem.hashBrowns());
-    
+ 
     this.assertRespondsTo('hashBrowns', Element);
     this.assertEqual('hash browns', Element.hashBrowns(elem));
   },

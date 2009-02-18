@@ -9,7 +9,7 @@
     RegExp.specialChar = { 's': '\\s' };
     RegExp.prototype.match = RegExp.prototype.test;
 
-    // Safari 2 and IE have non-spec-conforming /\s/ 
+    // Versions of WebKit and IE have non-spec-conforming /\s/ 
     // so we emulate it (see: ECMA-262 15.10.2.12)
     // http://www.unicode.org/Public/UNIDATA/PropList.txt
     if (Bug('REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY')) {

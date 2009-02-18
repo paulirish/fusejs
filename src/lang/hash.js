@@ -177,7 +177,6 @@
       'inspect':                inspect,
       'merge':                  merge,
       'partition':              partition,
-      'update':                 update,
       'reject':                 reject,
       'select':                 filter,
       'set':                    set,
@@ -186,6 +185,7 @@
       'toQueryString':          toQueryString,
       'toTemplateReplacements': toObject,
       'unset':                  unset,
+      'update':                 update,
       'values':                 values,
       'zip':                    zip
     };

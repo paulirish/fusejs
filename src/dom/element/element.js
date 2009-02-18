@@ -174,7 +174,7 @@
       if (global[klass]) return global[klass];
 
       global[klass] = { };
-      global[klass].prototype = doc.createElement(tagName).__proto__;
+      global[klass].prototype = doc.createElement(tagName)['__proto__'];
       return global[klass];
     }
 
@@ -212,11 +212,11 @@
       }
 
       if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
-        var klass, infiniteRevision = function() { return Infinity };
-        for (var tag in Element.Methods.ByTag) {
-          klass = findDOMClass(tag);
+        var klass, tagName, infiniteRevision = function() { return Infinity };
+        for (tagName in Element.Methods.ByTag) {
+          klass = findDOMClass(tagName);
           if (typeof klass === 'undefined') continue;
-          copy(T[tag], klass.prototype);
+          copy(T[tagName], klass.prototype);
           klass.prototype._extendedByFuse = infiniteRevision;
         }
         HTMLElement.prototype._extendedByFuse = infiniteRevision;

@@ -148,13 +148,12 @@
       removeEvent = function(element, eventName, handler) {
         element.detachEvent('on' + getDOMEventName(eventName), handler);
       };
-    } 
+    }
     else {
       // DOM Level 0
       addEvent = function(element, eventName, handler) {
-        var domEventName = getDOMEventName(eventName),
-         attrName = 'on' + domEventName, oldHandler = element[attrName];
-
+        var attrName = 'on' + getDOMEventName(eventName),
+         oldHandler = element[attrName];
         if (oldHandler) {
           if (oldHandler.isDispatcher) return false;
           addCache(element, eventName, element[attrName]);
@@ -163,8 +162,7 @@
       };
 
       removeEvent = function(element, eventName, handler) {
-        var domEventName = getDOMEventName(eventName),
-         attrName = 'on' + domEventName;
+        var attrName = 'on' + getDOMEventName(eventName);
         if (!eventName.include(':') && element[attrName] === handler)
           element[attrName] = null;
       };
@@ -340,13 +338,11 @@
     function fire(element, eventName, memo) {
       element = $(element);
       var event = createEvent(element, CUSTOM_EVENT_NAME);
-      if (event) {
-        event.eventName = eventName;
-        event.memo = memo || { };
-        fireEvent(element, event);
-        return Event.extend(event);
-      }
-      return false;
+      if (!event) return false;
+      event.eventName = eventName;
+      event.memo = memo || { };
+      fireEvent(element, event);
+      return Event.extend(event);
     }
 
     function getEventID() {
@@ -451,11 +447,11 @@
         doc = dummy = body = docEl = root = null;
       }
 
+      // avoid Function#wrap for better performance esp.
+      // in winLoadWrapper which could be called every 10ms
       addEvent(doc, 'dom:loaded',
         getOrCreateCache(DOC_ID, doc, 'dom:loaded').dispatcher = domLoadWrapper);
 
-      // avoid Function#wrap for better performance esp.
-      // in winLoadWrapper which could be called every 10ms
       addEvent(global, 'load',
         getOrCreateCache(WIN_ID, global, 'load').dispatcher = winLoadWrapper);
 
