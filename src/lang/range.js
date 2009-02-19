@@ -32,8 +32,9 @@
             c.pop();
           else c.push(c.last().succ());
         }
-        while (value = c[i++])
-          iterator(value);
+        var length = c.length;
+        while (i < length)
+          iterator(c[i++]);
       }
     }
 

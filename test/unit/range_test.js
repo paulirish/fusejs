@@ -58,12 +58,12 @@ new Test.Unit.Runner({
   },
   
   testRangeCache: function() {
-    var range = $R(1, 4);
+    var range = $R(-2, 2);
     range.toArray();
-    this.assertEnumEqual([1, 2, 3, 4], range.toArray());
+    this.assertEnumEqual([-2, -1, 0, 1, 2], range.toArray());
 
     range.exclusive = true;
-    this.assertEnumEqual([1, 2, 3], range.toArray());
+    this.assertEnumEqual([-2, -1, 0, 1], range.toArray());
 
     range.start = 3;
     range.end   = 6;

@@ -1,3 +1,5 @@
+* Fixed ObjectRange bug that caused it to exit the cached loop early when it encountered a 0 value. [jddalton]
+
 * unit test: Ensure Enumerable tests against Enumerable methods and not Array methods. [jddalton]
 
 * Make Array#each/Enumerable#each pass the object it's acting on as the third argument of the callback. [kangax]
