@@ -36,10 +36,7 @@
 
   (function(AP) {
     function _each(callback) {
-      // avoid using Array#forEach because we only want
-      // to pass one argument to the callback
-      for (var i = 0, length = this.length; i < length; i++)
-        callback(this[i]);
+      this.forEach(callback);
     }
 
     function clear() {
@@ -124,12 +121,14 @@
 
     function forEach(callback, thisArg) {
       // ECMA-3.1 15.4.4.18
-      for (var i = 0, length = this.length; i < length; i++)
-        callback.call(thisArg, this[i], i, this);
+      var i = 0, length = this.length;
+      if (thisArg) while (i < length)
+        callback.call(thisArg, this[i], i++, this);
+      else while (i < length) callback(this[i], i++, this);
     }
 
     function indexOf(item, fromIndex) {
-      fromIndex || (fromIndex = 0);
+      fromIndex = fromIndex || 0;
       var length = this.length;
       if (fromIndex < 0) fromIndex = length + fromIndex;
       for ( ; fromIndex < length; fromIndex++)
@@ -163,7 +162,7 @@
         return this[length && length - 1];
       if (typeof iterator === 'function') {
         while (length--)
-          if (iterator.call(context, this[length], length))
+          if (iterator.call(context, this[length], length, this))
             return this[length];
         return;        
       }
@@ -181,11 +180,13 @@
       return (n < 0) ? n : fromIndex - n - 1;
     }
 
-    function map(iterator, context) {
-      if (!iterator) return slice.call(this, 0);
-      var results = [];
-      for (var i = 0, length = this.length; i < length; i++)
-        results[i] = iterator.call(context, this[i], i);
+    function map(callback, thisArg) {
+      if (!callback) return slice.call(this, 0);
+      var results = [], i = 0, length = this.length;
+      if (thisArg) while (i < length)
+        results[i] = callback.call(thisArg, this[i], i++, this);
+      else while (i < length)
+        results[i] = callback(this[i], i++, this);
       return results;
     }
 
@@ -196,7 +197,7 @@
     function some(iterator, context) {
       iterator = iterator || Fuse.K;
       for (var i = 0, length = this.length; i < length; i++)
-        if (!!iterator.call(context, this[i], i))
+        if (iterator.call(context, this[i], i, this))
           return true;
       return false;
     }
@@ -233,9 +234,12 @@
       return false;
     }
 
-    function inject(accumulator, iterator, context) {
-      for (var i = 0, length = this.length; i < length; i++)
-        accumulator = iterator.call(context, accumulator, this[i], i);
+    function inject(accumulator, callback, thisArg) {
+      var i = 0, length = this.length;
+      if (thisArg) while (i < length)
+        accumulator = callback.call(thisArg, accumulator, this[i], i++, this);
+      else while (i < length)
+        accumulator = callback(accumulator, this[i], i++, this);
       return accumulator;
     }
 
@@ -262,7 +266,7 @@
 
       for (var i = 0, length = this.length; i < length; i++)
         if (pattern.match(this[i]))
-          results[results.length] = iterator.call(context, this[i], i);
+          results[results.length] = iterator.call(context, this[i], i, this);
       return results;
     }
 
@@ -276,7 +280,7 @@
       }
       result = null; iterator = Fuse.K;
       for (var i = 0, length = this.length, value; i < length; i++) {
-        value = iterator.call(context, this[i], i);
+        value = iterator.call(context, this[i], i, this);
         if (result == null || value >= result)
           result = value;
       }
@@ -291,7 +295,7 @@
       }
       result = null; iterator = Fuse.K;
       for (var i = 0, length = this.length, value; i < length; i++) {
-        value = iterator.call(context, this[i], i);
+        value = iterator.call(context, this[i], i, this);
         if (result == null || value < result)
           result = value;
       }
@@ -302,7 +306,7 @@
       iterator = iterator || Fuse.K;
       var trues = [], falses = [];
       for (var i = 0, length = this.length; i < length; i++)
-        (iterator.call(context, this[i], i) ?
+        (iterator.call(context, this[i], i, this) ?
           trues : falses).push(this[i]);
       return [trues, falses];
     }
@@ -316,14 +320,15 @@
 
     function reject(iterator, context) {
       for (var i = 0, results = [], length = this.length; i < length; i++)
-        if (!iterator.call(context, this[i], i))
+        if (!iterator.call(context, this[i], i, this))
           results[results.length] = this[i];
       return results;
     }
 
     function sortBy(iterator, context) {
-      for (var i = 0, results = [], length = this.length; i < length; i++)
-        results[i] = { 'value': this[i], 'criteria': iterator.call(context, this[i], i) };
+      var results = [], i = 0, length = this.length;
+      while (i < length)
+        results[i] = { 'value': this[i], 'criteria': iterator.call(context, this[i], i++, this) };
       return results.sort(function(left, right) {
         var a = left.criteria, b = right.criteria;
         return a < b ? -1 : a > b ? 1 : 0;
@@ -335,9 +340,9 @@
       if (typeof args.last() === 'function')
         iterator = args.pop();
 
-      var results = [], collections = prependList(args.map($A), this);
-      for (var i = 0, length = this.length; i < length; i++)
-        results[i] = iterator(collections.pluck(i));
+      var results = [], i = 0, length = this.length,
+       collections = prependList(args.map($A), this);
+      while (i < length) results[i] = iterator(collections.pluck(i), i++, this);
       return results;
     }
 

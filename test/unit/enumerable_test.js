@@ -26,10 +26,10 @@ new Test.Unit.Runner({
 
   testEachCallbackArguments: function() {
     var self = this;
-    Fixtures.Basic.each(function(item, index, array) {
+    Fixtures.Basic.each(function(item, index, iterable) {
       self.assertEqual(1, item);
       self.assertEqual(0, index);
-      self.assertEqual(Fixtures.Basic, array);
+      self.assertEqual(Fixtures.Basic, iterable);
       throw $break;
     });
   },

@@ -1,3 +1,9 @@
+* Ensure all Array, Enumerable, Hash, and ObjectRange methods, that allow a callback, pass the object they are acting on as its third argument. [jddalton]
+  Note: Backwards compatibility warning.
+   - The "_each" method is required to pass the second and third arguments to the callback.
+
+* Optimize Array#forEach, Array#inject, Array#map, Enumerable#map by only using "call" when a "thisArg" is given. [jddalton]
+
 * Fixed ObjectRange bug that caused it to exit the cached loop early when it encountered a 0 value. [jddalton]
 
 * unit test: Ensure Enumerable tests against Enumerable methods and not Array methods. [jddalton]

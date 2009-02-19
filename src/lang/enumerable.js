@@ -3,18 +3,10 @@
   $break = { };
 
   Enumerable = (function() {
-    function _map(context, iterator) {
-      var results = [];
-      context._each(function(value) {
-        results.push(iterator(value));
-      });
-      return results;
-    }
-
     function detect(iterator, context) {
       var result;
-      this.each(function(value, index) {
-        if (iterator.call(context, value, index)) {
+      this.each(function(value, index, iterable) {
+        if (iterator.call(context, value, index, iterable)) {
           result = value;
           throw $break;
         }
@@ -23,10 +15,9 @@
     }
 
     function each(callback, thisArg) {
-      var self = this, index = 0;
       try {
-        this._each(function(value) {
-          callback.call(thisArg, value, index++, self);
+        this._each(function(value, index, iterable) {
+          callback.call(thisArg, value, index, iterable);
         });
       } catch (e) {
         if (e !== $break) throw e;
@@ -45,19 +36,20 @@
     function every(iterator, context) {
       iterator = iterator || Fuse.K;
       var result = true;
-      this.each(function(value, index) {
-        result = !!iterator.call(context, value, index);
-        if (!result) throw $break;
+      this.each(function(value, index, iterable) {
+        if (!iterator.call(context, value, index, iterable)) {
+          result = false; throw $break;
+        }
       });
       return result;
     }
 
     function filter(iterator, context) {
-      var results = [], index = 0;
+      var results = [];
       if (!iterator)
         iterator = function() { return value != null };
-      this._each(function(value) {
-        if (iterator.call(context, value, index++))
+      this._each(function(value, index, iterable) {
+        if (iterator.call(context, value, index, iterable))
           results.push(value);
       });
       return results;
@@ -65,15 +57,15 @@
 
     function grep(pattern, iterator, context) {
       if (!pattern || Object.isRegExp(pattern) &&
-         !pattern.source) this.toArray();
+         !pattern.source) return this.toArray();
       iterator = iterator || Fuse.K;
-      var results = [], index = 0;
+      var results = [];
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
 
-      this._each(function(value) {
+      this._each(function(value, index, iterable) {
         if (pattern.match(value))
-          results.push(iterator.call(context, value, index++));
+          results.push(iterator.call(context, value, index, iterable));
       });
       return results;
     }
@@ -98,9 +90,8 @@
     }
 
     function inject(accumulator, iterator, context) {
-      var index = 0;
-      this._each(function(value) {
-        accumulator = iterator.call(context, accumulator, value, index++);
+      this._each(function(value, index, iterable) {
+        accumulator = iterator.call(context, accumulator, value, index, iterable);
       });
       return accumulator;
     }
@@ -111,25 +102,31 @@
 
     function invoke(method) {
       var args = slice.call(arguments, 1);
-      return _map(this, function(value) {
+      return this.map(function(value) {
         return Function.prototype.apply.call(value[method], value, args);
       });
     }
 
-    function map(iterator, context) {
-      if (!iterator) return this.toArray();
-      var results = [], index = 0;
-      this._each(function(value) {
-        results.push(iterator.call(context, value, index++));
-      });
+    function map(callback, thisArg) {
+      if (!callback) return this.toArray();
+      var results = [];
+      if (thisArg) {
+        this._each(function(value, index, iterable) {
+          results.push(callback.call(thisArg, value, index, iterable));
+        });
+      } else {
+        this._each(function(value, index, iterable) {
+          results.push(callback(value, index, iterable));
+        });
+      }
       return results;
     }
 
     function max(iterator, context) {
       iterator = iterator || Fuse.K;
-      var result, index = 0;
-      this._each(function(value) {
-        value = iterator.call(context, value, index++);
+      var result;
+      this._each(function(value, index, iterable) {
+        value = iterator.call(context, value, index, iterable);
         if (result == null || value >= result)
           result = value;
       });
@@ -138,9 +135,9 @@
 
     function min(iterator, context) {
       iterator = iterator || Fuse.K;
-      var result, index = 0;
-      this._each(function(value) {
-        value = iterator.call(context, value, index++);
+      var result;
+      this._each(function(value, index, iterable) {
+        value = iterator.call(context, value, index, iterable);
         if (result == null || value < result)
           result = value;
       });
@@ -149,24 +146,24 @@
 
     function partition(iterator, context) {
       iterator = iterator || Fuse.K;
-      var trues = [], falses = [], index = 0;
-      this._each(function(value) {
-        (iterator.call(context, value, index++) ?
+      var trues = [], falses = [];
+      this._each(function(value, index, iterable) {
+        (iterator.call(context, value, index, iterable) ?
           trues : falses).push(value);
       });
       return [trues, falses];
     }
 
     function pluck(property) {
-      return _map(this, function(value) {
+      return this.map(function(value) {
         return value[property];
       });
     }
 
     function reject(iterator, context) {
-      var results = [], index = 0;
-      this._each(function(value) {
-        if (!iterator.call(context, value, index++))
+      var results = [];
+      this._each(function(value, index, iterable) {
+        if (!iterator.call(context, value, index, iterable))
           results.push(value);
       });
       return results;
@@ -179,19 +176,19 @@
     function some(iterator, context) {
       iterator = iterator || Fuse.K;
       var result = false;
-      this.each(function(value, index) {
-        if (result = !!iterator.call(context, value, index))
-          throw $break;
+      this.each(function(value, index, iterable) {
+        if (iterator.call(context, value, index, iterable)) {
+          result = true; throw $break;
+        }
       });
       return result;
     }
 
     function sortBy(iterator, context) {
-      var index = 0;
-      return _map(this, function(value) {
+      return this.map(function(value, index, iterable) {
         return {
           'value': value,
-          'criteria': iterator.call(context, value, index)
+          'criteria': iterator.call(context, value, index, iterable)
         };
       }).sort(function(left, right) {
         var a = left.criteria, b = right.criteria;
@@ -206,13 +203,13 @@
     }
 
     function zip() {
-      var index = 0, iterator = Fuse.K, args = slice.call(arguments, 0);
+      var iterator = Fuse.K, args = slice.call(arguments, 0);
       if (typeof args.last() === 'function')
         iterator = args.pop();
 
       var sequences = prependList(args.map($A), this);
-      return _map(this, function(value) {
-        return iterator(sequences.pluck(index++));
+      return this.map(function(value, index, iterable) {
+        return iterator(sequences.pluck(index), index, iterable);
       });
     }
 

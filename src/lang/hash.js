@@ -11,12 +11,12 @@
     }
 
     function _each(iterator) {
-      var pair;
+      var pair, hash = this, i = 0;
       Object._each(this._object, function(value, key) {
         pair = [key, value];
         pair.key = key;
         pair.value = pair[1];
-        iterator(pair);
+        iterator(pair, i++, hash);
       });
     }
 
@@ -25,9 +25,9 @@
     }
 
     function filter(iterator, context) {
-      var result = new Hash();
+      var hash = this, result = new Hash();
       Object._each(this._object, function(value, key) {
-        if (iterator.call(context, value, key))
+        if (iterator.call(context, value, key, hash))
           result.set(key, value);
       });
       return result;
@@ -54,15 +54,16 @@
 
     function grep(pattern, iterator, context) {
       if (!pattern || Object.isRegExp(pattern) &&
-         !pattern.source) this.clone();
+         !pattern.source) return this.clone();
+
       iterator = iterator || Fuse.K;
-      var result = new Hash();
+      var hash = this, result = new Hash();
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
 
       Object._each(this._object, function(value, key) {
         if (pattern.match(value))
-          result.set(key, iterator.call(context, value, key));
+          result.set(key, iterator.call(context, value, key, hash));
       });
       return result;
     }
@@ -84,27 +85,27 @@
 
     function partition(iterator, context) {
       iterator = iterator || Fuse.K;
-      var trues = new Hash(), falses = new Hash();
+      var hash = this, trues = new Hash(), falses = new Hash();
       Object._each(this._object, function(value, key) {
-        (iterator.call(context, value, key) ?
+        (iterator.call(context, value, key, hash) ?
           trues : falses).set(key, value);
       });
       return [trues, falses];
     }
 
     function update(object) {
-      var self = this, object = new Hash(object)._object;
+      var hash = this, object = new Hash(object)._object;
       Object._each(object, function(value, key) {
-        self.set(key, value);
+        hash.set(key, value);
       });
-      return self;
+      return hash;
     }
 
     function reject(iterator, context) {
-      var result = new Hash();
+      var hash = this, result = new Hash();
       Object._each(this._object, function(value, key) {
-        if (!iterator.call(context, value, key))
-          result.set(key, value]);
+        if (!iterator.call(context, value, key, hash))
+          result.set(key, value);
       });
       return result;
     }
@@ -149,16 +150,16 @@
       if (typeof args.last() === 'function')
         iterator = args.pop();
 
-      var hash, value, values, j, i = 0, 
-       result = new Hash(), keys = this.keys(),
-       hashes = prependList(args.map($H), this);
+      var hash = this, result = new Hash(),
+       hashes  = prependList(args.map($H), this),
+       length  = hashes.length;
 
-      while (key = keys[i++]) {
-        j = 0; values = [];
-        while (hash = hashes[j++])
-          values.push(hash._object[key]);
-        result.set(key, iterator(values));
-      }
+      Object._each(this._object, function(value, key, object) {
+        if (!Object.isOwnProperty(object, key)) return;
+        var i = 0, values = [];
+        while (i < length) values.push(hashes[i++]._object[key]);
+        result.set(key, iterator(values, key, hash));
+      });
       return result;
     }
 

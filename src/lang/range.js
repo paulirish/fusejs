@@ -19,8 +19,8 @@
         c.end = this.end;
         c.exclusive = this.exclusive;
 
-        while (include(this, value)) {
-          iterator(value);
+        while (inRange(this, value)) {
+          iterator(value, i++, this);
           c.push(value);
           value = value.succ();
         }
@@ -34,11 +34,11 @@
         }
         var length = c.length;
         while (i < length)
-          iterator(c[i++]);
+          iterator(c[i], i++ , this);
       }
     }
 
-    function include(context, value) {
+    function inRange(context, value) {
       if (value < context.start)
         return false;
       if (context.exclusive)
