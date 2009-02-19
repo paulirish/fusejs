@@ -21,9 +21,9 @@
       return this + 1;
     }
 
-    function times(iterator, context) {
+    function times(callback, thisArg) {
       for (var i = 0, l = this; i < l; i++)
-        iterator.call(context, i, i);
+        callback.call(thisArg, i, i);
       return this;
     }
 

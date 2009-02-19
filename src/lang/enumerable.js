@@ -3,10 +3,10 @@
   $break = { };
 
   Enumerable = (function() {
-    function detect(iterator, context) {
+    function detect(callback, thisArg) {
       var result;
       this.each(function(value, index, iterable) {
-        if (iterator.call(context, value, index, iterable)) {
+        if (callback.call(thisArg, value, index, iterable)) {
           result = value;
           throw $break;
         }
@@ -25,47 +25,47 @@
       return this;
     }
 
-    function eachSlice(size, iterator, context) {
+    function eachSlice(size, callback, thisArg) {
       var index = -size, slices = [], array = this.toArray();
       if (size < 1) return array;
       while ((index += size) < array.length)
         slices[slices.length] = array.slice(index, index + size);
-      return slices.map(iterator, context);
+      return slices.map(callback, thisArg);
     }
 
-    function every(iterator, context) {
-      iterator = iterator || Fuse.K;
+    function every(callback, thisArg) {
+      callback = callback || Fuse.K;
       var result = true;
       this.each(function(value, index, iterable) {
-        if (!iterator.call(context, value, index, iterable)) {
+        if (!callback.call(thisArg, value, index, iterable)) {
           result = false; throw $break;
         }
       });
       return result;
     }
 
-    function filter(iterator, context) {
+    function filter(callback, thisArg) {
       var results = [];
-      if (!iterator)
-        iterator = function() { return value != null };
+      if (!callback)
+        callback = function() { return value != null };
       this._each(function(value, index, iterable) {
-        if (iterator.call(context, value, index, iterable))
+        if (callback.call(thisArg, value, index, iterable))
           results.push(value);
       });
       return results;
     }
 
-    function grep(pattern, iterator, context) {
+    function grep(pattern, callback, thisArg) {
       if (!pattern || Object.isRegExp(pattern) &&
          !pattern.source) return this.toArray();
-      iterator = iterator || Fuse.K;
+      callback = callback || Fuse.K;
       var results = [];
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
 
       this._each(function(value, index, iterable) {
         if (pattern.match(value))
-          results.push(iterator.call(context, value, index, iterable));
+          results.push(callback.call(thisArg, value, index, iterable));
       });
       return results;
     }
@@ -89,9 +89,9 @@
       });
     }
 
-    function inject(accumulator, iterator, context) {
+    function inject(accumulator, callback, thisArg) {
       this._each(function(value, index, iterable) {
-        accumulator = iterator.call(context, accumulator, value, index, iterable);
+        accumulator = callback.call(thisArg, accumulator, value, index, iterable);
       });
       return accumulator;
     }
@@ -122,33 +122,33 @@
       return results;
     }
 
-    function max(iterator, context) {
-      iterator = iterator || Fuse.K;
+    function max(callback, thisArg) {
+      callback = callback || Fuse.K;
       var result;
       this._each(function(value, index, iterable) {
-        value = iterator.call(context, value, index, iterable);
+        value = callback.call(thisArg, value, index, iterable);
         if (result == null || value >= result)
           result = value;
       });
       return result;
     }
 
-    function min(iterator, context) {
-      iterator = iterator || Fuse.K;
+    function min(callback, thisArg) {
+      callback = callback || Fuse.K;
       var result;
       this._each(function(value, index, iterable) {
-        value = iterator.call(context, value, index, iterable);
+        value = callback.call(thisArg, value, index, iterable);
         if (result == null || value < result)
           result = value;
       });
       return result;
     }
 
-    function partition(iterator, context) {
-      iterator = iterator || Fuse.K;
+    function partition(callback, thisArg) {
+      callback = callback || Fuse.K;
       var trues = [], falses = [];
       this._each(function(value, index, iterable) {
-        (iterator.call(context, value, index, iterable) ?
+        (callback.call(thisArg, value, index, iterable) ?
           trues : falses).push(value);
       });
       return [trues, falses];
@@ -160,10 +160,10 @@
       });
     }
 
-    function reject(iterator, context) {
+    function reject(callback, thisArg) {
       var results = [];
       this._each(function(value, index, iterable) {
-        if (!iterator.call(context, value, index, iterable))
+        if (!callback.call(thisArg, value, index, iterable))
           results.push(value);
       });
       return results;
@@ -173,22 +173,22 @@
       return this.toArray().length;
     }
 
-    function some(iterator, context) {
-      iterator = iterator || Fuse.K;
+    function some(callback, thisArg) {
+      callback = callback || Fuse.K;
       var result = false;
       this.each(function(value, index, iterable) {
-        if (iterator.call(context, value, index, iterable)) {
+        if (callback.call(thisArg, value, index, iterable)) {
           result = true; throw $break;
         }
       });
       return result;
     }
 
-    function sortBy(iterator, context) {
+    function sortBy(callback, thisArg) {
       return this.map(function(value, index, iterable) {
         return {
           'value': value,
-          'criteria': iterator.call(context, value, index, iterable)
+          'criteria': callback.call(thisArg, value, index, iterable)
         };
       }).sort(function(left, right) {
         var a = left.criteria, b = right.criteria;
@@ -203,13 +203,13 @@
     }
 
     function zip() {
-      var iterator = Fuse.K, args = slice.call(arguments, 0);
+      var callback = Fuse.K, args = slice.call(arguments, 0);
       if (typeof args.last() === 'function')
-        iterator = args.pop();
+        callback = args.pop();
 
       var sequences = prependList(args.map($A), this);
       return this.map(function(value, index, iterable) {
-        return iterator(sequences.pluck(index), index, iterable);
+        return callback(sequences.pluck(index), index, iterable);
       });
     }
 

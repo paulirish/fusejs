@@ -11,7 +11,7 @@
       this.exclusive = exclusive;
     }
 
-    function _each(iterator) {
+    function _each(callback) {
       var i = 0, c = this.cache, value = this.start;
       if (!c || this.start !== c.start || this.end !== c.end) {
         c = this.cache = [];
@@ -20,7 +20,7 @@
         c.exclusive = this.exclusive;
 
         while (inRange(this, value)) {
-          iterator(value, i++, this);
+          callback(value, i++, this);
           c.push(value);
           value = value.succ();
         }
@@ -34,16 +34,16 @@
         }
         var length = c.length;
         while (i < length)
-          iterator(c[i], i++ , this);
+          callback(c[i], i++ , this);
       }
     }
 
-    function inRange(context, value) {
-      if (value < context.start)
+    function inRange(thisArg, value) {
+      if (value < thisArg.start)
         return false;
-      if (context.exclusive)
-        return value < context.end;
-      return value <= context.end;
+      if (thisArg.exclusive)
+        return value < thisArg.end;
+      return value <= thisArg.end;
     }
 
     return {

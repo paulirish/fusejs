@@ -8,39 +8,39 @@
       return names.length == 1 && !names[0] ? [] : names;
     }
 
-    function bind(context) {
+    function bind(thisArg) {
       var args, __method = this;
       // simple bind
       if (arguments.length < 2 ) {
-        if (typeof context === 'undefined')
+        if (typeof thisArg === 'undefined')
           return this;
 
         return function() {
           return arguments.length
-            ? __method.apply(context, arguments)
-            : __method.call(context);
+            ? __method.apply(thisArg, arguments)
+            : __method.call(thisArg);
         };
       }
       // bind with curry
       args = slice.call(arguments, 1);
       return function() {
-        return __method.apply(context, arguments.length ?
+        return __method.apply(thisArg, arguments.length ?
           concatList(args, arguments) : args);
       };
     }
 
-    function bindAsEventListener(context) {
+    function bindAsEventListener(thisArg) {
       var args, __method = this;
       // simple bind
       if (arguments.length < 2 ) {
         return function(event) {
-          return __method.call(context, event || global.event);
+          return __method.call(thisArg, event || global.event);
         };
       }
       // bind with curry
       args = slice.call(arguments, 1);
       return function(event) {
-        return __method.apply(context,
+        return __method.apply(thisArg,
           prependList(args, event || global.event));
       };
     }

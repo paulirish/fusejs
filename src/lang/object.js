@@ -8,10 +8,10 @@
       return Object.extend({ }, object);
     }
 
-    function each(object, callback, context) {
+    function each(object, callback, thisArg) {
       try {
         Object._each(object, function(value, key, object) {
-          callback.call(context, value, key, object);
+          callback.call(thisArg, value, key, object);
         });
       } catch (e) {
         if (e !== $break) throw e;

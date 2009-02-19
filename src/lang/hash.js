@@ -10,13 +10,13 @@
         object.toObject() : Object.clone(object);
     }
 
-    function _each(iterator) {
+    function _each(callback) {
       var pair, hash = this, i = 0;
       Object._each(this._object, function(value, key) {
         pair = [key, value];
         pair.key = key;
         pair.value = pair[1];
-        iterator(pair, i++, hash);
+        callback(pair, i++, hash);
       });
     }
 
@@ -24,10 +24,10 @@
       return new Hash(this);
     }
 
-    function filter(iterator, context) {
+    function filter(callback, thisArg) {
       var hash = this, result = new Hash();
       Object._each(this._object, function(value, key) {
-        if (iterator.call(context, value, key, hash))
+        if (callback.call(thisArg, value, key, hash))
           result.set(key, value);
       });
       return result;
@@ -52,18 +52,18 @@
       return '#<Hash:{' + results.join(', ') + '}>';
     }
 
-    function grep(pattern, iterator, context) {
+    function grep(pattern, callback, thisArg) {
       if (!pattern || Object.isRegExp(pattern) &&
          !pattern.source) return this.clone();
 
-      iterator = iterator || Fuse.K;
+      callback = callback || Fuse.K;
       var hash = this, result = new Hash();
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
 
       Object._each(this._object, function(value, key) {
         if (pattern.match(value))
-          result.set(key, iterator.call(context, value, key, hash));
+          result.set(key, callback.call(thisArg, value, key, hash));
       });
       return result;
     }
@@ -83,11 +83,11 @@
       return this.clone().update(object);
     }
 
-    function partition(iterator, context) {
-      iterator = iterator || Fuse.K;
+    function partition(callback, thisArg) {
+      callback = callback || Fuse.K;
       var hash = this, trues = new Hash(), falses = new Hash();
       Object._each(this._object, function(value, key) {
-        (iterator.call(context, value, key, hash) ?
+        (callback.call(thisArg, value, key, hash) ?
           trues : falses).set(key, value);
       });
       return [trues, falses];
@@ -101,10 +101,10 @@
       return hash;
     }
 
-    function reject(iterator, context) {
+    function reject(callback, thisArg) {
       var hash = this, result = new Hash();
       Object._each(this._object, function(value, key) {
-        if (!iterator.call(context, value, key, hash))
+        if (!callback.call(thisArg, value, key, hash))
           result.set(key, value);
       });
       return result;
@@ -146,9 +146,9 @@
     }
 
     function zip() {
-      var iterator = Fuse.K, args = slice.call(arguments, 0);
+      var callback = Fuse.K, args = slice.call(arguments, 0);
       if (typeof args.last() === 'function')
-        iterator = args.pop();
+        callback = args.pop();
 
       var hash = this, result = new Hash(),
        hashes  = prependList(args.map($H), this),
@@ -158,7 +158,7 @@
         if (!Object.isOwnProperty(object, key)) return;
         var i = 0, values = [];
         while (i < length) values.push(hashes[i++]._object[key]);
-        result.set(key, iterator(values, key, hash));
+        result.set(key, callback(values, key, hash));
       });
       return result;
     }

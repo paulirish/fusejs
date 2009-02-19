@@ -143,8 +143,8 @@
       return "'" + escapedString.replace(/'/g, '\\\'') + "'";
     }
 
-    function scan(pattern, iterator) {
-      this.gsub(pattern, iterator);
+    function scan(pattern, callback) {
+      this.gsub(pattern, callback);
       return String(this);
     }
 

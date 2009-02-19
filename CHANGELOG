@@ -1,3 +1,5 @@
+* Rename "context" parameters to "thisArg" and "iterator" parameters to "callback". [FuseJS LH #21, #23] [jddalton, Joe Gornick]
+
 * Ensure all Array, Enumerable, Hash, and ObjectRange methods, that allow a callback, pass the object they are acting on as its third argument. [jddalton]
   Note: Backwards compatibility warning.
    - The "_each" method is required to pass the second and third arguments to the callback.

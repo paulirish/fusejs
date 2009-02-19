@@ -77,33 +77,33 @@
       return this;
     }
 
-    function every(iterator, context) {
-      iterator = iterator || Fuse.K;
+    function every(callback, thisArg) {
+      callback = callback || Fuse.K;
       for (var i = 0, length = this.length; i < length; i++)
-        if (!iterator.call(context, this[i], i))
+        if (!callback.call(thisArg, this[i], i))
           return false;
       return true;
     }
 
-    function filter(iterator, context) {
+    function filter(callback, thisArg) {
       for (var i = 0, results = [], length = this.length; i < length; i++)
-        if (iterator.call(context, this[i], i))
+        if (callback.call(thisArg, this[i], i))
           results[results.length] = this[i];
       return results;
     }
 
-    function first(iterator, context) {
+    function first(callback, thisArg) {
       var length = this.length;
       if (arguments.length === 0) return this[0];
-      if (typeof iterator === 'function') {
+      if (typeof callback === 'function') {
         for (var i = 0; i < length; i++)
-          if (iterator.call(context, this[i], i))
+          if (callback.call(thisArg, this[i], i))
             return this[i];
         return;
       }
       // Fast numeric type conversion:
       // http://www.jibbering.com/faq/faq_notes/type_convert.html#tcNumber
-      var count = +iterator;
+      var count = +callback;
       if (!isNaN(count)) {
         count = count < 1 ? 1 : count > length ? length : count;
         return slice.call(this, 0, count);
@@ -156,13 +156,13 @@
       return results;
     }
 
-    function last(iterator, context) {
+    function last(callback, thisArg) {
       var length = this.length;
       if (arguments.length === 0)
         return this[length && length - 1];
-      if (typeof iterator === 'function') {
+      if (typeof callback === 'function') {
         while (length--)
-          if (iterator.call(context, this[length], length, this))
+          if (callback.call(thisArg, this[length], length, this))
             return this[length];
         return;        
       }
@@ -194,10 +194,10 @@
       return this.length;
     }
 
-    function some(iterator, context) {
-      iterator = iterator || Fuse.K;
+    function some(callback, thisArg) {
+      callback = callback || Fuse.K;
       for (var i = 0, length = this.length; i < length; i++)
-        if (iterator.call(context, this[i], i, this))
+        if (callback.call(thisArg, this[i], i, this))
           return true;
       return false;
     }
@@ -256,57 +256,57 @@
       return results;
     }
 
-    function grep(pattern, iterator, context) {
+    function grep(pattern, callback, thisArg) {
       if (!pattern || Object.isRegExp(pattern) &&
          !pattern.source) this.toArray();
-      iterator = iterator || Fuse.K;
+      callback = callback || Fuse.K;
       var results = [];
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
 
       for (var i = 0, length = this.length; i < length; i++)
         if (pattern.match(this[i]))
-          results[results.length] = iterator.call(context, this[i], i, this);
+          results[results.length] = callback.call(thisArg, this[i], i, this);
       return results;
     }
 
-    function max(iterator, context) {
+    function max(callback, thisArg) {
       var result;
-      if (!iterator) {
+      if (!callback) {
         // John Resig's fast Array max|min:
         // http://ejohn.org/blog/fast-javascript-maxmin
         result = Math.max.apply(Math, this);
         if (!isNaN(result)) return result;
       }
-      result = null; iterator = Fuse.K;
+      result = null; callback = Fuse.K;
       for (var i = 0, length = this.length, value; i < length; i++) {
-        value = iterator.call(context, this[i], i, this);
+        value = callback.call(thisArg, this[i], i, this);
         if (result == null || value >= result)
           result = value;
       }
       return result;
     }
 
-    function min(iterator, context) {
+    function min(callback, thisArg) {
       var result;
-      if (!iterator) {
+      if (!callback) {
         result = Math.min.apply(Math, this);
         if (!isNaN(result)) return result;
       }
-      result = null; iterator = Fuse.K;
+      result = null; callback = Fuse.K;
       for (var i = 0, length = this.length, value; i < length; i++) {
-        value = iterator.call(context, this[i], i, this);
+        value = callback.call(thisArg, this[i], i, this);
         if (result == null || value < result)
           result = value;
       }
       return result;
     }
 
-    function partition(iterator, context) {
-      iterator = iterator || Fuse.K;
+    function partition(callback, thisArg) {
+      callback = callback || Fuse.K;
       var trues = [], falses = [];
       for (var i = 0, length = this.length; i < length; i++)
-        (iterator.call(context, this[i], i, this) ?
+        (callback.call(thisArg, this[i], i, this) ?
           trues : falses).push(this[i]);
       return [trues, falses];
     }
@@ -318,17 +318,17 @@
       return results;
     }
 
-    function reject(iterator, context) {
+    function reject(callback, thisArg) {
       for (var i = 0, results = [], length = this.length; i < length; i++)
-        if (!iterator.call(context, this[i], i, this))
+        if (!callback.call(thisArg, this[i], i, this))
           results[results.length] = this[i];
       return results;
     }
 
-    function sortBy(iterator, context) {
+    function sortBy(callback, thisArg) {
       var results = [], i = 0, length = this.length;
       while (i < length)
-        results[i] = { 'value': this[i], 'criteria': iterator.call(context, this[i], i++, this) };
+        results[i] = { 'value': this[i], 'criteria': callback.call(thisArg, this[i], i++, this) };
       return results.sort(function(left, right) {
         var a = left.criteria, b = right.criteria;
         return a < b ? -1 : a > b ? 1 : 0;
@@ -336,13 +336,13 @@
     }
 
     function zip() {
-      var iterator = Fuse.K, args = slice.call(arguments, 0);
+      var callback = Fuse.K, args = slice.call(arguments, 0);
       if (typeof args.last() === 'function')
-        iterator = args.pop();
+        callback = args.pop();
 
       var results = [], i = 0, length = this.length,
        collections = prependList(args.map($A), this);
-      while (i < length) results[i] = iterator(collections.pluck(i), i++, this);
+      while (i < length) results[i] = callback(collections.pluck(i), i++, this);
       return results;
     }
 
@@ -354,9 +354,9 @@
         (function(m) {
           // backup original
           AP['_' + m] = AP[m];
-          // overwrite allowing iterator || k
-          AP[m] = function(iterator, context) {
-            return this['_' + m](iterator || Fuse.K, context);
+          // overwrite allowing callback || k
+          AP[m] = function(callback, thisArg) {
+            return this['_' + m](callback || Fuse.K, thisArg);
           };
         })(method);
       }

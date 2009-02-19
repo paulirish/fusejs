@@ -171,10 +171,10 @@
       this.element = $(element);
     }
 
-    function _each(iterator) {
+    function _each(callback) {
       this.element.className.split(/\s+/)
         .select(function(name) { return name.length > 0 })
-          ._each(iterator);
+          ._each(callback);
     }
 
     function add(classNameToAdd) {
