@@ -46,8 +46,7 @@
 
     function filter(callback, thisArg) {
       var results = [];
-      if (!callback)
-        callback = function() { return value != null };
+      callback = callback || function(value) { return value != null };
       this._each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable))
           results.push(value);

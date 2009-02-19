@@ -134,8 +134,14 @@ new Test.Unit.Runner({
   },
 
   testFilter: function() {
+    var undef;
     this.assertEqual(Fixtures.Primes.join(', '),
       Fixtures.Z.filter(prime).join(', '));
+      
+    // test passing no arguments to filter()
+    this.assertEnumEqual($w('a b'), ['a', 'b', null].filter());
+    this.assertEnumEqual($w('a b'), ['a', 'b', undef].filter());
+    this.assertEnumEqual(['a', 'b', 0], ['a', 'b', 0].filter());
   },
 
   testFirst: function() {

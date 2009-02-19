@@ -26,6 +26,7 @@
 
     function filter(callback, thisArg) {
       var hash = this, result = new Hash();
+      callback = callback || function(value) { return value != null };
       Object._each(this._object, function(value, key) {
         if (callback.call(thisArg, value, key, hash))
           result.set(key, value);

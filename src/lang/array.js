@@ -86,6 +86,7 @@
     }
 
     function filter(callback, thisArg) {
+      callback = callback || function(value) { return value != null };
       for (var i = 0, results = [], length = this.length; i < length; i++)
         if (callback.call(thisArg, this[i], i))
           results[results.length] = this[i];
@@ -354,13 +355,20 @@
         (function(m) {
           // backup original
           AP['_' + m] = AP[m];
-          // overwrite allowing callback || k
+          // overwrite allowing callback || Fuse.K
           AP[m] = function(callback, thisArg) {
             return this['_' + m](callback || Fuse.K, thisArg);
           };
         })(method);
       }
     })('every', 'map', 'some');
+
+    if (AP.filter && !AP._filter) {
+      AP._filter = AP.filter;
+      AP.filter = function(callback, thisArg) {
+        return this._filter(callback || function(value) { return value != null }, thisArg);
+      };
+    }
 
     // Opera's implementation of Array.prototype.concat treats a functions arguments
     // object as an array so we overwrite concat to fix it.

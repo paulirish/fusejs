@@ -117,6 +117,11 @@ new Test.Unit.Runner({
       $H(Fixtures.mixed_dont_enum).filter(function(value, key) {
         return /^(bar|)$/.test(value);
       }));
+
+    // test passing no arguments to filter()
+    this.assertHashEqual({ 'a':'b' }, $H(Fixtures.value_undefined).filter());
+    this.assertHashEqual({ 'a':'b' }, $H(Fixtures.value_null).filter());
+    this.assertHashEqual(Fixtures.value_zero, $H(Fixtures.value_zero).filter());
   },
 
   testGrep: function() {

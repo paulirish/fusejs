@@ -23,6 +23,12 @@ Fixtures = {
   
   Emoticons: new EnumObject($w(';-) ;-( :-) :-P')),
   
+  UndefinedValues: new EnumObject(['a', 'b', window.undefined]),
+  
+  NullValues: new EnumObject(['a', 'b', null]),
+  
+  ZeroValues: new EnumObject(['a', 'b', 0]),
+  
   Basic: new EnumObject([1, 2, 3]),
   
   Primes: new EnumObject([

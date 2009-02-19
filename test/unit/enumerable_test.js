@@ -130,9 +130,14 @@ new Test.Unit.Runner({
     this.assertEqual('0, 1, 2, 3', indexes.join(', '));
   },
   
-  testFindAll: function() {
+  testFilter: function() {
     this.assertEqual(Fixtures.Primes.toArray().join(', '),
-      Fixtures.Z.findAll(prime).toArray().join(', '));
+      Fixtures.Z.filter(prime).toArray().join(', '));
+
+    // test passing no arguments to filter()
+    this.assertEqual(2, Fixtures.NullValues.filter().toArray().length);
+    this.assertEqual(2, Fixtures.UndefinedValues.filter().toArray().length);
+    this.assertEqual(3, Fixtures.ZeroValues.filter().toArray().length);
   },
   
   testGrep: function() {
