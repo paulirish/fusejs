@@ -36,7 +36,10 @@
     }
 
     if (original) {
-      Object.extend(global.Element, original);
+      // avoid Object.extend() because IE8 cannot set any
+      // variable/property reference to Element.toString
+      for (var key in original)
+        global.Element[key] = original[key];
       global.Element.prototype = original.prototype;
     }
   })();

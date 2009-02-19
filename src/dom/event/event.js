@@ -225,10 +225,14 @@
         };
       })(name);
 
-      // supports Event.prototype extensions; no need to extend
+      // no need to use Event.extend() if browser supports Event.prototype extensions
       if (function() {
-        var e = createEvent(doc), EP = Event.prototype || e && e['__proto__'];
-        return EP && Object.extend(Event.prototype = EP, Methods);
+        // Safari 2 support
+        if (!Event.prototype && Feature('OBJECT_PROTO')) {
+          var e = createEvent(doc);
+          Event.prototype = e && e['__proto__'];
+        }
+        return Event.prototype && Object.extend(Event.prototype, Methods);
       }()) Event.extend = Fuse.K;
 
       delete name; delete Methods.pointer; delete Methods.pointerX; delete Methods.pointerY;

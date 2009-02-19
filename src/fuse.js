@@ -61,8 +61,8 @@
       // Avoid the nodeList length property because,
       // in IE for example, it might be an element with an ID of "length"
       var i = 0, results = [];
-      while ((results[i] = this[i++])) { }
-      results.length--;
+      while (typeof this[i] === 'object')
+        results[i] = this[i++];
       return !begin && arguments.length < 2 ?
         results : results.slice(begin, end);
     };

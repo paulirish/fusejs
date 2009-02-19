@@ -1,3 +1,9 @@
+* Fixed critical IE8 bugs that prevented Fuse from loading. [jddalton]
+  - The nodeListSlice() should no longer cause a range error
+  - Account for element.currentStyle.hasLayout property permanently set to false
+  - Avoid iterating over Element.toString()
+  - Avoid replacing Event.prototype with itself
+
 * Make Array#filter, Enumerable#filter, Hash#filter remove null/undefined values if no callback is provided. [jddalton]
 
 * Rename "context" parameters to "thisArg" and "iterator" parameters to "callback". [FuseJS LH #21, #23] [jddalton, Joe Gornick]

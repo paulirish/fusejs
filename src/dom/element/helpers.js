@@ -20,8 +20,8 @@
 
     function hasLayout(element) {
       var currentStyle = element.currentStyle;
-      return (currentStyle && currentStyle.hasLayout) ||
-       (!currentStyle && element.style.zoom && element.style.zoom !== 'normal')
+      return element.style.zoom && element.style.zoom !== 'normal' ||
+        currentStyle && currentStyle.hasLayout;
     }
 
     function ensureLayout(element) {
