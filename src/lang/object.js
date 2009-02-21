@@ -204,34 +204,54 @@
       };
     })();
 
-    var isOwnProperty = function(object, property) {
-      // ECMA-3.1 15.2.4.5
-      if (object == null) throw new TypeError;
-      return Object.prototype.hasOwnProperty.call(object, property);
-    };
+    var isOwnProperty = (function() {
+      var hasOwnProperty = Object.prototype.hasOwnProperty;
+      if (typeof hasOwnProperty !== 'function') {
+        if (Feature('OBJECT_PROTO')) {
+          // Safari 2
+          return function(object, property) {
+            if (object == null) throw new TypeError;
+            // convert primatives into objects so they work with the IN statement
+            if (typeof object !== 'object' && !Object.isFunction(object))
+              object = new object.constructor(object);
 
-    if (typeof Object.prototype.hasOwnProperty !== 'function') {
-      if (Feature('OBJECT_PROTO')) {
-        // Safari 2
+            var result, proto = object['__proto__'];
+            object['__proto__'] = null;
+            result = property in object;
+            object['__proto__'] = proto;
+            return result;
+          };
+        } else {
+          // Other
+          return function(object, property) {
+            if (object == null) throw new TypeError;
+            return object[property] !== object.constructor.prototype[property];
+          };
+        }
+      }
+      return function(object, property) {
+        // ECMA-3.1 15.2.4.5
+        if (object == null) throw new TypeError;
+        return hasOwnProperty.call(object, property);
+      };
+    })();
+
+    (function() {
+      // Opera (bug occurs with the window object and not the global)
+      if (typeof window !== 'undefined' && window.Object &&
+          !isOwnProperty(window, 'Object')) {
+
+        var _isOwnProperty = isOwnProperty;
         isOwnProperty = function(object, property) {
           if (object == null) throw new TypeError;
-          if (typeof object !== 'object' && !Object.isFunction(object))
-            object = new object.constructor(object);
-
-          var result, proto = object['__proto__'];
-          object['__proto__'] = null;
-          result = property in object;
-          object['__proto__'] = proto;
-          return result;
-        };
-      } else {
-        // Other
-        isOwnProperty = function(object, property) {
-          if (object == null) throw new TypeError;
-          return object[property] !== object.constructor.prototype[property];
+          if(object == global) {
+            return property in object && 
+              object[property] !== Object.prototype[property];
+          }
+          return _isOwnProperty(object, property);
         };
       }
-    }
+    })();
 
     Object._each = _each;
     Object.isOwnProperty = isOwnProperty;

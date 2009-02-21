@@ -309,6 +309,10 @@ new Test.Unit.Runner({
     // test null/undefined values
     this.assertRaise('TypeError', function() { Object.isOwnProperty(null,  '') });
     this.assertRaise('TypeError', function() { Object.isOwnProperty(undef, '') });
+    
+    // test window object
+    this.assert(Object.isOwnProperty(window, 'Fuse'));
+    this.assert(!Object.isOwnProperty(window, 'abc123xyz'));
   },
   
   testObjectIsRegExp: function() {

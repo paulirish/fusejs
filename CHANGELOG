@@ -1,3 +1,5 @@
+* Fix Opera bug in Object.isOwnProperty() when checking properties of the `window` object. [Garrett Smith]
+
 * Fixed critical IE8 bugs that prevented Fuse from loading. [jddalton]
   - The nodeListSlice() should no longer cause a range error
   - Account for element.currentStyle.hasLayout property permanently set to false
