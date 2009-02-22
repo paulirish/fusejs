@@ -1,3 +1,5 @@
+* unit test: Cleanup functional event tests by ensuring variables are locally scoped.  [jddalton]
+
 * Add IE support for the event.currentTarget property. [Prototype LH #519] [Daniel Varga, jddalton]
 
 * Ensure the `target` property on events is never undefined in IE. [Prototype LH #383] [Mathias Karstädt, Diego Perini, Andrew Dupont]

@@ -69,7 +69,7 @@
     }
     $('basic').observe('click', basic_callback)
     $('basic_remove').observe('click', function(e){
-      el = $('basic')
+      var el = $('basic')
       el.passed('This test should now be inactive (try clicking)')
       el.stopObserving('click')
       $('basic_remove').remove()
@@ -91,7 +91,7 @@
   
   <script type="text/javascript">
     $('basic3').observe('click', function(evt) {
-      el = $('basic3');
+      var el = $('basic3');
       if (typeof evt != 'object') this.failed('Expected event object for first argument');
       else this.passed('Good first argument');
       log(evt);
@@ -102,7 +102,7 @@
   
   <script type="text/javascript">
     $('hijack').observe('click', function(e){
-      el = $(this.parentNode);
+      var el = $(this.parentNode);
       log(e); // this makes it fail?!?
       e.preventDefault();
 
@@ -217,7 +217,7 @@
   
   <script type="text/javascript">
     $('keyup').observe('keyup', function(e){
-      el = $('keyup_log');
+      var el = $('keyup_log');
       el.passed('Key captured: the length is ' + $('keyup').value.length);
       log(e);
     })
@@ -227,7 +227,7 @@
   
   <script type="text/javascript">
     $('bind').observe('click', function(e, str, arr){
-      el = $('bind')
+      var el = $('bind')
       try {
         if (arguments.length != 3) throw arguments.length + ' arguments: ' + $A(arguments).inspect()
         if (str != 'foo') throw 'wrong string: ' + str
@@ -243,7 +243,7 @@
   
   <script type="text/javascript">
     $('obj_inspect').observe('click', function(e){
-      el = $('obj_inspect')
+      var el = $('obj_inspect')
       try { el.passed(Object.inspect(e)) }
       catch (err) { el.failed('Failed! Error thrown') }
       log(e);
@@ -254,13 +254,13 @@
   
   <script type="text/javascript">
     $('addunload').observe('click', function(e){
-      if (this._done) return
+      if (this._done) return;
 
       window.onunload = function(){ alert('inline unload fired!') }
       Event.observe(window, 'unload', function(){ alert('observed unload fired!') })
 
       this.update('Registered two unload events, one inline ("onunload") and one regular - try to refresh, both should fire')
-      this._done = true
+      this._done = true;
       log(e);
     })
   </script>
