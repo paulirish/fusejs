@@ -252,6 +252,7 @@ new Test.Unit.Runner({
   testObjectIsFunction: function() {
     this.assert(Object.isFunction(function() { }));
     this.assert(Object.isFunction(Class.create()));
+    this.assert(!Object.isFunction(/foo/));
     this.assert(!Object.isFunction("a string"));
     this.assert(!Object.isFunction($("testlog")));
     this.assert(!Object.isFunction([]));
@@ -580,8 +581,16 @@ new Test.Unit.Runner({
 
     var Bird = Class.create(Fixtures.Animal);
     this.assertEqual(Bird, Fixtures.Animal.subclasses.last());
-    // for..in loop (for some reason) doesn't iterate over the constructor property in top-level classes
-    this.assertEnumEqual(Object.keys(new Fixtures.Animal).sort(), Object.keys(new Bird).without('constructor').sort());
+    
+    this.assertEnumEqual(Object.keys(new Fixtures.Animal).sort(), Object.keys(new Bird).sort());
+    
+    // Safari 3.1+ mistakes regular expressions as typeof `function`
+    var klass = function() { }, regexp = /foo/;
+    this.assertNothingRaised(function() {
+      klass = Class.create(Fixtures.Animal, { '_regexp': regexp });
+    }, 'Class creation failed when the subclass contains a regular expression as a property.');
+
+    this.assertEqual(regexp, new klass()._regexp, 'The regexp property should exist.');
   },
 
   testClassInstantiation: function() { 

@@ -48,7 +48,7 @@
     }
 
     function isFunction(object) {
-      return typeof object === 'function';
+      return toString.call(object) === '[object Function]';
     }
 
     function isHash(object) {

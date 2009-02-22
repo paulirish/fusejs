@@ -1,3 +1,7 @@
+* Ensure Class.create(), in Safari 3.1+, works with objects containing regular expressions as properties. [jddalton, kangax]
+
+* Ensure Object.isFunction() returns false for regular expressions. [kangax]
+
 * unit test: Cleanup functional event tests by ensuring variables are locally scoped.  [jddalton]
 
 * Add IE support for the event.currentTarget property. [Prototype LH #519] [Daniel Varga, jddalton]

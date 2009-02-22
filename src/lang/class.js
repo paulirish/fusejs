@@ -39,7 +39,9 @@
 
       while (key = keys[i++]) {
         method = source[key];
-        if (ancestor && typeof method === 'function' &&
+        // avoid typeof === 'function' because Safari 3.1+ mistakes
+        // regexp instances as typeof 'function'
+        if (ancestor && Object.isFunction(method) &&
             method.argumentNames()[0] === '$super') {
           __method = method;
           method = (function(m) {
