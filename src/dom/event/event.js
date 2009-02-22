@@ -272,6 +272,7 @@
           event.preventDefault  = preventDefault;
           event.relatedTarget   = relatedTarget(event);
           event.stopPropagation = stopPropagation;
+          event.currentTarget   = element;
           event.target          = event.srcElement || element;
 
           // optimize by re-defining with resolved values

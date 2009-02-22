@@ -289,6 +289,17 @@ new Test.Unit.Runner({
     });
   },
 
+  testEventCurrentTarget: function() {
+    this.assert(eventResults.windowLoad.eventCurrentTarget,
+      'window `onload` event.currentTarget should not be null. (versions of Safari may return null)');
+
+    this.assert(eventResults.contentLoaded.eventCurrentTarget,
+      'document `dom:loaded` event.currentTarget should not be null. (versions of Safari may return null)');
+
+    //this.assertIdentical(window, eventResults.windowLoad.eventCurrentTarget,
+      //'window `onload` event.currentTarget should be `window`');
+  },
+  
   testEventTarget: function() {
     this.assert(eventResults.windowLoad.eventTarget,
       'window `onload` event.target should not be null. (versions of Safari may return null)');
@@ -348,11 +359,12 @@ document.observe('dom:loaded', function(event) {
   var body = $(document.body);
 
   eventResults.contentLoaded = {
-    'endOfDocument': eventResults.endOfDocument,
-    'windowLoad':    eventResults.windowLoad,
-    'cssLoadCheck':  $('css_load_check').getStyle('height') == '100px',
-    'eventTarget':   event.target,
-    'eventElement':  false
+    'endOfDocument':      eventResults.endOfDocument,
+    'windowLoad':         eventResults.windowLoad,
+    'cssLoadCheck':       $('css_load_check').getStyle('height') == '100px',
+    'eventTarget':        event.target,
+    'eventCurrentTarget': event.currentTarget,
+    'eventElement':       false
   };
 
   Object.extend(eventResults.eventElement, { 
@@ -382,10 +394,11 @@ document.observe('dom:loaded', function(event) {
 
 Event.observe(window, 'load', function(event) {
   eventResults.windowLoad = {
-    'endOfDocument': eventResults.endOfDocument,
-    'contentLoaded': eventResults.contentLoaded,
-    'eventTarget':   event.target,
-    'eventElement':  false
+    'endOfDocument':      eventResults.endOfDocument,
+    'contentLoaded':      eventResults.contentLoaded,
+    'eventCurrentTarget': event.currentTarget,
+    'eventTarget':        event.target,
+    'eventElement':       false
   };
 
   try {
