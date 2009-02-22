@@ -1,3 +1,6 @@
+* Ensure the `target` property on events is never undefined in IE. [Prototype LH #383] [Mathias Karstädt, Diego Perini, Andrew Dupont]
+  Note: This update exposes a bug in Gecko/WebKit browsers where event.currentTarget/event.target are incorrect for window `onload` and document `dom:loaded` events.
+
 * Fix Opera bug in Object.isOwnProperty() when checking properties of the `window` object. [Garrett Smith]
 
 * Fixed critical IE8 bugs that prevented Fuse from loading. [jddalton]

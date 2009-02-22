@@ -38,14 +38,15 @@
       var node = event.target, type = event.type,
        currentTarget = event.currentTarget;
 
-      if (currentTarget && currentTarget.tagName) {
-        // Firefox screws up the "click" event when moving between radio buttons
-        // via arrow keys. It also screws up the "load" and "error" events on images,
-        // reporting the document as the target instead of the original image.
-        if (['load', 'error'].include(type) || (currentTarget.tagName.toUpperCase() === 'INPUT' &&
-          currentTarget.type === 'radio' && type === 'click')) {
-          node = currentTarget;
-        }
+      // Firefox screws up the "click" event when moving between radio buttons
+      // via arrow keys. It also screws up the "load" and "error" events on images,
+      // reporting the document as the target instead of the original image.
+
+      // Note: Fired events don't have a currentTarget
+      if (currentTarget && (/^(load|error)$/.test(type) ||
+         (currentTarget.nodeName.toUpperCase() === 'INPUT' &&
+          currentTarget.type === 'radio' && type === 'click'))) {
+        node = currentTarget;
       }
       // Fix a Safari bug where a text node gets passed as the target of an
       // anchor click rather than the anchor itself.
@@ -118,11 +119,11 @@
         // Before executing, make sure the event.eventName matches the eventName.
         if (!Event || !Event.extend || (event.eventName &&
             event.eventName !== eventName)) return false;
-        event = Event.extend(event || global.event);
 
         // shallow copy handlers to avoid issues with nested observe/stopObserving
         var c = Event.cache[id], ec = c.events[eventName],
          handlers = slice.call(ec.handlers, 0), length = handlers.length;
+        event = Event.extend(event || global.event, c.element);
         while (length--) handlers[length].call(c.element, event);
       };
     };
@@ -170,7 +171,7 @@
       createDispatcher = function(id, eventName) {
         var dispatcher = function(event) {
           if (!Event || !Event.extend) return false;
-          event = Event.extend(event || global.event);
+          event = Event.extend(event || global.event, this);
           var c = Event.cache[id], ec = c && c.events && c.events[event.eventName || eventName];
           if (!ec) return false;
           var handlers = slice.call(ec.handlers, 0), length = handlers.length;
@@ -260,7 +261,7 @@
           this.cancelBubble = true;
         }
 
-        return function(event) {
+        return function(event, element) {
           if (!event || event._extendedByFuse) return event;
 
           // avoid unnecessary Object.extend() usage
@@ -271,7 +272,7 @@
           event.preventDefault  = preventDefault;
           event.relatedTarget   = relatedTarget(event);
           event.stopPropagation = stopPropagation;
-          event.target          = event.srcElement;
+          event.target          = event.srcElement || element;
 
           // optimize by re-defining with resolved values
           event.pointer  = function() { return { 'x': this.pageX, 'y': this.pageY } };

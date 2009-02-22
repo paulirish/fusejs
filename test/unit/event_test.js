@@ -259,21 +259,47 @@ new Test.Unit.Runner({
   },
   
   testEventElement: function() {
-    // This bug would occur in IE on any windows event because it doesn't have a event.srcElement.
-    this.assertEqual(false, eventResults.eventElement.windowOnLoadBug, 'Event.element() window onload bug.');
+    this.assert(eventResults.windowLoad.eventElement,
+      'window `onload` event.element() should not be null. (versions of Safari may return null)');
 
-    // This bug would occur in Firefox on window an document events because the 
+    this.assert(eventResults.contentLoaded.eventElement,
+      'document `dom:loaded` event.element() should not be null. (versions of Safari may return null)');
+
+    //this.assertIdentical(window, eventResults.windowLoad.eventElement,
+      //'window `onload` event.element() should be `window`');
+
+    // This bug would occur in IE on any windows event because it
+    // doesn't have a event.srcElement.
+    this.assertEqual(false, eventResults.eventElement.windowOnLoadBug,
+      'Event.element() window onload bug.');
+
+    // This bug would occur in Firefox on window an document events because the
     // event.currentTarget does not have a tagName.
-    this.assertEqual(false, eventResults.eventElement.contentLoadedBug, 'Event.element() contentLoaded bug.');
+    this.assertEqual(false, eventResults.eventElement.contentLoadedBug,
+      'Event.element() contentLoaded bug.');
 
-    // This bug would occur in Firefox on image onload/onerror events because the event.target is 
-    // wrong and should use event.currentTarget.
-    this.assertEqual(false, eventResults.eventElement.imageOnErrorBug, 'Event.element() image onerror bug.');
+    // This bug would occur in Firefox on image onload/onerror event
+    // because the event.target is wrong and should use event.currentTarget.
+    this.assertEqual(false, eventResults.eventElement.imageOnErrorBug,
+      'Event.element() image onerror bug.');
+
     this.wait(1000, function() {
-      this.assertEqual(false, eventResults.eventElement.imageOnLoadBug,  'Event.element() image onload bug.');
+      this.assertEqual(false, eventResults.eventElement.imageOnLoadBug,
+        'Event.element() image onload bug.');
     });
   },
 
+  testEventTarget: function() {
+    this.assert(eventResults.windowLoad.eventTarget,
+      'window `onload` event.target should not be null. (versions of Safari may return null)');
+
+    this.assert(eventResults.contentLoaded.eventTarget,
+      'document `dom:loaded` event.target should not be null. (versions of Safari may return null)');
+ 
+    //this.assertIdentical(window, eventResults.windowLoad.eventTarget,
+      //'window `onload` event.target should be `window`');
+  },
+  
   testEventFindElement: function() {
     var span = $("span"), event;
     event = span.fire("test:somethingHappened");
@@ -318,20 +344,21 @@ new Test.Unit.Runner({
   }
 });
 
-document.observe("dom:loaded", function(event) {
+document.observe('dom:loaded', function(event) {
   var body = $(document.body);
 
   eventResults.contentLoaded = {
-    endOfDocument: eventResults.endOfDocument,
-    windowLoad:  eventResults.windowLoad,
-    cssLoadCheck:  $('css_load_check').getStyle('height') == '100px'
+    'endOfDocument': eventResults.endOfDocument,
+    'windowLoad':    eventResults.windowLoad,
+    'cssLoadCheck':  $('css_load_check').getStyle('height') == '100px',
+    'eventTarget':   event.target,
+    'eventElement':  false
   };
 
   Object.extend(eventResults.eventElement, { 
-    imageOnLoadBug:   false,
-    imageOnErrorBug:  false,
-    windowOnLoadBug:  false,
-    contentLoadedBug: false
+    'imageOnLoadBug':   false,
+    'imageOnErrorBug':  false,
+    'contentLoadedBug': false
   });
 
   body.insert(new Element('img', { id:'img_load_test' }));  
@@ -346,18 +373,25 @@ document.observe("dom:loaded", function(event) {
       eventResults.eventElement.imageOnErrorBug = true;
   }).writeAttribute('src', 'http://www.fusejs.com/xyz.gif');
   
-  try { event.element() } catch(e) {
+  try {
+    eventResults.contentLoaded.eventElement = event.element();
+  } catch(e) {
     eventResults.eventElement.contentLoadedBug = true;
   }
 });
 
-Event.observe(window, "load", function(event) {
+Event.observe(window, 'load', function(event) {
   eventResults.windowLoad = {
-    endOfDocument: eventResults.endOfDocument,
-    contentLoaded: eventResults.contentLoaded
+    'endOfDocument': eventResults.endOfDocument,
+    'contentLoaded': eventResults.contentLoaded,
+    'eventTarget':   event.target,
+    'eventElement':  false
   };
 
-  try { event.element() } catch(e) {
+  try {
+    eventResults.windowLoad.eventElement = event.element();
+    eventResults.eventElement.windowOnLoadBug = false;
+  } catch(e) {
     eventResults.eventElement.windowOnLoadBug = true;
   }
 });
