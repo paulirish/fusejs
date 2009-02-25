@@ -1,132 +1,107 @@
   /*--------------------------- ELEMENT: ATTRIBUTE ---------------------------*/
 
-  Object.extend(Element.Methods, (function() {
-    var FORM_CHILDNODES_ARE_ATTRIBUTES     = Bug('FORM_CHILDNODES_ARE_ATTRIBUTES'),
-     ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR = Bug('ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR');
+  Element.Attribute = {
+    'contentNames': { },
+    'read':         { },
+    'write':        { },
+    'names': { 'htmlFor':'for', 'className':'class' }
+  };
 
-    var getNamespacedAttribute = (function() {
-      if (ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR &&
-          Feature('ELEMENT_GET_ATTRIBUTE_IFLAG')) {
-        return function(element, name) {
-          return element.getAttribute(name, 2) || '';
-        };
-      }
-      return Fuse.K;
-    })();
+  (function(Methods) {
+    var ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS =
+      Bug('ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS');
+
+    // No use of $ in this function in order to keep things fast.
+    // Used by the Selector class.  
+    function hasAttribute(element, attribute) {
+      var node = element.getAttributeNode(attribute);
+      return !!node && node.specified;
+    }
+
+    function staticHasAttribute(element, attribute) {
+      if (element.hasAttribute)
+        return element.hasAttribute(attribute);
+      return Methods.Simulated.hasAttribute(element, attribute);
+    }
 
     function readAttribute(element, name) {
       element = $(element);
-      var result, t = Element._attributeTranslations;
-      name = t.names[name] || name;
+      var result, T = Element.Attribute;
+      name = T.names[name] || name;
 
-      if (FORM_CHILDNODES_ARE_ATTRIBUTES &&
-        element.tagName.toUpperCase() === 'FORM' &&
-          typeof element[name] !== 'string') {
-        element = element.cloneNode(false);
-      }
-
-      if (t.read[name])
-        result = t.read[name](element, name);
-      else if (ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR && name.include(':')) {
-        result = getNamespacedAttribute(element, name);
-      } else result = element.getAttribute(name);
-
+      if (T.read[name])
+        result = T.read[name](element, name);
+      else result = (result = element.getAttributeNode(name)) && result.value;
       return result || '';
     }
 
     function writeAttribute(element, name, value) {
       element = $(element);
-      var attributes = { }, t = Element._attributeTranslations;
+      var node, contentName, attr,
+       attributes = { }, T = Element.Attribute;
 
-      if (typeof name == 'object') attributes = name;
+      if (typeof name === 'object') attributes = name;
       else attributes[name] = (typeof value === 'undefined') ? true : value;
 
-      for (var attr in attributes) {
-        name = t.names[attr] || attr;
+      for (attr in attributes) {
+        name = T.names[attr] || attr;
+        contentName = T.contentNames[attr] || attr;
         value = attributes[attr];
 
-        if (t.write[name]) name = t.write[name](element, value);
-        if (value === false || value === null)
-          element.removeAttribute(name);
+        if (T.write[name])
+          T.write[name](element, value);
+        else if (value === false || value === null)
+          element.removeAttribute(contentName);
         else if (value === true)
-          element.setAttribute(name, name);
-        else element.setAttribute(name, value);
+          element.setAttribute(contentName, contentName);
+        else {
+          if (ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS &&
+              Element.hasAttribute(element, name))
+            element.removeAttribute(contentName);
+          element.setAttribute(contentName, value);
+        }
       }
       return element;
     }
 
-    return {
-      'readAttribute':  readAttribute,
-      'writeAttribute': writeAttribute
-    };
-  })());
+    Element.hasAttribute   = staticHasAttribute;
+    Methods.readAttribute  = readAttribute;
+    Methods.writeAttribute = writeAttribute;
+    Methods.Simulated.hasAttribute = hasAttribute;
+  })(Element.Methods);
 
   /*--------------------------------------------------------------------------*/
 
-  (function() {
-    // No use of $ in this function in order to keep things fast.
-    // Used by the Selector class.  
-    function hasAttribute(element, attribute) {
-      if (element.hasAttribute) return element.hasAttribute(attribute);
-      return Element.Methods.Simulated.hasAttribute(element, attribute);
+  (function(T) {
+    function getAttribute(element, attribute) {
+      return element.getAttribute(attribute);
     }
 
-    function simulatedHasAttribute(element, attribute) {
-      attribute = Element._attributeTranslations.has[attribute] || attribute;
+    function getEvent(element, attribute) {
       var node = element.getAttributeNode(attribute);
-      return !!(node && node.specified);
+      return node && node.specified && node.value;
     }
 
-    Element.Methods.Simulated.hasAttribute = simulatedHasAttribute;
-    Element.hasAttribute = hasAttribute;
-  })();
+    function getExact(element, attribute) {
+      return element.getAttribute(attribute, 2);
+    }
 
-  /*--------------------------------------------------------------------------*/
-
-  Element._attributeTranslations = {
-    'has':     { },
-    'names':   { }
-  };
-
-  Element._attributeTranslations.read = (function() {
-    function flag(attribute) {
+    function getFlag(attribute) {
       var lower = attribute.toLowerCase();
       return function(element) {
         return Element.hasAttribute(element, attribute) ? lower : '';
       };
     }
 
-    function getAttr(element, attribute) {
-      return element.getAttribute(attribute, 2);
+    function getStyle(element) {
+      return element.style.cssText.toLowerCase();
     }
 
-    function getAttrNode(element, attribute) {
-      var node = element.getAttributeNode(attribute);
-      return node && node.value;
-    }
-
-    function getEv(element, attribute) {
-      attribute = element.getAttribute(attribute);
-      if (typeof attribute !== 'function') return '';
-      var source = attribute.toString();
-      return source.indexOf('function anonymous()') === 0 ?
-        source.split('{')[1].split('}')[0].strip() : '';
-    }
- 
-    return {
-      '_flag':        flag,
-      '_getAttr':     getAttr,
-      '_getAttrNode': getAttrNode,
-      '_getEv':       getEv
-    };
-  })();
-
-  Element._attributeTranslations.write = (function() {
-    function checked(element, value) {
+    function setChecked(element, value) {
       element.checked = !!value;
     }
 
-    function setAttrNode(name) {
+    function setNode(name) {
       return function(element, value) {
         var attr = element.getAttributeNode(name);
         if (!attr) {
@@ -137,117 +112,80 @@
       };
     }
 
-    return {
-      '_setAttrNode': setAttrNode,
-      'checked':      checked
-    };
-  })();
+    function setStyle(element, value) {
+      element.style.cssText = value || '';
+    }
 
-  (function(T) {
-    var Has = T.has, Names = T.names, 
-     Read = T.read, Write = T.write;
+    // mandate getter / setters
+    T.read.type     = getAttribute;
+    T.write.checked = setChecked;
 
     // mandate flag attributes return their name
     $w('checked disabled isMap multiple readOnly')._each(function(attr) {
-      Read[attr] = Read._flag(attr);
+      T.read[attr] = getFlag(attr);
     });
 
-    // translate "htmlFor"
-    (function() {
-      var label = doc.createElement('label');
-      label.htmlFor = 'test';
-      if (label.getAttribute('for') === 'test')
-        Names.htmlFor = 'for';
-      else Names['for'] = 'htmlFor';
-    })();
+    // mandate event attribute getter
+    $w('blur change click contextmenu dblclick error focus load keydown ' +
+       'keypress keyup mousedown mousemove mouseout mouseover mouseup ' +
+       'readystatechange reset submit select unload')._each(function(attr) {
+      T.read['on' + attr] = getEvent;
+    });
 
-    // get and set "encType"
+    // add camel-cased attributes to name translations
+    $w('bgColor codeBase codeType cellPadding cellSpacing colSpan rowSpan ' +
+       'vAlign vLink aLink dateTime accessKey tabIndex encType maxLength ' +
+       'readOnly longDesc frameBorder isMap useMap noHref noResize noShade ' +
+       'noWrap marginWidth marginHeight')._each(function(attr) {
+      var lower = attr.toLowerCase();
+      T.contentNames[lower] = T.names[lower] = attr;
+    });
+
+    // capability checks
     (function() {
-      var form = doc.createElement('form');
+      var node, value, form = doc.createElement('form'),
+       label = doc.createElement('label'),
+       button = doc.createElement('button');
+
+      label.htmlFor = label.className = 'test';
+      label.setAttribute('style', 'display:block');
       form.setAttribute('encType', 'multipart/form-data');
-      if (form.getAttribute('encType') !== 'multipart/form-data') {
-        Read.encType  = Read._getAttrNode;
-        Write.encType = Write._setAttrNode('encType');
+      button.appendChild(doc.createTextNode('inside value'));
+      button.setAttribute('value', 'test');
+
+      // translate content name `htmlFor`
+      if (label.getAttribute('htmlFor') === 'test')
+        T.contentNames['for'] = 'htmlFor';
+      else T.contentNames.htmlFor = 'for';
+
+      // translate content name `className`
+      if (label.getAttribute('className') === 'test')
+        T.contentNames['class'] = 'className';
+      else T.contentNames.className = 'class';
+
+      // set `encType`
+      if ((node = form.getAttributeNode('encType')) && 
+          node.value !== 'multipart/form-data') {
+        T.write.encType = setNode('encType');
+      }
+
+      // set `value`
+      value = (node = button.getAttributeNode('value')) && node.value;
+      if (value !== 'test') T.write.value = setNode('value');
+
+      // get and set `style` attribute
+      value = (node = label.getAttributeNode('style')) && node.value;
+      if (typeof value !== 'string' || !value.startsWith('display:block')) {
+        T.read.style  = getStyle;
+        T.write.style = setStyle;
+      }
+
+      // get `href` and other uri attributes
+      // TODO: Check others attributes like action, cite, codeBase, lowsrc, and useMap.
+      // Opera 9.25 will automatically translate `action` uri's from relative to absolute.
+      if (Feature('ELEMENT_GET_ATTRIBUTE_IFLAG')) {
+        $w('data href longDesc src')
+          ._each(function(attr) { T.read[attr] = getExact });
       }
     })();
-
-    // get and set "value"
-    (function() {
-      var button = doc.createElement('button');
-      button.appendChild(doc.createTextNode('inner text'));
-      if (button.getAttribute('value')) {
-        Read.value  = Read._getAttrNode;
-        Write.value = Write._setAttrNode('value');
-      }
-    })();
-
-    (function() {
-      function getTitle(element) {
-        return element.title;
-      }
-
-      function getStyleAttribute(element) {
-        return element.style.cssText.toLowerCase();
-      }
-
-      function setStyleAttribute(element, value) {
-        element.style.cssText = value || '';
-      }
-
-      // translate "className"
-      dummy.className = 'test';
-      if (dummy.getAttribute('class') === 'test')
-        Names.className = 'class';
-      else Names['class'] = 'className';
-
-      // get and set "style"
-      dummy.setAttribute('style', 'display:block');
-      var style = dummy.getAttribute('style');
-      if (!(typeof style === 'string' && style.startsWith('display:block'))) {
-        Read.style  = getStyleAttribute;
-        Write.style = setStyleAttribute;
-      }
-
-      // get "title"
-      dummy.title = 'test';
-      if (!dummy.getAttribute('title'))
-        Read.title = getTitle;
-
-      // are attributes case sensitive ?
-      dummy.setAttribute('accesskey', 1);
-      if (dummy.accessKey !== 1) {
-        // add camel-cased attributes to the name translations
-        $w('bgColor codeBase codeType cellPadding cellSpacing colSpan rowSpan vAlign vLink aLink ' +
-           'dateTime accessKey tabIndex encType maxLength readOnly longDesc frameBorder isMap ' +
-           'useMap noHref noResize noShade noWrap marginWidth marginHeight')._each(function(attr) {
-          var lower = attr.toLowerCase();
-          Has[lower] = Names[lower] = attr;
-        });
-      }
-
-      dummy.innerHTML = '<a href="test.html" onclick="test()"></a>';
-      var anchor = dummy.firstChild;
-
-      // check if "href" and other uri attributes need fixing
-      if (Feature('ELEMENT_GET_ATTRIBUTE_IFLAG') &&
-          !(anchor.getAttribute('href') || '').toString().startsWith('test.html')) {
-        $w('data href longdesc src')._each(function(attr) {
-          Read[attr] = Read._getAttr;
-        });
-      }
-
-      // can read event attributes ?
-      var onclick = (anchor.getAttribute('onclick') || '').toString();
-      if (!onclick || onclick.startsWith('function anonymous()')) {
-        $w('blur change click contextmenu dblclick error focus load keydown keypress keyup mousedown ' +
-           'mousemove mouseout mouseover mouseup readystatechange reset submit select unload')._each(function(attr) {
-          Read['on' + attr] = Read._getEv;
-        });
-      }
-
-      // cleanup dummy
-      dummy.innerHTML = dummy.accessKey = dummy.className = dummy.title = '';
-    })();
-
-  })(Element._attributeTranslations);
-  
+  })(Element.Attribute);

@@ -291,6 +291,17 @@
           [].concat(arguments).length === 2 })(1, 2);
       }
 
+      function ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS() {
+        var node, clone;
+        (node = document.createAttribute('name')).value = 'original';
+        dummy.setAttributeNode(node);
+        (clone = dummy.cloneNode(false)).setAttribute('name', 'cloned');
+        dummy.removeAttribute('name');
+
+        return (node = clone.getAttributeNode('name')) &&
+          node.value === 'original';
+      }
+
       function BODY_ACTING_AS_ROOT() {
         // true for IE Quirks, Opera 9.25
         if (docEl.clientWidth === 0) return true;
@@ -382,19 +393,6 @@
         return result;
       }
 
-      function ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR() {
-        try { doc.createElement('table').getAttribute('xml:lang') }
-        catch(e) { return true }
-        return false;
-      }
-
-      function FORM_CHILDNODES_ARE_ATTRIBUTES() {
-        var form = doc.createElement('form');
-        form.appendChild(doc.createElement('input'));
-        form.firstChild.id = 'method';
-        return typeof form.getAttribute('method') !== 'string';
-      }
-
       function REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY() {
         // true for Webkit and IE
         return !!'\x09\x0B\x0C\x20\xA0\x0A\x0D\u2028\u2029\u1680\u180e\u2000-\u200a\u202f\u205f\u3000'
@@ -440,6 +438,7 @@
 
       return {
         'ARRAY_CONCAT_ARGUMENTS_BUGGY':                       ARRAY_CONCAT_ARGUMENTS_BUGGY,
+        'ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS':         ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS,
         'BODY_ACTING_AS_ROOT':                                BODY_ACTING_AS_ROOT,
         'BODY_OFFSETS_INHERIT_ITS_MARGINS':                   BODY_OFFSETS_INHERIT_ITS_MARGINS,
         'COMMENT_NODES_IN_CHILDREN_NODELIST':                 COMMENT_NODES_IN_CHILDREN_NODELIST,
@@ -450,8 +449,6 @@
         'ELEMENT_SELECT_INNERHTML_BUGGY':                     ELEMENT_SELECT_INNERHTML_BUGGY,
         'ELEMENT_TABLE_INNERHTML_BUGGY':                      ELEMENT_TABLE_INNERHTML_BUGGY,
         'ELEMENT_TABLE_INNERHTML_INSERTS_TBODY':              ELEMENT_TABLE_INNERHTML_INSERTS_TBODY,
-        'ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR':              ELEMENT_TABLE_XMLLANG_ATTRIBUTE_ERROR,
-        'FORM_CHILDNODES_ARE_ATTRIBUTES':                     FORM_CHILDNODES_ARE_ATTRIBUTES,
         'GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES':     GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES,
         'SELECTORS_API_CASE_SENSITIVE_CLASSNAME':             SELECTORS_API_CASE_INSENSITIVE_CLASSNAME,
         'REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY':            REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY

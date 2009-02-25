@@ -372,25 +372,30 @@ new Test.Unit.Runner({
   },
   
   testFormRequest: function() {
-    var request = $("form").request();
-    this.assert($("form").hasAttribute("method"));
-    this.assert(request.url.include("fixtures/empty.js?val1=4"));
-    this.assertEqual("get", request.method);
+    // Opera 9.25 will automatically translate 
+    // `action` uri's from relative to absolute.
     
-    request = $("form").request({ method: "put", parameters: {val2: "hello"} });
-    this.assert(request.url.endsWith("fixtures/empty.js"));
+    // test "GET" method
+    var request = $('form').request();
+    this.assert($('form').hasAttribute('method'));
+    this.assert(request.url.include('fixtures/empty.js?val1=4'));
+    this.assertEqual('get', request.method);
+
+    // test "PUT" method
+    request = $("form").request({ 'method':'put', 'parameters': { 'val2':'hello' } });
+    this.assert(request.url.endsWith('fixtures/empty.js'));
     this.assertEqual(4, request.options.parameters['val1']);
     this.assertEqual('hello', request.options.parameters['val2']);
-    this.assertEqual("post", request.method);
-    this.assertEqual("put", request.parameters['_method']);
+    this.assertEqual('post', request.method);
+    this.assertEqual('put', request.parameters['_method']);
 
     // with empty action attribute
-    request = $("ffe").request({ method: 'post' });
-    this.assert(request.url.include("unit/tmp/form_test.html"),
+    request = $("ffe").request({ 'method': 'post' });
+    this.assert(request.url.include('unit/tmp/form_test.html'),
       'wrong default action for form element with empty action attribute');
       
     // with explicit options.submit
-    request = $("form").request({ submit: 'second_submit' });
+    request = $("form").request({ 'submit':'second_submit' });
     this.assert(request.url.include("second_submit=Delete%20it!"));
   },
   

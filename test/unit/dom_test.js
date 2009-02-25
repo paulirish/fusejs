@@ -1175,7 +1175,8 @@ new Test.Unit.Runner({
     this.assertEqual('50' , $('attributes_with_issues_1').readAttribute('tabindex'));
     this.assertEqual('a link' , $('attributes_with_issues_1').readAttribute('title'));
     
-    $('cloned_element_attributes_issue').readAttribute('foo')
+    // test cloned elements
+    $('cloned_element_attributes_issue').readAttribute('foo'); // <- required
     var clone = $('cloned_element_attributes_issue').cloneNode(true);
     clone.writeAttribute('foo', 'cloned');
     this.assertEqual('cloned', clone.readAttribute('foo'));
@@ -1233,15 +1234,16 @@ new Test.Unit.Runner({
     $('attributes_with_issues_form').writeAttribute('encType', 'multipart/form-data');  
     this.assertEqual('multipart/form-data', $('attributes_with_issues_form').readAttribute('encType'));
     
-    var theForm = new Element('form', { name:'encTypeForm', method:'post', action:'myPage.php', enctype:'multipart/form-data' });
+    var theForm = new Element('form', { 'name':'encTypeForm', 'method':'post', 'action':'myPage.php', 'enctype':'multipart/form-data' });
     this.assertEqual('multipart/form-data', theForm.readAttribute('encType'));
   },
   
   testElementWriteAttributeWithBooleans: function() {
     var input = $('write_attribute_input'),
-      select = $('write_attribute_select'),
-      checkbox = $('write_attribute_checkbox'),
-      checkedCheckbox = $('write_attribute_checked_checkbox');
+     select = $('write_attribute_select'),
+     checkbox = $('write_attribute_checkbox'),
+     checkedCheckbox = $('write_attribute_checked_checkbox');
+
     this.assert( input.          writeAttribute('readonly').            hasAttribute('readonly'));
     this.assert(!input.          writeAttribute('readonly', false).     hasAttribute('readonly'));
     this.assert( input.          writeAttribute('readonly', true).      hasAttribute('readonly'));
@@ -1255,7 +1257,7 @@ new Test.Unit.Runner({
 
   testElementWriteAttributeWithIssues: function() {
     var input = $('write_attribute_input').writeAttribute({maxlength: 90, tabindex: 10}),
-      td = $('write_attribute_td').writeAttribute({valign: 'bottom', colspan: 2, rowspan: 2});
+      td = $('write_attribute_td').writeAttribute({ 'valign': 'bottom', 'colspan': 2, 'rowspan': 2 });
     this.assertEqual(90, input.readAttribute('maxlength'));
     this.assertEqual(10, input.readAttribute('tabindex'));
     this.assertEqual(2,  td.readAttribute('colspan'));
@@ -1263,12 +1265,12 @@ new Test.Unit.Runner({
     this.assertEqual('bottom', td.readAttribute('valign'));
     
     var p = $('write_attribute_para'), label = $('write_attribute_label');
-    this.assertEqual('some-class',     p.    writeAttribute({'class':   'some-class'}).    readAttribute('class'));
-    this.assertEqual('some-className', p.    writeAttribute({className: 'some-className'}).readAttribute('class'));
-    this.assertEqual('some-id',        label.writeAttribute({'for':     'some-id'}).       readAttribute('for'));
-    this.assertEqual('some-other-id',  label.writeAttribute({htmlFor:   'some-other-id'}). readAttribute('for'));
+    this.assertEqual('some-class',     p.    writeAttribute({ 'class':     'some-class' }).    readAttribute('class'));
+    this.assertEqual('some-className', p.    writeAttribute({ 'className': 'some-className' }).readAttribute('class'));
+    this.assertEqual('some-id',        label.writeAttribute({ 'for':       'some-id' }).       readAttribute('for'));
+    this.assertEqual('some-other-id',  label.writeAttribute({ 'htmlFor':   'some-other-id' }). readAttribute('for'));
     
-    this.assert(p.writeAttribute({style: 'width: 5px;'}).readAttribute('style').toLowerCase().include('width'));      
+    this.assert(p.writeAttribute({ 'style':'width: 5px;' }).readAttribute('style').toLowerCase().include('width'));      
 
     var table = $('write_attribute_table');
     table.writeAttribute('cellspacing', '2')

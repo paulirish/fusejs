@@ -1,3 +1,8 @@
+* Simplify Element#readAttribute and Element#writeAttribute by using element.getAttributeNode() as the default method of reading attributes. [Diego Perini, jddalton]
+  Note: Backwards compatibility warning.
+   - Renamed Element._attributeTranslations to Element.Attribute
+   - Element.Attribute methods `_setAttrNode`, `_flag`, `_getAttr`, `_getAttrNode`, and `_getEv` are private and renamed
+
 * Ensure Class.create(), in Safari 3.1+, works with objects containing regular expressions as properties. [jddalton, kangax]
 
 * Ensure Object.isFunction() returns false for regular expressions. [kangax]
