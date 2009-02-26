@@ -39,28 +39,34 @@
       }
     }
 
-    function isArray(object) {
-      return toString.call(object) === '[object Array]';
+    function isArray(value) {
+      return toString.call(value) === '[object Array]';
     }
 
-    function isElement(object) {
-      return !!object && object.nodeType === 1;
+    function isElement(value) {
+      return !!value && value.nodeType === 1;
     }
 
-    function isFunction(object) {
-      return toString.call(object) === '[object Function]';
+    function isFunction(value) {
+      return toString.call(value) === '[object Function]';
     }
 
-    function isHash(object) {
-      return !!object && object.constructor === Hash;
+    function isHash(value) {
+      return !!value && value.constructor === Hash;
     }
 
-    function isNumber(object) {
-      return toString.call(object) === '[object Number]' && isFinite(object);
+    function isNumber(value) {
+      return toString.call(value) === '[object Number]' && isFinite(value);
     }
 
-    function isRegExp(object) {
-      return toString.call(object) === '[object RegExp]';
+    function isPrimitive(value) {
+      // ECMA-3.1 Draft 4.3.2
+      var type = typeof value;
+      return value == null || type === 'boolean' || type === 'number' || type === 'string';
+    }
+
+    function isRegExp(value) {
+      return toString.call(value) === '[object RegExp]';
     }
 
     /* https://developer.mozilla.org/En/Same_origin_policy_for_JavaScript */
@@ -79,12 +85,12 @@
           defaultPort) === (global.location.port || defaultPort));
     }
 
-    function isString(object) {
-      return toString.call(object) === '[object String]';
+    function isString(value) {
+      return toString.call(value) === '[object String]';
     }
 
-    function isUndefined(object) {
-      return typeof object === 'undefined';
+    function isUndefined(value) {
+      return typeof value === 'undefined';
     }
 
     function toHTML(object) {
@@ -266,6 +272,7 @@
       'isFunction':    isFunction,
       'isHash':        isHash,
       'isNumber':      isNumber,
+      'isPrimitive':   isPrimitive,
       'isRegExp':      isRegExp,
       'isSameOrigin':  isSameOrigin,
       'isString':      isString,

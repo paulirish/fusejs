@@ -1,3 +1,5 @@
+* Add Object.isPrimitive(). [kangax]
+
 * Simplify Element#readAttribute and Element#writeAttribute by using element.getAttributeNode() as the default method of reading attributes. [Diego Perini, jddalton]
   Note: Backwards compatibility warning.
    - Renamed Element._attributeTranslations to Element.Attribute

@@ -316,6 +316,28 @@ new Test.Unit.Runner({
     this.assert(!Object.isOwnProperty(window, 'abc123xyz'));
   },
   
+  testObjectIsPrimitive: function() {
+    var undef;
+    this.assert(Object.isPrimitive('a string'));
+    this.assert(Object.isPrimitive(5));
+    this.assert(Object.isPrimitive(0));
+    this.assert(Object.isPrimitive(false));
+    this.assert(Object.isPrimitive(true));
+    this.assert(Object.isPrimitive(null));
+    this.assert(Object.isPrimitive(undef));
+    this.assert(Object.isPrimitive(NaN));
+    this.assert(Object.isPrimitive(Infinity));
+    this.assert(!Object.isPrimitive(/foo/));
+    this.assert(!Object.isPrimitive(new Number(0)));
+    this.assert(!Object.isPrimitive(new String('a string')));
+    this.assert(!Object.isPrimitive(function() { }));
+    this.assert(!Object.isPrimitive(new Boolean(true)));
+    this.assert(!Object.isPrimitive([ ]));
+    this.assert(!Object.isPrimitive({ }));
+    this.assert(!Object.isPrimitive({ valueOf: 0 }));
+    this.assert(!Object.isPrimitive({ valueOf: 'a string' }));
+  },
+  
   testObjectIsRegExp: function() {
     this.assert(Object.isRegExp(/foo/));
     this.assert(Object.isRegExp(new RegExp('foo')));
