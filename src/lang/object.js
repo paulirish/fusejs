@@ -139,8 +139,8 @@
     }
 
     function keys(object) {
-      // ECMA 3.1 Draft: 15.2.3.14
-      if (!object || typeof object !== 'object')
+      // ECMA-3.1 Draft 15.2.3.14
+      if (Object.isPrimitive(object))
         throw new TypeError;
       var results = [];
       Object._each(object, function(value, key) {
@@ -151,7 +151,7 @@
     }
 
     function values(object) {
-      if (!object || typeof object !== 'object')
+      if (Object.isPrimitive(object))
         throw new TypeError;
       var results = [];
       Object._each(object, function(value, key) {
@@ -172,7 +172,7 @@
       // IE
       if (iterations === 0) {
         var dontEnumProperties = ['constructor', 'hasOwnkey', 'isPrototypeOf',
-          'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
+          'propertyIsEnumerable', 'prototype', 'toLocaleString', 'toString', 'valueOf'];
         delete iterations;
         return function(object, callback) {
           if (object) {
@@ -236,7 +236,7 @@
         }
       }
       return function(object, property) {
-        // ECMA-3.1 15.2.4.5
+        // ECMA-3.1 Draft 15.2.4.5
         if (object == null) throw new TypeError;
         return hasOwnProperty.call(object, property);
       };

@@ -433,6 +433,17 @@ new Test.Unit.Runner({
     this.assertEnumEqual(['a'],       Object.keys({ 'a': 'A' }));
     this.assertEnumEqual($w('a b c'), Object.keys({ 'a':'A', 'b':'B', 'c':'C' }).sort());
 
+    // ensure function objects work
+    var result, foo = function() { this.a = 'a' };
+    foo.prototype.b = 'b';
+    foo.prop = 'blah';
+
+    this.assertNothingRaised(function() { result = Object.keys(foo) });
+    this.assertEnumEqual(['prop', 'prototype'], result.sort());
+    this.assertNothingRaised(function() { result = Object.keys(new foo) });
+    this.assertEnumEqual(['a'], result);
+
+    // test objects containing shadowed properties
     this.assertEnumEqual($w('a b toString valueOf'),
       Object.keys(Fixtures.mixed_dont_enum).sort());
 

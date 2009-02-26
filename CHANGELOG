@@ -1,3 +1,7 @@
+* Ensure Object.keys() and Object.values() accept function objects. [jddalton, kangax]
+
+* Add `prototype` to the list of properties to iterate over in the IE fork of Object._each(). [jddalton]
+
 * Add Object.isPrimitive(). [kangax]
 
 * Simplify Element#readAttribute and Element#writeAttribute by using element.getAttributeNode() as the default method of reading attributes. [Diego Perini, jddalton]
