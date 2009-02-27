@@ -58,10 +58,13 @@
   // Safari 2 will return a full array with undefined values
   if (!Feature('ARRAY_SLICE_THIS_AS_NODELIST')) {
     nodeListSlice = function(begin, end) {
-      // Avoid the nodeList length property because,
-      // in IE for example, it might be an element with an ID of "length"
+      // Avoid the nodeList length property because it might be an element 
+      // with an ID/Name of `length`.
+      // IE8 throws an error when attempting to access a non-existent index
+      // of a StaticNodeList.
+      // Safari 2 returns null when accessing a non-existant item in the list.
       var i = 0, results = [];
-      while (typeof this[i] === 'object')
+      while (typeof this[i] === 'object' && this[i])
         results[i] = this[i++];
       return !begin && arguments.length < 2 ?
         results : results.slice(begin, end);

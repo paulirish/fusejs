@@ -1,3 +1,5 @@
+* Fix private method nodeListSlice() causing Safari 2 to enter an infinite loop. [jddalton]
+
 * Ensure Object.keys() and Object.values() accept function objects. [jddalton, kangax]
 
 * Add `prototype` to the list of properties to iterate over in the IE fork of Object._each(). [jddalton]
