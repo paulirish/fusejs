@@ -70,17 +70,24 @@ new Test.Unit.Runner({
     
     outer.stopObserving("test:somethingHappened", outerObserver);
   },
-  
+
+  testEventAddMethods: function() {
+    Event.addMethods({ 'hashBrowns': function() { return 'hash browns' } });
+    var event = $('span').fire('test:somethingHappened');
+    this.assertRespondsTo('hashBrowns', event);
+  },
+
   testEventObjectIsExtended: function() { 
-    var span = $("span"), event, observedEvent, observer = function(e) { observedEvent = e };
-    span.observe("test:somethingHappened", observer);
-    event = span.fire("test:somethingHappened");
-    this.assertEqual(event, observedEvent);
-    this.assertEqual(Event.Methods.stop.methodize(), event.stop);
-    span.stopObserving("test:somethingHappened", observer);
-    
-    event = span.fire("test:somethingHappenedButNoOneIsListening");
-    this.assertEqual(Event.Methods.stop.methodize(), event.stop);
+    var span = $('span'), event, observedEvent,
+     observer = function(e) { observedEvent = e };
+
+    span.observe('test:somethingHappened', observer);
+    event = span.fire('test:somethingHappened');
+    this.assertRespondsTo('stop', event, 'Failed to extend event object.');
+    span.stopObserving('test:somethingHappened', observer);
+
+    event = span.fire('test:somethingHappenedButNoOneIsListening');
+    this.assertRespondsTo('stop', event, 'Failed to extend event with no observers');
   },
   
   testEventObserversAreBoundToTheObservedElement: function() {

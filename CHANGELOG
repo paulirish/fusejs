@@ -1,3 +1,9 @@
+* Allow IE8 to utilize the Element and Event prototype objects. [Andrew Dupont, jddalton]
+
+* Add Event.addMethods() to allow adding methods to Event instances. [Prototype LH #203] [jddalton, Ken Snyder]
+
+* Cleanup Fuse.Browser.Feature and Fuse.Browser.Bug and rename the Tester `add` and `remove` methods to `set` and `unset`. [jddalton]
+
 * Fix private method nodeListSlice() causing Safari 2 to enter an infinite loop. [jddalton]
 
 * Ensure Object.keys() and Object.values() accept function objects. [jddalton, kangax]

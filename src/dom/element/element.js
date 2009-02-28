@@ -13,13 +13,19 @@
 
   /*--------------------------------------------------------------------------*/
 
+  // cache Element capabilities before overwriting the Element object
+  Feature('ELEMENT_EXTENSIONS');
+  Feature('ELEMENT_SPECIFIC_EXTENSIONS');
+
   (function() {
     var original = global.Element;
 
     function createElement(tagName, attributes) {
       tagName = tagName.toLowerCase();
-      if (!Element.cache[tagName]) Element.cache[tagName] = Element.extend(doc.createElement(tagName));
-      return Element.writeAttribute(Element.cache[tagName].cloneNode(false), attributes || { });
+      if (!Element.cache[tagName])
+        Element.cache[tagName] = Element.extend(doc.createElement(tagName));
+      return Element.writeAttribute(Element.cache[tagName]
+        .cloneNode(false), attributes || { });
     }
 
     global.Element = createElement;
@@ -57,15 +63,15 @@
     }
 
     function extend(element) {
-      // Bail on elements that don't need extending, 
+      // Bail on elements that don't need extending,
       // XML nodes (IE errors on them), document, window objects
-      if (!element || (typeof element._extendedByFuse !== 'undefined' && 
+      if (!element || (typeof element._extendedByFuse !== 'undefined' &&
         element._extendedByFuse() >= revision) ||
         element.nodeType !== 1 || element === global ||
         !element.ownerDocument.body) return element;
 
       var pair,
-       tagName = element.tagName.toUpperCase(), 
+       tagName = element.tagName.toUpperCase(),
        methods = ByTag[tagName] || Methods,
        length  = methods.length;
 
@@ -115,6 +121,58 @@
   })();
 
   Element.addMethods = (function() {
+    // add HTMLElement for Safari 2
+    if (Feature('OBJECT_PROTO') && !Feature('HTML_ELEMENT_CLASS')) {
+      Feature.set('HTML_ELEMENT_CLASS', true);
+      Feature.set('ELEMENT_EXTENSIONS', true);
+      emulateDOMClass('HTMLElement');
+    }
+
+    var tagNameClassLookup = {
+      'A':        'Anchor',
+      'CAPTION':  'TableCaption',
+      'COL':      'TableCol',
+      'COLGROUP': 'TableCol',
+      'DEL':      'Mod',
+      'DIR':      'Directory',
+      'DL':       'DList',
+      'H1':       'Heading',
+      'H2':       'Heading',
+      'H3':       'Heading',
+      'H4':       'Heading',
+      'H5':       'Heading',
+      'H6':       'Heading',
+      'IFRAME':   'IFrame',
+      'IMG':      'Image',
+      'INS':      'Mod',
+      'FIELDSET': 'FieldSet',
+      'FRAMESET': 'FrameSet',
+      'OL':       'OList',
+      'OPTGROUP': 'OptGroup',
+      'P':        'Paragraph',
+      'Q':        'Quote',
+      'TBODY':    'TableSection',
+      'TD':       'TableCell',
+      'TEXTAREA': 'TextArea',
+      'TH':       'TableCell',
+      'TFOOT':    'TableSection',
+      'THEAD':    'TableSection',
+      'TR':       'TableRow',
+      'UL':       'UList'
+    },
+
+    EMULATE_ELEMENT_CLASSES_WITH_PROTO =
+      Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO'),
+
+    elementPrototype = Feature('HTML_ELEMENT_CLASS') ?
+      global.HTMLElement.prototype : Feature('ELEMENT_CLASS') ?
+        global.Element.prototype : false;
+
+    function emulateDOMClass(className) {
+      (global[className] = { }).prototype = dummy['__proto__'];
+      return global[className];
+    }
+
     function extend(tagName, methods) {
       tagName = tagName.toUpperCase();
       if (!Element.Methods.ByTag[tagName])
@@ -133,52 +191,15 @@
     }
 
     function findDOMClass(tagName) {
-      var klass;
-      var trans = {
-        'A':        'Anchor',
-        'CAPTION':  'TableCaption',
-        'COL':      'TableCol',
-        'COLGROUP': 'TableCol',
-        'DEL':      'Mod',
-        'DIR':      'Directory',
-        'DL':       'DList',
-        'H1':       'Heading',
-        'H2':       'Heading',
-        'H3':       'Heading',
-        'H4':       'Heading',
-        'H5':       'Heading',
-        'H6':       'Heading',
-        'IFRAME':   'IFrame',
-        'IMG':      'Image',
-        'INS':      'Mod',
-        'FIELDSET': 'FieldSet',
-        'FRAMESET': 'FrameSet',
-        'OL':       'OList',
-        'OPTGROUP': 'OptGroup',
-        'P':        'Paragraph',
-        'Q':        'Quote',
-        'TBODY':    'TableSection',
-        'TD':       'TableCell',
-        'TEXTAREA': 'TextArea',
-        'TH':       'TableCell',
-        'TFOOT':    'TableSection',
-        'THEAD':    'TableSection',
-        'TR':       'TableRow',
-        'UL':       'UList'
-      };
-
-      if (trans[tagName]) klass = 'HTML' + trans[tagName] + 'Element';
-      if (global[klass]) return global[klass];
-
-      klass = 'HTML' + tagName + 'Element';
-      if (global[klass]) return global[klass];
-
-      klass = 'HTML' + tagName.capitalize() + 'Element';
-      if (global[klass]) return global[klass];
-
-      global[klass] = { };
-      global[klass].prototype = doc.createElement(tagName)['__proto__'];
-      return global[klass];
+      var className = 'HTML' + (tagNameClassLookup[tagName] ||
+        tagName.capitalize()) + 'Element';
+      if (global[className])
+        return global[className];
+      className = 'HTML' + tagName + 'Element';
+      if (global[className])
+        return global[className];
+      if (EMULATE_ELEMENT_CLASSES_WITH_PROTO)
+        return emulateDOMClass(className);
     }
 
     return function(methods) {
@@ -202,7 +223,7 @@
       }
 
       if (!tagName)
-        Object.extend(Element.Methods, methods || { });  
+        Object.extend(Element.Methods, methods || { });
       else {
         Object.isArray(tagName)
           ? tagName._each(function(name) { extend(name, methods) })
@@ -210,8 +231,8 @@
       }
 
       if (Feature('ELEMENT_EXTENSIONS')) {
-        copy(Element.Methods, HTMLElement.prototype);
-        copy(Element.Methods.Simulated, HTMLElement.prototype, true);
+        copy(Element.Methods, elementPrototype);
+        copy(Element.Methods.Simulated, elementPrototype, true);
       }
 
       if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
@@ -220,9 +241,8 @@
           klass = findDOMClass(tagName);
           if (typeof klass === 'undefined') continue;
           copy(T[tagName], klass.prototype);
-          klass.prototype._extendedByFuse = infiniteRevision;
         }
-        HTMLElement.prototype._extendedByFuse = infiniteRevision;
+        elementPrototype._extendedByFuse = infiniteRevision;
       }
 
       Object.extend(Element, Element.Methods);
@@ -256,7 +276,7 @@
     function getDimensions(element) {
       return { 'width': Element.getWidth(element), 'height': Element.getHeight(element) };
     }
-    
+
     function getOffsetParent(element) {
       element = $(element);
 

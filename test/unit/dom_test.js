@@ -73,9 +73,6 @@ new Test.Unit.Runner({
     
     this.assertElementsMatch(document.getElementsByClassName('A'), 'p.A', 'ul#class_names_ul.A', 'li.A.C');
     
-    if (Fuse.Browser.Agent.IE)
-      this.assertUndefined(document.getElementById('unextended').show);
-    
     this.assertElementsMatch(div.getElementsByClassName('B'), 'ul#class_names_ul.A.B', 'div.B.C.D');
     this.assertElementsMatch(div.getElementsByClassName('D C B'), 'div.B.C.D');
     this.assertElementsMatch(div.getElementsByClassName(' D\nC\tB '), 'div.B.C.D');
@@ -95,8 +92,8 @@ new Test.Unit.Runner({
     this.assertElementsMatch(list.getElementsByClassName({}));
     
     // those lookups shouldn't have extended all nodes in document
-    if (Fuse.Browser.Agent.IE)
-      this.assertUndefined(document.getElementById('unextended')['show']);
+    if (!Fuse.Browser.Feature('ELEMENT_EXTENSIONS'))
+      this.assertUndefined(document.getElementById('unextended').show);
   },
 
   testElementInsertWithHTML: function() {
@@ -816,7 +813,8 @@ new Test.Unit.Runner({
     XHTML_TAGS.each(function(tag) {
       var element = document.createElement(tag);
       this.assertEqual(element, Element.extend(element));
-      this.assertRespondsTo('show', element);
+      this.assertRespondsTo('show', element,
+        element.nodeName.toUpperCase() + ' failed to be extended.');
     }, this);
     
     [null,'','a','aa'].each(function(content) {

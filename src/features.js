@@ -10,7 +10,7 @@
       };
     }
 
-    function createInnerHTMLTest(source, innerHTML, level) {
+    function createInnerHTMLTest(source, innerHTML) {
       return function() {
         dummy.innerHTML = source;
         var result = true, element = dummy.firstChild;
@@ -23,19 +23,19 @@
       };
     }
 
-    function createTester(testObject) {
+    function createTester(cache) {
       var Tester = function() {
-        for (var i = 0, answer, name; name = arguments[i++]; ) {
-          answer = name.charAt(0) !== '!';
-          if (typeof testObject[name] === 'function')
-            testObject[name] = testObject[name]();
-          if (testObject[name] !== answer)
+        var name, i = 0;
+      	while (name = arguments[i++]) {
+          if (typeof cache[name] === 'function')
+            cache[name] = cache[name]();
+          if (cache[name] !== true)
             return false;
         }
         return true;
       };
-      Tester.add = function(name, value) { testObject[name] = value };
-      Tester.remove = function(name) { delete testObject[name] };
+      Tester.set   = function(name, value) { cache[name] = value };
+      Tester.unset = function(name) { delete cache[name] };
       return Tester;
     }
 
@@ -96,6 +96,12 @@
         return isHostObject(docEl, 'getBoundingClientRect');
       }
 
+      function ELEMENT_CLASS() {
+        // true for all but Safari 2 and IE7-
+        return isHostObject(global, 'Element') &&
+          isHostObject(global.Element, 'prototype');
+      }
+
       function ELEMENT_CLIENT_COORDS() {
         // true for IE
         return typeof docEl.clientLeft === 'number';
@@ -103,7 +109,8 @@
 
       function ELEMENT_COMPUTED_STYLE() {
         // true for all but IE
-        return isHostObject(doc, 'defaultView') && isHostObject(doc.defaultView, 'getComputedStyle');
+        return isHostObject(doc, 'defaultView') &&
+          isHostObject(doc.defaultView, 'getComputedStyle');
       }
 
       function ELEMENT_COMPARE_DOCUMENT_POSITION() {
@@ -113,7 +120,8 @@
 
       function ELEMENT_CURRENT_STYLE() {
         // true for IE
-        return isHostObject(docEl, 'currentStyle') && !Feature('ELEMENT_COMPUTED_STYLE');
+        return isHostObject(docEl, 'currentStyle') &&
+          !Feature('ELEMENT_COMPUTED_STYLE');
       }
 
       function ELEMENT_DISPATCH_EVENT() {
@@ -127,14 +135,8 @@
       }
 
       function ELEMENT_EXTENSIONS() {
-        // true for Firefox, WebKit
-        var result = isHostObject(global,'HTMLElement');
-        if (!result && isHostObject(dummy, '__proto__')) {
-          global.HTMLElement = { };
-          global.HTMLElement.prototype = dummy.__proto__;
-          result = true;
-        }
-        return result;
+        // true for all but Safari 2 and IE7-
+        return Feature('HTML_ELEMENT_CLASS') || Feature('ELEMENT_CLASS');
       }
 
       function ELEMENT_FIRE_EVENT() {
@@ -143,15 +145,13 @@
       }
 
       function ELEMENT_GET_ATTRIBUTE_IFLAG() {
-        // create new div because we can't remove these
-        // once they are added :(
+        // true for IE
         var result = false;
         try {
-          var div = doc.createElement('div');
-          div.setAttribute('test', 1);
-          div.setAttribute('tEsT', 2);
-          result = (div.getAttribute('tEsT') === 1 &&
-            div.getAttribute('tEsT', 1) === 2);
+          dummy.setAttribute('align', 'center'); dummy.setAttribute('aLiGn', 'left');
+          result = (dummy.getAttribute('aLiGn') === 'center' &&
+            dummy.getAttribute('aLiGn', 1) === 'left');
+          dummy.removeAttribute('align'); dummy.removeAttribute('aLiGn');
         } catch(e) { }
         return result;
       }
@@ -179,8 +179,15 @@
       }
 
       function ELEMENT_SPECIFIC_EXTENSIONS() {
-        var result =  isHostObject(docEl, '__proto__') &&
-          dummy['__proto__'] !== docEl['__proto__'];
+        var result = false;
+        if (isHostObject(global, 'HTMLHtmlElement') &&
+            isHostObject(global.HTMLHtmlElement, 'prototype') &&
+            (docEl.constructor === HTMLHtmlElement || Feature('OBJECT_PROTO') &&
+            docEl['__proto__'] === HTMLHtmlElement.prototype)) {
+          result = true;
+        } else result = Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO');
+
+        // TODO: Remove this browser sniff
         return Fuse.Browser.Agent.MobileSafari ? false : result;
       }
 
@@ -189,21 +196,38 @@
         return typeof dummy.textContent === 'string';
       }
 
+      function EMULATE_ELEMENT_CLASSES_WITH_PROTO() {
+        return Feature('OBJECT_PROTO') &&
+          dummy['__proto__'] !== docEl['__proto__'];
+      }
+
       function FUNCTION_TO_STRING_RETURNS_SOURCE() {
-        // true for all but Mobile WebKit
+        // true for all but some mobile browsers
         function toStringTest(param1, param2) { var number = 1234 }
         var source = toStringTest.toString();
         return source.indexOf('param1') > -1 && source.indexOf('number = 1234') > -1;
       }
 
+      function HTML_ELEMENT_CLASS() {
+        // true for all but IE
+        // (Safari 2 support is emulated in element.js)
+        return isHostObject(global,'HTMLElement') &&
+          isHostObject(global.HTMLElement, 'prototype');
+      }
+
       function OBJECT_PROTO() {
-        // true for Webkit and Gecko
-        return []['__proto__'] === Array.prototype;
+        // true for Gecko and Webkit
+        return isHostObject(docEl, '__proto__') &&
+          [ ]['__proto__'] === Array.prototype  &&
+          { }['__proto__'] === Object.prototype;
       }
 
       function SELECTORS_API() {
-        // true for WebKit (Safari 3, Chrome)
-        return isHostObject(doc, 'querySelector');
+        // true for IE8, WebKit (Safari 3, Chrome)
+        return isHostObject(doc, 'querySelector') &&
+          isHostObject(doc, 'querySelectorAll') &&
+          isHostObject(docEl, 'querySelector') &&
+          isHostObject(docEl, 'querySelectorAll');
       }
 
       function TYPEOF_NODELIST_IS_FUNCTION() {
@@ -213,7 +237,9 @@
 
       function XPATH() {
         // true for all but IE
-        return isHostObject(doc, 'evaluate');
+        return isHostObject(doc, 'evaluate') &&
+          isHostObject(global, 'XPathResult') &&
+          typeof XPathResult.ORDERED_NODE_SNAPSHOT_TYPE === 'number';
       }
 
       var ELEMENT_CHILDREN_NODELIST, ELEMENT_CONTAINS;
@@ -230,8 +256,7 @@
         if (ELEMENT_CHILDREN_NODELIST === false &&
           ELEMENT_CONTAINS === false) return;
 
-        dummy.appendChild(dummy.cloneNode(false));
-        dummy.appendChild(dummy.cloneNode(true));
+        dummy.innerHTML = '<div></div><div><div></div></div>';
 
         // ensure children collection only contains direct descendants
         if (ELEMENT_CHILDREN_NODELIST !== false)
@@ -241,48 +266,49 @@
         if (ELEMENT_CONTAINS !== false)
           ELEMENT_CONTAINS = !dummy.firstChild.contains(dummy.childNodes[1].firstChild);
 
-        // cleanup dummy
-        dummy.removeChild(dummy.firstChild);
-        dummy.removeChild(dummy.firstChild);
+        dummy.innerHTML = '';
       })();
 
       return {
-        'ARRAY_SLICE_THIS_AS_NODELIST':      ARRAY_SLICE_THIS_AS_NODELIST,
-        'CREATE_ELEMENT_WITH_HTML':          CREATE_ELEMENT_WITH_HTML,
-        'DOCUMENT_ALL_COLLECTION':           DOCUMENT_ALL_COLLECTION,
-        'DOCUMENT_CREATE_EVENT':             DOCUMENT_CREATE_EVENT,
-        'DOCUMENT_CREATE_EVENT_OBJECT':      DOCUMENT_CREATE_EVENT_OBJECT,
-        'DOCUMENT_RANGE':                    DOCUMENT_RANGE,
-        'DOCUMENT_STYLE_SHEETS_COLLECTION':  DOCUMENT_STYLE_SHEETS_COLLECTION,
-        'ELEMENT_ADD_EVENT_LISTENER':        ELEMENT_ADD_EVENT_LISTENER,
-        'ELEMENT_ATTACH_EVENT':              ELEMENT_ATTACH_EVENT,
-        'ELEMENT_BOUNDING_CLIENT_RECT':      ELEMENT_BOUNDING_CLIENT_RECT,
-        'ELEMENT_CHILDREN_NODELIST':         ELEMENT_CHILDREN_NODELIST,
-        'ELEMENT_CLIENT_COORDS':             ELEMENT_CLIENT_COORDS,
-        'ELEMENT_COMPARE_DOCUMENT_POSITION': ELEMENT_COMPARE_DOCUMENT_POSITION,
-        'ELEMENT_COMPUTED_STYLE':            ELEMENT_COMPUTED_STYLE,
-        'ELEMENT_CONTAINS':                  ELEMENT_CONTAINS,
-        'ELEMENT_CURRENT_STYLE':             ELEMENT_CURRENT_STYLE,
-        'ELEMENT_DISPATCH_EVENT':            ELEMENT_DISPATCH_EVENT,
-        'ELEMENT_DO_SCROLL':                 ELEMENT_DO_SCROLL,
-        'ELEMENT_EXTENSIONS':                ELEMENT_EXTENSIONS,
-        'ELEMENT_FIRE_EVENT':                ELEMENT_FIRE_EVENT,
-        'ELEMENT_GET_ATTRIBUTE_IFLAG':       ELEMENT_GET_ATTRIBUTE_IFLAG,
-        'ELEMENT_INNER_TEXT':                ELEMENT_INNER_TEXT,
-        'ELEMENT_MS_CSS_FILTERS':            ELEMENT_MS_CSS_FILTERS,
-        'ELEMENT_REMOVE_NODE':               ELEMENT_REMOVE_NODE,
-        'ELEMENT_SOURCE_INDEX':              ELEMENT_SOURCE_INDEX,
-        'ELEMENT_SPECIFIC_EXTENSIONS':       ELEMENT_SPECIFIC_EXTENSIONS,
-        'ELEMENT_TEXT_CONTENT':              ELEMENT_TEXT_CONTENT,
-        'FUNCTION_TO_STRING_RETURNS_SOURCE': FUNCTION_TO_STRING_RETURNS_SOURCE,
-        'OBJECT_PROTO':                      OBJECT_PROTO,
-        'SELECTORS_API':                     SELECTORS_API,
-        'TYPEOF_NODELIST_IS_FUNCTION':       TYPEOF_NODELIST_IS_FUNCTION,
-        'XPATH':                             XPATH
+        'ARRAY_SLICE_THIS_AS_NODELIST':       ARRAY_SLICE_THIS_AS_NODELIST,
+        'CREATE_ELEMENT_WITH_HTML':           CREATE_ELEMENT_WITH_HTML,
+        'DOCUMENT_ALL_COLLECTION':            DOCUMENT_ALL_COLLECTION,
+        'DOCUMENT_CREATE_EVENT':              DOCUMENT_CREATE_EVENT,
+        'DOCUMENT_CREATE_EVENT_OBJECT':       DOCUMENT_CREATE_EVENT_OBJECT,
+        'DOCUMENT_RANGE':                     DOCUMENT_RANGE,
+        'DOCUMENT_STYLE_SHEETS_COLLECTION':   DOCUMENT_STYLE_SHEETS_COLLECTION,
+        'ELEMENT_ADD_EVENT_LISTENER':         ELEMENT_ADD_EVENT_LISTENER,
+        'ELEMENT_ATTACH_EVENT':               ELEMENT_ATTACH_EVENT,
+        'ELEMENT_BOUNDING_CLIENT_RECT':       ELEMENT_BOUNDING_CLIENT_RECT,
+        'ELEMENT_CHILDREN_NODELIST':          ELEMENT_CHILDREN_NODELIST,
+        'ELEMENT_CLASS':                      ELEMENT_CLASS,
+        'ELEMENT_CLIENT_COORDS':              ELEMENT_CLIENT_COORDS,
+        'ELEMENT_COMPARE_DOCUMENT_POSITION':  ELEMENT_COMPARE_DOCUMENT_POSITION,
+        'ELEMENT_COMPUTED_STYLE':             ELEMENT_COMPUTED_STYLE,
+        'ELEMENT_CONTAINS':                   ELEMENT_CONTAINS,
+        'ELEMENT_CURRENT_STYLE':              ELEMENT_CURRENT_STYLE,
+        'ELEMENT_DISPATCH_EVENT':             ELEMENT_DISPATCH_EVENT,
+        'ELEMENT_DO_SCROLL':                  ELEMENT_DO_SCROLL,
+        'ELEMENT_EXTENSIONS':                 ELEMENT_EXTENSIONS,
+        'ELEMENT_FIRE_EVENT':                 ELEMENT_FIRE_EVENT,
+        'ELEMENT_GET_ATTRIBUTE_IFLAG':        ELEMENT_GET_ATTRIBUTE_IFLAG,
+        'ELEMENT_INNER_TEXT':                 ELEMENT_INNER_TEXT,
+        'ELEMENT_MS_CSS_FILTERS':             ELEMENT_MS_CSS_FILTERS,
+        'ELEMENT_REMOVE_NODE':                ELEMENT_REMOVE_NODE,
+        'ELEMENT_SOURCE_INDEX':               ELEMENT_SOURCE_INDEX,
+        'ELEMENT_SPECIFIC_EXTENSIONS':        ELEMENT_SPECIFIC_EXTENSIONS,
+        'ELEMENT_TEXT_CONTENT':               ELEMENT_TEXT_CONTENT,
+        'EMULATE_ELEMENT_CLASSES_WITH_PROTO': EMULATE_ELEMENT_CLASSES_WITH_PROTO,
+        'FUNCTION_TO_STRING_RETURNS_SOURCE':  FUNCTION_TO_STRING_RETURNS_SOURCE,
+        'HTML_ELEMENT_CLASS':                 HTML_ELEMENT_CLASS,
+        'OBJECT_PROTO':                       OBJECT_PROTO,
+        'SELECTORS_API':                      SELECTORS_API,
+        'TYPEOF_NODELIST_IS_FUNCTION':        TYPEOF_NODELIST_IS_FUNCTION,
+        'XPATH':                              XPATH
       };
     })());
 
-    /*----------------------------------- BUGS ---------------------------------*/
+  /*---------------------------------- BUGS ----------------------------------*/
 
     Bug = Fuse.Browser.Bug = createTester((function() {
       function ARRAY_CONCAT_ARGUMENTS_BUGGY() {
@@ -292,6 +318,7 @@
       }
 
       function ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS() {
+        // true for IE
         var node, clone;
         (node = document.createAttribute('name')).value = 'original';
         dummy.setAttributeNode(node);
@@ -364,7 +391,7 @@
           // true for Opera
           var backup = docEl.style.display;
           docEl.style.display = 'none';
-          
+
           // Safari 2: getComputedStyle() will return null
           // for elements with style display:none
           var style = doc.defaultView.getComputedStyle(docEl, null),
@@ -400,19 +427,14 @@
       }
 
       function SELECTORS_API_CASE_INSENSITIVE_CLASSNAME() {
-        // Safari 3 before 3.1.2 treat class names 
+        // Safari 3 before 3.1.2 treat class names
         // case-insensitively in quirks mode.
         var result = false;
         if (Feature('SELECTORS_API')) {
-          var span = document.createElement('span');
           dummy.id = 'fusejs_test_id';
-          span.className = 'Test';
-          dummy.appendChild(span);
+          dummy.innerHTML = '<span class="Test"></span>';
           result = dummy.querySelector('#fusejs_test_id .test') !== null;
-
-          // cleanup dummy
-          dummy.id = '';
-          dummy.removeChild(span);
+          dummy.id = dummy.innerHTML = '';
         }
         return result;
       }
