@@ -162,52 +162,47 @@
     }
 
     var _each = (function() {
-      var iterations = (function() {
+      // avoid creating a temp variable
+      switch (function() {
         var key, count = 0, klass = function() { this.toString = 1 };
         klass.prototype.toString = 0;
         for (key in new klass()) count++;
         return count;
-      })();
-
-      // IE
-      if (iterations === 0) {
-        var dontEnumProperties = ['constructor', 'hasOwnkey', 'isPrototypeOf',
-          'propertyIsEnumerable', 'prototype', 'toLocaleString', 'toString', 'valueOf'];
-        delete iterations;
-        return function(object, callback) {
-          if (object) {
-            var key, i = 0;
-            for (key in object)
-              callback(object[key], key, object);
-            while(key = dontEnumProperties[i++])
-              if (Object.isOwnProperty(object, key))
-                 callback(object[key], key, object);
-          }
-          return object;
-        };
-      }
-      // Tobie Langel: Safari 2 broken for-in loop
-      // http://tobielangel.com/2007/1/29/for-in-loop-broken-in-safari/
-      if (iterations === 2) {
-        delete iterations;
-        return function(object, callback) {
-          var key, keys = { };
-          for (key in object) {
-            if (!Object.isOwnProperty(keys, key)) {
-              keys[key] = true;
-              callback(object[key], key, object);
+      }()) {
+        case 0: // IE
+          var dontEnumProperties = ['constructor', 'hasOwnkey', 'isPrototypeOf',
+            'propertyIsEnumerable', 'prototype', 'toLocaleString', 'toString', 'valueOf'];
+          return function(object, callback) {
+            if (object) {
+              var key, i = 0;
+              for (key in object)
+                callback(object[key], key, object);
+              while(key = dontEnumProperties[i++])
+                if (Object.isOwnProperty(object, key))
+                   callback(object[key], key, object);
             }
-          }
-          return object;
-        };
+            return object;
+          };
+        case 1:
+          // Tobie Langel: Safari 2 broken for-in loop
+          // http://tobielangel.com/2007/1/29/for-in-loop-broken-in-safari/
+          return function(object, callback) {
+            var key, keys = { };
+            for (key in object) {
+              if (!Object.isOwnProperty(keys, key)) {
+                keys[key] = true;
+                callback(object[key], key, object);
+              }
+            }
+            return object;
+          };
+        default: // Others
+          return function(object, callback) {
+            for (var key in object)
+              callback(object[key], key, object);
+            return object;
+          };
       }
-      // Others
-      delete iterations;
-      return function(object, callback) {
-        for (var key in object)
-          callback(object[key], key, object);
-        return object;
-      };
     })();
 
     var isOwnProperty = (function() {

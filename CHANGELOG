@@ -1,3 +1,5 @@
+* Ensure correct use of the delete operator. [jddalton]
+
 * Allow IE8 to utilize the Element and Event prototype objects. [Andrew Dupont, jddalton]
 
 * Add Event.addMethods() to allow adding methods to Event instances. [Prototype LH #203] [jddalton, Ken Snyder]
