@@ -1,3 +1,5 @@
+* Fix bug in Array#concat substitution that caused it to exit early for falsy values. [jddalton]
+
 * Optimize Class.create() and Class#addMethods and switch to using `this._super()`. [Joey Hurst, jddalton, John Resig]
   Note: Backwards compatibility warning.
     - The $super variable is no longer used to access a super's method.

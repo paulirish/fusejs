@@ -56,14 +56,13 @@
     }
 
     function concat() {
-      var item, subItem, j, i = 0, results = slice.call(this, 0);
-      while (item = arguments[i++]) {
-        if (Object.isArray(item)) {
-          j = 0;
-          while (subItem = item[j++])
-            results.push(subItem);
+      var args = arguments, results = slice.call(this, 0);
+      for (var i = 0, length = args.length; i < length; i++) {
+        if (Object.isArray(args[i])) {
+          for (var j = 0, subLen = args[i].length; j < subLen; j++)
+            results.push(args[i][j]);
         }
-        else results.push(item);
+        else results.push(args[i]);
       }
       return results;
     }

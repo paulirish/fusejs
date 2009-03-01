@@ -81,7 +81,7 @@ new Test.Unit.Runner({
 
   testConcat: function() {
     // test passing an arguments object to concat
-     var self = this;
+     var undef, self = this;
     (function() {
       self.assertEqual(1, [].concat(arguments).length, 'treats arguments as an array');
     })(1, 2);
@@ -89,6 +89,11 @@ new Test.Unit.Runner({
     var list = ['a', 'b', 'c'];
     this.assertEnumEqual($w('a b c d e f g h i'),
       list.concat(['d', 'e'], 'f', ['g', 'h'], ['i']), 'failed basic concat test');
+    
+    // test falsy values
+    var expected = [8, 9, 0, 'a', null, undef, false, 'd'];
+    this.assertEnumEqual(expected, [8].concat([9, 0], 'a', [null], undef, false, 'd'),
+      'failed to concat falsy values');
   },
 
   testContains: function() {
