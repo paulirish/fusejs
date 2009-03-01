@@ -1,3 +1,5 @@
+* Remove internal use of the $super variable in Fuse. [jddalton]
+
 * Allow Element.addMethods() and Event.addMethods() to add `toString` and other special methods. [jddalton]
   Note: Additions to HTMLElement.prototype will be ignored if HTML<tagName>Element.prototype has an existing 
   property with the same name. Extending elements by tagName will get around the issue.

@@ -1,9 +1,11 @@
   /*-------------------------- FORM: TIMED OBSERVER --------------------------*/
 
   Abstract.TimedObserver = Class.create(Timer, (function() {
-    function initialize($super, element, interval, callback) {
-      $super(callback, interval);
-      this.element   = $(element);
+    function initialize(element, interval, callback) {
+      // $super equivalent
+      Timer.prototype.initialize.call(this, callback, interval);
+
+      this.element = $(element);
       this.lastValue = this.getValue();
       this.start();
     }

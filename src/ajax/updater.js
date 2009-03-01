@@ -1,7 +1,7 @@
   /*------------------------------ AJAX: UPDATER -----------------------------*/
 
   Ajax.Updater = Class.create(Ajax.Request, (function() {
-    function initialize($super, container, url, options) {
+    function initialize(container, url, options) {
       this.container = {
         'success': (container.success || container),
         'failure': (container.failure || (container.success ? null : container))
@@ -15,7 +15,8 @@
         if (typeof onComplete === 'function') onComplete(response, json);
       };
 
-      $super(url, options);
+      // $super equivalent
+      Ajax.Request.prototype.initialize.call(this, url, options);
     }
 
     function updateContent(responseText) {

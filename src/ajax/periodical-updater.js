@@ -1,8 +1,10 @@
   /*------------------------ AJAX: PERIODICAL UPDATER ------------------------*/
 
   Ajax.PeriodicalUpdater = Class.create(Ajax.Base, (function() {
-    function initialize($super, container, url, options) {
-      $super(options);
+    function initialize(container, url, options) {
+      // $super equivalent
+      Ajax.Base.prototype.initialize.call(this, options);
+
       options = Object.extend(Object
        .clone(this.constructor.defaultOptions), options || { });
 
