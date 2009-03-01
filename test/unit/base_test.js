@@ -6,7 +6,7 @@ new Test.Unit.Runner({
     this.assertEnumEqual(["one", "two", "three"], (function(  one  , two 
       , three   ) {}).argumentNames());
       
-    this.assertEqual("$super", (function($super) {}).argumentNames().first());
+    this.assertEqual("$fuse", (function($fuse) {}).argumentNames().first());
     
     function named1() {};
     this.assertEnumEqual([], named1.argumentNames());
@@ -669,20 +669,33 @@ new Test.Unit.Runner({
 
     // augment the constructor and test
     var Dodo = Class.create(Fixtures.Animal, {
-      initialize: function($super, name) {
-        $super(name);
+      initialize: function(name) {
+        this._super(name);
         this.extinct = true;
       },
       
-      say: function($super, message) {
-        return $super(message) + " honk honk";
-      }
+      say: function(message) {
+        return this._super(message) + " honk honk";
+      },
+      
+      speed: 4
     });
 
     var gonzo = new Dodo('Gonzo');
     this.assertEqual('Gonzo', gonzo.name);
     this.assert(gonzo.extinct, 'Dodo birds should be extinct');
     this.assertEqual("Gonzo: hello honk honk", gonzo.say("hello"));
+    
+    // test against super that is not a method
+    var Twit = Class.create(Dodo, {
+      initialize: function() { },
+      speed: function() {
+        if (this._super && !Object.isFunction(this._super))
+          throw new TypeError;
+      }
+    });
+
+    this.assertNothingRaised(function() { new Twit().speed() });
   },
 
   testClassAddMethods: function() {
@@ -696,8 +709,8 @@ new Test.Unit.Runner({
     });
     
     Fixtures.Mouse.addMethods({
-      sleep: function($super) {
-        return $super() + " ... no, can't sleep! Gotta steal cheese!";
+      sleep: function() {
+        return this._super() + " ... no, can't sleep! Gotta steal cheese!";
       },
       escape: function(cat) {
         return this.say('(from a mousehole) Take that, ' + cat.name + '!');
@@ -749,12 +762,13 @@ new Test.Unit.Runner({
       'm2': function(){ return 'm2' }
     });
     var Child = Class.create(Parent, {
-      'm1': function($super) { return 'm1 child' },
-      'm2': function($super) { return 'm2 child' }
+      'm1': function() { return this._super() + ' child' },
+      'm2': function() { return this._super() + ' child' }
     });
-    
-    this.assert(new Child().m1.toString().indexOf('m1 child') > -1);
-    
+ 
+    if (Fuse.Browser.Feature('FUNCTION_TO_STRING_RETURNS_SOURCE'))
+      this.assert(new Child().m1.toString().indexOf(' child') > -1);
+
     this.assertEqual('toString', new Foo().toString());
     this.assertEqual('valueOf',  new Foo().valueOf());
   }

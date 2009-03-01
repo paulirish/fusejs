@@ -1,9 +1,13 @@
   /*------------------------------ LANG: CLASS -------------------------------*/
 
-  /* Based on Alex Arnell's inheritance implementation. */
+  /* Based on work by Alex Arnell, Joey Hurst, John Resig, and Prototype core. */
   Class = (function() {
+    var matchSuper = Feature('FUNCTION_TO_STRING_RETURNS_SOURCE')
+      ? /\bthis\._super\b/
+      : { 'test': function() { return true } };
+
     function create() {
-      var parent = null, properties = slice.call(arguments, 0);
+      var i = 0, parent = null, properties = slice.call(arguments, 0);
       if (typeof properties[0] === 'function')
         parent = properties.shift();
 
@@ -22,37 +26,45 @@
         parent.subclasses.push(klass);
       }
 
-      for (var i = 0; i < properties.length; i++)
-        klass.addMethods(properties[i]);
+      while (properties[i]) klass.addMethods(properties[i++]);
 
       if (!klass.prototype.initialize)
         klass.prototype.initialize = Fuse.emptyFunction;
 
       klass.prototype.constructor = klass;
-
       return klass;
     }
 
     function addMethods(source) {
-      var __method, method, key, i = 0, keys = Object.keys(source),
+      var prototype = this.prototype,
        ancestor = this.superclass && this.superclass.prototype;
 
-      while (key = keys[i++]) {
-        method = source[key];
+      Object._each(source, function(method, key) {
         // avoid typeof === 'function' because Safari 3.1+ mistakes
         // regexp instances as typeof 'function'
-        if (ancestor && Object.isFunction(method) &&
-            method.argumentNames()[0] === '$super') {
-          __method = method;
-          method = (function(m) {
-            return function() { return ancestor[m].apply(this, arguments) };
-          })(key).wrap(__method);
+        if (ancestor && Object.isFunction(ancestor[key]) && 
+            Object.isFunction(method) && matchSuper.test(method)) {
+          var __method = method;
+          method = function() {
+            // backup this._super and assign the ancestors method to it
+            var result, backup = this._super;
+            this._super = ancestor[key];
+
+            // execute and capture the result
+            if (arguments.length > 1)
+              result = __method.apply(this, arguments);
+            else result = __method.call(this, arguments[0]);
+
+            // restore backup and return result
+            this._super = backup;
+            return result;
+          };
 
           method.valueOf  = __method.valueOf.bind(__method);
           method.toString = __method.toString.bind(__method);
         }
-        this.prototype[key] = method;
-      }
+        prototype[key] = method;
+      });
       return this;
     }
 

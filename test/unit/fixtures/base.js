@@ -55,8 +55,9 @@ Fixtures = {
 Object.extend(Fixtures, {
   // subclass that augments a method
   Cat: Class.create(Fixtures.Animal, {
-    eat: function($super, food) {
-      if (food instanceof Fixtures.Mouse) return $super();
+    eat: function(food) {
+      if (food instanceof Fixtures.Mouse)
+        return this._super();
       else return this.say('Yuk! I only eat mice.');
     }
   }),
@@ -78,19 +79,19 @@ Object.extend(Fixtures, {
   
   // subclass with mixin
   Dog: Class.create(Fixtures.Animal, Fixtures.Reproduceable, {
-    initialize: function($super, name, weight, sex) {
+    initialize: function(name, weight, sex) {
       this.weight = weight;
       this.sex = sex;
-      $super(name);
+      this._super(name);
     }
   }),
   
   // subclass with mixins
   Ox: Class.create(Fixtures.Animal, Fixtures.Sellable, Fixtures.Reproduceable, {
-    initialize: function($super, name, weight, sex) {
+    initialize: function(name, weight, sex) {
       this.weight = weight;
       this.sex = sex;
-      $super(name);
+      this._super(name);
     },
     
     eat: function(food) {

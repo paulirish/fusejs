@@ -15,7 +15,7 @@
         if (typeof onComplete === 'function') onComplete(response, json);
       };
 
-      // $super equivalent
+      // this._super() equivalent
       Ajax.Request.prototype.initialize.call(this, url, options);
     }
 

@@ -2,7 +2,7 @@
 
   Ajax.PeriodicalUpdater = Class.create(Ajax.Base, (function() {
     function initialize(container, url, options) {
-      // $super equivalent
+      // this._super() equivalent
       Ajax.Base.prototype.initialize.call(this, options);
 
       options = Object.extend(Object

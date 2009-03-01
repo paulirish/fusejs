@@ -31,6 +31,8 @@
     global.Element = createElement;
     if (Feature('CREATE_ELEMENT_WITH_HTML')) {
       global.Element = function(tagName, attributes) {
+        // setAttribute is broken in IE when setting name and type attributes
+        // see: http://msdn.microsoft.com/en-us/library/ms536389.aspx
         if (attributes && (attributes.name || attributes.type)) {
           tagName = '<' + tagName +
            (attributes.name ? ' name="' + attributes.name + '"' : '') +

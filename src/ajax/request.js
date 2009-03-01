@@ -2,7 +2,7 @@
 
   Ajax.Request = Class.create(Ajax.Base, (function() {
     function initialize(url, options) {
-      // $super equivalent
+      // this._super() equivalent
       Ajax.Base.prototype.initialize.call(this, options);
       this.transport = Ajax.getTransport();
       this.request(url);

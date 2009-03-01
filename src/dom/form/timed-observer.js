@@ -2,7 +2,7 @@
 
   Abstract.TimedObserver = Class.create(Timer, (function() {
     function initialize(element, interval, callback) {
-      // $super equivalent
+      // this._super() equivalent
       Timer.prototype.initialize.call(this, callback, interval);
 
       this.element = $(element);
