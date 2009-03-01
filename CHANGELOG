@@ -1,3 +1,5 @@
+* Optimize Array#inject to use Array#reduce if available. [jddalton, kangax]
+
 * Fix bug in Array#concat substitution that caused it to exit early for falsy values. [jddalton]
 
 * Optimize Class.create() and Class#addMethods and switch to using `this._super()`. [Joey Hurst, jddalton, John Resig]

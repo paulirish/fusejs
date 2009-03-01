@@ -213,6 +213,22 @@ new Test.Unit.Runner({
       Fixtures.Primes.inject(0, function(sum, value) {
         return sum + value;
       }));
+      
+    // test thisArg
+    var Foo = { 'base': 4 };
+    this.assertEqual(18, Fixtures.Basic.inject(0, function(sum, value) {
+      return this.base + sum + value;
+    }, Foo));
+
+    // test undefined/null accumulator
+    var undef;
+    this.assertEqual(undef, Fixtures.Basic.inject(undef, function(accumulator) {
+      return accumulator;
+    }));
+
+    this.assertEqual(null, Fixtures.Basic.inject(null, function(accumulator) {
+      return accumulator;
+    }));
   },
 
   testInsert: function() {

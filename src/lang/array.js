@@ -243,6 +243,12 @@
       return accumulator;
     }
 
+    function injectUsingReduce(accumulator, callback, thisArg) {
+      if (thisArg)
+        return inject.call(this, accumulator, callback, thisArg);
+      return this.reduce(callback, accumulator);
+    }
+
     function invoke(method) {
       var args, results = [], length = this.length;
       if (arguments.length < 2) {
@@ -374,6 +380,9 @@
     if (!AP.concat || Bug('ARRAY_CONCAT_ARGUMENTS_BUGGY'))
       AP.concat = concat;
 
+    // optimize Array#inject if Array#reduce is available
+    AP.inject = AP.reduce ? injectUsingReduce : inject;
+
     if (!AP.every)       AP.every       = every;
     if (!AP.filter)      AP.filter      = filter;
     if (!AP.forEach)     AP.forEach     = forEach;
@@ -394,7 +403,6 @@
       'first':     first,
       'flatten':   flatten,
       'grep':      grep,
-      'inject':    inject,
       'insert':    insert,
       'inspect':   inspect,
       'intersect': intersect,
