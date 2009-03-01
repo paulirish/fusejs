@@ -69,6 +69,10 @@
       return result;
     }
 
+    function hasKey(key) {
+      return Object.hasKey(this._object, key);
+    }
+
     function keyOf(value) {
       var result = -1;
       Object.each(this._object, function(objValue, key) {
@@ -124,7 +128,7 @@
     }
 
     function get(key) {
-      if (Object.isOwnProperty(this._object, key))
+      if (Object.hasKey(this._object, key))
         return this._object[key];
     }
 
@@ -156,7 +160,7 @@
        length  = hashes.length;
 
       Object._each(this._object, function(value, key, object) {
-        if (!Object.isOwnProperty(object, key)) return;
+        if (!Object.hasKey(object, key)) return;
         var i = 0, values = [];
         while (i < length) values.push(hashes[i++]._object[key]);
         result.set(key, callback(values, key, hash));
@@ -172,6 +176,7 @@
       'filter':                 filter,
       'get':                    get,
       'grep':                   grep,
+      'hasKey':                 hasKey,
       'keys':                   keys,
       'keyOf':                  keyOf,
       'include':                include,

@@ -77,7 +77,7 @@ new Test.Unit.Runner({
     this.assertRespondsTo('hashBrowns', event);
     
     // only test `toString` addition if events don't have it
-    if (!Event.prototype || !Object.isOwnProperty(Event.prototype, 'toString')) {
+    if (!Event.prototype || !Object.hasKey(Event.prototype, 'toString')) {
 
       Event.addMethods({ 'toString': function() { return '[Fuse Event]' } });
       event = $('span').fire('test:somethingHappened');

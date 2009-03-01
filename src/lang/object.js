@@ -144,7 +144,7 @@
         throw new TypeError;
       var results = [];
       Object._each(object, function(value, key) {
-        if (Object.isOwnProperty(object, key))
+        if (Object.hasKey(object, key))
           results.push(key);
       });
       return results;
@@ -155,7 +155,7 @@
         throw new TypeError;
       var results = [];
       Object._each(object, function(value, key) {
-        if (Object.isOwnProperty(object, key))
+        if (Object.hasKey(object, key))
           results.push(value);
       });
       return results;
@@ -178,7 +178,7 @@
               for (key in object)
                 callback(object[key], key, object);
               while(key = dontEnumProperties[i++])
-                if (Object.isOwnProperty(object, key))
+                if (Object.hasKey(object, key))
                    callback(object[key], key, object);
             }
             return object;
@@ -189,7 +189,7 @@
           return function(object, callback) {
             var key, keys = { };
             for (key in object) {
-              if (!Object.isOwnProperty(keys, key)) {
+              if (!Object.hasKey(keys, key)) {
                 keys[key] = true;
                 callback(object[key], key, object);
               }
@@ -205,7 +205,7 @@
       }
     })();
 
-    var isOwnProperty = (function() {
+    var hasKey = (function() {
       var hasOwnProperty = Object.prototype.hasOwnProperty;
       if (typeof hasOwnProperty !== 'function') {
         if (Feature('OBJECT_PROTO')) {
@@ -240,22 +240,22 @@
     (function() {
       // Opera (bug occurs with the window object and not the global)
       if (typeof window !== 'undefined' && window.Object &&
-          !isOwnProperty(window, 'Object')) {
+          !hasKey(window, 'Object')) {
 
-        var _isOwnProperty = isOwnProperty;
-        isOwnProperty = function(object, property) {
+        var _hasKey = hasKey;
+        hasKey = function(object, property) {
           if (object == null) throw new TypeError;
           if(object == global) {
             return property in object && 
               object[property] !== Object.prototype[property];
           }
-          return _isOwnProperty(object, property);
+          return _hasKey(object, property);
         };
       }
     })();
 
     Object._each = _each;
-    Object.isOwnProperty = isOwnProperty;
+    Object.hasKey = hasKey;
 
     extend(Object, {
       'clone':         clone,

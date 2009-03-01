@@ -77,7 +77,7 @@
 
       while (length--) {
         pair = methods[length];
-        if (!Object.isOwnProperty(element, pair[0]))
+        if (!Object.hasKey(element, pair[0]))
           element[pair[0]] = pair[1];
       }
 

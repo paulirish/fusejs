@@ -262,7 +262,7 @@ new Test.Unit.Runner({
     this.assert(!Object.isFunction(undefined));
   },
   
-  testObjectIsOwnProperty: function() {
+  testObjectHasKey: function() {
     function A() { this.foo = 3 }
     A.prototype = { 'foo': 4 };
 
@@ -276,44 +276,44 @@ new Test.Unit.Runner({
      properties = ['constructor', 'hasOwnProperty', 'isPrototypeOf',
        'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
 
-    this.assert(Object.isOwnProperty(c, 'foo'), 'Expected c.foo as own property.');
+    this.assert(Object.hasKey(c, 'foo'), 'Expected c.foo as own property.');
 
     delete c.foo;
-    this.assert(!Object.isOwnProperty(c, 'foo'), 'Expected c.foo as inherited property.');
+    this.assert(!Object.hasKey(c, 'foo'), 'Expected c.foo as inherited property.');
     this.assertEqual(2, c.foo, 'Expected c.foo to equal 2');
 
     delete C.prototype.foo;
     this.assertEqual(3, c.foo, 'Expected c.foo to equal 3 after deleting C.prototype.foo.');
 
     c.foo = undef;
-    this.assert(Object.isOwnProperty(c, 'foo'), 'Expected c.foo, value set as undefined, as own property.');
-    this.assert(!Object.isOwnProperty(C.prototype, 'foo'), 'Expected C.prototype.foo as inherited property.');
+    this.assert(Object.hasKey(c, 'foo'), 'Expected c.foo, value set as undefined, as own property.');
+    this.assert(!Object.hasKey(C.prototype, 'foo'), 'Expected C.prototype.foo as inherited property.');
     this.assertEqual(3, C.prototype.foo, 'Expected C.prototype.foo to equal 3');
 
     C.prototype.foo = undef;
-    this.assert(Object.isOwnProperty(A.prototype, 'foo', 'Expected A.prototype.foo as own property.'));
+    this.assert(Object.hasKey(A.prototype, 'foo', 'Expected A.prototype.foo as own property.'));
 
     properties.each(function(property) {
-      this.assert(!Object.isOwnProperty(empty, property),
+      this.assert(!Object.hasKey(empty, property),
         'Expected "' + property + '" as inherited property');
       
       // Safari 2 doesn't have many of the properties
       if (Object.prototype[property]) {
-        this.assert(Object.isOwnProperty(Object.prototype, property),
+        this.assert(Object.hasKey(Object.prototype, property),
           'Expected "' + property + '" as own property');
       }
     }, this);
 
-    this.assert(!Object.isOwnProperty(0, 'toString'));
-    this.assert(!Object.isOwnProperty('testing', 'valueOf'));
+    this.assert(!Object.hasKey(0, 'toString'));
+    this.assert(!Object.hasKey('testing', 'valueOf'));
 
     // test null/undefined values
-    this.assertRaise('TypeError', function() { Object.isOwnProperty(null,  '') });
-    this.assertRaise('TypeError', function() { Object.isOwnProperty(undef, '') });
+    this.assertRaise('TypeError', function() { Object.hasKey(null,  '') });
+    this.assertRaise('TypeError', function() { Object.hasKey(undef, '') });
     
     // test window object
-    this.assert(Object.isOwnProperty(window, 'Fuse'));
-    this.assert(!Object.isOwnProperty(window, 'abc123xyz'));
+    this.assert(Object.hasKey(window, 'Fuse'));
+    this.assert(!Object.hasKey(window, 'abc123xyz'));
   },
   
   testObjectIsPrimitive: function() {

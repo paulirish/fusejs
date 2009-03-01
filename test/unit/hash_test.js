@@ -25,6 +25,15 @@ new Test.Unit.Runner({
     }, this);
   },
   
+  testHasKey: function() {
+    this.assert($H(Fixtures.mixed_dont_enum).hasKey('valueOf'),
+      'Failed to find key `valueOf`.');
+
+    this.assert($H(Fixtures.many).hasKey('a'), 'Failed to find key `a`.');
+    this.assert(!$H(Fixtures.many).hasKey('valueOf'), '`valueOf` is not a key.');
+    this.assert(!$H(Fixtures.mixed_dont_enum).hasKey('e'), '`e` is not a key.');
+  },
+  
   testUnset: function() {
     var hash = $H(Fixtures.many);
     this.assertEqual('B', hash.unset('b'));

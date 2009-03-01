@@ -48,7 +48,7 @@ new Test.Unit.Runner({
     // Additions to HTMLElement.prototype will be ignored if 
     // HTML<tagName>Element.prototype has an existing property with the
     // same name. Extending elements by tagName will get around the issue.
-    if (!Object.isOwnProperty(new Element('div'), 'toString')) {
+    if (!Object.hasKey(new Element('div'), 'toString')) {
 
       Element.addMethods('DIV', { 'toString': Element.Methods.inspect });
       this.assertEqual('<div id="testdiv">', $('testdiv').toString(),

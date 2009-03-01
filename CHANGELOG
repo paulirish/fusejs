@@ -1,3 +1,5 @@
+* Rename Object.isOwnProperty() to Object.hasKey() and add Hash#hasKey. [apm, jddalton]
+
 * Remove internal use of the $super variable in Fuse. [jddalton]
 
 * Allow Element.addMethods() and Event.addMethods() to add `toString` and other special methods. [jddalton]

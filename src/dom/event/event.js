@@ -337,12 +337,12 @@
 
       // IE8 supports Event.prototype but still needs 
       // DOM Level 2 event methods and properties.
-      if (Object.isOwnProperty(Event.prototype, 'cancelBubble') &&
-          Object.isOwnProperty(Event.prototype, 'returnValue') &&
-         !Object.isOwnProperty(Event.prototype, 'stopPropagation') &&
-         !Object.isOwnProperty(Event.prototype, 'preventDefault') &&
-         !Object.isOwnProperty(Event.prototype, 'target') &&
-         !Object.isOwnProperty(Event.prototype, 'currentTarget')) {
+      if (Object.hasKey(Event.prototype, 'cancelBubble') &&
+          Object.hasKey(Event.prototype, 'returnValue') &&
+         !Object.hasKey(Event.prototype, 'stopPropagation') &&
+         !Object.hasKey(Event.prototype, 'preventDefault') &&
+         !Object.hasKey(Event.prototype, 'target') &&
+         !Object.hasKey(Event.prototype, 'currentTarget')) {
 
         addLevel2Methods(Event.prototype);
         Event.extend = function(event, element) {

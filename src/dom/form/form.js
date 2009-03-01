@@ -59,7 +59,7 @@
         if (!key) continue;
 
         // property exists and and belongs to result
-        if (Object.isOwnProperty(result, key)) {
+        if (Object.hasKey(result, key)) {
           // a key is already present; construct an array of values
           if (!Object.isArray(result[key])) result[key] = [result[key]];
           result[key].push(value);

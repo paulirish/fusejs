@@ -5,7 +5,7 @@ EnumObject = Class.create(Enumerable, {
   
   _each: function(callback) {
     for (key in this.interior) {
-      if (Object.isOwnProperty(this.interior, key))
+      if (Object.hasKey(this.interior, key))
         callback(this.interior[key], key, this);
     }
   }
