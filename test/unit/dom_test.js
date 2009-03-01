@@ -40,6 +40,27 @@ new Test.Unit.Runner({
   testIframeAccess: function() {
     this.assert(isIframeAccessible(), 'Iframe failed. You MUST run the tests from Rake and not the local file system.');
   },
+
+  testElementAddMethods: function() {
+    Element.addMethods({ 'cheeseCake': function() { return 'Cheese cake' } });
+    this.assertRespondsTo('cheeseCake', new Element('div'));
+
+    // Additions to HTMLElement.prototype will be ignored if 
+    // HTML<tagName>Element.prototype has an existing property with the
+    // same name. Extending elements by tagName will get around the issue.
+    if (!Object.isOwnProperty(new Element('div'), 'toString')) {
+
+      Element.addMethods('DIV', { 'toString': Element.Methods.inspect });
+      this.assertEqual('<div id="testdiv">', $('testdiv').toString(),
+        'Failed to extend element with a toString method.');
+
+      // remove toString addition
+      if (Fuse.Browser.Feature('ELEMENT_SPECIFIC_EXTENSIONS'))
+        delete HTMLDivElement.prototype.toString;
+      delete Element.Methods.ByTag.DIV.toString;
+      Element.addMethods();
+    }
+  },
   
   testDollarFunction: function() {
     this.assertUndefined($());
@@ -795,7 +816,7 @@ new Test.Unit.Runner({
       this.assertEqual(overflowValue, element.getStyle('overflow'));
     }, this);
   },
-  
+
   testElementExtend: function() {
     var element = $('element_extend_test');
     this.assertRespondsTo('show', element);
@@ -1355,13 +1376,6 @@ new Test.Unit.Runner({
     }, 5); */
 
     this.assert(new Element('h1'));
-
-    Element.addMethods({
-      'cheeseCake': function() { return 'Cheese cake' }
-    });
-    
-    this.assertRespondsTo('cheeseCake', new Element('div'));
-    
     this.assertRespondsTo('update', new Element('div'));
 
     this.assertEqual('foobar', new Element('a', {custom: 'foobar'}).readAttribute('custom'));

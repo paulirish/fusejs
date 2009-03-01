@@ -77,7 +77,7 @@
 
       while (length--) {
         pair = methods[length];
-        if (!(pair[0] in element))
+        if (!Object.isOwnProperty(element, pair[0]))
           element[pair[0]] = pair[1];
       }
 
@@ -88,20 +88,22 @@
     }
 
     function refresh() {
-      Methods = []; ByTag = { };
-      var name, tagName;
+      var tagName; Methods = []; ByTag = { };
 
-      for (name in Element.Methods)
-        if (name !== 'Simulated' && name !== 'ByTag')
-          Methods.push([name, Element.Methods[name].methodize()]);
+      Object._each(Element.Methods, function(value, key) {
+        if (key !== 'Simulated' && key !== 'ByTag')
+          Methods.push([key, value.methodize()]);
+      });
 
-      for (name in Element.Methods.Simulated)
-        Methods.push([name, Element.Methods.Simulated[name].methodize()]);
+      Object._each(Element.Methods.Simulated, function(value, key) {
+        Methods.push([key, value.methodize()]);
+      });
 
       for (tagName in Element.Methods.ByTag) {
         ByTag[tagName] = slice.call(Methods, 0);
-        for (name in Element.Methods.ByTag[tagName])
-          ByTag[tagName].push([name, Element.Methods.ByTag[tagName][name].methodize()]);
+        Object._each(Element.Methods.ByTag[tagName], function(value, key) {
+          ByTag[tagName].push([key, value.methodize()]);
+        });
       }
       revision++;
     }
@@ -182,12 +184,11 @@
 
     function copy(methods, destination, onlyIfAbsent) {
       onlyIfAbsent = onlyIfAbsent || false;
-      for (var property in methods) {
-        var value = methods[property];
-        if (typeof value !== 'function') continue;
-        if (!onlyIfAbsent || !(property in destination))
-          destination[property] = value.methodize();
-      }
+      Object._each(methods, function(value, key) {
+        if (typeof value === 'function' && 
+           (!onlyIfAbsent || !(key in destination)))
+          destination[key] = value.methodize();
+      });
     }
 
     function findDOMClass(tagName) {

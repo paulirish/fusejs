@@ -75,6 +75,21 @@ new Test.Unit.Runner({
     Event.addMethods({ 'hashBrowns': function() { return 'hash browns' } });
     var event = $('span').fire('test:somethingHappened');
     this.assertRespondsTo('hashBrowns', event);
+    
+    // only test `toString` addition if events don't have it
+    if (!Event.prototype || !Object.isOwnProperty(Event.prototype, 'toString')) {
+
+      Event.addMethods({ 'toString': function() { return '[Fuse Event]' } });
+      event = $('span').fire('test:somethingHappened');
+      this.assertEqual('[Fuse Event]', event.toString(),
+        'Failed to extend element with a toString method.');
+
+      // remove toString addition
+      if (Fuse.Browser.Feature('ELEMENT_SPECIFIC_EXTENSIONS'))
+        delete Event.prototype.toString;
+      delete Event.Methods.toString;
+      Event.addMethods();
+    }
   },
 
   testEventObjectIsExtended: function() { 

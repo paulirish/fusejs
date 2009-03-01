@@ -282,14 +282,13 @@
     function addMethods(methods) {
       var name; Methods = [];
       methods && Object.extend(Event.Methods, methods);
-      if (Event.prototype)
-        for (name in Event.Methods) Event.prototype[name] = methodize(name);
-      else {
-        for (name in Event.Methods) {
-          if (name.indexOf('pointer') !== 0)
-            Methods.push([name, methodize(name)]);
-        }
-      }
+      Object._each(Event.Methods, Event.prototype
+        ? function(value, key) { Event.prototype[key] = methodize(key) }
+        : function(value, key) {
+            if (key.indexOf('pointer') !== 0)
+              Methods.push([key, methodize(key)]);
+          }
+      );
     }
 
     function extend(event, element) {

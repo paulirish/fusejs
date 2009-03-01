@@ -65,8 +65,7 @@ if (typeof(DOMParser) === 'undefined') {
 }
 
 Element.addMethods({
-  'hashBrowns': function(element) { return 'hash browns' },
-  'toString': Element.Methods.inspect
+  'hashBrowns': function(element) { return 'hash browns' }
 });
 
 Element.addMethods('LI', {

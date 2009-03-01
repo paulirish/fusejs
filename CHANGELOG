@@ -1,3 +1,7 @@
+* Allow Element.addMethods() and Event.addMethods() to add `toString` and other special methods. [jddalton]
+  Note: Additions to HTMLElement.prototype will be ignored if HTML<tagName>Element.prototype has an existing 
+  property with the same name. Extending elements by tagName will get around the issue.
+  
 * Ensure correct use of the delete operator. [jddalton]
 
 * Allow IE8 to utilize the Element and Event prototype objects. [Andrew Dupont, jddalton]
