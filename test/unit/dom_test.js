@@ -289,7 +289,7 @@ new Test.Unit.Runner({
     this.assert(getInnerHTML('element-insertions-main').startsWith('some text uppercase top'));
     
     $('element-insertions-multiple-main').insert({
-      top:'1', bottom:2, before: new Element('p').update('3'), after:'4'
+      'top':'1', 'bottom':2, 'before': new Element('p').update('3'), 'after':'4'
     });
     this.assert(getInnerHTML('element-insertions-multiple-main').startsWith('1'));
     this.assert(getInnerHTML('element-insertions-multiple-main').endsWith('2'));
@@ -298,8 +298,9 @@ new Test.Unit.Runner({
     
     $('element-insertions-main').update('test');
     $('element-insertions-main').insert(null);
-    $('element-insertions-main').insert({bottom:null});
+    $('element-insertions-main').insert({ 'bottom':null });
     this.assertEqual('test', getInnerHTML('element-insertions-main'));
+
     $('element-insertions-main').insert(1337);
     this.assertEqual('test1337', getInnerHTML('element-insertions-main'));
   },
@@ -499,43 +500,90 @@ new Test.Unit.Runner({
       });
     });
   },
-  
+
   testElementUpdateInTableRow: function() {
     $('third_row').update('<td id="i_am_a_td">test</td>');
-    this.assertEqual('test',$('i_am_a_td').innerHTML);
+    this.assertEqual('test', getInnerHTML('i_am_a_td'),
+      'Failed simple update in table row.');
 
     Element.update('third_row','<td id="i_am_a_td">another <span>test</span></td>');
-    this.assertEqual('another <span>test</span>',$('i_am_a_td').innerHTML.toLowerCase());
+    this.assertEqual('another <span>test</span>', getInnerHTML('i_am_a_td'),
+      'Failed complex in table row.');
+
+    // test passing object with "toElement" method
+    var newTD = new Element('TD', { 'id': 'i_am_another_td' });
+    newTD.appendChild(document.createTextNode('more tests'));
+
+    $('third_row').update({ 'toElement': function() { return newTD } });
+    this.assertEqual('more tests', getInnerHTML('i_am_another_td'),
+      'Failed to update table row via `toElement`.');
   },
-  
+
   testElementUpdateInTableCell: function() {
     Element.update('a_cell','another <span>test</span>');
-    this.assertEqual('another <span>test</span>',$('a_cell').innerHTML.toLowerCase());
+    this.assertEqual('another <span>test</span>', getInnerHTML('a_cell'),
+      'Failed complex update in table cell.');
+
+    // test passing object with "toElement" method
+    var newFrag = document.createDocumentFragment();
+    newFrag.appendChild(document.createTextNode('something else '));
+    newFrag.appendChild(document.createElement('span')).appendChild(document.createTextNode('blah'));
+
+    $('a_cell').update({ 'toElement': function() { return newFrag } });
+    this.assertEqual('something else <span>blah</span>', getInnerHTML('a_cell'),
+      'Failed to update table cell via `toElement`.');
   },
   
   testElementUpdateInTableColGroup: function() {
     var colgroup = $('table').down('colgroup');
     colgroup.update('<col class="foo" /><col class="bar" />');
+
     var children = colgroup.childElements();
-    this.assertEnumEqual(['foo', 'bar'], [children[0].className, children[1].className]);
+    this.assertEnumEqual(['foo', 'bar'], [children[0].className, children[1].className],
+      'Failed to update colgroup.');
+
+    // test passing object with "toElement" method
+    var newCol = new Element('col', { 'className': 'baz' });
+    colgroup.update({ 'toElement': function() { return newCol } });
+    this.assertEqual(newCol, colgroup.down(), 'Failed to update colgroup via `toElement`.');
   },
   
   testElementUpdateInTable: function() {
     Element.update('table','<tr><td>boo!</td></tr>');
-    this.assertMatch(/^<tr>\s*<td>boo!<\/td>\s*<\/tr>$/, $('table').innerHTML.toLowerCase());
+    this.assertMatch(/^<tr>\s*<td>boo!<\/td>\s*<\/tr>$/, getInnerHTML('table'),
+      'Failed to update table element.');
+
+    // test passing object with "toElement" method
+    var newTR = document.createElement('TR'),
+     newTD = document.createElement('TD');
+    newTR.appendChild(newTD).appendChild(document.createTextNode('something else'));
+
+    $('table').update({ 'toElement': function() { return newTR } });
+    this.assertEqual('<tr><td>something else</td></tr>', getInnerHTML('table'),
+      'Failed to update table element via `toElement`.');
   },
   
   testElementUpdateInSelectOptGroup: function() {
     // must run before testElementUpdateInSelect
     var select = $('select_for_update');
     select.down('optgroup').update('<option value="C" selected="selected">option C</option><option value="D">option D</option>');
-    this.assertEqual('C', select.getValue());
+    this.assertEqual('C', select.getValue(), 'Failed to update opt-group element');
+    
+    // test passing object with "toElement" method
+    var newOption = new Element('option', { 'value': 'E', 'text': 'option E', 'selected': true });
+    select.down('optgroup').update({ 'toElement': function() { return newOption } });
+    this.assertEqual('E', select.getValue(), 'Failed to update opt-group element via `toElement`.');
   },
   
   testElementUpdateInSelect: function() {
     var select = $('select_for_update');
     select.update('<option value="3">option 3</option><option selected="selected">option 4</option>');
-    this.assertEqual('option 4', select.getValue());
+    this.assertEqual('option 4', select.getValue(), 'Failed to update select element.');
+
+    // test passing object with "toElement" method
+    var newOption = new Element('option', { 'value': '2', 'text': 'option 2', 'selected': true });
+    select.update({ 'toElement': function() { return newOption } });
+    this.assertEqual('2', select.getValue(), 'Failed to update select element via `toElement`.');
   },
 
   testElementUpdateWithDOMNode: function() {
@@ -544,8 +592,30 @@ new Test.Unit.Runner({
   },
   
   testElementUpdateWithToElementMethod: function() {
-    $('testdiv').update({toElement: createParagraph.curry('foo')});
-    this.assertEqual('<p>foo</p>', getInnerHTML('testdiv'));
+  	var div = $('testdiv');
+
+    div.update({ 'toElement': createParagraph.curry('foo') });
+    this.assertEqual('<p>foo</p>', getInnerHTML(div),
+      'Failed to update via `toElement`.');
+      
+    // test comment node
+    var comment = document.createComment("test");
+    div.update({ 'toElement': function() { return comment } });
+    this.assertEqual('<!--test-->', getInnerHTML(div),
+      'Failed to update via `toElement` with a comment node.');
+
+    // test document fragment
+    var fragment = document.createDocumentFragment();
+    fragment.appendChild(document.createElement('span'));
+    div.update({ 'toElement': function() { return fragment } });
+    this.assertEqual('<span></span>', getInnerHTML(div),
+      'Failed to update via `toElement` with a document fragment.');
+
+    // test text node
+    var textNode = document.createTextNode("test");
+    div.update({ 'toElement': function() { return textNode } });
+    this.assertEqual('test', getInnerHTML(div),
+      'Failed to update via `toElement` with a text node.');
   },
   
   testElementUpdateWithToHTMLMethod: function() {

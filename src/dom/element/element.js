@@ -325,32 +325,32 @@
 
     function insert(element, insertions) {
       element = $(element);
-      var content, fragment, insert, tagName;
-
-      if (typeof insertions === 'string' || typeof insertions === 'number' ||
-          Object.isElement(insertions) || (insertions && (insertions.toElement || insertions.toHTML))) {
+      var content, fragment, insertContent, position, tagName, type = typeof insertions;
+      if (insertions && (type === 'string' || type === 'number' ||
+          isInsertable(insertions) || insertions.toElement || insertions.toHTML)) {
         insertions = { 'bottom':insertions };
       }
 
-      for (var position in insertions) {
+      for (position in insertions) {
         content  = insertions[position];
         position = position.toLowerCase();
-        insert   = Element._insertionTranslations[position];
+        insertContent = Element._insertionTranslations[position];
 
-        if (content && content.toElement) content = content.toElement();
-        if (Object.isElement(content)) {
-          insert(element, content);
-          continue;
+        if (content) {
+          if (content.toElement) content = content.toElement();
+          if (isInsertable(content)) {
+            insertContent(element, content);
+            continue;
+          }
+          content = Object.toHTML(content);
         }
-
-        content = Object.toHTML(content);
-        if (!content) continue;
+        else continue;
 
         tagName = ((position === 'before' || position === 'after')
           ? element.parentNode : element).tagName.toUpperCase();
 
         fragment = Element._getContentFromAnonymousElement(element.ownerDocument, tagName, content.stripScripts());
-        insert(element, fragment);
+        insertContent(element, fragment);
         content.evalScripts.bind(content).defer();
       }
       return element;
@@ -387,6 +387,20 @@
       return element;
     }
 
+    function replace(element, content) {
+      element = $(element);
+      if (!content)
+        return element.parentNode.removeChild(element);
+      if (content.toElement)
+        content = content.toElement();
+      else if (!isInsertable(content)) {
+        content = Object.toHTML(content);
+        content.evalScripts.bind(content).defer();
+        content = createContextualFragment(element, content.stripScripts());
+      }
+      return element.parentNode.replaceChild(content, element);
+    }
+
     function toggle(element) {
       return Element[Element.visible(element) ? 'hide' : 'show'](element);
     }
@@ -408,77 +422,83 @@
       return wrapper;
     }
 
-    var isFragment = (function() {
-      return Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION') ?
-        function (element) {
-          element = $(element);
-          var nodeType = element.nodeType;
-          return nodeType === 11 || (nodeType === 1 &&
-            element.ownerDocument.all[element.sourceIndex] !== element);
-        } :
-        function (element) {
-          element = $(element);
-          var nodeType = element.nodeType;
-          return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
-            Element.descendantOf(element, element.ownerDocument)));
-        };
+    var createContextualFragment = Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT') ?
+      function(element, content) {
+        var range = element.ownerDocument.createRange();
+        range.selectNode(element);
+        return range.createContextualFragment(content);
+      } :
+      function(element, content) {
+        return Element._getContentFromAnonymousElement(element.ownerDocument,
+          element.parentNode.tagName.toUpperCase(), content);
+      },
+
+    isFragment = Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION') ?
+      function (element) {
+        element = $(element);
+        var nodeType = element.nodeType;
+        return nodeType === 11 || (nodeType === 1 &&
+          element.ownerDocument.all[element.sourceIndex] !== element);
+      } :
+      function (element) {
+        element = $(element);
+        var nodeType = element.nodeType;
+        return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
+          Element.descendantOf(element, element.ownerDocument)));
+      },
+
+    isInsertable = (function() {
+      // comment, document fragment, document type, element, and text nodes are insertable
+      var insertable = { '1':1, '3':1, '8':1, '10':1, '11':1 };
+      return function(node) {
+        return insertable[node.nodeType] === 1;
+      }
     })(),
 
-    update = (function() {
-      var setInnerHTML = Bug('ELEMENT_SELECT_INNERHTML_BUGGY') ||
-                         Bug('ELEMENT_TABLE_INNERHTML_BUGGY')  ||
-                         Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY') ?
-        function(element, content) {
-          var tagName = element.tagName.toUpperCase();
-          if (tagName in Element._insertionTranslations.tags) {
-            var children = element.childNodes, length = children.length;
-            while (length--) element.removeChild(children[length]);
-            element.appendChild(Element._getContentFromAnonymousElement(element.ownerDocument, tagName, content));
-          } else element.innerHTML = content;
-        } :
-        function(element, content) {
-          element.innerHTML = content;
-        };
+    update = Bug('ELEMENT_SELECT_INNERHTML_BUGGY') ||
+             Bug('ELEMENT_TABLE_INNERHTML_BUGGY')  ||
+             Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY') ?
 
-      return function(element, content) {
+      function(element, content) {
         element = $(element);
-        if (content && content.toElement)
-          content = content.toElement();
-        if (Object.isElement(content)) {
-          element.innerHTML = '';
-          element.appendChild(content);
-          return element;
+        var tagName = element.tagName.toUpperCase(),
+         isBuggy = Element._insertionTranslations.tags[tagName];
+
+        // remove children
+        if (isBuggy) {
+          while (element.lastChild)
+            element.removeChild(element.lastChild);
+        } else element.innerHTML = '';
+
+        if (content) {
+          if (content.toElement) content = content.toElement();
+          if (isInsertable(content)) element.appendChild(content);
+          else {
+            content = Object.toHTML(content);
+            if (isBuggy)
+              element.appendChild(Element._getContentFromAnonymousElement(element.ownerDocument, tagName, content.stripScripts()));
+            else element.innerHTML = content.stripScripts();
+            content.evalScripts.bind(content).defer();
+          }
         }
-        content = Object.toHTML(content);
-        setInnerHTML(element, content.stripScripts());
-        content.evalScripts.bind(content).defer();
+        return element;
+      } :
+      function(element, content) {
+        element = $(element);
+        if (content) {
+          if (content.toElement)
+            content = content.toElement();
+          if (isInsertable(content)) {
+            element.innerHTML = '';
+            element.appendChild(content);
+            return element;
+          }
+          content = Object.toHTML(content);
+          element.innerHTML = content.stripScripts();
+          content.evalScripts.bind(content).defer();
+        } else element.innerHTML = '';
         return element;
       };
-    })(),
-
-    replace = (function() {
-      var createFragment = Feature('DOCUMENT_RANGE') ?
-        function(element, content) {
-          var range = element.ownerDocument.createRange();
-          range.selectNode(element);
-          return range.createContextualFragment(content);
-        } :
-        function(element, content) {
-          return Element._getContentFromAnonymousElement(element.ownerDocument, element.parentNode.tagName.toUpperCase(), content);
-        };
-
-      return function(element, content) {
-        element = $(element);
-        if (content && content.toElement)
-          content = content.toElement();
-        else if (!Object.isElement(content)) {
-          content = Object.toHTML(content);
-          content.evalScripts.bind(content).defer();
-          content = createFragment(element, content.stripScripts());
-        }
-        return element.parentNode.replaceChild(content, element);
-      };
-    })();
 
     return {
       'ByTag':           { },
