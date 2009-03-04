@@ -18,6 +18,48 @@
     };
   })());
 
+  // based on work by Dean Edwards
+  // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
+  (function() {
+    var __replace = String.prototype.replace;
+
+    function replace(pattern, replacement) {
+      if (typeof replacement !== 'function')
+        return __replace.call(this, pattern, replacement);
+
+      var match, global, source = this, result = '';
+      if (!Object.isRegExp(pattern))
+        pattern = new RegExp(RegExp.escape(String(pattern)));
+
+      // convert to non-global
+      if (global = pattern.global)
+        pattern = new RegExp(pattern.source,
+          (pattern.ignoreCase ? 'i' : '') +
+          (pattern.multiline  ? 'm' : ''));
+
+      while (match = pattern.exec(source)) {
+        result += source.slice(0, match.index) +
+          replacement.apply(null, concatList(match, [match.index, source]));
+        source = source.slice(match.index + match[0].length);
+
+        if (global && !match[0]) {
+          result += source.slice(0, 1);
+          source  = source.slice(1);
+          if (!source) {
+            if (!match.index) result +=
+              replacement.apply(null, concatList(match, [match.index, source]));
+            break;
+          }
+        }
+        else if (!global) break;
+      }
+      return result + source;
+    }
+
+    if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING'))
+      String.prototype.replace = replace;
+  })();
+
   Object.extend(String.prototype, (function() {
     function succ() {
       return this.slice(0, this.length - 1) +

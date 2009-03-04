@@ -445,6 +445,12 @@
         return result;
       }
 
+      function STRING_REPLACE_COHERSE_FUNCTION_TO_STRING() {
+        // true for Safari 2
+        var func = function() { return '' };
+        return 'a'.replace(/a/, func) === String(func);
+      }
+
       var COMMENT_NODES_IN_CHILDREN_NODELIST = createCommentTest(function(element) {
         // true for IE
         return Feature('ELEMENT_CHILDREN_NODELIST') && element.children.length === 2;
@@ -479,6 +485,7 @@
         'ELEMENT_TABLE_INNERHTML_INSERTS_TBODY':              ELEMENT_TABLE_INNERHTML_INSERTS_TBODY,
         'GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES':     GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES,
         'SELECTORS_API_CASE_SENSITIVE_CLASSNAME':             SELECTORS_API_CASE_INSENSITIVE_CLASSNAME,
+        'STRING_REPLACE_COHERSE_FUNCTION_TO_STRING':          STRING_REPLACE_COHERSE_FUNCTION_TO_STRING,
         'REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY':            REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY
       };
     })());

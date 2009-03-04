@@ -1,3 +1,5 @@
+* Ensure correct behavior of String#replace, in Safari 2, when passing a function as the `replacement` argument. [Prototype LH #534] [Dean Edwards, jddalon, kangax, Samuel Lebeau]
+
 * Allow Element#insert, Element#update, and Element#replace to insert comment, document fragment, document type, and text nodes. [jddalton]
 
 * Fix Element#update error on `buggy elements` when appending an element created by `toElement`. [jddalton]

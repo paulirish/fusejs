@@ -76,6 +76,46 @@ new Test.Unit.Runner({
     this.assertEqual('ab', 'a.b'.gsub('.', ''));
   },
 
+  testReplace: function() {
+    var source = '321abc123', expected = '321xyz123';
+    this.assertEqual(expected, source.replace(/abc/, 'xyz'),
+      'Failed with simple regexp pattern.');
+
+    this.assertEqual(expected, source.replace('abc', 'xyz'),
+      'Failed with simple string pattern.');
+    
+    var args = [], slice = Array.prototype.slice;
+    this.assertEqual('_abc_', source.replace(/\d+/g, function() {
+      args.push(slice.call(arguments, 0));
+      return '_';
+    }), 'Failed with function as replace.');
+
+    this.assertEnumEqual(['321', 0, '321abc123'], args[0],
+      'Failed to pass the proper arguments to the replacement function.');
+    
+    this.assertEqual(2, args.length,
+      'Failed to execute the function for each replacement.');
+
+    // test empty 
+    var expected, pattern,
+     source = 'awesome', replacement = function() { return 'x' };
+
+    expected = 'xxsxoxmxex'; pattern = new RegExp('(awe|)', 'g');
+    this.assertEqual(expected, source.replace(pattern, replacement));
+
+    expected = 'awesomex'; pattern = new RegExp('(awe|)$', 'g');
+    this.assertEqual(expected, source.replace(pattern, replacement));
+    
+    expected = 'xawesome'; pattern = /()/;
+    this.assertEqual(expected, source.replace(pattern, replacement));
+
+    expected = 'xaxwxexsxoxmxex'; pattern = /()/g;
+    this.assertEqual(expected, source.replace(pattern, replacement));
+
+    pattern = new RegExp('','g');
+    this.assertEqual(expected, source.replace(pattern, replacement));
+  },
+  
   testSubsWithUncommonPattern: function() {
     // test with empty pattern (String#gsub is used by String#sub)
     var empty = new RegExp('');
