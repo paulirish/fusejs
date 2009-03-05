@@ -10,14 +10,22 @@
       if (object && typeof object.toTemplateReplacements === 'function')
         object = object.toTemplateReplacements();
 
-      return this.template.gsub(this.pattern, function(match) {
-        var before = match[1] || '';
-        if (before === '\\') return match[2];
+      var pattern = this.pattern;
+      if (!Object.isRegExp(pattern))
+        pattern = new RegExp(RegExp.escape(String(pattern)));
+      if (!pattern.global)
+        pattern = pattern.clone({ 'global': true });
+
+      return this.template.replace(pattern, function() {
+        var before = arguments[1] || '';
+        if (before === '\\') return arguments[2];
         if (object == null) return before;
 
-        var ctx = object, expr = match[3];
-        var pattern = /^([^.[]+|\[((?:.*?[^\\])?)\])(\.|\[|$)/;
-        match = pattern.exec(expr);
+        // adds support for dot and bracket notation:
+        var ctx  = object, 
+         expr    = arguments[3],
+         pattern = /^([^.[]+|\[((?:.*?[^\\])?)\])(\.|\[|$)/,
+         match   = pattern.exec(expr);
         if (match == null) return before;
 
         while (match != null) {

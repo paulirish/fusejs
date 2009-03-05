@@ -18,11 +18,32 @@
     };
   })());
 
-  // based on work by Dean Edwards
-  // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
+  /*--------------------------------------------------------------------------*/
+
   (function() {
     var __replace = String.prototype.replace;
 
+    function gsub(pattern, replacement) {
+      if (!Object.isRegExp(pattern))
+        pattern = new RegExp(RegExp.escape(String(pattern)), 'g');
+      if (!pattern.global)
+        pattern = pattern.clone({ 'global': true });
+      return this.replace(pattern, prepareReplacement(replacement));
+    }
+
+    function interpolate(object, pattern) {
+      return new Template(this, pattern).evaluate(object);
+    }
+
+    function prepareReplacement(replacement) {
+      if (typeof replacement === 'function')
+        return function() { return replacement(slice.call(arguments, 0, -2)) };
+      var template = new Template(replacement);
+      return function() { return template.evaluate(slice.call(arguments, 0, -2)) };
+    }
+    
+    // based on work by Dean Edwards
+    // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
     function replace(pattern, replacement) {
       if (typeof replacement !== 'function')
         return __replace.call(this, pattern, replacement);
@@ -30,8 +51,6 @@
       var match, global, source = this, result = '';
       if (!Object.isRegExp(pattern))
         pattern = new RegExp(RegExp.escape(String(pattern)));
-
-      // convert to non-global
       if (global = pattern.global)
         pattern = pattern.clone({ 'global': false });
 
@@ -54,9 +73,37 @@
       return result + source;
     }
 
+    function sub(pattern, replacement, count) {
+      count = (typeof count === 'undefined') ? 1 : count;
+      if (count === 1) {
+        if (!Object.isRegExp(pattern))
+          pattern = new RegExp(RegExp.escape(String(pattern)));
+        if (pattern.global)
+          pattern = pattern.clone({ 'global': false });
+        return this.replace(pattern, prepareReplacement(replacement));
+      }
+
+      if (typeof replacement !== 'function') {
+        var template = new Template(replacement);
+        replacement = function(match) { return template.evaluate(match) };
+      }
+      return this.gsub(pattern, function(match) {
+        if (--count < 0) return match[0];
+        return replacement(match);
+      });
+    }
+    
     if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING'))
       String.prototype.replace = replace;
+
+    Object.extend(String.prototype, {
+      'gsub':        gsub,
+      'interpolate': interpolate,
+      'sub':         sub
+    });
   })();
+
+  /*--------------------------------------------------------------------------*/
 
   Object.extend(String.prototype, (function() {
     function succ() {
@@ -92,42 +139,6 @@
         else hash[key] = value;
       }
       return hash;
-    }
-
-    /* FORMAT FUNCTIONS */
-
-    function camelize() {
-      var parts = this.split('-'), len = parts.length;
-      if (len == 1) return parts[0];
-
-      var camelized = this.charAt(0) == '-' 
-        ? parts[0].charAt(0).toUpperCase() + parts[0].substring(1)
-        : parts[0];
-
-      for (var i = 1; i < len; i++)
-        camelized += parts[i].charAt(0).toUpperCase() + parts[i].substring(1);
-
-      return camelized;
-    }
-
-    function capitalize() {
-      return this.charAt(0).toUpperCase() + this.substring(1).toLowerCase();
-    }
-
-    function dasherize() {
-      return this.replace(/_/g,'-');
-    }
-
-    function underscore() {
-      return this.replace(/::/g, '/').replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-        .replace(/([a-z\d])([A-Z])/g, '$1_$2').replace(/-/g,'_').toLowerCase();
-    }
-
-    function truncate(length, truncation) {
-      length = length || 30;
-      truncation = (typeof truncation === 'undefined') ? '...' : truncation;
-      return this.length > length ? 
-        this.slice(0, length - truncation.length) + truncation : String(this);
     }
 
     /* JSON FUNCTIONS */
@@ -175,9 +186,9 @@
     }
 
     function inspect(useDoubleQuotes) {
-      var escapedString = this.gsub(/[\x00-\x1f\\]/, function(match) {
-        var character = String.specialChar[match[0]];
-        return character ? character : '\\u00' + match[0].charCodeAt().toPaddedString(2, 16);
+      var escapedString = this.replace(/[\x00-\x1f\\]/g, function(match) {
+        var character = String.specialChar[match];
+        return character ? character : '\\u00' + match.charCodeAt().toPaddedString(2, 16);
       });
       if (useDoubleQuotes) return '"' + escapedString.replace(/"/g, '\\"') + '"';
       return "'" + escapedString.replace(/'/g, '\\\'') + "'";
@@ -192,59 +203,37 @@
       return this.indexOf(pattern) === 0;
     }
 
-    /* TEXT SUBSTITUTION FUNCTIONS */
+    /* FORMAT FUNCTIONS */
 
-    function gsub(pattern, replacement) {
-      var match, result = '', source = this,
-       isRegExp = Object.isRegExp(pattern);
-      replacement = prepareReplacement(replacement);
+    function capitalize() {
+      return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
+    }
 
-      // see EMCA-262 15.5.4.11
-      if (!isRegExp)
-        pattern = RegExp.escape(String(pattern));
-      if (pattern === '' || isRegExp && !pattern.source) {
-        replacement = replacement(['']);
-        return replacement + source.split('').join(replacement) + replacement;
+    function dasherize() {
+      return this.replace(/_/g,'-');
+    }
+
+    function underscore() {
+      return this.replace(/::/g, '/').replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+        .replace(/([a-z\d])([A-Z])/g, '$1_$2').replace(/-/g,'_').toLowerCase();
+    }
+
+    function truncate(length, truncation) {
+      length = length || 30;
+      truncation = (typeof truncation === 'undefined') ? '...' : truncation;
+      return this.length > length ? 
+        this.slice(0, length - truncation.length) + truncation : String(this);
+    }
+
+    var camelize= (function() {
+      function replacer(match, captured) {
+        return captured.toUpperCase();
       }
-      // convert to non-global
-      if (isRegExp && pattern.global)
-        pattern = new RegExp(pattern.source,
-          (pattern.ignoreCase ? 'i' : '') +
-          (pattern.multiline  ? 'm' : ''));
-
-      while (source.length > 0) {
-        if (match = source.match(pattern)) {
-          result += source.slice(0, match.index);
-          result += String.interpret(replacement(match));
-          source  = source.slice(match.index + match[0].length);
-        } else {
-          result += source; break;
-        }
+      function camelize() {
+        return this.replace(/\-(\w|$)/g, replacer);
       }
-      return result;
-    }
-
-    function interpolate(object, pattern) {
-      return new Template(this, pattern).evaluate(object);
-    }
-
-    function prepareReplacement(replacement) {
-      if (typeof replacement === 'function') return replacement;
-      var template = new Template(replacement);
-      return function(match) { return template.evaluate(match) };
-    }
-
-    function sub(pattern, replacement, count) {
-      replacement = prepareReplacement(replacement);
-      count = (typeof count === 'undefined') ? 1 : count;
-
-      return this.gsub(pattern, function(match) {
-        if (--count < 0) return match[0];
-        return replacement(match);
-      });
-    }
-
-    /*--------------------------------------------------------------------------*/
+      return camelize;
+    })();
 
     return {
       'blank':         blank,
@@ -254,15 +243,12 @@
       'endsWith':      endsWith,
       'empty':         empty,
       'evalJSON':      evalJSON,
-      'gsub':          gsub,
       'include':       include,
       'inspect':       inspect,
-      'interpolate':   interpolate,
       'isJSON':        isJSON,
       'parseQuery':    toQueryParams,
       'scan':          scan,
       'startsWith':    startsWith,
-      'sub':           sub,
       'succ':          succ,
       'times':         times, 
       'toArray':       toArray,
@@ -274,6 +260,8 @@
     };
   })());
 
+  /*--------------------------------------------------------------------------*/
+  
   Object.extend(String.prototype, (function() {
     var s = RegExp.specialChar.s,
      matchTrimLeft     = new RegExp('^' + s + '+'),
@@ -314,6 +302,8 @@
       'stripTags':      stripTags
     };
   })());
+
+  /*--------------------------------------------------------------------------*/
 
   Object.extend(String.prototype, (function() {
     var container = doc.createElement('pre'),

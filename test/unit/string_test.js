@@ -121,7 +121,7 @@ new Test.Unit.Runner({
     var empty = new RegExp('');
     this.assertEqual('xaxbx', 'ab'.gsub('', 'x'));
     this.assertEqual('xaxbx', 'ab'.gsub(empty, 'x'));
-    this.assertEqual('xaxbx', 'ab'.sub('', 'x'));
+    this.assertEqual('xab',   'ab'.sub('', 'x'));
 
     this.assertEqual('abc', 'anullc'.sub(null, 'b'));
     this.assertEqual('abc', 'aundefinedc'.gsub(window.undefined, 'b'));
