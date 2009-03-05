@@ -33,9 +33,7 @@
 
       // convert to non-global
       if (global = pattern.global)
-        pattern = new RegExp(pattern.source,
-          (pattern.ignoreCase ? 'i' : '') +
-          (pattern.multiline  ? 'm' : ''));
+        pattern = pattern.clone({ 'global': false });
 
       while (match = pattern.exec(source)) {
         result += source.slice(0, match.index) +

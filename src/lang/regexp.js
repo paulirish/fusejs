@@ -7,7 +7,6 @@
 
     RegExp.escape = escape;
     RegExp.specialChar = { 's': '\\s' };
-    RegExp.prototype.match = RegExp.prototype.test;
 
     // Versions of WebKit and IE have non-spec-conforming /\s/ 
     // so we emulate it (see: ECMA-262 15.10.2.12)
@@ -23,3 +22,23 @@
       ']';
     }
   })();
+
+  Object.extend(RegExp.prototype, (function() {
+    function clone(options) {
+       options = Object.extend({
+         'global':     this.global,
+         'ignoreCase': this.ignoreCase,
+         'multiline':  this.multiline
+       }, options);
+
+       return new RegExp(this.source,
+        (options.global     ? 'g' : '') +
+        (options.ignoreCase ? 'i' : '') +
+        (options.multiline  ? 'm' : ''));
+    }
+
+    return {
+      'clone': clone,
+      'match': RegExp.prototype.test
+    };
+  })());

@@ -524,6 +524,45 @@ new Test.Unit.Runner({
     this.assertEqual('\"1970-01-01T00:00:00Z\"', new Date(Date.UTC(1970, 0, 1)).toJSON());
   },
   
+  testRegExpClone: function() {
+    var pattern = /[a-z]([a-z])\1/g;
+
+    this.assertEqual(pattern.source, pattern.clone().source,
+      'Clones `source` property does not match reference pattern\'s `source`.');
+
+    this.assert(pattern.global, 'Regexp objects do *not* have `global` property.');
+    this.assert(!pattern.clone({ 'global':false }).global,
+      'Failed to change `global` flag on clone.');
+
+    this.assert(!pattern.ignoreCase, '`ignoreCase` should be false on reference pattern');
+    this.assert(pattern.clone({ 'ignoreCase':true }).ignoreCase,
+      'Failed to change `ignoreCase` flag on clone.');
+
+    this.assert(!pattern.multiline, '`multiline` should be false on reference pattern');
+    this.assert(pattern.clone({ 'multiline':true }).multiline,
+      'Failed to change `multiline` flag on clone.');
+
+    var source = 'foobar baabang';
+    this.assertEnumEqual(['foo', 'o'], source.match(pattern.clone({ 'global': false })),
+      'Clone did not respect the `global` flag as false.');
+    this.assertEnumEqual(['foo', 'baa'], source.match(pattern.clone()),
+      'Clone did not respect the `global` flag as true.');
+
+    pattern = /(?:lower|Upper)/g; source = 'lower Upper UPPER';
+    this.assertEnumEqual(['lower', 'Upper', 'UPPER'], source.match(pattern.clone({ 'ignoreCase': true })),
+      'Clone did not respect the ignoreCase flag as true.');
+    this.assertEnumEqual(['lower', 'Upper'], source.match(pattern.clone({ 'ignoreCase': false })),
+      'Clone did not respect the` ignoreCase` flag as false.');
+
+    pattern = /^a.*?z$/; source = 'abcxyz\n123\nahh onooz';
+    this.assertEnumEqual(['abcxyz'], source.match(pattern.clone({ 'multiline': true })),
+      'Clone did not respect the `multiline` flag as true.');
+    this.assertEnumEqual(['abcxyz', 'ahh onooz'], source.match(pattern.clone({ 'multiline': true, 'global': true })),
+      'Clone did not respect flag combination of `multiline` flag as true and `global` flag as true.');
+    this.assertEnumEqual([], source.match(pattern.clone({ 'multiline': false })),
+      'Clone did not respect the `multiline` flag as false.');
+  },
+  
   testRegExpEscape: function() {
     this.assertEqual('word', RegExp.escape('word'));
     this.assertEqual('\\/slashes\\/', RegExp.escape('/slashes/'));
