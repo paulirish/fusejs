@@ -6,7 +6,7 @@
     }
 
     return {
-      specialChar: {
+      'specialChar': {
         '\b': '\\b',
         '\f': '\\f',
         '\n': '\\n',
@@ -14,7 +14,7 @@
         '\t': '\\t',
         '\\': '\\\\'
       },
-      interpret: interpret
+      'interpret': interpret
     };
   })());
 
@@ -41,7 +41,7 @@
       var template = new Template(replacement);
       return function() { return template.evaluate(slice.call(arguments, 0, -2)) };
     }
-    
+
     // based on work by Dean Edwards
     // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
     function replace(pattern, replacement) {
@@ -141,8 +141,18 @@
       return hash;
     }
 
-    /* JSON FUNCTIONS */
+    return {
+      'parseQuery':    toQueryParams,
+      'succ':          succ,
+      'times':         times, 
+      'toArray':       toArray,
+      'toQueryParams': toQueryParams
+    };
+  })());
 
+  /*--------------------------------------------------------------------------*/
+    
+  Object.extend(String.prototype, (function() {
     function evalJSON(sanitize) {
       var json = this.unfilterJSON();
       try {
@@ -166,8 +176,17 @@
       return this.sub(filter || Fuse.JSONFilter, '#{1}');
     }
 
-    /* STRING QUERY FUNCTIONS */
+    return {
+      'evalJSON':     evalJSON,
+      'isJSON':       isJSON,
+      'toJSON':       toJSON,
+      'unfilterJSON': unfilterJSON
+    };
+  })());
 
+  /*--------------------------------------------------------------------------*/
+
+  Object.extend(String.prototype, (function() {
     function blank() {
       return /^\s*$/.test(this);
     }
@@ -203,8 +222,20 @@
       return this.indexOf(pattern) === 0;
     }
 
-    /* FORMAT FUNCTIONS */
+    return {
+      'blank':      blank,
+      'empty':      empty,
+      'endsWith':   endsWith,
+      'include':    include,
+      'inspect':    inspect,
+      'scan':       scan,
+      'startsWith': startsWith
+    };
+  })());
 
+  /*--------------------------------------------------------------------------*/
+
+  Object.extend(String.prototype, (function() {
     function capitalize() {
       return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
     }
@@ -213,16 +244,16 @@
       return this.replace(/_/g,'-');
     }
 
-    function underscore() {
-      return this.replace(/::/g, '/').replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-        .replace(/([a-z\d])([A-Z])/g, '$1_$2').replace(/-/g,'_').toLowerCase();
-    }
-
     function truncate(length, truncation) {
       length = length || 30;
       truncation = (typeof truncation === 'undefined') ? '...' : truncation;
       return this.length > length ? 
         this.slice(0, length - truncation.length) + truncation : String(this);
+    }
+
+    function underscore() {
+      return this.replace(/::/g, '/').replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+        .replace(/([a-z\d])([A-Z])/g, '$1_$2').replace(/-/g,'_').toLowerCase();
     }
 
     var camelize= (function() {
@@ -236,32 +267,16 @@
     })();
 
     return {
-      'blank':         blank,
-      'camelize':      camelize,
-      'capitalize':    capitalize,
-      'dasherize':     dasherize,
-      'endsWith':      endsWith,
-      'empty':         empty,
-      'evalJSON':      evalJSON,
-      'include':       include,
-      'inspect':       inspect,
-      'isJSON':        isJSON,
-      'parseQuery':    toQueryParams,
-      'scan':          scan,
-      'startsWith':    startsWith,
-      'succ':          succ,
-      'times':         times, 
-      'toArray':       toArray,
-      'toJSON':        toJSON,
-      'toQueryParams': toQueryParams,
-      'truncate':      truncate,
-      'underscore':    underscore,
-      'unfilterJSON':  unfilterJSON
+      'camelize':    camelize,
+      'capitalize':  capitalize,
+      'dasherize':   dasherize,
+      'truncate':    truncate,
+      'underscore':  underscore
     };
   })());
 
   /*--------------------------------------------------------------------------*/
-  
+
   Object.extend(String.prototype, (function() {
     var s = RegExp.specialChar.s,
      matchTrimLeft     = new RegExp('^' + s + '+'),

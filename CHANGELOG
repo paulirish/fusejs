@@ -1,3 +1,5 @@
+* Reorganize String.prototype extensions. [jddalton]
+
 * Optimize String#camelize, String#gsub, String#inspect, String#sub and Template#evaluate by using String#replace. [jddalton, kangax]
 
 * unit test: Comment-out benchmarks in the String unit tests. [jddalton]
