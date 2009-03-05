@@ -213,9 +213,11 @@ new Test.Unit.Runner({
     this.assertEqual('classNameTest','className-test'.camelize());
     this.assertEqual('classNameTest','class-nameTest'.camelize());
     
-    /* this.benchmark(function(){
+    /*
+    this.benchmark(function(){
       'class-name-test'.camelize();
-    },10000); */
+    }, 10000);
+    */
   },
 
   testCapitalize: function() {
@@ -306,8 +308,10 @@ new Test.Unit.Runner({
      longString   = 'foo <script type="text/javascript">'+ longScript + '<'+'/script> bar';
     this.assertEnumEqual([longScript], longString.extractScripts());
 
+    /*
     var str = 'foo <script>boo();<'+'/script>blub\nblub<script type="text/javascript">boo();\nmoo();<'+'/script>bar';
     this.benchmark(function() { str.extractScripts() }, 1000);
+    */
   },
   
   testEvalScripts: function() {
@@ -338,7 +342,7 @@ new Test.Unit.Runner({
     this.assertEqual('&amp;', '&'.escapeHTML());
     this.assertEqual('1\n2', '1\n2'.escapeHTML());
     
-    this.benchmark(function() { largeTextUnescaped.escapeHTML() }, 1000);
+    /* this.benchmark(function() { largeTextUnescaped.escapeHTML() }, 1000); */
   },
   
   testUnescapeHTML: function() {
@@ -358,8 +362,7 @@ new Test.Unit.Runner({
     var sameInSameOut = '"&lt;" means "<" in HTML';
     this.assertEqual(sameInSameOut, sameInSameOut.escapeHTML().unescapeHTML());
     
-    this.benchmark(function() { largeTextEscaped.unescapeHTML() }, 1000);
-    
+    /* this.benchmark(function() { largeTextEscaped.unescapeHTML() }, 1000); */
   },
   
   testTemplateEvaluation: function() {
@@ -568,7 +571,8 @@ new Test.Unit.Runner({
     this.assertEqual('foofoofoofoofoo', 'foo'.times(5));
     this.assertEqual('', 'foo'.times(-5));
     
-    /*window.String.prototype.oldTimes = function(count) {
+    /*
+    window.String.prototype.oldTimes = function(count) {
       var result = '';
       for (var i = 0; i < count; i++) result += this;
       return result;
@@ -580,7 +584,8 @@ new Test.Unit.Runner({
     
     this.benchmark(function() {
       'foo'.oldTimes(15);
-    }, 1000, 'previous: ');*/
+    }, 1000, 'previous: ');
+    */
   },
   
   testToJSON: function() {
