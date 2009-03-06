@@ -1,3 +1,5 @@
+* unit test: Fix DOM test `testElementUpdateWithToElementMethod` check for html comments in Safari 2 and change the wording on some Event test error messages. [jddalton]
+
 * Add Object._extend() as a stripped down version of Object.extend() without any `DontEnum` fixes. [jddalton]
 
 * Ensure Template#evaluate does not evaluate inherited properties of the `object`. [jddalton, kangax]

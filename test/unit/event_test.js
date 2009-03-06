@@ -282,10 +282,10 @@ new Test.Unit.Runner({
   
   testEventElement: function() {
     this.assert(eventResults.windowLoad.eventElement,
-      'window `onload` event.element() should not be null. (versions of Safari may return null)');
+      'window `onload` event.element() should not be null. (some WebKit versions may return null)');
 
     this.assert(eventResults.contentLoaded.eventElement,
-      'document `dom:loaded` event.element() should not be null. (versions of Safari may return null)');
+      'document `dom:loaded` event.element() should not be null. (some WebKit versions may return null)');
 
     //this.assertIdentical(window, eventResults.windowLoad.eventElement,
       //'window `onload` event.element() should be `window`');
@@ -313,10 +313,10 @@ new Test.Unit.Runner({
 
   testEventCurrentTarget: function() {
     this.assert(eventResults.windowLoad.eventCurrentTarget,
-      'window `onload` event.currentTarget should not be null. (versions of Safari may return null)');
+      'window `onload` event.currentTarget should not be null. (some WebKit versions may return null)');
 
     this.assert(eventResults.contentLoaded.eventCurrentTarget,
-      'document `dom:loaded` event.currentTarget should not be null. (versions of Safari may return null)');
+      'document `dom:loaded` event.currentTarget should not be null. (some WebKit versions may return null)');
 
     //this.assertIdentical(window, eventResults.windowLoad.eventCurrentTarget,
       //'window `onload` event.currentTarget should be `window`');
@@ -324,10 +324,10 @@ new Test.Unit.Runner({
   
   testEventTarget: function() {
     this.assert(eventResults.windowLoad.eventTarget,
-      'window `onload` event.target should not be null. (versions of Safari may return null)');
+      'window `onload` event.target should not be null. (some WebKit versions may return null)');
 
     this.assert(eventResults.contentLoaded.eventTarget,
-      'document `dom:loaded` event.target should not be null. (versions of Safari may return null)');
+      'document `dom:loaded` event.target should not be null. (some WebKit versions may return null)');
  
     //this.assertIdentical(window, eventResults.windowLoad.eventTarget,
       //'window `onload` event.target should be `window`');

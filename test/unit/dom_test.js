@@ -600,7 +600,7 @@ new Test.Unit.Runner({
     // test comment node
     var comment = document.createComment("test");
     div.update({ 'toElement': function() { return comment } });
-    this.assertEqual('<!--test-->', getInnerHTML(div),
+    this.assert(div.firstChild && div.firstChild.nodeType === 8,
       'Failed to update via `toElement` with a comment node.');
 
     // test document fragment
