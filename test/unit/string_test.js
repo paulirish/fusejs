@@ -397,15 +397,31 @@ new Test.Unit.Runner({
   },
 
   testTemplateEvaluationWithNested: function() {
-    var source = '#{name} #{manager.name} #{manager.age} #{manager.undef} #{manager.age.undef} #{colleagues.first.name}';
-    var subject = { manager: { name: 'John', age: 29 }, name: 'Stephan', age: 22, colleagues: { first: { name: 'Mark' }} };
-    this.assertEqual('Stephan', new Template('#{name}').evaluate(subject));
-    this.assertEqual('John', new Template('#{manager.name}').evaluate(subject));
-    this.assertEqual('29', new Template('#{manager.age}').evaluate(subject));
-    this.assertEqual('', new Template('#{manager.undef}').evaluate(subject));
-    this.assertEqual('', new Template('#{manager.age.undef}').evaluate(subject));
-    this.assertEqual('Mark', new Template('#{colleagues.first.name}').evaluate(subject));
-    this.assertEqual('Stephan John 29   Mark', new Template(source).evaluate(subject));
+    var source  = '#{name} #{manager.name} #{manager.age} #{manager.undef} #{manager.age.undef} #{colleagues.first.name}';
+    var man = function(options){
+      Object.extend(this, options);
+    };
+    
+    man.prototype.gender = 'Male';
+    
+    var worker = new man({
+      'colleagues': { 'first': { 'name': 'Mark' } },
+      'manager': new man({ 'name': 'John', 'age': 29 }),
+      'name': 'Stephan',
+      'age': 22
+    });
+    
+    this.assertEqual('Stephan', new Template('#{name}').evaluate(worker));
+    this.assertEqual('John', new Template('#{manager.name}').evaluate(worker));
+    this.assertEqual('29', new Template('#{manager.age}').evaluate(worker));
+    this.assertEqual('', new Template('#{manager.undef}').evaluate(worker));
+    this.assertEqual('', new Template('#{manager.age.undef}').evaluate(worker));
+    this.assertEqual('Mark', new Template('#{colleagues.first.name}').evaluate(worker));
+    this.assertEqual('Stephan John 29   Mark', new Template(source).evaluate(worker));
+    
+    // test inherited properties
+    this.assertEqual('', new Template('#{manager.gender}').evaluate(worker),
+      'Template should not evaluate inherited properties.');
   },
 
   testTemplateEvaluationWithIndexing: function() {
