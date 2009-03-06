@@ -28,6 +28,14 @@
       return Element.extend(element);
     }
 
+    function getNth(element, property, nth) {
+      var count = 0;
+      while (element = element[property]) {
+        if (element.nodeType === 1 && count++ === nth)
+          return Element.extend(element);
+      }
+    }
+    
     function immediateDescendants(element) {
       if (!(element = $(element).firstChild)) return [];
       while (element && element.nodeType !== 1) element = element.nextSibling;
@@ -36,17 +44,19 @@
     }
 
     function next(element, expression, index) {
-      if (arguments.length === 1) return Element.extend(Selector.handlers.nextElementSibling(element));
-      var nextSiblings = Element.nextSiblings(element);
-      return typeof expression === 'number' ? nextSiblings[expression] :
-        Selector.findElement(nextSiblings, expression, index);
+      if (arguments.length === 1)
+        return Element.extend(Selector.handlers.nextElementSibling(element));
+      return typeof expression === 'number'
+        ? getNth($(element), 'nextSibling', expression)
+        : Selector.findElement(Element.nextSiblings(element), expression, index);
     }
 
     function previous(element, expression, index) {
-      if (arguments.length == 1) return Element.extend(Selector.handlers.previousElementSibling(element));
-      var previousSiblings = Element.previousSiblings(element);
-      return typeof expression === 'number' ? previousSiblings[expression] :
-        Selector.findElement(previousSiblings, expression, index);   
+      if (arguments.length == 1)
+        return Element.extend(Selector.handlers.previousElementSibling(element));
+      return typeof expression === 'number'
+        ? getNth($(element), 'previousSibling', expression)
+        : Selector.findElement(Element.previousSiblings(element), expression, index);   
     }
 
     function nextSiblings(element) {
@@ -71,16 +81,19 @@
     }
 
     function down(element, expression, index) {
-      if (arguments.length == 1) return Element.firstDescendant(element);
-      return typeof expression === 'number' ? Element.descendants(element)[expression] :
-        Element.select(element, expression)[index || 0];
+      if (arguments.length == 1)
+        return Element.firstDescendant(element);
+      return typeof expression === 'number'
+        ? getNthDescendant($(element), expression)
+        : Element.select(element, expression)[index || 0];
     }
 
     function up(element, expression, index) {
-      if (arguments.length === 1) return Element.extend($(element).parentNode);
-      var ancestors = Element.ancestors(element);
-      return typeof expression === 'number' ? ancestors[expression] :
-        Selector.findElement(ancestors, expression, index);
+      if (arguments.length === 1)
+        return Element.extend($(element).parentNode);
+      return typeof expression === 'number'
+        ? getNth($(element), 'parentNode', expression)
+        : Selector.findElement(Element.ancestors(element), expression, index);
     }
 
     function match(element, selector) {
@@ -94,7 +107,21 @@
         slice.call(arguments, 1));
     }
 
-    var descendantOf = (function() {
+    var getNthDescendant =
+      Bug('GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES') ?
+        function(element, nth) {
+          var node, i = 0, count = 0, nodes = element.getElementsByTagName('*');
+          while (node = nodes[i++]) {
+            if (node.nodeType === 1 && count++ === nth)
+              return Element.extend(node);
+          }
+        } :
+        function(element, nth) {
+          var node = element.getElementsByTagName('*')[nth];
+          if (node) return Element.extend(node);
+        },
+
+    descendantOf = (function() {
       function basic(element, ancestor) {
        element = $(element); ancestor = $(ancestor);
         while (element = element.parentNode)

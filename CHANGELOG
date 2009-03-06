@@ -1,3 +1,5 @@
+* Avoid unneeded extending/iterating in Element#down, Element#next, Element#previous and Element#up. [Prototype LH #452] [eno, jddalton]
+
 * Reorganize String.prototype extensions. [jddalton]
 
 * Optimize String#camelize, String#gsub, String#inspect, String#sub and Template#evaluate by using String#replace. [jddalton, kangax]

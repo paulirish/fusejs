@@ -554,8 +554,7 @@ new Test.Unit.Runner({
       'Failed to update table element.');
 
     // test passing object with "toElement" method
-    var newTR = document.createElement('TR'),
-     newTD = document.createElement('TD');
+    var newTR = new Element('tr'), newTD = new Element('td');
     newTR.appendChild(newTD).appendChild(document.createTextNode('something else'));
 
     $('table').update({ 'toElement': function() { return newTR } });
@@ -726,9 +725,9 @@ new Test.Unit.Runner({
       'div#nav_tests_isolator', 'body', 'html');
     this.assertElementsMatch(ancestors.last().ancestors());
     
-    var dummy = $(document.createElement('DIV'));
+    var dummy = new Element('div');
     dummy.innerHTML = '<div></div>'.times(3);
-    this.assert(typeof $(dummy.childNodes[0]).ancestors()[0]['setStyle'] == 'function');
+    this.assertRespondsTo('show', dummy.down().ancestors()[0]);
   },
   
   testElementDescendants: function() {
@@ -737,9 +736,9 @@ new Test.Unit.Runner({
       'em.dim', 'li#navigation_test_f', 'em', 'li', 'em');
     this.assertElementsMatch($('navigation_test_f').descendants(), 'em');
     
-    var dummy = $(document.createElement('DIV'));
+    var dummy = new Element('div');
     dummy.innerHTML = '<div></div>'.times(3);
-    this.assert(typeof dummy.descendants()[0].setStyle == 'function');
+    this.assertRespondsTo('show', dummy.descendants()[0]);
     
     var input = new Element('input', { type: 'text' });
     this.assert(Object.isArray(input.descendants()), 'Did not return an array.');
@@ -756,9 +755,9 @@ new Test.Unit.Runner({
     this.assertNotEqual(0, $('navigation_test_next_sibling').childNodes.length);
     this.assertEnumEqual([], $('navigation_test_next_sibling').childElements());
     
-    var dummy = $(document.createElement('DIV'));
+    var dummy = new Element('div');
     dummy.innerHTML = '<div></div>'.times(3);
-    this.assert(typeof dummy.childElements()[0].setStyle == 'function');
+    this.assertRespondsTo('show', dummy.childElements()[0]);
   },
 
   testElementImmediateDescendants: function() {
@@ -770,9 +769,9 @@ new Test.Unit.Runner({
       'span#nav_test_prev_sibling', 'p.test', 'div', 'div#nav_test_first_sibling');
     this.assertElementsMatch($('navigation_test_f').previousSiblings(), 'li');
     
-    var dummy = $(document.createElement('DIV'));
+    var dummy = new Element('div');
     dummy.innerHTML = '<div></div>'.times(3);
-    this.assert(typeof $(dummy.childNodes[1]).previousSiblings()[0].setStyle == 'function');
+    this.assertRespondsTo('show', dummy.down(1).previousSiblings()[0]);
   },
   
   testElementNextSiblings: function() {
@@ -780,9 +779,9 @@ new Test.Unit.Runner({
       'div#navigation_test_next_sibling', 'p');
     this.assertElementsMatch($('navigation_test_f').nextSiblings());
     
-    var dummy = $(document.createElement('DIV'));
+    var dummy = new Element('div');
     dummy.innerHTML = '<div></div>'.times(3);
-    this.assert(typeof $(dummy.childNodes[0]).nextSiblings()[0].setStyle == 'function');
+    this.assertRespondsTo('show', dummy.down().nextSiblings()[0]);
   },
   
   testElementSiblings: function() {
@@ -790,26 +789,26 @@ new Test.Unit.Runner({
       'div#nav_test_first_sibling', 'div', 'p.test',
       'span#nav_test_prev_sibling', 'div#navigation_test_next_sibling', 'p');
       
-    var dummy = $(document.createElement('DIV'));
+    var dummy = new Element('div');
     dummy.innerHTML = '<div></div>'.times(3);
-    this.assert(typeof $(dummy.childNodes[0]).siblings()[0].setStyle == 'function');
+    this.assertRespondsTo('show', dummy.down().siblings()[0]);
   },
   
   testElementUp: function() {
-    var element = $('navigation_test_f');
+    var undef, element = $('navigation_test_f');
     this.assertElementMatches(element.up(), 'ul');
     this.assertElementMatches(element.up(0), 'ul');
     this.assertElementMatches(element.up(1), 'li');
     this.assertElementMatches(element.up(2), 'ul#navigation_test');
     this.assertElementsMatch(element.up('li').siblings(), 'li.first', 'li', 'li.last');
     this.assertElementMatches(element.up('ul', 1), 'ul#navigation_test');
-    this.assertEqual(undefined, element.up('garbage'));
-    this.assertEqual(undefined, element.up(6));
+    this.assertEqual(undef, element.up('garbage'));
+    this.assertEqual(undef, element.up(6));
     this.assertElementMatches(element.up('.non-existant, ul'), 'ul');
     
-    var dummy = $(document.createElement('DIV'));
+    var dummy = new Element('div');
     dummy.innerHTML = '<div></div>'.times(3);
-    this.assert(typeof $(dummy.childNodes[0]).up().setStyle == 'function');
+    this.assertRespondsTo('show', dummy.down().up());
   },
   
   testElementDown: function() {
@@ -821,9 +820,9 @@ new Test.Unit.Runner({
     this.assertElementMatches(element.down('ul').down('li', 1), 'li#navigation_test_f');
     this.assertElementMatches(element.down('.non-existant, .first'), 'li.first');
     
-    var dummy = $(document.createElement('DIV'));
+    var dummy = new Element('div');
     dummy.innerHTML = '<div></div>'.times(3);
-    this.assert(typeof dummy.down().setStyle == 'function');
+    this.assertRespondsTo('show', dummy.down());
     
     // Test INPUT elements because Element#down calls Element#select
     var input = $$('input')[0];
@@ -840,9 +839,9 @@ new Test.Unit.Runner({
     this.assertEqual(undefined, $('navigation_test').down().previous());
     this.assertElementMatches(element.previous('.non-existant, .first'), 'li.first');
     
-    var dummy = $(document.createElement('DIV'));
+    var dummy = new Element('div');
     dummy.innerHTML = '<div></div>'.times(3);
-    this.assert(typeof $(dummy.childNodes[1]).previous().setStyle == 'function');
+    this.assertRespondsTo('show', dummy.down(1).previous());
   },
   
   testElementNext: function() {
@@ -855,9 +854,9 @@ new Test.Unit.Runner({
     this.assertEqual(undefined, element.next(2).next());
     this.assertElementMatches(element.next('.non-existant, .last'), 'li.last');
     
-    var dummy = $(document.createElement('DIV'));
+    var dummy = new Element('div');
     dummy.innerHTML = '<div></div>'.times(3);
-    this.assert(typeof $(dummy.childNodes[0]).next().setStyle == 'function');
+    this.assertRespondsTo('show', dummy.down().next());
   },
   
   testElementInspect: function() {
@@ -867,7 +866,7 @@ new Test.Unit.Runner({
   },
   
   testElementMakeClipping: function() {
-    var chained = Element.extend(document.createElement('DIV'));
+    var chained = new Element('div');
     this.assertEqual(chained, chained.makeClipping());
     this.assertEqual(chained, chained.makeClipping());
     this.assertEqual(chained, chained.makeClipping().makeClipping());
