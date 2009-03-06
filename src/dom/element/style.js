@@ -1,6 +1,6 @@
   /*----------------------------- ELEMENT: STYLE -----------------------------*/
 
-  Object.extend(Element.Methods, (function() {
+  Object._extend(Element.Methods, (function() {
     function classNames(element) {
       return new Element.ClassNames(element);
     }

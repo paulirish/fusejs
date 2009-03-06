@@ -1,3 +1,5 @@
+* Add Object._extend() as a stripped down version of Object.extend() without any `DontEnum` fixes. [jddalton]
+
 * Ensure Template#evaluate does not evaluate inherited properties of the `object`. [jddalton, kangax]
 
 * Avoid unneeded extending/iterating in Element#down, Element#next, Element#previous and Element#up. [Prototype LH #452] [eno, jddalton]

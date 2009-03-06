@@ -25,7 +25,7 @@
       if (!Element.cache[tagName])
         Element.cache[tagName] = Element.extend(doc.createElement(tagName));
       return Element.writeAttribute(Element.cache[tagName]
-        .cloneNode(false), attributes || { });
+        .cloneNode(false), attributes);
     }
 
     global.Element = createElement;
@@ -46,8 +46,7 @@
     if (original) {
       // avoid Object.extend() because IE8 cannot set any
       // variable/property reference to Element.toString
-      for (var key in original)
-        global.Element[key] = original[key];
+      Object._extend(global.Element, original);
       global.Element.prototype = original.prototype;
     }
   })();
@@ -114,7 +113,7 @@
     // don't need their elements extended UNLESS
     // they belong to a different document
     if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
-      return Object.extend(function(element) {
+      return Object._extend(function(element) {
         return (element && element.ownerDocument &&
           element.ownerDocument !== doc) ? extend(element) : element;
       }, { 'refresh': refresh });
@@ -226,7 +225,7 @@
       }
 
       if (!tagName)
-        Object.extend(Element.Methods, methods || { });
+        Object.extend(Element.Methods, methods);
       else {
         Object.isArray(tagName)
           ? tagName._each(function(name) { extend(name, methods) })
@@ -412,7 +411,7 @@
     function wrap(element, wrapper, attributes) {
       element = $(element);
       if (Object.isElement(wrapper))
-        $(wrapper).writeAttribute(attributes || { });
+        $(wrapper).writeAttribute(attributes);
       else if (typeof wrapper === 'string')
         wrapper = new Element(wrapper, attributes);
       else wrapper = new Element('div', wrapper);

@@ -393,7 +393,7 @@
 
     /*--------------------------------------------------------------------------*/
 
-    Object.extend(AP, {
+    Object._extend(AP, {
       '_each':     _each,
       'clear':     clear,
       'clone':     clone,

@@ -9,7 +9,7 @@
     Feature('ELEMENT_ATTACH_EVENT') ? 'beforeupdate' : 'keyup';
 
   // temporarily hold these helpers to avoid creating several closures.
-  Object.extend(Event.Temp = { }, (function() {
+  Object._extend(Event.Temp = { }, (function() {
 
     function getCacheID(element) {
       if (element === global) return 1;
@@ -358,7 +358,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Object.extend(Event, (function() {
+  Object._extend(Event, (function() {
     var createEvent       = Event.Temp.createEvent,
      createDispatcher     = Event.Temp.createDispatcher,
      fireEvent            = Event.Temp.fireEvent,
@@ -566,14 +566,14 @@
 
   Object.extend(Event, Event.Methods);
 
-  Object.extend(Element.Methods, {
+  Object._extend(Element.Methods, {
     'fire':          Event.fire,
     'getEventID':    Event.getEventID,
     'observe':       Event.observe,
     'stopObserving': Event.stopObserving
   });
 
-  Object.extend(doc, {
+  Object._extend(doc, {
     'loaded':        false,
     'fire':          Element.Methods.fire.methodize(),
     'observe':       Element.Methods.observe.methodize(),

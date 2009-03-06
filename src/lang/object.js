@@ -4,6 +4,12 @@
     // used to access the an object's internal [[Class]] property
     var toString = Object.prototype.toString;
 
+    function _extend(destination, source) {
+      for (var key in source)
+         destination[key] = source[key]; 
+      return destination;
+    }
+
     function clone(object) {
       return Object.extend({ }, object);
     }
@@ -258,6 +264,7 @@
     Object.hasKey = hasKey;
 
     extend(Object, {
+      '_extend':       _extend,
       'clone':         clone,
       'each':          each,
       'extend':        extend,

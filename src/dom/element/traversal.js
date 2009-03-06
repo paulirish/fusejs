@@ -1,6 +1,6 @@
   /*--------------------------- ELEMENT: TRAVERSAL ---------------------------*/
 
-  Object.extend(Element.Methods, (function() {
+  Object._extend(Element.Methods, (function() {
     function adjacent(element) {
       element = $(element);
       var args = slice.call(arguments, 1),

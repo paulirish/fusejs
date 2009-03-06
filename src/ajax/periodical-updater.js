@@ -5,8 +5,8 @@
       // this._super() equivalent
       Ajax.Base.prototype.initialize.call(this, options);
 
-      options = Object.extend(Object
-       .clone(this.constructor.defaultOptions), options || { });
+      options = Object._extend(Object
+       .clone(this.constructor.defaultOptions), options);
 
       this.onStop = this.options.onStop;
       this.onTimerEvent = this.start.bind(this);

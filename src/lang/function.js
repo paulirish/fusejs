@@ -1,6 +1,6 @@
   /*----------------------------- LANG: FUNCTIONS ----------------------------*/
 
-  Object.extend(Function.prototype, (function() {
+  Object._extend(Function.prototype, (function() {
     function argumentNames() {
       var names = this.toString().match(/^[\s\(]*function[^(]*\(([^)]*)\)/)[1]
        .replace(/\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g, '')

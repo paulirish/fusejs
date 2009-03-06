@@ -1305,14 +1305,15 @@ new Test.Unit.Runner({
   },
   
   testElementWriteAttribute: function() {
-    var element = Element.extend(document.body.appendChild(document.createElement('p')));
+    var undef, element = Element.extend(document.body.appendChild(document.createElement('p')));
+    
     this.assertRespondsTo('writeAttribute', element);
     this.assertEqual(element, element.writeAttribute('id', 'write_attribute_test'));
     this.assertEqual('write_attribute_test', element.id);
     this.assertEqual('http://fusejs.com/', $('write_attribute_link').
-      writeAttribute({href: 'http://fusejs.com/', title: 'Home of Fuse'}).href);
+      writeAttribute({ 'href': 'http://fusejs.com/', title: 'Home of Fuse' }).href);
     this.assertEqual('Home of Fuse', $('write_attribute_link').title);
-    
+
     var element2 = Element.extend(document.createElement('p'));
     element2.writeAttribute('id', 'write_attribute_without_hash');
     this.assertEqual('write_attribute_without_hash', element2.id);
@@ -1322,8 +1323,18 @@ new Test.Unit.Runner({
     $('attributes_with_issues_form').writeAttribute('encType', 'multipart/form-data');  
     this.assertEqual('multipart/form-data', $('attributes_with_issues_form').readAttribute('encType'));
     
-    var theForm = new Element('form', { 'name':'encTypeForm', 'method':'post', 'action':'myPage.php', 'enctype':'multipart/form-data' });
+    var theForm = new Element('form',
+      { 'name':'encTypeForm', 'method':'post', 'action':'myPage.php', 'enctype':'multipart/form-data' });
     this.assertEqual('multipart/form-data', theForm.readAttribute('encType'));
+    
+    // test null/undefined name argument
+    this.assertIdentical(element, element.writeAttribute(),
+      'Failed when passing no name.');
+    this.assertIdentical(element, element.writeAttribute(null),
+      'Failed when passing a null name.');
+    this.assertIdentical(element, element.writeAttribute(undef),
+      'Failed when passing an undefined name.');
+    element.remove();
   },
   
   testElementWriteAttributeWithBooleans: function() {

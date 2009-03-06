@@ -1,6 +1,6 @@
   /*---------------------------- ELEMENT: POSITION ---------------------------*/
 
-  Object.extend(Element.Methods, (function() {
+  Object._extend(Element.Methods, (function() {
     // TODO: rename to "makeAbsolute"
     function absolutize(element) {
       element = $(element);
@@ -101,18 +101,19 @@
       return element;
     }
 
-   function clonePosition(element, source) {
-      element = $(element); source = $(source);
-      var s = element.style;
-      var options = Object.extend({
+   function clonePosition(element, source, options) {
+      element = $(element);
+      source  = $(source);
+      options = Object._extend({
         'offsetLeft': 0,
         'offsetTop':  0,
         'setLeft':    true,
         'setTop':     true,
         'setWidth':   true,
         'setHeight':  true
-      }, arguments[2] || { });
+      }, options);
 
+      var s = element.style;
       if (options.setHeight)
         s.height = Element._getCssHeight(element) + 'px';
       if (options.setWidth)

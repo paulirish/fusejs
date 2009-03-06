@@ -113,14 +113,46 @@ new Test.Unit.Runner({
     this.assertEqual(baz, baz.quux());
   },
 
+  testSimpleObjectExtend: function() {
+    var undef, object = { 'foo': 'foo', 'bar': [1, 2, 3] };
+
+    // test empty/null/undefined sources
+    this.assertIdentical(object, Object._extend(object),
+      'Failed when passing no source.');
+    this.assertIdentical(object, Object._extend(object, null),
+      'Failed when passing a null source.');
+    this.assertIdentical(object, Object._extend(object, undef),
+      'Failed when passing an undefined source.');
+
+    this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3] }, object);
+    this.assertIdentical(object, Object._extend(object, { 'bla': 123 }));
+    this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3], 'bla': 123 }, object);
+    this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3], 'bla': null },
+      Object._extend(object, { 'bla': null }));
+  },
+  
   testObjectExtend: function() {
-    var object = {foo: 'foo', bar: [1, 2, 3]};
-    this.assertIdentical(object, Object.extend(object));
-    this.assertHashEqual({foo: 'foo', bar: [1, 2, 3]}, object);
-    this.assertIdentical(object, Object.extend(object, {bla: 123}));
-    this.assertHashEqual({foo: 'foo', bar: [1, 2, 3], bla: 123}, object);
-    this.assertHashEqual({foo: 'foo', bar: [1, 2, 3], bla: null},
-      Object.extend(object, {bla: null}));
+    var undef, object = { 'foo': 'foo', 'bar': [1, 2, 3] };
+
+    // test empty/null/undefined sources
+    this.assertIdentical(object, Object.extend(object),
+      'Failed when passing no source.');
+    this.assertIdentical(object, Object.extend(object, null),
+      'Failed when passing a null source.');
+    this.assertIdentical(object, Object.extend(object, undef),
+      'Failed when passing an undefined source.');
+
+    this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3] }, object);
+    this.assertIdentical(object, Object.extend(object, { 'bla': 123 }));
+    this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3], 'bla': 123 }, object);
+    this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3], 'bla': null },
+      Object.extend(object, { 'bla': null }));
+      
+    // test shadowed `DontEnum` properties
+    object = { 'foo': 'foo', 'bar': [1, 2, 3] };
+    Object.extend(object, { 'valueOf':  function() { return '[Awesome]' } });
+    this.assertEqual('[Awesome]', object.valueOf(),
+      'Failed to extend shadowed `DontEnum` properties.');
   },
   
   testObjectToQueryString: function() {
@@ -130,13 +162,21 @@ new Test.Unit.Runner({
   },
   
   testObjectClone: function() {
-    var object = {foo: 'foo', bar: [1, 2, 3]};
+    var undef, object = { 'foo': 'foo', 'bar': [1, 2, 3] };
     this.assertNotIdentical(object, Object.clone(object));
     this.assertHashEqual(object, Object.clone(object));
-    this.assertHashEqual({}, Object.clone());
+
+    // test empty/null/undefined objects
+    this.assertHashEqual({ }, Object.clone(),
+      'Failed when passing no value.');
+    this.assertHashEqual({ }, Object.clone(null),
+      'Failed when passing a null value.');
+    this.assertHashEqual({ }, Object.clone(undef),
+      'Failed when passing an undefined value.');
+
     var clone = Object.clone(object);
     delete clone.bar;
-    this.assertHashEqual({foo: 'foo'}, clone, 
+    this.assertHashEqual({ 'foo': 'foo' }, clone, 
       "Optimizing Object.clone perf using prototyping doesn't allow properties to be deleted.");
   },
 

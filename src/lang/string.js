@@ -1,6 +1,6 @@
   /*------------------------------ LANG: STRING ------------------------------*/
 
-  Object.extend(String, (function() {
+  Object._extend(String, (function() {
     function interpret(value) {
       return value == null ? '' : String(value);
     }
@@ -96,7 +96,7 @@
     if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING'))
       String.prototype.replace = replace;
 
-    Object.extend(String.prototype, {
+    Object._extend(String.prototype, {
       'gsub':        gsub,
       'interpolate': interpolate,
       'sub':         sub
@@ -105,7 +105,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Object.extend(String.prototype, (function() {
+  Object._extend(String.prototype, (function() {
     function succ() {
       return this.slice(0, this.length - 1) +
         String.fromCharCode(this.charCodeAt(this.length - 1) + 1);
@@ -152,7 +152,7 @@
 
   /*--------------------------------------------------------------------------*/
     
-  Object.extend(String.prototype, (function() {
+  Object._extend(String.prototype, (function() {
     function evalJSON(sanitize) {
       var json = this.unfilterJSON();
       try {
@@ -186,7 +186,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Object.extend(String.prototype, (function() {
+  Object._extend(String.prototype, (function() {
     function blank() {
       return /^\s*$/.test(this);
     }
@@ -235,7 +235,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Object.extend(String.prototype, (function() {
+  Object._extend(String.prototype, (function() {
     function capitalize() {
       return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
     }
@@ -277,7 +277,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Object.extend(String.prototype, (function() {
+  Object._extend(String.prototype, (function() {
     var s = RegExp.specialChar.s,
      matchTrimLeft     = new RegExp('^' + s + '+'),
      matchTrimRight    = new RegExp(s + '+$'),
@@ -320,7 +320,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Object.extend(String.prototype, (function() {
+  Object._extend(String.prototype, (function() {
     var container = doc.createElement('pre'),
      textNode = container.appendChild(doc.createTextNode(''));
 

@@ -40,7 +40,7 @@
       var node, contentName, attr,
        attributes = { }, T = Element.Attribute;
 
-      if (typeof name === 'object') attributes = name;
+      if (typeof name !== 'string') attributes = name;
       else attributes[name] = (typeof value === 'undefined') ? true : value;
 
       for (attr in attributes) {
@@ -170,6 +170,7 @@
       }
 
       // set `value`
+      // http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-30233917
       value = (node = button.getAttributeNode('value')) && node.value;
       if (value !== 'test') T.write.value = setNode('value');
 

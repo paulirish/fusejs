@@ -47,7 +47,7 @@
     }
 
     function clone(source, target, options) {
-      return Element.clonePosition(target, source, options || { });
+      return Element.clonePosition(target, source, options);
     }
 
     // within must be called directly before
@@ -195,7 +195,7 @@
       return this.toArray().join(' ');
     }
 
-    return Object.extend({
+    return Object._extend({
       'initialize': initialize,
       '_each':      _each,
       'add':        add,

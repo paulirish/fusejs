@@ -2,8 +2,8 @@
 
   Ajax.Base = Class.create((function() {
     function initialize(options) {
-      this.options = Object.extend(Object
-        .clone(Ajax.Base.defaultOptions), options || { });
+      this.options = Object._extend(Object
+        .clone(Ajax.Base.defaultOptions), options);
 
       this.options.method = this.options.method.toLowerCase();
 

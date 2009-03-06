@@ -220,7 +220,7 @@
     };
   })());
   
-  Object.extend(Selector, (function() {
+  Object._extend(Selector, (function() {
     function findChildElements(element, expressions) {
       expressions = Selector.split(expressions.join(','));
       var results = [], h = Selector.handlers;    
@@ -262,7 +262,7 @@
     };
   })());
 
-  Object.extend(Selector, {
+  Object._extend(Selector, {
     _cache: { },
 
     xpath: (function() {

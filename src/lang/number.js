@@ -1,6 +1,6 @@
   /*------------------------------ LANG: NUMBER ------------------------------*/
 
-  Object.extend(Number.prototype, (function() {
+  Object._extend(Number.prototype, (function() {
     function abs() {
       return Math.abs(this);
     }

@@ -23,9 +23,9 @@
     }
   })();
 
-  Object.extend(RegExp.prototype, (function() {
+  Object._extend(RegExp.prototype, (function() {
     function clone(options) {
-       options = Object.extend({
+       options = Object._extend({
          'global':     this.global,
          'ignoreCase': this.ignoreCase,
          'multiline':  this.multiline

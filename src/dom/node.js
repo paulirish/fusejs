@@ -2,7 +2,7 @@
 
   if (!Node.ELEMENT_NODE) {
     // DOM level 2 ECMAScript Language Binding
-    Object.extend(Node, {
+    Object._extend(Node, {
       'ELEMENT_NODE':                1,
       'ATTRIBUTE_NODE':              2,
       'TEXT_NODE':                   3,

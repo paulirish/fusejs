@@ -1,6 +1,6 @@
   /*------------------------------- LANG: DATE -------------------------------*/
 
-  Object.extend(Date.prototype, (function() {
+  Object._extend(Date.prototype, (function() {
     function toJSON() {
       return '"' + this.getUTCFullYear() + '-' +
         (this.getUTCMonth() + 1).toPaddedString(2) + '-' +

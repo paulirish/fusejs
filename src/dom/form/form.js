@@ -143,7 +143,7 @@
     }
 
     function request(form, options) {
-      form = $(form), options = Object.clone(options || { });
+      form = $(form), options = Object.clone(options);
 
       var params = options.parameters, submit = options.submit,
        action = Element.readAttribute(form, 'action') || '';

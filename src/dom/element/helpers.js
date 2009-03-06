@@ -1,6 +1,6 @@
   /*---------------------------- ELEMENT: HELPERS ----------------------------*/
 
-  Object.extend(Element, (function() {
+  Object._extend(Element, (function() {
     function returnOffset(left, top) {
       var result  = [left, top];
       result.left = left;
@@ -122,7 +122,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Object.extend(Element._insertionTranslations = { }, (function() {
+  Object._extend(Element._insertionTranslations = { }, (function() {
     function before(element, node) {
       element.parentNode &&
         element.parentNode.insertBefore(node, element);
@@ -158,7 +158,7 @@
   })());
 
   (function() {
-    Object.extend(this.tags, {
+    Object._extend(this.tags, {
       // TODO: Opera fails to render optgroups when set with innerHTML
       'OPTGROUP': this.tags.SELECT,
       'TFOOT':    this.tags.TBODY,
