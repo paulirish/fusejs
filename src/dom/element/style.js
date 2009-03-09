@@ -67,11 +67,11 @@
 
     /* SET OPACITY */
     setOpacity = (function() {
-      function stripAlpha(filter) {
+      function _stripAlpha(filter) {
         return filter.replace(/alpha\([^\)]*\)/gi,'');
       }
 
-      function setStyleOpacity(element, value) {
+      function _setStyleOpacity(element, value) {
         element = $(element);
         element.style.opacity = (value == 1 || value === '') ? '' : 
         (value < 0.00001) ? 0 : value;
@@ -80,9 +80,9 @@
 
       if (Fuse.Browser.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
         return function(element, value) {
-          element = setStyleOpacity(element, value);
+          element = _setStyleOpacity(element, value);
           if (value == 1) {
-            if (element.tagName.toUpperCase() == 'IMG' && element.width) {
+            if (getNodeName(element) == 'IMG' && element.width) {
               element.width++; element.width--;
             } else try {
               var n = element.ownerDocument.createTextNode(' ');
@@ -110,50 +110,50 @@
            filter = Element.getStyle(element, 'filter');
 
           if (value == 1 || value === '') {
-            (filter = stripAlpha(filter)) ?
+            (filter = _stripAlpha(filter)) ?
               style.filter = filter : style.removeAttribute('filter');
             return element;
           } else if (value < 0.00001) value = 0;
 
-          style.filter = stripAlpha(filter) + 'alpha(opacity=' + (value * 100) + ')';
+          style.filter = _stripAlpha(filter) + 'alpha(opacity=' + (value * 100) + ')';
           return element;   
         };
       }
       // else default
-      return setStyleOpacity;
+      return _setStyleOpacity;
     })(),
 
     /* GET STYLE */
     getStyle = (function() {
-      function getStyleValue(element, styleName) {
-        return getResult(getStyleName(styleName), element.style[styleName]);
+      function _getStyleValue(element, styleName) {
+        return _getResult(_getStyleName(styleName), element.style[styleName]);
       }
 
-      function getCascadedStyle(element, styleName) {
+      function _getCascadedStyle(element, styleName) {
         styleName = (styleName === 'float' || styleName === 'cssFloat') ? 'styleFloat' : styleName;
         var currentStyle = element.currentStyle;
         return element[element.currentStyle !== null ? 'currentStyle' : 'style'][styleName];
       }
 
-      function getComputedStyle(element, styleName) {
-        styleName = getStyleName(styleName);
+      function _getComputedStyle(element, styleName) {
+        styleName = _getStyleName(styleName);
         var css = element.ownerDocument.defaultView.getComputedStyle(element, null);
-        if (css) return getResult(styleName, css[styleName]);
-        return getStyleValue(element, styleName);
+        if (css) return _getResult(styleName, css[styleName]);
+        return _getStyleValue(element, styleName);
       }
 
-      function getStyleName(styleName) {
+      function _getStyleName(styleName) {
         return styleName === 'float' ? 'cssFloat' : styleName;
       }
 
-      function getResult(styleName, value) {
+      function _getResult(styleName, value) {
         if (styleName === 'opacity')
 		      return value ? parseFloat(value) : 1.0;
         return value === 'auto' || value === '' ? null : value;
       }
 
-      function resolveAsNull(element, styleName) {
-        var handlers = resolveAsNull.handlers,
+      function _resolveAsNull(element, styleName) {
+        var handlers = _resolveAsNull.handlers,
          length = handlers.length;
         if (!length) return false;
 
@@ -163,19 +163,19 @@
         }
         return false;
       };
-      resolveAsNull.handlers = [];
+      _resolveAsNull.handlers = [];
 
       // Opera
       if (Bug('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO')) {
-        resolveAsNull.handlers.push(function(element, styleName) {
+        _resolveAsNull.handlers.push(function(element, styleName) {
           switch (styleName) {
             case 'left': case 'top': case 'right': case 'bottom':
-              if (getComputedStyle(element, 'position') === 'static') return true;
+              if (_getComputedStyle(element, 'position') === 'static') return true;
           }
         });
       }
       if (Bug('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN')) {
-        resolveAsNull.handlers.push(function(element, styleName) {
+        _resolveAsNull.handlers.push(function(element, styleName) {
          return ((styleName === 'height' || styleName === 'width') &&
            element.style.display === 'none');
         });
@@ -187,8 +187,8 @@
           return function(element, styleName) {
             element = $(element);
             styleName = styleName.camelize();
-            return resolveAsNull(element, styleName) ? null :
-              getComputedStyle(element, styleName);
+            return _resolveAsNull(element, styleName) ? null :
+              _getComputedStyle(element, styleName);
           };
         }
 
@@ -196,17 +196,17 @@
         return function(element, styleName) {
           element = $(element);
           styleName = styleName.camelize();
-          if (resolveAsNull(element, styleName)) return null;
+          if (_resolveAsNull(element, styleName)) return null;
 
           if (styleName === 'height' || styleName === 'width') {
             // returns the border-box dimensions rather than the content-box
             // dimensions, so we subtract padding and borders from the value
             var D = styleName.capitalize(),
-             dim = parseFloat(getComputedStyle(element, styleName)) || 0;
+             dim = parseFloat(_getComputedStyle(element, styleName)) || 0;
             if (dim !== element['offset' + D]) return dim + 'px';
             return Element['_getCss' + D](element) + 'px';
           }
-          return getComputedStyle(element, styleName);
+          return _getComputedStyle(element, styleName);
         };
       }
 
@@ -217,7 +217,7 @@
         // The element.offsetHeight will give us the font size in px units.
         // Inspired by Google Doctype:
         // http://code.google.com/p/doctype/source/browse/trunk/goog/style/style.js#1146
-        var span = doc.createElement('span');
+        var span = Fuse._doc.createElement('span');
         span.style.cssText = 'position:absolute;visibility:hidden;height:1em;lineHeight:0;padding:0;margin:0;border:0;';
         span.innerHTML = 'M';
 
@@ -230,7 +230,7 @@
           styleName = styleName.camelize();
           element = $(element);
 
-          var value = getCascadedStyle(element, styleName);
+          var value = _getCascadedStyle(element, styleName);
           if (value === 'auto') {
             if ((styleName === 'width' || styleName === 'height') && element.style.display !== 'none')
               return element['offset' + styleName.capitalize()] + 'px';
@@ -272,7 +272,7 @@
 
       // else default
       return function(element, styleName) {
-        return getStyleValue($(element), styleName.camelize());
+        return _getStyleValue($(element), styleName.camelize());
       };
     })();
 

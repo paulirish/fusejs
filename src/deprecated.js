@@ -65,14 +65,14 @@
     // every time the page is scrolled
     function prepare() {
       this.deltaX =  
-        global.pageXOffset ||
-        docEl.scrollLeft   ||
-        body.scrollLeft    || 0;
+        global.pageXOffset     ||
+        Fuse._docEl.scrollLeft ||
+        Fuse._body.scrollLeft  || 0;
 
       this.deltaY =
-        global.pageYOffset || 
-        docEl.scrollTop    ||
-        body.scrollTop     || 0;
+        global.pageYOffset    || 
+        Fuse._docEl.scrollTop ||
+        Fuse._body.scrollTop  || 0;
     }
 
     function within(element, x, y) {
@@ -129,7 +129,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    if (doc.getElementsByClassName) return;
+    if (Fuse._doc.getElementsByClassName) return;
 
     function iter(name) {
       return name.blank() ? null : '[contains(concat(" ", @class, " "), " ' + name + ' ")]';
@@ -139,7 +139,7 @@
       function(element, className) {
         className = className.toString().strip();
         var cond = /\s/.test(className) ? $w(className).map(iter).join('') : iter(className);
-        return cond ? doc._getElementsByXPath('.//*' + cond, element) : [];
+        return cond ? Fuse._doc._getElementsByXPath('.//*' + cond, element) : [];
       } : 
       function(element, className) {
         className = className.toString().strip();
@@ -159,8 +159,8 @@
         return elements;
       };
 
-    doc.getElementsByClassName = function(className, parentElement) {
-      return $(parentElement || body).getElementsByClassName(className);
+    Fuse._doc.getElementsByClassName = function(className, parentElement) {
+      return $(parentElement || Fuse._body).getElementsByClassName(className);
     };
   })();
 

@@ -5,13 +5,13 @@
    * license.  Please see http://www.yui-ext.com/ for more information. */
 
   $$ = function() {
-    return Selector.findChildElements(doc, slice.call(arguments, 0));
+    return Selector.findChildElements(Fuse._doc, slice.call(arguments, 0));
   };
 
   if (Feature('XPATH')) {
-    doc._getElementsByXPath = function(expression, parentElement) {
+    Fuse._doc._getElementsByXPath = function(expression, parentElement) {
       parentElement = $(parentElement);
-      var results = [], ownerDoc = getOwnerDoc(parentElement);
+      var results = [], ownerDoc = getDocument(parentElement);
       var query = ownerDoc.evaluate(expression, parentElement || ownerDoc,
         null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
       for (var i = 0, length = query.snapshotLength; i < length; i++)
@@ -44,7 +44,7 @@
       // Make sure the browser treats the selector as valid. Test on an 
       // isolated element to minimize cost of this check.    
       try {
-        dummy.querySelector(this.expression);
+        Fuse._div.querySelector(this.expression);
       } catch(e) {
         return false;
       }
@@ -129,7 +129,7 @@
     }
 
     function findElements(root) {
-      root = root || doc;
+      root = root || Fuse._doc;
       var results, e = this.expression;
 
       switch (this.mode) {
@@ -147,7 +147,7 @@
 
           return results;
         case 'xpath':
-          return doc._getElementsByXPath(this.xpath, root);
+          return Fuse._doc._getElementsByXPath(this.xpath, root);
         default:
          return this.matcher(root);
       }
@@ -657,7 +657,7 @@
               targetNode = $(el); break;
             }
           }
-        } else targetNode = getOwnerDoc(root).getElementById(id || '');
+        } else targetNode = getDocument(root).getElementById(id || '');
 
         if (!targetNode) return [];
         if (!nodes && root.nodeType === 9) return [targetNode];

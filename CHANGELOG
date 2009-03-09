@@ -1,3 +1,14 @@
+* Large cleanup of code in preparation for the namespace rewrite. [jddalton]
+  - Add private method getNodeName() [David Mark, kangax]
+  - Rename private method getOwnerDoc() to getDocument()
+  - Move private variables body, doc, docEl, dummy, and root to the Fuse object as Fuse._body, Fuse._doc, Fuse._docEl, Fuse._div, Fuse._root
+  - Remove window onunload event handlers to enable bfcache
+  - Fix IE memory leak in the Event object
+  - Indicate methods are private by prefixing their name with an underscore
+  - Optimize the RegExp.specialChar.s fix
+  - Cleanup Try object
+  - Ensure elements are cached propertly, in IE, when created with a name/type attribute
+
 * unit test: Fix DOM test `testElementUpdateWithToElementMethod` check for html comments in Safari 2 and change the wording on some Event test error messages. [jddalton]
 
 * Add Object._extend() as a stripped down version of Object.extend() without any `DontEnum` fixes. [jddalton]

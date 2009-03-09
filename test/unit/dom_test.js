@@ -1464,16 +1464,24 @@ new Test.Unit.Runner({
       { 'id': 'my_input_field_id', 'name': 'my_input_field' }));
     this.assertEqual(input, document.body.lastChild);
     this.assertEqual('my_input_field', $(document.body.lastChild).name);
-    
+
     // TODO: Fix IE7 and lower bug in getElementById()
     if (Fuse.Browser.Agent.IE && $('my_input_field'))
       this.assertMatch(/name=["']?my_input_field["']?/, $('my_input_field').outerHTML);
+
+    // cleanup
+    $('my_input_field_id').remove();
     
+    // ensure name attribute case is respected even when
+    // a  similar element has been cached.
+    input = new Element('input', { 'name': 'MY_INPUT_FIELD' });
+    this.assertEqual('MY_INPUT_FIELD', input.name, 'Attribute did not respect case.');
+
     if (originalElement && Fuse.Browser.Feature('ELEMENT_EXTENSIONS')) {
       Element.prototype.fooBar = Fuse.emptyFunction
       this.assertRespondsTo('fooBar', new Element('div'));
     }
-    
+
     // test IE setting "type" property of newly created button/input elements
     var form  = $('write_attribute_form'),
      input = $('write_attribute_input');

@@ -165,7 +165,7 @@
 
 		if (position === 'fixed' || (BODY_OFFSETS_INHERIT_ITS_MARGINS &&
 		    position === 'absolute' && offsetParent &&
-		    offsetParent.tagName.toUpperCase() === 'BODY')) {
+		    getNodeName(offsetParent) === 'BODY')) {
 		  break;
 		}
       } while (element = offsetParent);
@@ -175,21 +175,21 @@
     function cumulativeScrollOffset(element, onlyAncestors) {
       element = $(element);
       var original = element, valueT = 0, valueL = 0,
-       tagName = element.tagName.toUpperCase();
-       rootTag = root.tagName.toUpperCase();
+       nodeName = getNodeName(element);
+       rootNodeName = getNodeName(Fuse._root);
 
       do {
         valueT += element.scrollTop  || 0;
         valueL += element.scrollLeft || 0;
 
-		if (element.tagName.toUpperCase() === rootTag ||
-		    Element.getStyle(element, 'position') === 'fixed') {
-	      break;
-		}
-		element = element.parentNode;
+		    if (getNodeName(element) === rootNodeName ||
+		      Element.getStyle(element, 'position') === 'fixed') {
+	        break;
+		    }
+		    element = element.parentNode;
       } while (element && element.nodeType === 1);
 
-      if (onlyAncestors || (tagName === 'TEXTAREA' || tagName === 'INPUT')) {
+      if (onlyAncestors || (nodeName === 'TEXTAREA' || nodeName === 'INPUT')) {
         valueT -= original.scrollTop  || 0;
         valueL -= original.scrollLeft || 0;
       }
@@ -204,23 +204,23 @@
         valueT += element.offsetTop  || 0;
         valueL += element.offsetLeft || 0;
         element = Element._getRealOffsetParent(element);
-      } while (element && element.tagName.toUpperCase() !== 'BODY' &&
-        Element.getStyle(element, 'position') === 'static');
+      } while (element && getNodeName(element) !== 'BODY' &&
+          Element.getStyle(element, 'position') === 'static');
 
       return Element._returnOffset(valueL, valueT);
     }
 
     var viewportOffset = (function(forElement) {
       if (Feature('ELEMENT_BOUNDING_CLIENT_RECT')) {
-        var backup = docEl.style.cssText;
-        docEl.style.cssText += ';margin:0';
+        var backup = Fuse._docEl.style.cssText;
+        Fuse._docEl.style.cssText += ';margin:0';
 
         // IE window's upper-left is at 2,2 (pixels) with respect
         // to the true client, so its pad.left and pad.top will be 2.
-        var rect = docEl.getBoundingClientRect(), pad = { 'left': 0, 'top': 0 };
+        var rect = Fuse._docEl.getBoundingClientRect(), pad = { 'left': 0, 'top': 0 };
         if (Feature('ELEMENT_CLIENT_COORDS'))
-          pad = { 'left': docEl.clientLeft, 'top': docEl.clientTop };
-        docEl.style.cssText = backup;
+          pad = { 'left': Fuse._docEl.clientLeft, 'top': Fuse._docEl.clientTop };
+        Fuse._docEl.style.cssText = backup;
 
         return function(element) {
           element = $(element);

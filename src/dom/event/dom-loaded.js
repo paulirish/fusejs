@@ -21,8 +21,8 @@
 
     function fireDomLoadedEvent() {
       clearPoller();
-      if (doc.loaded) return;
-      return Event.fire(doc, 'dom:loaded');
+      if (Fuse._doc.loaded) return;
+      return Event.fire(Fuse._doc, 'dom:loaded');
     }
 
     function checkCssAndFire() {
@@ -30,8 +30,8 @@
     }
 
     function getSheetElements() {
-      var i = 0, link, links = doc.getElementsByTagName('LINK'),
-       results = nodeListSlice(doc.getElementsByTagName('STYLE'));
+      var i = 0, link, links = Fuse._doc.getElementsByTagName('LINK'),
+       results = nodeListSlice(Fuse._doc.getElementsByTagName('STYLE'));
       while (link = links[i++]) results.push(link);
       return results;
     }
@@ -53,10 +53,10 @@
     var pollerID,
 
     checkDomLoadedState = function(event) {
-      if (doc.loaded) clearPoller();
+      if (Fuse._doc.loaded) clearPoller();
       else if (event && event.type === 'DOMContentLoaded' ||
-          /loaded|complete/.test(doc.readyState)) {
-        doc.stopObserving('readystatechange', respondToReadyState);
+          /loaded|complete/.test(Fuse._doc.readyState)) {
+        Fuse._doc.stopObserving('readystatechange', respondToReadyState);
         if (!checkCssAndFire()) createPoller(checkCssAndFire);
       }
     },
@@ -171,12 +171,12 @@
                       if (rules.length === 1) continue;
 
                       if (!c.div) {
-                        c.div = doc.createElement('div');
+                        c.div = Fuse._doc.createElement('div');
                         c.div.className = c.className;
                         c.div.style.cssText = 'position:absolute;visibility:hidden;';
                       }
 
-                      doc.body.appendChild(c.div);
+                      Fuse._doc.body.appendChild(c.div);
 
                       // when loaded clear cache entry
                       if (getStyle(c.div, 'marginTop') === '-1234px')
@@ -184,7 +184,7 @@
 
                       // cleanup
                       removeRule(c.sheet, lastIndex);
-                      doc.body.removeChild(c.div);
+                      Fuse._doc.body.removeChild(c.div);
                     }
                   }
 
@@ -207,18 +207,15 @@
       // Diego Perini's IEContentLoaded
       // http://javascript.nwbox.com/IEContentLoaded/
       checkDomLoadedState = function() {
-        try { docEl.doScroll('left') } catch(e) { return }
+        try { Fuse._docEl.doScroll('left') } catch(e) { return }
         fireDomLoadedEvent();
       };
     }
     else if (Feature('ELEMENT_ADD_EVENT_LISTENER'))
-      doc.observe('DOMContentLoaded', respondToReadyState);
+      Fuse._doc.observe('DOMContentLoaded', respondToReadyState);
 
     // remove poller if other options are available
-    doc.observe('readystatechange', respondToReadyState);
-
-    // stop poller onunload because it may reference cleared variables
-    Event.observe(global, 'unload', clearPoller);
+    Fuse._doc.observe('readystatechange', respondToReadyState);
 
     // worst case create poller and window onload observer
     createPoller(checkDomLoadedState);

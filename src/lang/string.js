@@ -23,23 +23,23 @@
   (function() {
     var __replace = String.prototype.replace;
 
+    function _prepareReplacement(replacement) {
+      if (typeof replacement === 'function')
+        return function() { return replacement(slice.call(arguments, 0, -2)) };
+      var template = new Template(replacement);
+      return function() { return template.evaluate(slice.call(arguments, 0, -2)) };
+    }
+
     function gsub(pattern, replacement) {
       if (!Object.isRegExp(pattern))
         pattern = new RegExp(RegExp.escape(String(pattern)), 'g');
       if (!pattern.global)
         pattern = pattern.clone({ 'global': true });
-      return this.replace(pattern, prepareReplacement(replacement));
+      return this.replace(pattern, _prepareReplacement(replacement));
     }
 
     function interpolate(object, pattern) {
       return new Template(this, pattern).evaluate(object);
-    }
-
-    function prepareReplacement(replacement) {
-      if (typeof replacement === 'function')
-        return function() { return replacement(slice.call(arguments, 0, -2)) };
-      var template = new Template(replacement);
-      return function() { return template.evaluate(slice.call(arguments, 0, -2)) };
     }
 
     // based on work by Dean Edwards
@@ -80,7 +80,7 @@
           pattern = new RegExp(RegExp.escape(String(pattern)));
         if (pattern.global)
           pattern = pattern.clone({ 'global': false });
-        return this.replace(pattern, prepareReplacement(replacement));
+        return this.replace(pattern, _prepareReplacement(replacement));
       }
 
       if (typeof replacement !== 'function') {
@@ -321,14 +321,14 @@
   /*--------------------------------------------------------------------------*/
 
   Object._extend(String.prototype, (function() {
-    var container = doc.createElement('pre'),
-     textNode = container.appendChild(doc.createTextNode(''));
+    var container = Fuse._doc.createElement('pre'),
+     textNode = container.appendChild(Fuse._doc.createTextNode(''));
 
     // Safari 2.x has issues with escaping html inside a "pre"
     // element so we use the deprecated "xmp" element instead.
     if ((textNode.data = '&') && container.innerHTML !== '&amp;') {
-      container = doc.createElement('xmp');
-      textNode = container.appendChild(doc.createTextNode(''));
+      container = Fuse._doc.createElement('xmp');
+      textNode = container.appendChild(Fuse._doc.createTextNode(''));
     }
 
     var escapeHTML = function() {
@@ -337,8 +337,8 @@
     },
 
     unescapeHTML = function() {
-      dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-      return dummy.textContent;
+      Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+      return Fuse._div.textContent;
     };
 
     // Safari 3.x has issues with escaping the ">" character
@@ -350,29 +350,29 @@
     }
 
     if (!Feature('ELEMENT_TEXT_CONTENT')) {
-      dummy.innerHTML = '<pre>&lt;span&gt;test&lt;/span&gt;</pre>';
-      if (Feature('ELEMENT_INNER_TEXT') && dummy.firstChild.innerText === '<span>test</span>') {
+      Fuse._div.innerHTML = '<pre>&lt;span&gt;test&lt;/span&gt;</pre>';
+      if (Feature('ELEMENT_INNER_TEXT') && Fuse._div.firstChild.innerText === '<span>test</span>') {
         unescapeHTML = function() {
-          dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-          return dummy.firstChild.innerText.replace(/\r/g, '');
+          Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+          return Fuse._div.firstChild.innerText.replace(/\r/g, '');
         };
       }
-      else if (dummy.firstChild.innerHTML === '<span>test</span>') {
+      else if (Fuse._div.firstChild.innerHTML === '<span>test</span>') {
         unescapeHTML = function() {
-          dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-          return dummy.firstChild.innerHTML;
+          Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+          return Fuse._div.firstChild.innerHTML;
         };
       } else {
         unescapeHTML = function() {
-          dummy.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+          Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
           var node, i = 0, results = [];
-          while (node = dummy.firstChild.childNodes[i++])
+          while (node = Fuse._div.firstChild.childNodes[i++])
             results.push(node.nodeValue);
           return results.join('');
         };
       }
-      // cleanup dummy
-      dummy.innerHTML = '';
+      // cleanup Fuse._div
+      Fuse._div.innerHTML = '';
     }
 
     return {

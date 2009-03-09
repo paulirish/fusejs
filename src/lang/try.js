@@ -2,15 +2,14 @@
 
   Try = (function() {
     function these() {
-      var returnValue;
-      for (var i = 0, length = arguments.length; i < length; i++) {
-        var lambda = arguments[i];
+      var result, length = arguments.length;
+      while (i < length) {
         try {
-          returnValue = lambda();
+          result = arguments[i++]();
           break;
         } catch (e) { }
       }
-      return returnValue;
+      return result;
     }
 
     return {

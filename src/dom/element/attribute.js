@@ -143,14 +143,14 @@
 
     // capability checks
     (function() {
-      var node, value, form = doc.createElement('form'),
-       label = doc.createElement('label'),
-       button = doc.createElement('button');
+      var node, value, form = Fuse._doc.createElement('form'),
+       label  = Fuse._doc.createElement('label'),
+       button = Fuse._doc.createElement('button');
 
       label.htmlFor = label.className = 'test';
       label.setAttribute('style', 'display:block');
       form.setAttribute('encType', 'multipart/form-data');
-      button.appendChild(doc.createTextNode('inside value'));
+      button.appendChild(Fuse._doc.createTextNode('inside value'));
       button.setAttribute('value', 'test');
 
       // translate content name `htmlFor`

@@ -3,22 +3,22 @@
   (function() {
     function createCommentTest(conditional) {
       return function() {
-        dummy.innerHTML = '<span>a</span><!--b-->';
-        var result = conditional(dummy);
-        dummy.innerHTML = '';
+        Fuse._div.innerHTML = '<span>a</span><!--b-->';
+        var result = conditional(Fuse._div);
+        Fuse._div.innerHTML = '';
         return result;
       };
     }
 
     function createInnerHTMLTest(source, innerHTML) {
       return function() {
-        dummy.innerHTML = source;
-        var result = true, element = dummy.firstChild;
+        Fuse._div.innerHTML = source;
+        var result = true, element = Fuse._div.firstChild;
         try {
           result = (element.innerHTML = innerHTML) &&
             element.innerHTML.toLowerCase() !== innerHTML;
         } catch(e) { }
-        dummy.innerHTML = '';
+        Fuse._div.innerHTML = '';
         return result;
       };
     }
@@ -40,15 +40,9 @@
     }
 
     Feature = Fuse.Browser.Feature = createTester((function() {
-      function ARRAY_SLICE_THIS_AS_NODELIST() {
-        // true for all but IE
-        try { return !!slice.call(docEl.childNodes, 0)[0] }
-        catch(e) { return false }
-      }
-
       function CREATE_ELEMENT_WITH_HTML() {
         try { // true for IE
-          var div = doc.createElement('<div id="test">');
+          var div = Fuse._doc.createElement('<div id="test">');
           return div.id === 'test';
         } catch(e) {
           return false;
@@ -57,48 +51,48 @@
 
       function DOCUMENT_ALL_COLLECTION() {
         // true for all but Firefox
-        return isHostObject(doc, 'all');
+        return isHostObject(Fuse._doc, 'all');
       }
 
       function DOCUMENT_CREATE_EVENT() {
         // true for all but IE
-        return isHostObject(doc, 'createEvent');
+        return isHostObject(Fuse._doc, 'createEvent');
       }
 
       function DOCUMENT_CREATE_EVENT_OBJECT() {
         // true for IE
-        return isHostObject(doc, 'createEventObject')
+        return isHostObject(Fuse._doc, 'createEventObject')
       }
 
       function DOCUMENT_RANGE(){
         // true for all but IE
-        return isHostObject(doc, 'createRange');
+        return isHostObject(Fuse._doc, 'createRange');
       }
 
       function DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT() {
         if (Feature('DOCUMENT_RANGE'))
-          return isHostObject(doc.createRange(), 'createContextualFragment');
+          return isHostObject(Fuse._doc.createRange(), 'createContextualFragment');
       }
 
       function DOCUMENT_STYLE_SHEETS_COLLECTION() {
         // true for all so far
-        return isHostObject(doc, 'styleSheets');
+        return isHostObject(Fuse._doc, 'styleSheets');
       }
 
       function ELEMENT_ADD_EVENT_LISTENER() {
         // true for all but IE
-        return isHostObject(doc, 'addEventListener');
+        return isHostObject(Fuse._doc, 'addEventListener');
       }
 
       function ELEMENT_ATTACH_EVENT() {
         // true for IE
-        return isHostObject(doc, 'attachEvent') &&
+        return isHostObject(Fuse._doc, 'attachEvent') &&
           !Feature('ELEMENT_ADD_EVENT_LISTENER');
       }
 
       function ELEMENT_BOUNDING_CLIENT_RECT() {
         // true for IE, Firefox 3
-        return isHostObject(docEl, 'getBoundingClientRect');
+        return isHostObject(Fuse._docEl, 'getBoundingClientRect');
       }
 
       function ELEMENT_CLASS() {
@@ -109,34 +103,34 @@
 
       function ELEMENT_CLIENT_COORDS() {
         // true for IE
-        return typeof docEl.clientLeft === 'number';
+        return typeof Fuse._docEl.clientLeft === 'number';
       }
 
       function ELEMENT_COMPUTED_STYLE() {
         // true for all but IE
-        return isHostObject(doc, 'defaultView') &&
-          isHostObject(doc.defaultView, 'getComputedStyle');
+        return isHostObject(Fuse._doc, 'defaultView') &&
+          isHostObject(Fuse._doc.defaultView, 'getComputedStyle');
       }
 
       function ELEMENT_COMPARE_DOCUMENT_POSITION() {
         // true for Firefox and Opera 9.5+
-        return isHostObject(docEl, 'compareDocumentPosition');
+        return isHostObject(Fuse._docEl, 'compareDocumentPosition');
       }
 
       function ELEMENT_CURRENT_STYLE() {
         // true for IE
-        return isHostObject(docEl, 'currentStyle') &&
+        return isHostObject(Fuse._docEl, 'currentStyle') &&
           !Feature('ELEMENT_COMPUTED_STYLE');
       }
 
       function ELEMENT_DISPATCH_EVENT() {
         // true for all but IE
-        return isHostObject(docEl, 'dispatchEvent');
+        return isHostObject(Fuse._docEl, 'dispatchEvent');
       }
 
       function ELEMENT_DO_SCROLL() {
         // true for IE
-        return isHostObject(docEl, 'doScroll');
+        return isHostObject(Fuse._docEl, 'doScroll');
       }
 
       function ELEMENT_EXTENSIONS() {
@@ -146,17 +140,17 @@
 
       function ELEMENT_FIRE_EVENT() {
         // true for IE
-        return isHostObject(docEl, 'fireEvent');
+        return isHostObject(Fuse._docEl, 'fireEvent');
       }
 
       function ELEMENT_GET_ATTRIBUTE_IFLAG() {
         // true for IE
         var result = false;
         try {
-          dummy.setAttribute('align', 'center'); dummy.setAttribute('aLiGn', 'left');
-          result = (dummy.getAttribute('aLiGn') === 'center' &&
-            dummy.getAttribute('aLiGn', 1) === 'left');
-          dummy.removeAttribute('align'); dummy.removeAttribute('aLiGn');
+          Fuse._div.setAttribute('align', 'center'); Fuse._div.setAttribute('aLiGn', 'left');
+          result = (Fuse._div.getAttribute('aLiGn') === 'center' &&
+            Fuse._div.getAttribute('aLiGn', 1) === 'left');
+          Fuse._div.removeAttribute('align'); Fuse._div.removeAttribute('aLiGn');
         } catch(e) { }
         return result;
       }
@@ -164,31 +158,31 @@
       function ELEMENT_INNER_TEXT() {
         // true for IE
         return !Feature('ELEMENT_TEXT_CONTENT') &&
-          typeof dummy.innerText === 'string';
+          typeof Fuse._div.innerText === 'string';
       }
 
       function ELEMENT_MS_CSS_FILTERS() {
         // true for IE
-        return isHostObject(docEl, 'filters') &&
-          typeof docEl.style.filter === 'string';
+        return isHostObject(Fuse._docEl, 'filters') &&
+          typeof Fuse._docEl.style.filter === 'string';
       }
 
       function ELEMENT_REMOVE_NODE() {
         // true for IE
-        return isHostObject(docEl, 'removeNode');
+        return isHostObject(Fuse._docEl, 'removeNode');
       }
 
       function ELEMENT_SOURCE_INDEX() {
         // true for IE and Opera
-        return typeof docEl.sourceIndex === 'number';
+        return typeof Fuse._docEl.sourceIndex === 'number';
       }
 
       function ELEMENT_SPECIFIC_EXTENSIONS() {
         var result = false;
         if (isHostObject(global, 'HTMLHtmlElement') &&
             isHostObject(global.HTMLHtmlElement, 'prototype') &&
-            (docEl.constructor === HTMLHtmlElement || Feature('OBJECT_PROTO') &&
-            docEl['__proto__'] === HTMLHtmlElement.prototype)) {
+            (Fuse._docEl.constructor === HTMLHtmlElement || Feature('OBJECT_PROTO') &&
+            Fuse._docEl['__proto__'] === HTMLHtmlElement.prototype)) {
           result = true;
         } else result = Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO');
 
@@ -198,12 +192,12 @@
 
       function ELEMENT_TEXT_CONTENT() {
         // true for all but IE and Safari 2
-        return typeof dummy.textContent === 'string';
+        return typeof Fuse._div.textContent === 'string';
       }
 
       function EMULATE_ELEMENT_CLASSES_WITH_PROTO() {
         return Feature('OBJECT_PROTO') &&
-          dummy['__proto__'] !== docEl['__proto__'];
+          Fuse._div['__proto__'] !== Fuse._docEl['__proto__'];
       }
 
       function FUNCTION_TO_STRING_RETURNS_SOURCE() {
@@ -222,27 +216,27 @@
 
       function OBJECT_PROTO() {
         // true for Gecko and Webkit
-        return isHostObject(docEl, '__proto__') &&
+        return isHostObject(Fuse._docEl, '__proto__') &&
           [ ]['__proto__'] === Array.prototype  &&
           { }['__proto__'] === Object.prototype;
       }
 
       function SELECTORS_API() {
         // true for IE8, WebKit (Safari 3, Chrome)
-        return isHostObject(doc, 'querySelector') &&
-          isHostObject(doc, 'querySelectorAll') &&
-          isHostObject(docEl, 'querySelector') &&
-          isHostObject(docEl, 'querySelectorAll');
+        return isHostObject(Fuse._doc, 'querySelector') &&
+          isHostObject(Fuse._doc, 'querySelectorAll') &&
+          isHostObject(Fuse._docEl, 'querySelector') &&
+          isHostObject(Fuse._docEl, 'querySelectorAll');
       }
 
       function TYPEOF_NODELIST_IS_FUNCTION() {
         // true for WebKit
-        return typeof docEl.childNodes === 'function';
+        return typeof Fuse._docEl.childNodes === 'function';
       }
 
       function XPATH() {
         // true for all but IE
-        return isHostObject(doc, 'evaluate') &&
+        return isHostObject(Fuse._doc, 'evaluate') &&
           isHostObject(global, 'XPathResult') &&
           typeof XPathResult.ORDERED_NODE_SNAPSHOT_TYPE === 'number';
       }
@@ -250,32 +244,31 @@
       var ELEMENT_CHILDREN_NODELIST, ELEMENT_CONTAINS;
       (function() {
         // true for IE, Safari 3, Opera, Firefox 3+
-		    if (!isHostObject(docEl, 'children'))
+		    if (!isHostObject(Fuse._docEl, 'children'))
 		      ELEMENT_CHILDREN_NODELIST = false;
 
         // true for all but IE and Safari 2
-		    if (!isHostObject(docEl, 'contains'))
+		    if (!isHostObject(Fuse._docEl, 'contains'))
 		      ELEMENT_CONTAINS = false;
 
         // no need to test further is both failed
         if (ELEMENT_CHILDREN_NODELIST === false &&
           ELEMENT_CONTAINS === false) return;
 
-        dummy.innerHTML = '<div></div><div><div></div></div>';
+        Fuse._div.innerHTML = '<div></div><div><div></div></div>';
 
         // ensure children collection only contains direct descendants
         if (ELEMENT_CHILDREN_NODELIST !== false)
-          ELEMENT_CHILDREN_NODELIST = dummy.children.length === dummy.childNodes.length;
+          ELEMENT_CHILDREN_NODELIST = Fuse._div.children.length === Fuse._div.childNodes.length;
 
         // ensure element.contains() returns the correct results;
         if (ELEMENT_CONTAINS !== false)
-          ELEMENT_CONTAINS = !dummy.firstChild.contains(dummy.childNodes[1].firstChild);
+          ELEMENT_CONTAINS = !Fuse._div.firstChild.contains(Fuse._div.childNodes[1].firstChild);
 
-        dummy.innerHTML = '';
+        Fuse._div.innerHTML = '';
       })();
 
       return {
-        'ARRAY_SLICE_THIS_AS_NODELIST':              ARRAY_SLICE_THIS_AS_NODELIST,
         'CREATE_ELEMENT_WITH_HTML':                  CREATE_ELEMENT_WITH_HTML,
         'DOCUMENT_ALL_COLLECTION':                   DOCUMENT_ALL_COLLECTION,
         'DOCUMENT_CREATE_EVENT':                     DOCUMENT_CREATE_EVENT,
@@ -327,9 +320,9 @@
         // true for IE
         var node, clone;
         (node = document.createAttribute('name')).value = 'original';
-        dummy.setAttributeNode(node);
-        (clone = dummy.cloneNode(false)).setAttribute('name', 'cloned');
-        dummy.removeAttribute('name');
+        Fuse._div.setAttributeNode(node);
+        (clone = Fuse._div.cloneNode(false)).setAttribute('name', 'cloned');
+        Fuse._div.removeAttribute('name');
 
         return (node = clone.getAttributeNode('name')) &&
           node.value === 'original';
@@ -337,18 +330,18 @@
 
       function BODY_ACTING_AS_ROOT() {
         // true for IE Quirks, Opera 9.25
-        if (docEl.clientWidth === 0) return true;
+        if (Fuse._docEl.clientWidth === 0) return true;
 
-        var dms = dummy.style, bs = body.style, des = docEl.style,
+        var dms = Fuse._div.style, bs = Fuse._body.style, des = Fuse._docEl.style,
          bsBackup = bs.cssText, desBackup = des.cssText;
 
         bs.margin   = des.margin = '0';
         bs.height   = des.height = 'auto';
         dms.cssText = 'display:block;height:8500px;';
 
-        body.insertBefore(dummy, body.firstChild);
-        var result = docEl.clientHeight >= 8500;
-        body.removeChild(dummy);
+        Fuse._body.insertBefore(Fuse._div, Fuse._body.firstChild);
+        var result = Fuse._docEl.clientHeight >= 8500;
+        Fuse._body.removeChild(Fuse._div);
 
         bs.cssText  = bsBackup;
         des.cssText = desBackup;
@@ -359,23 +352,23 @@
 
       function BODY_OFFSETS_INHERIT_ITS_MARGINS() {
         // true for Safari
-        var backup = body.style.cssText || '';
-        body.style.cssText += ';position:absolute;top:0;margin:1px 0 0 0;';
-        var result = body.offsetTop === 1;
-        body.style.cssText = backup;
+        var backup = Fuse._body.style.cssText || '';
+        Fuse._body.style.cssText += ';position:absolute;top:0;margin:1px 0 0 0;';
+        var result = Fuse._body.offsetTop === 1;
+        Fuse._body.style.cssText = backup;
         return result;
       }
 
       function ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO() {
         if (Feature('ELEMENT_COMPUTED_STYLE')) {
           // true for Opera
-          var result, s = docEl.style, backup = s.cssText;
+          var result, s = Fuse._docEl.style, backup = s.cssText;
           s.position = 'static';
           s.top = s.left = '';
 
-          var style = doc.defaultView.getComputedStyle(docEl, null);
+          var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null);
           result = (style && style.top === '0px' && style.left === '0px');
-          docEl.style.cssText = backup;
+          Fuse._docEl.style.cssText = backup;
           return result;
         }
       }
@@ -383,11 +376,11 @@
       function ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX() {
         if (Feature('ELEMENT_COMPUTED_STYLE')) {
           // true for Opera 9.2x
-          var backup = docEl.style.paddingBottom;
-          docEl.style.paddingBottom = '1px';
-          var style = doc.defaultView.getComputedStyle(docEl, null),
-           result = style && (parseInt(style.height) || 0) ===  docEl.offsetHeight;
-          docEl.style.paddingBottom = backup;
+          var backup = Fuse._docEl.style.paddingBottom;
+          Fuse._docEl.style.paddingBottom = '1px';
+          var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null),
+           result = style && (parseInt(style.height) || 0) ===  Fuse._docEl.offsetHeight;
+          Fuse._docEl.style.paddingBottom = backup;
           return result;
         }
       }
@@ -395,34 +388,34 @@
       function ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN() {
         if (Feature('ELEMENT_COMPUTED_STYLE')) {
           // true for Opera
-          var backup = docEl.style.display;
-          docEl.style.display = 'none';
+          var backup = Fuse._docEl.style.display;
+          Fuse._docEl.style.display = 'none';
 
           // Safari 2: getComputedStyle() will return null
           // for elements with style display:none
-          var style = doc.defaultView.getComputedStyle(docEl, null),
+          var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null),
            result = style && style.height === '0px';
 
-          docEl.style.display = backup;
+          Fuse._docEl.style.display = backup;
           return result;
         }
       }
 
       function ELEMENT_PROPERTIES_ARE_ATTRIBUTES() {
         // true for IE
-        dummy.__attrAsExpandoProps = 'something';
-        var result = dummy.getAttribute('__attrAsExpandoProps') === 'something';
-        dummy.removeAttribute('__propertiesAreAttributes');
-        if (typeof dummy.__propertiesAreAttributes !== 'undefined')
-          delete dummy.__propertiesAreAttributes;
+        Fuse._div.__attrAsExpandoProps = 'something';
+        var result = Fuse._div.getAttribute('__attrAsExpandoProps') === 'something';
+        Fuse._div.removeAttribute('__propertiesAreAttributes');
+        if (typeof Fuse._div.__propertiesAreAttributes !== 'undefined')
+          delete Fuse._div.__propertiesAreAttributes;
         return result;
       }
 
       function ELEMENT_TABLE_INNERHTML_INSERTS_TBODY() {
         // true for IE and Firefox 3
-        dummy.innerHTML = '<table><tr><td></td></tr></table>';
-        var result = dummy.firstChild.firstChild.tagName.toUpperCase() === 'TBODY';
-        dummy.innerHTML = '';
+        Fuse._div.innerHTML = '<table><tr><td></td></tr></table>';
+        var result = getNodeName(Fuse._div.firstChild.firstChild) === 'TBODY';
+        Fuse._div.innerHTML = '';
         return result;
       }
 
@@ -437,10 +430,10 @@
         // case-insensitively in quirks mode.
         var result = false;
         if (Feature('SELECTORS_API')) {
-          dummy.id = 'fusejs_test_id';
-          dummy.innerHTML = '<span class="Test"></span>';
-          result = dummy.querySelector('#fusejs_test_id .test') !== null;
-          dummy.id = dummy.innerHTML = '';
+          Fuse._div.id = 'fusejs_test_id';
+          Fuse._div.innerHTML = '<span class="Test"></span>';
+          result = Fuse._div.querySelector('#fusejs_test_id .test') !== null;
+          Fuse._div.id = Fuse._div.innerHTML = '';
         }
         return result;
       }

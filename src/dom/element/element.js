@@ -7,7 +7,7 @@
       return elements;
     }
     if (typeof element === 'string')
-      element = doc.getElementById(element || '');
+      element = Fuse._doc.getElementById(element || '');
     return Element.extend(element);
   };
 
@@ -21,14 +21,16 @@
     var original = global.Element;
 
     function createElement(tagName, attributes) {
-      tagName = tagName.toLowerCase();
       if (!Element.cache[tagName])
-        Element.cache[tagName] = Element.extend(doc.createElement(tagName));
+        Element.cache[tagName] = Element.extend(Fuse._doc.createElement(tagName));
       return Element.writeAttribute(Element.cache[tagName]
         .cloneNode(false), attributes);
     }
 
-    global.Element = createElement;
+    global.Element = function(tagName, attributes) {
+      return createElement(tagName.toUpperCase(), attributes);
+    };
+
     if (Feature('CREATE_ELEMENT_WITH_HTML')) {
       global.Element = function(tagName, attributes) {
         // setAttribute is broken in IE when setting name and type attributes
@@ -38,7 +40,7 @@
            (attributes.name ? ' name="' + attributes.name + '"' : '') +
             (attributes.type ? ' type="' + attributes.type + '"' : '') + '>';
           delete attributes.name; delete attributes.type;
-        }
+        } else tagName = tagName.toUpperCase();
         return createElement(tagName, attributes);
       };
     }
@@ -59,7 +61,7 @@
   Element.extend = (function() {
     var Methods, ByTag, revision = 0;
 
-    function createRevisionGetter(r) {
+    function _createRevisionGetter(r) {
       return function() { return r };
     }
 
@@ -72,9 +74,9 @@
         !element.ownerDocument.body) return element;
 
       var pair,
-       tagName = element.tagName.toUpperCase(),
-       methods = ByTag[tagName] || Methods,
-       length  = methods.length;
+       nodeName = getNodeName(element),
+       methods  = ByTag[nodeName] || Methods,
+       length   = methods.length;
 
       while (length--) {
         pair = methods[length];
@@ -83,7 +85,7 @@
       }
 
       // avoid using Fuse.K.curry(revision) for speed
-      element._extendedByFuse = createRevisionGetter(revision);
+      element._extendedByFuse = _createRevisionGetter(revision);
 
       return element;
     }
@@ -115,7 +117,7 @@
     if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
       return Object._extend(function(element) {
         return (element && element.ownerDocument &&
-          element.ownerDocument !== doc) ? extend(element) : element;
+          element.ownerDocument !== Fuse._doc) ? extend(element) : element;
       }, { 'refresh': refresh });
     }
 
@@ -128,7 +130,7 @@
     if (Feature('OBJECT_PROTO') && !Feature('HTML_ELEMENT_CLASS')) {
       Feature.set('HTML_ELEMENT_CLASS', true);
       Feature.set('ELEMENT_EXTENSIONS', true);
-      emulateDOMClass('HTMLElement');
+      _emulateDOMClass('HTMLElement');
     }
 
     var tagNameClassLookup = {
@@ -171,19 +173,7 @@
       global.HTMLElement.prototype : Feature('ELEMENT_CLASS') ?
         global.Element.prototype : false;
 
-    function emulateDOMClass(className) {
-      (global[className] = { }).prototype = dummy['__proto__'];
-      return global[className];
-    }
-
-    function extend(tagName, methods) {
-      tagName = tagName.toUpperCase();
-      if (!Element.Methods.ByTag[tagName])
-        Element.Methods.ByTag[tagName] = { };
-      Object.extend(Element.Methods.ByTag[tagName], methods);
-    }
-
-    function copy(methods, destination, onlyIfAbsent) {
+    function _copy(methods, destination, onlyIfAbsent) {
       onlyIfAbsent = onlyIfAbsent || false;
       Object._each(methods, function(value, key) {
         if (typeof value === 'function' && 
@@ -192,7 +182,19 @@
       });
     }
 
-    function findDOMClass(tagName) {
+    function _emulateDOMClass(className) {
+      (global[className] = { }).prototype = Fuse._div['__proto__'];
+      return global[className];
+    }
+
+    function _extend(tagName, methods) {
+      tagName = tagName.toUpperCase();
+      if (!Element.Methods.ByTag[tagName])
+        Element.Methods.ByTag[tagName] = { };
+      Object.extend(Element.Methods.ByTag[tagName], methods);
+    }
+
+    function _findDOMClass(tagName) {
       var className = 'HTML' + (tagNameClassLookup[tagName] ||
         tagName.capitalize()) + 'Element';
       if (global[className])
@@ -201,7 +203,7 @@
       if (global[className])
         return global[className];
       if (EMULATE_ELEMENT_CLASSES_WITH_PROTO)
-        return emulateDOMClass(className);
+        return _emulateDOMClass(className);
     }
 
     return function(methods) {
@@ -228,21 +230,21 @@
         Object.extend(Element.Methods, methods);
       else {
         Object.isArray(tagName)
-          ? tagName._each(function(name) { extend(name, methods) })
-          : extend(tagName, methods);
+          ? tagName._each(function(name) { _extend(name, methods) })
+          : _extend(tagName, methods);
       }
 
       if (Feature('ELEMENT_EXTENSIONS')) {
-        copy(Element.Methods, elementPrototype);
-        copy(Element.Methods.Simulated, elementPrototype, true);
+        _copy(Element.Methods, elementPrototype);
+        _copy(Element.Methods.Simulated, elementPrototype, true);
       }
 
       if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
         var klass, tagName, infiniteRevision = function() { return Infinity };
         for (tagName in Element.Methods.ByTag) {
-          klass = findDOMClass(tagName);
+          klass = _findDOMClass(tagName);
           if (typeof klass === 'undefined') continue;
-          copy(T[tagName], klass.prototype);
+          _copy(T[tagName], klass.prototype);
         }
         elementPrototype._extendedByFuse = infiniteRevision;
       }
@@ -284,18 +286,18 @@
 
       // IE throws an error if the element is not in the document.
       if (Element.isFragment(element) || !element.offsetParent)
-        return Element.extend(getOwnerDoc(element).body);
+        return Element.extend(getDocument(element).body);
 
-      var tagName;
+      var nodeName;
       while (element = element.offsetParent) {
         /* http://www.w3.org/TR/cssom-view/#offset-attributes */
-        tagName = element.tagName;
-        if (/^(html|body)$/i.test(tagName)) break;
-        if (/^(table|td|th)$/i.test(tagName) ||
+        nodeName = getNodeName(element);
+        if (nodeName === 'BODY'  || nodeName === 'HTML') break;
+        if (nodeName === 'TABLE' || nodeName === 'TD' || nodeName === 'TH' ||
             Element.getStyle(element, 'position') !== 'static')
           return Element.extend(element);
       }
-      return Element.extend(getOwnerDoc(element).body);
+      return Element.extend(getDocument(element).body);
     }
 
     function identify(element) {
@@ -311,7 +313,7 @@
 
     function inspect(element) {
       element = $(element);
-      var attribute, value, result = '<' + element.tagName.toLowerCase(),
+      var attribute, value, result = '<' + element.nodeName.toLowerCase(),
        translation = { 'id':'id', 'className':'class' };
 
       for (var property in translation) {
@@ -324,9 +326,9 @@
 
     function insert(element, insertions) {
       element = $(element);
-      var content, fragment, insertContent, position, tagName, type = typeof insertions;
+      var content, fragment, insertContent, position, nodeName, type = typeof insertions;
       if (insertions && (type === 'string' || type === 'number' ||
-          isInsertable(insertions) || insertions.toElement || insertions.toHTML)) {
+          _isInsertable(insertions) || insertions.toElement || insertions.toHTML)) {
         insertions = { 'bottom':insertions };
       }
 
@@ -337,7 +339,7 @@
 
         if (content) {
           if (content.toElement) content = content.toElement();
-          if (isInsertable(content)) {
+          if (_isInsertable(content)) {
             insertContent(element, content);
             continue;
           }
@@ -345,10 +347,10 @@
         }
         else continue;
 
-        tagName = ((position === 'before' || position === 'after')
-          ? element.parentNode : element).tagName.toUpperCase();
+        nodeName = getNodeName(position === 'before' || position === 'after'
+          ? element.parentNode : element);
 
-        fragment = Element._getContentFromAnonymousElement(element.ownerDocument, tagName, content.stripScripts());
+        fragment = Element._getContentFromAnonymousElement(element.ownerDocument, nodeName, content.stripScripts());
         insertContent(element, fragment);
         content.evalScripts.bind(content).defer();
       }
@@ -392,10 +394,10 @@
         return element.parentNode.removeChild(element);
       if (content.toElement)
         content = content.toElement();
-      else if (!isInsertable(content)) {
+      else if (!_isInsertable(content)) {
         content = Object.toHTML(content);
         content.evalScripts.bind(content).defer();
-        content = createContextualFragment(element, content.stripScripts());
+        content = _createContextualFragment(element, content.stripScripts());
       }
       return element.parentNode.replaceChild(content, element);
     }
@@ -421,7 +423,7 @@
       return wrapper;
     }
 
-    var createContextualFragment = Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT') ?
+    var _createContextualFragment = Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT') ?
       function(element, content) {
         var range = element.ownerDocument.createRange();
         range.selectNode(element);
@@ -429,8 +431,16 @@
       } :
       function(element, content) {
         return Element._getContentFromAnonymousElement(element.ownerDocument,
-          element.parentNode.tagName.toUpperCase(), content);
+          getNodeName(element.parentNode), content);
       },
+
+    _isInsertable = (function() {
+      // comment, document fragment, document type, element, and text nodes are insertable
+      var insertable = { '1':1, '3':1, '8':1, '10':1, '11':1 };
+      return function(node) {
+        return insertable[node.nodeType] === 1;
+      }
+    })(),
 
     isFragment = Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION') ?
       function (element) {
@@ -444,15 +454,7 @@
         var nodeType = element.nodeType;
         return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
           Element.descendantOf(element, element.ownerDocument)));
-      },
-
-    isInsertable = (function() {
-      // comment, document fragment, document type, element, and text nodes are insertable
-      var insertable = { '1':1, '3':1, '8':1, '10':1, '11':1 };
-      return function(node) {
-        return insertable[node.nodeType] === 1;
-      }
-    })(),
+      };
 
     update = Bug('ELEMENT_SELECT_INNERHTML_BUGGY') ||
              Bug('ELEMENT_TABLE_INNERHTML_BUGGY')  ||
@@ -460,8 +462,8 @@
 
       function(element, content) {
         element = $(element);
-        var tagName = element.tagName.toUpperCase(),
-         isBuggy = Element._insertionTranslations.tags[tagName];
+        var nodeName = getNodeName(element),
+         isBuggy = Element._insertionTranslations.tags[nodeName];
 
         // remove children
         if (isBuggy) {
@@ -471,11 +473,11 @@
 
         if (content) {
           if (content.toElement) content = content.toElement();
-          if (isInsertable(content)) element.appendChild(content);
+          if (_isInsertable(content)) element.appendChild(content);
           else {
             content = Object.toHTML(content);
             if (isBuggy)
-              element.appendChild(Element._getContentFromAnonymousElement(element.ownerDocument, tagName, content.stripScripts()));
+              element.appendChild(Element._getContentFromAnonymousElement(element.ownerDocument, nodeName, content.stripScripts()));
             else element.innerHTML = content.stripScripts();
             content.evalScripts.bind(content).defer();
           }
@@ -487,7 +489,7 @@
         if (content) {
           if (content.toElement)
             content = content.toElement();
-          if (isInsertable(content)) {
+          if (_isInsertable(content)) {
             element.innerHTML = '';
             element.appendChild(content);
             return element;

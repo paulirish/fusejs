@@ -2,15 +2,15 @@
 (function(global) {
 
   // Host objects have a range of typeof values. For example:
-  // doc.createElement('div').offsetParent -> unknown
-  // doc.createElement -> object
+  // document.createElement('div').offsetParent -> unknown
+  // document.createElement -> object
   function isHostObject(object, property) {
     var type = typeof object[property];
     return type === 'function' || type === 'object' || type === 'unknown';
   }
 
-  function getOwnerDoc(element) { // assume element is not null
-    return element.ownerDocument || (element.nodeType === 9 ? element : doc);
+  function getDocument(element) { // assume element is not null
+    return element.ownerDocument || (element.nodeType === 9 ? element : Fuse._doc);
   }
 
   function concatList(list, other) {
@@ -24,18 +24,43 @@
     while (length--) result[1 + length] = list[length];
     return result;
   }
-  
-  var Feature, Bug, body, root,
-   doc   = document,
-   docEl = doc.documentElement,
-   dummy = doc.createElement('div'),
+
+  var Bug, Feature,
    slice = Array.prototype.slice,
    userAgent = global.navigator.userAgent,
    nodeListSlice = slice;
 
-  /*---------------------------- PROTOTYPE OBJECT ----------------------------*/
+  var getNodeName = document.documentElement.nodeName === 'HTML'
+    ? function(element) { return element.nodeName }
+    : function(element) { return element.nodeName.toUpperCase() };
+
+  try {
+    if (false === !!slice.call(document.documentElement.childNodes, 0)[0])
+      throw true;
+  } catch(e) {
+    // IE throws an error when passing a nodeList to slice.call()
+    // Safari 2 will return a full array with undefined values
+    nodeListSlice = function(begin, end) {
+      // 1) Avoid the length property, it might be an element with an id/name of `length`.
+      // 2) IE8 throws an error when accessing a non-existant item of a StaticNodeList.
+      // 3) Safari 2 returns null when accessing a non-existant item.
+      var i = 0, results = [];
+      while (typeof this[i] === 'object' && this[i])
+        results[i] = this[i++];
+      return !begin && arguments.length < 2 ?
+        results : results.slice(begin, end);
+    };
+  }
+
+  /*---------------------------- FUSE OBJECT ---------------------------------*/
 
   Fuse = {
+    '_body':  { },
+    '_root':  { },
+    '_div':   document.createElement('div'),
+    '_doc':   document,
+    '_docEl': document.documentElement,
+
     Browser: {
       Agent: {
         'IE':     isHostObject(global, 'attachEvent') && userAgent.indexOf('Opera') === -1,
@@ -45,45 +70,29 @@
         'MobileSafari': !!userAgent.match(/AppleWebKit.*Mobile/)
       }
     },
-    emptyFunction: function() { },
-    JSONFilter: /^\/\*-secure-([\s\S]*)\*\/\s*$/,  
-    K: function(x) { return x },
+
+    emptyFunction:  function() { },
+    JSONFilter:     /^\/\*-secure-([\s\S]*)\*\/\s*$/, 
+    K:              function(x) { return x },
     ScriptFragment: '<script[^>]*>([^\\x00]*?)<\/script>',
-    Version: '<%= FUSEJS_VERSION %>'
+    Version:        '<%= FUSEJS_VERSION %>'
   };
 
-<%= include('features.js') %>
-  // IE will throw an error when attempting to
-  // pass a nodeList to slice.call() AND
-  // Safari 2 will return a full array with undefined values
-  if (!Feature('ARRAY_SLICE_THIS_AS_NODELIST')) {
-    nodeListSlice = function(begin, end) {
-      // Avoid the nodeList length property because it might be an element 
-      // with an ID/Name of `length`.
-      // IE8 throws an error when attempting to access a non-existent index
-      // of a StaticNodeList.
-      // Safari 2 returns null when accessing a non-existant item in the list.
-      var i = 0, results = [];
-      while (typeof this[i] === 'object' && this[i])
-        results[i] = this[i++];
-      return !begin && arguments.length < 2 ?
-        results : results.slice(begin, end);
-    };
-  }
-  
 <%= include(
+   'features.js',
+
    'lang/class.js',
    'lang/object.js',
    'lang/function.js',
    'lang/try.js',
    'lang/abstract.js',
    'lang/date.js',
-   'lang/regexp.js',
    'lang/timer.js',
-   'lang/string.js',
-   'lang/template.js',
    'lang/enumerable.js',
    'lang/array.js',
+   'lang/regexp.js',
+   'lang/string.js',
+   'lang/template.js',
    'lang/hash.js',
    'lang/number.js',
    'lang/range.js',

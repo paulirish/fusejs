@@ -14,7 +14,7 @@
 
     function getRealOffsetParent(element) {
       return (typeof element.offsetParent !== 'object' || !element.offsetParent) ? null :
-       element.offsetParent.tagName.toUpperCase() === 'HTML' ?
+       getNodeName(element.offsetParent) === 'HTML' ?
          element.offsetParent : Element.getOffsetParent(element);
     }
 
@@ -35,22 +35,22 @@
       var ELEMENT_TABLE_INNERHTML_INSERTS_TBODY = Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY');
 
       function getCache(ownerDoc) {
-        if (ownerDoc === doc)
+        if (ownerDoc === Fuse._doc)
           return getCache.cache[0];
         var id = ownerDoc.frameID;
         if (!id) {
           id = getCache.id++;
           ownerDoc.frameID = id;
           getCache.cache[id] = {
-            node: ownerDoc.createElement('div'),
-            fragment: ownerDoc.createDocumentFragment()
+            'node':     ownerDoc.createElement('div'),
+            'fragment': ownerDoc.createDocumentFragment()
           };
         }
         return getCache.cache[id];
       }
       getCache.id = 1;
       getCache.cache = { };
-      getCache.cache[0] = { node: dummy, fragment: doc.createDocumentFragment() };
+      getCache.cache[0] = { 'node': Fuse._div, 'fragment': Fuse._doc.createDocumentFragment() };
 
       var getContentAsFragment = (function() {
         if (Feature('ELEMENT_REMOVE_NODE')) {
@@ -77,9 +77,9 @@
         };
       })();
 
-      return function(ownerDoc, tagName, html) {
+      return function(ownerDoc, nodeName, html) {
         var cache = getCache(ownerDoc), node = cache.node,
-         t = Element._insertionTranslations.tags[tagName];
+         t = Element._insertionTranslations.tags[nodeName];
         if (t) {
           node.innerHTML= t[0] + html + t[1];
           t[2].times(function() { node = node.firstChild });
@@ -87,7 +87,7 @@
 
         // skip auto-inserted tbody
         if (ELEMENT_TABLE_INNERHTML_INSERTS_TBODY &&
-            tagName === 'TABLE' && /[^<]*<tr/i.test(html)) {
+            nodeName === 'TABLE' && /[^<]*<tr/i.test(html)) {
           node = node.firstChild;
         }
         return getContentAsFragment(cache, node);

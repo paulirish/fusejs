@@ -5,12 +5,6 @@
   };
 
   ObjectRange = Class.create(Enumerable, (function() {
-    function initialize(start, end, exclusive) {
-      this.start = start;
-      this.end = end;
-      this.exclusive = exclusive;
-    }
-
     function _each(callback) {
       var i = 0, c = this.cache, value = this.start;
       if (!c || this.start !== c.start || this.end !== c.end) {
@@ -19,7 +13,7 @@
         c.end = this.end;
         c.exclusive = this.exclusive;
 
-        while (inRange(this, value)) {
+        while (_inRange(this, value)) {
           callback(value, i++, this);
           c.push(value);
           value = value.succ();
@@ -38,7 +32,7 @@
       }
     }
 
-    function inRange(thisArg, value) {
+    function _inRange(thisArg, value) {
       if (value < thisArg.start)
         return false;
       if (thisArg.exclusive)
@@ -46,8 +40,14 @@
       return value <= thisArg.end;
     }
 
+    function initialize(start, end, exclusive) {
+      this.start = start;
+      this.end = end;
+      this.exclusive = exclusive;
+    }
+
     return {
-      'initialize': initialize,
-      '_each':      _each
+      '_each':      _each,
+      'initialize': initialize
     };
   })());

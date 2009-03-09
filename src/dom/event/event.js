@@ -40,7 +40,7 @@
          oldHandler = element[attrName];
         if (oldHandler) {
           if (oldHandler.isDispatcher) return false;
-          addCache(element, eventName, element[attrName]);
+          _addCache(element, eventName, element[attrName]);
         }
         element[attrName] = Event.cache[getCacheID(element)]
           .events[eventName].dispatcher;
@@ -103,13 +103,13 @@
     createEvent =
       Feature('DOCUMENT_CREATE_EVENT') ?
         function(context, eventType) {
-          var event = getOwnerDoc(context).createEvent('HTMLEvents');
+          var event = getDocument(context).createEvent('HTMLEvents');
           eventType && event.initEvent(eventType, true, true);
           return event;
         } :
       Feature('DOCUMENT_CREATE_EVENT_OBJECT') ?
         function(context, eventType) {
-          var event = getOwnerDoc(context).createEventObject();
+          var event = getDocument(context).createEventObject();
           eventType && (event.eventType = 'on' + eventType);
           return event;
         } :
@@ -145,7 +145,7 @@
 
   Event.Methods = (function() {
 
-    var isButton = function(event, mouseButton) {
+    var _isButton = function(event, mouseButton) {
       var property = (typeof event.which === 'number')
        ? 'which' : (typeof event.button === 'number')
          ? 'button' : false;
@@ -163,15 +163,15 @@
     };
 
     function isLeftClick(event) {
-      return isButton(event, 'left');
+      return _isButton(event, 'left');
     }
 
     function isMiddleClick(event) {
-      return isButton(event, 'middle');
+      return _isButton(event, 'middle');
     }
 
     function isRightClick(event) {
-      return isButton(event, 'right');
+      return _isButton(event, 'right');
     }
 
     function element(event) {
@@ -185,7 +185,7 @@
 
       // Note: Fired events don't have a currentTarget
       if (currentTarget && (/^(load|error)$/.test(type) ||
-         (currentTarget.nodeName.toUpperCase() === 'INPUT' &&
+         (getNodeName(currentTarget) === 'INPUT' &&
           currentTarget.type === 'radio' && type === 'click'))) {
         node = currentTarget;
       }
@@ -229,15 +229,15 @@
   // lazy define Event.pointerX() and Event.pointerY()
   (function(m) {
     function define(methodName, event) {
-      if (!body) return 0;
+      if (!Fuse._body) return 0;
       if (typeof global.pageXOffset === 'number') {
         m.pointerX = function() { return global.pageXOffset };
         m.pointerY = function() { return global.pageYOffset };
       } else {
         m.pointerX = function(event) { return event.clientX +
-          (root.scrollLeft - docEl.clientLeft) };
+          (Fuse._root.scrollLeft - Fuse._docEl.clientLeft) };
         m.pointerY = function(event) { return event.clientY +
-          (root.scrollTop  - docEl.clientTop)  };
+          (Fuse._root.scrollTop  - Fuse._docEl.clientTop)  };
       }
       return m[methodName](event);
     }
@@ -250,14 +250,15 @@
   (function() {
     var Methods;
 
-    function addLevel2Methods(event) {
+    function _addLevel2Methods(event) {
       event.inspect         = inspect;
       event.preventDefault  = preventDefault;
       event.stopPropagation = stopPropagation;
 
-      event.pointer  = function() { return { 'x': this.pageX, 'y': this.pageY } };
-      event.pointerX = function() { return this.pageX };
-      event.pointerY = function() { return this.pageY };
+      // avoid memory leak
+      event.pointer  = _createPointerMethod();
+      event.pointerX = _createPointerMethod('x');
+      event.pointerY = _createPointerMethod('y');
 
       var length = Methods.length;
       while (length--) {
@@ -268,15 +269,31 @@
       return event;
     }
 
-    function addLevel2Properties(event, element) {
+    function _addLevel2Properties(event, element) {
       event.pageX = Event.pointerX(event);
       event.pageY = Event.pointerY(event);
 
       event._extendedByFuse = Fuse.emptyFunction;
       event.currentTarget   = element;
       event.target          = event.srcElement || element;
-      event.relatedTarget   = relatedTarget(event);
+      event.relatedTarget   = _relatedTarget(event);
       return event;
+    }
+
+    function _createPointerMethod(xOrY) {
+      switch (xOrY) {
+        case 'x': return function() { return this.pageX };
+        case 'y': return function() { return this.pageY };
+        default : return function() { return { 'x': this.pageX, 'y': this.pageY } };
+      }
+    }
+
+    function _relatedTarget(event) {
+      switch (event.type) {
+        case 'mouseover': return Element.extend(event.fromElement);
+        case 'mouseout':  return Element.extend(event.toElement);
+        default:          return null;
+      }
     }
 
     function addMethods(methods) {
@@ -290,10 +307,10 @@
           }
       );
     }
-
+    
     function extend(event, element) {
       return (event && !event._extendedByFuse)
-        ? addLevel2Properties(addLevel2Methods(event), element)
+        ? _addLevel2Properties(_addLevel2Methods(event), element)
         : event;
     }
 
@@ -315,14 +332,6 @@
       this.returnValue = false;
     }
 
-    function relatedTarget(event) {
-      switch (event.type) {
-        case 'mouseover': return Element.extend(event.fromElement);
-        case 'mouseout':  return Element.extend(event.toElement);
-        default:          return null;
-      }
-    }
-
     function stopPropagation() {
       this.cancelBubble = true;
     }
@@ -333,7 +342,7 @@
     if (Event.prototype || Feature('OBJECT_PROTO')) {
       // Safari 2 support
       if (!Event.prototype)
-        Event.prototype = Event.Temp.createEvent(doc)['__proto__'];
+        Event.prototype = Event.Temp.createEvent(Fuse._doc)['__proto__'];
 
       // IE8 supports Event.prototype but still needs 
       // DOM Level 2 event methods and properties.
@@ -344,10 +353,10 @@
          !Object.hasKey(Event.prototype, 'target') &&
          !Object.hasKey(Event.prototype, 'currentTarget')) {
 
-        addLevel2Methods(Event.prototype);
+        _addLevel2Methods(Event.prototype);
         Event.extend = function(event, element) {
           return (event && !event._extendedByFuse)
-            ? addLevel2Properties(event, element)
+            ? _addLevel2Properties(event, element)
             : event;
         };
       }
@@ -359,31 +368,29 @@
   /*--------------------------------------------------------------------------*/
 
   Object._extend(Event, (function() {
-    var createEvent       = Event.Temp.createEvent,
-     createDispatcher     = Event.Temp.createDispatcher,
-     fireEvent            = Event.Temp.fireEvent,
-     getCacheID           = Event.Temp.getCacheID,
-     getDOMEventName      = Event.Temp.getDOMEventName,
-     addObserver          = Event.Temp.addObserver,
-     removeObserver       = Event.Temp.removeObserver,
+    var _createEvent    = Event.Temp.createEvent,
+     _createDispatcher  = Event.Temp.createDispatcher,
+     _fireEvent         = Event.Temp.fireEvent,
+     _getCacheID        = Event.Temp.getCacheID,
+     _addObserver       = Event.Temp.addObserver,
+     _removeObserver    = Event.Temp.removeObserver,
 
-     domLoadDispatcher    = createDispatcher(2, 'dom:loaded'),
-     winLoadDispatcher    = createDispatcher(1, 'load'),
-     winUnloadDispatcher  = createDispatcher(1, 'unload');
+     _domLoadDispatcher = _createDispatcher(2, 'dom:loaded'),
+     _winLoadDispatcher = _createDispatcher(1, 'load');
 
     delete Event.Temp;
 
   /*--------------------------------------------------------------------------*/
 
-    function getNewCacheID(element) {
-      var id = getCacheID.id++;
+    function _getNewCacheID(element) {
+      var id = _getCacheID.id++;
       element._prototypeEventID = [id]; // backwards compatibility
       return id;
     }
 
-    function addCache(element, eventName, handler) {
-      var id = getCacheID(element),
-       ec = getOrCreateCache(id, element, eventName);
+    function _addCache(element, eventName, handler) {
+      var id = _getCacheID(element),
+       ec = _getOrCreateCache(id, element, eventName);
 
       // bail if handler is already exists
       if (ec.handlers.indexOf(handler) !== -1)
@@ -391,17 +398,17 @@
 
       ec.handlers.unshift(handler);
       if (ec.dispatcher) return false;
-      return ec.dispatcher = createDispatcher(id, eventName);
+      return ec.dispatcher = _createDispatcher(id, eventName);
     }
 
-    function getOrCreateCache(id, element, eventName) {
+    function _getOrCreateCache(id, element, eventName) {
       var c = Event.cache[id] = Event.cache[id] || { 'events': { } };
       c.element = c.element || element;
       return c.events[eventName] = c.events[eventName] ||
         { 'handlers': [ ], 'dispatcher': false };
     }
 
-    function removeCacheAtIndex(id, eventName, index) {
+    function _removeCacheAtIndex(id, eventName, index) {
       // remove responders and handlers at the given index
       var c = Event.cache[id], ec = c.events[eventName];
       ec.handlers.splice(index, 1);
@@ -420,11 +427,11 @@
 
     function fire(element, eventName, memo) {
       element = $(element);
-      var event = createEvent(element, Event.CUSTOM_EVENT_NAME);
+      var event = _createEvent(element, Event.CUSTOM_EVENT_NAME);
       if (!event) return false;
       event.eventName = eventName;
       event.memo = memo || { };
-      fireEvent(element, event);
+      _fireEvent(element, event);
       return Event.extend(event);
     }
 
@@ -433,29 +440,29 @@
       if (this !== global)
         return $(arguments[0]).getEventID();
       // private id variable
-      var id = getNewCacheID(arguments[0]);
+      var id = _getNewCacheID(arguments[0]);
       // overwrite element.getEventID and execute
       return (arguments[0].getEventID = function() {
         // if cache doesn't match, request a new id
         var c = Event.cache[id];
         if (c && c.element !== this)
-          id = getNewCacheID(this);
+          id = _getNewCacheID(this);
         return id;
       })();
     }
 
     function observe(element, eventName, handler) {
       element = $(element);
-      var dispatcher = addCache(element, eventName, handler);
+      var dispatcher = _addCache(element, eventName, handler);
       if (!dispatcher) return element;
-      addObserver(element, eventName, dispatcher);
+      _addObserver(element, eventName, dispatcher);
       return element;
     }
 
     function stopObserving(element, eventName, handler) {
       element = $(element);
       eventName = (typeof eventName === 'string') ? eventName : null;
-      var id = getCacheID(element), c = Event.cache[id];
+      var id = _getCacheID(element), c = Event.cache[id];
 
       if (!c || !c.events) return element;
       var ec = c.events[eventName];
@@ -480,10 +487,10 @@
         handler : ec.handlers.indexOf(handler);
 
       if (foundAt === -1) return element;
-      removeCacheAtIndex(id, eventName, foundAt);
+      _removeCacheAtIndex(id, eventName, foundAt);
 
       if (!Event.cache[id] || !Event.cache[id].events[eventName])
-        removeObserver(element, eventName, dispatcher);
+        _removeObserver(element, eventName, dispatcher);
 
       return element;
     }
@@ -493,52 +500,39 @@
     // Ensure that the dom:loaded event has finished
     // executing its observers before allowing the
     // window onload event to proceed.
-    function domLoadWrapper(event) {
-      if (!doc.loaded) {
+    function _domLoadWrapper(event) {
+      if (!Fuse._doc.loaded) {
         event = event || global.event;
         event.eventName = 'dom:loaded';
 
-        // define private body and root variables
-        body = Element.extend(doc.body);
-        root = Bug('BODY_ACTING_AS_ROOT') ? body : Element.extend(docEl);
+        // define pseudo private body and root properties
+        Fuse._body = Element.extend(Fuse._doc.body);
+        Fuse._root = Bug('BODY_ACTING_AS_ROOT') ? Fuse._body : Element.extend(Fuse._docEl);
 
-        doc.loaded = true;
-        domLoadDispatcher(event);
-        Event.stopObserving(doc, 'dom:loaded');
+        Fuse._doc.loaded = true;
+        _domLoadDispatcher(event);
+        Event.stopObserving(Fuse._doc, 'dom:loaded');
       }
     }
 
-    function winLoadWrapper(event) {
+    function _winLoadWrapper(event) {
       event = event || global.event;
-      if (!doc.loaded)
-        domLoadWrapper(event);
+      if (!Fuse._doc.loaded)
+        _domLoadWrapper(event);
       else if (Event.cache['1'].events['dom:loaded'])
-        return winLoadWrapper.defer(event);
+        return _winLoadWrapper.defer(event);
       event.eventName = null;
-      winLoadDispatcher(event);
+      _winLoadDispatcher(event);
       Event.stopObserving(global, 'load');
     }
 
-    function winUnloadWrapper(event) {
-      // to avoid memory leaks we clear
-      // private body and root variables
-      winUnloadDispatcher(event || global.event);
-      doc = dummy = body = docEl = root = null;
-    }
-
     // avoid Function#wrap for better performance esp.
-    // in winLoadWrapper which could be called every 10ms
-    addObserver(doc, 'dom:loaded',
-      getOrCreateCache(2, doc, 'dom:loaded').dispatcher = domLoadWrapper);
+    // in _winLoadWrapper which could be called every 10ms
+    _addObserver(Fuse._doc, 'dom:loaded',
+      _getOrCreateCache(2, Fuse._doc, 'dom:loaded').dispatcher = _domLoadWrapper);
 
-    addObserver(global, 'load',
-      getOrCreateCache(1, global, 'load').dispatcher = winLoadWrapper);
-
-    // Warning: Disables bfcache for all browsers.
-    // Safari <= 3.1 has an issue with restoring the "document"
-    // object when page is returned to via the back button using its bfcache.
-    addObserver(global, 'unload',
-      getOrCreateCache(1, global, 'unload').dispatcher = winUnloadWrapper);
+    _addObserver(global, 'load',
+      _getOrCreateCache(1, global, 'load').dispatcher = _winLoadWrapper);
 
   /*--------------------------------------------------------------------------*/
 
@@ -573,7 +567,7 @@
     'stopObserving': Event.stopObserving
   });
 
-  Object._extend(doc, {
+  Object._extend(Fuse._doc, {
     'loaded':        false,
     'fire':          Element.Methods.fire.methodize(),
     'observe':       Element.Methods.observe.methodize(),

@@ -5,11 +5,11 @@
       this.element = $(element);
       this.onElementEvent = this.onElementEvent.bind(this);
 
-      if (this.element.tagName.toUpperCase() === 'FORM')
+      if (getNodeName(this.element) === 'FORM')
         return this.registerFormCallbacks();
 
       var member, name = element.name, i = 0;
-      this.group = (name && $$(element.tagName +
+      this.group = (name && $$(element.nodeName +
         '[name="' + name + '"]')) || [element];
 
       this.callback = callback;

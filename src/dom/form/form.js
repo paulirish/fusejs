@@ -3,7 +3,7 @@
   $F = function(element) {
     element = $(element);
     var s = Field.Serializers,
-     method = element && element.tagName.toLowerCase();
+     method = element && element.nodeName.toLowerCase();
     return s[method] ? s[method](element) : null;
   };
 
@@ -123,7 +123,7 @@
        nodes = $(form).getElementsByTagName('*');
       while (node = nodes[i++])
         if (node.nodeType === 1 &&
-            Field.Serializers[node.tagName.toLowerCase()])
+            Field.Serializers[node.nodeName.toLowerCase()])
           results.push(Element.extend(node));
       return results;
     }
@@ -209,7 +209,7 @@
     function activate(element) {
       element = $(element);
       try { element.focus() } catch(e) { }
-      if (element.select && element.tagName.toUpperCase() !== 'BUTTON' &&
+      if (element.select && getNodeName(element) !== 'BUTTON' &&
           !matchInputButtons.test(element.type))
         element.select();
       return element;
@@ -217,7 +217,7 @@
 
     function clear(element) {
       element = $(element);
-      if (element.tagName.toUpperCase() !== 'BUTTON' &&
+      if (getNodeName(element) !== 'BUTTON' &&
           !matchInputButtons.test(element.type))
         Field.setValue(element, null);
       return element;
@@ -256,13 +256,13 @@
 
     function getValue(element) {
       element = $(element);
-      var method = element.tagName.toLowerCase();
+      var method = element.nodeName.toLowerCase();
       return Field.Serializers[method](element);
     }
 
     function setValue(element, value) {
       element = $(element);
-      var method = element.tagName.toLowerCase();
+      var method = element.nodeName.toLowerCase();
       Field.Serializers[method](element, value || null);
       return element;
     }
