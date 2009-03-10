@@ -192,15 +192,15 @@
         }
       }
 
-      var match = true, name, matches;
+      var matches, name, result = true;
       for (var i = 0, token; token = this.tokens[i++]; ) {
-        name = token[0], matches = token[1];
+        name = token[0]; matches = token[1];
         if (!Selector.assertions[name](element, matches)) {
-          match = false; break;
+          result = false; break;
         }
       }
 
-      return match;
+      return result;
     }
 
     function toString() {
@@ -525,18 +525,18 @@
       // rather than nth-child
       function index(parentNode, reverse, ofType) {
         parentNode._countedByFuse = Fuse.emptyFunction;
-        var node, nodes = parentNode.childNodes, index = 1;
+        var node, nodes = parentNode.childNodes, nodeIndex = 1;
         if (reverse) {
           var length = nodes.length;
           while (length--) {
             node = nodes[length];
             if (node.nodeType == 1 && (!ofType || typeof node._countedByFuse !== 'undefined'))
-              node.nodeIndex = index++;
+              node.nodeIndex = nodeIndex++;
           }
         } else {
           for (var i = 0; node = nodes[i++]; )
             if (node.nodeType == 1 && (!ofType || typeof node._countedByFuse !== 'undefined'))
-              node.nodeIndex = index++;
+              node.nodeIndex = nodeIndex++;
         }
       }
 
@@ -609,22 +609,22 @@
 
       /* TOKEN FUNCTIONS */
 
-      function attr(nodes, root, attr, value, operator, combinator) {
+      function attr(nodes, root, attrName, value, operator, combinator) {
         if (!nodes) nodes = root.getElementsByTagName('*');
         if (nodes && combinator) nodes = this[combinator](nodes);
         var handler = Selector.operators[operator], results = [];
         for (var i = 0, node; node = nodes[i++]; ) {
-          if (handler(Element.readAttribute(node, attr), value))
+          if (handler(Element.readAttribute(node, attrName), value))
             results.push(node);
         }
         return results;
       }
 
-      function attrPresence(nodes, root, attr, combinator) {
+      function attrPresence(nodes, root, attrName, combinator) {
         if (!nodes) nodes = root.getElementsByTagName('*');
         if (nodes && combinator) nodes = this[combinator](nodes);
         for (var i = 0, results = [], node; node = nodes[i++]; )
-          if (Element.hasAttribute(node, attr)) results.push(node);
+          if (Element.hasAttribute(node, attrName)) results.push(node);
         return results;      
       }
 
@@ -640,12 +640,12 @@
         return results;
       }
 
-      function className(nodes, root, className, combinator) {
+      function className(nodes, root, value, combinator) {
         if (nodes && combinator) nodes = this[combinator](nodes);
-        return Selector.handlers.byClassName(nodes, root, className);
+        return Selector.handlers.byClassName(nodes, root, value);
       }
 
-      function id(nodes, root, id, combinator) {
+      function id(nodes, root, value, combinator) {
         var targetNode, h = Selector.handlers;
 
         // check if the root is detached from the document
@@ -653,11 +653,11 @@
         if (Element.isFragment(root)) {
           var els = root.getElementsByTagName('*');
           for (var i = 0, el; el = els[i++]; ) {
-            if (el.id === id) {
+            if (el.id === value) {
               targetNode = $(el); break;
             }
           }
-        } else targetNode = getDocument(root).getElementById(id || '');
+        } else targetNode = getDocument(root).getElementById(value || '');
 
         if (!targetNode) return [];
         if (!nodes && root.nodeType === 9) return [targetNode];
@@ -688,9 +688,9 @@
         return Selector.pseudos[name](nodes, value, root);
       }
 
-      function tagName(nodes, root, tagName, combinator) {
-        tagName = tagName || '';
-        var uTagName = tagName.toUpperCase();
+      function tagName(nodes, root, value, combinator) {
+        value = value || '';
+        var uTagName = value.toUpperCase();
         var results = [], h = Selector.handlers;
 
         if (nodes) {
@@ -698,15 +698,15 @@
             // fastlane for ordinary descendant combinators
             if (combinator == 'descendant') {
               for (var i = 0, node; node = nodes[i++]; )
-                h.concat(results, node.getElementsByTagName(tagName));
+                h.concat(results, node.getElementsByTagName(value));
               return results;
             } else nodes = this[combinator](nodes);
-            if (tagName == '*') return nodes;
+            if (value == '*') return nodes;
           }
           for (var i = 0, node; node = nodes[i++]; )
             if (node.tagName.toUpperCase() === uTagName) results.push(node);
           return results;
-        } else return root.getElementsByTagName(tagName);
+        } else return root.getElementsByTagName(value);
       }
 
       return {

@@ -127,7 +127,7 @@
        pairs = match[1].split(separator || '&'), length = pairs.length;
 
       for ( ; i < length; i++) {
-        if (!(pair = pairs[i].split('='))[0]) continue
+        if (!(pair = pairs[i].split('='))[0]) continue;
         key = decodeURIComponent(pair.shift());
         value = pair.length > 1 ? pair.join('=') : pair[0];
         if (value != null) value = decodeURIComponent(value);
