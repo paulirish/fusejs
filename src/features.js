@@ -181,8 +181,9 @@
         var result = false;
         if (isHostObject(global, 'HTMLHtmlElement') &&
             isHostObject(global.HTMLHtmlElement, 'prototype') &&
-            (Fuse._docEl.constructor === HTMLHtmlElement || Feature('OBJECT_PROTO') &&
-            Fuse._docEl['__proto__'] === HTMLHtmlElement.prototype)) {
+            (Fuse._docEl.constructor === HTMLHtmlElement || 
+             Fuse._docEl instanceof HTMLHtmlElement || Feature('OBJECT_PROTO') &&
+             Fuse._docEl['__proto__'] === HTMLHtmlElement.prototype)) {
           result = true;
         } else result = Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO');
 

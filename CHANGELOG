@@ -1,3 +1,5 @@
+* Add Opera support to the ELEMENT_SPECIFIC_EXTENSIONS feature detection. [jddalton]
+
 * Add missing semi-colon to String#toQueryParams and make Selector methods more Caja friendly. [jddalton]
 
 * Large cleanup of code in preparation for the namespace rewrite. [jddalton]
