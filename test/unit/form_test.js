@@ -248,10 +248,14 @@ new Test.Unit.Runner({
   testFormGetInputs: function() {
     var form = $('form');
     [form.getInputs(), Form.getInputs(form)].each(function(inputs){
-      this.assertEqual(inputs.length, 5);
+      this.assertEqual(5, inputs.length);
       this.assert(inputs instanceof Array);
-      this.assert(inputs.all(function(input) { return (input.tagName == "INPUT"); }));
+      this.assert(inputs.all(function(input) { return (input.nodeName.toUpperCase() === 'INPUT') }));
     }, this);
+    
+    // ensure private method nodeListSlice works as expected
+    this.assertEqual(3, $('form_with_object_prototypes').getInputs().length,
+      'Failed to convert nodeList to an array using private method `nodeListSlice`.');
   },
 
   testFormFindFirstElement: function() {

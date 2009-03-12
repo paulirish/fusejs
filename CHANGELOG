@@ -1,3 +1,5 @@
+* Fixed Opera 9.2x bug in nodeListSlice() when converting node lists containing an element with an id="length". [Diego Perini, jddalton]
+
 * Add Opera support to the ELEMENT_SPECIFIC_EXTENSIONS feature detection. [jddalton]
 
 * Add missing semi-colon to String#toQueryParams and make Selector methods more Caja friendly. [jddalton]

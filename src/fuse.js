@@ -25,32 +25,14 @@
     return result;
   }
 
-  var Bug, Feature,
-   slice = Array.prototype.slice,
-   userAgent = global.navigator.userAgent,
-   nodeListSlice = slice;
-
   var getNodeName = document.documentElement.nodeName === 'HTML'
     ? function(element) { return element.nodeName }
     : function(element) { return element.nodeName.toUpperCase() };
 
-  try {
-    if (false === !!slice.call(document.documentElement.childNodes, 0)[0])
-      throw true;
-  } catch(e) {
-    // IE throws an error when passing a nodeList to slice.call()
-    // Safari 2 will return a full array with undefined values
-    nodeListSlice = function(begin, end) {
-      // 1) Avoid the length property, it might be an element with an id/name of `length`.
-      // 2) IE8 throws an error when accessing a non-existant item of a StaticNodeList.
-      // 3) Safari 2 returns null when accessing a non-existant item.
-      var i = 0, results = [];
-      while (typeof this[i] === 'object' && this[i])
-        results[i] = this[i++];
-      return !begin && arguments.length < 2 ?
-        results : results.slice(begin, end);
-    };
-  }
+  var Bug, Feature,
+   slice = Array.prototype.slice,
+   userAgent = global.navigator.userAgent,
+   nodeListSlice = slice;
 
   /*---------------------------- FUSE OBJECT ---------------------------------*/
 
@@ -77,6 +59,43 @@
     ScriptFragment: '<script[^>]*>([^\\x00]*?)<\/script>',
     Version:        '<%= FUSEJS_VERSION %>'
   };
+
+  // IE throws an error when passing a nodeList to slice.call()
+  // Safari 2 will return a full array with undefined values
+  // Opera 9.2x will return an empty array if an element has an id of `length`
+  (function() {
+    function complex(begin, end) {
+      // IE8 throws an error when accessing a non-existant item of a StaticNodeList.
+      // TODO: Confirm using instanceof on elements causes a memory leak in IE8
+      if (this != '[object StaticNodeList]')
+        return simple.call(this, begin, end);
+      var i = 0, results = [];
+      while (typeof this[i] === 'object')
+        results[i] = this[i++];
+      return !begin && end == null ?
+        results : results.slice(begin, end);
+    }
+
+    function simple(begin, end) {
+      // Safari 2 and Opera 9.2x
+      var i = 0, results = [];
+      while (results[i] = this[i++]) { }
+      results.length--;
+      return !begin && end == null ?
+        results : results.slice(begin, end);
+    }
+
+    try {
+      Fuse._div.innerHTML = '<div id="length"></div>';
+      Fuse._docEl.insertBefore(Fuse._div, Fuse._docEl.firstChild);
+      if (!slice.call(Fuse._div.childNodes, 0)[0])
+        nodeListSlice = simple;
+    } catch(e) {
+      nodeListSlice = complex;
+    } finally {
+      Fuse._docEl.removeChild(Fuse._div).innerHTML = '';
+    }
+  })();
 
 <%= include(
    'features.js',
