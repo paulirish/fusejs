@@ -34,14 +34,14 @@
       // simple bind
       if (arguments.length < 2 ) {
         return function(event) {
-          return __method.call(thisArg, event || global.event);
+          return __method.call(thisArg, event || getWindow(this).event);
         };
       }
       // bind with curry
       args = slice.call(arguments, 1);
       return function(event) {
         return __method.apply(thisArg,
-          prependList(args, event || global.event));
+          prependList(args, event || getWindow(this).event));
       };
     }
 

@@ -1,3 +1,9 @@
+* Fix incorrect method references in the DOM Level 0 event system. [jddalton]
+
+* Add private methods getWindow() and getRoot() to ensure the Event system works across frames. [jddalton]
+
+* Fix how Event#pointer methods lazily define themselves as well as a bug in IE Event#pointer methods . [jddalton]
+
 * Fixed Opera 9.2x bug in nodeListSlice() when converting node lists containing an element with an id="length". [Diego Perini, jddalton]
 
 * Add Opera support to the ELEMENT_SPECIFIC_EXTENSIONS feature detection. [jddalton]

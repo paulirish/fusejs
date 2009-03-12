@@ -37,18 +37,14 @@
       function getCache(ownerDoc) {
         if (ownerDoc === Fuse._doc)
           return getCache.cache[0];
-        var id = ownerDoc.frameID;
-        if (!id) {
-          id = getCache.id++;
-          ownerDoc.frameID = id;
-          getCache.cache[id] = {
-            'node':     ownerDoc.createElement('div'),
-            'fragment': ownerDoc.createDocumentFragment()
-          };
-        }
+        // TODO: This is a perfect example of when Element#getUniqueID could be used
+        var id = Event.getEventID(getWindow(ownerDoc).frameElement);
+        getCache.cache[id] = getCache.cache[id] || {
+          'node':     ownerDoc.createElement('div'),
+          'fragment': ownerDoc.createDocumentFragment()
+        };
         return getCache.cache[id];
       }
-      getCache.id = 1;
       getCache.cache = { };
       getCache.cache[0] = { 'node': Fuse._div, 'fragment': Fuse._doc.createDocumentFragment() };
 

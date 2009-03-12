@@ -11,9 +11,30 @@
   // temporarily hold these helpers to avoid creating several closures.
   Object._extend(Event.Temp = { }, (function() {
 
+    function addCache(element, eventName, handler) {
+      var id = getCacheID(element),
+       ec = getOrCreateCache(id, element, eventName);
+
+      // bail if handler is already exists
+      if (ec.handlers.indexOf(handler) !== -1)
+        return false;
+
+      ec.handlers.unshift(handler);
+      if (ec.dispatcher) return false;
+      return ec.dispatcher = createDispatcher(id, eventName);
+    }
+
     function getCacheID(element) {
-      if (element === global) return 1;
-      if (element.nodeType === 9) return 2;
+      var win = getWindow(element);
+      // keep a loose match because frame object !== document.parentWindow
+      if (element == win) {
+        if (element === global) return 1;
+        return getCacheID(win.frameElement) + '-1';
+      }
+      else if (element.nodeType === 9) {
+        if (element === Fuse._doc) return 2;
+        return getCacheID(win.frameElement) + '-2';
+      }
       return element.getEventID();
     }
     getCacheID.id = 3;
@@ -24,6 +45,34 @@
       return eventName;
     }
 
+    function getNewCacheID(element) {
+      var id = getCacheID.id++;
+      element._prototypeEventID = [id]; // backwards compatibility
+      return id;
+    }
+
+    function getOrCreateCache(id, element, eventName) {
+      var c = Event.cache[id] = Event.cache[id] || { 'events': { } };
+      c.element = c.element || element;
+      return c.events[eventName] = c.events[eventName] ||
+        { 'handlers': [ ], 'dispatcher': false };
+    }
+
+    function removeCacheAtIndex(id, eventName, index) {
+      // remove responders and handlers at the given index
+      var c = Event.cache[id], ec = c.events[eventName];
+      ec.handlers.splice(index, 1);
+
+      // if no more handlers/responders then
+      // remove the eventName cache
+      if (!ec.handlers.length) delete c.events[eventName];
+
+      // if no more events cached remove the
+      // cache for the element
+      for (var i in c.events) return;
+      delete Event.cache[id];
+    }
+    
     var addObserver =
       // DOM Level 2
       Feature('ELEMENT_ADD_EVENT_LISTENER') ?
@@ -40,7 +89,7 @@
          oldHandler = element[attrName];
         if (oldHandler) {
           if (oldHandler.isDispatcher) return false;
-          _addCache(element, eventName, element[attrName]);
+          addCache(element, eventName, element[attrName]);
         }
         element[attrName] = Event.cache[getCacheID(element)]
           .events[eventName].dispatcher;
@@ -81,7 +130,7 @@
             // observe/stopObserving
             var c = Event.cache[id], ec = c.events[eventName],
              handlers = slice.call(ec.handlers, 0), length = handlers.length;
-            event = Event.extend(event || global.event, c.element);
+            event = Event.extend(event || getWindow(c.element).event, c.element);
             while (length--) handlers[length].call(c.element, event);
           };
         } :
@@ -89,7 +138,7 @@
         function(id, eventName) {
           var dispatcher = function(event) {
             if (!Event || !Event.extend) return false;
-            event = Event.extend(event || global.event, this);
+            event = Event.extend(event || getWindow(this).event, this);
             var c = Event.cache[id], ec = c && c.events &&
               c.events[event.eventName || eventName];
             if (!ec) return false;
@@ -131,13 +180,18 @@
       function() { return false };
 
     return {
-      'addObserver':      addObserver,
-      'removeObserver':   removeObserver,
-      'createDispatcher': createDispatcher,
-      'createEvent':      createEvent,
-      'fireEvent':        fireEvent,
-      'getCacheID':       getCacheID,
-      'getDOMEventName':  getDOMEventName
+      'addCache':           addCache,
+      'addObserver':        addObserver,
+      'createDispatcher':   createDispatcher,
+      'createEvent':        createEvent,
+      'fireEvent':          fireEvent,
+      'getCacheID':         getCacheID,
+      'getDOMEventName':    getDOMEventName,
+      'getNewCacheID':      getNewCacheID,
+      'getOrCreateCache':   getOrCreateCache,
+      'removeCacheAtIndex': removeCacheAtIndex,
+      'removeObserver':     removeObserver
+      
     };
   })());
 
@@ -230,14 +284,20 @@
   (function(m) {
     function define(methodName, event) {
       if (!Fuse._body) return 0;
-      if (typeof global.pageXOffset === 'number') {
-        m.pointerX = function() { return global.pageXOffset };
-        m.pointerY = function() { return global.pageYOffset };
+      if (typeof event.pageX === 'number') {
+        Event.pointerX = m.pointerX = function(event) { return event.pageX };
+        Event.pointerY = m.pointerY = function(event) { return event.pageY };
       } else {
-        m.pointerX = function(event) { return event.clientX +
-          (Fuse._root.scrollLeft - Fuse._docEl.clientLeft) };
-        m.pointerY = function(event) { return event.clientY +
-          (Fuse._root.scrollTop  - Fuse._docEl.clientTop)  };
+        Event.pointerX = m.pointerX = function(event) {
+          var element = event.srcElement || global;
+          return event.clientX + getRoot(element).scrollLeft - 
+            getDocument(element).documentElement.clientLeft;
+        };
+        Event.pointerY = m.pointerY = function(event) {
+          var element = event.srcElement || global;
+          return event.clientY + getRoot(element).scrollTop -
+            getDocument(element).documentElement.clientTop;
+        };
       }
       return m[methodName](event);
     }
@@ -300,10 +360,10 @@
       var name; Methods = [];
       methods && Object.extend(Event.Methods, methods);
       Object._each(Event.Methods, Event.prototype
-        ? function(value, key) { Event.prototype[key] = methodize(key) }
+        ? function(value, key) { Event.prototype[key] = value.methodize() }
         : function(value, key) {
             if (key.indexOf('pointer') !== 0)
-              Methods.push([key, methodize(key)]);
+              Methods.push([key, value.methodize()]);
           }
       );
     }
@@ -316,16 +376,6 @@
 
     function inspect() {
       return '[object Event]';
-    }
-
-    // compile list of methods using use custom "methodize"
-    // to allow lazy defined Event methods
-    function methodize(method) {
-      return function() {
-        return arguments.length
-          ? Event.Methods[method].apply(null, prependList(arguments, this))
-          : Event.Methods[method].call(null, this);
-      };
     }
 
     function preventDefault() {
@@ -368,60 +418,21 @@
   /*--------------------------------------------------------------------------*/
 
   Object._extend(Event, (function() {
-    var _createEvent    = Event.Temp.createEvent,
-     _createDispatcher  = Event.Temp.createDispatcher,
-     _fireEvent         = Event.Temp.fireEvent,
-     _getCacheID        = Event.Temp.getCacheID,
-     _addObserver       = Event.Temp.addObserver,
-     _removeObserver    = Event.Temp.removeObserver,
+    var _addCache        = Event.Temp.addCache,
+     _addObserver        = Event.Temp.addObserver,
+     _createDispatcher   = Event.Temp.createDispatcher,
+     _createEvent        = Event.Temp.createEvent,
+     _fireEvent          = Event.Temp.fireEvent,
+     _getCacheID         = Event.Temp.getCacheID,
+     _getNewCacheID      = Event.Temp.getNewCacheID,
+     _getOrCreateCache   = Event.Temp.getOrCreateCache,
+     _removeCacheAtIndex = Event.Temp.removeCacheAtIndex,
+     _removeObserver     = Event.Temp.removeObserver,
 
      _domLoadDispatcher = _createDispatcher(2, 'dom:loaded'),
      _winLoadDispatcher = _createDispatcher(1, 'load');
 
     delete Event.Temp;
-
-  /*--------------------------------------------------------------------------*/
-
-    function _getNewCacheID(element) {
-      var id = _getCacheID.id++;
-      element._prototypeEventID = [id]; // backwards compatibility
-      return id;
-    }
-
-    function _addCache(element, eventName, handler) {
-      var id = _getCacheID(element),
-       ec = _getOrCreateCache(id, element, eventName);
-
-      // bail if handler is already exists
-      if (ec.handlers.indexOf(handler) !== -1)
-        return false;
-
-      ec.handlers.unshift(handler);
-      if (ec.dispatcher) return false;
-      return ec.dispatcher = _createDispatcher(id, eventName);
-    }
-
-    function _getOrCreateCache(id, element, eventName) {
-      var c = Event.cache[id] = Event.cache[id] || { 'events': { } };
-      c.element = c.element || element;
-      return c.events[eventName] = c.events[eventName] ||
-        { 'handlers': [ ], 'dispatcher': false };
-    }
-
-    function _removeCacheAtIndex(id, eventName, index) {
-      // remove responders and handlers at the given index
-      var c = Event.cache[id], ec = c.events[eventName];
-      ec.handlers.splice(index, 1);
-
-      // if no more handlers/responders then
-      // remove the eventName cache
-      if (!ec.handlers.length) delete c.events[eventName];
-
-      // if no more events cached remove the
-      // cache for the element
-      for (var i in c.events) return;
-      delete Event.cache[id];
-    }
 
   /*--------------------------------------------------------------------------*/
 
@@ -437,8 +448,13 @@
 
     function getEventID() {
       // handle calls from Event object
-      if (this !== global)
-        return $(arguments[0]).getEventID();
+      if (this !== global) {
+        var element = arguments[0];
+        return typeof element === 'string' || element.nodeType === 1
+          ? _getCacheID($(element))
+          : _getCacheID(element);
+      }
+
       // private id variable
       var id = _getNewCacheID(arguments[0]);
       // overwrite element.getEventID and execute

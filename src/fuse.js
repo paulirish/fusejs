@@ -1,6 +1,11 @@
 <%= include 'HEADER' %>
 (function(global) {
 
+  var Bug, Feature,
+   slice = Array.prototype.slice,
+   userAgent = global.navigator.userAgent,
+   nodeListSlice = slice;
+
   // Host objects have a range of typeof values. For example:
   // document.createElement('div').offsetParent -> unknown
   // document.createElement -> object
@@ -10,7 +15,8 @@
   }
 
   function getDocument(element) { // assume element is not null
-    return element.ownerDocument || (element.nodeType === 9 ? element : Fuse._doc);
+    return element.ownerDocument || element.document ||
+      (element.nodeType === 9 ? element : Fuse._doc);
   }
 
   function concatList(list, other) {
@@ -24,15 +30,6 @@
     while (length--) result[1 + length] = list[length];
     return result;
   }
-
-  var getNodeName = document.documentElement.nodeName === 'HTML'
-    ? function(element) { return element.nodeName }
-    : function(element) { return element.nodeName.toUpperCase() };
-
-  var Bug, Feature,
-   slice = Array.prototype.slice,
-   userAgent = global.navigator.userAgent,
-   nodeListSlice = slice;
 
   /*---------------------------- FUSE OBJECT ---------------------------------*/
 
@@ -59,6 +56,38 @@
     ScriptFragment: '<script[^>]*>([^\\x00]*?)<\/script>',
     Version:        '<%= FUSEJS_VERSION %>'
   };
+
+  var getNodeName = Fuse._docEl.nodeName === 'HTML'
+    ? function(element) { return element.nodeName }
+    : function(element) { return element.nodeName.toUpperCase() };
+
+  var getRoot = function(element) {
+    return (getRoot = getNodeName(Fuse._root) === 'BODY'
+      ? function(element) { return getDocument(element).body }
+      : function(element) { return getDocument(element).documentElement }
+    )(element);
+  };
+
+  // based on work by Diego Perini
+  var getWindow =
+    isHostObject(Fuse._doc, 'parentWindow') ?
+      function(element) {
+        return getDocument(element).parentWindow || element;
+      } :
+    isHostObject(document, 'defaultView') && Fuse._doc.defaultView === global ?
+      function(element) {
+        return getDocument(element).defaultView || element;
+      } :
+    function(element) {
+      // Safari 2.0.x returns `Abstract View` instead of `global`
+      var frame, i = 0, doc = getDocument(element);
+      if (Fuse._doc !== doc) {
+        while (frame = global.frames[i++]) {
+          if (frame === doc) return frame;
+        }
+      }
+      return global;
+    };
 
   // IE throws an error when passing a nodeList to slice.call()
   // Safari 2 will return a full array with undefined values

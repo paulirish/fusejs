@@ -70,7 +70,7 @@
       // XML nodes (IE errors on them), document, window objects
       if (!element || (typeof element._extendedByFuse !== 'undefined' &&
         element._extendedByFuse() >= revision) ||
-        element.nodeType !== 1 || element === global ||
+        element.nodeType !== 1 || element == getWindow(element) ||
         !element.ownerDocument.body) return element;
 
       var pair,

@@ -4,26 +4,8 @@
 <head>
   <title>FuseJS functional test file</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" href="event.css" type="text/css" />
   <script src="../../dist/fuse.js" type="text/javascript"></script>
-  
-  <style type="text/css" media="screen">
-  /* <![CDATA[ */
-    body { margin:1em 2em; padding:0; font-size:0.8em }
-    hr { width:31.2em; margin:1em 0; text-align:left }
-    p { width:30em; margin:0.5em 0; padding:0.3em 0.6em; color:#222; background:#eee; border:1px solid silver; }
-    .subtest { margin-top:-0.5em }
-    .passed { color:green; border-color:olive }
-    .failed { color:firebrick; border-color:firebrick }
-    .button { padding:0.2em 0.4em; background:#ccc; border:1px solid #aaa }
-    #log { position:absolute; left:35em; top:5em; width:20em; font-size:13px !important }
-    h2 { font:normal 1.1em Verdana,Arial,sans-serif; font-style:italic; color:gray; margin-top:-1.2em }
-    h2 *, h2 a:visited { color:#444 }
-    h2 a:hover { color:blue }
-    a:visited { color:blue }
-    a:hover { color:red }
-  /* ]]> */
-  </style>
-  
   <script type="text/javascript">
     Element.addMethods({
       passed: function(el, message) {
@@ -52,6 +34,16 @@
 </head>
 <body>
   <h1>FuseJS functional tests for the Event module</h1>
+  
+  <div id="pointer"></div>
+  <script type="text/javascript">
+    (function() {
+      var pointer = $('pointer');
+      Event.observe(document.documentElement, 'mousemove', function(e) {
+        pointer.innerHTML = 'x:' +e.pageX +', y:'+ e.pointerY();
+      });
+    })();
+  </script>
   
   <div id="log">log empty</div>
   
@@ -321,6 +313,29 @@
         (function() { el[count ? 'passed' : 'failed']() }).defer();
       });
     })();
+  </script>
+  
+  <iframe id="iframe" src="event_iframe.html"></iframe>
+
+  <script type="text/javascript">
+    $('iframe').observe('load', function() {
+      var frame = window.frames[0],
+       pointer = Element.extend(frame.document.getElementById('pointer')),
+       elFire  = Element.extend(frame.document.getElementById('element-fire'));
+
+      // test pointer methods
+      Event.observe(frame.document.documentElement, 'mousemove', function(e) {
+        pointer.innerHTML = 'x:' +e.pageX +', y:'+ e.pointerY();
+      });
+      
+      // test firing methods
+      elFire.observe('click', function() {
+        var counter = 0;
+        elFire.observe('something:happened', function() { counter++ });
+        elFire.fire('something:happened');
+        this[ counter ? 'passed' : 'failed']();
+      });
+    });
   </script>
 </body>
 </html>

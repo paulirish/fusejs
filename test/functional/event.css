@@ -1,0 +1,71 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width:100%;
+  height: 100%;
+}
+
+body { 
+  margin:1em 2em;
+  font-size:0.8em;
+}
+
+hr {
+  width:31.2em;
+  margin:1em 0;
+  text-align:left;
+}
+
+p {
+  width:30em;
+  margin:0.5em 0;
+  padding:0.3em 0.6em;
+  color:#222;
+  background:#eee;
+  border:1px solid silver;
+}
+
+h2 {
+  font:normal 1.1em Verdana,Arial,sans-serif;
+  font-style:italic;
+  color:gray;
+  margin-top:-1.2em;
+}
+
+h2 *, h2 a:visited { color:#444 }
+h2 a:hover { color:blue }
+a:visited { color:blue }
+a:hover { color:red }
+
+iframe {
+  width: 600px;
+  height: 400px;
+}
+
+.subtest {
+  margin-top:-0.5em;
+}
+
+.passed {
+  color:green;
+  border-color:olive;
+}
+
+.failed {
+  color:firebrick;
+  border-color:firebrick;
+}
+
+.button {
+  padding:0.2em 0.4em;
+  background:#ccc;
+  border:1px solid #aaa;
+}
+
+#log {
+  position:absolute;
+  left:35em;
+  top:5em;
+  width:20em;
+  font-size:13px !important;
+}
