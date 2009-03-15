@@ -48,10 +48,10 @@
       if (typeof replacement !== 'function')
         return __replace.call(this, pattern, replacement);
 
-      var match, global, source = this, result = '';
+      var isGlobal, match, source = this, result = '';
       if (!Object.isRegExp(pattern))
         pattern = new RegExp(RegExp.escape(String(pattern)));
-      if (global = pattern.global)
+      if (isGlobal = pattern.global)
         pattern = pattern.clone({ 'global': false });
 
       while (match = pattern.exec(source)) {
@@ -59,7 +59,7 @@
           replacement.apply(null, concatList(match, [match.index, source]));
         source = source.slice(match.index + match[0].length);
 
-        if (global && !match[0]) {
+        if (isGlobal && !match[0]) {
           result += source.slice(0, 1);
           source  = source.slice(1);
           if (!source) {
@@ -67,7 +67,7 @@
             break;
           }
         }
-        else if (!global) break;
+        else if (!isGlobal) break;
       }
       return result + source;
     }

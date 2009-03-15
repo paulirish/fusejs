@@ -1,3 +1,5 @@
+* Rename the `global` variable in String#replace to `isGlobal` as to not be confused with the environment's `global` object. [jddalton]
+
 * Optimize private method concatList() by no longer cloning the list being concatenated. [jddalton, Robert Kieffer]
 
 * Optimize Element#hasClassName. [Diego Perini]
