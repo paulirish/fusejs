@@ -1,3 +1,5 @@
+* Optimize Element#hasClassName. [Diego Perini]
+
 * Remove extraneous Safari 2 fork of the $A() utility method. [Prototype LH #595] [jddalton, kangax]
 
 * Fix incorrect method references in the DOM Level 0 event system. [jddalton]

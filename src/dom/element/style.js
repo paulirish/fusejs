@@ -8,8 +8,8 @@
     function hasClassName(element, className) {
       element = $(element);
       var elementClassName = element.className;
-      return (elementClassName.length > 0 && (elementClassName == className || 
-        new RegExp('(^|\\s)' + className + '(\\s|$)').test(elementClassName)));
+      return (elementClassName.length > 0 && (elementClassName === className || 
+        (' ' + elementClassName + ' ').indexOf(' ' + className + ' ') > -1));
     }
 
     function addClassName(element, className) {
