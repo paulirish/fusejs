@@ -230,11 +230,6 @@
           isHostObject(Fuse._docEl, 'querySelectorAll');
       }
 
-      function TYPEOF_NODELIST_IS_FUNCTION() {
-        // true for WebKit
-        return typeof Fuse._docEl.childNodes === 'function';
-      }
-
       function XPATH() {
         // true for all but IE
         return isHostObject(Fuse._doc, 'evaluate') &&
@@ -303,7 +298,6 @@
         'HTML_ELEMENT_CLASS':                        HTML_ELEMENT_CLASS,
         'OBJECT_PROTO':                              OBJECT_PROTO,
         'SELECTORS_API':                             SELECTORS_API,
-        'TYPEOF_NODELIST_IS_FUNCTION':               TYPEOF_NODELIST_IS_FUNCTION,
         'XPATH':                                     XPATH
       };
     })());

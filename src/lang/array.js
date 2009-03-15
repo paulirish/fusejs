@@ -1,30 +1,14 @@
   /*------------------------------ LANG: ARRAY -------------------------------*/
 
-  $A = (function() {
-    // Safari returns 'function' for HTMLCollection `typeof`
-    if (Feature('TYPEOF_NODELIST_IS_FUNCTION')) {
-      return function(iterable) {
-        if (!iterable) return [];    
-        // In Safari, only use the `toArray` method if it's not a NodeList.
-        // A NodeList is a function, has an function `item` property, and a numeric
-        // `length` property. Adapted from Google Doctype.
-        if (!(typeof iterable === 'function' && typeof iterable.length ===
-            'number' && typeof iterable.item === 'function') && iterable.toArray)
-          return iterable.toArray();
-        var length = iterable.length || 0, results = new Array(length);
-        while (length--) results[length] = iterable[length];
-        return results;
-      };
-    }
-
-    return function(iterable) {
-      if (!iterable) return [];
-      if (iterable.toArray) return iterable.toArray();
-      var length = iterable.length || 0, results = new Array(length);
-      while (length--) results[length] = iterable[length];
-      return results;
-    };
-  })();
+  $A = function(iterable) {
+    if (!iterable) return [];
+    // Safari 2.x will crash when accessing a non-existent property of a
+    // node list that contains a text node unless we use the `in` operator
+    if ('toArray' in iterable) return iterable.toArray();
+    var length = iterable.length || 0, results = new Array(length);
+    while (length--) results[length] = iterable[length];
+    return results;
+  };
 
   $w = function(string) {
     if (typeof string !== 'string') return [];
