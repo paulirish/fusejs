@@ -19,10 +19,10 @@
       (element.nodeType === 9 ? element : Fuse._doc);
   }
 
-  function concatList(list, other) {
-    var result = slice.call(list, 0), pad = list.length, length = other.length;
-    while (length--) result[pad + length] = other[length];
-    return result;
+  function concatList(list, otherList) {
+    var pad = list.length, length = otherList.length;
+    while (length--) list[pad + length] = otherList[length];
+    return list;
   }
 
   function prependList(list, value) {

@@ -22,8 +22,9 @@
         };
       }
       // bind with curry
-      args = slice.call(arguments, 1);
+      args = slice.call(arguments, 1); reset = args.length;
       return function() {
+      	args.length = reset; // reset arg length
         return __method.apply(thisArg, arguments.length ?
           concatList(args, arguments) : args);
       };
@@ -47,8 +48,9 @@
 
     function curry() {
       if (!arguments.length) return this;
-      var __method = this, args = slice.call(arguments, 0);
+      var __method = this, args = slice.call(arguments, 0), reset = args.length;
       return function() {
+        args.length = reset; // reset arg length
         return arguments.length
           ? __method.apply(this, concatList(args, arguments))
           : __method.apply(this, args);

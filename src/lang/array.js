@@ -97,7 +97,7 @@
     function flatten() {
       for (var i = 0, results = [], length = this.length; i < length; i++) {
         if (Object.isArray(this[i])) 
-          results = concatList(results, this[i].flatten());
+          concatList(results, this[i].flatten());
         else results.push(this[i]);
       }
       return results;

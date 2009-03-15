@@ -28,9 +28,10 @@ new Test.Unit.Runner({
   },
   
   testFunctionBind: function() {
+    var func = Fuse.emptyFunction;
+    
     function methodWithoutArguments() { return this.hi };
     function methodWithArguments()    { return this.hi + ',' + $A(arguments).join(',') };
-    var func = Fuse.emptyFunction;
 
     this.assertIdentical(func, func.bind());
     this.assertIdentical(func, func.bind(undefined));
@@ -40,16 +41,31 @@ new Test.Unit.Runner({
     this.assertEqual('with,arg1,arg2', methodWithArguments.bind({ hi: 'with' })('arg1','arg2'));
     this.assertEqual('withBindArgs,arg1,arg2',
       methodWithArguments.bind({ hi: 'withBindArgs' }, 'arg1', 'arg2')());
+
     this.assertEqual('withBindArgsAndArgs,arg1,arg2,arg3,arg4',
       methodWithArguments.bind({ hi: 'withBindArgsAndArgs' }, 'arg1', 'arg2')('arg3', 'arg4'));
+
+    // ensure private arg array is reset
+    var bound = methodWithArguments.bind({ hi: 'with' }, 'arg1', 'arg2');
+    bound('arg3', 'arg4');
+    this.assertEqual('with,arg1,arg2', bound());
+    
   },
   
   testFunctionCurry: function() {
-    var split = function(delimiter, string) { return string.split(delimiter); };
-    var splitOnColons = split.curry(":");
+    function split(delimiter, string) { return string.split(delimiter) };
+    function methodWithArguments()    { return $A(arguments).join(',') };
+
+    var splitOnColons = split.curry(':'),
+     curried = methodWithArguments.curry('arg1');
+
     this.assertNotIdentical(split, splitOnColons);
-    this.assertEnumEqual(split(":", "0:1:2:3:4:5"), splitOnColons("0:1:2:3:4:5"));
+    this.assertEnumEqual(split(':', '0:1:2:3:4:5'), splitOnColons('0:1:2:3:4:5'));
     this.assertIdentical(split, split.curry());
+    
+    // ensure private arg array is reset
+    curried('arg2', 'arg3');
+    this.assertEqual('arg1', curried());
   },
   
   testFunctionDelay: function() {

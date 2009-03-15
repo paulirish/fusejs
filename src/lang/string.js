@@ -63,8 +63,7 @@
           result += source.slice(0, 1);
           source  = source.slice(1);
           if (!source) {
-            if (!match.index) result +=
-              replacement.apply(null, concatList(match, [match.index, source]));
+            if (!match.index) result += replacement.apply(null, match);
             break;
           }
         }

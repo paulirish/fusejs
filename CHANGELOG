@@ -1,3 +1,5 @@
+* Optimize private method concatList() by no longer cloning the list being concatenated. [jddalton, Robert Kieffer]
+
 * Optimize Element#hasClassName. [Diego Perini]
 
 * Remove extraneous Safari 2 fork of the $A() utility method. [Prototype LH #595] [jddalton, kangax]
