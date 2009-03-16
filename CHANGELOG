@@ -1,3 +1,5 @@
+* Fix bug in Element#getOffsetParent caused when returning a null element and ensure AREA elements return their parent MAP element. [Diego Perini, jddalton]
+
 * Rename the `global` variable in String#replace to `isGlobal` as to not be confused with the environment's `global` object. [jddalton]
 
 * Optimize private method concatList() by no longer cloning the list being concatenated. [jddalton, Robert Kieffer]

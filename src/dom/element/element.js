@@ -281,23 +281,25 @@
       return { 'width': Element.getWidth(element), 'height': Element.getHeight(element) };
     }
 
+    /* http://www.w3.org/TR/cssom-view/#offset-attributes */
     function getOffsetParent(element) {
       element = $(element);
+
+      var original = element, nodeName = getNodeName(element);
+      if (nodeName === 'AREA') return Element.extend(element.parentNode); 
 
       // IE throws an error if the element is not in the document.
       if (Element.isFragment(element) || !element.offsetParent)
         return Element.extend(getDocument(element).body);
 
-      var nodeName;
       while (element = element.offsetParent) {
-        /* http://www.w3.org/TR/cssom-view/#offset-attributes */
         nodeName = getNodeName(element);
         if (nodeName === 'BODY'  || nodeName === 'HTML') break;
         if (nodeName === 'TABLE' || nodeName === 'TD' || nodeName === 'TH' ||
             Element.getStyle(element, 'position') !== 'static')
           return Element.extend(element);
       }
-      return Element.extend(getDocument(element).body);
+      return Element.extend(getDocument(original).body);
     }
 
     function identify(element) {
