@@ -19,6 +19,10 @@ getIframeDocument = function() {
   return element.contentDocument || element.contentWindow && element.contentWindow.document;
 },
 
+getIframeWindow = function() {
+  return window.frames[0];
+},
+
 isIframeDocument = function(doc) {
   return (doc.parentWindow || doc.defaultView).frameElement != null;
 },

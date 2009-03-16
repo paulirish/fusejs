@@ -5,16 +5,15 @@
 
     function getScrollOffsets() {
       // lazy define
-      if (typeof global.pageXOffset === 'number') {
-        this.getScrollOffsets = function() {
-          return Element._returnOffset(global.pageXOffset, global.pageYOffset);
-        };
-      } else {
-        this.getScrollOffsets = function() {
-          return Element._returnOffset(Fuse._root.scrollLeft, Fuse._root.scrollTop);
-        };
-      }
-      return this.getScrollOffsets();
+      return (this.getScrollOffsets =
+        typeof global.pageXOffset === 'number' ?
+          function() {
+            return Element._returnOffset(global.pageXOffset, global.pageYOffset);
+          } :
+          function() {
+            return Element._returnOffset(Fuse._root.scrollLeft, Fuse._root.scrollTop);
+          }
+      )();
     }
 
     return {

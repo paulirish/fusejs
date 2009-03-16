@@ -175,7 +175,7 @@
     function cumulativeScrollOffset(element, onlyAncestors) {
       element = $(element);
       var original = element, valueT = 0, valueL = 0,
-       nodeName = getNodeName(element);
+       nodeName = getNodeName(element),
        rootNodeName = getNodeName(Fuse._root);
 
       do {
@@ -210,31 +210,22 @@
       return Element._returnOffset(valueL, valueT);
     }
 
-    var viewportOffset = (function(forElement) {
-      if (Feature('ELEMENT_BOUNDING_CLIENT_RECT')) {
-        var backup = Fuse._docEl.style.cssText;
-        Fuse._docEl.style.cssText += ';margin:0';
-
-        // IE window's upper-left is at 2,2 (pixels) with respect
-        // to the true client, so its pad.left and pad.top will be 2.
-        var rect = Fuse._docEl.getBoundingClientRect(), pad = { 'left': 0, 'top': 0 };
-        if (Feature('ELEMENT_CLIENT_COORDS'))
-          pad = { 'left': Fuse._docEl.clientLeft, 'top': Fuse._docEl.clientTop };
-        Fuse._docEl.style.cssText = backup;
-
-        return function(element) {
-          element = $(element);
-          var r, valueT = 0, valueL = 0;
-          if (!Element.isFragment(element)) {
-            r = element.getBoundingClientRect();
-            valueT = Math.round(r.top)  - pad.top;
-            valueL = Math.round(r.left) - pad.left;
-         }
-          return Element._returnOffset(valueL, valueT);
-        };
-      }
-
-      return function(element) {
+    var viewportOffset = Feature('ELEMENT_BOUNDING_CLIENT_RECT') ?
+      function(element) {
+        element = $(element);
+        var rect, valueT = 0, valueL = 0;
+        if (!Element.isFragment(element)) {
+          // IE window's upper-left is at 2,2 (pixels) with respect
+          // to the true client when not in quirks mode.
+          rect = element.getBoundingClientRect();
+          valueT = Math.round(rect.top)  -
+            (getDocument(element).documentElement.clientTop  || 0);
+          valueL = Math.round(rect.left) -
+            (getDocument(element).documentElement.clientLeft || 0);
+        }
+        return Element._returnOffset(valueL, valueT);
+      } :
+      function(element) {
         element = $(element);
         var scrollOffset = Element.cumulativeScrollOffset(element, /*onlyAncestors*/ true),
          cumulativeOffset = Element.cumulativeOffset(element),
@@ -245,7 +236,6 @@
         valueL -= scrollOffset.left;
         return Element._returnOffset(valueL, valueT);
       };
-    })();
 
     return {
       'absolutize':             absolutize,

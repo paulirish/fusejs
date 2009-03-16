@@ -1,3 +1,5 @@
+* Make Element#viewportOffset work with elements in iframes, ensure `rootNodeName` is a declared locally in Element#cumulativeScrollOffset, and cleanup document.viewport.getScrollOffsets(). [jddalton]
+
 * Fix bug in Element#getOffsetParent caused when returning a null element and ensure AREA elements return their parent MAP element. [Diego Perini, jddalton]
 
 * Rename the `global` variable in String#replace to `isGlobal` as to not be confused with the environment's `global` object. [jddalton]

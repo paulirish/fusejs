@@ -1738,59 +1738,78 @@ new Test.Unit.Runner({
   },
   
   testViewportOffset: function() {
-    window.scrollTo(0, 0);
-    this.assertEnumEqual([10,10],
-      $('body_absolute').viewportOffset());
-    this.assertEnumEqual([20,20],
-      $('absolute_absolute').viewportOffset());
-    this.assertEnumEqual([20,20],
-      $('absolute_relative').viewportOffset());
-    this.assertEnumEqual([20,30],
-      $('absolute_relative_undefined').viewportOffset());
- 
-    // Element.viewportOffset is forked for element.getBoundingClientRect usage.
-    // Ensure each fork produces the same output when dealing with scroll offsets
-    // on form fields
-    var offsets = [
-      $('scrollOffset_input').viewportOffset(),
-      $('scrollOffset_textarea').viewportOffset()
-    ];
+    var msg,
+     windows   = [window, getIframeWindow()], 
+     documents = [document, getIframeDocument()];
+    
+    if (!isIframeAccessible()) documents.pop();
 
-    $('scrollOffset_input').scrollLeft    =
-    $('scrollOffset_textarea').scrollLeft =
-    $('scrollOffset_textarea').scrollTop  = 25;
+    documents.each(function(context, index) {
+      var window = windows[index];
+      msg = isIframeDocument(context) ? 'On iframe' : 'On document';
 
-    this.assertEnumEqual(offsets.first(), $('scrollOffset_input').viewportOffset(), 'With scroll offsets on input field'); 
-    this.assertEnumEqual(offsets.last(),  $('scrollOffset_textarea').viewportOffset(), 'With scroll offsets on textarea'); 
-
-    $('scrollOffset_input').scrollLeft    = 
-    $('scrollOffset_textarea').scrollLeft = 
-    $('scrollOffset_textarea').scrollTop  = 0;
-
-    // IE6 and lower do not support "fixed" positioned elements
-    if (!isIE6AndLower) {
-      window.scrollTo(0, 30);
-      $('absolute_fixed').scrollTop = 20;
-      this.assertEnumEqual([10, 10], $('absolute_fixed').viewportOffset());
-      
       window.scrollTo(0, 0);
-      $('absolute_fixed').scrollTop = 0;
-      this.assertEnumEqual([10, 10], $('absolute_fixed').viewportOffset());
-      
-      var offset = [], element = new Element('div');
-      this.assertNothingRaised(function() { offset = element.viewportOffset() });
-      this.assertEnumEqual([0,0], offset);
-      this.assertIdentical(0, offset.top);
-      this.assertIdentical(0, offset.left);
-      
-      var offset = $('absolute_fixed').viewportOffset();
-      this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());  
-      window.scrollTo(0,30);
-      this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());  
-      window.scrollTo(0,80);
-      this.assertEnumEqual([offset.left,offset.top], $('absolute_fixed').viewportOffset());
-    }
-    window.scrollTo(0,0);
+
+      this.assertEnumEqual([10,10],
+        getElement('body_absolute', context).viewportOffset(), msg);
+      this.assertEnumEqual([20,20],
+        getElement('absolute_absolute', context).viewportOffset(), msg);
+      this.assertEnumEqual([20,20],
+        getElement('absolute_relative', context).viewportOffset(), msg);
+      this.assertEnumEqual([20,30],
+        getElement('absolute_relative_undefined', context).viewportOffset(), msg);
+   
+      // Element.viewportOffset is forked for element.getBoundingClientRect usage.
+      // Ensure each fork produces the same output when dealing with scroll offsets
+      // on form fields
+      var offsets = [
+        getElement('scrollOffset_input', context).viewportOffset(),
+        getElement('scrollOffset_textarea', context).viewportOffset()
+      ];
+  
+      getElement('scrollOffset_input', context).scrollLeft    =
+      getElement('scrollOffset_textarea', context).scrollLeft =
+      getElement('scrollOffset_textarea', context).scrollTop  = 25;
+  
+      this.assertEnumEqual(offsets.first(),
+        getElement('scrollOffset_input', context).viewportOffset(),
+          'With scroll offsets on input field', msg);
+          
+      this.assertEnumEqual(offsets.last(),
+        getElement('scrollOffset_textarea', context).viewportOffset(),
+          'With scroll offsets on textarea', msg);
+  
+      getElement('scrollOffset_input').scrollLeft    = 
+      getElement('scrollOffset_textarea').scrollLeft = 
+      getElement('scrollOffset_textarea').scrollTop  = 0;
+  
+      // IE6 and lower do not support "fixed" positioned elements
+      if (!isIE6AndLower) {
+        window.scrollTo(0, 30);
+
+        var element = getElement('absolute_fixed', context);
+        element.scrollTop = 20;
+        this.assertEnumEqual([10, 10], element.viewportOffset(), msg);
+        
+        window.scrollTo(0, 0);
+        element.scrollTop = 0;
+        this.assertEnumEqual([10, 10], element.viewportOffset(), msg);
+        
+        var offset = [], element = new Element('div');
+        this.assertNothingRaised(function() { offset = element.viewportOffset() }, msg);
+        this.assertEnumEqual([0,0], offset, msg);
+        this.assertIdentical(0, offset.top, msg);
+        this.assertIdentical(0, offset.left, msg);
+        
+        var offset = element.viewportOffset();
+        this.assertEnumEqual([offset.left,offset.top], element.viewportOffset(), msg);
+        window.scrollTo(0,30);
+        this.assertEnumEqual([offset.left,offset.top], element.viewportOffset(), msg);
+        window.scrollTo(0,80);
+        this.assertEnumEqual([offset.left,offset.top], element.viewportOffset(), msg);
+      }
+      window.scrollTo(0,0);
+    }, this);
   },
   
   testOffsetParent: function() {

@@ -101,11 +101,6 @@
           isHostObject(global.Element, 'prototype');
       }
 
-      function ELEMENT_CLIENT_COORDS() {
-        // true for IE
-        return typeof Fuse._docEl.clientLeft === 'number';
-      }
-
       function ELEMENT_COMPUTED_STYLE() {
         // true for all but IE
         return isHostObject(Fuse._doc, 'defaultView') &&
@@ -277,7 +272,6 @@
         'ELEMENT_BOUNDING_CLIENT_RECT':              ELEMENT_BOUNDING_CLIENT_RECT,
         'ELEMENT_CHILDREN_NODELIST':                 ELEMENT_CHILDREN_NODELIST,
         'ELEMENT_CLASS':                             ELEMENT_CLASS,
-        'ELEMENT_CLIENT_COORDS':                     ELEMENT_CLIENT_COORDS,
         'ELEMENT_COMPARE_DOCUMENT_POSITION':         ELEMENT_COMPARE_DOCUMENT_POSITION,
         'ELEMENT_COMPUTED_STYLE':                    ELEMENT_COMPUTED_STYLE,
         'ELEMENT_CONTAINS':                          ELEMENT_CONTAINS,
