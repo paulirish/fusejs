@@ -7,24 +7,11 @@
     'names': { 'htmlFor':'for', 'className':'class' }
   };
 
-  (function(Methods) {
+  (function() {
     var ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS =
       Bug('ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS');
 
-    // No use of $ in this function in order to keep things fast.
-    // Used by the Selector class.  
-    function hasAttribute(element, attribute) {
-      var node = element.getAttributeNode(attribute);
-      return !!node && node.specified;
-    }
-
-    function staticHasAttribute(element, attribute) {
-      if (element.hasAttribute)
-        return element.hasAttribute(attribute);
-      return Methods.Simulated.hasAttribute(element, attribute);
-    }
-
-    function readAttribute(element, name) {
+    this.readAttribute = function readAttribute(element, name) {
       element = $(element);
       var result, T = Element.Attribute;
       name = T.names[name] || name;
@@ -33,9 +20,9 @@
         result = T.read[name](element, name);
       else result = (result = element.getAttributeNode(name)) && result.value;
       return result || '';
-    }
+    };
 
-    function writeAttribute(element, name, value) {
+    this.writeAttribute = function writeAttribute(element, name, value) {
       element = $(element);
       var node, contentName, attr,
        attributes = { }, T = Element.Attribute;
@@ -62,13 +49,27 @@
         }
       }
       return element;
-    }
+    };
+  }).call(Element.Methods);
 
-    Element.hasAttribute   = staticHasAttribute;
-    Methods.readAttribute  = readAttribute;
-    Methods.writeAttribute = writeAttribute;
-    Methods.Simulated.hasAttribute = hasAttribute;
-  })(Element.Methods);
+  // No use of $ in this function in order to keep things fast.
+  // Used by the Selector class. 
+  Element.Methods.Simulated.hasAttribute = (function() {
+    function hasAttribute(element, attribute) {
+      var node = element.getAttributeNode(attribute);
+      return !!node && node.specified;
+    }
+    return hasAttribute;
+  })();
+
+  Element.hasAttribute = (function() {
+    function hasAttribute(element, attribute) {
+      if (element.hasAttribute)
+        return element.hasAttribute(attribute);
+      return Element.Simulated.hasAttribute(element, attribute);
+    }
+    return hasAttribute;
+  })();
 
   /*--------------------------------------------------------------------------*/
 

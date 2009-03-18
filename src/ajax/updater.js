@@ -1,7 +1,8 @@
   /*------------------------------ AJAX: UPDATER -----------------------------*/
 
-  Ajax.Updater = Class.create(Ajax.Request, (function() {
-    function initialize(container, url, options) {
+  Ajax.Updater = Class.create(Ajax.Request);
+  (function() {
+    this.initialize = function initialize(container, url, options) {
       this.container = {
         'success': (container.success || container),
         'failure': (container.failure || (container.success ? null : container))
@@ -17,9 +18,9 @@
 
       // this._super() equivalent
       Ajax.Request.prototype.initialize.call(this, url, options);
-    }
+    };
 
-    function updateContent(responseText) {
+    this.updateContent = function updateContent(responseText) {
       var receiver = this.container[this.success() ? 'success' : 'failure'], 
           options = this.options;
 
@@ -35,10 +36,8 @@
         } 
         else receiver.update(responseText);
       }
-    }
-
-    return {
-      'initialize':    initialize,
-      'updateContent': updateContent
     };
-  })());
+
+    // prevent JScript bug with named function expressions
+    var initialize = null, updateContent = null;
+  }).call(Ajax.Updater.prototype);

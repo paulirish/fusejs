@@ -1,11 +1,7 @@
   /*------------------------------ LANG: CLASS -------------------------------*/
+  /* Based on work by Alex Arnell, Joey Hurst, John Resig, and Prototype core */
 
-  /* Based on work by Alex Arnell, Joey Hurst, John Resig, and Prototype core. */
   Class = (function() {
-    var matchSuper = Feature('FUNCTION_TO_STRING_RETURNS_SOURCE')
-      ? /\bthis\._super\b/
-      : { 'test': function() { return true } };
-
     function create() {
       var i = 0, parent = null, properties = slice.call(arguments, 0);
       if (typeof properties[0] === 'function')
@@ -34,6 +30,16 @@
       klass.prototype.constructor = klass;
       return klass;
     }
+
+    return {
+      'create': create
+    };
+  })();
+
+  Class.Methods = (function() {
+    var matchSuper = Feature('FUNCTION_TO_STRING_RETURNS_SOURCE')
+      ? /\bthis\._super\b/
+      : { 'test': function() { return true } };
 
     function addMethods(source) {
       var prototype = this.prototype,
@@ -69,9 +75,6 @@
     }
 
     return {
-      'create': create,
-      'Methods': {
-        'addMethods': addMethods
-      }
+      'addMethods': addMethods
     };
   })();

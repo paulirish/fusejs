@@ -1,6 +1,8 @@
+  /*---------------------------------- NODE ----------------------------------*/
+
   if (!global.Node) Node = { };
 
-  if (!Node.ELEMENT_NODE) {
+  if (typeof Node.ELEMENT_NODE !== 'number') {
     // DOM level 2 ECMAScript Language Binding
     Object._extend(Node, {
       'ELEMENT_NODE':                1,

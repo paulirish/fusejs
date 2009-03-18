@@ -1,29 +1,29 @@
   /*-------------------------- FORM: TIMED OBSERVER --------------------------*/
 
-  Abstract.TimedObserver = Class.create(Timer, (function() {
-    function initialize(element, interval, callback) {
+  Abstract.TimedObserver = Class.create(Timer);
+  
+  (function() {
+    this.initialize = function initialize(element, interval, callback) {
       // this._super() equivalent
       Timer.prototype.initialize.call(this, callback, interval);
 
       this.element = $(element);
       this.lastValue = this.getValue();
       this.start();
-    }
+    };
 
-    function execute() {
+    this.execute = function execute() {
       var value = this.getValue();
       if ((typeof this.lastValue === 'string' && typeof value === 'string') ?
           this.lastValue != value : String(this.lastValue) != String(value)) {
         this.callback(this.element, value);
         this.lastValue = value;
       }
-    }
-
-    return {
-      'initialize': initialize,
-      'execute':    execute
     };
-  })());
+
+    // prevent JScript bug with named function expressions
+    var initialize = null, execute = null;
+  }).call(Abstract.TimedObserver.prototype);
 
   Field.Observer = 
   Field.TimedObserver = Class.create(Abstract.TimedObserver, (function() {

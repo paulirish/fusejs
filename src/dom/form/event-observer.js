@@ -1,51 +1,54 @@
   /*-------------------------- FORM: EVENT OBSERVER --------------------------*/
 
-  Abstract.EventObserver = Class.create((function() {
-    function initialize(element, callback) {
-      this.element = $(element);
-      this.onElementEvent = this.onElementEvent.bind(this);
+  Abstract.EventObserver = Class.create();
 
-      if (getNodeName(this.element) === 'FORM')
-        return this.registerFormCallbacks();
-
-      var member, name = element.name, i = 0;
-      this.group = (name && $$(element.nodeName +
-        '[name="' + name + '"]')) || [element];
-
-      this.callback = callback;
-      this.lastValue = this.getValue();
-
-      while (member = this.group[i++])
-        this.registerCallback(member);
-    }
-
-    function onElementEvent() {
-      var value = this.getValue();
-      if (this.lastValue === value) return;
-      this.callback(this.element, value);
-      this.lastValue = value;
-    }
-
-    function registerCallback(element) {
-      if (!element.type) return;
-      var eventName = 'change', type = element.type;
-      if (type === 'checkbox' || type === 'radio')
-        eventName = 'click';
-      Event.observe(element, eventName, this.onElementEvent);
-    }
-
-    function registerFormCallbacks() {
-      var element, elements = Form.getElements(this.element), i= 0;
-      while (element = elements[i++]) this.registerCallback(element);
-    }
-
-    return {
-      'initialize':            initialize,
-      'onElementEvent':        onElementEvent,
-      'registerCallback':      registerCallback,
-      'registerFormCallbacks': registerFormCallbacks
+  (function() {
+    Abstract.EventObserver.prototype = {
+      'initialize': function initialize(element, callback) {
+        this.element = $(element);
+        this.onElementEvent = this.onElementEvent.bind(this);
+  
+        if (getNodeName(this.element) === 'FORM')
+          return this.registerFormCallbacks();
+  
+        var member, name = element.name, i = 0;
+        this.group = (name && $$(element.nodeName +
+          '[name="' + name + '"]')) || [element];
+  
+        this.callback = callback;
+        this.lastValue = this.getValue();
+  
+        while (member = this.group[i++])
+          this.registerCallback(member);
+      },
+  
+      'onElementEvent': function onElementEvent() {
+        var value = this.getValue();
+        if (this.lastValue === value) return;
+        this.callback(this.element, value);
+        this.lastValue = value;
+      },
+  
+      'registerCallback': function registerCallback(element) {
+        if (!element.type) return;
+        var eventName = 'change', type = element.type;
+        if (type === 'checkbox' || type === 'radio')
+          eventName = 'click';
+        Event.observe(element, eventName, this.onElementEvent);
+      },
+  
+      'registerFormCallbacks': function registerFormCallbacks() {
+        var element, elements = Form.getElements(this.element), i= 0;
+        while (element = elements[i++]) this.registerCallback(element);
+      }
     };
-  })());
+
+    // prevent JScript bug with named function expressions
+    var initialize =         null,
+     onElementEvent =        null,
+     registerCallback =      null,
+     registerFormCallbacks = null;
+  })();
 
   Field.EventObserver = Class.create(Abstract.EventObserver, (function() {
     function getValue() {

@@ -1,15 +1,18 @@
   /*-------------------------------- ELEMENT ---------------------------------*/
 
-  $ = function(element) {
-    if (arguments.length > 1) {
-      for (var i = 0, elements = [], length = arguments.length; i < length; i++)
-        elements.push($(arguments[i]));
-      return elements;
+  $ = (function() {
+    function $(element) {
+      if (arguments.length > 1) {
+        for (var i = 0, elements = [], length = arguments.length; i < length; i++)
+          elements.push($(arguments[i]));
+        return elements;
+      }
+      if (typeof element === 'string')
+        element = Fuse._doc.getElementById(element || '');
+      return Element.extend(element);
     }
-    if (typeof element === 'string')
-      element = Fuse._doc.getElementById(element || '');
-    return Element.extend(element);
-  };
+    return $;
+  })();
 
   /*--------------------------------------------------------------------------*/
 
@@ -259,272 +262,293 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Element.Methods = (function() {
-    // removes whitespace-only text node children
-    function cleanWhitespace(element) {
-      element = $(element);
-      var nextNode, node = element.firstChild;
-      while (node) {
-        nextNode = node.nextSibling;
-        if (node.nodeType === 3 && !/\S/.test(node.nodeValue))
-          element.removeChild(node);
-        node = nextNode;
-      }
-      return element;
-    }
+  (function() {
+    Element.Methods = {
+      'ByTag': { },
 
-    function empty(element) {
-      return $(element).innerHTML.blank();
-    }
+      'Simulated': { },
 
-    function getDimensions(element) {
-      return { 'width': Element.getWidth(element), 'height': Element.getHeight(element) };
-    }
-
-    /* http://www.w3.org/TR/cssom-view/#offset-attributes */
-    function getOffsetParent(element) {
-      element = $(element);
-
-      var original = element, nodeName = getNodeName(element);
-      if (nodeName === 'AREA') return Element.extend(element.parentNode); 
-
-      // IE throws an error if the element is not in the document.
-      if (Element.isFragment(element) || !element.offsetParent)
-        return Element.extend(getDocument(element).body);
-
-      while (element = element.offsetParent) {
-        nodeName = getNodeName(element);
-        if (nodeName === 'BODY'  || nodeName === 'HTML') break;
-        if (nodeName === 'TABLE' || nodeName === 'TD' || nodeName === 'TH' ||
-            Element.getStyle(element, 'position') !== 'static')
-          return Element.extend(element);
-      }
-      return Element.extend(getDocument(original).body);
-    }
-
-    function identify(element) {
-      var id = Element.readAttribute(element, 'id');
-      if (id) return id;
-
-      var ownerDoc = element.ownerDocument;
-      do { id = 'anonymous_element_' + Element.idCounter++ }
-      while (ownerDoc.getElementById(id));
-      Element.writeAttribute(element, 'id', id);
-      return id;
-    }
-
-    function inspect(element) {
-      element = $(element);
-      var attribute, value, result = '<' + element.nodeName.toLowerCase(),
-       translation = { 'id':'id', 'className':'class' };
-
-      for (var property in translation) {
-        attribute = translation[property];
-        value = (element[property] || '').toString();
-        if (value) result += ' ' + attribute + '=' + value.inspect(true);
-      }
-      return result + '>';
-    }
-
-    function insert(element, insertions) {
-      element = $(element);
-      var content, fragment, insertContent, position, nodeName, type = typeof insertions;
-      if (insertions && (type === 'string' || type === 'number' ||
-          _isInsertable(insertions) || insertions.toElement || insertions.toHTML)) {
-        insertions = { 'bottom':insertions };
-      }
-
-      for (position in insertions) {
-        content  = insertions[position];
-        position = position.toLowerCase();
-        insertContent = Element._insertionTranslations[position];
-
-        if (content) {
-          if (content.toElement) content = content.toElement();
-          if (_isInsertable(content)) {
-            insertContent(element, content);
-            continue;
-          }
-          content = Object.toHTML(content);
+      // removes whitespace-only text node children
+      'cleanWhitespace': function cleanWhitespace(element) {
+        element = $(element);
+        var nextNode, node = element.firstChild;
+        while (node) {
+          nextNode = node.nextSibling;
+          if (node.nodeType === 3 && !/\S/.test(node.nodeValue))
+            element.removeChild(node);
+          node = nextNode;
         }
-        else continue;
-
-        nodeName = getNodeName(position === 'before' || position === 'after'
-          ? element.parentNode : element);
-
-        fragment = Element._getContentFromAnonymousElement(element.ownerDocument, nodeName, content.stripScripts());
-        insertContent(element, fragment);
-        content.evalScripts.bind(content).defer();
-      }
-      return element;
-    }
-
-    function hide(element) {
-      element = $(element);
-      var display = element.style.display;
-      if (display && display !== 'none')
-        element._originalDisplay = display;
-      element.style.display = 'none';
-      return element;
-    }
-
-    function show(element) {
-      element = $(element);
-      var display = element.style.display;
-      if (display === 'none')
-        element.style.display = element._originalDisplay || '';
-      element._originalDisplay = null;
-      return element;
-    }
-
-    function scrollTo(element) {
-      var pos = Element.cumulativeOffset(element);
-      global.scrollTo(pos[0], pos[1]);
-      return $(element);
-    }
-
-    function remove(element) {
-      element = $(element);
-      element.parentNode &&
-      element.parentNode.removeChild(element);
-      return element;
-    }
-
-    function replace(element, content) {
-      element = $(element);
-      if (!content)
-        return element.parentNode.removeChild(element);
-      if (content.toElement)
-        content = content.toElement();
-      else if (!_isInsertable(content)) {
-        content = Object.toHTML(content);
-        content.evalScripts.bind(content).defer();
-        content = _createContextualFragment(element, content.stripScripts());
-      }
-      return element.parentNode.replaceChild(content, element);
-    }
-
-    function toggle(element) {
-      return Element[Element.visible(element) ? 'hide' : 'show'](element);
-    }
-
-    function visible(element) {
-      return $(element).style.display != 'none';
-    }
-
-    function wrap(element, wrapper, attributes) {
-      element = $(element);
-      if (Object.isElement(wrapper))
-        $(wrapper).writeAttribute(attributes);
-      else if (typeof wrapper === 'string')
-        wrapper = new Element(wrapper, attributes);
-      else wrapper = new Element('div', wrapper);
-      if (element.parentNode)
-        element.parentNode.replaceChild(wrapper, element);
-      wrapper.appendChild(element);
-      return wrapper;
-    }
-
-    var _createContextualFragment = Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT') ?
-      function(element, content) {
-        var range = element.ownerDocument.createRange();
-        range.selectNode(element);
-        return range.createContextualFragment(content);
-      } :
-      function(element, content) {
-        return Element._getContentFromAnonymousElement(element.ownerDocument,
-          getNodeName(element.parentNode), content);
+        return element;
       },
 
-    _isInsertable = (function() {
+      'empty': function empty(element) {
+        return $(element).innerHTML.blank();
+      },
+
+      'getDimensions': function getDimensions(element) {
+        return { 'width': Element.getWidth(element), 'height': Element.getHeight(element) };
+      },
+
+      'getOffsetParent': function getOffsetParent(element) {
+        // http://www.w3.org/TR/cssom-view/#offset-attributes
+        element = $(element);
+        var original = element, nodeName = getNodeName(element);
+        if (nodeName === 'AREA') return Element.extend(element.parentNode); 
+
+        // IE throws an error if the element is not in the document.
+        if (Element.isFragment(element) || !element.offsetParent)
+          return Element.extend(getDocument(element).body);
+
+        while (element = element.offsetParent) {
+          nodeName = getNodeName(element);
+          if (nodeName === 'BODY'  || nodeName === 'HTML') break;
+          if (nodeName === 'TABLE' || nodeName === 'TD' || nodeName === 'TH' ||
+              Element.getStyle(element, 'position') !== 'static')
+            return Element.extend(element);
+        }
+        return Element.extend(getDocument(original).body);
+      },
+
+      'identify': function identify(element) {
+        var id = Element.readAttribute(element, 'id');
+        if (id) return id;
+
+        var ownerDoc = element.ownerDocument;
+        do { id = 'anonymous_element_' + Element.idCounter++ }
+        while (ownerDoc.getElementById(id));
+        Element.writeAttribute(element, 'id', id);
+        return id;
+      },
+
+      'inspect': function inspect(element) {
+        element = $(element);
+        var attribute, value, result = '<' + element.nodeName.toLowerCase(),
+         translation = { 'id':'id', 'className':'class' };
+
+        for (var property in translation) {
+          attribute = translation[property];
+          value = (element[property] || '').toString();
+          if (value) result += ' ' + attribute + '=' + value.inspect(true);
+        }
+        return result + '>';
+      },
+
+      'isFragment':  (function() {
+        var isFragment = Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION') ?
+          function isFragment(element) {
+            element = $(element);
+            var nodeType = element.nodeType;
+            return nodeType === 11 || (nodeType === 1 &&
+              element.ownerDocument.all[element.sourceIndex] !== element);
+          } :
+          function isFragment(element) {
+            element = $(element);
+            var nodeType = element.nodeType;
+            return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
+              Element.descendantOf(element, element.ownerDocument)));
+          };
+        return isFragment;
+      })(),
+
+      'hide': function hide(element) {
+        element = $(element);
+        var display = element.style.display;
+        if (display && display !== 'none')
+          element._originalDisplay = display;
+        element.style.display = 'none';
+        return element;
+      },
+
+      'show': function show(element) {
+        element = $(element);
+        var display = element.style.display;
+        if (display === 'none')
+          element.style.display = element._originalDisplay || '';
+        element._originalDisplay = null;
+        return element;
+      },
+
+      'scrollTo': function scrollTo(element) {
+        var pos = Element.cumulativeOffset(element);
+        global.scrollTo(pos[0], pos[1]);
+        return $(element);
+      },
+
+      'remove': function remove(element) {
+        element = $(element);
+        element.parentNode &&
+        element.parentNode.removeChild(element);
+        return element;
+      },
+
+      'toggle': function toggle(element) {
+        return Element[Element.visible(element) ? 'hide' : 'show'](element);
+      },
+
+      'visible': function visible(element) {
+        return $(element).style.display != 'none';
+      },
+
+      'wrap': function wrap(element, wrapper, attributes) {
+        element = $(element);
+        if (Object.isElement(wrapper))
+          $(wrapper).writeAttribute(attributes);
+        else if (typeof wrapper === 'string')
+          wrapper = new Element(wrapper, attributes);
+        else wrapper = new Element('div', wrapper);
+        if (element.parentNode)
+          element.parentNode.replaceChild(wrapper, element);
+        wrapper.appendChild(element);
+        return wrapper;
+      }
+    };
+
+    // prevent JScript bug with named function expressions
+    var cleanWhitespace = null,
+     empty =              null,
+     getDimensions =      null,
+     getOffsetParent =    null,
+     hide =               null,
+     identify =           null,
+     inspect =            null,
+     isFragment =         null,
+     remove =             null,
+     scrollTo =           null,
+     show =               null,
+     toggle =             null,
+     visible =            null,
+     wrap =               null;
+  })();
+
+  Object._extend(Element.Methods, (function() {
+
+    var _isInsertable = (function() {
       // comment, document fragment, document type, element, and text nodes are insertable
       var insertable = { '1':1, '3':1, '8':1, '10':1, '11':1 };
       return function(node) {
         return insertable[node.nodeType] === 1;
       }
-    })(),
+    })();
 
-    isFragment = Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION') ?
-      function (element) {
-        element = $(element);
-        var nodeType = element.nodeType;
-        return nodeType === 11 || (nodeType === 1 &&
-          element.ownerDocument.all[element.sourceIndex] !== element);
-      } :
-      function (element) {
-        element = $(element);
-        var nodeType = element.nodeType;
-        return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
-          Element.descendantOf(element, element.ownerDocument)));
-      };
+    return {
+      'insert': (function() {
+         function insert(element, insertions) {
+          element = $(element);
+          var content, fragment, insertContent, position, nodeName, type = typeof insertions;
+          if (insertions && (type === 'string' || type === 'number' ||
+              _isInsertable(insertions) || insertions.toElement || insertions.toHTML)) {
+            insertions = { 'bottom':insertions };
+          }
 
-    update = Bug('ELEMENT_SELECT_INNERHTML_BUGGY') ||
+          for (position in insertions) {
+            content  = insertions[position];
+            position = position.toLowerCase();
+            insertContent = Element._insertionTranslations[position];
+
+            if (content) {
+              if (content.toElement) content = content.toElement();
+              if (_isInsertable(content)) {
+                insertContent(element, content);
+                continue;
+              }
+              content = Object.toHTML(content);
+            }
+            else continue;
+
+            nodeName = getNodeName(position === 'before' || position === 'after'
+              ? element.parentNode : element);
+
+            fragment = Element._getContentFromAnonymousElement(
+              element.ownerDocument, nodeName, content.stripScripts());
+
+            insertContent(element, fragment);
+            content.evalScripts.bind(content).defer();
+          }
+          return element;
+        }
+        return insert;
+      })(),
+
+      'replace': (function() {
+        var _createContextualFragment = Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT') ?
+          function(element, content) {
+            var range = element.ownerDocument.createRange();
+            range.selectNode(element);
+            return range.createContextualFragment(content);
+          } :
+          function(element, content) {
+            return Element._getContentFromAnonymousElement(element.ownerDocument,
+              getNodeName(element.parentNode), content);
+          };
+
+        function replace(element, content) {
+          element = $(element);
+          if (!content)
+            return element.parentNode.removeChild(element);
+          if (content.toElement)
+            content = content.toElement();
+          else if (!_isInsertable(content)) {
+            content = Object.toHTML(content);
+            content.evalScripts.bind(content).defer();
+            content = _createContextualFragment(element, content.stripScripts());
+          }
+          return element.parentNode.replaceChild(content, element);
+        }
+
+        return replace;
+      })(),
+
+      'update': (function() {
+         var update =
+             Bug('ELEMENT_SELECT_INNERHTML_BUGGY') ||
              Bug('ELEMENT_TABLE_INNERHTML_BUGGY')  ||
              Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY') ?
 
-      function(element, content) {
-        element = $(element);
-        var nodeName = getNodeName(element),
-         isBuggy = Element._insertionTranslations.tags[nodeName];
+          function update(element, content) {
+            element = $(element);
+            var nodeName = getNodeName(element),
+             isBuggy = Element._insertionTranslations.tags[nodeName];
 
-        // remove children
-        if (isBuggy) {
-          while (element.lastChild)
-            element.removeChild(element.lastChild);
-        } else element.innerHTML = '';
+            // remove children
+            if (isBuggy) {
+              while (element.lastChild)
+                element.removeChild(element.lastChild);
+            } else element.innerHTML = '';
 
-        if (content) {
-          if (content.toElement) content = content.toElement();
-          if (_isInsertable(content)) element.appendChild(content);
-          else {
-            content = Object.toHTML(content);
-            if (isBuggy)
-              element.appendChild(Element._getContentFromAnonymousElement(element.ownerDocument, nodeName, content.stripScripts()));
-            else element.innerHTML = content.stripScripts();
-            content.evalScripts.bind(content).defer();
-          }
-        }
-        return element;
-      } :
-      function(element, content) {
-        element = $(element);
-        if (content) {
-          if (content.toElement)
-            content = content.toElement();
-          if (_isInsertable(content)) {
-            element.innerHTML = '';
-            element.appendChild(content);
+            if (content) {
+              if (content.toElement) content = content.toElement();
+              if (_isInsertable(content)) element.appendChild(content);
+              else {
+                content = Object.toHTML(content);
+                if (isBuggy)
+                  element.appendChild(Element._getContentFromAnonymousElement(
+                    element.ownerDocument, nodeName, content.stripScripts()));
+                else element.innerHTML = content.stripScripts();
+                content.evalScripts.bind(content).defer();
+              }
+            }
             return element;
-          }
-          content = Object.toHTML(content);
-          element.innerHTML = content.stripScripts();
-          content.evalScripts.bind(content).defer();
-        } else element.innerHTML = '';
-        return element;
-      };
-
-    return {
-      'ByTag':           { },
-      'Simulated':       { },
-      'cleanWhitespace': cleanWhitespace,
-      'empty':           empty,
-      'getDimensions':   getDimensions,
-      'getOffsetParent': getOffsetParent,
-      'hide':            hide,
-      'identify':        identify,
-      'inspect':         inspect,
-      'insert':          insert,
-      'isFragment':      isFragment,
-      'remove':          remove,
-      'replace':         replace,
-      'scrollTo':        scrollTo,
-      'show':            show,
-      'toggle':          toggle,
-      'update':          update,
-      'visible':         visible,
-      'wrap':            wrap
+          } :
+          function update(element, content) {
+            element = $(element);
+            if (content) {
+              if (content.toElement)
+                content = content.toElement();
+              if (_isInsertable(content)) {
+                element.innerHTML = '';
+                element.appendChild(content);
+                return element;
+              }
+              content = Object.toHTML(content);
+              element.innerHTML = content.stripScripts();
+              content.evalScripts.bind(content).defer();
+            } else element.innerHTML = '';
+            return element;
+          };
+        return update;
+      })()
     };
-  })();
+  })());
 
   // define Element#getWidth() and Element#getHeight()
   $w('Width Height')._each(function(D) {
