@@ -1,6 +1,7 @@
   /*----------------------------- LANG: TEMPLATE -----------------------------*/
 
-  Template = Class.create();
+  global.Template = Class.create();
+
   Template.Pattern = /(\\)?(#\{([^}]*)\})/;
 
   (function() {

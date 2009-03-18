@@ -1,6 +1,6 @@
   /*---------------------------------- AJAX ----------------------------------*/
 
-  Ajax = (function() {
+  global.Ajax = (function() {
     // Check ActiveXObject first because IE7+ implementation of
     // XMLHttpRequest doesn't work with local files.
     var getTransport = isHostObject(global, 'ActiveXObject')

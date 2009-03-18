@@ -1,6 +1,6 @@
   /*------------------------ LANG: TIMER -----------------------*/
 
-  Timer = Class.create();
+  global.Timer = Class.create();
 
   (function() {
     Timer.prototype = {

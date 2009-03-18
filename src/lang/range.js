@@ -1,13 +1,13 @@
   /*------------------------------- LANG: RANGE ------------------------------*/
 
-  $R = (function() {
+  global.$R = (function() {
     function $R(start, end, exclusive) {
       return new ObjectRange(start, end, exclusive);
     }
     return $R;
   })();
 
-  ObjectRange = Class.create(Enumerable);
+  global.ObjectRange = Class.create(Enumerable);
 
   (function() {
     this._each = (function() {

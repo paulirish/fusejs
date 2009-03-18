@@ -1,6 +1,6 @@
   /*---------------------------------- EVENT ---------------------------------*/
 
-  if (!global.Event) Event = { };
+  if (!global.Event) global.Event = { };
 
   Event.cache = { };
 

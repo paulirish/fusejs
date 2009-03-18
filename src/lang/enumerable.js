@@ -1,9 +1,9 @@
   /*---------------------------- LANG: ENUMERABLE ----------------------------*/
 
-  $break = { };
+  global.$break = { };
 
   (function() {
-    Enumerable = {
+    global.Enumerable = {
       'detect': function detect(callback, thisArg) {
         var result;
         this.each(function(value, index, iterable) {

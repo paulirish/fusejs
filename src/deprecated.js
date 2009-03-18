@@ -1,15 +1,15 @@
   /*------------------------------- DEPRECATED -------------------------------*/
 
-  $continue = new Error('"throw $continue" is deprecated, use "return" instead.');
+  global.$continue = new Error('"throw $continue" is deprecated, use "return" instead.');
+
+  global.Toggle = { 'display': Element.toggle };
 
   Element.Methods.childOf = Element.Methods.descendantOf;
 
   Hash.toQueryString = Object.toQueryString;
 
-  Toggle = { 'display': Element.toggle };
-
   (function() {
-    Insertion = {
+    global.Insertion = {
       'Before': function Before(element, content) {
         return Element.insert(element, { 'before':content });
       },
@@ -37,7 +37,7 @@
   // This should be moved to script.aculo.us; notice the deprecated methods
   // further below, that map to the newer Element methods.
   (function () {
-    Position = {
+    global.Position = {
       // set to true if needed, warning: firefox performance problems
       // NOT needed for page scrolling, only if draggable contained in
       // scrollable elements

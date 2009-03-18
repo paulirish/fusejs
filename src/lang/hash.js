@@ -1,13 +1,14 @@
   /*------------------------------- LANG: HASH -------------------------------*/
 
-  $H = (function() {
+  global.$H = (function() {
     function $H(object) {
       return new Hash(object);
     }
     return $H;
   })();
 
-  Hash = Class.create(Enumerable);
+  global.Hash = Class.create(Enumerable);
+
   Hash.from = $H;
 
   (function() {

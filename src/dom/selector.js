@@ -4,7 +4,7 @@
    * part of YUI-Ext version 0.40, distributed under the terms of an MIT-style
    * license.  Please see http://www.yui-ext.com/ for more information. */
 
-  $$ = function() {
+  global.$$ = function() {
     return Selector.findChildElements(Fuse._doc, slice.call(arguments, 0));
   };
 
@@ -20,7 +20,7 @@
     };
   }
 
-  Selector = Class.create((function() {
+  global.Selector = Class.create((function() {
     function initialize(expression) {
       this.expression = expression.strip();
 

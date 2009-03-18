@@ -1,6 +1,6 @@
   /*---------------------------------- FORM ----------------------------------*/
 
-  $F = (function() {
+  global.$F = (function() {
     function $F(element) {
       element = $(element);
       var s = Field.Serializers,
@@ -11,7 +11,7 @@
   })();
 
   (function() {
-    Form = {
+    global.Form = {
       'reset': function reset(form) {
         form = $(form);
         form.reset();
@@ -187,7 +187,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    Field = Form.Element = {
+    global.Field = Form.Element = {
       'focus': function focus(element) {
         element = $(element);
         // avoid IE errors when element

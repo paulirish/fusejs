@@ -1,6 +1,6 @@
   /*------------------------------- LANG: TRY --------------------------------*/
 
-  Try = (function() {
+  global.Try = (function() {
     function these() {
       var result, length = arguments.length;
       while (i < length) {

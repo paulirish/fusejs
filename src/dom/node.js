@@ -1,6 +1,6 @@
   /*---------------------------------- NODE ----------------------------------*/
 
-  if (!global.Node) Node = { };
+  if (!global.Node) global.Node = { };
 
   if (typeof Node.ELEMENT_NODE !== 'number') {
     // DOM level 2 ECMAScript Language Binding

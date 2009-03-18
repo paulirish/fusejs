@@ -1,6 +1,6 @@
   /*-------------------------------- ELEMENT ---------------------------------*/
 
-  $ = (function() {
+  global.$ = (function() {
     function $(element) {
       if (arguments.length > 1) {
         for (var i = 0, elements = [], length = arguments.length; i < length; i++)

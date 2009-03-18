@@ -15,6 +15,8 @@
   }
 
   function getDocument(element) { // assume element is not null
+    // Check for `ownerDocument` first because an element of a document fragment
+    // will have a `document` property that is NOT the pages document object.
     return element.ownerDocument || element.document ||
       (element.nodeType === 9 ? element : Fuse._doc);
   }
@@ -33,7 +35,7 @@
 
   /*---------------------------- FUSE OBJECT ---------------------------------*/
 
-  Fuse = {
+  global.Fuse = {
     '_body':  { },
     '_root':  { },
     '_div':   document.createElement('div'),

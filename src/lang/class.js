@@ -1,7 +1,7 @@
   /*------------------------------ LANG: CLASS -------------------------------*/
   /* Based on work by Alex Arnell, Joey Hurst, John Resig, and Prototype core */
 
-  Class = (function() {
+  global.Class = (function() {
     function create() {
       var i = 0, parent = null, properties = slice.call(arguments, 0);
       if (typeof properties[0] === 'function')

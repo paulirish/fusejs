@@ -1,6 +1,6 @@
   /*------------------------------ LANG: ARRAY -------------------------------*/
 
-  $A = (function() {
+  global.$A = (function() {
     function $A(iterable) {
       if (!iterable) return [];
       // Safari 2.x will crash when accessing a non-existent property of a
@@ -13,7 +13,7 @@
     return $A;
   })();
 
-  $w = (function() {
+  global.$w = (function() {
    function $w(string) {
       if (typeof string !== 'string') return [];
       string = string.strip();
