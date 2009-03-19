@@ -102,46 +102,44 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    Object._extend(String.prototype, {
-      'interpolate': function interpolate(object, pattern) {
-        return new Template(this, pattern).evaluate(object);
-      },
+    this.interpolate = function interpolate(object, pattern) {
+      return new Template(this, pattern).evaluate(object);
+    };
 
-      'succ': function succ() {
-        return this.slice(0, this.length - 1) +
-          String.fromCharCode(this.charCodeAt(this.length - 1) + 1);
-      },
+    this.succ = function succ() {
+      return this.slice(0, this.length - 1) +
+        String.fromCharCode(this.charCodeAt(this.length - 1) + 1);
+    };
 
-      'times': function times(count) {
-        return count < 1 ? '' : new Array(count + 1).join(this);
-      },
+    this.times = function times(count) {
+      return count < 1 ? '' : new Array(count + 1).join(this);
+    };
 
-      'toArray': function toArray() {
-        return this.split('');
-      },
+    this.toArray = function toArray() {
+      return this.split('');
+    };
 
-      'toQueryParams': function toQueryParams(separator) {
-        var hash = { }, match = this.strip().match(/([^?#]*)(#.*)?$/);
-        if (!match) return hash;
+    this.toQueryParams = function toQueryParams(separator) {
+      var hash = { }, match = this.strip().match(/([^?#]*)(#.*)?$/);
+      if (!match) return hash;
 
-        var pair, key, value, i = 0,
-         pairs = match[1].split(separator || '&'), length = pairs.length;
+      var pair, key, value, i = 0,
+       pairs = match[1].split(separator || '&'), length = pairs.length;
 
-        for ( ; i < length; i++) {
-          if (!(pair = pairs[i].split('='))[0]) continue;
-          key = decodeURIComponent(pair.shift());
-          value = pair.length > 1 ? pair.join('=') : pair[0];
-          if (value != null) value = decodeURIComponent(value);
+      for ( ; i < length; i++) {
+        if (!(pair = pairs[i].split('='))[0]) continue;
+        key = decodeURIComponent(pair.shift());
+        value = pair.length > 1 ? pair.join('=') : pair[0];
+        if (value != null) value = decodeURIComponent(value);
 
-          if (Object.hasKey(hash, key)) {
-            if (!Object.isArray(hash[key])) hash[key] = [hash[key]];
-            hash[key].push(value);
-          }
-          else hash[key] = value;
+        if (Object.hasKey(hash, key)) {
+          if (!Object.isArray(hash[key])) hash[key] = [hash[key]];
+          hash[key].push(value);
         }
-        return hash;
+        else hash[key] = value;
       }
-    });
+      return hash;
+    };
 
     // alias
     this.parseQuery = this.toQueryParams;
@@ -157,77 +155,73 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    Object._extend(String.prototype, {
-      'evalJSON': function evalJSON(sanitize) {
-        var json = this.unfilterJSON();
-        try {
-          if (!sanitize || json.isJSON()) return eval('(' + json + ')');
-        } catch (e) { }
-        throw new SyntaxError('Badly formed JSON string: ' + this.inspect());
-      },
+    this.evalJSON = function evalJSON(sanitize) {
+      var json = this.unfilterJSON();
+      try {
+        if (!sanitize || json.isJSON()) return eval('(' + json + ')');
+      } catch (e) { }
+      throw new SyntaxError('Badly formed JSON string: ' + this.inspect());
+    };
 
-      'isJSON': function isJSON() {
-        var str = this;
-        if (str.blank()) return false;
-        str = this.replace(/\\./g, '@').replace(/"[^"\\\n\r]*"/g, '');
-        return (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/).test(str);
-      },
+    this.isJSON = function isJSON() {
+      var str = this;
+      if (str.blank()) return false;
+      str = this.replace(/\\./g, '@').replace(/"[^"\\\n\r]*"/g, '');
+      return (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/).test(str);
+    };
 
-      'toJSON': function toJSON() {
-        return this.inspect(true);
-      },
+    this.toJSON = function toJSON() {
+      return this.inspect(true);
+    };
 
-      'unfilterJSON': function unfilterJSON(filter) {
-        return this.sub(filter || Fuse.JSONFilter, '#{1}');
-      }
-    });
+    this.unfilterJSON = function unfilterJSON(filter) {
+      return this.sub(filter || Fuse.JSONFilter, '#{1}');
+    };
 
     // prevent JScript bug with named function expressions
     var evalJSON =  null,
      isJSON =       null,
      toJSON =       null,
      unfilterJSON = null;
-  })();
+  }).call(String.prototype);
 
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    Object._extend(String.prototype, {
-      'blank': function blank() {
-        return /^\s*$/.test(this);
-      },
+    this.blank = function blank() {
+      return /^\s*$/.test(this);
+    };
 
-      'empty': function empty() {
-        return !this.length;
-      },
+    this.empty = function empty() {
+      return !this.length;
+    };
 
-      'endsWith': function endsWith(pattern) {
-        var d = this.length - pattern.length;
-        return d >= 0 && this.lastIndexOf(pattern) === d;
-      },
+    this.endsWith = function endsWith(pattern) {
+      var d = this.length - pattern.length;
+      return d >= 0 && this.lastIndexOf(pattern) === d;
+    };
 
-      'include': function include(pattern) {
-        return this.indexOf(pattern) > -1;
-      },
+    this.include = function include(pattern) {
+      return this.indexOf(pattern) > -1;
+    };
 
-      'inspect': function inspect(useDoubleQuotes) {
-        var escapedString = this.replace(/[\x00-\x1f\\]/g, function(match) {
-          var character = String.specialChar[match];
-          return character ? character : '\\u00' + match.charCodeAt().toPaddedString(2, 16);
-        });
-        if (useDoubleQuotes) return '"' + escapedString.replace(/"/g, '\\"') + '"';
-        return "'" + escapedString.replace(/'/g, '\\\'') + "'";
-      },
+    this.inspect = function inspect(useDoubleQuotes) {
+      var escapedString = this.replace(/[\x00-\x1f\\]/g, function(match) {
+        var character = String.specialChar[match];
+        return character ? character : '\\u00' + match.charCodeAt().toPaddedString(2, 16);
+      });
+      if (useDoubleQuotes) return '"' + escapedString.replace(/"/g, '\\"') + '"';
+      return "'" + escapedString.replace(/'/g, '\\\'') + "'";
+    };
 
-      'scan': function scan(pattern, callback) {
-        this.gsub(pattern, callback);
-        return String(this);
-      },
+    this.scan = function scan(pattern, callback) {
+      this.gsub(pattern, callback);
+      return String(this);
+    };
 
-      'startsWith': function startsWith(pattern) {
-        return this.indexOf(pattern) === 0;
-      }
-    });
+    this.startsWith = function startsWith(pattern) {
+      return this.indexOf(pattern) === 0;
+    };
 
     // prevent JScript bug with named function expressions
     var blank =    null,
@@ -237,49 +231,47 @@
       inspect =    null,
       scan =       null,
       startsWith = null;
-  })();
+  }).call(String.prototype);
 
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    Object._extend(String.prototype, {
-      'camelize': (function() {
-        function _replacer(match, captured) {
-          return captured.toUpperCase();
-        }
-        function camelize() {
-          return this.replace(/\-(\w|$)/g, _replacer);
-        }
-        return camelize;
-      })(),
-
-      'capitalize': function capitalize() {
-        return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
-      },
-
-      'dasherize': function dasherize() {
-        return this.replace(/_/g,'-');
-      },
-
-      'truncate': function truncate(length, truncation) {
-        length = length || 30;
-        truncation = (typeof truncation === 'undefined') ? '...' : truncation;
-        return this.length > length ? 
-          this.slice(0, length - truncation.length) + truncation : String(this);
-      },
-
-      'underscore': function underscore() {
-        return this.replace(/::/g, '/').replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-          .replace(/([a-z\d])([A-Z])/g, '$1_$2').replace(/-/g,'_').toLowerCase();
+    this.camelize = (function() {
+      function _replacer(match, captured) {
+        return captured.toUpperCase();
       }
-    });
+      function camelize() {
+        return this.replace(/\-(\w|$)/g, _replacer);
+      }
+      return camelize;
+    })();
+
+    this.capitalize = function capitalize() {
+      return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
+    };
+
+    this.dasherize = function dasherize() {
+      return this.replace(/_/g,'-');
+    };
+
+    this.truncate = function truncate(length, truncation) {
+      length = length || 30;
+      truncation = (typeof truncation === 'undefined') ? '...' : truncation;
+      return this.length > length ? 
+        this.slice(0, length - truncation.length) + truncation : String(this);
+    };
+
+    this.underscore = function underscore() {
+      return this.replace(/::/g, '/').replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+        .replace(/([a-z\d])([A-Z])/g, '$1_$2').replace(/-/g,'_').toLowerCase();
+    };
 
     // prevent JScript bug with named function expressions
     var capitalize = null,
      dasherize =     null,
      truncate =      null,
      underscore =    null;
-  })();
+  }).call(String.prototype);
 
   /*--------------------------------------------------------------------------*/
 

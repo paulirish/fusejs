@@ -197,56 +197,53 @@
 
   /*--------------------------------------------------------------------------*/
 
+  Event.Methods = { };
+
   (function() {
-    Event.Methods = {
-      'element': function element(event) {
-        event = Event.extend(event);
-        var node = event.target, type = event.type,
-         currentTarget = event.currentTarget;
+    this.element = function element(event) {
+      event = Event.extend(event);
+      var node = event.target, type = event.type,
+       currentTarget = event.currentTarget;
 
-        // Firefox screws up the "click" event when moving between radio buttons
-        // via arrow keys. It also screws up the "load" and "error" events on images,
-        // reporting the document as the target instead of the original image.
+      // Firefox screws up the "click" event when moving between radio buttons
+      // via arrow keys. It also screws up the "load" and "error" events on images,
+      // reporting the document as the target instead of the original image.
 
-        // Note: Fired events don't have a currentTarget
-        if (currentTarget && (/^(load|error)$/.test(type) ||
-           (getNodeName(currentTarget) === 'INPUT' &&
-            currentTarget.type === 'radio' && type === 'click'))) {
-          node = currentTarget;
-        }
-        // Fix a Safari bug where a text node gets passed as the target of an
-        // anchor click rather than the anchor itself.
-        return node && Element.extend(node.nodeType === 3 ?
-          node.parentNode : node);
-      },
-
-      'findElement': function findElement(event, expression) {
-        var element = Event.element(event);
-        if (!expression) return element;
-        var elements = prependList(Element.ancestors(element), element);
-        return Selector.findElement(elements, expression, 0);
-      },
-
-      'pointer': function pointer(event) {
-        return { 'x': Event.pointerX(event), 'y': Event.pointerY(event) };
-      },
-
-      'stop': function stop(event) {
-        // Set a "stopped" property so that a custom event can be inspected
-        // after the fact to determine whether or not it was stopped.
-        event = Event.extend(event);
-        event.stopped = true;
-        event.preventDefault();
-        event.stopPropagation();
+      // Note: Fired events don't have a currentTarget
+      if (currentTarget && (/^(load|error)$/.test(type) ||
+         (getNodeName(currentTarget) === 'INPUT' &&
+          currentTarget.type === 'radio' && type === 'click'))) {
+        node = currentTarget;
       }
+      // Fix a Safari bug where a text node gets passed as the target of an
+      // anchor click rather than the anchor itself.
+      return node && Element.extend(node.nodeType === 3 ?
+        node.parentNode : node);
+    };
+
+    this.findElement = function findElement(event, expression) {
+      var element = Event.element(event);
+      if (!expression) return element;
+      var elements = prependList(Element.ancestors(element), element);
+      return Selector.findElement(elements, expression, 0);
+    };
+
+    this.pointer = function pointer(event) {
+      return { 'x': Event.pointerX(event), 'y': Event.pointerY(event) };
+    };
+
+    this.stop = function stop(event) {
+      // Set a "stopped" property so that a custom event can be inspected
+      // after the fact to determine whether or not it was stopped.
+      event = Event.extend(event);
+      event.stopped = true;
+      event.preventDefault();
+      event.stopPropagation();
     };
 
     // prevent JScript bug with named function expressions
-    var element =  null,
-     findElement = null,
-     pointer =     null,
-     stop =        null;
-  })();
+    var element = null, findElement = null, pointer = null, stop = null;
+  }).call(Event.Methods);
 
   (function() {
     var _isButton = function(event, mouseButton) {
@@ -266,25 +263,21 @@
       )(event, mouseButton);
     };
 
-    Object._extend(Event.Methods, {
-      'isLeftClick': function isLeftClick(event) {
-        return _isButton(event, 'left');
-      },
+    this.isLeftClick = function isLeftClick(event) {
+      return _isButton(event, 'left');
+    };
 
-      'isMiddleClick': function isMiddleClick(event) {
-        return _isButton(event, 'middle');
-      },
+    this.isMiddleClick = function isMiddleClick(event) {
+      return _isButton(event, 'middle');
+    };
 
-      'isRightClick': function isRightClick(event) {
-        return _isButton(event, 'right');
-      }
-    });
+    this.isRightClick = function isRightClick(event) {
+      return _isButton(event, 'right');
+    };
 
     // prevent JScript bug with named function expressions
-    var isLeftClick = null,
-     isMiddleClick =  null,
-     isRightClick =   null;
-  })();
+    var isLeftClick = null, isMiddleClick = null, isRightClick = null;
+  }).call(Event.Methods);
 
   // lazy define Event.pointerX() and Event.pointerY()
   (function(m) {
@@ -424,113 +417,93 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    var _addCache        = Event.Temp.addCache,
-     _addObserver        = Event.Temp.addObserver,
-     _createEvent        = Event.Temp.createEvent,
-     _fireEvent          = Event.Temp.fireEvent,
-     _getCacheID         = Event.Temp.getCacheID,
-     _getNewCacheID      = Event.Temp.getNewCacheID,
-     _removeCacheAtIndex = Event.Temp.removeCacheAtIndex,
-     _removeObserver     = Event.Temp.removeObserver;
+    var _addCache        = this.Temp.addCache,
+     _addObserver        = this.Temp.addObserver,
+     _createEvent        = this.Temp.createEvent,
+     _fireEvent          = this.Temp.fireEvent,
+     _getCacheID         = this.Temp.getCacheID,
+     _getNewCacheID      = this.Temp.getNewCacheID,
+     _removeCacheAtIndex = this.Temp.removeCacheAtIndex,
+     _removeObserver     = this.Temp.removeObserver;
 
-    Object._extend(Event, {
-      'KEY_BACKSPACE': 8,
-      'KEY_DELETE':    46,
-      'KEY_DOWN':      40,
-      'KEY_END':       35,
-      'KEY_ESC':       27,
-      'KEY_HOME':      36,
-      'KEY_INSERT':    45,
-      'KEY_LEFT':      37,
-      'KEY_PAGEDOWN':  34,
-      'KEY_PAGEUP':    33,
-      'KEY_RETURN':    13,
-      'KEY_RIGHT':     39,
-      'KEY_TAB':       9,
-      'KEY_UP':        38,
+    this.fire = function fire(element, eventName, memo) {
+      element = $(element);
+      var event = _createEvent(element, Event.CUSTOM_EVENT_NAME);
+      if (!event) return false;
+      event.eventName = eventName;
+      event.memo = memo || { };
+      _fireEvent(element, event);
+      return Event.extend(event);
+    };
 
-      'fire': function fire(element, eventName, memo) {
-        element = $(element);
-        var event = _createEvent(element, Event.CUSTOM_EVENT_NAME);
-        if (!event) return false;
-        event.eventName = eventName;
-        event.memo = memo || { };
-        _fireEvent(element, event);
-        return Event.extend(event);
-      },
+    this.getEventID = function getEventID() {
+      // handle calls from Event object
+      if (this != global) {
+        var element = arguments[0];
+        return (typeof element === 'string' || element.nodeType === 1)
+          ? _getCacheID($(element))
+          : _getCacheID(element);
+      }
 
-      'getEventID': function getEventID() {
-        // handle calls from Event object
-        if (this != global) {
-          var element = arguments[0];
-          return typeof element === 'string' || element.nodeType === 1
-            ? _getCacheID($(element))
-            : _getCacheID(element);
-        }
+      // private id variable
+      var id = _getNewCacheID(arguments[0]);
+      // overwrite element.getEventID and execute
+      return (arguments[0].getEventID = function() {
+        // if cache doesn't match, request a new id
+        var c = Event.cache[id];
+        if (c && c.element !== this)
+          id = _getNewCacheID(this);
+        return id;
+      })();
+    };
 
-        // private id variable
-        var id = _getNewCacheID(arguments[0]);
-        // overwrite element.getEventID and execute
-        return (arguments[0].getEventID = function() {
-          // if cache doesn't match, request a new id
-          var c = Event.cache[id];
-          if (c && c.element !== this)
-            id = _getNewCacheID(this);
-          return id;
-        })();
-      },
+    this.observe = function observe(element, eventName, handler) {
+      element = $(element);
+      var dispatcher = _addCache(element, eventName, handler);
+      if (!dispatcher) return element;
+      _addObserver(element, eventName, dispatcher);
+      return element;
+    };
 
-      'observe': function observe(element, eventName, handler) {
-        element = $(element);
-        var dispatcher = _addCache(element, eventName, handler);
-        if (!dispatcher) return element;
-        _addObserver(element, eventName, dispatcher);
-        return element;
-      },
+    this.stopObserving = function stopObserving(element, eventName, handler) {
+      element = $(element);
+      eventName = (typeof eventName === 'string') ? eventName : null;
+      var id = _getCacheID(element), c = Event.cache[id];
 
-      'stopObserving': function stopObserving(element, eventName, handler) {
-        element = $(element);
-        eventName = (typeof eventName === 'string') ? eventName : null;
-        var id = _getCacheID(element), c = Event.cache[id];
+      if (!c || !c.events) return element;
+      var ec = c.events[eventName];
 
-        if (!c || !c.events) return element;
-        var ec = c.events[eventName];
-
-        if (ec && handler == null) {
-          // If an event name is passed without a handler,
-          // we stop observing all handlers of that type.
-          var length = ec.handlers.length;
-          while (length--) Event.stopObserving(element, eventName, length);
-          return element;
-        }
-        else if (!eventName) {
-          // If both the event name and the handler are omitted,
-          // we stop observing _all_ handlers on the element.
-          for (var eventName in c.events)
-            Event.stopObserving(element, eventName);
-          return element;
-        }
-
-        var dispatcher = ec.dispatcher,
-         foundAt = (typeof handler === 'number') ?
-          handler : ec.handlers.indexOf(handler);
-
-        if (foundAt === -1) return element;
-        _removeCacheAtIndex(id, eventName, foundAt);
-
-        if (!Event.cache[id] || !Event.cache[id].events[eventName])
-          _removeObserver(element, eventName, dispatcher);
-
+      if (ec && handler == null) {
+        // If an event name is passed without a handler,
+        // we stop observing all handlers of that type.
+        var length = ec.handlers.length;
+        while (length--) Event.stopObserving(element, eventName, length);
         return element;
       }
-    });
+      else if (!eventName) {
+        // If both the event name and the handler are omitted,
+        // we stop observing _all_ handlers on the element.
+        for (var eventName in c.events)
+          Event.stopObserving(element, eventName);
+        return element;
+      }
+
+      var dispatcher = ec.dispatcher,
+       foundAt = (typeof handler === 'number') ?
+         handler : ec.handlers.indexOf(handler);
+
+      if (foundAt === -1) return element;
+      _removeCacheAtIndex(id, eventName, foundAt);
+
+      if (!Event.cache[id] || !Event.cache[id].events[eventName])
+      _removeObserver(element, eventName, dispatcher);
+
+      return element;
+    };
 
     // prevent JScript bug with named function expressions
-    var fire =       null,
-     getEventID =    null,
-     observe =       null,
-     stopObserving = null;
-  })();
+    var fire = null, getEventID = null, observe = null, stopObserving = null;
+  }).call(Event);
 
   /*--------------------------------------------------------------------------*/
 
@@ -584,6 +557,23 @@
   delete Event.Temp;
 
   Object.extend(Event, Event.Methods);
+
+  Object._extend(Event, {
+    'KEY_BACKSPACE': 8,
+    'KEY_DELETE':    46,
+    'KEY_DOWN':      40,
+    'KEY_END':       35,
+    'KEY_ESC':       27,
+    'KEY_HOME':      36,
+    'KEY_INSERT':    45,
+    'KEY_LEFT':      37,
+    'KEY_PAGEDOWN':  34,
+    'KEY_PAGEUP':    33,
+    'KEY_RETURN':    13,
+    'KEY_RIGHT':     39,
+    'KEY_TAB':       9,
+    'KEY_UP':        38
+  });
 
   Object._extend(Element.Methods, {
     'fire':          Event.fire,

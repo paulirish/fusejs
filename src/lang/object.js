@@ -117,137 +117,135 @@
   })();
 
   (function() {
-    Object._extend(Object, {
-      'clone': function clone(object) {
-        return Object.extend({ }, object);
-      },
+    this.clone = function clone(object) {
+      return Object.extend({ }, object);
+    };
 
-      'each': function each(object, callback, thisArg) {
-        try {
-          Object._each(object, function(value, key, object) {
-            callback.call(thisArg, value, key, object);
-          });
-        } catch (e) {
-          if (e !== $break) throw e;
-        }
-        return object;
-      },
-
-      'inspect': function inspect(object) {
-        if (typeof object === 'undefined') return 'undefined';
-        if (object === null) return 'null';
-        if (typeof object.inspect === 'function') return object.inspect();
-
-        try {
-          return String(object);
-        } catch (e) {
-          if (e.constructor === RangeError) return '...';
-          throw e;
-        }
-      },
-
-      'isElement': function isElement(value) {
-        return !!value && value.nodeType === 1;
-      },
-
-      'isHash': function isHash(value) {
-        return !!value && value.constructor === Hash;
-      },
-
-      'isPrimitive': function isPrimitive(value) {
-        // ECMA-3.1 Draft 4.3.2
-        var type = typeof value;
-        return value == null || type === 'boolean' || type === 'number' || type === 'string';
-      },
-
-      'isSameOrigin': function isSameOrigin(url) {
-        // https://developer.mozilla.org/En/Same_origin_policy_for_JavaScript
-        var domain = document.domain,
-         protocol = global.location.protocol,
-         // http://www.iana.org/assignments/port-numbers
-         defaultPort = (protocol === 'ftp:') ? 21 :
-           (protocol === 'https:') ? 443 : 80,
-         // #{protocol}//#{hostname}#{port}
-         parts = String(url)
-           .match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^/:$]+)(?:\:(\d+))?/) || [];
-
-        return !parts[0] || (parts[1] === protocol &&
-          parts[2].endsWith(domain) && (parts[3] || 
-            defaultPort) === (global.location.port || defaultPort));
-      },
-
-      'isUndefined': function isUndefined(value) {
-        return typeof value === 'undefined';
-      },
-
-      'toHTML': function toHTML(object) {
-        return object && typeof object.toHTML === 'function'
-          ? object.toHTML()
-          : String.interpret(object);
-      },
-
-      'toJSON': function toJSON(object) {
-        var type = typeof object;
-        switch (type) {
-          case 'undefined':
-          case 'function':
-          case 'unknown': return;
-          case 'boolean': return object.toString();
-        }
-
-        if (object === null) return 'null';
-        if (typeof object.toJSON === 'function') return object.toJSON();
-        if (Object.isElement(object)) return;
-
-        var results = [];
-        Object._each(object, function(value, key) {
-          value = Object.toJSON(value);
-          if (typeof value !== 'undefined')
-            results.push(key.toJSON() + ': ' + value);
+    this.each = function each(object, callback, thisArg) {
+      try {
+        Object._each(object, function(value, key, object) {
+          callback.call(thisArg, value, key, object);
         });
-        return '{' + results.join(', ') + '}';
-      },
-
-      'toQueryPair': function toQueryPair(key, value) {
-        if (typeof value === 'undefined') return key;
-        return key + '=' + encodeURIComponent(String.interpret(value));
-      },
-
-      'toQueryString': function toQueryString(object) {
-        var toQueryPair = Object.toQueryPair, results = [];
-        Object._each(object, function(value, key) {
-          key = encodeURIComponent(key);
-          if (value && typeof value === 'object') {
-            if (Object.isArray(value))
-              concatList(results, value.map(toQueryPair.curry(key)));
-          } else results.push(toQueryPair(key, value));
-        });
-        return results.join('&');
-      },
-
-      'keys': function keys(object) {
-        // ECMA-3.1 Draft 15.2.3.14
-        if (Object.isPrimitive(object))
-          throw new TypeError;
-        var results = [];
-        Object._each(object, function(value, key) {
-          if (Object.hasKey(object, key))
-            results.push(key);
-        });
-        return results;
-      },
-
-      'values': function values(object) {
-        if (Object.isPrimitive(object))
-          throw new TypeError;
-        var results = [];
-        Object._each(object, function(value, key) {
-          if (Object.hasKey(object, key))
-            results.push(value);
-        });
-        return results;
+      } catch (e) {
+        if (e !== $break) throw e;
       }
-    });
+      return object;
+    };
+
+    this.inspect = function inspect(object) {
+      if (typeof object === 'undefined') return 'undefined';
+      if (object === null) return 'null';
+      if (typeof object.inspect === 'function') return object.inspect();
+
+      try {
+        return String(object);
+      } catch (e) {
+        if (e.constructor === RangeError) return '...';
+        throw e;
+      }
+    };
+
+    this.isElement = function isElement(value) {
+      return !!value && value.nodeType === 1;
+    };
+
+    this.isHash = function isHash(value) {
+      return !!value && value.constructor === Hash;
+    };
+
+    this.isPrimitive = function isPrimitive(value) {
+      // ECMA-3.1 Draft 4.3.2
+      var type = typeof value;
+      return value == null || type === 'boolean' || type === 'number' || type === 'string';
+    };
+
+    this.isSameOrigin = function isSameOrigin(url) {
+      // https://developer.mozilla.org/En/Same_origin_policy_for_JavaScript
+      var domain = document.domain,
+       protocol = global.location.protocol,
+       // http://www.iana.org/assignments/port-numbers
+       defaultPort = (protocol === 'ftp:') ? 21 :
+         (protocol === 'https:') ? 443 : 80,
+       // #{protocol}//#{hostname}#{port}
+       parts = String(url)
+         .match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^/:$]+)(?:\:(\d+))?/) || [];
+
+      return !parts[0] || (parts[1] === protocol &&
+        parts[2].endsWith(domain) && (parts[3] || 
+          defaultPort) === (global.location.port || defaultPort));
+    };
+
+    this.isUndefined = function isUndefined(value) {
+      return typeof value === 'undefined';
+    };
+
+    this.toHTML = function toHTML(object) {
+      return object && typeof object.toHTML === 'function'
+        ? object.toHTML()
+        : String.interpret(object);
+    };
+
+    this.toJSON = function toJSON(object) {
+      var type = typeof object;
+      switch (type) {
+        case 'undefined':
+        case 'function':
+        case 'unknown': return;
+        case 'boolean': return object.toString();
+      }
+
+      if (object === null) return 'null';
+      if (typeof object.toJSON === 'function') return object.toJSON();
+      if (Object.isElement(object)) return;
+
+      var results = [];
+      Object._each(object, function(value, key) {
+        value = Object.toJSON(value);
+        if (typeof value !== 'undefined')
+          results.push(key.toJSON() + ': ' + value);
+      });
+      return '{' + results.join(', ') + '}';
+    };
+
+    this.toQueryPair = function toQueryPair(key, value) {
+      if (typeof value === 'undefined') return key;
+      return key + '=' + encodeURIComponent(String.interpret(value));
+    };
+
+    this.toQueryString = function toQueryString(object) {
+      var toQueryPair = Object.toQueryPair, results = [];
+      Object._each(object, function(value, key) {
+        key = encodeURIComponent(key);
+        if (value && typeof value === 'object') {
+          if (Object.isArray(value))
+            concatList(results, value.map(toQueryPair.curry(key)));
+        } else results.push(toQueryPair(key, value));
+      });
+      return results.join('&');
+    };
+
+    this.keys = function keys(object) {
+      // ECMA-3.1 Draft 15.2.3.14
+      if (Object.isPrimitive(object))
+        throw new TypeError;
+      var results = [];
+      Object._each(object, function(value, key) {
+        if (Object.hasKey(object, key))
+          results.push(key);
+      });
+      return results;
+    };
+
+    this.values = function values(object) {
+      if (Object.isPrimitive(object))
+        throw new TypeError;
+      var results = [];
+      Object._each(object, function(value, key) {
+        if (Object.hasKey(object, key))
+          results.push(value);
+      });
+      return results;
+    };
 
     // prevent JScript bug with named function expressions
     var clone =      null,
@@ -264,32 +262,31 @@
      toQueryString = null,
      toHTML =        null,
      values =        null;
-  })();
+  }).call(Object);
 
   (function() {
     // used to access the an object's internal [[Class]] property
     var toString = Object.prototype.toString;
-    Object._extend(Object, {
-      'isArray': function isArray(value) {
-        return toString.call(value) === '[object Array]';
-      },
 
-     'isFunction': function isFunction(value) {
-        return toString.call(value) === '[object Function]';
-      },
+    this.isArray = function isArray(value) {
+      return toString.call(value) === '[object Array]';
+    };
 
-      'isNumber': function isNumber(value) {
-        return toString.call(value) === '[object Number]' && isFinite(value);
-      },
+    this.isFunction = function isFunction(value) {
+      return toString.call(value) === '[object Function]';
+    };
 
-      'isRegExp': function isRegExp(value) {
-        return toString.call(value) === '[object RegExp]';
-      },
+    this.isNumber = function isNumber(value) {
+      return toString.call(value) === '[object Number]' && isFinite(value);
+    };
 
-      'isString': function isString(value) {
-        return toString.call(value) === '[object String]';
-      }
-    });
+    this.isRegExp = function isRegExp(value) {
+      return toString.call(value) === '[object RegExp]';
+    };
+
+    this.isString = function isString(value) {
+      return toString.call(value) === '[object String]';
+    };
 
     // prevent JScript bug with named function expressions
     var isArray = null,
@@ -297,4 +294,4 @@
      isNumber =   null,
      isRegExp =   null,
      isString =   null;
-  })();
+  }).call(Object);

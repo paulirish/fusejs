@@ -13,7 +13,7 @@
   RegExp.specialChar = { 's': '\\s' };
 
   if (Bug('REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY')) {
-    RegExp.specialChar.s = [];
+    RegExp.specialChar.s = ['\\s'];
 
     [ /* Whitespace */
       '\x09', '\x0B', '\x0C', '\x20', '\xA0',
@@ -30,10 +30,10 @@
         RegExp.specialChar.s.push(chr);
     });
 
-    RegExp.specialChar.s = '[\\s' + RegExp.specialChar.s.join('') + ']';
+    RegExp.specialChar.s = '[' + RegExp.specialChar.s.join('') + ']';
   }
 
-  Object._extend(RegExp.prototype, (function() {
+  (function() {
     function clone(options) {
        options = Object._extend({
          'global':     this.global,
@@ -47,8 +47,6 @@
         (options.multiline  ? 'm' : ''));
     }
 
-    return {
-      'clone': clone,
-      'match': RegExp.prototype.test
-    };
-  })());
+    this.clone = clone;
+    this.match = this.test;
+  }).call(RegExp.prototype);

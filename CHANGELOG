@@ -1,3 +1,5 @@
+* Fix coding pattern so function expressions will work in Safari 2. [jddalton]
+
 * Remove undeclared assignments for ECMA 3.1 strict mode compliance. [jddalton, kangax]
 
 * Change coding pattern to utilize named function expressions and reduce FuseJS's memory footprint. [jddalton, kangax]

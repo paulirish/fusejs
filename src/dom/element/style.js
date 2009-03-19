@@ -1,128 +1,128 @@
   /*----------------------------- ELEMENT: STYLE -----------------------------*/
 
   (function() {
-    Object._extend(Element.Methods, {
-      'classNames': function classNames(element) {
-        return new Element.ClassNames(element);
-      },
+    this.classNames = function classNames(element) {
+      return new Element.ClassNames(element);
+    };
 
-      'hasClassName': function hasClassName(element, className) {
-        element = $(element);
-        var elementClassName = element.className;
-        return (elementClassName.length > 0 && (elementClassName === className || 
-          (' ' + elementClassName + ' ').indexOf(' ' + className + ' ') > -1));
-      },
+    this.hasClassName = function hasClassName(element, className) {
+      element = $(element);
+      var elementClassName = element.className;
+      return (elementClassName.length > 0 && (elementClassName === className || 
+        (' ' + elementClassName + ' ').indexOf(' ' + className + ' ') > -1));
+    };
 
-      'addClassName': function addClassName(element, className) {
+    this.addClassName = function addClassName(element, className) {
+      element = $(element);
+      if (!Element.hasClassName(element, className))
+        element.className += (element.className ? ' ' : '') + className;
+      return element;
+    };
+
+    this.removeClassName = function removeClassName(element, className) {
+      element = $(element);
+      element.className = element.className.replace(
+        new RegExp('(^|\\s+)' + className + '(\\s+|$)'), ' ').strip();
+      return element;
+    };
+
+    this.toggleClassName = function toggleClassName(element, className) {
+      return Element[Element.hasClassName(element, className) ?
+        'removeClassName' : 'addClassName'](element, className);
+    };
+
+    this.setStyle = function setStyle(element, styles) {
+      element = $(element);
+      var elementStyle = element.style;
+      if (typeof styles === 'string') {
+        element.style.cssText += ';' + styles;
+        return styles.include('opacity')
+          ? Element.setOpacity(element, styles.match(/opacity:\s*(\d?\.?\d*)/)[1])
+          : element;
+      }
+      for (var property in styles) {
+        if (property === 'opacity')
+          Element.setOpacity(element, styles[property]);
+        else 
+          elementStyle[(property === 'float' || property === 'cssFloat') ?
+            (typeof elementStyle.styleFloat === 'undefined' ? 'cssFloat' : 'styleFloat') : 
+              property] = styles[property];
+      }
+      return element;
+    };
+
+    this.getOpacity = (function() {
+      var getOpacity = function getOpacity(element) {
+        return Element.getStyle(element, 'opacity');
+      };
+
+      if (Feature('ELEMENT_MS_CSS_FILTERS')) {
+        getOpacity = function getOpacity(element) {
+          var value = (Element.getStyle(element, 'filter') || '').match(/alpha\(opacity=(.*)\)/);
+          if (value && value[1]) return parseFloat(value[1]) / 100;
+          return 1.0;
+        };
+      }
+      return getOpacity;
+    })();
+
+    this.setOpacity = (function() {
+      function setOpacity(element, value) {
         element = $(element);
-        if (!Element.hasClassName(element, className))
-          element.className += (element.className ? ' ' : '') + className;
+        element.style.opacity = (value == 1 || value === '') ? '' : 
+        (value < 0.00001) ? 0 : value;
         return element;
-      },
+      }
 
-      'removeClassName': function removeClassName(element, className) {
-        element = $(element);
-        element.className = element.className.replace(
-          new RegExp('(^|\\s+)' + className + '(\\s+|$)'), ' ').strip();
-        return element;
-      },
-
-      'toggleClassName': function toggleClassName(element, className) {
-        return Element[Element.hasClassName(element, className) ?
-          'removeClassName' : 'addClassName'](element, className);
-      },
-
-      'setStyle': function setStyle(element, styles) {
-        element = $(element);
-        var elementStyle = element.style;
-        if (typeof styles === 'string') {
-          element.style.cssText += ';' + styles;
-          return styles.include('opacity')
-            ? Element.setOpacity(element, styles.match(/opacity:\s*(\d?\.?\d*)/)[1])
-            : element;
-        }
-        for (var property in styles) {
-          if (property === 'opacity')
-            Element.setOpacity(element, styles[property]);
-          else 
-            elementStyle[(property === 'float' || property === 'cssFloat') ?
-              (typeof elementStyle.styleFloat === 'undefined' ? 'cssFloat' : 'styleFloat') : 
-                property] = styles[property];
-        }
-        return element;
-      },
-
-      'getOpacity': (function() {
-        var getOpacity = Feature('ELEMENT_MS_CSS_FILTERS') ?
-          function getOpacity(element) {
-            var value = (Element.getStyle(element, 'filter') || '').match(/alpha\(opacity=(.*)\)/);
-            if (value && value[1]) return parseFloat(value[1]) / 100;
-            return 1.0;
-          } :
-          function getOpacity(element) {
-            return Element.getStyle(element, 'opacity');
-          };
-        return getOpacity;
-      })(),
-
-      'setOpacity': (function() {
-        function setOpacity(element, value) {
-          element = $(element);
-          element.style.opacity = (value == 1 || value === '') ? '' : 
-          (value < 0.00001) ? 0 : value;
+      if (Fuse.Browser.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
+        var _setOpacity = setOpacity;
+        setOpacity = function setOpacity(element, value) {
+          element = _setOpacity(element, value);
+          if (value == 1) {
+            if (getNodeName(element) == 'IMG' && element.width) {
+              element.width++; element.width--;
+            } else try {
+              var n = element.ownerDocument.createTextNode(' ');
+              element.removeChild(element.appendChild(n));
+            } catch (e) { }
+          }
           return element;
-        }
+        };
+      }
+      else if (Fuse.Browser.Agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
+        setOpacity = function setOpacity(element, value) {
+          element = $(element);
+          element.style.opacity = (value == 1) ? 0.999999 : 
+            (value === '') ? '' : (value < 0.00001) ? 0 : value;
+          return element;
+        };
+      }
+      else if (Feature('ELEMENT_MS_CSS_FILTERS')) {
+        setOpacity = function(element, value) {
+          element = $(element);
+          if (!Element._hasLayout(element))
+            element.style.zoom = 1;
 
-        if (Fuse.Browser.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
-          var _setOpacity = setOpacity;
-          setOpacity = function setOpacity(element, value) {
-            element = _setOpacity(element, value);
-            if (value == 1) {
-              if (getNodeName(element) == 'IMG' && element.width) {
-                element.width++; element.width--;
-              } else try {
-                var n = element.ownerDocument.createTextNode(' ');
-                element.removeChild(element.appendChild(n));
-              } catch (e) { }
-            }
+          var style = element.style,
+           filter = Element.getStyle(element, 'filter');
+
+          // strip alpha
+          filter = filter.replace(/alpha\([^)]*\)/gi, '');
+
+          if (value == 1 || value === '') {
+            if (filter) style.filter = filter;
+            else style.removeAttribute('filter');
             return element;
-          };
-        }
-        else if (Fuse.Browser.Agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
-          setOpacity = function setOpacity(element, value) {
-            element = $(element);
-            element.style.opacity = (value == 1) ? 0.999999 : 
-              (value === '') ? '' : (value < 0.00001) ? 0 : value;
-            return element;
-          };
-        }
-        else if (Feature('ELEMENT_MS_CSS_FILTERS')) {
-          setOpacity = function(element, value) {
-            element = $(element);
-            if (!Element._hasLayout(element))
-              element.style.zoom = 1;
+          }
+          else if (value < 0.00001) value = 0;
 
-            var style = element.style,
-             filter = Element.getStyle(element, 'filter');
+          style.filter = filter + 'alpha(opacity=' + (value * 100) + ')';
+          return element;   
+        };
+      }
 
-            // strip alpha
-            filter = filter.replace(/alpha\([^)]*\)/gi, '');
-
-            if (value == 1 || value === '') {
-              if (filter) style.filter = filter;
-              else style.removeAttribute('filter');
-              return element;
-            }
-            else if (value < 0.00001) value = 0;
-
-            style.filter = filter + 'alpha(opacity=' + (value * 100) + ')';
-            return element;   
-          };
-        }
-
-        return setOpacity;
-      })()
-    });
+      return setOpacity;
+    })();
 
     // prevent JScript bug with named function expressions
     var addClassName = null,
@@ -133,7 +133,7 @@
      setStyle =        null,
      getOpacity =      null,
      setOpacity =      null;
-  })();
+  }).call(Element.Methods);
 
   if (Feature('ELEMENT_COMPUTED_STYLE') || !Feature('ELEMENT_CURRENT_STYLE')) {
     Element.Methods.getStyle = (function() {

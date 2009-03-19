@@ -1,28 +1,28 @@
   /*--------------------------- DOCUMENT VIEWPORT ----------------------------*/
 
-  (function() {
-    Fuse._doc.viewport = {
-      'getDimensions': function getDimensions() {
-        return { 'width': this.getWidth(), 'height': this.getHeight() };
-      },
+  Fuse._doc.viewport = { };
 
-      'getScrollOffsets': function getScrollOffsets() {
-        // lazy define
-        return (this.getScrollOffsets =
-          typeof global.pageXOffset === 'number' ?
-            function() {
-              return Element._returnOffset(global.pageXOffset, global.pageYOffset);
-            } :
-            function() {
-              return Element._returnOffset(Fuse._root.scrollLeft, Fuse._root.scrollTop);
-            }
-        )();
-      }
+  (function() {
+    this.getDimensions = function getDimensions() {
+      return { 'width': this.getWidth(), 'height': this.getHeight() };
+    };
+
+    this.getScrollOffsets = function getScrollOffsets() {
+      // lazy define
+      return (this.getScrollOffsets =
+        typeof global.pageXOffset === 'number' ?
+          function() {
+            return Element._returnOffset(global.pageXOffset, global.pageYOffset);
+          } :
+          function() {
+            return Element._returnOffset(Fuse._root.scrollLeft, Fuse._root.scrollTop);
+          }
+      )();
     };
 
     // prevent JScript bug with named function expressions
     var getDimensions = null, getScrollOffsets = null;
-  })();
+  }).call(Fuse._doc.viewport);
 
   // lazy define document.viewport.getWidth() and document.viewport.getHeight()
   (function(v) {

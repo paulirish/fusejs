@@ -25,260 +25,258 @@
   Array.from = $A;
 
   (function() {
-    Object._extend(this, {
-      '_each': function _each(callback) {
-        this.forEach(callback);
-      },
+    this._each = function _each(callback) {
+      this.forEach(callback);
+    };
 
-      'clear': function clear() {
-        this.length = 0;
-        return this;
-      },
+    this.clear = function clear() {
+      this.length = 0;
+      return this;
+    };
 
-      'clone': function clone() {
-        return slice.call(this, 0);
-      },
+    this.clone = function clone() {
+      return slice.call(this, 0);
+    };
 
-      'compact': function compact(falsy) {
-        for (var i = 0, results = [], length = this.length; i < length; i++)
-          if (!(this[i] == null || falsy && !this[i]))
-            results.push(this[i]);
-        return results;
-      },
+    this.compact = function compact(falsy) {
+      for (var i = 0, results = [], length = this.length; i < length; i++)
+        if (!(this[i] == null || falsy && !this[i]))
+          results.push(this[i]);
+      return results;
+    };
 
-      'each': function each(callback, thisArg) {
-        try {
-          this.forEach(callback, thisArg);
-        } catch (e) {
-          if (e !== $break) throw e;
-        }
-        return this;
-      },
-
-      'first': function first(callback, thisArg) {
-        var length = this.length;
-        if (arguments.length === 0) return this[0];
-        if (typeof callback === 'function') {
-          for (var i = 0; i < length; i++)
-            if (callback.call(thisArg, this[i], i))
-              return this[i];
-          return;
-        }
-        // Fast numeric type conversion:
-        // http://www.jibbering.com/faq/faq_notes/type_convert.html#tcNumber
-        var count = +callback;
-        if (!isNaN(count)) {
-          count = count < 1 ? 1 : count > length ? length : count;
-          return slice.call(this, 0, count);
-        } else return [];
-      },
-
-      'flatten': function flatten() {
-        for (var i = 0, results = [], length = this.length; i < length; i++) {
-          if (Object.isArray(this[i])) 
-            concatList(results, this[i].flatten());
-          else results.push(this[i]);
-        }
-        return results;
-      },
-
-      'insert': function insert(index, value) {
-        if (this.length < index) this.length = index;
-        if (index < 0) index = this.length;
-        if (arguments.length > 2)
-          this.splice.apply(this, concatList([index, 0], slice.call(arguments, 1)));
-        else this.splice(index, 0, value);
-        return this;
-      },
-
-      'inspect': function inspect() {
-        return '[' + this.map(Object.inspect).join(', ') + ']';
-      },
-
-      'intersect': function intersect(array) {
-        for (var i = 0, results = [], length = array.length; i < length; i++)
-          if (this.indexOf(array[i]) !== -1 && results.indexOf(array[i]) === -1)
-            results.push(array[i]);
-        return results;
-      },
-
-      'last': function last(callback, thisArg) {
-        var length = this.length;
-        if (arguments.length === 0)
-          return this[length && length - 1];
-        if (typeof callback === 'function') {
-          while (length--)
-            if (callback.call(thisArg, this[length], length, this))
-              return this[length];
-          return;        
-        }
-        var count = +arguments[0];
-        if (!isNaN(count)) {
-          count = count < 1 ? 1 : count > length ? length : count;
-          return slice.call(this, length - count);
-        } else return [];     
-      },
-
-      'size': function size() {
-        return this.length;
-      },
-
-      'toJSON': function toJSON() {
-        for (var value, i = 0, results = [], length = this.length; i < length; i++) {
-          value = Object.toJSON(this[i]);
-          if (typeof value !== 'undefined') results.push(value);
-        }
-        return '[' + results.join(', ') + ']';
-      },
-
-      'unique': function unique() {
-        for (var i = 0, results = [], length = this.length; i < length; i++)
-          if (results.indexOf(this[i]) < 0) results.push(this[i]);
-        return results.length && results || this;
-      },
-
-      'without': function without() {
-        var results = [], i = 0, length = this.length, args = slice.call(arguments, 0);
-        for ( ; i < length; i++)
-          if (args.indexOf(this[i]) === -1) results.push(this[i]);
-        return results;
-      },
-
-      /* Create optimized Enumerable equivalents */
-
-      'contains': function contains(object, strict) {
-        // attempt a fast strict search first
-        var result = this.indexOf(object) > -1;
-        if (strict || result) return result;
-        for (var i = 0, length = this.length; i < length; i++)
-          if (this[i] == object) return true;
-        return false;
-      },
-
-      'inject': (function() {
-        function inject(accumulator, callback, thisArg) {
-          var i = 0, length = this.length;
-          if (thisArg) while (i < length)
-            accumulator = callback.call(thisArg, accumulator, this[i], i++, this);
-          else while (i < length)
-            accumulator = callback(accumulator, this[i], i++, this);
-          return accumulator;
-        }
-
-        function injectUsingReduce(accumulator, callback, thisArg) {
-          if (thisArg)
-            return inject.call(this, accumulator, callback, thisArg);
-          return this.reduce(callback, accumulator);
-        }
-
-        // optimize Array#inject if Array#reduce is available
-        return typeof Array.prototype.reduce === 'function' ?
-          injectUsingReduce : inject;
-      })(),
-
-      'invoke': function invoke(method) {
-        var args, results = [], length = this.length;
-        if (arguments.length < 2) {
-          while (length--) results[length] = Function.prototype.call
-            .call(this[length][method], this[length]);
-        } else {
-          args = slice.call(arguments, 1);
-          while (length--) results[length] = Function.prototype.apply
-            .call(this[length][method], this[length], args);
-        }
-        return results;
-      },
-
-      'grep': function grep(pattern, callback, thisArg) {
-        if (!pattern || Object.isRegExp(pattern) &&
-           !pattern.source) this.toArray();
-        callback = callback || Fuse.K;
-        var results = [];
-        if (typeof pattern === 'string')
-          pattern = new RegExp(RegExp.escape(pattern));
-
-        for (var i = 0, length = this.length; i < length; i++)
-          if (pattern.match(this[i]))
-            results[results.length] = callback.call(thisArg, this[i], i, this);
-        return results;
-      },
-
-      'max': function max(callback, thisArg) {
-        var result;
-        if (!callback) {
-          // John Resig's fast Array max|min:
-          // http://ejohn.org/blog/fast-javascript-maxmin
-          result = Math.max.apply(Math, this);
-          if (!isNaN(result)) return result;
-        }
-        result = null; callback = Fuse.K;
-        for (var i = 0, length = this.length, value; i < length; i++) {
-          value = callback.call(thisArg, this[i], i, this);
-          if (result == null || value >= result)
-            result = value;
-        }
-        return result;
-      },
-
-      'min': function min(callback, thisArg) {
-        var result;
-        if (!callback) {
-          result = Math.min.apply(Math, this);
-          if (!isNaN(result)) return result;
-        }
-        result = null; callback = Fuse.K;
-        for (var i = 0, length = this.length, value; i < length; i++) {
-          value = callback.call(thisArg, this[i], i, this);
-          if (result == null || value < result)
-            result = value;
-        }
-        return result;
-      },
-
-      'partition': function partition(callback, thisArg) {
-        callback = callback || Fuse.K;
-        var trues = [], falses = [];
-        for (var i = 0, length = this.length; i < length; i++)
-          (callback.call(thisArg, this[i], i, this) ?
-            trues : falses).push(this[i]);
-        return [trues, falses];
-      },
-
-      'pluck': function pluck(property) {
-        var results = [];
-        for (var i = 0, length = this.length; i < length; i++)
-          results[i] = this[i][property];
-        return results;
-      },
-
-      'reject': function reject(callback, thisArg) {
-        for (var i = 0, results = [], length = this.length; i < length; i++)
-          if (!callback.call(thisArg, this[i], i, this))
-            results[results.length] = this[i];
-        return results;
-      },
-
-      'sortBy': function sortBy(callback, thisArg) {
-        var results = [], i = 0, length = this.length;
-        while (i < length)
-          results[i] = { 'value': this[i], 'criteria': callback.call(thisArg, this[i], i++, this) };
-        return results.sort(function(left, right) {
-          var a = left.criteria, b = right.criteria;
-          return a < b ? -1 : a > b ? 1 : 0;
-        }).pluck('value');
-      },
-
-      'zip': function zip() {
-        var callback = Fuse.K, args = slice.call(arguments, 0);
-        if (typeof args.last() === 'function')
-          callback = args.pop();
-
-        var results = [], i = 0, length = this.length,
-         collections = prependList(args.map($A), this);
-        while (i < length) results[i] = callback(collections.pluck(i), i++, this);
-        return results;
+    this.each = function each(callback, thisArg) {
+      try {
+        this.forEach(callback, thisArg);
+      } catch (e) {
+        if (e !== $break) throw e;
       }
-    });
+      return this;
+    };
+
+    this.first = function first(callback, thisArg) {
+      var length = this.length;
+      if (arguments.length === 0) return this[0];
+      if (typeof callback === 'function') {
+        for (var i = 0; i < length; i++)
+          if (callback.call(thisArg, this[i], i))
+            return this[i];
+        return;
+      }
+      // Fast numeric type conversion:
+      // http://www.jibbering.com/faq/faq_notes/type_convert.html#tcNumber
+      var count = +callback;
+      if (!isNaN(count)) {
+        count = count < 1 ? 1 : count > length ? length : count;
+        return slice.call(this, 0, count);
+      } else return [];
+    };
+
+    this.flatten = function flatten() {
+      for (var i = 0, results = [], length = this.length; i < length; i++) {
+        if (Object.isArray(this[i])) 
+          concatList(results, this[i].flatten());
+        else results.push(this[i]);
+      }
+      return results;
+    };
+
+    this.insert = function insert(index, value) {
+      if (this.length < index) this.length = index;
+      if (index < 0) index = this.length;
+      if (arguments.length > 2)
+        this.splice.apply(this, concatList([index, 0], slice.call(arguments, 1)));
+      else this.splice(index, 0, value);
+      return this;
+    };
+
+    this.inspect = function inspect() {
+      return '[' + this.map(Object.inspect).join(', ') + ']';
+    };
+
+    this.intersect = function intersect(array) {
+      for (var i = 0, results = [], length = array.length; i < length; i++)
+        if (this.indexOf(array[i]) !== -1 && results.indexOf(array[i]) === -1)
+          results.push(array[i]);
+      return results;
+    };
+
+    this.last = function last(callback, thisArg) {
+      var length = this.length;
+      if (arguments.length === 0)
+        return this[length && length - 1];
+      if (typeof callback === 'function') {
+        while (length--)
+          if (callback.call(thisArg, this[length], length, this))
+            return this[length];
+        return;        
+      }
+      var count = +arguments[0];
+      if (!isNaN(count)) {
+        count = count < 1 ? 1 : count > length ? length : count;
+        return slice.call(this, length - count);
+      } else return [];     
+    };
+
+    this.size = function size() {
+      return this.length;
+    };
+
+    this.toJSON = function toJSON() {
+      for (var value, i = 0, results = [], length = this.length; i < length; i++) {
+        value = Object.toJSON(this[i]);
+        if (typeof value !== 'undefined') results.push(value);
+      }
+      return '[' + results.join(', ') + ']';
+    };
+
+    this.unique = function unique() {
+      for (var i = 0, results = [], length = this.length; i < length; i++)
+        if (results.indexOf(this[i]) < 0) results.push(this[i]);
+      return results.length && results || this;
+    };
+
+    this.without = function without() {
+      var results = [], i = 0, length = this.length, args = slice.call(arguments, 0);
+      for ( ; i < length; i++)
+        if (args.indexOf(this[i]) === -1) results.push(this[i]);
+      return results;
+    };
+
+    /* Create optimized Enumerable equivalents */
+
+    this.contains = function contains(object, strict) {
+      // attempt a fast strict search first
+      var result = this.indexOf(object) > -1;
+      if (strict || result) return result;
+      for (var i = 0, length = this.length; i < length; i++)
+        if (this[i] == object) return true;
+      return false;
+    };
+
+    this.inject = (function() {
+      function inject(accumulator, callback, thisArg) {
+        var i = 0, length = this.length;
+        if (thisArg) while (i < length)
+          accumulator = callback.call(thisArg, accumulator, this[i], i++, this);
+        else while (i < length)
+          accumulator = callback(accumulator, this[i], i++, this);
+        return accumulator;
+      }
+
+      function injectUsingReduce(accumulator, callback, thisArg) {
+        if (thisArg)
+          return inject.call(this, accumulator, callback, thisArg);
+        return this.reduce(callback, accumulator);
+      }
+
+      // optimize Array#inject if Array#reduce is available
+      return typeof Array.prototype.reduce === 'function' ?
+        injectUsingReduce : inject;
+    })();
+
+    this.invoke = function invoke(method) {
+      var args, results = [], length = this.length;
+      if (arguments.length < 2) {
+        while (length--) results[length] = Function.prototype.call
+          .call(this[length][method], this[length]);
+      } else {
+        args = slice.call(arguments, 1);
+        while (length--) results[length] = Function.prototype.apply
+          .call(this[length][method], this[length], args);
+      }
+      return results;
+    };
+
+    this.grep = function grep(pattern, callback, thisArg) {
+      if (!pattern || Object.isRegExp(pattern) &&
+         !pattern.source) this.toArray();
+      callback = callback || Fuse.K;
+      var results = [];
+      if (typeof pattern === 'string')
+        pattern = new RegExp(RegExp.escape(pattern));
+
+      for (var i = 0, length = this.length; i < length; i++)
+        if (pattern.match(this[i]))
+          results[results.length] = callback.call(thisArg, this[i], i, this);
+      return results;
+    };
+
+    this.max = function max(callback, thisArg) {
+      var result;
+      if (!callback) {
+        // John Resig's fast Array max|min:
+        // http://ejohn.org/blog/fast-javascript-maxmin
+        result = Math.max.apply(Math, this);
+        if (!isNaN(result)) return result;
+      }
+      result = null; callback = Fuse.K;
+      for (var i = 0, length = this.length, value; i < length; i++) {
+        value = callback.call(thisArg, this[i], i, this);
+        if (result == null || value >= result)
+          result = value;
+      }
+      return result;
+    };
+
+    this.min = function min(callback, thisArg) {
+      var result;
+      if (!callback) {
+        result = Math.min.apply(Math, this);
+        if (!isNaN(result)) return result;
+      }
+      result = null; callback = Fuse.K;
+      for (var i = 0, length = this.length, value; i < length; i++) {
+        value = callback.call(thisArg, this[i], i, this);
+        if (result == null || value < result)
+          result = value;
+      }
+      return result;
+    };
+
+    this.partition = function partition(callback, thisArg) {
+      callback = callback || Fuse.K;
+      var trues = [], falses = [];
+      for (var i = 0, length = this.length; i < length; i++)
+        (callback.call(thisArg, this[i], i, this) ?
+          trues : falses).push(this[i]);
+      return [trues, falses];
+    };
+
+    this.pluck = function pluck(property) {
+      var results = [];
+      for (var i = 0, length = this.length; i < length; i++)
+        results[i] = this[i][property];
+      return results;
+    };
+
+    this.reject = function reject(callback, thisArg) {
+      for (var i = 0, results = [], length = this.length; i < length; i++)
+        if (!callback.call(thisArg, this[i], i, this))
+          results[results.length] = this[i];
+      return results;
+    };
+
+    this.sortBy = function sortBy(callback, thisArg) {
+      var results = [], i = 0, length = this.length;
+      while (i < length)
+        results[i] = { 'value': this[i], 'criteria': callback.call(thisArg, this[i], i++, this) };
+      return results.sort(function(left, right) {
+        var a = left.criteria, b = right.criteria;
+        return a < b ? -1 : a > b ? 1 : 0;
+      }).pluck('value');
+    };
+
+    this.zip = function zip() {
+      var callback = Fuse.K, args = slice.call(arguments, 0);
+      if (typeof args.last() === 'function')
+        callback = args.pop();
+
+      var results = [], i = 0, length = this.length,
+       collections = prependList(args.map($A), this);
+      while (i < length) results[i] = callback(collections.pluck(i), i++, this);
+      return results;
+    };
 
     /* Use native browser JS 1.6 implementations if available */
 
