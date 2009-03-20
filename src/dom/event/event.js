@@ -385,8 +385,7 @@
       this.cancelBubble = true;
     }
 
-    // add methods
-    (Event.addMethods = addMethods)();
+    Event.addMethods = addMethods;
 
     if (Event.prototype || Feature('OBJECT_PROTO')) {
       // Safari 2 support
@@ -402,7 +401,10 @@
          !Object.hasKey(Event.prototype, 'target') &&
          !Object.hasKey(Event.prototype, 'currentTarget')) {
 
+        // initially add methods
+        Event.addMethods();
         _addLevel2Methods(Event.prototype);
+
         Event.extend = function(event, element) {
           return (event && !event._extendedByFuse)
             ? _addLevel2Properties(event, element)
@@ -412,6 +414,9 @@
       else Event.extend = Fuse.K;
     }
     else Event.extend = extend;
+
+    // add methods if haven't yet
+    if (!Methods) Event.addMethods();
   })();
 
   /*--------------------------------------------------------------------------*/

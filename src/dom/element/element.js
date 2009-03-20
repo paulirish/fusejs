@@ -133,7 +133,7 @@
     if (Feature('OBJECT_PROTO') && !Feature('HTML_ELEMENT_CLASS')) {
       Feature.set('HTML_ELEMENT_CLASS', true);
       Feature.set('ELEMENT_EXTENSIONS', true);
-      _emulateDOMClass('HTMLElement');
+      _emulateDOMClass('HTMLElement', 'DIV');
     }
 
     var tagNameClassLookup = {
@@ -172,6 +172,7 @@
     EMULATE_ELEMENT_CLASSES_WITH_PROTO =
       Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO'),
 
+    // supports IE8 as well as EOMB
     elementPrototype = Feature('HTML_ELEMENT_CLASS') ?
       global.HTMLElement.prototype : Feature('ELEMENT_CLASS') ?
         global.Element.prototype : false;
@@ -185,8 +186,9 @@
       });
     }
 
-    function _emulateDOMClass(className) {
-      (global[className] = { }).prototype = Fuse._div['__proto__'];
+    function _emulateDOMClass(className, tagName) {
+      (global[className] = { }).prototype =
+        Fuse._doc.createElement(tagName)['__proto__'];
       return global[className];
     }
 
@@ -198,15 +200,18 @@
     }
 
     function _findDOMClass(tagName) {
+      // catch most classes like HTMLUListElement and HTMLSelectElement
       var className = 'HTML' + (tagNameClassLookup[tagName] ||
         tagName.capitalize()) + 'Element';
       if (global[className])
         return global[className];
+      // catch element classes like HTMLLIElement
       className = 'HTML' + tagName + 'Element';
       if (global[className])
         return global[className];
+      // emulate the class (not used by any browser)
       if (EMULATE_ELEMENT_CLASSES_WITH_PROTO)
-        return _emulateDOMClass(className);
+        return _emulateDOMClass(className, tagName);
     }
 
     return function(methods) {

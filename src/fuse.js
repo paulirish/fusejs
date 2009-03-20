@@ -85,7 +85,7 @@
       var frame, i = 0, doc = getDocument(element);
       if (Fuse._doc !== doc) {
         while (frame = global.frames[i++]) {
-          if (frame === doc) return frame;
+          if (frame.document === doc) return frame;
         }
       }
       return global;
