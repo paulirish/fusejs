@@ -41,37 +41,37 @@
   
   Test.Unit.Testcase.addMethods({
     assertInfoNotified: function(expected) {
-      var actualMessage = log.message.beforeLast() || log.message.last();
-      var actualType = log.type.beforeLast() || log.type.last();
+      var actualMessage = log.message.beforeLast() || log.message.last(),
+       actualType = log.type.beforeLast() || log.type.last();
       this.assertEqual(expected, actualMessage, 'assertInfoNotified');
       this.assertEqual('info', actualType, 'assertInfoNotified');
-      log.message.push(null);
-      log.type.push(null);
+      log.message.length = log.type.length = 0;
     },
     
     assertErrorNotified: function(expected) {
-      var actualMessage = log.message.beforeLast() || log.message.last();
-      var actualType = log.type.beforeLast() || log.type.last();
+      var actualMessage = log.message.beforeLast() || log.message.last(),
+       actualType = log.type.beforeLast() || log.type.last();
       this.assertEqual(expected, actualMessage, 'assertErrorNotified');
       this.assertEqual('error', actualType, 'assertErrorNotified');
-      log.message.push(null);
-      log.type.push(null);
+      log.message.length = log.type.length = 0;
     },
     
     assertWarnNotified: function(expected) {
-      var actualMessage = log.message.beforeLast() || log.message.last();
-      var actualType = log.type.beforeLast() || log.type.last();
+      var actualMessage = log.message.beforeLast() || log.message.last(),
+       actualType = log.type.beforeLast() || log.type.last();
       this.assertEqual(expected, actualMessage, 'assertWarnNotified');
       this.assertEqual('warn', actualType, 'assertWarnNotified');
-      log.message.push(null);
-      log.type.push(null);
+      log.message.length = log.type.length = 0;
     },
     
     assertNotNotified: function() {
-      this.assertNull(log.message.last(), 'assertNotNotified');
-      this.assertNull(log.type.last());
-      log.message.push(null);
-      log.type.push(null);
+      this.assertEmpty(log.message, 'assertNotNotified');
+      this.assertEmpty(log.type, 'assertNotNotified');
+      log.message.length = log.type.length = 0;
+    },
+    
+    assertEmpty: function(array, message) {
+      this.assertEqual(0, array.length, message || '');
     }
   });
   

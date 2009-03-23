@@ -1,3 +1,5 @@
+* deprecation extension: Cleanup `assertInfoNotified`, `assertErrorNotified`, `assertWarnNotified`, and `assertNotNotified` tests, as well as add `assertEmpty` test. [Tobie Langel]
+
 * Add support for script elements in Element#update, Element#insert, and Element#replace. [Prototype LH #573] [jddalton, kangax, Martin, Tobie Langel]
 
 * Work around IE8 bug causing APPLET and OBJECT elements not to inherit from their prototypes. [jddalton]
