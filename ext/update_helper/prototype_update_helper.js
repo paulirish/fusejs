@@ -301,6 +301,7 @@ var prototypeUpdateHelper = new UpdateHelper([
   }
   
   function defineSetters(obj, prop) {
+    storeProperties(obj);
     if (obj.__properties.include(prop)) return;
     obj.__properties.push(prop);
     obj.__defineGetter__(prop, function() {
@@ -312,8 +313,9 @@ var prototypeUpdateHelper = new UpdateHelper([
       notify(prop, value);
     });
   }
-  
+
   function checkProperties(hash) {
+    storeProperties(hash);
     var current = Object.keys(hash);
     if (current.length == hash.__properties.length)
       return;
@@ -323,7 +325,13 @@ var prototypeUpdateHelper = new UpdateHelper([
       defineSetters(hash, prop);
     });
   }
-  
+
+  function storeProperties(h) {
+    if (typeof h.__properties === 'undefined')
+      h.__properties = __properties.clone();
+    return h;
+  }
+
   Hash.prototype.set = Hash.prototype.set.wrap(function(proceed, property, value) {
     defineSetters(this, property);
     return proceed(property, value);
@@ -346,7 +354,7 @@ var prototypeUpdateHelper = new UpdateHelper([
   });
 
   Hash.prototype.initialize = Hash.prototype.initialize.wrap(function(proceed, object) {
-    this.__properties = __properties.clone();
+    storeProperties(this);
     for (var prop in object) defineSetters(this, prop);
     proceed(object);
   });
