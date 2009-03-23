@@ -55,7 +55,7 @@ var UpdateHelper = Class.create({
       throw new Error("stack");
     } catch(e) {
       return (e.stack || '').match(this.Regexp).reject(function(path) {
-        return /(prototype|unittest|update_helper)\.js/.test(path);
+        return /(fuse|prototype|unittest|update_helper)\.js/.test(path);
       }).join("\n");
     }
   },

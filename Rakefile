@@ -9,6 +9,8 @@ FUSEJS_TEST_DIR = File.join(FUSEJS_ROOT, 'test')
 FUSEJS_TMP_DIR  = File.join(FUSEJS_TEST_DIR, 'unit', 'tmp')
 FUSEJS_VERSION  = 'Alpha'
 
+PROTOTYPE_VERSION = '1.6.0.3'
+
 task :default => [:dist, :dist_helper, :package, :clean_package_source]
 
 desc "Builds the distribution."

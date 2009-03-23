@@ -252,7 +252,7 @@ var prototypeUpdateHelper = new UpdateHelper([
       'If you need a destructive merge, use Hash#update instead.',
     type: 'warn'
   },
-  
+
   {
     methodName: 'unloadCache',
     namespace: Event,
@@ -291,7 +291,16 @@ var prototypeUpdateHelper = new UpdateHelper([
     getting: new Template("Directly accessing a property of an instance of Hash is no longer supported.\n" + 
       "Please use Hash#get('#{property}') instead.")
   };
-  
+
+  function getKeys(obj) {
+    var key, results = [];
+    for (key in obj) {
+      if (Object.hasKey(obj, key))
+        results.push(key);
+    }
+    return results;
+  }
+
   function notify(property, value) {
     var message = messages[arguments.length == 1 ? 'getting' : 'setting'].evaluate({
       property: property,
@@ -299,7 +308,7 @@ var prototypeUpdateHelper = new UpdateHelper([
     });
     prototypeUpdateHelper.notify(message, 'error');
   }
-  
+
   function defineSetters(obj, prop) {
     storeProperties(obj);
     if (obj.__properties.include(prop)) return;
@@ -316,7 +325,9 @@ var prototypeUpdateHelper = new UpdateHelper([
 
   function checkProperties(hash) {
     storeProperties(hash);
-    var current = Object.keys(hash);
+ 
+    // avoid infinite loop in Object.keys() caused by the __getter__
+    var current = getKeys(hash);
     if (current.length == hash.__properties.length)
       return;
     current.each(function(prop) {

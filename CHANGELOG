@@ -1,3 +1,5 @@
+* deprecation extension: Modify so it will run in Fuse. [jddalton]
+
 * deprecation extension: Cleanup Hash update helpers. [Tobie Langel]
 
 * deprecation extension: Cleanup `assertInfoNotified`, `assertErrorNotified`, `assertWarnNotified`, and `assertNotNotified` tests, as well as add `assertEmpty` test. [Tobie Langel]
