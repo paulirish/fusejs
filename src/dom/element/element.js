@@ -68,19 +68,9 @@
       return function() { return r };
     }
 
-    function extend(element) {
-      // Bail on elements that don't need extending,
-      // XML nodes (IE errors on them), document, window objects
-      if (!element || (typeof element._extendedByFuse !== 'undefined' &&
-        element._extendedByFuse() >= revision) ||
-        element.nodeType !== 1 || element == getWindow(element) ||
-        !element.ownerDocument.body) return element;
-
-      var pair,
-       nodeName = getNodeName(element),
-       methods  = ByTag[nodeName] || Methods,
-       length   = methods.length;
-
+    function _extendElement(element, nodeName) {
+      nodeName = nodeName || getNodeName(element);
+      var pair, methods = ByTag[nodeName] || Methods, length = methods.length;
       while (length--) {
         pair = methods[length];
         if (!Object.hasKey(element, pair[0]))
@@ -89,8 +79,18 @@
 
       // avoid using Fuse.K.curry(revision) for speed
       element._extendedByFuse = _createRevisionGetter(revision);
-
       return element;
+    }
+
+    function extend(element) {
+      // Bail on elements that don't need extending,
+      // XML nodes (IE errors on them), document, window objects
+      if (!element || (typeof element._extendedByFuse !== 'undefined' &&
+        element._extendedByFuse() >= revision) ||
+        element.nodeType !== 1 || element == getWindow(element) ||
+        !element.ownerDocument.body) return element;
+
+      return _extendElement(element);
     }
 
     function refresh() {
@@ -118,10 +118,36 @@
     // don't need their elements extended UNLESS
     // they belong to a different document
     if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
-      return Object._extend(function(element) {
-        return (element && element.ownerDocument &&
-          element.ownerDocument !== Fuse._doc) ? extend(element) : element;
-      }, { 'refresh': refresh });
+      extend = (function(_extend) {
+        function extend(element) {
+          return (element && element.ownerDocument &&
+            element.ownerDocument !== Fuse._doc) ? _extend(element) : element;
+        }
+        return extend;
+      })(extend);
+    }
+
+    // In IE8, APPLET and OBJECT elements don't inherit from their prototypes
+    if (Feature('ELEMENT_EXTENSIONS')) {
+      (function(APPLET_BUGGY, OBJECT_BUGGY) {
+        if (!(APPLET_BUGGY || OBJECT_BUGGY)) return;
+        var _extend = extend,
+         BUGGY = { 'APPLET': APPLET_BUGGY, 'OBJECT': OBJECT_BUGGY };
+
+        extend = (function() {
+          function extend(element) {
+            var nodeName = element && getNodeName(element);
+            if (BUGGY[nodeName]) {
+              return (typeof element._extendedByFuse !== 'undefined' &&
+                element._extendedByFuse() >= revision) ?
+                  element : _extendElement(element, nodeName);
+            }
+            return _extend(element);
+          }
+          return extend;
+        })();
+      })(Bug('ELEMENT_APPLET_FAILS_TO_INHERIT_FROM_PROTOTYPE'),
+         Bug('ELEMENT_OBJECT_FAILS_TO_INHERIT_FROM_PROTOTYPE'));
     }
 
     extend.refresh = refresh;
@@ -131,8 +157,7 @@
   Element.addMethods = (function() {
     // add HTMLElement for Safari 2
     if (Feature('OBJECT_PROTO') && !Feature('HTML_ELEMENT_CLASS')) {
-      Feature.set('HTML_ELEMENT_CLASS', true);
-      Feature.set('ELEMENT_EXTENSIONS', true);
+      Feature.set({ 'HTML_ELEMENT_CLASS': true, 'ELEMENT_EXTENSIONS': true });
       _emulateDOMClass('HTMLElement', 'DIV');
     }
 

@@ -446,3 +446,29 @@
       })
     };
   })());
+
+  if (Feature('ELEMENT_CLASS')) {
+    Bug.set((function() {
+      function createElementInheritableTest(nodeName) {
+        return function() {
+          // IE8 bug:
+          // Must reference Element as a property of global when assigning
+          // properties to its prototype or it will create a seperate instance
+          // for Element and global.Element.
+          var element = Fuse._doc.createElement(nodeName),
+           prototype = global.Element.prototype;
+          prototype._fuseInheritableTest = true;
+          var result = !element._fuseInheritableTest;
+          delete prototype._fuseInheritableTest;
+          return result;
+        };
+      }
+
+      return {
+        'ELEMENT_APPLET_FAILS_TO_INHERIT_FROM_PROTOTYPE':
+          createElementInheritableTest('applet'),
+        'ELEMENT_OBJECT_FAILS_TO_INHERIT_FROM_PROTOTYPE':
+          createElementInheritableTest('object')
+      };
+    })());
+  }

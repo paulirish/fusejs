@@ -1,3 +1,5 @@
+* Work around IE8 bug causing APPLET and OBJECT elements not to inherit from their prototypes. [jddalton]
+
 * Fix Safari 2 bugs in getWindow() and Event.extend() as well as comment Element.extend(). [jddalton]
 
 * Fix coding pattern so function expressions will work in Safari 2. [jddalton]
