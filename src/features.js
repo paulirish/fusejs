@@ -364,6 +364,16 @@
       return result;
     },
 
+    'ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT_PROPERTY_ON_INSERT': function() {
+      var element = Fuse._doc.createElement('script');
+      element.text = 'Fuse.__testScriptText = true;';
+      Fuse._docEl.insertBefore(element, Fuse._docEl.firstChild);
+      var result = !Fuse.__testScriptText;
+      Fuse._docEl.removeChild(element);
+      delete Fuse.__testScriptText;
+      return result;
+    },
+
     'ELEMENT_TABLE_INNERHTML_INSERTS_TBODY': function() {
       // true for IE and Firefox 3
       Fuse._div.innerHTML = '<table><tr><td></td></tr></table>';

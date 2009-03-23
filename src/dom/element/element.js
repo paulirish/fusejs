@@ -292,6 +292,50 @@
 
   /*--------------------------------------------------------------------------*/
 
+  Element._insertionTranslations = {
+    'tags': {
+      'COLGROUP': ['<table><colgroup>',      '</colgroup><tbody></tbody></table>', 2],
+      'SELECT':   ['<select>',               '</select>',                          1],
+      'TABLE':    ['<table>',                '</table>',                           1],
+      'TBODY':    ['<table><tbody>',         '</tbody></table>',                   2],
+      'TR':       ['<table><tbody><tr>',     '</tr></tbody></table>',              3],
+      'TD':       ['<table><tbody><tr><td>', '</td></tr></tbody></table>',         4]
+    }
+  };
+
+  (function() {
+    Object._extend(this.tags, {
+      // TODO: Opera fails to render optgroups when set with innerHTML
+      'OPTGROUP': this.tags.SELECT,
+      'TFOOT':    this.tags.TBODY,
+      'TH':       this.tags.TD,
+      'THEAD':    this.tags.TBODY
+    });
+
+    this.before = function before(element, node) {
+      element.parentNode &&
+        element.parentNode.insertBefore(node, element);
+    };
+
+    this.top = function top(element, node) {
+      element.insertBefore(node, element.firstChild);
+    };
+
+    this.bottom = function bottom(element, node) {
+      element.appendChild(node);
+    };
+
+    this.after = function after(element, node) {
+      element.parentNode &&
+        element.parentNode.insertBefore(node, element.nextSibling);
+    };
+
+    // prevent JScript bug with named function expressions
+    var after = null, before = null,  bottom = null, top = null;
+  }).call(Element._insertionTranslations);
+
+  /*--------------------------------------------------------------------------*/
+
   Element.Methods = {
     'ByTag':     { },
     'Simulated': { }
@@ -370,7 +414,7 @@
         return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
           Element.descendantOf(element, element.ownerDocument)));
       };
-      
+
       if (Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
         isFragment = function isFragment(element) {
           element = $(element);
@@ -452,16 +496,50 @@
   }).call(Element.Methods);
 
   (function() {
-    var _isInsertable = (function() {
-      // comment, document fragment, document type, element, and text nodes are insertable
-      var insertable = { '1':1, '3':1, '8':1, '10':1, '11':1 };
-      return function(node) {
-        return insertable[node.nodeType] === 1;
-      }
-    })();
+    function _isInsertable(node) {
+      return _isInsertable.nodeType[node.nodeType];
+    }
+    _isInsertable.nodeType = { '1':1, '3':1, '8':1, '10':1, '11':1 };
+
+    function _replaceElement(element, node) {
+      element.parentNode.replaceChild(node, element);
+    }
+
+    // Fix Safari <= 2.0.2 inserting script elements
+    if (Bug('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT_PROPERTY_ON_INSERT')) {
+      (function() {
+        function wrapper(proceed, element, node) {
+          var script, scripts = [], i = 0;
+          if (_isInsertable(node)) {
+            if (getNodeName(node) === 'SCRIPT')
+              scripts = [node];
+            else if (node.getElementsByTagName)
+              scripts = node.getElementsByTagName('SCRIPT');
+            else {
+              var child = node.firstChild;
+              while (child) {
+                if (getNodeName(child) === 'SCRIPT') scripts.push(child);
+                else if (child.getElementsByTagName)
+                  scripts = concatList(scripts, nodeListSlice.call(child.getElementsByTagName('SCRIPT')));
+                child = child.nextSibling;
+              }
+            }
+          }
+
+          proceed(element, node);
+          while (script = scripts[i++]) global.eval(script.text);
+        }
+
+        _replaceElement = _replaceElement.wrap(wrapper);
+
+        $w('before top bottom after').each(function(method) {
+          this[method] = this[method].wrap(wrapper);
+        }, Element._insertionTranslations);
+      })();
+    }
 
     this.insert = (function() {
-       function insert(element, insertions) {
+      function insert(element, insertions) {
         element = $(element);
         var content, fragment, insertContent, position, nodeName, type = typeof insertions;
         if (insertions && (type === 'string' || type === 'number' ||
@@ -521,30 +599,35 @@
           content.evalScripts.bind(content).defer();
           content = _createContextualFragment(element, content.stripScripts());
         }
-        return element.parentNode.replaceChild(content, element);
+        _replaceElement(element, content);
+        return element;
       }
 
       return replace;
     })();
 
     this.update = (function() {
-       var update = function update(element, content) {
+      var update = function update(element, content) {
         element = $(element);
-        if (content) {
-          if (content.toElement)
-            content = content.toElement();
-          if (_isInsertable(content)) {
-            element.innerHTML = '';
-            element.appendChild(content);
-            return element;
-          }
-          content = Object.toHTML(content);
-          element.innerHTML = content.stripScripts();
-          content.evalScripts.bind(content).defer();
-        } else element.innerHTML = '';
+        if (getNodeName(element) === 'SCRIPT') {
+          element.text = String.interpret(content);
+        } else {
+          if (content) {
+            if (content.toElement)
+              content = content.toElement();
+            if (_isInsertable(content)) {
+              element.innerHTML = '';
+              element.appendChild(content);
+              return element;
+            }
+            content = Object.toHTML(content);
+            element.innerHTML = content.stripScripts();
+            content.evalScripts.bind(content).defer();
+          } else element.innerHTML = '';
+        }
         return element;
       };
-      
+
       if (Bug('ELEMENT_SELECT_INNERHTML_BUGGY') ||
           Bug('ELEMENT_TABLE_INNERHTML_BUGGY')  ||
           Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY')) {
@@ -553,27 +636,31 @@
           var nodeName = getNodeName(element),
            isBuggy = Element._insertionTranslations.tags[nodeName];
 
-          // remove children
-          if (isBuggy) {
-            while (element.lastChild)
-              element.removeChild(element.lastChild);
-          } else element.innerHTML = '';
+          if (nodeName === 'SCRIPT') {
+            element.text = String.interpret(content);
+          } else {
+            // remove children
+            if (isBuggy) {
+              while (element.lastChild)
+                element.removeChild(element.lastChild);
+            } else element.innerHTML = '';
 
-          if (content) {
-            if (content.toElement) content = content.toElement();
-            if (_isInsertable(content)) element.appendChild(content);
-            else {
-              content = Object.toHTML(content);
-              if (isBuggy)
-                element.appendChild(Element._getContentFromAnonymousElement(
-                  element.ownerDocument, nodeName, content.stripScripts()));
-              else element.innerHTML = content.stripScripts();
-              content.evalScripts.bind(content).defer();
+            if (content) {
+              if (content.toElement) content = content.toElement();
+              if (_isInsertable(content)) element.appendChild(content);
+              else {
+                content = Object.toHTML(content);
+                if (isBuggy)
+                  element.appendChild(Element._getContentFromAnonymousElement(
+                    element.ownerDocument, nodeName, content.stripScripts()));
+                else element.innerHTML = content.stripScripts();
+                content.evalScripts.bind(content).defer();
+              }
             }
           }
           return element;
         }
-      }  
+      }
       return update;
     })();
   }).call(Element.Methods);

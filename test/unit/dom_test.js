@@ -304,7 +304,19 @@ new Test.Unit.Runner({
     $('element-insertions-main').insert(1337);
     this.assertEqual('test1337', getInnerHTML('element-insertions-main'));
   },
-  
+
+  testElementInsertScriptElement: function() {
+    var head = document.getElementsByTagName('HEAD')[0],
+     script = new Element('script', { 'type': 'text/javascript' });
+
+    script.text = 'window.__testInsertScriptElement = true;';
+    $(head).insert({ 'top': script });
+
+    this.assert(window.__testInsertScriptElement,
+      'Failed to eval SCRIPT element text property');
+    window.__testInsertScriptElement = null;
+  },
+
   testNewElementInsert: function() {
     var container = new Element('div'),
      element = new Element('div');
@@ -320,7 +332,7 @@ new Test.Unit.Runner({
     element.insert('some text');
     this.assertEqual('<p>a paragraph</p>some text', getInnerHTML(element));
   },
-  
+
   testInsertionBackwardsCompatibility: function() {
     new Insertion.Before('element-insertions-main', 'some backward-compatibility testing before');
     this.assert(getInnerHTML('element-insertions-container').include('some backward-compatibility testing before'));
@@ -471,6 +483,16 @@ new Test.Unit.Runner({
     
     Element.update('testdiv', '&nbsp;');
     this.assert(!$('testdiv').innerHTML.empty());
+  },
+
+  testElementUpdateScriptElement: function() {
+    var script = new Element('script', { 'type': 'text/javascript' });
+    this.assertNothingRaised(function(){
+      script.update('window.__testUpdateScriptElement = true;');
+    });
+
+    this.assert(script.text.indexOf('window.__testUpdateScriptElement') > -1,
+      'Failed to set text property of SCRIPT element');
   },
 
   testElementUpdateWithScript: function() {
@@ -645,7 +667,28 @@ new Test.Unit.Runner({
     Element.replace('testform-replace', '<form></form>');
     this.assertEqual('<p>some text</p><form></form><p>some text</p>', getInnerHTML('testform-replace-container'));
   },
-  
+
+  testElementReplaceWithScriptElement: function() {
+    var script = new Element('script', { 'type': 'text/javascript' });
+    script.update('window.__testReplaceWithScriptElement = true;');
+
+    $('testdiv-replace-6').replace(script);
+    this.assert(window.__testReplaceWithScriptElement, 
+      'Failed to eval SCRIPT element text property');
+    window.__testReplaceWithScriptElement = null;
+    
+    var fragment = document.createDocumentFragment();
+    fragment.appendChild(
+      new Element('script', { 'type': 'text/javascript' })
+        .update('window.__testReplaceWithScriptInFragment = true;')
+    );
+
+    $('testdiv-replace-7').replace(fragment);
+    this.assert(window.__testReplaceWithScriptInFragment,
+      'Failed to eval SCRIPT element text property when nested inside a html fragment');
+    window.__testReplaceWithScriptInFragment = null;
+  },
+
   testElementReplaceWithScript: function() {
     $('testdiv-replace-4').replace('hello from div!<script>testVarReplace="hello!"</'+'script>');
     this.assertEqual('hello from div!', $('testdiv-replace-container-4').innerHTML);
