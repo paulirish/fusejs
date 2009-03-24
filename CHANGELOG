@@ -1,3 +1,5 @@
+* Optimize Hash using the `expando` property to avoid costly Object.hasKey() lookups. [jddalton, kangax]
+
 * Add unique private `expando` property. [jddalton]
 
 * Fix regression bug in the Object._each() Safari 2 fork. [jddalton]
