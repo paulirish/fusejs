@@ -23,8 +23,20 @@
   (function() {
     var __replace = this.replace;
 
-    // based on work by Dean Edwards
-    // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
+    function replace(pattern, replacement) {
+      var result = __replace.call(this, pattern, replacement);
+      if (Object.isRegExp(pattern)) pattern.lastIndex = 0;
+      return result;
+    }
+
+    // For IE
+    if (Bug('STRING_REPLACE_SETS_REGEXP_LAST_INDEX'))
+      this.replace = replace;
+  }).call(String.prototype);
+
+  (function() {
+    var __replace = this.replace;
+
     function replace(pattern, replacement) {
       if (typeof replacement !== 'function')
         return __replace.call(this, pattern, replacement);
@@ -32,6 +44,8 @@
       var isGlobal, match, source = this, result = '';
       if (!Object.isRegExp(pattern))
         pattern = new RegExp(RegExp.escape(String(pattern)));
+
+      pattern.lastIndex = 0;
       if (isGlobal = pattern.global)
         pattern = pattern.clone({ 'global': false });
 
@@ -50,9 +64,12 @@
         }
         else if (!isGlobal) break;
       }
+      pattern.lastIndex = 0;
       return result + source;
     }
 
+    // For Safari 2, based on work by Dean Edwards
+    // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
     if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING'))
       this.replace = replace;
   }).call(String.prototype);
@@ -295,8 +312,8 @@
       function strip() {
         return this.replace(matchTrimLeft, '').replace(matchTrimRight, '');
       }
-      return String.prototype.trim || strip
-    })();
+      return this.trim || strip;
+    }).call(this);
 
     this.stripScripts = function stripScripts() {
       return this.replace(matchScripts, '');

@@ -405,6 +405,13 @@
       // true for Safari 2
       var func = function() { return '' };
       return 'a'.replace(/a/, func) === String(func);
+    },
+    
+    'STRING_REPLACE_SETS_REGEXP_LAST_INDEX': function() {
+      // true for IE
+      var pattern = /x/;
+      'oxo'.replace(pattern, '');
+      return !!pattern.lastIndex;
     }
   });
 
