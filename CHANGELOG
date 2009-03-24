@@ -1,3 +1,5 @@
+* Fix regression bug in the Object._each() Safari 2 fork. [jddalton]
+
 * Ensure Object.isHash() returns false for Hash.prototype. [jddalton]
 
 * unit test: Update unit test framework. [jddalton, Tobie Langel]

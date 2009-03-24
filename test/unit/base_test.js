@@ -129,6 +129,14 @@ new Test.Unit.Runner({
     this.assertEqual(baz, baz.quux());
   },
 
+  testObjectEach: function() {
+    var count = 0, klass = function() { this.toString = 1 };
+    klass.prototype.toString = 0;
+    
+    Object.each(new klass(), function() { count++ });
+    this.assertEqual(1, count, 'Failed to iterate correctly over the object properties');
+  },
+  
   testSimpleObjectExtend: function() {
     var undef, object = { 'foo': 'foo', 'bar': [1, 2, 3] };
 

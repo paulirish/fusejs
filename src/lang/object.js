@@ -25,7 +25,7 @@
         };
         break;
 
-      case 1:
+      case 2:
         // Tobie Langel: Safari 2 broken for-in loop
         // http://tobielangel.com/2007/1/29/for-in-loop-broken-in-safari/
         _each = function _each(object, callback) {
