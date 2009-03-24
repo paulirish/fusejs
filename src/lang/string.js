@@ -339,6 +339,16 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
+    var escapeHTML = function escapeHTML() {
+      textNode.data = this;
+      return container.innerHTML.replace(/"/g, '&quot;');
+    };
+
+    var unescapeHTML = function unescapeHTML() {
+      Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+      return Fuse._div.textContent;
+    };
+
     var container = Fuse._doc.createElement('pre'),
      textNode = container.appendChild(Fuse._doc.createTextNode(''));
 
@@ -349,22 +359,6 @@
       textNode = container.appendChild(Fuse._doc.createTextNode(''));
     }
 
-    var escapeHTML = (function() {
-      function escapeHTML() {
-        textNode.data = this;
-        return container.innerHTML.replace(/"/g, '&quot;');
-      }
-      return escapeHTML;
-    })();
-
-    var unescapeHTML = (function() {
-      function unescapeHTML() {
-        Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-        return Fuse._div.textContent;
-      };
-      return unescapeHTML;
-    })();
-
     // Safari 3.x has issues with escaping the ">" character
     if ((textNode.data = '>') && container.innerHTML !== '&gt;') {
       escapeHTML = function escapeHTML() {
@@ -374,14 +368,14 @@
     }
 
     if (!Feature('ELEMENT_TEXT_CONTENT')) {
-      Fuse._div.innerHTML = '<pre>&lt;span&gt;test&lt;/span&gt;</pre>';
-      if (Feature('ELEMENT_INNER_TEXT') && Fuse._div.firstChild.innerText === '<span>test</span>') {
+      Fuse._div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;</pre>';
+      if (Feature('ELEMENT_INNER_TEXT') && Fuse._div.firstChild.innerText === '<p>x</p>') {
         unescapeHTML = function unescapeHTML() {
           Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
           return Fuse._div.firstChild.innerText.replace(/\r/g, '');
         };
       }
-      else if (Fuse._div.firstChild.innerHTML === '<span>test</span>') {
+      else if (Fuse._div.firstChild.innerHTML === '<p>x</p>') {
         unescapeHTML = function unescapeHTML() {
           Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
           return Fuse._div.firstChild.innerHTML;

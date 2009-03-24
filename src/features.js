@@ -36,8 +36,8 @@
   Feature.set({
     'CREATE_ELEMENT_WITH_HTML': function() {
       try { // true for IE
-        var div = Fuse._doc.createElement('<div id="test">');
-        return div.id === 'test';
+        var div = Fuse._doc.createElement('<div id="x">');
+        return div.id === 'x';
       } catch(e) {
         return false;
       }
@@ -192,9 +192,9 @@
 
     'FUNCTION_TO_STRING_RETURNS_SOURCE': function() {
       // true for all but some mobile browsers
-      function toStringTest(param1, param2) { var number = 1234 }
+      function toStringTest(param1, param2) { var x = 1 }
       var source = toStringTest.toString();
-      return source.indexOf('param1') > -1 && source.indexOf('number = 1234') > -1;
+      return source.indexOf('param1') > -1 && source.indexOf('x = 1') > -1;
     },
 
     'HTML_ELEMENT_CLASS': function() {
@@ -272,13 +272,12 @@
     'ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS': function() {
       // true for IE
       var node, clone;
-      (node = document.createAttribute('name')).value = 'original';
+      (node = document.createAttribute('name')).value = 'x';
       Fuse._div.setAttributeNode(node);
-      (clone = Fuse._div.cloneNode(false)).setAttribute('name', 'cloned');
+      (clone = Fuse._div.cloneNode(false)).setAttribute('name', 'y');
       Fuse._div.removeAttribute('name');
 
-      return (node = clone.getAttributeNode('name')) &&
-        node.value === 'original';
+      return (node = clone.getAttributeNode('name')) && node.value === 'x';
     },
 
     'BODY_ACTING_AS_ROOT': function() {
@@ -344,8 +343,7 @@
         var backup = Fuse._docEl.style.display;
         Fuse._docEl.style.display = 'none';
 
-        // Safari 2: getComputedStyle': function() will return null
-        // for elements with style display:none
+        // In Safari 2 getComputedStyle() will return null for elements with style display:none
         var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null),
          result = style && style.height === '0px';
 
@@ -431,12 +429,12 @@
 
     return {
       'ELEMENT_SELECT_INNERHTML_BUGGY': createInnerHTMLTest(
-        '<select><option></option></select>', '<option>test</option>'
+        '<select><option></option></select>', '<option>x</option>'
       ),
 
       'ELEMENT_TABLE_INNERHTML_BUGGY': createInnerHTMLTest(
         // left out tbody to test if it's auto inserted
-        '<table><tr><td></td></tr></table>', '<tr><td><div>test</div></td></tr>'
+        '<table><tr><td></td></tr></table>', '<tr><td><div>x</div></td></tr>'
       )
     };
   })());
@@ -444,7 +442,7 @@
   Bug.set((function() {
     function createCommentTest(conditional) {
       return function() {
-        Fuse._div.innerHTML = '<span>a</span><!--b-->';
+        Fuse._div.innerHTML = '<p>x</p><!--y-->';
         var result = conditional(Fuse._div);
         Fuse._div.innerHTML = '';
         return result;

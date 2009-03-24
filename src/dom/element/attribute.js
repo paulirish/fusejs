@@ -148,19 +148,19 @@
        label  = Fuse._doc.createElement('label'),
        button = Fuse._doc.createElement('button');
 
-      label.htmlFor = label.className = 'test';
+      label.htmlFor = label.className = 'x';
       label.setAttribute('style', 'display:block');
       form.setAttribute('encType', 'multipart/form-data');
-      button.appendChild(Fuse._doc.createTextNode('inside value'));
-      button.setAttribute('value', 'test');
+      button.appendChild(Fuse._doc.createTextNode('y'));
+      button.setAttribute('value', 'x');
 
       // translate content name `htmlFor`
-      if (label.getAttribute('htmlFor') === 'test')
+      if (label.getAttribute('htmlFor') === 'x')
         T.contentNames['for'] = 'htmlFor';
       else T.contentNames.htmlFor = 'for';
 
       // translate content name `className`
-      if (label.getAttribute('className') === 'test')
+      if (label.getAttribute('className') === 'x')
         T.contentNames['class'] = 'className';
       else T.contentNames.className = 'class';
 
@@ -173,7 +173,7 @@
       // set `value`
       // http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-30233917
       value = (node = button.getAttributeNode('value')) && node.value;
-      if (value !== 'test') T.write.value = setNode('value');
+      if (value !== 'x') T.write.value = setNode('value');
 
       // get and set `style` attribute
       value = (node = label.getAttributeNode('style')) && node.value;
@@ -183,9 +183,11 @@
       }
 
       // get `href` and other uri attributes
-      // TODO: Check others attributes like action, cite, codeBase, lowsrc, and useMap.
-      // Opera 9.25 will automatically translate `action` uri's from relative to absolute.
+      // TODO: Check others attributes like cite, codeBase, lowsrc, and useMap.
       if (Feature('ELEMENT_GET_ATTRIBUTE_IFLAG')) {
+        // Exclude `action` attribute because:
+        // Opera 9.25 will automatically translate the URI from relative to absolute.
+        // In IE this fix has the reverse effect.
         $w('data href longDesc src')
           ._each(function(attr) { T.read[attr] = getExact });
       }
