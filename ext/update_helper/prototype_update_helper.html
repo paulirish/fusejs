@@ -263,6 +263,15 @@
       this.assertRespondsTo('toJSON', h)
     },
 
+    /* Commented out because Array#inject uses native Array#reduce
+    testArray: function() {
+       var a = [0, 1, 2, 3];
+       a.reduce(function(){ });
+       this.assertErrorNotified('Array#reduce is no longer supported.\n' +
+	    'This is due to an unfortunate naming collision with Mozilla\'s own implementation of Array#reduce which differs completely from Prototype\'s implementation (it\'s in fact similar to Prototype\'s Array#inject).\n' + 
+	    'Mozilla\'s Array#reduce is already implemented in Firefox 3 (as part of JavaScript 1.8) and is about to be standardized in EcmaScript 3.1.')
+    }, */
+
     testClass: function() {
       Class.create();
       this.assertInfoNotified('The class API has been fully revised and now allows for mixins and inheritance.\n' + 

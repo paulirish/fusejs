@@ -253,6 +253,16 @@ var prototypeUpdateHelper = new UpdateHelper([
     type: 'warn'
   },
 
+  /* Commented out because Array#inject uses native Array#reduce
+  {
+    methodName: 'reduce',
+    namespace: Array.prototype,
+    message: 'Array#reduce is no longer supported.\n' + 
+      'This is due to an unfortunate naming collision with Mozilla\'s own implementation of Array#reduce which differs completely from Prototype\'s implementation (it\'s in fact similar to Prototype\'s Array#inject).\n' + 
+      'Mozilla\'s Array#reduce is already implemented in Firefox 3 (as part of JavaScript 1.8) and is about to be standardized in EcmaScript 3.1.',
+    type: 'error'
+  }, */
+
   {
     methodName: 'unloadCache',
     namespace: Event,
