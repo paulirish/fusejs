@@ -282,6 +282,7 @@ new Test.Unit.Runner({
     this.assert(!Object.isHash(false));
     this.assert(!Object.isHash(true));
     this.assert(!Object.isHash([]));
+    this.assert(!Object.isHash(Hash.prototype));
     
     // falsy variables should not mess up return value type
     this.assertIdentical(false, Object.isHash(0));

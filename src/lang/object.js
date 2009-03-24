@@ -150,7 +150,7 @@
     };
 
     this.isHash = function isHash(value) {
-      return !!value && value.constructor === Hash;
+      return value instanceof Hash;
     };
 
     this.isPrimitive = function isPrimitive(value) {

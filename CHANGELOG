@@ -1,3 +1,5 @@
+* Ensure Object.isHash() returns false for Hash.prototype. [jddalton]
+
 * unit test: Update unit test framework. [jddalton, Tobie Langel]
 
 * deprecation extension: Mark Array#reduce() as removed (commented out because native Array#reduce is used in Array#inject). [jddalton, Tobie Langel]
