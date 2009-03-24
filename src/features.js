@@ -356,21 +356,21 @@
 
     'ELEMENT_PROPERTIES_ARE_ATTRIBUTES': function() {
       // true for IE
-      Fuse._div.__attrAsExpandoProps = 'something';
-      var result = Fuse._div.getAttribute('__attrAsExpandoProps') === 'something';
-      Fuse._div.removeAttribute('__propertiesAreAttributes');
-      if (typeof Fuse._div.__propertiesAreAttributes !== 'undefined')
-        delete Fuse._div.__propertiesAreAttributes;
+      Fuse._div[expando] = 'x';
+      var result = Fuse._div.getAttribute(expando) === 'x';
+      Fuse._div.removeAttribute(expando);
+      if (typeof Fuse._div[expando] !== 'undefined')
+        delete Fuse._div[expando];
       return result;
     },
 
     'ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT_PROPERTY_ON_INSERT': function() {
       var element = Fuse._doc.createElement('script');
-      element.text = 'Fuse.__testScriptText = true;';
+      element.text = 'Fuse.' + expando +' = true;';
       Fuse._docEl.insertBefore(element, Fuse._docEl.firstChild);
-      var result = !Fuse.__testScriptText;
+      var result = !Fuse[expando];
       Fuse._docEl.removeChild(element);
-      delete Fuse.__testScriptText;
+      delete Fuse[expando];
       return result;
     },
 
@@ -393,9 +393,9 @@
       // case-insensitively in quirks mode.
       var result = false;
       if (Feature('SELECTORS_API')) {
-        Fuse._div.id = 'fusejs_test_id';
-        Fuse._div.innerHTML = '<span class="Test"></span>';
-        result = Fuse._div.querySelector('#fusejs_test_id .test') !== null;
+        Fuse._div.id = expando;
+        Fuse._div.innerHTML = '<span class="X"></span>';
+        result = Fuse._div.querySelector('#'+ expando +' .x') !== null;
         Fuse._div.id = Fuse._div.innerHTML = '';
       }
       return result;

@@ -2,6 +2,7 @@
 (function(global) {
 
   var Bug, Feature,
+   expando = '_fuse' + String(+new Date).slice(0, 10),
    slice = Array.prototype.slice,
    userAgent = global.navigator.userAgent,
    nodeListSlice = slice;
