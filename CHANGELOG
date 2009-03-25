@@ -1,3 +1,5 @@
+* Add Object.isEmpty() utility method to help detect when an object contains no properties of its own. [Prototype LH #245] [jddalton, Ken Snyder]
+
 * Cleanup String#escapeHTML and String#unescapeHTML as well as standardize capability check property values to reduce extraneous text. [jddalton]
 
 * Fix IE bug where String#replace sets regexp's lastIndex property. [jddalton]

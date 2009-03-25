@@ -69,7 +69,7 @@
 
       // if no more events cached remove the
       // cache for the element
-      for (var i in c.events) return;
+      if (!Object.isEmpty(c.events)) return;
       delete Event.cache[id];
     }
 

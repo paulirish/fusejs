@@ -149,6 +149,14 @@
       return !!value && value.nodeType === 1;
     };
 
+    this.isEmpty = function isEmpty(object) {
+      for (var key in object) {
+        if (Object.hasKey(object, key))
+          return false;
+      }
+      return true;
+    };
+
     this.isHash = function isHash(value) {
       return value instanceof Hash;
     };
@@ -252,6 +260,7 @@
      each =          null,
      inspect =       null,
      isElement =     null,
+     isEmpty =       null,
      isHash =        null,
      isPrimitive =   null,
      isSameOrigin =  null,

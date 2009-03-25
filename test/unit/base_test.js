@@ -314,6 +314,23 @@ new Test.Unit.Runner({
     this.assertIdentical(false, Object.isElement(undefined));
   },
   
+  testObjectIsEmpty: function () {
+    var undef, klass = Class.create({ 'foo': 1 }), instance = new klass;
+    instance.foo = 1;
+
+    this.assert(Object.isEmpty({ }));
+    this.assert(Object.isEmpty([ ]));
+    this.assert(Object.isEmpty(new klass));
+    this.assert(Object.isEmpty(false));
+    this.assert(Object.isEmpty(true));
+    this.assert(Object.isEmpty(0));
+    this.assert(Object.isEmpty(null));
+    this.assert(Object.isEmpty(undef));
+    this.assert(!Object.isEmpty({ 'foo': 1 }));
+    this.assert(!Object.isEmpty(instance));
+    this.assert(!Object.isEmpty([1, 2, 3]));
+  },
+  
   testObjectIsFunction: function() {
     this.assert(Object.isFunction(function() { }));
     this.assert(Object.isFunction(Class.create()));
