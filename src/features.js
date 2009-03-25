@@ -404,7 +404,7 @@
       var func = function() { return '' };
       return 'a'.replace(/a/, func) === String(func);
     },
-    
+
     'STRING_REPLACE_SETS_REGEXP_LAST_INDEX': function() {
       // true for IE
       var pattern = /x/;
@@ -414,10 +414,11 @@
   });
 
   Bug.set((function() {
-    function createInnerHTMLTest(source, innerHTML) {
+    function createInnerHTMLTest(source, innerHTML, targetNode) {
       return function() {
         Fuse._div.innerHTML = source;
         var result = true, element = Fuse._div.firstChild;
+        if (targetNode) element = element.getElementsByTagName(targetNode)[0];
         try {
           result = (element.innerHTML = innerHTML) &&
             element.innerHTML.toLowerCase() !== innerHTML;
@@ -428,13 +429,23 @@
     }
 
     return {
+      'ELEMENT_COLGROUP_INNERHTML_BUGGY': createInnerHTMLTest(
+        '<table><colgroup></colgroup><tbody></tbody></table>',
+        '<col/><col/>', 'colgroup'
+      ),
+
+      'ELEMENT_OPTGROUP_INNERHTML_BUGGY': createInnerHTMLTest(
+        '<select><optgroup></optgroup></select>',
+        '<option>x</option>', 'optgroup'
+      ),
+
       'ELEMENT_SELECT_INNERHTML_BUGGY': createInnerHTMLTest(
         '<select><option></option></select>', '<option>x</option>'
       ),
 
       'ELEMENT_TABLE_INNERHTML_BUGGY': createInnerHTMLTest(
         // left out tbody to test if it's auto inserted
-        '<table><tr><td></td></tr></table>', '<tr><td><div>x</div></td></tr>'
+        '<table><tr><td></td></tr></table>', '<tr><td><p>x</p></td></tr>'
       )
     };
   })());
