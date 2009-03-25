@@ -92,7 +92,7 @@ new Test.Unit.Runner({
     
     var temp = String.prototype.capitalize;
     String.prototype.capitalize = String.prototype.capitalize.wrap(function(proceed, eachWord) {
-      if (eachWord && this.include(' ')) return this.split(' ').map(function(str){
+      if (eachWord && this.contains(' ')) return this.split(' ').map(function(str){
         return str.capitalize();
       }).join(' ');
       return proceed();

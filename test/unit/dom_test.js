@@ -19,10 +19,10 @@ new Test.Unit.Runner({
         'document.body.offsetHeight', 'document.body.offsetWidth',
         'document.body.offsetTop', 'document.body.offsetLeft'
       ].inject([], function(properties, prop) {
-        if (!self.screen && prop.include('self.screen')) return;
-        if (!document.body && prop.include('document.body')) return;
+        if (!self.screen && prop.contains('self.screen')) return;
+        if (!document.body && prop.contains('document.body')) return;
         properties.push(prop);
-        if (prop.include('.body') && document.documentElement)
+        if (prop.contains('.body') && document.documentElement)
           properties.push(prop.sub('.body', '.documentElement'));
         return properties;
       }),
@@ -85,7 +85,7 @@ new Test.Unit.Runner({
   },
   
   testGetElementsByClassName: function() {
-    if (document.getElementsByClassName.toString().include('[native code]')) {
+    if (document.getElementsByClassName.toString().contains('[native code]')) {
       this.info("browser uses native getElementsByClassName; skipping tests");
       return;
     } 
@@ -240,7 +240,7 @@ new Test.Unit.Runner({
 
       element = getElement('table_for_insertions', context);
       element.insert('<tr><td>a cell!</td></tr>');
-      this.assert(getInnerHTML(element).include('<tr><td>a cell!</td></tr>'), msg);
+      this.assert(getInnerHTML(element).contains('<tr><td>a cell!</td></tr>'), msg);
 
       getElement('row_1', context).insert({ after:'<tr></tr><tr></tr><tr><td>last</td></tr>' });
       this.assertEqual('last', $A(getElement('table_for_row_insertions')
@@ -335,9 +335,9 @@ new Test.Unit.Runner({
 
   testInsertionBackwardsCompatibility: function() {
     new Insertion.Before('element-insertions-main', 'some backward-compatibility testing before');
-    this.assert(getInnerHTML('element-insertions-container').include('some backward-compatibility testing before'));
+    this.assert(getInnerHTML('element-insertions-container').contains('some backward-compatibility testing before'));
     new Insertion.After('element-insertions-main', 'some backward-compatibility testing after');
-    this.assert(getInnerHTML('element-insertions-container').include('some backward-compatibility testing after'));
+    this.assert(getInnerHTML('element-insertions-container').contains('some backward-compatibility testing after'));
     new Insertion.Top('element-insertions-main', 'some backward-compatibility testing top');
     this.assert(getInnerHTML('element-insertions-main').startsWith('some backward-compatibility testing top'));
     new Insertion.Bottom('element-insertions-main', 'some backward-compatibility testing bottom');
@@ -656,10 +656,10 @@ new Test.Unit.Runner({
     this.assertEqual('', $('testdiv-replace-container-3').innerHTML);
     
     $('testrow-replace').replace('<tr><td>hello</td></tr>');
-    this.assert(getInnerHTML('testrow-replace-container').include('<tr><td>hello</td></tr>'));
+    this.assert(getInnerHTML('testrow-replace-container').contains('<tr><td>hello</td></tr>'));
     
     $('testoption-replace').replace('<option>hello</option>');
-    this.assert($('testoption-replace-container').innerHTML.include('hello'));
+    this.assert($('testoption-replace-container').innerHTML.contains('hello'));
     
     Element.replace('testinput-replace', '<p>hello world</p>');
     this.assertEqual('<p>hello world</p>', getInnerHTML('testform-replace'));
@@ -1412,7 +1412,7 @@ new Test.Unit.Runner({
     this.assertEqual('some-id',        label.writeAttribute({ 'for':       'some-id' }).       readAttribute('for'));
     this.assertEqual('some-other-id',  label.writeAttribute({ 'htmlFor':   'some-other-id' }). readAttribute('for'));
     
-    this.assert(p.writeAttribute({ 'style':'width: 5px;' }).readAttribute('style').toLowerCase().include('width'));      
+    this.assert(p.writeAttribute({ 'style':'width: 5px;' }).readAttribute('style').toLowerCase().contains('width'));      
 
     var table = $('write_attribute_table');
     table.writeAttribute('cellspacing', '2')

@@ -76,12 +76,12 @@ new Test.Unit.Runner({
   },
 
   testInclude: function() {
-    this.assert($H(Fixtures.one).include('A#'));
-    this.assert($H(Fixtures.many).include('A'));
-    this.assert($H(Fixtures.mixed_dont_enum).include('bar'));
+    this.assert($H(Fixtures.one).contains('A#'));
+    this.assert($H(Fixtures.many).contains('A'));
+    this.assert($H(Fixtures.mixed_dont_enum).contains('bar'));
     
-    this.assert(!$H(Fixtures.many).include('Z'));
-    this.assert(!$H().include('foo'));
+    this.assert(!$H(Fixtures.many).contains('Z'));
+    this.assert(!$H().contains('foo'));
   },
 
   testKeys: function() {
@@ -109,7 +109,7 @@ new Test.Unit.Runner({
     this.assertIdentical(-1, $H(Fixtures.many).keyOf('Z'));
 
     var hash = $H({ 'a':1, 'b':'2', 'c':1, 'toString':'foo', 'valueOf':'' });
-    this.assert(['a','c'].include(hash.keyOf(1)));
+    this.assert(['a','c'].contains(hash.keyOf(1)));
     this.assertEqual('toString', hash.keyOf('foo'));
     this.assertEqual('valueOf', hash.keyOf(''));
     
@@ -194,13 +194,13 @@ new Test.Unit.Runner({
 
   testReject: function() {
     this.assertHashEqual({ 'c':'C', 'd': 'D#' },
-      $H(Fixtures.many).reject(function(value) {
-        return !/[CD]/.test(value);
+      $H(Fixtures.many).filter(function(value) {
+        return /[CD]/.test(value);
       }));
       
     this.assertHashEqual({ 'toString':'bar', 'valueOf':'' },
-      $H(Fixtures.mixed_dont_enum).reject(function(value) {
-        return /[AB]/.test(value);
+      $H(Fixtures.mixed_dont_enum).filter(function(value) {
+        return !/[AB]/.test(value);
       }));
   },
 

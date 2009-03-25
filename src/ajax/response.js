@@ -42,7 +42,7 @@
     this._getResponseJSON = function _getResponseJSON() {
       var options = this.request.options;
       if (!options.evalJSON || (options.evalJSON != 'force' && 
-        !(this.getHeader('Content-type') || '').include('application/json')) || 
+        !(this.getHeader('Content-type') || '').contains('application/json')) || 
           this.responseText.blank())
             return null;
       try {

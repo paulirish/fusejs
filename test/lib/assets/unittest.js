@@ -144,7 +144,7 @@ Test.Unit.Logger = Class.create({
   
   appendActionButtons: function(actions) {
    /* actions = $H(actions);
-    if (!actions.any()) return;
+    if (!actions.some()) return;
     var div = new Element("div", {className: 'action_buttons'});
     actions.inject(div, function(container, action) {
       var button = new Element("input").setValue(action.key).observe("click", action.value);
@@ -314,7 +314,7 @@ Test.Unit.Assertions = (function() {
     actual = $A(actual);
     message = buildMessage(message || 'assertEnumEqual', 'expected: <?>, actual: <?>', expected, actual);
     this.assertBlock(message, function() {
-      return expected.length == actual.length && expected.zip(actual).all(function(pair) { return pair[0] == pair[1] });
+      return expected.length == actual.length && expected.zip(actual).every(function(pair) { return pair[0] == pair[1] });
     });
   }
 
@@ -323,13 +323,13 @@ Test.Unit.Assertions = (function() {
     actual = $A(actual);
     message = buildMessage(message || 'assertEnumNotEqual', '<?> was the same as <?>', expected, actual);
     this.assertBlock(message, function() {
-      return expected.length != actual.length || expected.zip(actual).any(function(pair) { return pair[0] != pair[1] });
+      return expected.length != actual.length || expected.zip(actual).every(function(pair) { return pair[0] != pair[1] });
     });
   }
   
   function assertPairEqual(pair) {
-    return pair.all(Object.isArray) ?
-      pair[0].zip(pair[1]).all(assertPairEqual) : pair[0] == pair[1];
+    return pair.every(Object.isArray) ?
+      pair[0].zip(pair[1]).every(assertPairEqual) : pair[0] == pair[1];
   }
   
   function assertHashEqual(expected, actual, message) {
@@ -340,7 +340,7 @@ Test.Unit.Assertions = (function() {
     // from now we recursively zip & compare nested arrays
     function block() {
       return expected_array.length == actual_array.length && 
-        expected_array.zip(actual_array).all(assertPairEqual);
+        expected_array.zip(actual_array).every(assertPairEqual);
     }
     this.assertBlock(message, block);
   }
@@ -353,7 +353,7 @@ Test.Unit.Assertions = (function() {
     // from now we recursively zip & compare nested arrays
     function block() {
       return !(expected_array.length == actual_array.length && 
-        expected_array.zip(actual_array).all(assertPairEqual));
+        expected_array.zip(actual_array).every(assertPairEqual));
     };
     this.assertBlock(message, block);
   }
@@ -478,7 +478,7 @@ Test.Unit.Assertions = (function() {
       this.flunk(message);
       pass = false;
     }
-    elements.zip(expressions).all(function(pair, index) {
+    elements.zip(expressions).every(function(pair, index) {
       var element = $(pair.first()), expression = pair.last();
       if (element.match(expression)) return true;
       message = buildMessage('assertElementsMatch', 'In index <?>: expected <?> but got ?', index, expression, element);

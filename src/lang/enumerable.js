@@ -5,15 +5,15 @@
   global.Enumerable = { };
 
   (function() {
-    this.detect = function detect(callback, thisArg) {
-      var result;
-      this.each(function(value, index, iterable) {
-        if (callback.call(thisArg, value, index, iterable)) {
-          result = value;
+    this.contains = function contains(object, strict) {
+      var found = false;
+      this.each(function(value) {
+        if ((strict && value === object) || (!strict && value == object)) {
+          found = true;
           throw $break;
         }
       });
-      return result;
+      return found;
     };
 
     this.each = function(callback, thisArg) {
@@ -28,10 +28,10 @@
     };
 
     this.eachSlice = function eachSlice(size, callback, thisArg) {
-      var index = -size, slices = [], array = this.toArray();
-      if (size < 1) return array;
-      while ((index += size) < array.length)
-        slices[slices.length] = array.slice(index, index + size);
+      var index = -size, slices = [], list = this.toArray();
+      if (size < 1) return list;
+      while ((index += size) < list.length)
+        slices[slices.length] = list.slice(index, index + size);
       return slices.map(callback, thisArg);
     };
 
@@ -56,6 +56,11 @@
       return results;
     };
 
+    this.first = function first(callback, thisArg) {
+      var list = this.toArray();
+      return list.first.apply(list, arguments)
+    };
+
     this.grep = function grep(pattern, callback, thisArg) {
       if (!pattern || Object.isRegExp(pattern) &&
          !pattern.source) return this.toArray();
@@ -69,17 +74,6 @@
           results.push(callback.call(thisArg, value, index, iterable));
       });
       return results;
-    };
-
-    this.include = function include(object) {
-      var found = false;
-      this.each(function(value) {
-        if (value == object) {
-          found = true;
-          throw $break;
-        }
-      });
-      return found;
     };
 
     this.inGroupsOf = function inGroupsOf(size, filler) {
@@ -106,6 +100,11 @@
       return this.map(function(value) {
         return Function.prototype.apply.call(value[method], value, args);
       });
+    };
+
+    this.last = function last(callback, thisArg) {
+      var list = this.toArray();
+      return list.last.apply(list, arguments)
     };
 
     this.map = function map(callback, thisArg) {
@@ -161,15 +160,6 @@
       });
     };
 
-    this.reject = function reject(callback, thisArg) {
-      var results = [];
-      this._each(function(value, index, iterable) {
-        if (!callback.call(thisArg, value, index, iterable))
-          results.push(value);
-      });
-      return results;
-    };
-
     this.size = function size() {
       return this.toArray().length;
     };
@@ -215,40 +205,26 @@
     };
 
     // prevent JScript bug with named function expressions
-    var detect =  null,
+    var contains = null,
      each =       null,
      eachSlice =  null,
      every =      null,
      filter =     null,
+     first =      null,
      grep =       null,
-     include =    null,
      inject =     null,
      inGroupsOf = null,
      inspect =    null,
      invoke =     null,
+     last =       null,
      map =        null,
      max =        null,
      min =        null,
      partition =  null,
      pluck =      null,
-     reject =     null,
      size =       null,
      some =       null,
      sortBy =     null,
-     toArray =    null;
+     toArray =    null,
+     zip =        null;
   }).call(Enumerable);
-
-  // aliases
-  Object._extend(Enumerable, (function() {
-    return {
-      'all':     this.every,
-      'any':     this.some,
-      'collect': this.map,
-      'entries': this.toArray,
-      'find':    this.detect,
-      'findAll': this.filter,
-      'member':  this.include,
-      'select':  this.filter,
-      'zip':     this.zip
-    };
-  }).call(Enumerable));

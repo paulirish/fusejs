@@ -250,13 +250,6 @@
       return results;
     };
 
-    this.reject = function reject(callback, thisArg) {
-      for (var i = 0, results = [], length = this.length; i < length; i++)
-        if (!callback.call(thisArg, this[i], i, this))
-          results[results.length] = this[i];
-      return results;
-    };
-
     this.sortBy = function sortBy(callback, thisArg) {
       var results = [], i = 0, length = this.length;
       while (i < length)

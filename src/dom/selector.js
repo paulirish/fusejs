@@ -63,7 +63,7 @@
 
       // Safari 3 chokes on :*-of-type and :empty
       if (Fuse.Browser.Agent.WebKit && 
-       (e.include('-of-type') || e.include(':empty')))
+       (e.contains('-of-type') || e.contains(':empty')))
         return false;
 
       // XPath can't do namespaced attributes, nor can it read
@@ -161,7 +161,7 @@
       var le, e = this.expression, ps = Selector.patterns,
        as = Selector.assertions;
 
-      if (e.include(',')) {
+      if (e.contains(',')) {
         // If the expression includes a comma, it might be a union of several
         // selectors. Split and check each one.
         var expressions = Selector.split(e);
@@ -186,7 +186,7 @@
             } else {
               // reluctantly do a document-wide search
               // and look for a match in the array
-              return this.findElements(element.ownerDocument).include(element);
+              return this.findElements(element.ownerDocument).contains(element);
             }
           }
         }
@@ -634,7 +634,7 @@
         for (var i = 0, node, nodeClassName; node = nodes[i++]; ) {
           nodeClassName = node.className;
           if (nodeClassName.length == 0) continue;
-          if (nodeClassName == className || (' ' + nodeClassName + ' ').include(needle))
+          if (nodeClassName == className || (' ' + nodeClassName + ' ').contains(needle))
             results.push(node);
         }
         return results;
@@ -749,16 +749,16 @@
       }
 
       function include(nv, v) {
-        return nv == v || nv && nv.include(v);
+        return nv == v || nv && nv.contains(v);
       }
 
       function dashSeparated(nv, v) {
         return ('-' + (nv || '').toUpperCase() + '-')
-          .include('-' + (v || '').toUpperCase() + '-');
+          .contains('-' + (v || '').toUpperCase() + '-');
       }
 
       function spaceSeparated(nv, v) {
-        return (' ' + nv + ' ').include(' ' + v + ' ');
+        return (' ' + nv + ' ').contains(' ' + v + ' ');
       }
 
       return {

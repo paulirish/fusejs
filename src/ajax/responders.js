@@ -19,7 +19,7 @@
       for (name in responder) {
         m = responder[name];
         if (!(this.responders[name] || [])
-            .detect(function(c) { return c.__method === m })) {
+            .first(function(c) { return c.__method === m })) {
           (handler = m.bind(responder)).__method = m;
           if (!this.responders[name]) this.responders[name] = [];
           this.responders[name].push(handler);
@@ -30,7 +30,7 @@
     this.unregister = function unregister(responder) {
       for (var name in responder)
         this.responders[name] = (this.responders[name] || [])
-         .reject(function(c) { return c.__method === responder[name] });
+         .filter(function(c) { return c.__method !== responder[name] });
     };
 
     // prevent JScript bug with named function expressions

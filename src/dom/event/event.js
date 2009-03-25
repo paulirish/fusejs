@@ -40,7 +40,7 @@
     getCacheID.id = 3;
 
     function getDOMEventName(eventName) {
-      if (eventName && eventName.include(':'))
+      if (eventName && eventName.contains(':'))
         return Event.CUSTOM_EVENT_NAME;
       return eventName;
     }
@@ -108,7 +108,7 @@
       // DOM Level 0
       function(element, eventName, handler) {
         var attrName = 'on' + getDOMEventName(eventName);
-        if (!eventName.include(':') && element[attrName] === handler)
+        if (!eventName.contains(':') && element[attrName] === handler)
           element[attrName] = null;
       },
 

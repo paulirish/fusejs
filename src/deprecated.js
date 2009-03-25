@@ -143,9 +143,9 @@
         className = ' ' + className + ' ';
 
         for (var i = 0, child, cn; child = nodes[i]; i++) {
-          if (child.className && (cn = ' ' + child.className + ' ') && (cn.include(className) ||
-            (classNames && classNames.all(function(name) {
-              return !name.toString().blank() && cn.include(' ' + name + ' ') })))) {
+          if (child.className && (cn = ' ' + child.className + ' ') && (cn.contains(className) ||
+            (classNames && classNames.every(function(name) {
+              return !name.toString().blank() && cn.contains(' ' + name + ' ') })))) {
             elements.push(Element.extend(child));
           }
         }
@@ -187,17 +187,17 @@
 
     this._each = function _each(callback) {
       this.element.className.split(/\s+/)
-        .select(function(name) { return name.length > 0 })
+        .filter(function(name) { return name.length > 0 })
           ._each(callback);
     };
 
     this.add = function add(classNameToAdd) {
-      if (this.include(classNameToAdd)) return;
+      if (this.contains(classNameToAdd)) return;
       this.set(this.toArray().concat(classNameToAdd).join(' '));
     };
 
     this.remove = function remove(classNameToRemove) {
-      if (!this.include(classNameToRemove)) return;
+      if (!this.contains(classNameToRemove)) return;
       this.set(this.toArray().without(classNameToRemove).join(' '));
     };
 

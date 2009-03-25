@@ -47,63 +47,43 @@ new Test.Unit.Runner({
     
     this.assertEqual('2 4 6', results.join(' '));
 
-    this.assert(Fixtures.Basic.all(function(value){
+    this.assert(Fixtures.Basic.every(function(value){
       return value >= this.min && value <= this.max;
     }, { min: 1, max: 3 }));
-    this.assert(!Fixtures.Basic.all(function(value){
+    this.assert(!Fixtures.Basic.every(function(value){
       return value >= this.min && value <= this.max;
     }));
-    this.assert(Fixtures.Basic.any(function(value){
+    this.assert(Fixtures.Basic.some(function(value){
       return value == this.target_value;
     }, { target_value: 2 }));
   },
 
-  testAny: function() {
-    this.assert(!([].any()));
-    
-    this.assert([true, true, true].any());
-    this.assert([true, false, false].any());
-    this.assert(![false, false, false].any());
-    
-    this.assert(Fixtures.Basic.any(function(value) {
-      return value > 2;
-    }));
-    this.assert(!Fixtures.Basic.any(function(value) {
-      return value > 5;
-    }));
+  testContains: function() {
+    this.assert(Fixtures.Nicknames.contains('sam-'));
+    this.assert(Fixtures.Nicknames.contains('noradio'));
+    this.assert(!Fixtures.Nicknames.contains('gmosx'));
+    this.assert(Fixtures.Basic.contains(2));
+    this.assert(Fixtures.Basic.contains(2, true));
+    this.assert(Fixtures.Basic.contains('2'));
+    this.assert(!Fixtures.Basic.contains('2', true));    
+    this.assert(!Fixtures.Basic.contains('4'));
   },
   
-  testAll: function() {
-    this.assert([].all());
+  testEvery: function() {
+    this.assert([].every());
     
-    this.assert([true, true, true].all());
-    this.assert(![true, false, false].all());
-    this.assert(![false, false, false].all());
+    this.assert([true, true, true].every());
+    this.assert(![true, false, false].every());
+    this.assert(![false, false, false].every());
 
-    this.assert(Fixtures.Basic.all(function(value) {
+    this.assert(Fixtures.Basic.every(function(value) {
       return value > 0;
     }));
-    this.assert(!Fixtures.Basic.all(function(value) {
+    this.assert(!Fixtures.Basic.every(function(value) {
       return value > 1;
     }));
   },
-  
-  testCollect: function() {
-    this.assertEqual(Fixtures.Nicknames.toArray().join(', '), 
-      Fixtures.People.collect(function(person) {
-        return person.nickname;
-      }).toArray().join(', '));
-    
-    this.assertEqual(26,  Fixtures.Primes.map().size());
-  },
-  
-  testDetect: function() {
-    this.assertEqual('Marcel Molina Jr.', 
-      Fixtures.People.detect(function(person) {
-        return person.nickname.match(/no/);
-      }).name);
-  },
-  
+      
   testEachSlice: function() {
     this.assertEnumEqual([], [].eachSlice(2));
     this.assertEqual(1, [1].eachSlice(1).length);
@@ -140,6 +120,22 @@ new Test.Unit.Runner({
     this.assertEqual(3, Fixtures.ZeroValues.filter().toArray().length);
   },
   
+  testFirst: function() {
+    this.assertUndefined(Fixtures.Empty.first());
+    this.assertEnumEqual([], Fixtures.Empty.first(3));
+    this.assertUndefined(Fixtures.Empty.first(function(item) { return item === 2 }));
+    this.assertEqual(1, Fixtures.Basic.first());
+    this.assertEnumEqual([1,2], Fixtures.Basic.first(2));
+    this.assertEqual(2, Fixtures.Basic.first(function(item) { return item === 2 }));
+    this.assertUndefined(Fixtures.Basic.first(function(item) { return item === 4 }));
+    this.assertEnumEqual([1], Fixtures.Basic.first(-3));
+    this.assertEnumEqual([1,2,3], Fixtures.Basic.first(1000));
+    this.assertEnumEqual([], Fixtures.Basic.first('r0x0r5'));    
+    this.assertEqual('Marcel Molina Jr.', Fixtures.People.first(function(person) { 
+      return person.nickname.match(/no/); 
+    }).name);
+  },  
+  
   testGrep: function() {
     // test empty pattern
     this.assertEqual('abc', ['a', 'b', 'c'].grep('').join(''));
@@ -168,16 +164,7 @@ new Test.Unit.Runner({
     this.assertEnumEqual(['(a', 'c('], ['(a','b','c('].grep('('));
     this.assertEnumEqual(['|a', 'c|'], ['|a','b','c|'].grep('|'));
   },
-  
-  testInclude: function() {
-    this.assert(Fixtures.Nicknames.include('sam-'));
-    this.assert(Fixtures.Nicknames.include('noradio'));
-    this.assert(!Fixtures.Nicknames.include('gmosx'));
-    this.assert(Fixtures.Basic.include(2));
-    this.assert(Fixtures.Basic.include('2'));
-    this.assert(!Fixtures.Basic.include('4'));
-  },
-  
+    
   testInGroupsOf: function() {
     this.assertEnumEqual([], [].inGroupsOf(3));
     
@@ -240,6 +227,35 @@ new Test.Unit.Runner({
     this.assert(Object.isArray(elements.invoke('focus')));
   },
   
+  testLast: function() {
+    this.assertUndefined(Fixtures.Empty.last());
+    this.assertEnumEqual([], Fixtures.Empty.last(3));
+    this.assertUndefined(Fixtures.Empty.last(function(item) { return item === 2 }));
+    
+    this.assertEqual(3, Fixtures.Basic.last());
+    this.assertEnumEqual([2,3], Fixtures.Basic.last(2));
+    this.assertEqual(2, Fixtures.Basic.last(function(item) { return item === 2 }));
+    this.assertUndefined(Fixtures.Basic.last(function(item) { return item === 4 }));
+    
+    this.assertEnumEqual([3], Fixtures.Basic.last(-3));
+    this.assertEnumEqual([1,2,3], Fixtures.Basic.last(1000));
+    
+    this.assertEnumEqual([], Fixtures.Basic.last('r0x0r5'));    
+    
+    this.assertEqual('Marcel Molina Jr.', Fixtures.People.last(function(person) {
+      return person.nickname.match(/no/);
+    }).name);
+  },    
+  
+  testMap: function() {
+    this.assertEqual(Fixtures.Nicknames.toArray().join(', '), 
+      Fixtures.People.map(function(person) {
+        return person.nickname;
+      }).toArray().join(', '));
+    
+    this.assertEqual(26,  Fixtures.Primes.map().size());
+  },  
+  
   testMax: function() {
     this.assertEqual(100, Fixtures.Z.max());
     this.assertEqual(97, Fixtures.Primes.max());
@@ -268,15 +284,20 @@ new Test.Unit.Runner({
       Fixtures.People.pluck('nickname').toArray().join(', '));
   },
   
-  testReject: function() {
-    this.assertEqual(0, 
-      Fixtures.Nicknames.reject(Fuse.K).length);
-      
-    this.assertEqual('sam-, noradio, htonl',
-      Fixtures.Nicknames.reject(function(nickname) {
-        return nickname != nickname.toLowerCase();
-      }).join(', '));
-  },
+  testSome: function() {
+    this.assert(!([].some()));
+    
+    this.assert([true, true, true].some());
+    this.assert([true, false, false].some());
+    this.assert(![false, false, false].some());
+    
+    this.assert(Fixtures.Basic.some(function(value) {
+      return value > 2;
+    }));
+    this.assert(!Fixtures.Basic.some(function(value) {
+      return value > 5;
+    }));
+  },  
   
   testSortBy: function() {
     this.assertEqual('htonl, noradio, sam-, Ulysses',

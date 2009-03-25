@@ -25,7 +25,7 @@ new Test.Unit.Runner({
   },
   
   testCollections: function() {
-    this.assert($$("input").all(function(input) {
+    this.assert($$("input").every(function(input) {
       return (input.focus != null);
     }));
   }

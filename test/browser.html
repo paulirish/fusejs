@@ -99,7 +99,7 @@
               elements = history.slice(-3).pluck('element');
                   
           children.each(function(element) {
-            if (element && !elements.include(element))
+            if (element && !elements.contains(element))
               this.element.removeChild(element);
           }.bind(this));
           

@@ -250,7 +250,7 @@ new Test.Unit.Runner({
     [form.getInputs(), Form.getInputs(form)].each(function(inputs){
       this.assertEqual(5, inputs.length);
       this.assert(inputs instanceof Array);
-      this.assert(inputs.all(function(input) { return (input.nodeName.toUpperCase() === 'INPUT') }));
+      this.assert(inputs.every(function(input) { return (input.nodeName.toUpperCase() === 'INPUT') }));
     }, this);
     
     // ensure private method nodeListSlice works as expected
@@ -382,7 +382,7 @@ new Test.Unit.Runner({
     // test "GET" method
     var request = $('form').request();
     this.assert($('form').hasAttribute('method'));
-    this.assert(request.url.include('fixtures/empty.js?val1=4'));
+    this.assert(request.url.contains('fixtures/empty.js?val1=4'));
     this.assertEqual('get', request.method);
 
     // test "PUT" method
@@ -395,12 +395,12 @@ new Test.Unit.Runner({
 
     // with empty action attribute
     request = $("ffe").request({ 'method': 'post' });
-    this.assert(request.url.include('unit/tmp/form_test.html'),
+    this.assert(request.url.contains('unit/tmp/form_test.html'),
       'wrong default action for form element with empty action attribute');
       
     // with explicit options.submit
     request = $("form").request({ 'submit':'second_submit' });
-    this.assert(request.url.include("second_submit=Delete%20it!"));
+    this.assert(request.url.contains("second_submit=Delete%20it!"));
   },
   
   testFormElementClear: function() {
@@ -418,11 +418,11 @@ new Test.Unit.Runner({
          prop = 'value', tagName = element.tagName.toUpperCase();
         
         if (tagName == 'BUTTON' ||
-           ['button', 'image', 'reset', 'submit'].include(element.type)) {
+           ['button', 'image', 'reset', 'submit'].contains(element.type)) {
           // default values for "asserted" and "prop"
         }
         else if (tagName == 'INPUT' || tagName  == 'TEXTAREA') {
-          if (['checkbox', 'radio'].include(element.type)) {
+          if (['checkbox', 'radio'].contains(element.type)) {
             backup = element.checked;
             element.checked = true;
             asserted = false;

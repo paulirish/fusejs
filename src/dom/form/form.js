@@ -327,7 +327,7 @@
       var node, results = [], i = 0;
       if (Object.isArray(value)) {
         while (node = element.options[i++])
-          node.selected = value.include(this.optionValue(node));
+          node.selected = value.contains(this.optionValue(node));
       } else {
         while (node = element.options[i++])
           if (this.optionValue(node) === value)

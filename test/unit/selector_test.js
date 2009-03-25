@@ -363,9 +363,9 @@ new Test.Unit.Runner({
   testCountedIsNotAnAttribute: function() {
     var el = $('list');
     Selector.handlers.mark([el]);
-    this.assert(!el.innerHTML.include("_counted"));
+    this.assert(!el.innerHTML.contains("_counted"));
     Selector.handlers.unmark([el]);
-    this.assert(!el.innerHTML.include("_counted"));      
+    this.assert(!el.innerHTML.contains("_counted"));      
   },
 
   testCopiedNodesGetIncluded: function() {

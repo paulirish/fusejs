@@ -12,6 +12,8 @@ EnumObject = Class.create(Enumerable, {
 });
 
 Fixtures = {
+  Empty: new EnumObject([]),
+  
   People: new EnumObject([
     { 'name': 'Sam Stephenson',    'nickname': 'sam-' },
     { 'name': 'Marcel Molina Jr.', 'nickname': 'noradio' },

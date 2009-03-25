@@ -521,12 +521,12 @@ new Test.Unit.Runner({
   },
   
   testInclude: function() {
-    this.assert('hello world'.include('h'));
-    this.assert('hello world'.include('hello'));
-    this.assert('hello world'.include('llo w'));
-    this.assert('hello world'.include('world'));      
-    this.assert(!'hello world'.include('bye'));
-    this.assert(!''.include('bye'));
+    this.assert('hello world'.contains('h'));
+    this.assert('hello world'.contains('hello'));
+    this.assert('hello world'.contains('llo w'));
+    this.assert('hello world'.contains('world'));      
+    this.assert(!'hello world'.contains('bye'));
+    this.assert(!''.contains('bye'));
   },
   
   testStartsWith: function() {
@@ -635,7 +635,7 @@ new Test.Unit.Runner({
     var dangerous = '{});attackTarget = "attack succeeded!";({}';
 
     // use smaller huge string size for KHTML
-    var size = navigator.userAgent.include('KHTML') ? 20 : 100;
+    var size = navigator.userAgent.contains('KHTML') ? 20 : 100;
     var longString = '"' + '123456789\\"'.times(size * 10) + '"';
     var object = '{' + longString + ': ' + longString + '},';
     var huge = '[' + object.times(size) + '{"test": 123}]';

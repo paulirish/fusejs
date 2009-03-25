@@ -51,7 +51,7 @@
       this.method = this.options.method;
       var params = Object.clone(this.options.parameters);
 
-      if (!['get', 'post'].include(this.method)) {
+      if (!['get', 'post'].contains(this.method)) {
         // simulate other verbs over post
         params['_method'] = this.method;
         this.method = 'post';
@@ -62,7 +62,7 @@
       if (params = Object.toQueryString(params)) {
         // when GET, append parameters to URL
         if (this.method == 'get')
-          this.url += (this.url.include('?') ? '&' : '?') + params
+          this.url += (this.url.contains('?') ? '&' : '?') + params
       }
 
       try {

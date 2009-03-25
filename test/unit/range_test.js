@@ -1,16 +1,16 @@
 new Test.Unit.Runner({
   
   testInclude: function() {
-    this.assert(!$R(0, 0, true).include(0));
-    this.assert($R(0, 0, false).include(0));
+    this.assert(!$R(0, 0, true).contains(0));
+    this.assert($R(0, 0, false).contains(0));
 
-    this.assert($R(0, 5, true).include(0));
-    this.assert($R(0, 5, true).include(4));
-    this.assert(!$R(0, 5, true).include(5));
+    this.assert($R(0, 5, true).contains(0));
+    this.assert($R(0, 5, true).contains(4));
+    this.assert(!$R(0, 5, true).contains(5));
 
-    this.assert($R(0, 5, false).include(0));
-    this.assert($R(0, 5, false).include(5));
-    this.assert(!$R(0, 5, false).include(6));
+    this.assert($R(0, 5, false).contains(0));
+    this.assert($R(0, 5, false).contains(5));
+    this.assert(!$R(0, 5, false).contains(6));
   },
 
   testEach: function() {
@@ -30,15 +30,15 @@ new Test.Unit.Runner({
   },
 
   testAny: function() {
-    this.assert(!$R(1, 1, true).any());
-    this.assert($R(0, 3, false).any(function(value) {
+    this.assert(!$R(1, 1, true).some());
+    this.assert($R(0, 3, false).some(function(value) {
       return value == 3;
     }));
   },
 
   testAll: function() {
-    this.assert($R(1, 1, true).all());
-    this.assert($R(0, 3, false).all(function(value) {
+    this.assert($R(1, 1, true).every());
+    this.assert($R(0, 3, false).every(function(value) {
       return value <= 3;
     }));
   },

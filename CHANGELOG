@@ -1,3 +1,18 @@
+* Updated Array, Enumerable, and String APIs. [FuseJS LH #16] [jddalton, Joe Gornick]
+  Note: Backwards compatibility warning.
+   - Renamed methods: include -> contains
+   - Removed methods: detect, reject
+   - Removed aliases: all, any, collect, entries, find, findAll, member, select
+
+   - Updated methods:
+     Enumerable.contains: Added a strict parameter for strict comparisons.
+
+   - Added methods:
+     Enumerable.first: Replaces the need for `detect` and accepts optional parameters.
+       * first(n): Returns an array containing the first n of the list.
+       * first(callback, [thisArg]): Returns the first item when the callback returns true.
+     Enumerable.last: Same as Enumerable.first, but starts from the end.
+
 * Fix Safari 3.0.4 bug in Element#update when updating COLGROUP and OPTGROUP elements as well as cleanup the Safari 2 insertion wrapper for script elements. [jddalton]
 
 * Ensure exceptions thrown in the Timer's callback are not swallowed by the try-catch in onTimerEvent(). [jddalton]

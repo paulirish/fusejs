@@ -209,6 +209,10 @@
       return /^\s*$/.test(this);
     };
 
+    this.contains = function contains(pattern) {
+      return this.indexOf(pattern) > -1;
+    };
+
     this.empty = function empty() {
       return !this.length;
     };
@@ -216,10 +220,6 @@
     this.endsWith = function endsWith(pattern) {
       var d = this.length - pattern.length;
       return d >= 0 && this.lastIndexOf(pattern) === d;
-    };
-
-    this.include = function include(pattern) {
-      return this.indexOf(pattern) > -1;
     };
 
     this.inspect = function inspect(useDoubleQuotes) {
@@ -242,9 +242,9 @@
 
     // prevent JScript bug with named function expressions
     var blank =    null,
+      contains =   null,
       empty =      null,
       endsWith =   null,
-      include =    null,
       inspect =    null,
       scan =       null,
       startsWith = null;

@@ -279,7 +279,7 @@ new Test.Unit.Runner({
         sanitizeJSON: true,
         parameters: Fixtures.invalidJson,
         onException: function(request, error) {
-          this.assert(error.message.include('Badly formed JSON string'));
+          this.assert(error.message.contains('Badly formed JSON string'));
           this.assertInstanceOf(Ajax.Request, request);
         }.bind(this)
       }));
@@ -382,14 +382,14 @@ new Test.Unit.Runner({
       new Ajax.Request("/response", extendDefault({
         parameters: Fixtures.invalidJson,
         onException: function(request, error) {
-          this.assert(error.message.include('Badly formed JSON string'));
+          this.assert(error.message.contains('Badly formed JSON string'));
         }.bind(this)
       }));
 
       new Ajax.Request("/response", extendDefault({
         parameters: { 'X-JSON': '{});window.attacked = true;({}' },
         onException: function(request, error) {
-          this.assert(error.message.include('Badly formed JSON string'));
+          this.assert(error.message.contains('Badly formed JSON string'));
         }.bind(this)
       }));
 
