@@ -14,9 +14,12 @@
       function onTimerEvent() {
         if (!this.executing) {
           this.executing = true;
-          try { this.execute() } catch (e) { }
-          if (this.timerID !== null) this.start();
-          this.executing = false;
+          try { this.execute() }
+          catch (e) { throw e; }
+          finally {
+            if (this.timerID !== null) this.start();
+            this.executing = false;
+          }
         }
       }
 

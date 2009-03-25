@@ -577,10 +577,17 @@ new Test.Unit.Runner({
   testTimerException: function() {
     function timerEventFired(timer) {
       timer.stop();
-      throw "error";
+      throw new Error;
     }
-    
-    var timer = new Timer(timerEventFired, 0.05).start();
+
+    var timer = new Timer(timerEventFired, 0.05);
+    timer.onTimerEvent = timer.onTimerEvent.wrap(function(proceed) {
+      // we don't want to stop timer's callback from throwing errors
+      this.assertRaise('Error', proceed);
+    }.bind(this));
+
+    timer.start();
+
     this.wait(100, function() {
       this.assertEqual(false, timer.executing);
     });
