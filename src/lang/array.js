@@ -56,7 +56,7 @@
 
     this.first = function first(callback, thisArg) {
       var length = this.length;
-      if (arguments.length === 0) return this[0];
+      if (callback == null) return this[0];
       if (typeof callback === 'function') {
         for (var i = 0; i < length; i++)
           if (callback.call(thisArg, this[i], i))
@@ -66,10 +66,9 @@
       // Fast numeric type conversion:
       // http://www.jibbering.com/faq/faq_notes/type_convert.html#tcNumber
       var count = +callback;
-      if (!isNaN(count)) {
-        count = count < 1 ? 1 : count > length ? length : count;
-        return slice.call(this, 0, count);
-      } else return [];
+      if (isNaN(count)) return [];
+      count = count < 1 ? 1 : count > length ? length : count;
+      return slice.call(this, 0, count);
     };
 
     this.flatten = function flatten() {
@@ -103,7 +102,7 @@
 
     this.last = function last(callback, thisArg) {
       var length = this.length;
-      if (arguments.length === 0)
+      if (callback == null)
         return this[length && length - 1];
       if (typeof callback === 'function') {
         while (length--)
@@ -111,11 +110,10 @@
             return this[length];
         return;        
       }
-      var count = +arguments[0];
-      if (!isNaN(count)) {
-        count = count < 1 ? 1 : count > length ? length : count;
-        return slice.call(this, length - count);
-      } else return [];     
+      var count = +callback;
+      if (isNaN(count)) return [];
+      count = count < 1 ? 1 : count > length ? length : count;
+      return slice.call(this, length - count);
     };
 
     this.size = function size() {
@@ -155,24 +153,24 @@
     };
 
     this.inject = (function() {
-      function inject(accumulator, callback, thisArg) {
+      var inject = function inject(accumulator, callback, thisArg) {
         var i = 0, length = this.length;
         if (thisArg) while (i < length)
           accumulator = callback.call(thisArg, accumulator, this[i], i++, this);
         else while (i < length)
           accumulator = callback(accumulator, this[i], i++, this);
         return accumulator;
-      }
+      };
 
-      function injectUsingReduce(accumulator, callback, thisArg) {
-        if (thisArg)
-          return inject.call(this, accumulator, callback, thisArg);
-        return this.reduce(callback, accumulator);
+      // use Array#reduce if available
+      if (typeof Array.prototype.reduce === 'function') {
+        inject = function inject(accumulator, callback, thisArg) {
+          if (thisArg)
+            return inject.call(this, accumulator, callback, thisArg);
+          return this.reduce(callback, accumulator);
+        };
       }
-
-      // optimize Array#inject if Array#reduce is available
-      return typeof Array.prototype.reduce === 'function' ?
-        injectUsingReduce : inject;
+      return inject;
     })();
 
     this.invoke = function invoke(method) {

@@ -57,8 +57,7 @@
     };
 
     this.first = function first(callback, thisArg) {
-      var list = this.toArray();
-      return list.first.apply(list, arguments)
+      return this.toArray().first(callback, thisArg);
     };
 
     this.grep = function grep(pattern, callback, thisArg) {
@@ -103,8 +102,7 @@
     };
 
     this.last = function last(callback, thisArg) {
-      var list = this.toArray();
-      return list.last.apply(list, arguments)
+      return this.toArray().last(callback, thisArg);
     };
 
     this.map = function map(callback, thisArg) {

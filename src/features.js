@@ -15,7 +15,7 @@
       };
 
       Tester.set = function(name, value) {
-        if (arguments.length === 1 && typeof name === 'object'){
+        if (typeof name === 'object'){
           for (var i in name) cache[i] = name[i];
         } else cache[name] = value;
       };

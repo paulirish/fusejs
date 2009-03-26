@@ -153,7 +153,7 @@
     };
 
     this.previous = function previous(element, expression, index) {
-      if (arguments.length == 1)
+      if (arguments.length === 1)
         return Element.extend(Selector.handlers.previousElementSibling(element));
       return typeof expression === 'number'
         ? _getNth($(element), 'previousSibling', expression)

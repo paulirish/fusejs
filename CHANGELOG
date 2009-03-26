@@ -1,3 +1,5 @@
+* Ensure strict arguments.length comparisons, cleanup Array#inject, and remove arguments.length based forking in Array#first and Array#last. [jddalton]
+
 * Updated Array, Enumerable, and String APIs. [FuseJS LH #16] [jddalton, Joe Gornick]
   Note: Backwards compatibility warning.
    - Renamed methods: include -> contains

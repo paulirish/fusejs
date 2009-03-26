@@ -254,7 +254,7 @@
         });
       }
 
-      if (arguments.length == 2) {
+      if (arguments.length === 2) {
         tagName = methods;
         methods = arguments[1];
       }
