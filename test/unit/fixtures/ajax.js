@@ -34,6 +34,6 @@ Fixtures = {
   },
   
   'headerJson': {
-    'X-JSON': '{"test": "hello #éà"}'
+    'X-JSON': '{"test": "hello #\u00E9\u00E0 "}' // hello #éà
   }
 };

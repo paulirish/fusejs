@@ -30,7 +30,6 @@
     this._getHeaderJSON = function _getHeaderJSON() {
       var json = this.getHeader('X-JSON');
       if (!json) return null;
-      json = decodeURIComponent(escape(json));
       try {
         return json.evalJSON(this.request.options.sanitizeJSON ||
           !Object.isSameOrigin(this.request.url));

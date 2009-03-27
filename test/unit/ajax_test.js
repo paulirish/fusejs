@@ -294,12 +294,23 @@ new Test.Unit.Runner({
   },
   
   testHeaderJSON: function() {
+    function decode(value) {
+      return decodeURIComponent(escape(value));
+    }
+    
     if (this.isRunningFromRake) {
       new Ajax.Request("/response", extendDefault({
         parameters: Fixtures.headerJson,
         onComplete: function(transport, json) {
-          this.assertEqual('hello #éà', transport.headerJSON.test);
-          this.assertEqual('hello #éà', json.test);
+          // Normally you should set the proper encoding charset on your page
+          // such as charset=ISO-8859-7 and handle decoding on the serverside.
+          // PHP server-side ex:
+          // $value = utf8_decode($_GET['X-JSON']);
+          // or for none superglobals values
+          // $value = utf8_decode(urldecode($encoded));
+          var expected = 'hello #\u00E9\u00E0 '; // hello #éà
+          this.assertEqual(expected, decode(transport.headerJSON.test));
+          this.assertEqual(expected, decode(json.test));
         }.bind(this)
       }));
     
