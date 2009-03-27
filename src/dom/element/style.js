@@ -31,26 +31,6 @@
         'removeClassName' : 'addClassName'](element, className);
     };
 
-    this.setStyle = function setStyle(element, styles) {
-      element = $(element);
-      var elementStyle = element.style;
-      if (typeof styles === 'string') {
-        element.style.cssText += ';' + styles;
-        return styles.contains('opacity')
-          ? Element.setOpacity(element, styles.match(/opacity:\s*(\d?\.?\d*)/)[1])
-          : element;
-      }
-      for (var property in styles) {
-        if (property === 'opacity')
-          Element.setOpacity(element, styles[property]);
-        else 
-          elementStyle[(property === 'float' || property === 'cssFloat') ?
-            (typeof elementStyle.styleFloat === 'undefined' ? 'cssFloat' : 'styleFloat') : 
-              property] = styles[property];
-      }
-      return element;
-    };
-
     this.getOpacity = (function() {
       var getOpacity = function getOpacity(element) {
         return Element.getStyle(element, 'opacity');
@@ -67,19 +47,20 @@
     })();
 
     this.setOpacity = (function() {
-      function setOpacity(element, value) {
+      var setOpacity = function setOpacity(element, value) {
         element = $(element);
-        element.style.opacity = (value == 1 || value === '') ? '' : 
+        element.style.opacity = (value === 1 || value === '') ? '' : 
         (value < 0.00001) ? 0 : value;
         return element;
-      }
+      };
 
       if (Fuse.Browser.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
         var _setOpacity = setOpacity;
         setOpacity = function setOpacity(element, value) {
           element = _setOpacity(element, value);
-          if (value == 1) {
-            if (getNodeName(element) == 'IMG' && element.width) {
+          // TODO: Is this really needed or the best approach ?
+          if (value === 1) {
+            if (getNodeName(element) === 'IMG' && element.width) {
               element.width++; element.width--;
             } else try {
               var n = element.ownerDocument.createTextNode(' ');
@@ -92,13 +73,13 @@
       else if (Fuse.Browser.Agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
         setOpacity = function setOpacity(element, value) {
           element = $(element);
-          element.style.opacity = (value == 1) ? 0.999999 : 
+          element.style.opacity = (value === 1) ? 0.999999 : 
             (value === '') ? '' : (value < 0.00001) ? 0 : value;
           return element;
         };
       }
       else if (Feature('ELEMENT_MS_CSS_FILTERS')) {
-        setOpacity = function(element, value) {
+        setOpacity = function setOpacity(element, value) {
           element = $(element);
           if (!Element._hasLayout(element))
             element.style.zoom = 1;
@@ -109,7 +90,7 @@
           // strip alpha
           filter = filter.replace(/alpha\([^)]*\)/gi, '');
 
-          if (value == 1 || value === '') {
+          if (value === 1 || value === '') {
             if (filter) style.filter = filter;
             else style.removeAttribute('filter');
             return element;
@@ -120,7 +101,6 @@
           return element;   
         };
       }
-
       return setOpacity;
     })();
 
@@ -130,160 +110,178 @@
      removeClassName = null,
      classNames =      null,
      toggleClassName = null,
-     setStyle =        null,
      getOpacity =      null,
      setOpacity =      null;
   }).call(Element.Methods);
 
-  if (Feature('ELEMENT_COMPUTED_STYLE') || !Feature('ELEMENT_CURRENT_STYLE')) {
-    Element.Methods.getStyle = (function() {
+  /*--------------------------------------------------------------------------*/
 
-      var DIMENSION_NAMES = { 'height': true, 'width': true },
-       FLOAT_TRANSLATIONS = { 'float': 'cssFloat' },
-       POSITION_NAMES     = { 'bottom': true, 'left': true, 'right': true, 'top': true };
+  (function() {
+    var DIMENSION_NAMES = { 'height': 1, 'width': 1 };
 
-      function _getResult(name, value) {
-        if (name === 'opacity')
-		      return value ? parseFloat(value) : 1.0;
-        return value === 'auto' || value === '' ? null : value;
+    var FLOAT_TRANSLATIONS = typeof Fuse._docEl.style.styleFloat !== 'undefined'
+     ? { 'float': 'styleFloat', 'cssFloat': 'styleFloat' }
+     : { 'float': 'cssFloat' };
+
+    this.setStyle = function setStyle(element, styles) {
+      element = $(element);
+      var key, name, elementStyle = element.style;
+      if (typeof styles === 'string') {
+        element.style.cssText += ';' + styles;
+        return styles.indexOf('opacity') > -1
+          ? Element.setOpacity(element, styles.match(/opacity:\s*(\d?\.?\d*)/)[1])
+          : element;
       }
-
-      function getStyle(element, name) {
-        return _getResult(FLOAT_TRANSLATIONS[name] || name,
-          element.style[name]);
+      for (key in styles) {
+        name = FLOAT_TRANSLATIONS[key] || key;
+        if (name === 'opacity') Element.setOpacity(element, styles[key]);
+        else elementStyle[name] = styles[key];
       }
+      return element;
+    };
 
-      // Other
-      if (!Feature('ELEMENT_COMPUTED_STYLE'))
-        return getStyle;
-
-      var _getComputedStyle = (function() {
-        var _getStyle = getStyle;
-        return function (element, name) {
+    this.getStyle =
+      Feature('ELEMENT_COMPUTED_STYLE') || !Feature('ELEMENT_CURRENT_STYLE') ?
+      (function() {
+        function _getComputedStyle(element, name) {
           name = FLOAT_TRANSLATIONS[name] || name;
           var css = element.ownerDocument.defaultView.getComputedStyle(element, null);
           if (css) return _getResult(name, css[name]);
-          return _getStyle(element, name);
-        };
-      })();
-
-      var _resolveAsNull = function(element, name) {
-        var length = _resolveAsNull.handlers.length;
-        while (length--) {
-          if (_resolveAsNull.handlers[length](element, name))
-            return true;
+          return _getStyleValue(element, name);
         }
-        return false;
-      };
-      _resolveAsNull.handlers = [];
 
-      // Opera
-      if (Bug('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO')) {
-        _resolveAsNull.handlers.push(function(element, name) {
-          return POSITION_NAMES[name] && 
-            _getComputedStyle(element, 'position') === 'static';
-        });
-      }
-      if (Bug('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN')) {
-        _resolveAsNull.handlers.push(function(element, name) {
-          return DIMENSION_NAMES[name] && element.style.display === 'none';
-        });
-      }
+        function _getStyleValue(element, name) {
+          name = FLOAT_TRANSLATIONS[name] || name;
+          return _getResult(name, element.style[name]);
+        }
 
-      // Opera 9.2x
-      if (Bug('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX')) {
-        getStyle = function getStyle(element, name) {
-          element = $(element);
-          name = name.camelize();
-          if (_resolveAsNull(element, name)) return null;
+        function _getResult(name, value) {
+          if (name === 'opacity') return value ? parseFloat(value) : 1.0;
+          return value === 'auto' || value === '' ? null : value;
+        }
 
-          if (DIMENSION_NAMES[name]) {
+        function _isNull(element, name) {
+          var length = _isNull.handlers.length;
+          while (length--) {
+            if (_isNull.handlers[length](element, name))
+            return true;
+          }
+          return false;
+        }
+
+        _isNull.handlers = [];
+
+        if (Bug('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO')) {
+          _isNull.handlers.push((function() {
+            var POSITION_NAMES = { 'bottom': 1, 'left': 1, 'right': 1, 'top': 1 };
+            return function(element, name) {
+              return POSITION_NAMES[name] && 
+                _getComputedStyle(element, 'position') === 'static';
+            };
+          })());
+        }
+        if (Bug('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN')) {
+          _isNull.handlers.push(function(element, name) {
+            return DIMENSION_NAMES[name] && element.style.display === 'none';
+          });
+        }
+
+        if (!Feature('ELEMENT_COMPUTED_STYLE')) {
+          var getStyle = function getStyle(element, name) {
+            return _getStyleValue(element, name);
+          };
+        }
+        else if (Bug('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX')) {
+          // Opera 9.2x
+          var getStyle = function getStyle(element, name) {
+            element = $(element);
+            name = name.camelize();
+            if (_isNull(element, name)) return null;
+            var value = _getComputedStyle(element, name);
+
             // returns the border-box dimensions rather than the content-box
             // dimensions, so we subtract padding and borders from the value
-            var D = name.capitalize(),
-             dim = parseFloat(_getComputedStyle(element, name)) || 0;
-            if (dim !== element['offset' + D]) return dim + 'px';
-            return Element['_getCss' + D](element) + 'px';
-          }
-          return _getComputedStyle(element, name);
-        };
-      }
-      // Firefox, Safari, Opera 9.5+
-      else getStyle = function getStyle(element, name) {
-        element = $(element);
-        name = name.camelize();
-        return _resolveAsNull(element, name) ? null :
-          _getComputedStyle(element, name);
-      };
-
-      return getStyle;
-    })();
-  }
-  else if (Feature('ELEMENT_CURRENT_STYLE')) {
-    Element.Methods.getStyle = (function() {
-
-      var DIMENSION_NAMES = { 'height': true, 'width': true },
-       FLOAT_TRANSLATIONS = { 'float': 'styleFloat', 'cssFloat': 'styleFloat' },
-       RELATIVE_CSS_UNITS = { 'em': true, 'ex': true };
-
-      // We need to insert into element a span with the M character in it.
-      // The element.offsetHeight will give us the font size in px units.
-      // Inspired by Google Doctype:
-      // http://code.google.com/p/doctype/source/browse/trunk/goog/style/style.js#1146
-      var span = Fuse._doc.createElement('span');
-      span.style.cssText = 'position:absolute;visibility:hidden;height:1em;lineHeight:0;padding:0;margin:0;border:0;';
-      span.innerHTML = 'M';
-
-      var getStyle = function getStyle(element, name) {
-        if (name === 'opacity')
-          return Element.getOpacity(element);
-
-        element = $(element);
-        name = name.camelize();
-
-        // get cascaded style
-        var value = element[element.currentStyle !== null ? 'currentStyle' : 'style']
-         [FLOAT_TRANSLATIONS[name] || name];
-
-        if (value === 'auto') {
-          if (DIMENSION_NAMES[name] && element.style.display !== 'none')
-            return element['offset' + name.capitalize()] + 'px';
-          return null;
+            if (DIMENSION_NAMES[name]) {
+              var D = name.capitalize(), dim = parseFloat(value) || 0;
+              if (dim !== element['offset' + D]) return dim + 'px';
+              return Element['_getCss' + D](element) + 'px';
+            }
+            return value;
+          };
         }
+        else { // Firefox, Safari, Opera 9.5+
+          var getStyle = function getStyle(element, name) {
+            element = $(element);
+            name = name.camelize();
+              return _isNull(element, name) ? null :
+              _getComputedStyle(element, name);
+          };
+        }
+        return getStyle;
+      })() :
 
-        // If the unit is something other than a pixel (em, pt, %),
-        // set it on something we can grab a pixel value from.
-        // Inspired by Dean Edwards' comment
-        // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
-        if (/^\d+(\.\d+)?(?!px)[%a-z]+$/i.test(value)) {
-          if (name === 'fontSize') {
-            var unit = value.match(/\D+$/)[0];
-            if (unit === '%') {
-              var size = element.appendChild(span).offsetHeight;
-              element.removeChild(span);
-              return Math.round(size) + 'px';
-            } 
-            else if (unit in RELATIVE_CSS_UNITS)
-              element = element.parentNode;
+      // IE
+      (function() {
+        var RELATIVE_CSS_UNITS = { 'em': 1, 'ex': 1 };
+
+        // We need to insert into element a span with the M character in it.
+        // The element.offsetHeight will give us the font size in px units.
+        // Inspired by Google Doctype:
+        // http://code.google.com/p/doctype/source/browse/trunk/goog/style/style.js#1146
+        var span = Fuse._doc.createElement('span');
+        span.style.cssText = 'position:absolute;visibility:hidden;height:1em;lineHeight:0;padding:0;margin:0;border:0;';
+        span.innerHTML = 'M';
+
+        function getStyle(element, name) {
+          if (name === 'opacity')
+            return Element.getOpacity(element);
+
+          element = $(element);
+          name = name.camelize();
+          name = FLOAT_TRANSLATIONS[name] || name;
+
+          // get cascaded style
+          var s = element.currentStyle || element.style, value = s[name];
+          if (value === 'auto') {
+            if (DIMENSION_NAMES[name] && s.display !== 'none')
+              return element['offset' + name.capitalize()] + 'px';
+            return null;
           }
 
-          // backup values
-          var pos = (name === 'height') ? 'top' : 'left',
-           stylePos = element.style[pos], runtimePos = element.runtimeStyle[pos];
+          // If the unit is something other than a pixel (em, pt, %),
+          // set it on something we can grab a pixel value from.
+          // Inspired by Dean Edwards' comment
+          // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
+          if (/^\d+(\.\d+)?(?!px)[%a-z]+$/i.test(value)) {
+            if (name === 'fontSize') {
+              var unit = value.match(/\D+$/)[0];
+              if (unit === '%') {
+                var size = element.appendChild(span).offsetHeight;
+                element.removeChild(span);
+                return Math.round(size) + 'px';
+              } 
+              else if (RELATIVE_CSS_UNITS[unit])
+                element = element.parentNode;
+            }
 
-          // set runtimeStyle so no visible shift is seen
-          element.runtimeStyle[pos] = element.currentStyle[pos];
-          element.style[pos] = value;
-          value = element.style['pixel' + pos.capitalize()] + 'px';
+            // backup values
+            var pos = (name === 'height') ? 'top' : 'left',
+             stylePos = element.style[pos], runtimePos = element.runtimeStyle[pos];
 
-          // revert changes
-          element.style[pos] = stylePos;
-          element.runtimeStyle[pos] = runtimePos;
+            // set runtimeStyle so no visible shift is seen
+            element.runtimeStyle[pos] = s[pos];
+            element.style[pos] = value;
+            value = element.style['pixel' + pos.capitalize()] + 'px';
+
+            // revert changes
+            element.style[pos] = stylePos;
+            element.runtimeStyle[pos] = runtimePos;
+          }
           return value;
         }
-        return value;
-      };
+        return getStyle;
+      })();
 
-      return getStyle;
-    })();
-  }
+    // prevent JScript bug with named function expressions
+    var setStyle = null;
+  }).call(Element.Methods);
