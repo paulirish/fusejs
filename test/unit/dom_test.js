@@ -1870,8 +1870,8 @@ new Test.Unit.Runner({
     // IE with strict doctype may try to return documentElement as offsetParent on relatively positioned elements.  
     this.assertEqual(document.body, $('body_relative').getOffsetParent());
 
-    // Ensure document.body is returned even when using document.documentElement.
-    this.assertEqual(document.body, $(document.documentElement).getOffsetParent());
+    // Ensure null is returned even when using document.documentElement.
+    this.assertEqual(null, $(document.documentElement).getOffsetParent());
 
     // Ensure TD, TH, or TABLE is returned
     this.assertEqual('TABLE', $('tr_offset_parent_test').getOffsetParent().tagName.toUpperCase(), 'offsetParent should be TABLE');
@@ -1881,14 +1881,13 @@ new Test.Unit.Runner({
     // Ensure MAP is returned
     var element = $('map_offset_parent_test');
     this.assertEqual('MAP', element.getOffsetParent().tagName.toUpperCase(), 'offsetParent should be MAP');
-    this.assertEqual('BODY', element.up().getOffsetParent().tagName.toUpperCase(), 'offsetParent should be BODY');
 
     // Ensure no errors are raised on document fragments
     var offsetParent, div = new Element('div'), fragment = document.createDocumentFragment();
     div.appendChild(div.cloneNode(false));
     Element.getOffsetParent(div.firstChild);
     this.assertNothingRaised(function() { offsetParent = Element.getOffsetParent(div.firstChild) });
-    this.assertEqual(document.body, offsetParent);
+    this.assertEqual(null, offsetParent);
   },
 
   testAbsolutize: function() {

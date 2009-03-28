@@ -157,7 +157,7 @@
        BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS');
 
       do {
-        offsetParent = Element._getRealOffsetParent(element);
+        offsetParent = Element.getOffsetParent(element);
         position     = Element.getStyle(element, 'position');
 
         valueT += element.offsetTop  || 0;
@@ -203,7 +203,7 @@
       do {
         valueT += element.offsetTop  || 0;
         valueL += element.offsetLeft || 0;
-        element = Element._getRealOffsetParent(element);
+        element = Element.getOffsetParent(element);
       } while (element && getNodeName(element) !== 'BODY' &&
           Element.getStyle(element, 'position') === 'static');
 

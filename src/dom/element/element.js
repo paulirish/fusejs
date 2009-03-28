@@ -363,25 +363,34 @@
       return { 'width': Element.getWidth(element), 'height': Element.getHeight(element) };
     };
 
-    this.getOffsetParent = function getOffsetParent(element) {
-      // http://www.w3.org/TR/cssom-view/#offset-attributes
-      element = $(element);
-      var original = element, nodeName = getNodeName(element);
-      if (nodeName === 'AREA') return Element.extend(element.parentNode); 
+    this.getOffsetParent = (function() {
+      var END_ON_NODE = { 'BODY': 1, 'HTML': 1 },
+       OFFSET_PARENTS = { 'TABLE': 1, 'TD': 1, 'TH': 1 };
 
-      // IE throws an error if the element is not in the document.
-      if (Element.isFragment(element) || !element.offsetParent)
-        return Element.extend(getDocument(element).body);
+      function getOffsetParent(element) {
+        // http://www.w3.org/TR/cssom-view/#offset-attributes
+        element = $(element);
+        var original = element, nodeName = getNodeName(element);
+        if (nodeName === 'AREA') return Element.extend(element.parentNode); 
 
-      while (element = element.offsetParent) {
-        nodeName = getNodeName(element);
-        if (nodeName === 'BODY'  || nodeName === 'HTML') break;
-        if (nodeName === 'TABLE' || nodeName === 'TD' || nodeName === 'TH' ||
-            Element.getStyle(element, 'position') !== 'static')
-          return Element.extend(element);
-      }
-      return Element.extend(getDocument(original).body);
-    };
+        // IE throws an error if the element is not in the document.
+        // Many browsers report offsetParent as null if the element's
+        // style is display:none.
+        if (Element.isFragment(element) || element.nodeType === 9 ||
+            END_ON_NODE[nodeName] || !element.offsetParent )
+          return null;
+
+        while (element = element.parentNode) {
+          nodeName = getNodeName(element);
+          if (END_ON_NODE[nodeName]) break;
+          if (OFFSET_PARENTS[nodeName] ||
+              Element.getStyle(element, 'position') !== 'static')
+            return Element.extend(element);
+        }
+        return Element.extend(getDocument(original).body);
+      };
+      return getOffsetParent;
+    })();
 
     this.identify = function identify(element) {
       var id = Element.readAttribute(element, 'id');

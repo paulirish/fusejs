@@ -1,3 +1,6 @@
+* Allow Element#getOffsetParent to return null and remove Element._getRealOffsetParent() helper. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Move Element#getStyle and Element#setStyle to the same closure so they can share constants as well as cleanup Element#setOpacity and Element#getStyle. [jddalton]
 
 * Remove unneeded `decodeURIComponent(escape(json))` from Ajax.Response#_getHeaderJSON and rely on proper encoding instead. [Prototype LH #620] [FuseJS LH #27] [jddalton, Mark Caudill, Paul Alexandrow]

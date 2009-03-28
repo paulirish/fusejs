@@ -12,12 +12,6 @@
       return { 'width': Element._getCssWidth(element), 'height': Element._getCssHeight(element) };
     };
 
-    this._getRealOffsetParent = function _getRealOffsetParent(element) {
-      return (typeof element.offsetParent !== 'object' || !element.offsetParent) ? null :
-       getNodeName(element.offsetParent) === 'HTML' ?
-         element.offsetParent : Element.getOffsetParent(element);
-    };
-
     this._hasLayout = function _hasLayout(element) {
       var currentStyle = element.currentStyle;
       return element.style.zoom && element.style.zoom !== 'normal' ||
@@ -96,7 +90,6 @@
     // prevent JScript bug with named function expressions
     var _ensureLayout =     null,
      _getCssDimensions =    null,
-     _getRealOffsetParent = null,
      _hasLayout =           null, 
      _returnOffset =        null;
   }).call(Element);
