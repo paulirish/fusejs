@@ -114,15 +114,19 @@
       }, options);
 
       var s = element.style;
+
+      // Get element size without border or padding then add
+      // the difference between the source and element padding/border
+      // to the height and width in an attempt to keep the same dimensions.
       if (options.setHeight)
-        s.height = Math.max(0, Element.getHeight(source) -
-          Element._getPaddingHeight(source) -
-          Element._getBorderHeight(element)) + 'px';
+        s.height = Math.max(0, Element._getCssHeight(source) +
+          (Element._getPaddingHeight(source) - Element._getPaddingHeight(element)) +
+          (Element._getBorderHeight(source)  - Element._getBorderHeight(element))) + 'px';
 
       if (options.setWidth)
-        s.width = Math.max(0, Element.getWidth(source) -
-          Element._getPaddingWidth(source) -
-          Element._getBorderWidth(element)) + 'px';
+        s.width = Math.max(0, Element._getCssWidth(source) +
+          (Element._getPaddingWidth(source) - Element._getPaddingWidth(element)) +
+          (Element._getBorderWidth(source)  - Element._getBorderWidth(element))) + 'px';
 
       // bail if skipping setLeft and setTop
       if (!options.setLeft && !options.setTop)
@@ -152,31 +156,68 @@
       return element;
     };
 
-    this.cumulativeOffset = function cumulativeOffset(element, ancestor) {
-      // TODO: overhaul with a thorough solution for finding the correct
-      // offsetLeft and offsetTop values
-      element = Element._ensureLayout(element);
-      ancestor = $(ancestor);
+    this.cumulativeOffset = (function() {
+      function getOffset(element, ancestor) {
+        // TODO: overhaul with a thorough solution for finding the correct
+        // offsetLeft and offsetTop values
+        var offsetParent, position, valueT = 0, valueL = 0,
+         BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS'),
+         ELEMENT_OFFSETS_DONT_INHERIT_BORDER_WIDTH = Bug('ELEMENT_OFFSETS_DONT_INHERIT_BORDER_WIDTH');
+        do {
+          valueT += element.offsetTop  || 0;
+          valueL += element.offsetLeft || 0;
 
-      var offsetParent, position, valueT = 0, valueL = 0,
-       BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS');
+          offsetParent = Element.getOffsetParent(element);
+          position     = Element.getStyle(element, 'position');
 
-      do {
-        offsetParent = Element.getOffsetParent(element);
-        position     = Element.getStyle(element, 'position');
+          if (offsetParent && ELEMENT_OFFSETS_DONT_INHERIT_BORDER_WIDTH) {
+            valueT += parseFloat(Element.getStyle(offsetParent, 'borderTopWidth'))  || 0;
+            valueL += parseFloat(Element.getStyle(offsetParent, 'borderLeftWidth')) || 0;
+          }
+          if (position === 'fixed' || offsetParent && (offsetParent === ancestor ||
+             (BODY_OFFSETS_INHERIT_ITS_MARGINS && position === 'absolute' && 
+              getNodeName(offsetParent) === 'BODY'))) {
+            break;
+          }
+        } while (element = offsetParent);
+        return Element._returnOffset(valueL, valueT);
+      }
 
-        valueT += element.offsetTop  || 0;
-        valueL += element.offsetLeft || 0;
+      function cumulativeOffset(element, ancestor) {
+        element = Element._ensureLayout(element);
+        ancestor = $(ancestor);
+        if (!Object.isElement(ancestor)) ancestor = null;
 
-        if (position === 'fixed' || offsetParent && (offsetParent === ancestor ||
-           (BODY_OFFSETS_INHERIT_ITS_MARGINS && position === 'absolute' && 
-            getNodeName(offsetParent) === 'BODY'))) {
-          break;
-        }
-      } while (element = offsetParent);
+        var s = element.style, backup = s.display;
+        if (Element.getStyle(element, 'display') === 'none')
+          s.display = 'block';
+        var result = getOffset(element, ancestor);
+        s.display = backup;
+        return result;
+      }
 
-      return Element._returnOffset(valueL, valueT);
-    };
+      if (Feature('ELEMENT_BOUNDING_CLIENT_RECT')) {
+        getOffset = (function() {
+          var _getOffset = getOffset;
+          return function(element, ancestor) {
+            if (ancestor) return _getOffset(element, ancestor);
+            var doc, rect, root, valueT = 0, valueL = 0;
+            if (!Element.isFragment(element)) {
+              doc  = getDocument(element);
+              rect = element.getBoundingClientRect();
+              root = doc[Bug('BODY_ACTING_AS_ROOT') ? 'body' : 'documentElement'];
+
+              valueT = Math.round(rect.top)  -
+                (doc.documentElement.clientTop  || 0) + (root.scrollTop  || 0);
+              valueL = Math.round(rect.left) -
+                (doc.documentElement.clientLeft || 0) + (root.scrollLeft || 0);
+            }
+            return Element._returnOffset(valueL, valueT);
+          };
+        })();
+      }
+      return cumulativeOffset;
+    })();
 
     this.cumulativeScrollOffset = function cumulativeScrollOffset(element, onlyAncestors) {
       element = $(element);
@@ -251,7 +292,6 @@
     // prevent JScript bug with named function expressions
     var absolutize =          null,
      clonePosition =          null,
-     cumulativeOffset =       null,
      cumulativeScrollOffset = null,
      makeClipping =           null,
      makePositioned =         null,

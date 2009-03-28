@@ -378,9 +378,20 @@
 
 <div id='elementToViewportDimensions' style='display: none'></div>
 
-<div id='clone_position_source_absolute'></div>
 <div id='clone_position_target_absolute'></div>
-<div id='clone_position_target_relative'></div>
+<div id='clone_position_source_absolute'></div>
 <div id='clone_position_source_relative'></div>
+<div id='clone_position_target_relative'></div>
+
+<div id='clone_position_nested'>
+  <div id='clone_position_nested_lvl1_abs'>
+    <div id='clone_position_nested_lvl1_abs_lvl2_abs'></div>
+    <div id='clone_position_nested_lvl1_abs_lvl2_rel'></div>
+  </div>
+  <div id='clone_position_nested_lvl1_rel'>
+    <div id='clone_position_nested_lvl1_rel_lvl2_abs'></div>
+    <div id='clone_position_nested_lvl1_rel_lvl2_rel'></div>
+  </div>
+</div>
 
 <iframe id="iframe" src="../fixtures/dom_iframe.html"></iframe>

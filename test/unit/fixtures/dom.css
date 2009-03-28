@@ -156,6 +156,51 @@ div.style-test { margin-left: 1px }
   z-index: 1;
 }
 
+#clone_position_nested {
+  background-color:green;
+  border-style: solid;
+  border-color: #0000FF;
+  top: 12px;
+  left: 600px;
+  width: 75px;
+  height: 50px;
+}
+
+#clone_position_nested_lvl1_abs, #clone_position_nested_lvl1_rel {
+  background-color:#00FFFF;
+  border-style: solid;
+  border-color: #0000FF;
+  border: 8px solid #0000FF;
+  top: -100px;
+  left: -100px;
+  width: 60px;
+  height: 90px;
+}
+
+#clone_position_nested_lvl1_abs_lvl2_abs, #clone_position_nested_lvl1_abs_lvl2_rel,
+#clone_position_nested_lvl1_rel_lvl2_abs, #clone_position_nested_lvl1_rel_lvl2_rel {
+  background-color:#FFFF00;
+  border-style: solid;
+  border-color: #00FF00;
+  border: 8px solid #0000FF;
+  top: 10px;
+  left: 5px;
+  width: 30px;
+  height: 15px;
+}
+
+#clone_position_nested_lvl1_abs,
+#clone_position_nested_lvl1_abs_lvl2_abs,
+#clone_position_nested_lvl1_rel_lvl2_abs {
+  position: absolute;
+}
+
+#clone_position_nested_lvl1_rel,
+#clone_position_nested_lvl1_abs_lvl2_rel,
+#clone_position_nested_lvl1_rel_lvl2_rel {
+  position: relative;
+}
+
 #absolutize_dimensions_test div,
 #absolutize_dimensions_test span,
 #absolutize_dimensions_test img {

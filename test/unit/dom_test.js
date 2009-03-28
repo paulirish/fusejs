@@ -1591,44 +1591,85 @@ new Test.Unit.Runner({
   },
       
   testElementClonePosition: function() {
-    var rand = function(n) {
+    var styles =
+      $w('marginLeft marginRight marginTop marginBottom ' +
+         'paddingLeft paddingRight paddingTop paddingBottom borderLeftWidth ' +
+         'borderRightWidth borderTopWidth borderBottomWidth');
+
+    function rand(n) {
       return Math.ceil(n*Math.random());
+    }
+
+    function $(element) {
+      element = window.$(element);
+      styles._each(function(s) {
+        element.style[s] = rand(10) + 'px';
+      });
+      return element;
     };
 
-    [$w('absolute relative'), $w('relative absolute'),
-     $w('relative relative'), $w('absolute absolute')]
-     .each(function(positions) {
-       var source = $('clone_position_source_' + positions[0]),
-        target = $('clone_position_target_' + positions[1]);
+    ['hide', 'show'].each(function(method) {
+      [$w('absolute relative'), $w('relative absolute'),
+       $w('relative relative'), $w('absolute absolute')]
+       .each(function(positions) {
+         var target = $('clone_position_target_' + positions[0]),
+          source = $('clone_position_source_' + positions[1]);
 
-       var styles = $w('marginLeft marginRight marginTop marginBottom ' +
-        'paddingLeft paddingRight paddingTop paddingBottom borderLeftWidth ' +
-        'borderRightWidth borderTopWidth borderBottomWidth');
-
-       [source, target]._each(function(el) {
-         styles._each(function(s) {
-           el.style[s] = rand(10) + 'px';
+         target[method]();
+         target.clonePosition(source, {  
+           offsetTop: 25,
+           offsetLeft: 35
          });
-       });
 
-       source.setOpacity(0.5)
-        .clonePosition(target, {  
-          offsetTop: 25,
-          offsetLeft: 35
-       });
+         var targOffset = target.cumulativeOffset();
+         targOffset[0] -= 35;
+         targOffset[1] -= 25;
 
-       var srcOffset = source.cumulativeOffset(),
-        targOffset = target.cumulativeOffset();
-       this.assertIdentical(targOffset.top  + 25, srcOffset.top, 'top');
-       this.assertIdentical(targOffset.left + 35, srcOffset.left, 'left');
+         this.assertEnumEqual(source.cumulativeOffset(), targOffset);
+         target.show();
+       }, this);
+    }, this);
 
-       source.clonePosition(target);
+    var targets = $w('target_absolute target_relative'),
+     sources = $w('source_absolute source_relative');
+    targets.each(function(targID) {
+      var target = $('clone_position_' + targID);
+      sources.each(function(srcID) {
+        var source = $('clone_position_' + srcID);
+        source.setStyle({ 'height': '50px', 'width': '80px' });
 
-       var srcDims = source.cumulativeOffset(),
-        targDims = target.cumulativeOffset();
-       this.assertIdentical(targDims.height, srcDims.height, 'height');
-       this.assertIdentical(targDims.width, srcDims.width, 'width');
-     }, this);
+        target.clonePosition(source);
+        this.assertHashEqual(source.getDimensions(), target.getDimensions());
+      }, this);
+    }, this);
+
+    targets = $w('lvl1_abs lvl1_rel lvl1_abs_lvl2_abs lvl1_abs_lvl2_rel lvl1_rel_lvl2_abs lvl1_rel_lvl2_rel');
+    ['hide', 'show'].each(function(method) {
+      ['relative', 'absolute'].each(function(position) {
+        targets.each(function(id) {
+          var source = $('clone_position_nested');
+          source.style.position = position;
+
+          var target = $('clone_position_nested_' + id);
+          target[method]();
+          target.clonePosition(source);
+
+          this.assertEnumEqual(source.cumulativeOffset(), target.cumulativeOffset());
+          target.show();
+        }, this);
+      }, this);
+    }, this);
+
+    var source = window.$('clone_position_nested');
+    source.setStyle({ 'height': '40px', 'width': '70px' });
+    var srcDims = source.getDimensions();
+
+    targets.each(function(id, index) {
+      var target = window.$('clone_position_nested_' + id);
+      target.clonePosition(source);
+      target.style.left = ((index + 1) * 100) + 'px';
+      this.assertHashEqual(srcDims, target.getDimensions());
+    }, this);
   },
   
   testDOMAttributesHavePrecedenceOverExtendedElementMethods: function() {

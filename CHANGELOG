@@ -1,3 +1,5 @@
+* Ensure Element#cumulativeOffset works with hidden elements or elements with borders and Element#clonePosition resizes elements, with various paddings, correctly. [Prototype LH #603] [jddalton, Manuel Carrasco]
+
 * Make Element#clonePosition work correctly when `source` is an ancestor of `element`. [jddalton]
   - Add Element._getBorderWidth(), Element._getBorderHeight(), Element._getPaddingWidth(), and Element._getPaddingHeight()
   - Element#cummulativeOffset allow a second `ancestor` argument to be used to stop iterating when it encounters the ancestor

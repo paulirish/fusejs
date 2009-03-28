@@ -355,6 +355,18 @@
       }
     },
 
+    'ELEMENT_OFFSETS_DONT_INHERIT_BORDER_WIDTH': function() {
+      // true for all but IE8
+      var s = Fuse._body.style, backup = s.cssText;
+      Fuse._body.appendChild(Fuse._div);
+      var value = Fuse._div.offsetLeft;
+      s.cssText += '; border: 1px solid transparent;';
+      var result = (value === Fuse._div.offsetLeft);
+      s.cssText = backup;
+      Fuse._body.removeChild(Fuse._div);
+      return result;
+    },
+
     'ELEMENT_PROPERTIES_ARE_ATTRIBUTES': function() {
       // true for IE
       Fuse._div[expando] = 'x';
