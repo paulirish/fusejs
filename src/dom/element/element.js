@@ -376,8 +376,8 @@
         // IE throws an error if the element is not in the document.
         // Many browsers report offsetParent as null if the element's
         // style is display:none.
-        if (Element.isFragment(element) || element.nodeType === 9 ||
-            END_ON_NODE[nodeName] || !element.offsetParent )
+        if (Element.isFragment(element) || element.nodeType === 9 || END_ON_NODE[nodeName] ||
+           !element.offsetParent && Element.getStyle(element, 'display') !== 'none')
           return null;
 
         while (element = element.parentNode) {

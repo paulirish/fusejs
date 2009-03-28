@@ -1858,6 +1858,9 @@ new Test.Unit.Runner({
   testOffsetParent: function() {
     this.assertEqual('body_absolute', $('absolute_absolute').getOffsetParent().id);
     this.assertEqual('body_absolute', $('absolute_relative').getOffsetParent().id);
+    this.assertEqual($('body_absolute'), $('absolute_hidden').getOffsetParent(),
+      'Failed to report an offsetParent on a hidden (display:none) element.');
+
     this.assertEqual('absolute_relative', $('inline').getOffsetParent().id);
     this.assertEqual('absolute_relative', $('absolute_relative_undefined').getOffsetParent().id);
 

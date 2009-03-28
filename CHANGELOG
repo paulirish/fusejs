@@ -1,3 +1,5 @@
+* Ensure Element#getOffsetParent returns the proper offsetParent for hidden elements. [Prototype LH #618] [jddalton, rvagg]
+
 * Allow Element#getOffsetParent to return null and remove Element._getRealOffsetParent() helper. [jddalton]
   Note: Backwards compatibility warning.
 
