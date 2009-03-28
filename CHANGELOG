@@ -1,3 +1,8 @@
+* Make Element#clonePosition work correctly when `source` is an ancestor of `element`. [jddalton]
+  - Add Element._getBorderWidth(), Element._getBorderHeight(), Element._getPaddingWidth(), and Element._getPaddingHeight()
+  - Element#cummulativeOffset allow a second `ancestor` argument to be used to stop iterating when it encounters the ancestor
+  - Make Fuse.Browser.Bug() and Fuse.Browser.Feature() expose their internal cache object as `_object`
+
 * Ensure Element#getOffsetParent returns the proper offsetParent for hidden elements. [Prototype LH #618] [jddalton, rvagg]
 
 * Allow Element#getOffsetParent to return null and remove Element._getRealOffsetParent() helper. [jddalton]

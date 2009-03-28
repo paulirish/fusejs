@@ -94,18 +94,38 @@
      _returnOffset =        null;
   }).call(Element);
 
-  // define Element._getCssWidth() and Element._getCssHeight()
+  // define Element._getCssHeight(), Element._getCssWidth(),
+  // Element._getBorderHeight(), Element._getBorderWidth(),
+  // Element._getPaddingHeight(), Element._getPaddingWidth()
   (function() {
-    var Subtract = {
-      'Width':  $w('borderLeftWidth paddingLeft borderRightWidth paddingRight'),
-      'Height': $w('borderTopWidth paddingTop borderBottomWidth paddingBottom')
-    };
+    function getAsNumber(element, style) {
+      return parseFloat(Element.getStyle(element, style)) || 0;
+    }
 
-    $w('Width Height')._each(function(D) {
-      Element['_getCss' + D] = function(element) {
-        return Math.max(0, Subtract[D].inject(Element['get' + D](element), function(value, styleName) {
-          return value -= parseFloat(Element.getStyle(element, styleName)) || 0;
-        }));
-      };
+    $w('width height')._each(function(d) {
+      var D = d.capitalize(),
+       pos = d === 'width' ? ['Left', 'Right'] : ['Top', 'Bottom'];
+
+      Element['_getBorder' + D] = (function() {
+        var a = 'border' + pos[0] + 'Width', b = 'border' + pos[1] + 'Width';
+        return function(element) {
+          return getAsNumber(element, a) + getAsNumber(element, b);
+        };
+      })();
+
+      Element['_getPadding' + D] = (function() {
+        var a = 'padding' + pos[0], b = 'padding' + pos[1];
+        return function(element) {
+          return getAsNumber(element, a) + getAsNumber(element, b);
+        };
+      })();
+
+      Element['_getCss' + D] = (function() {
+        var a = 'get' + D, b = '_getBorder' + D, c = '_getPadding' + D;
+        return function(element) {
+          return Math.max(0, Element[a](element) -
+            Element[b](element) - Element[c](element));
+        };
+      })();
     });
   })();

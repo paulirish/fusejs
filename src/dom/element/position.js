@@ -115,33 +115,36 @@
 
       var s = element.style;
       if (options.setHeight)
-        s.height = Element._getCssHeight(element) + 'px';
+        s.height = Math.max(0, Element.getHeight(source) -
+          Element._getPaddingHeight(source) -
+          Element._getBorderHeight(element)) + 'px';
+
       if (options.setWidth)
-        s.width = Element._getCssWidth(element) + 'px';
+        s.width = Math.max(0, Element.getWidth(source) -
+          Element._getPaddingWidth(source) -
+          Element._getBorderWidth(element)) + 'px';
 
       // bail if skipping setLeft and setTop
       if (!options.setLeft && !options.setTop)
         return element;
 
-      // clear margins
-      if (options.setLeft) s.marginLeft = '0';
-      if (options.setTop)  s.marginTop  = '0';
+      // clear element coords before getting
+      // the cumulativeOffset because Opera
+      // will fumble the calculations if
+      // you try to subtract the coords after
+      if (options.setLeft) s.left = s.marginLeft = '0';
+      if (options.setTop)  s.top  = s.marginTop  = '0';
 
-      var delta = [0, 0],
-       p = Element.cumulativeOffset(source),
-       position = Element.getStyle(element, 'position');
+      var p, position = Element.getStyle(element, 'position');
 
-      if (position === 'relative') {
-        // clear element coords before getting
-        // the cumulativeOffset because Opera
-        // will fumble the calculations if
-        // you try to subtract the coords after
-        if (options.setLeft) s.left = '0';
-        if (options.setTop)  s.top  = '0';
+      var delta = position === 'relative'
+        ? Element.cumulativeOffset(element)
+        : [0, 0];
 
-        // store element offsets so we can subtract them later
-        delta = Element.cumulativeOffset(element);
-      }
+      if (position === 'absolute' && Element.descendantOf(element, source)) {
+        p = Element.cumulativeOffset(element, source);
+        p[0] *= -1; p[1] *= -1;
+      } else p = Element.cumulativeOffset(source);
 
       // set position
       if (options.setLeft) s.left = (p[0] - delta[0] + options.offsetLeft) + 'px';
@@ -149,10 +152,12 @@
       return element;
     };
 
-    this.cumulativeOffset = function cumulativeOffset(element) {
+    this.cumulativeOffset = function cumulativeOffset(element, ancestor) {
       // TODO: overhaul with a thorough solution for finding the correct
       // offsetLeft and offsetTop values
       element = Element._ensureLayout(element);
+      ancestor = $(ancestor);
+
       var offsetParent, position, valueT = 0, valueL = 0,
        BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS');
 
@@ -163,12 +168,13 @@
         valueT += element.offsetTop  || 0;
         valueL += element.offsetLeft || 0;
 
-		    if (position === 'fixed' || (BODY_OFFSETS_INHERIT_ITS_MARGINS &&
-		        position === 'absolute' && offsetParent &&
-		        getNodeName(offsetParent) === 'BODY')) {
-		      break;
-		    }
+        if (position === 'fixed' || offsetParent && (offsetParent === ancestor ||
+           (BODY_OFFSETS_INHERIT_ITS_MARGINS && position === 'absolute' && 
+            getNodeName(offsetParent) === 'BODY'))) {
+          break;
+        }
       } while (element = offsetParent);
+
       return Element._returnOffset(valueL, valueT);
     };
 
@@ -182,11 +188,11 @@
         valueT += element.scrollTop  || 0;
         valueL += element.scrollLeft || 0;
 
-		    if (getNodeName(element) === rootNodeName ||
-		      Element.getStyle(element, 'position') === 'fixed') {
-	        break;
-		    }
-		    element = element.parentNode;
+        if (getNodeName(element) === rootNodeName ||
+          Element.getStyle(element, 'position') === 'fixed') {
+          break;
+        }
+        element = element.parentNode;
       } while (element && element.nodeType === 1);
 
       if (onlyAncestors || (nodeName === 'TEXTAREA' || nodeName === 'INPUT')) {
@@ -209,7 +215,7 @@
 
       return Element._returnOffset(valueL, valueT);
     },
-    
+
     this.viewportOffset = (function() {
       var viewportOffset = function viewportOffset(element) {
         element = $(element);
@@ -217,7 +223,7 @@
          cumulativeOffset = Element.cumulativeOffset(element),
          valueT = cumulativeOffset.top, valueL = cumulativeOffset.left;
 
-        // Subtract the the scrollOffset totals from the element offset totals.
+        // subtract the the scrollOffset totals from the element offset totals.
         valueT -= scrollOffset.top;
         valueL -= scrollOffset.left;
         return Element._returnOffset(valueL, valueT);

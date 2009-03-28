@@ -2,30 +2,33 @@
 
   (function() {
     function createTester(cache) {
-      cache = cache || { };
       function Tester() {
-        var name, i = 0;
+        var name, o = Tester._object, i = 0;
       	while (name = arguments[i++]) {
-          if (typeof cache[name] === 'function')
-            cache[name] = cache[name]();
-          if (cache[name] !== true)
+          if (typeof o[name] === 'function')
+            o[name] = o[name]();
+          if (o[name] !== true)
             return false;
         }
         return true;
       };
 
       Tester.set = function(name, value) {
+        var o = this._object;
         if (typeof name === 'object'){
-          for (var i in name) cache[i] = name[i];
-        } else cache[name] = value;
+          for (var i in name) o[i] = name[i];
+        } else o[name] = value;
       };
 
       Tester.unset = function(name) {
-        if (typeof name === 'string') delete cache[name];
+        var o = this._object;
+        if (typeof name === 'string') delete o[name];
         else {
-          for (var i in name) delete cache[i];
+          for (var i in name) delete o[i];
         }
       };
+
+      Tester._object = cache || { };
       return Tester;
     }
 
@@ -304,10 +307,10 @@
 
     'BODY_OFFSETS_INHERIT_ITS_MARGINS': function() {
       // true for Safari
-      var backup = Fuse._body.style.cssText || '';
-      Fuse._body.style.cssText += ';position:absolute;top:0;margin:1px 0 0 0;';
+      var s = Fuse._body.style, backup = s.cssText || '';
+      s.cssText += ';position:absolute;top:0;margin:1px 0 0 0;';
       var result = Fuse._body.offsetTop === 1;
-      Fuse._body.style.cssText = backup;
+      s.cssText = backup;
       return result;
     },
 
@@ -320,7 +323,7 @@
 
         var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null);
         result = (style && style.top === '0px' && style.left === '0px');
-        Fuse._docEl.style.cssText = backup;
+        s.cssText = backup;
         return result;
       }
     },
@@ -328,11 +331,11 @@
     'ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX': function() {
       if (Feature('ELEMENT_COMPUTED_STYLE')) {
         // true for Opera 9.2x
-        var backup = Fuse._docEl.style.paddingBottom;
-        Fuse._docEl.style.paddingBottom = '1px';
+        var s = Fuse._docEl.style, backup = s.paddingBottom;
+        s.paddingBottom = '1px';
         var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null),
          result = style && (parseInt(style.height) || 0) ===  Fuse._docEl.offsetHeight;
-        Fuse._docEl.style.paddingBottom = backup;
+        s.paddingBottom = backup;
         return result;
       }
     },
@@ -340,14 +343,14 @@
     'ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN': function() {
       if (Feature('ELEMENT_COMPUTED_STYLE')) {
         // true for Opera
-        var backup = Fuse._docEl.style.display;
-        Fuse._docEl.style.display = 'none';
+        var s = Fuse._docEl.style, backup = s.display;
+        s.display = 'none';
 
         // In Safari 2 getComputedStyle() will return null for elements with style display:none
         var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null),
          result = style && style.height === '0px';
 
-        Fuse._docEl.style.display = backup;
+        s.display = backup;
         return result;
       }
     },

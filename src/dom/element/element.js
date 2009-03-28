@@ -696,20 +696,22 @@
 
   // define Element#getWidth() and Element#getHeight()
   $w('Width Height')._each(function(D) {
-    Element.Methods['get' + D] = function(element) {
-      element = $(element);
-      var result, display = Element.getStyle(element, 'display');
+    Element.Methods['get' + D] = (function() {
+      var property = 'offset' + D;
+      return function(element) {
+        element = $(element);
+        var result, display = Element.getStyle(element, 'display');
 
-      // offsetHidth/offsetWidth properties return 0 on elements
-      // with display:none, so show the element temporarily
-      if (display === 'none' || display === null) {
-        var backup = element.style.cssText;
-        element.style.cssText += ';display:block;visibility:hidden;';
-        result = element['offset' + D];
-        element.style.cssText = backup;
-      }
-      else result = element['offset' + D];
-
-      return result;
-    };
+        // offsetHidth/offsetWidth properties return 0 on elements
+        // with display:none, so show the element temporarily
+        if (display === 'none' || display === null) {
+          var backup = element.style.cssText;
+          element.style.cssText += ';display:block;visibility:hidden;';
+            result = element[property];
+          element.style.cssText = backup;
+        }
+        else result = element[property];
+        return result;
+      };
+    })();
   });
