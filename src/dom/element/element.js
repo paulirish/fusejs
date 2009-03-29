@@ -8,7 +8,7 @@
         return elements;
       }
       if (typeof element === 'string')
-        element = Fuse._doc.getElementById(element || '');
+        element = Fuse._doc.getElementById(element || expando);
       return Element.extend(element);
     }
     return $;
