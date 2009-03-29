@@ -395,6 +395,12 @@ new Test.Unit.Runner({
   testElementVisible: function(){
     this.assertNotEqual('none', $('test-visible').style.display);
     this.assertEqual('none', $('test-hidden').style.display);
+
+    this.assert($('test-visible').visible());
+    this.assert(!$('test-hidden').visible());
+    this.assert(!$('test-hidden-by-size').visible());
+    this.assert(!$('test-nested-hidden-visible').visible());
+    this.assert(!Element.visible('test-nestee-hidden-visible'));
   },
   
   testElementToggle: function(){
@@ -1555,38 +1561,38 @@ new Test.Unit.Runner({
   },
   
   testElementGetDimensions: function() {
-    this.assertIdentical(100, $('dimensions-visible').getDimensions().height);
-    this.assertIdentical(200, $('dimensions-visible').getDimensions().width);
-    this.assertIdentical(100, $('dimensions-display-none').getDimensions().height);
-    this.assertIdentical(200, $('dimensions-display-none').getDimensions().width);
+    this.assertIdentical(100, $('dimensions-visible').getDimensions().height, '`dimensions-visible` height');
+    this.assertIdentical(200, $('dimensions-visible').getDimensions().width, '`dimensions-visible` width');
+    this.assertIdentical(100, $('dimensions-display-none').getDimensions().height, '`dimensions-display-none` height');
+    this.assertIdentical(200, $('dimensions-display-none').getDimensions().width, '`dimensions-display-none` width');
     
-    this.assertIdentical(100, $('dimensions-visible-pos-rel').getDimensions().height);
-    this.assertIdentical(200, $('dimensions-visible-pos-rel').getDimensions().width);
-    this.assertIdentical(100, $('dimensions-display-none-pos-rel').getDimensions().height);
-    this.assertIdentical(200, $('dimensions-display-none-pos-rel').getDimensions().width);
+    this.assertIdentical(100, $('dimensions-visible-pos-rel').getDimensions().height, '`dimensions-visible-pos-rel` height');
+    this.assertIdentical(200, $('dimensions-visible-pos-rel').getDimensions().width, '`dimensions-visible-pos-rel` width');
+    this.assertIdentical(100, $('dimensions-display-none-pos-rel').getDimensions().height, '`dimensions-display-none-pos-rel` height');
+    this.assertIdentical(200, $('dimensions-display-none-pos-rel').getDimensions().width, '`dimensions-display-none-pos-rel` width');
     
-    this.assertIdentical(100, $('dimensions-visible-pos-abs').getDimensions().height);
-    this.assertIdentical(200, $('dimensions-visible-pos-abs').getDimensions().width);
-    this.assertIdentical(100, $('dimensions-display-none-pos-abs').getDimensions().height);
-    this.assertIdentical(200, $('dimensions-display-none-pos-abs').getDimensions().width);
+    this.assertIdentical(100, $('dimensions-visible-pos-abs').getDimensions().height, '`dimensions-visible-pos-abs` height');
+    this.assertIdentical(200, $('dimensions-visible-pos-abs').getDimensions().width, '`dimensions-visible-pos-abs` width');
+    this.assertIdentical(100, $('dimensions-display-none-pos-abs').getDimensions().height, '`dimensions-display-none-pos-abs` height');
+    this.assertIdentical(200, $('dimensions-display-none-pos-abs').getDimensions().width, '`dimensions-display-none-pos-abs` width');
     
     this.assertEqual(500, $('dimensions-nestee').getWidth(),
       'elements should not shrink-wrap when made temporarily visible');
     
     $('dimensions-td').hide();
-    this.assertIdentical(100, $('dimensions-td').getDimensions().height);
-    this.assertIdentical(200, $('dimensions-td').getDimensions().width);
+    this.assertIdentical(100, $('dimensions-td').getDimensions().height, 'TD height');
+    this.assertIdentical(200, $('dimensions-td').getDimensions().width,  'TD width');
     $('dimensions-td').show();
     
     $('dimensions-tr').hide();
-    this.assertIdentical(100, $('dimensions-tr').getDimensions().height);
-    this.assertIdentical(200, $('dimensions-tr').getDimensions().width);
+    this.assertIdentical(100, $('dimensions-tr').getDimensions().height, 'TR height');
+    this.assertIdentical(200, $('dimensions-tr').getDimensions().width,  'TR height');
     $('dimensions-tr').show();
     
     $('dimensions-table').hide();
    
-    this.assertIdentical(100, $('dimensions-table').getDimensions().height);
-    this.assertIdentical(200, $('dimensions-table').getDimensions().width);
+    this.assertIdentical(100, $('dimensions-table').getDimensions().height, 'TABLE height');
+    this.assertIdentical(200, $('dimensions-table').getDimensions().width, 'TABLE height');
     $('dimensions-table').show();
   },
       

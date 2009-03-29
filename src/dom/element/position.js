@@ -186,11 +186,16 @@
         ancestor = $(ancestor);
         if (!Object.isElement(ancestor)) ancestor = null;
 
-        var s = element.style, backup = s.display;
-        if (Element.getStyle(element, 'display') === 'none')
-          s.display = 'block';
-        var result = getOffset(element, ancestor);
-        s.display = backup;
+        // offsetLeft/offsetTop properties return 0 on elements
+        // with display:none, so show the element temporarily
+        var result;
+        if (!Element.visible(element)) {
+          var s = element.style, backup = s.cssText;
+          s.cssText += ';display:block;visibility:hidden;';
+          result = getOffset(element, ancestor);
+          s.cssText = backup;
+        }
+        else result = getOffset(element, ancestor);
         return result;
       }
 

@@ -467,11 +467,15 @@
     };
 
     this.toggle = function toggle(element) {
-      return Element[Element.visible(element) ? 'hide' : 'show'](element);
+      var element = $(element);
+      return Element[element.offsetHeight === 0 || element.offsetWidth === 0 ?
+        'show' : 'hide'](element);
     };
 
     this.visible = function visible(element) {
-      return $(element).style.display != 'none';
+      // In IE hidden TR elements still have an offsetWidth
+      var element = $(element);
+      return !(element.offsetHeight === 0 || element.offsetWidth === 0)
     };
 
     this.wrap = function wrap(element, wrapper, attributes) {
@@ -700,15 +704,15 @@
       var property = 'offset' + D;
       return function(element) {
         element = $(element);
-        var result, display = Element.getStyle(element, 'display');
 
         // offsetHidth/offsetWidth properties return 0 on elements
         // with display:none, so show the element temporarily
-        if (display === 'none' || display === null) {
-          var backup = element.style.cssText;
-          element.style.cssText += ';display:block;visibility:hidden;';
-            result = element[property];
-          element.style.cssText = backup;
+        var result;
+        if (!Element.visible(element)) {
+          var s = element.style, backup = s.cssText;
+          s.cssText += ';display:block;visibility:hidden;';
+          result = element[property];
+          s.cssText = backup;
         }
         else result = element[property];
         return result;

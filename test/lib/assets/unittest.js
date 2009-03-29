@@ -456,7 +456,7 @@ Test.Unit.Assertions = (function() {
     element = $(element);
     if (!element.parentNode) return true;
     this.assertNotNull(element);
-    if (element.style && Element.getStyle(element, 'display') == 'none')
+    if (element.style && !Element.isVisible(element))
       return false;
     return isVisible.call(this, element.parentNode);
   }

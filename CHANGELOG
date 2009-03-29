@@ -1,3 +1,6 @@
+* Make Element#visible work with elements that are nested in hidden parent elements or have an offsetWidth/offsetHeight of zero. [jddalton, matheusalmeida]
+  Originally reported on http://dev.jquery.com/ticket/3895.
+
 * Make $() fallback on the `expando` varaible for malformed strings to avoid passing an empty string to document.getElementById(). [jddalton]
 
 * Rename String#strip to String#trim and add JavaScript 1.8.1 String#trimLeft and String#trimRight support. [jddalton]
