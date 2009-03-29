@@ -135,7 +135,7 @@
       };
 
       var getElementsByClassName = function getElementsByClassName(element, className) {
-        className = className.toString().strip();
+        className = className.toString().trim();
         var elements = [], classNames = (/\s/.test(className) ? $w(className) : null);
         if (!classNames && !className) return elements;
 
@@ -154,7 +154,7 @@
 
       if (Feature('XPATH')) {
         getElementsByClassName = function getElementsByClassName(element, className) {
-          className = className.toString().strip();
+          className = className.toString().trim();
           var cond = /\s/.test(className)
             ? $w(className).map(iter).join('')
             : iter(className);

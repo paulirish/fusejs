@@ -16,7 +16,7 @@
   global.$w = (function() {
    function $w(string) {
       if (typeof string !== 'string') return [];
-      string = string.strip();
+      string = string.trim();
       return string ? string.split(/\s+/) : [];
     }
     return $w;

@@ -22,7 +22,7 @@
     this.removeClassName = function removeClassName(element, className) {
       element = $(element);
       element.className = element.className.replace(
-        new RegExp('(^|\\s+)' + className + '(\\s+|$)'), ' ').strip();
+        new RegExp('(^|\\s+)' + className + '(\\s+|$)'), ' ').trim();
       return element;
     };
 

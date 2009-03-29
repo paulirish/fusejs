@@ -22,7 +22,7 @@
 
   global.Selector = Class.create((function() {
     function initialize(expression) {
-      this.expression = expression.strip();
+      this.expression = expression.trim();
 
       if (this.shouldUseSelectorsAPI()) {
         this.mode = 'selectorsAPI';
@@ -225,7 +225,7 @@
       expressions = Selector.split(expressions.join(','));
       var results = [], h = Selector.handlers;    
       for (var i = 0, exp; exp = expressions[i++]; )
-        h.concat(results, new Selector(exp.strip()).findElements(element));
+        h.concat(results, new Selector(exp.trim()).findElements(element));
       return (expressions.length > 1) ? h.unique(results) : results;
     }
 
@@ -249,7 +249,7 @@
     function split(expression) {
       var expressions = [];
       expression.scan(/(([\w#:.~>+()\s-]|\*|\[.*?\])+)\s*(,|$)/, function(m) {
-        expressions.push(m[1].strip());
+        expressions.push(m[1].trim());
       });
       return expressions;
     }

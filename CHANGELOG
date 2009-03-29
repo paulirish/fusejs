@@ -1,3 +1,6 @@
+* Rename String#strip to String#trim and add JavaScript 1.8.1 String#trimLeft and String#trimRight support. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Rename Element#absolutize to Element#makeAbsolute and Element#relativize to Element#undoAbsolute. [jddalton]
   Note: Backwards compatibility warning.
 

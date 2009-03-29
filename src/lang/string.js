@@ -137,7 +137,7 @@
     };
 
     this.toQueryParams = function toQueryParams(separator) {
-      var hash = { }, match = this.strip().match(/([^?#]*)(#.*)?$/);
+      var hash = { }, match = this.trim().match(/([^?#]*)(#.*)?$/);
       if (!match) return hash;
 
       var pair, key, value, i = 0,
@@ -308,19 +308,30 @@
       return results;
     };
 
-    this.strip = (function() {
-      function strip() {
-        return this.replace(matchTrimLeft, '').replace(matchTrimRight, '');
-      }
-      return this.trim || strip;
-    }).call(this);
-
     this.stripScripts = function stripScripts() {
       return this.replace(matchScripts, '');
     };
 
+    if (!this.trim)
+      this.trim = function trim() {
+        // keep this method as simple as possible, avoid extraneous method calls
+        return this.replace(matchTrimLeft, '').replace(matchTrimRight, '');
+      };
+    if (!this.trimLeft)
+      this.trimLeft = function trimLeft() {
+        return this.replace(matchTrimLeft, '');
+      };
+    if (!this.trimRight)
+      this.trimRight = function trimRight() {
+        return this.replace(matchTrimRight, '');
+      };
+
     // prevent JScript bug with named function expressions
-    var extractScripts = null, stripScripts = null;
+    var extractScripts = null,
+     stripScripts =      null,
+     trim =              null,
+     trimLeft =          null,
+     trimRight =         null;
   }).call(String.prototype);
 
   (function() {

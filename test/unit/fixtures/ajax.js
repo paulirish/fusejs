@@ -3,6 +3,10 @@ var responderCounter = 0,
  sentence = 'pack my box with <em>five dozen</em> liquor jugs! ' +
    'oh, how <strong>quickly</strong> daft jumping zebras vex...';
 
+function getInnerHTML(id) {
+  return $(id).innerHTML.toString().toLowerCase().replace(/[\r\n\t]/g, '');
+}
+
 Fixtures = {
   'js': {
     'responseBody': '$("content").update("<H2>Hello world!</H2>");', 

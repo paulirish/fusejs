@@ -1,44 +1,44 @@
 var documentViewportProperties,
  isIE6AndLower = Fuse.Browser.Agent.IE && !window.XMLHttpRequest,
  testVar = 'to be updated',
- testVar2 = '',
+ testVar2 = '';
 
-getInnerHTML = function(id) {
-  return $(id).innerHTML.toString().toLowerCase().gsub(/[\r\n\t]/, '');
-},
+function getInnerHTML(id) {
+  return $(id).innerHTML.toString().toLowerCase().replace(/[\r\n\t]/g, '');
+}
 
-createParagraph = function(text, context) {
+function createParagraph(text, context) {
   context = context || document;
   var p = context.createElement('p');
   p.appendChild(context.createTextNode(text));
   return p;
-},
+}
 
-getIframeDocument = function() {
+function getIframeDocument() {
   var element = $('iframe');
   return element.contentDocument || element.contentWindow && element.contentWindow.document;
-},
+}
 
-getIframeWindow = function() {
+function getIframeWindow() {
   return window.frames[0];
-},
+}
 
-isIframeDocument = function(doc) {
+function isIframeDocument(doc) {
   return (doc.parentWindow || doc.defaultView).frameElement != null;
-},
+}
 
-isIframeAccessible = function() {
+function isIframeAccessible() {
   try {
     return !!getIframeDocument().body;
   } catch(e) {
     return false;
   }
-},
+}
 
-getElement = function(element, context) {
+function getElement(element, context) {
   if (typeof element !== 'string') return element;
   return Element.extend((context || document).getElementById(element));
-};
+}
 
 // Parsing and serializing XML
 // http://developer.mozilla.org/En/Parsing_and_serializing_XML

@@ -260,17 +260,33 @@ new Test.Unit.Runner({
     this.assert(typeof 'foo bar baz'.truncate(5) == 'string');
   },
   
-  testStrip: function() {
-    this.assertEqual('hello world', '   hello world  '.strip());
-    this.assertEqual('hello world', 'hello world'.strip());
-    this.assertEqual('hello  \n  world', '  hello  \n  world  '.strip());
-    this.assertEqual('', ' '.strip());
+  testTrim: function() {
+    this.assertEqual('hello world', '   hello world  '.trim());
+    this.assertEqual('hello world', 'hello world'.trim());
+    this.assertEqual('hello  \n  world', '  hello  \n  world  '.trim());
+    this.assertEqual('', ' '.trim());
 
-    // Ensure strip removes all whitespace and line terminators
+    // Ensure trim removes all whitespace and line terminators
     // IE doesn't understand '\v' so replace it with '\x0B'
-    this.assertEqual('hello', ' \n\r\t\x0B\f\xA0 hello \xA0\n \r\t\f\x0B'.strip());
+    this.assertEqual('hello', ' \n\r\t\x0B\f\xA0 hello \xA0\n \r\t\f\x0B'.trim());
   },
-  
+
+  testTrimLeft: function() {
+    this.assertEqual('hello world  ', '   hello world  '.trimLeft());
+    this.assertEqual('hello world', 'hello world'.trimLeft());
+    this.assertEqual('hello  \n  world  ', '  hello  \n  world  '.trimLeft());
+    this.assertEqual('', ' '.trimLeft());
+    this.assertEqual('hello', ' \n\r\t\x0B\f\xA0 hello'.trimLeft());
+  },
+
+  testTrimRight: function() {
+    this.assertEqual('   hello world', '   hello world  '.trimRight());
+    this.assertEqual('hello world', 'hello world'.trimRight());
+    this.assertEqual('  hello  \n  world', '  hello  \n  world  '.trimRight());
+    this.assertEqual('', ' '.trimRight());
+    this.assertEqual('hello', 'hello \xA0\n \r\t\f\x0B'.trimRight());
+  },
+
   testStripTags: function() {
     this.assertEqual('hello world', 'hello world'.stripTags());
     this.assertEqual('hello world', 'hello <span>world</span>'.stripTags());
