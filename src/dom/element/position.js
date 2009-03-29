@@ -1,8 +1,7 @@
   /*---------------------------- ELEMENT: POSITION ---------------------------*/
 
   (function() {
-    // TODO: rename to "makeAbsolute"
-    this.absolutize = function absolutize(element) {
+    this.makeAbsolute = function makeAbsolute(element) {
       element = $(element);
       if (Element.getStyle(element, 'position') === 'absolute')
         return element;
@@ -35,13 +34,12 @@
       return element;
     },
 
-    // TODO: rename to "undoAbsolute"
-    this.relativize = function relativize(element) {
+    this.undoAbsolute = function undoAbsolute(element) {
       element = $(element);
       if (Element.getStyle(element, 'position') === 'relative')
         return element;
       if (typeof element._originalTop === 'undefined')
-        throw new Error('Element#absolutize must be called first.');
+        throw new Error('Element#makeAbsolute must be called first.');
 
       var s = element.style;
       s.position   = 'relative';
@@ -290,13 +288,13 @@
     })();
 
     // prevent JScript bug with named function expressions
-    var absolutize =          null,
+    var makeAbsolute =        null,
      clonePosition =          null,
      cumulativeScrollOffset = null,
      makeClipping =           null,
      makePositioned =         null,
      positionedOffset =       null,
-     relativize =             null,
+     undoAbsolute =           null,
      undoClipping =           null,
      undoPositioned =         null;
   }).call(Element.Methods);

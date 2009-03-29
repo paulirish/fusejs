@@ -1934,48 +1934,48 @@ new Test.Unit.Runner({
     this.assertEqual(null, offsetParent);
   },
 
-  testAbsolutize: function() {
+  testAbsolute: function() {
     $('notInlineAbsoluted', 'inlineAbsoluted').each(function(elt) {
       if ('_originalLeft' in elt) delete elt._originalLeft;
-      elt.absolutize();
-      this.assertUndefined(elt._originalLeft, 'absolutize() did not detect absolute positioning');
+      elt.makeAbsolute();
+      this.assertUndefined(elt._originalLeft, 'makeAbsolute() did not detect absolute positioning');
     }, this);
     
     // invoking on "absolute" positioned element should return element
     var element = $('absolute_relative_undefined').setStyle({ position: 'absolute' });
-    this.assertEqual(element, element.absolutize());
+    this.assertEqual(element, element.makeAbsolute());
     element.style.position = '';
     
     // test relatively positioned element with no height specified for IE7
     var element = $('absolute_relative'),
     dimensions = element.getDimensions();
     
-    element.absolutize();
+    element.makeAbsolute();
     this.assertIdentical(dimensions.width, element.getDimensions().width);
     this.assertIdentical(dimensions.height, element.getDimensions().height);
-    element.relativize();
+    element.undoAbsolute();
   },
   
-  testRelativize: function() {
+  testUndoAbsolute: function() {
     // invoking on "relative" positioned element should return element
     var element = $('absolute_fixed_undefined').setStyle({ position: 'relative' });
-    this.assertEqual(element, element.relativize());
+    this.assertEqual(element, element.undoAbsolute());
     element.style.position = '';
     
-    // test relativize on elements that have not called absolutize first
+    // test undoAbsolute on elements that have not called makeAbsolute first
     $w('notInlineAbsoluted inlineAbsoluted absolute_absolute').each(function(id) {
       var passed = true;
-      try { $(id).relativize() } catch(e) { passed = false }
+      try { $(id).undoAbsolute() } catch(e) { passed = false }
       this.assertEqual(false, passed);
     }, this);
   },
   
-  testAbsolutizeRelativizeNotAffectElementDimensions: function() {
-    $('absolutize_dimensions_test').childElements().each(function(element) {
+  testMakeAndUndoAbsoluteNotAffectElementDimensions: function() {
+    $('make_absolute_dimensions_test').childElements().each(function(element) {
       var original = element.getDimensions();
-      element.absolutize();
+      element.makeAbsolute();
       var absolute = element.getDimensions();
-      element.relativize();
+      element.undoAbsolute();
       var relative = element.getDimensions();
       
       this.assert(original.width == absolute.width && absolute.width == relative.width,

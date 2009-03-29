@@ -1,3 +1,6 @@
+* Rename Element#absolutize to Element#makeAbsolute and Element#relativize to Element#undoAbsolute. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Ensure Element#cumulativeOffset works with hidden elements or elements with borders and Element#clonePosition resizes elements, with various paddings, correctly. [Prototype LH #603] [jddalton, Manuel Carrasco]
 
 * Make Element#clonePosition work correctly when `source` is an ancestor of `element`. [jddalton]

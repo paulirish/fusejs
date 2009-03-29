@@ -48,12 +48,12 @@
   (function () {
     this.absolutize = function absolutize(element) {
       Position.prepare();
-      return Element.absolutize(element);
+      return Element.makeAbsolute(element);
     };
 
     this.relativize = function relativize(element) {
       Position.prepare();
-      return Element.relativize(element);
+      return Element.undoAbsolute(element);
     };
 
     this.clone = function clone(source, target, options) {
