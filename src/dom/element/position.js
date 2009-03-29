@@ -189,7 +189,7 @@
         // offsetLeft/offsetTop properties return 0 on elements
         // with display:none, so show the element temporarily
         var result;
-        if (!Element.visible(element)) {
+        if (!Element.isVisible(element)) {
           var s = element.style, backup = s.cssText;
           s.cssText += ';display:block;visibility:hidden;';
           result = getOffset(element, ancestor);

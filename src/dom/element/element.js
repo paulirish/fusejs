@@ -472,7 +472,7 @@
         'show' : 'hide'](element);
     };
 
-    this.visible = function visible(element) {
+    this.isVisible = function isVisible(element) {
       // In IE hidden TR elements still have an offsetWidth
       var element = $(element);
       return !(element.offsetHeight === 0 || element.offsetWidth === 0)
@@ -500,11 +500,11 @@
      identify =           null,
      inspect =            null,
      isFragment =         null,
+     isVisible =          null,
      remove =             null,
      scrollTo =           null,
      show =               null,
      toggle =             null,
-     visible =            null,
      wrap =               null;
   }).call(Element.Methods);
 
@@ -708,7 +708,7 @@
         // offsetHidth/offsetWidth properties return 0 on elements
         // with display:none, so show the element temporarily
         var result;
-        if (!Element.visible(element)) {
+        if (!Element.isVisible(element)) {
           var s = element.style, backup = s.cssText;
           s.cssText += ';display:block;visibility:hidden;';
           result = element[property];

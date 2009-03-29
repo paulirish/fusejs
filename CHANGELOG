@@ -1,3 +1,6 @@
+* Rename Element#visible to Element#isVisible. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Make Element#visible work with elements that are nested in hidden parent elements or have an offsetWidth/offsetHeight of zero. [jddalton, matheusalmeida]
   Originally reported on http://dev.jquery.com/ticket/3895.
 

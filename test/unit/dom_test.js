@@ -392,40 +392,40 @@ new Test.Unit.Runner({
     this.assert(!Element.isFragment(document), 'document object is not a fragment');
   },
   
-  testElementVisible: function(){
+  testElementIsVisible: function(){
     this.assertNotEqual('none', $('test-visible').style.display);
     this.assertEqual('none', $('test-hidden').style.display);
 
-    this.assert($('test-visible').visible());
-    this.assert(!$('test-hidden').visible());
-    this.assert(!$('test-hidden-by-size').visible());
-    this.assert(!$('test-nested-hidden-visible').visible());
-    this.assert(!Element.visible('test-nestee-hidden-visible'));
+    this.assert($('test-visible').isVisible());
+    this.assert(!$('test-hidden').isVisible());
+    this.assert(!$('test-hidden-by-size').isVisible());
+    this.assert(!$('test-nested-hidden-visible').isVisible());
+    this.assert(!Element.isVisible('test-nestee-hidden-visible'));
   },
   
   testElementToggle: function(){
     $('test-toggle-visible').toggle();
-    this.assert(!$('test-toggle-visible').visible());
+    this.assert(!$('test-toggle-visible').isVisible());
     $('test-toggle-visible').toggle();
-    this.assert($('test-toggle-visible').visible());
+    this.assert($('test-toggle-visible').isVisible());
     $('test-toggle-hidden').toggle();
-    this.assert($('test-toggle-hidden').visible());
+    this.assert($('test-toggle-hidden').isVisible());
     $('test-toggle-hidden').toggle();
-    this.assert(!$('test-toggle-hidden').visible());
+    this.assert(!$('test-toggle-hidden').isVisible());
   },
   
   testElementShow: function(){
     $('test-show-visible').show();
-    this.assert($('test-show-visible').visible());
+    this.assert($('test-show-visible').isVisible());
     this.assert(Object.isElement(Element.show('test-show-hidden')));
-    this.assert($('test-show-hidden').visible());
+    this.assert($('test-show-hidden').isVisible());
   },
   
   testElementHide: function(){
     $('test-hide-visible').hide();
-    this.assert(!$('test-hide-visible').visible());
+    this.assert(!$('test-hide-visible').isVisible());
     this.assert(Object.isElement(Element.hide('test-hide-hidden')));
-    this.assert(!$('test-hide-hidden').visible());
+    this.assert(!$('test-hide-hidden').isVisible());
     this.assertUndefined($('test-hide-visible')._originalDisplay);
   },
   
@@ -437,14 +437,14 @@ new Test.Unit.Runner({
       'Should only empty display when display is set to "none".');
 
     element.hide();
-    this.assert(!element.visible(),
+    this.assert(!element.isVisible(),
       'Element should be hidden. (inline)');
 
     this.assertEqual('inline', element._originalDisplay,
       'display:inline did not get stored in _originalDisplay.');
 
     element.show();
-    this.assert(element.visible(), 'Element should be visible');
+    this.assert(element.isVisible(), 'Element should be visible');
     this.assertEqual('inline', element.style.display,
       'Element should have inline display.');
 
@@ -453,7 +453,7 @@ new Test.Unit.Runner({
 
     element.style.display = 'block';
     element.hide();
-    this.assert(!element.visible(),
+    this.assert(!element.isVisible(),
       'Element should be hidden. (block)');
 
     this.assertEqual('block', element._originalDisplay,
