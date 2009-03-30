@@ -137,12 +137,12 @@
 
     'ELEMENT_GET_ATTRIBUTE_IFLAG': function() {
       // true for IE
-      var result = false;
+      var div = Fuse._div, result = false;
       try {
-        Fuse._div.setAttribute('align', 'center'); Fuse._div.setAttribute('aLiGn', 'left');
-        result = (Fuse._div.getAttribute('aLiGn') === 'center' &&
-          Fuse._div.getAttribute('aLiGn', 1) === 'left');
-        Fuse._div.removeAttribute('align'); Fuse._div.removeAttribute('aLiGn');
+        div.setAttribute('align', 'center'); div.setAttribute('aLiGn', 'left');
+        result = (div.getAttribute('aLiGn') === 'center' &&
+          div.getAttribute('aLiGn', 1) === 'left');
+        div.removeAttribute('align'); div.removeAttribute('aLiGn');
       } catch(e) { }
       return result;
     },
@@ -170,12 +170,12 @@
     },
 
     'ELEMENT_SPECIFIC_EXTENSIONS': function() {
-      var result = false;
+      var docEl = Fuse._docEl, result = false;
       if (isHostObject(global, 'HTMLHtmlElement') &&
           isHostObject(global.HTMLHtmlElement, 'prototype') &&
-          (Fuse._docEl.constructor === HTMLHtmlElement || 
-           Fuse._docEl instanceof HTMLHtmlElement || Feature('OBJECT_PROTO') &&
-           Fuse._docEl['__proto__'] === HTMLHtmlElement.prototype)) {
+          (docEl.constructor === HTMLHtmlElement || 
+           docEl instanceof HTMLHtmlElement || Feature('OBJECT_PROTO') &&
+           docEl['__proto__'] === HTMLHtmlElement.prototype)) {
         result = true;
       } else result = Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO');
 
@@ -216,10 +216,11 @@
 
     'SELECTORS_API': function() {
       // true for IE8, WebKit (Safari 3, Chrome)
-      return isHostObject(Fuse._doc, 'querySelector') &&
-        isHostObject(Fuse._doc, 'querySelectorAll') &&
-        isHostObject(Fuse._docEl, 'querySelector') &&
-        isHostObject(Fuse._docEl, 'querySelectorAll');
+      var doc = Fuse._doc, docEl = Fuse._docEl;
+      return isHostObject(doc, 'querySelector') &&
+        isHostObject(doc,   'querySelectorAll') &&
+        isHostObject(docEl, 'querySelector')    &&
+        isHostObject(docEl, 'querySelectorAll');
     },
 
     'XPATH': function() {
@@ -231,31 +232,32 @@
   });
 
   (function() {
-    var ELEMENT_CHILDREN_NODELIST, ELEMENT_CONTAINS;
+    var div = Fuse._div, docEl = Fuse._docEl,
+     ELEMENT_CHILDREN_NODELIST, ELEMENT_CONTAINS;
 
     // true for IE, Safari 3, Opera, Firefox 3+
-    if (!isHostObject(Fuse._docEl, 'children'))
+    if (!isHostObject(docEl, 'children'))
       ELEMENT_CHILDREN_NODELIST = false;
 
     // true for all but IE and Safari 2
-    if (!isHostObject(Fuse._docEl, 'contains'))
+    if (!isHostObject(docEl, 'contains'))
       ELEMENT_CONTAINS = false;
 
     // no need to test further is both failed
     if (ELEMENT_CHILDREN_NODELIST === false &&
       ELEMENT_CONTAINS === false) return;
 
-    Fuse._div.innerHTML = '<div></div><div><div></div></div>';
+    div.innerHTML = '<div></div><div><div></div></div>';
 
     // ensure children collection only contains direct descendants
     if (ELEMENT_CHILDREN_NODELIST !== false)
-      ELEMENT_CHILDREN_NODELIST = Fuse._div.children.length === Fuse._div.childNodes.length;
+      ELEMENT_CHILDREN_NODELIST = div.children.length === div.childNodes.length;
 
     // ensure element.contains() returns the correct results;
     if (ELEMENT_CONTAINS !== false)
-      ELEMENT_CONTAINS = !Fuse._div.firstChild.contains(Fuse._div.childNodes[1].firstChild);
+      ELEMENT_CONTAINS = !div.firstChild.contains(div.childNodes[1].firstChild);
 
-    Fuse._div.innerHTML = '';
+    div.innerHTML = '';
 
     Feature.set({
       'ELEMENT_CHILDREN_NODELIST': ELEMENT_CHILDREN_NODELIST,
@@ -274,56 +276,55 @@
 
     'ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS': function() {
       // true for IE
-      var node, clone;
+      var node, clone, div = Fuse._div;
       (node = document.createAttribute('name')).value = 'x';
-      Fuse._div.setAttributeNode(node);
-      (clone = Fuse._div.cloneNode(false)).setAttribute('name', 'y');
-      Fuse._div.removeAttribute('name');
-
+      div.setAttributeNode(node);
+      (clone = div.cloneNode(false)).setAttribute('name', 'y');
+      div.removeAttribute('name');
       return (node = clone.getAttributeNode('name')) && node.value === 'x';
     },
 
     'BODY_ACTING_AS_ROOT': function() {
       // true for IE Quirks, Opera 9.25
-      if (Fuse._docEl.clientWidth === 0) return true;
+      var body = Fuse._body, div = Fuse._div, docEl = Fuse._docEl;
+      if (docEl.clientWidth === 0) return true;
 
-      var dms = Fuse._div.style, bs = Fuse._body.style, des = Fuse._docEl.style,
+      var ds = div.style, bs = body.style, des = docEl.style,
        bsBackup = bs.cssText, desBackup = des.cssText;
 
-      bs.margin   = des.margin = '0';
-      bs.height   = des.height = 'auto';
-      dms.cssText = 'display:block;height:8500px;';
+      bs.margin  = des.margin = '0';
+      bs.height  = des.height = 'auto';
+      ds.cssText = 'display:block;height:8500px;';
 
-      Fuse._body.insertBefore(Fuse._div, Fuse._body.firstChild);
-      var result = Fuse._docEl.clientHeight >= 8500;
-      Fuse._body.removeChild(Fuse._div);
+      body.insertBefore(div, body.firstChild);
+      var result = docEl.clientHeight >= 8500;
+      body.removeChild(div);
 
       bs.cssText  = bsBackup;
       des.cssText = desBackup;
-      dms.cssText = '';
-
+      ds.cssText  = '';
       return result;
     },
 
     'BODY_OFFSETS_INHERIT_ITS_MARGINS': function() {
       // true for Safari
-      var s = Fuse._body.style, backup = s.cssText || '';
-      s.cssText += ';position:absolute;top:0;margin:1px 0 0 0;';
-      var result = Fuse._body.offsetTop === 1;
-      s.cssText = backup;
+      var body = Fuse._body, bs = body.style, backup = bs.cssText;
+      bs.cssText += ';position:absolute;top:0;margin:1px 0 0 0;';
+      var result = body.offsetTop === 1;
+      bs.cssText = backup;
       return result;
     },
 
     'ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO': function() {
       if (Feature('ELEMENT_COMPUTED_STYLE')) {
         // true for Opera
-        var result, s = Fuse._docEl.style, backup = s.cssText;
-        s.position = 'static';
-        s.top = s.left = '';
+        var result, des = Fuse._docEl.style, backup = des.cssText;
+        des.position = 'static';
+        des.top = des.left = '';
 
         var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null);
         result = (style && style.top === '0px' && style.left === '0px');
-        s.cssText = backup;
+        des.cssText = backup;
         return result;
       }
     },
@@ -331,11 +332,11 @@
     'ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX': function() {
       if (Feature('ELEMENT_COMPUTED_STYLE')) {
         // true for Opera 9.2x
-        var s = Fuse._docEl.style, backup = s.paddingBottom;
-        s.paddingBottom = '1px';
-        var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null),
-         result = style && (parseInt(style.height) || 0) ===  Fuse._docEl.offsetHeight;
-        s.paddingBottom = backup;
+        var docEl = Fuse._docEl, des = docEl.style, backup = des.paddingBottom;
+        des.paddingBottom = '1px';
+        var style = Fuse._doc.defaultView.getComputedStyle(docEl, null),
+         result = style && (parseInt(style.height) || 0) ===  docEl.offsetHeight;
+        des.paddingBottom = backup;
         return result;
       }
     },
@@ -343,55 +344,57 @@
     'ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN': function() {
       if (Feature('ELEMENT_COMPUTED_STYLE')) {
         // true for Opera
-        var s = Fuse._docEl.style, backup = s.display;
-        s.display = 'none';
+        var des = Fuse._docEl.style, backup = des.display;
+        des.display = 'none';
 
         // In Safari 2 getComputedStyle() will return null for elements with style display:none
         var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null),
          result = style && style.height === '0px';
 
-        s.display = backup;
+        des.display = backup;
         return result;
       }
     },
 
-    'ELEMENT_OFFSETS_DONT_INHERIT_BORDER_WIDTH': function() {
+    'ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH': function() {
       // true for all but IE8
-      var s = Fuse._body.style, backup = s.cssText;
-      Fuse._body.appendChild(Fuse._div);
-      var value = Fuse._div.offsetLeft;
-      s.cssText += '; border: 1px solid transparent;';
-      var result = (value === Fuse._div.offsetLeft);
-      s.cssText = backup;
-      Fuse._body.removeChild(Fuse._div);
+      var body = Fuse._body, div = Fuse._div, bs = Fuse._body.style, backup = bs.cssText;
+      body.appendChild(div);
+      var value = div.offsetLeft;
+      bs.cssText += ';border: 1px solid transparent;';
+      var result = (value === div.offsetLeft);
+      bs.cssText = backup;
+      body.removeChild(div);
       return result;
     },
 
     'ELEMENT_PROPERTIES_ARE_ATTRIBUTES': function() {
       // true for IE
-      Fuse._div[expando] = 'x';
-      var result = Fuse._div.getAttribute(expando) === 'x';
-      Fuse._div.removeAttribute(expando);
-      if (typeof Fuse._div[expando] !== 'undefined')
-        delete Fuse._div[expando];
+      var div = Fuse._div;
+      div[expando] = 'x';
+      var result = div.getAttribute(expando) === 'x';
+      div.removeAttribute(expando);
+      if (typeof div[expando] !== 'undefined')
+        delete div[expando];
       return result;
     },
 
     'ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT_PROPERTY_ON_INSERT': function() {
-      var element = Fuse._doc.createElement('script');
+      var docEl = Fuse._docEl, element = Fuse._doc.createElement('script');
       element.text = 'Fuse.' + expando +' = true;';
-      Fuse._docEl.insertBefore(element, Fuse._docEl.firstChild);
+      docEl.insertBefore(element, docEl.firstChild);
       var result = !Fuse[expando];
-      Fuse._docEl.removeChild(element);
+      docEl.removeChild(element);
       delete Fuse[expando];
       return result;
     },
 
     'ELEMENT_TABLE_INNERHTML_INSERTS_TBODY': function() {
       // true for IE and Firefox 3
-      Fuse._div.innerHTML = '<table><tr><td></td></tr></table>';
-      var result = getNodeName(Fuse._div.firstChild.firstChild) === 'TBODY';
-      Fuse._div.innerHTML = '';
+      var div = Fuse._div;
+      div.innerHTML = '<table><tr><td></td></tr></table>';
+      var result = getNodeName(div.firstChild.firstChild) === 'TBODY';
+      div.innerHTML = '';
       return result;
     },
 
@@ -404,12 +407,12 @@
     'SELECTORS_API_CASE_INSENSITIVE_CLASSNAME': function() {
       // Safari 3 before 3.1.2 treat class names
       // case-insensitively in quirks mode.
-      var result = false;
+      var div = Fuse._div, result = false;
       if (Feature('SELECTORS_API')) {
-        Fuse._div.id = expando;
-        Fuse._div.innerHTML = '<span class="X"></span>';
-        result = Fuse._div.querySelector('#'+ expando +' .x') !== null;
-        Fuse._div.id = Fuse._div.innerHTML = '';
+        div.id = expando;
+        div.innerHTML = '<span class="X"></span>';
+        result = div.querySelector('#'+ expando +' .x') !== null;
+        div.id = div.innerHTML = '';
       }
       return result;
     },
@@ -431,14 +434,15 @@
   Bug.set((function() {
     function createInnerHTMLTest(source, innerHTML, targetNode) {
       return function() {
-        Fuse._div.innerHTML = source;
-        var result = true, element = Fuse._div.firstChild;
+        var div = Fuse._div, result = true;
+        div.innerHTML = source;
+        var element = div.firstChild;
         if (targetNode) element = element.getElementsByTagName(targetNode)[0];
         try {
           result = (element.innerHTML = innerHTML) &&
             element.innerHTML.toLowerCase() !== innerHTML;
         } catch(e) { }
-        Fuse._div.innerHTML = '';
+        div.innerHTML = '';
         return result;
       };
     }
@@ -468,9 +472,10 @@
   Bug.set((function() {
     function createCommentTest(conditional) {
       return function() {
-        Fuse._div.innerHTML = '<p>x</p><!--y-->';
-        var result = conditional(Fuse._div);
-        Fuse._div.innerHTML = '';
+        var div = Fuse._div;
+        div.innerHTML = '<p>x</p><!--y-->';
+        var result = conditional(div);
+        div.innerHTML = '';
         return result;
       };
     }
@@ -498,9 +503,9 @@
           // for Element and global.Element.
           var element = Fuse._doc.createElement(nodeName),
            prototype = global.Element.prototype;
-          prototype._fuseInheritableTest = true;
-          var result = !element._fuseInheritableTest;
-          delete prototype._fuseInheritableTest;
+          prototype[expando] = true;
+          var result = !element[expando];
+          delete prototype[expando];
           return result;
         };
       }

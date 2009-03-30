@@ -68,6 +68,23 @@ if (typeof(DOMParser) === 'undefined') {
   })();
 }
 
+Fuse.Browser.Bug.set({
+  'ELEMENT_STYLE_OVERFLOW_VISIBLE_EXPANDS_TO_FIT_CONTENT': function() {
+    // IE 6 and lower
+    var div = Fuse._div, clone = div.cloneNode(false), ds = div.style, cs = clone.style;
+    ds.cssText = cs.cssText = 'overflow:visible;padding:0;margin:0;';
+    ds.width = '20px'; cs.width = '21px';
+
+    Fuse._body.appendChild(div);
+    var value = div.offsetWidth;
+    div.appendChild(clone);
+    var result = (value !== div.offsetWidth);
+    Fuse._body.removeChild(div);
+    div.innerHTML = ds.cssText = '';
+    return result;
+  }
+});
+
 Element.addMethods({
   'hashBrowns': function(element) { return 'hash browns' }
 });

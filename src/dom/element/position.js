@@ -160,7 +160,8 @@
         // offsetLeft and offsetTop values
         var offsetParent, position, valueT = 0, valueL = 0,
          BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS'),
-         ELEMENT_OFFSETS_DONT_INHERIT_BORDER_WIDTH = Bug('ELEMENT_OFFSETS_DONT_INHERIT_BORDER_WIDTH');
+         ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH =
+           Bug('ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH');
         do {
           valueT += element.offsetTop  || 0;
           valueL += element.offsetLeft || 0;
@@ -168,7 +169,7 @@
           offsetParent = Element.getOffsetParent(element);
           position     = Element.getStyle(element, 'position');
 
-          if (offsetParent && ELEMENT_OFFSETS_DONT_INHERIT_BORDER_WIDTH) {
+          if (offsetParent && ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH) {
             valueT += parseFloat(Element.getStyle(offsetParent, 'borderTopWidth'))  || 0;
             valueL += parseFloat(Element.getStyle(offsetParent, 'borderLeftWidth')) || 0;
           }
