@@ -1,3 +1,5 @@
+* Fix Array#inject recursion error in Firefox. [jddalton]
+
 * Cleanup Feature/Bug tests and correct Element#clonePosition unit test for IE 6. [jddalton]
 
 * Rename Element#visible to Element#isVisible. [jddalton]

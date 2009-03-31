@@ -164,9 +164,10 @@
 
       // use Array#reduce if available
       if (typeof Array.prototype.reduce === 'function') {
+        var _inject = inject;
         inject = function inject(accumulator, callback, thisArg) {
           if (thisArg)
-            return inject.call(this, accumulator, callback, thisArg);
+            return _inject.call(this, accumulator, callback, thisArg);
           return this.reduce(callback, accumulator);
         };
       }
