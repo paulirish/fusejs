@@ -173,9 +173,9 @@
       var docEl = Fuse._docEl, result = false;
       if (isHostObject(global, 'HTMLHtmlElement') &&
           isHostObject(global.HTMLHtmlElement, 'prototype') &&
-          (docEl.constructor === HTMLHtmlElement || 
-           docEl instanceof HTMLHtmlElement || Feature('OBJECT_PROTO') &&
-           docEl['__proto__'] === HTMLHtmlElement.prototype)) {
+         (docEl.constructor === HTMLHtmlElement || 
+          docEl instanceof HTMLHtmlElement || Feature('OBJECT_PROTO') &&
+          docEl['__proto__'] === HTMLHtmlElement.prototype)) {
         result = true;
       } else result = Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO');
 
@@ -233,28 +233,19 @@
 
   (function() {
     var div = Fuse._div, docEl = Fuse._docEl,
-     ELEMENT_CHILDREN_NODELIST, ELEMENT_CONTAINS;
-
-    // true for IE, Safari 3, Opera, Firefox 3+
-    if (!isHostObject(docEl, 'children'))
-      ELEMENT_CHILDREN_NODELIST = false;
-
-    // true for all but IE and Safari 2
-    if (!isHostObject(docEl, 'contains'))
-      ELEMENT_CONTAINS = false;
-
-    // no need to test further is both failed
-    if (ELEMENT_CHILDREN_NODELIST === false &&
-      ELEMENT_CONTAINS === false) return;
+     // true for IE, Safari 3, Opera, Firefox 3+
+     ELEMENT_CHILDREN_NODELIST = isHostObject(docEl, 'children'),
+     // true for all but IE and Safari 2
+     ELEMENT_CONTAINS = isHostObject(docEl, 'contains');
 
     div.innerHTML = '<div></div><div><div></div></div>';
 
     // ensure children collection only contains direct descendants
-    if (ELEMENT_CHILDREN_NODELIST !== false)
+    if (ELEMENT_CHILDREN_NODELIST)
       ELEMENT_CHILDREN_NODELIST = div.children.length === div.childNodes.length;
 
     // ensure element.contains() returns the correct results;
-    if (ELEMENT_CONTAINS !== false)
+    if (ELEMENT_CONTAINS)
       ELEMENT_CONTAINS = !div.firstChild.contains(div.childNodes[1].firstChild);
 
     div.innerHTML = '';
@@ -421,6 +412,14 @@
       // true for Safari 2
       var func = function() { return '' };
       return 'a'.replace(/a/, func) === String(func);
+    },
+
+    'STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN': function() {
+      // true for Chrome
+      var str = 'xy', replacement = function() { return 'o' };
+      return !(str.replace(/()/g, 'o') === 'oxoyo' &&
+        str.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
+        str.replace(/(y|)/g, replacement) === 'oxoo');
     },
 
     'STRING_REPLACE_SETS_REGEXP_LAST_INDEX': function() {

@@ -1,3 +1,5 @@
+* Fix Chrome's broken String#replace that returns the wrong results for global empty pattern matches with functions as replacements. [jddalton]
+
 * Optimize String#toQueryParams by avoiding String#match and Array#shift. [jddalton]
 
 * Optimize Enumerable.first() when passing no arguments. [jddalton]
