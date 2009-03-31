@@ -57,6 +57,11 @@
     };
 
     this.first = function first(callback, thisArg) {
+      if (callback == null) {
+        var result;
+        this.each(function(value) { result = value; throw $break; });
+        return result;
+      }
       return this.toArray().first(callback, thisArg);
     };
 
