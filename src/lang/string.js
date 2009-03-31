@@ -137,17 +137,26 @@
     };
 
     this.toQueryParams = function toQueryParams(separator) {
-      var hash = { }, match = this.trim().match(/([^?#]*)(#.*)?$/);
+      var match = this.split('?'), hash = { };
+      if (match.length > 1 && !match[1]) return hash;
+
+      (match = (match = match[1] || match[0]).split('#')) &&
+        (match = match[0].split(' ')[0]);
       if (!match) return hash;
 
-      var pair, key, value, i = 0,
-       pairs = match[1].split(separator || '&'), length = pairs.length;
+      var pair, key, value, undef, index, i = 0,
+       pairs = match.split(separator || '&'), length = pairs.length;
 
       for ( ; i < length; i++) {
-        if (!(pair = pairs[i].split('='))[0]) continue;
-        key = decodeURIComponent(pair.shift());
-        value = pair.length > 1 ? pair.join('=') : pair[0];
-        if (value != null) value = decodeURIComponent(value);
+        value = undef;
+        index = (pair = pairs[i]).indexOf('=');
+        if (!pair || index === 0) continue;
+
+        if(index !== -1) {
+          key = decodeURIComponent(pair.slice(0, index));
+          value = pair.slice(index + 1);
+          if (value) value = decodeURIComponent(value);
+        } else key = pair;
 
         if (Object.hasKey(hash, key)) {
           if (!Object.isArray(hash[key])) hash[key] = [hash[key]];
