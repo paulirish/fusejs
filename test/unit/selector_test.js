@@ -7,7 +7,7 @@ new Test.Unit.Runner({
     this.assertEnumEqual([$('strong')], $$('strong'));
     this.assertEnumEqual([], $$('nonexistent'));
     
-    var allNodes = $A(document.getElementsByTagName('*')).select( function(node) {
+    var allNodes = $A(document.getElementsByTagName('*')).filter(function(node) {
       return node.tagName !== '!';
     });      
     this.assertEnumEqual(allNodes, $$('*'));

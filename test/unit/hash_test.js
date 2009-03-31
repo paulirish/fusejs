@@ -75,7 +75,7 @@ new Test.Unit.Runner({
     this.assertIdentical($H, Hash.from);
   },
 
-  testInclude: function() {
+  testContains: function() {
     this.assert($H(Fixtures.one).contains('A#'));
     this.assert($H(Fixtures.many).contains('A'));
     this.assert($H(Fixtures.mixed_dont_enum).contains('bar'));

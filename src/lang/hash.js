@@ -51,7 +51,7 @@
       return result;
     };
 
-    this.include = function include(value) {
+    this.contains = function contains(value) {
       for (var key in this._object) {
         if (value == this._object[key])
           return true;
@@ -203,7 +203,7 @@
      hasKey =        null,
      keys =          null,
      keyOf =         null,
-     include =       null,
+     contains =      null,
      inspect =       null,
      merge =         null,
      partition =     null,
