@@ -211,6 +211,10 @@ new Test.Unit.Runner({
     this.assertEqual("'foo\\\\b\\\'ar'", Object.inspect('foo\\b\'ar'));
     this.assertEqual('[]', Object.inspect([]));
     this.assertNothingRaised(function() { Object.inspect(window.Node) });
+
+    // test Object object
+    this.assertEqual("{'a': 'A', 'b': 'B', 'c': 'C'}",
+      Object.inspect({ 'a': 'A', 'b': 'B', 'c': 'C' }), 'Object object');
   },
   
   testObjectToJSON: function() {

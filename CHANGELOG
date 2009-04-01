@@ -1,3 +1,5 @@
+* Give Object.inspect() the ability to process Object objects. [Prototype LH #638] [Evil.2000, jddalton]
+
 * Hash API updates and optimizations. [FuseJS LH #17] [jddalton, Joe Gornick]
   Note: Backwards compatibility warning.
    - Renamed methods: include -> contains

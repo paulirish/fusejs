@@ -62,7 +62,7 @@
   Object.extend = (function() {
     function extend(destination, source) {
       Object._each(source || { }, function(value, key) { 
-         destination[key] = value; 
+        destination[key] = value; 
       });
       return destination;
     }
@@ -136,6 +136,14 @@
       if (typeof object === 'undefined') return 'undefined';
       if (object === null) return 'null';
       if (typeof object.inspect === 'function') return object.inspect();
+      if (object.constructor === Object.prototype.constructor) {
+        var results = [];
+        Object._each(object, function(value, key) {
+          if (Object.hasKey(object, key))
+            results.push(key.inspect() + ': ' + Object.inspect(object[key]));
+        });
+        return '{' + results.join(', ') + '}';
+      }
 
       try {
         return String(object);
