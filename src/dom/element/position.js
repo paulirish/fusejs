@@ -205,16 +205,18 @@
           var _getOffset = getOffset;
           return function(element, ancestor) {
             if (ancestor) return _getOffset(element, ancestor);
-            var doc, rect, root, valueT = 0, valueL = 0;
+            var valueT = 0, valueL = 0;
             if (!Element.isFragment(element)) {
-              doc  = getDocument(element);
-              rect = element.getBoundingClientRect();
-              root = doc[Bug('BODY_ACTING_AS_ROOT') ? 'body' : 'documentElement'];
+              var doc = getDocument(element),
+               info = Fuse._info,
+               rect = element.getBoundingClientRect(),
+               root = doc[info.root.property],
+               scrollEl = doc[info.scrollEl.property],
 
               valueT = Math.round(rect.top)  -
-                (doc.documentElement.clientTop  || 0) + (root.scrollTop  || 0);
+                (root.clientTop  || 0) + (scrollEl.scrollTop  || 0);
               valueL = Math.round(rect.left) -
-                (doc.documentElement.clientLeft || 0) + (root.scrollLeft || 0);
+                (root.clientLeft || 0) + (scrollEl.scrollLeft || 0);
             }
             return Element._returnOffset(valueL, valueT);
           };
@@ -225,22 +227,28 @@
 
     this.cumulativeScrollOffset = function cumulativeScrollOffset(element, onlyAncestors) {
       element = $(element);
-      var original = element, valueT = 0, valueL = 0,
-       nodeName = getNodeName(element),
-       rootNodeName = getNodeName(Fuse._root);
+      var nodeName, original = element, valueT = 0, valueL = 0,
+       doc = getDocument(element), info = Fuse._info,
+       scrollEl = doc[info.scrollEl.property],
+       skipEl = info.scrollEl.nodeName === 'HTML'
+         ? doc[info.body.property]
+         : doc[info.docEl.property];
 
       do {
-        valueT += element.scrollTop  || 0;
-        valueL += element.scrollLeft || 0;
+        if (element !== skipEl) {
+          valueT += element.scrollTop  || 0;
+          valueL += element.scrollLeft || 0;
 
-        if (getNodeName(element) === rootNodeName ||
-          Element.getStyle(element, 'position') === 'fixed') {
-          break;
+          if (element === scrollEl ||
+              Element.getStyle(element, 'position') === 'fixed') {
+            break;
+          }
         }
         element = element.parentNode;
       } while (element && element.nodeType === 1);
 
-      if (onlyAncestors || (nodeName === 'TEXTAREA' || nodeName === 'INPUT')) {
+      if (onlyAncestors || ((nodeName = getNodeName(original)) && 
+          nodeName === 'TEXTAREA' || nodeName === 'INPUT')) {
         valueT -= original.scrollTop  || 0;
         valueL -= original.scrollLeft || 0;
       }
@@ -277,15 +285,16 @@
       if (Feature('ELEMENT_BOUNDING_CLIENT_RECT')) {
         viewportOffset = function viewportOffset(element) {
           element = $(element);
-          var rect, valueT = 0, valueL = 0;
+          var valueT = 0, valueL = 0;
           if (!Element.isFragment(element)) {
             // IE window's upper-left is at 2,2 (pixels) with respect
             // to the true client when not in quirks mode.
-            rect = element.getBoundingClientRect();
-            valueT = Math.round(rect.top)  -
-              (getDocument(element).documentElement.clientTop  || 0);
-            valueL = Math.round(rect.left) -
-              (getDocument(element).documentElement.clientLeft || 0);
+            var doc = getDocument(element),
+             rect   = element.getBoundingClientRect(),
+             root   = doc[Fuse._info.root.property];
+
+            valueT = Math.round(rect.top)  - (root.clientTop  || 0);
+            valueL = Math.round(rect.left) - (root.clientLeft || 0);
           }
           return Element._returnOffset(valueL, valueT);
         };

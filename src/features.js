@@ -289,11 +289,19 @@
 
       body.insertBefore(div, body.firstChild);
       var result = docEl.clientHeight >= 8500;
-      body.removeChild(div);
 
+      // check scroll coords
+      var scrollTop = docEl.scrollTop;
+      Bug.set('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT',
+        ++docEl.scrollTop === scrollTop + 1);
+      docEl.scrollTop = scrollTop;
+
+      // cleanup
+      body.removeChild(div);
       bs.cssText  = bsBackup;
       des.cssText = desBackup;
       ds.cssText  = '';
+
       return result;
     },
 

@@ -37,11 +37,12 @@
   /*---------------------------- FUSE OBJECT ---------------------------------*/
 
   global.Fuse = {
-    '_body':  { },
-    '_root':  { },
-    '_div':   document.createElement('div'),
-    '_doc':   document,
-    '_docEl': document.documentElement,
+    '_body':     null,
+    '_root':     null,
+    '_scrollEl': null,
+    '_div':      document.createElement('div'),
+    '_doc':      document,
+    '_docEl':    document.documentElement,
 
     Browser: {
       Agent: {
@@ -60,16 +61,17 @@
     Version:        '<%= FUSEJS_VERSION %>'
   };
 
+  Fuse._info = {
+    'body':  { 'nodeName': 'BODY', 'property': 'body' },
+    'docEl': { 'nodeName': 'HTML', 'property': 'documentElement' }
+  };
+
+  Fuse._info.root = Fuse._info.docEl;
+  Fuse._info.scrollEl = Fuse._info.body;
+
   var getNodeName = Fuse._docEl.nodeName === 'HTML'
     ? function(element) { return element.nodeName }
     : function(element) { return element.nodeName.toUpperCase() };
-
-  var getRoot = function(element) {
-    return (getRoot = getNodeName(Fuse._root) === 'BODY'
-      ? function(element) { return getDocument(element).body }
-      : function(element) { return getDocument(element).documentElement }
-    )(element);
-  };
 
   // based on work by Diego Perini
   var getWindow =

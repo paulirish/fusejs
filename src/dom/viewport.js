@@ -15,7 +15,7 @@
             return Element._returnOffset(global.pageXOffset, global.pageYOffset);
           } :
           function() {
-            return Element._returnOffset(Fuse._root.scrollLeft, Fuse._root.scrollTop);
+            return Element._returnOffset(Fuse._scrollEl.scrollLeft, Fuse._scrollEl.scrollTop);
           }
       )();
     };

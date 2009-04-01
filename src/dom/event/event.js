@@ -286,16 +286,20 @@
       if (typeof event.pageX === 'number') {
         Event.pointerX = m.pointerX = function(event) { return event.pageX };
         Event.pointerY = m.pointerY = function(event) { return event.pageY };
-      } else {
+      }
+      else {
         Event.pointerX = m.pointerX = function(event) {
-          var element = event.srcElement || global;
-          return event.clientX + getRoot(element).scrollLeft - 
-            getDocument(element).documentElement.clientLeft;
+          var info = Fuse._info, doc = getDocument(event.srcElement || global),
+           result = event.clientX + doc[info.scrollEl.property].scrollLeft -
+             doc[info.root.property].clientLeft;
+          return result > -1 ? result : 0;
         };
+
         Event.pointerY = m.pointerY = function(event) {
-          var element = event.srcElement || global;
-          return event.clientY + getRoot(element).scrollTop -
-            getDocument(element).documentElement.clientTop;
+          var info = Fuse._info, doc = getDocument(event.srcElement || global),
+           result = event.clientY + doc[info.scrollEl.property].scrollTop -
+             doc[info.root.property].clientTop;
+           return result > -1 ? result : 0;
         };
       }
       return m[methodName](event);
@@ -528,8 +532,18 @@
         event.eventName = 'dom:loaded';
 
         // define pseudo private body and root properties
-        Fuse._body = Element.extend(Fuse._doc.body);
-        Fuse._root = Bug('BODY_ACTING_AS_ROOT') ? Fuse._body : Element.extend(Fuse._docEl);
+        Fuse._body     = Element.extend(Fuse._doc.body);
+        Fuse._root     = Element.extend(Fuse._docEl);
+        Fuse._scrollEl = Fuse._body;
+
+        if (Bug('BODY_ACTING_AS_ROOT')) {
+          Fuse._root = Fuse._body;
+          Fuse._info.root = Fuse._info.body;
+        }
+        if (Bug('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT')) {
+          Fuse._scrollEl = Fuse._docEl;
+          Fuse._info.scrollEl = Fuse._info.docEl;
+        }
 
         Fuse._doc.loaded = true;
         _domLoadDispatcher(event);

@@ -75,14 +75,12 @@
     // every time the page is scrolled
     this.prepare = function prepare() {
       this.deltaX =  
-        global.pageXOffset     ||
-        Fuse._docEl.scrollLeft ||
-        Fuse._body.scrollLeft  || 0;
+        global.pageXOffset  ||
+        Fuse._scrollEl.scrollLeft || 0;
 
       this.deltaY =
-        global.pageYOffset    || 
-        Fuse._docEl.scrollTop ||
-        Fuse._body.scrollTop  || 0;
+        global.pageYOffset || 
+        Fuse._scrollEl.scrollTop || 0;
     };
 
     this.within = function within(element, x, y) {
