@@ -1,3 +1,22 @@
+* Hash API updates and optimizations. [FuseJS LH #17] [jddalton, Joe Gornick]
+  Note: Backwards compatibility warning.
+   - Renamed methods: include -> contains
+   - Removed methods: reject, update
+   - Removed aliases: findAll, index, select, toTemplateReplacements
+
+   - Updated methods:
+     Hash#contains: Added a strict parameter for strict comparisons.
+     Hash#set: Updated to accept either key/value arguments or an object/Hash.
+     Hash#unset: Updated to accept either an array of keys or arguments of keys.
+
+   - Added methods:
+     Hash#clear
+     Hash#first: Added proper `first` support to Hash.
+      * first(n): Returns an array containing the first n of the list.
+      * first(callback, [thisArg]): Returns the first item when the callback returns true.
+     Hash#last: Added proper `last` support to Hash.  Same as Hash#first, but starts from end.
+     Hash#map: Added proper `map` support to Hash.
+
 * Ensure Fuse determines the correct element to get page scroll data from. [jddalton]
 
 * Fix Chrome's broken String#replace that returns the wrong results for global empty pattern matches with functions as replacements. [jddalton]

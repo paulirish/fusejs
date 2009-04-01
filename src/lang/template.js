@@ -11,8 +11,12 @@
     };
 
     this.evaluate = function evaluate(object) {
-      if (object && typeof object.toTemplateReplacements === 'function')
-        object = object.toTemplateReplacements();
+      if (object) {
+        if (typeof object.toTemplateReplacements === 'function')
+          object = object.toTemplateReplacements();
+        else if (typeof object.toObject === 'function')
+          object = object.toObject();
+      }
 
       var pattern = this.pattern;
       if (!Object.isRegExp(pattern))

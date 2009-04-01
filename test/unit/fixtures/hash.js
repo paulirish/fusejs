@@ -25,3 +25,10 @@ Fixtures = {
   'value_null':       { 'a':'b', 'c':null },
   'value_zero':       { 'a':'b', 'c':0 }
 };
+
+function returnPair(key, value) {
+  var pair = [key, value];
+  pair.key = key;
+  pair.value = value;
+  return pair;
+}

@@ -1,59 +1,4 @@
 new Test.Unit.Runner({
-  testSet: function() {
-    var h = $H({a: 'A'})
-
-    this.assertEqual('B', h.set('b', 'B'));
-    this.assertHashEqual({a: 'A', b: 'B'}, h);
-    
-    this.assertUndefined(h.set('c'));
-    this.assertHashEqual({a: 'A', b: 'B', c: undefined}, h);
-  },
-
-  testGet: function() {
-    var h = $H({ 'a': 'A' }), empty = $H({ }),
-     properties = ['constructor', 'hasOwnProperty', 'isPrototypeOf',
-       'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
-
-    this.assertEqual('A', h.get('a'));
-    this.assertUndefined(h.a);
-    this.assertUndefined(empty.get('a'));
-
-    // ensure Hash#get only returns the objects own properties
-    properties.each(function(property) {
-      this.assertUndefined(empty.get(property),
-        'Returned the "' + property + '" property of its prototype.');
-    }, this);
-  },
-  
-  testHasKey: function() {
-    this.assert($H(Fixtures.mixed_dont_enum).hasKey('valueOf'),
-      'Failed to find key `valueOf`.');
-
-    this.assert($H(Fixtures.many).hasKey('a'), 'Failed to find key `a`.');
-    this.assert(!$H(Fixtures.many).hasKey('valueOf'), '`valueOf` is not a key.');
-    this.assert(!$H(Fixtures.mixed_dont_enum).hasKey('e'), '`e` is not a key.');
-  },
-  
-  testUnset: function() {
-    var hash = $H(Fixtures.many);
-    this.assertEqual('B', hash.unset('b'));
-    this.assertHashEqual({a:'A', c: 'C', d:'D#'}, hash);
-    this.assertUndefined(hash.unset('z'));
-    this.assertHashEqual({a:'A', c: 'C', d:'D#'}, hash);
-    // not equivalent to Hash#remove
-    this.assertEqual('A', hash.unset('a', 'c'));
-    this.assertHashEqual({c: 'C', d:'D#'}, hash);
-  },
-  
-  testToObject: function() {
-    var hash = $H(Fixtures.many), object = hash.toObject();
-    this.assertInstanceOf(Object, object);
-    this.assertHashEqual(Fixtures.many, object);
-    this.assertNotIdentical(Fixtures.many, object);
-    hash.set('foo', 'bar');
-    this.assertHashNotEqual(object, hash.toObject());
-  },
-  
   testConstruct: function() {
     var object = Object.clone(Fixtures.one);
     var h = new Hash(object), h2 = $H(object);
@@ -75,45 +20,48 @@ new Test.Unit.Runner({
     this.assertIdentical($H, Hash.from);
   },
 
+  testAbilityToContainAnyKey: function() {
+    var h = $H({ _each: 'E', map: 'M', keys: 'K', pluck: 'P', unset: 'U' });
+    this.assertEnumEqual($w('_each keys map pluck unset'), h.keys().sort());
+    this.assertHashEqual({ _each: 'E', map: 'M', keys: 'K', pluck: 'P' }, h.unset('unset'));
+  },
+  
+  testHashUsedInTemplate: function() {
+    var template = new Template("#{a} #{b}"), hash = $H({ a: "hello", b: "world" });
+    this.assertEqual("hello world", template.evaluate(hash.toObject()));
+    this.assertEqual("hello world", template.evaluate(hash));
+    this.assertEqual("hello", "#{a}".interpolate(hash));
+  },
+  
+  testPreventIterationOverShadowedProperties: function() {
+    // redundant now that object is systematically cloned.
+    var FooMaker = function(value) {
+      this.key = value;
+    };
+    FooMaker.prototype.key = 'foo';
+    var foo = new FooMaker('bar');
+    this.assertEqual("key=bar", new Hash(foo).toQueryString());
+    this.assertEqual("key=bar", new Hash(new Hash(foo)).toQueryString());
+  },
+  
+  testClear: function() {
+    this.assertHashEqual(new Hash(), $H(Fixtures.one).clear());
+    this.assertInstanceOf(Hash, $H(Fixtures.one).clear());
+  },  
+  
+  testClone: function() {
+    var h = $H(Fixtures.many);
+    this.assertHashEqual(h, h.clone());
+    this.assertInstanceOf(Hash, h.clone());
+    this.assertNotIdentical(h, h.clone());
+  },
+
   testContains: function() {
     this.assert($H(Fixtures.one).contains('A#'));
     this.assert($H(Fixtures.many).contains('A'));
     this.assert($H(Fixtures.mixed_dont_enum).contains('bar'));
-    
     this.assert(!$H(Fixtures.many).contains('Z'));
     this.assert(!$H().contains('foo'));
-  },
-
-  testKeys: function() {
-    this.assertEnumEqual([],               $H({ }).keys());
-    this.assertEnumEqual(['a'],            $H(Fixtures.one).keys());
-    this.assertEnumEqual($w('a b c d'),    $H(Fixtures.many).keys().sort());
-    this.assertEnumEqual($w('plus quad'),  $H(Fixtures.functions).keys().sort());
-  },
-  
-  testValues: function() {
-    this.assertEnumEqual([],             $H({}).values());
-    this.assertEnumEqual(['A#'],         $H(Fixtures.one).values());
-    this.assertEnumEqual($w('A B C D#'), $H(Fixtures.many).values().sort());
-    this.assertEnumEqual($w('function function'),
-      $H(Fixtures.functions).values().map(function(i){ return typeof i }));
-    this.assertEqual(9, $H(Fixtures.functions).get('quad')(3));
-    this.assertEqual(6, $H(Fixtures.functions).get('plus')(3));
-  },
-
-  testKeyOf: function() {
-    this.assert('a', $H(Fixtures.one).keyOf('A#'));
-    this.assert('a', $H(Fixtures.many).keyOf('A'));
-    
-    this.assertIdentical(-1, $H().keyOf('foo'));
-    this.assertIdentical(-1, $H(Fixtures.many).keyOf('Z'));
-
-    var hash = $H({ 'a':1, 'b':'2', 'c':1, 'toString':'foo', 'valueOf':'' });
-    this.assert(['a','c'].contains(hash.keyOf(1)));
-    this.assertEqual('toString', hash.keyOf('foo'));
-    this.assertEqual('valueOf', hash.keyOf(''));
-    
-    this.assertEqual(-1, hash.keyOf('1'));
   },
 
   testFilter: function() {
@@ -132,6 +80,47 @@ new Test.Unit.Runner({
     this.assertHashEqual({ 'a':'b' }, $H(Fixtures.value_null).filter());
     this.assertHashEqual(Fixtures.value_zero, $H(Fixtures.value_zero).filter());
   },
+  
+  testFirst: function() {
+    var results;
+    this.assertUndefined($H().first());
+    this.assertEnumEqual([], $H().first(3));
+    this.assertUndefined($H().first(function(value, key) { return value === 'C' }));
+    this.assertEnumEqual(['a', 'A'], $H(Fixtures.many).first());
+    results = $H(Fixtures.many).first(2);
+    this.assertEnumEqual(['a', 'A'], results[0]);
+    this.assertEnumEqual(['b', 'B'], results[1]);
+    this.assertEnumEqual(['c', 'C'], $H(Fixtures.many).first(
+      function(value, key) { return value === 'C' })
+    );
+    this.assertUndefined($H(Fixtures.many).first(
+      function(value, key) { return value === 'Z' })
+    );
+    results = $H(Fixtures.many).first(-3);
+    this.assertEnumEqual(['a', 'A'], results[0]);
+    results = $H(Fixtures.many).first(1000);
+    this.assertEnumEqual(['a', 'A'], results[0]);
+    this.assertEnumEqual(['b', 'B'], results[1]);
+    this.assertEnumEqual(['c', 'C'], results[2]);
+    this.assertEnumEqual(['d', 'D#'], results[3]);    
+    this.assertEnumEqual([], $H(Fixtures.many).first('r0x0r5'));
+  }, 
+  
+  testGet: function() {
+    var h = $H({ 'a': 'A' }), empty = $H({ }),
+     properties = ['constructor', 'hasOwnProperty', 'isPrototypeOf',
+       'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
+
+    this.assertEqual('A', h.get('a'));
+    this.assertUndefined(h.a);
+    this.assertUndefined(empty.get('a'));
+
+    // ensure Hash#get only returns the objects own properties
+    properties.each(function(property) {
+      this.assertUndefined(empty.get(property),
+        'Returned the "' + property + '" property of its prototype.');
+    }, this);
+  },
 
   testGrep: function() {
     // test empty pattern
@@ -146,6 +135,74 @@ new Test.Unit.Runner({
     this.assert('toString' === $H(Fixtures.mixed_dont_enum).grep(/bar/, function(v) {
       return v;
     }).keys().join(''));
+  },
+  
+  testHasKey: function() {
+    this.assert($H(Fixtures.mixed_dont_enum).hasKey('valueOf'),
+      'Failed to find key `valueOf`.');
+
+    this.assert($H(Fixtures.many).hasKey('a'), 'Failed to find key `a`.');
+    this.assert(!$H(Fixtures.many).hasKey('valueOf'), '`valueOf` is not a key.');
+    this.assert(!$H(Fixtures.mixed_dont_enum).hasKey('e'), '`e` is not a key.');
+  },
+
+  testInspect: function() {
+    this.assertEqual('#<Hash:{}>', $H({}).inspect());
+    this.assertEqual("#<Hash:{'a': 'A#'}>", $H(Fixtures.one).inspect());
+    this.assertEqual("#<Hash:{'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D#'}>", $H(Fixtures.many).inspect());
+    this.assertEqual("#<Hash:{'a': 'A', 'b': 'B', 'toString': 'bar', 'valueOf': ''}>", $H(Fixtures.mixed_dont_enum).inspect());
+  },
+
+  testKeyOf: function() {
+    this.assert('a', $H(Fixtures.one).keyOf('A#'));
+    this.assert('a', $H(Fixtures.many).keyOf('A'));
+    
+    this.assertIdentical(-1, $H().keyOf('foo'));
+    this.assertIdentical(-1, $H(Fixtures.many).keyOf('Z'));
+
+    var hash = $H({ 'a':1, 'b':'2', 'c':1, 'toString':'foo', 'valueOf':'' });
+    this.assert(['a','c'].contains(hash.keyOf(1)));
+    this.assertEqual('toString', hash.keyOf('foo'));
+    this.assertEqual('valueOf', hash.keyOf(''));
+    
+    this.assertEqual(-1, hash.keyOf('1'));
+  },
+
+  testKeys: function() {
+    this.assertEnumEqual([],               $H({ }).keys());
+    this.assertEnumEqual(['a'],            $H(Fixtures.one).keys());
+    this.assertEnumEqual($w('a b c d'),    $H(Fixtures.many).keys().sort());
+    this.assertEnumEqual($w('plus quad'),  $H(Fixtures.functions).keys().sort());
+  },
+
+  testLast: function() {
+    var results;
+    this.assertUndefined($H().last());
+    this.assertEnumEqual([], $H().last(3));
+    this.assertUndefined($H().last(function(value, key) { return value === 'C' }));
+    this.assertEnumEqual(['d', 'D#'], $H(Fixtures.many).last());
+    
+    results = $H(Fixtures.many).last(2);
+    this.assertEnumEqual(['c', 'C'], results[0]);
+    this.assertEnumEqual(['d', 'D#'], results[1]);
+    
+    this.assertEnumEqual(['c', 'C'], $H(Fixtures.many).last(
+      function(value, key) { return value === 'C' })
+    );
+    this.assertUndefined($H(Fixtures.many).last(
+      function(value, key) { return value === 'Z' })
+    );
+
+    results = $H(Fixtures.many).last(-3);
+    this.assertEnumEqual(['d', 'D#'], results[0]);
+
+    results = $H(Fixtures.many).last(1000);
+    this.assertEnumEqual(['a', 'A'], results[0]);
+    this.assertEnumEqual(['b', 'B'], results[1]);
+    this.assertEnumEqual(['c', 'C'], results[2]);
+    this.assertEnumEqual(['d', 'D#'], results[3]);
+        
+    this.assertEnumEqual([], $H(Fixtures.many).last('r0x0r5'));
   },
 
   testMerge: function() {
@@ -177,31 +234,27 @@ new Test.Unit.Runner({
     this.assertHashEqual({ 'toString':'bar', 'valueOf':'' }, result[1]);
   },
 
-  testUpdate: function() {
-    var h = $H(Fixtures.many);
-    this.assertIdentical(h, h.update());
-    this.assertIdentical(h, h.update({ }));
-    this.assertHashEqual(h, h.update());
-    this.assertHashEqual(h, h.update({ }));
-    this.assertHashEqual(h, h.update($H()));
-    
-    this.assertHashEqual({ 'a':'A',  'b':'B', 'c':'C', 'd':'D#', 'aaa':'AAA' }, h.update({ 'aaa':'AAA' }));
-    this.assertHashEqual({ 'a':'A#', 'b':'B', 'c':'C', 'd':'D#', 'aaa':'AAA' }, h.update(Fixtures.one));
-    
-    this.assertHashEqual({ 'a':'A',  'b':'B', 'c':'C', 'd':'D#', 'toString':'bar', 'valueOf':'' },
-      $H(Fixtures.many).update({ 'toString':'bar', 'valueOf':'' }));
+  testSet: function() {
+    var h = $H({a: 'A'});
+    this.assertHashEqual({a: 'A', b: 'B'}, h.set('b', 'B'));
+    this.assertHashEqual({a: 'A', b: 'B', c: undefined}, h.set('c'));
+    this.assertHashEqual({a: 'A', b: 'B', c: undefined, d: 'D', z: 'Z'}, 
+      h.set({ d: 'D', z: 'Z'})
+    );    
+  },
+  
+  testToJSON: function() {
+    this.assertEqual('{\"b\": [false, true], \"c\": {\"a\": \"hello!\"}}',
+      $H({'b': [undefined, false, true, undefined], c: {a: 'hello!'}}).toJSON());
   },
 
-  testReject: function() {
-    this.assertHashEqual({ 'c':'C', 'd': 'D#' },
-      $H(Fixtures.many).filter(function(value) {
-        return /[CD]/.test(value);
-      }));
-      
-    this.assertHashEqual({ 'toString':'bar', 'valueOf':'' },
-      $H(Fixtures.mixed_dont_enum).filter(function(value) {
-        return !/[AB]/.test(value);
-      }));
+  testToObject: function() {
+    var hash = $H(Fixtures.many), object = hash.toObject();
+    this.assertInstanceOf(Object, object);
+    this.assertHashEqual(Fixtures.many, object);
+    this.assertNotIdentical(Fixtures.many, object);
+    hash.set('foo', 'bar');
+    this.assertHashNotEqual(object, hash.toObject());
   },
 
   testToQueryString: function() {
@@ -228,24 +281,24 @@ new Test.Unit.Runner({
     this.assertEqual('a=A&b=B&toString=bar&valueOf=', 
       $H(Fixtures.mixed_dont_enum).toQueryString());
   },
-  
-  testInspect: function() {
-    this.assertEqual('#<Hash:{}>', $H({}).inspect());
-    this.assertEqual("#<Hash:{'a': 'A#'}>", $H(Fixtures.one).inspect());
-    this.assertEqual("#<Hash:{'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D#'}>", $H(Fixtures.many).inspect());
-    this.assertEqual("#<Hash:{'a': 'A', 'b': 'B', 'toString': 'bar', 'valueOf': ''}>", $H(Fixtures.mixed_dont_enum).inspect());
+
+  testUnset: function() {
+    var hash = $H(Fixtures.many);
+    this.assertHashEqual({a:'A', c: 'C', d: 'D#'}, hash.unset('b'));
+    this.assertHashEqual({a:'A', c: 'C', d:'D#'}, hash.unset('z'));
+    this.assertHashEqual({d:'D#'}, hash.unset('a', 'c'));
+    var hash = $H(Fixtures.many);
+    this.assertHashEqual({b: 'B', d:'D#'}, hash.unset(['a', 'c']));
   },
 
-  testClone: function() {
-    var h = $H(Fixtures.many);
-    this.assertHashEqual(h, h.clone());
-    this.assertInstanceOf(Hash, h.clone());
-    this.assertNotIdentical(h, h.clone());
-  },
-  
-  testToJSON: function() {
-    this.assertEqual('{\"b\": [false, true], \"c\": {\"a\": \"hello!\"}}',
-      $H({'b': [undefined, false, true, undefined], c: {a: 'hello!'}}).toJSON());
+  testValues: function() {
+    this.assertEnumEqual([],             $H({}).values());
+    this.assertEnumEqual(['A#'],         $H(Fixtures.one).values());
+    this.assertEnumEqual($w('A B C D#'), $H(Fixtures.many).values().sort());
+    this.assertEnumEqual($w('function function'),
+      $H(Fixtures.functions).values().map(function(i){ return typeof i }));
+    this.assertEqual(9, $H(Fixtures.functions).get('quad')(3));
+    this.assertEqual(6, $H(Fixtures.functions).get('plus')(3));
   },
 
   testZip: function() {
@@ -260,31 +313,5 @@ new Test.Unit.Runner({
       return values.join(', ');
     })
     this.assertHashEqual({ 'name':'jquery, prototype, fusejs', 'size':'18kb, 28kb, 29kb' }, result);
-  },
-
-  testAbilityToContainAnyKey: function() {
-    var h = $H({ _each: 'E', map: 'M', keys: 'K', pluck: 'P', unset: 'U' });
-    this.assertEnumEqual($w('_each keys map pluck unset'), h.keys().sort());
-    this.assertEqual('U', h.unset('unset'));
-    this.assertHashEqual({ _each: 'E', map: 'M', keys: 'K', pluck: 'P' }, h);
-  },
-  
-  testHashToTemplateReplacements: function() {
-    var template = new Template("#{a} #{b}"), hash = $H({ a: "hello", b: "world" });
-    this.assertEqual("hello world", template.evaluate(hash.toObject()));
-    this.assertEqual("hello world", template.evaluate(hash));
-    this.assertEqual("hello", "#{a}".interpolate(hash));
-  },
-  
-  testPreventIterationOverShadowedProperties: function() {
-    // redundant now that object is systematically cloned.
-    var FooMaker = function(value) {
-      this.key = value;
-    };
-    FooMaker.prototype.key = 'foo';
-    var foo = new FooMaker('bar');
-    this.assertEqual("key=bar", new Hash(foo).toQueryString());
-    this.assertEqual("key=bar", new Hash(new Hash(foo)).toQueryString());
-  }
-  
+  }  
 });
