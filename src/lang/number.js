@@ -22,8 +22,12 @@
     };
 
     this.times = function times(callback, thisArg) {
-      for (var i = 0, l = this; i < l; i++)
-        callback.call(thisArg, i, i);
+      var i = 0, length = this;
+      if (arguments.length === 1) {
+        while (i < length) callback(i, i++);
+      } else {
+        while (i < length) callback.call(thisArg, i, i++);
+      }
       return this;
     };
 

@@ -28,8 +28,7 @@
         else {
           if (this.exclusive !== c.exclusive) {
             c.exclusive = this.exclusive;
-            if (this.exclusive)
-              c.pop();
+            if (c.exclusive) c.pop();
             else c.push(c.last().succ());
           }
           var length = c.length;
