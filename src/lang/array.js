@@ -143,14 +143,28 @@
 
     /* Create optimized Enumerable equivalents */
 
-    this.contains = function contains(object, strict) {
-      // attempt a fast strict search first
-      var result = this.indexOf(object) > -1;
-      if (strict || result) return result;
-      for (var i = 0, length = this.length; i < length; i++)
-        if (this[i] == object) return true;
-      return false;
-    };
+    this.contains = (function() {
+      var contains = function contains(object, strict) {
+        var i = 0, length = this.length
+        if (strict) {
+          while (i < length) if (this[i++] === object) return true;
+        } else {
+          while (i < length) if (this[i++] == object) return true;
+        }
+        return false;
+      };
+
+      if (typeof Array.prototype.indexOf === 'function') {
+        var _contains = contains;
+        contains = function contains(object, strict) {
+          // attempt a fast strict search first
+          var result = this.indexOf(object) > -1;
+          if (strict || result) return result;
+          return _contains.call(this, object);
+        };
+      }
+      return contains;
+    })();
 
     this.inject = (function() {
       var inject = function inject(accumulator, callback, thisArg) {
@@ -395,7 +409,6 @@
      clone =       null,
      compact =     null,
      concat =      null,
-     contains =    null,
      each =        null,
      every =       null,
      filter =      null,

@@ -6,14 +6,12 @@
 
   (function() {
     this.contains = function contains(object, strict) {
-      var found = false;
-      this.each(function(value) {
-        if ((strict && value === object) || (!strict && value == object)) {
-          found = true;
-          throw $break;
-        }
-      });
-      return found;
+      var result = 0;
+      if (strict)
+        this.each(function(value) { if (value === object && result++) throw $break; });
+      else
+        this.each(function(value) { if (value == object && result++) throw $break; });
+      return !!result;
     };
 
     this.each = function(callback, thisArg) {
