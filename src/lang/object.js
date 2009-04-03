@@ -72,7 +72,7 @@
   Object.hasKey = (function() {
     var hasKey, hasOwnProperty = Object.prototype.hasOwnProperty;
     if (typeof hasOwnProperty !== 'function') {
-      if (Feature('OBJECT_PROTO')) {
+      if (Feature('OBJECT__PROTO__')) {
         // Safari 2
         hasKey = function hasKey(object, property) {
           if (object == null) throw new TypeError;
@@ -157,13 +157,23 @@
       return !!value && value.nodeType === 1;
     };
 
-    this.isEmpty = function isEmpty(object) {
-      for (var key in object) {
-        if (Object.hasKey(object, key))
-          return false;
+    this.isEmpty = (function() {
+      var isEmpty = function isEmpty(object) {
+        for (var key in object)
+          if (Object.hasKey(object, key))
+            return false;
+        return true;
+      };
+
+      if (Feature('OBJECT__COUNT__')) {
+        // __count__ is buggy on arrays so we check for push because it's fast.
+        var _isEmpty = isEmpty;
+        isEmpty = function isEmpty(object) {
+          return !object || object.push ? _isEmpty(object) : !object['__count__'];
+        };
       }
-      return true;
-    };
+      return isEmpty;
+    })();
 
     this.isHash = function isHash(value) {
       return value instanceof Hash;
@@ -268,7 +278,6 @@
      each =          null,
      inspect =       null,
      isElement =     null,
-     isEmpty =       null,
      isHash =        null,
      isPrimitive =   null,
      isSameOrigin =  null,

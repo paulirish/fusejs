@@ -156,7 +156,7 @@
 
   Element.addMethods = (function() {
     // add HTMLElement for Safari 2
-    if (Feature('OBJECT_PROTO') && !Feature('HTML_ELEMENT_CLASS')) {
+    if (Feature('OBJECT__PROTO__') && !Feature('HTML_ELEMENT_CLASS')) {
       Feature.set({ 'HTML_ELEMENT_CLASS': true, 'ELEMENT_EXTENSIONS': true });
       _emulateDOMClass('HTMLElement', 'DIV');
     }

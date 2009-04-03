@@ -391,7 +391,7 @@
 
     Event.addMethods = addMethods;
 
-    if (Event.prototype || Feature('OBJECT_PROTO')) {
+    if (Event.prototype || Feature('OBJECT__PROTO__')) {
       // Safari 2 support
       if (!Event.prototype)
         Event.prototype = Event.Temp.createEvent(Fuse._doc)['__proto__'];

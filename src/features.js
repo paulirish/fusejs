@@ -174,7 +174,7 @@
       if (isHostObject(global, 'HTMLHtmlElement') &&
           isHostObject(global.HTMLHtmlElement, 'prototype') &&
          (docEl.constructor === HTMLHtmlElement || 
-          docEl instanceof HTMLHtmlElement || Feature('OBJECT_PROTO') &&
+          docEl instanceof HTMLHtmlElement || Feature('OBJECT__PROTO__') &&
           docEl['__proto__'] === HTMLHtmlElement.prototype)) {
         result = true;
       } else result = Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO');
@@ -189,7 +189,7 @@
     },
 
     'EMULATE_ELEMENT_CLASSES_WITH_PROTO': function() {
-      return Feature('OBJECT_PROTO') &&
+      return Feature('OBJECT__PROTO__') &&
         Fuse._div['__proto__'] !== Fuse._docEl['__proto__'];
     },
 
@@ -207,11 +207,27 @@
         isHostObject(global.HTMLElement, 'prototype');
     },
 
-    'OBJECT_PROTO': function() {
+    'OBJECT__PROTO__': function() {
       // true for Gecko and Webkit
-      return isHostObject(Fuse._docEl, '__proto__') &&
-        [ ]['__proto__'] === Array.prototype  &&
-        { }['__proto__'] === Object.prototype;
+      if (isHostObject(Fuse._docEl, '__proto__') &&
+          [ ]['__proto__'] === Array.prototype  &&
+          { }['__proto__'] === Object.prototype) {
+        // test if it's writable and restorable
+        var result, list = [], backup = list['__proto__'];
+        list['__proto__'] = { };
+        result = typeof list.push === 'undefined';
+        list['__proto__'] = backup;
+        return result && typeof list.push === 'function';
+      }
+    },
+
+    'OBJECT__COUNT__': function() {
+      // true for Gecko
+      if (Feature('OBJECT__PROTO__')) {
+        var o = { 'x':0 };
+        delete o['__count__'];
+        return typeof o['__count__'] === 'number' && o['__count__'] === 1;
+      }
     },
 
     'SELECTORS_API': function() {
