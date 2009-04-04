@@ -1,3 +1,5 @@
+* Make Ajax.Request() use the window.location.href value if a falsey url is given. [Prototype LH #597] [jddalton, Spezi]
+
 * Ensure IE String#replace converts null/undefined return values to string `null`/`undefined` and add more unit tests for String#replace, String#gsub, and String#sub. [jddalton, Michael Hollauf, Samuel Lebeau]
 
 * Add Hash#toArray and properties _prairs, _keys, and _values to optimize methods iterating over the internal hash object. [jddalton]

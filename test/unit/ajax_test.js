@@ -48,6 +48,21 @@ new Test.Unit.Runner({
       this.assertEqual('hello world!', getInnerHTML(h2));
     });
   },
+
+  testRequestWithNoUrl: function() {
+    var test = this,  suceeded = false;
+    new Ajax.Request(null, {
+      asynchronous: true,
+      method: 'get',
+      onSuccess: function() {
+        suceeded = true;
+      }
+    });
+
+    this.wait(1000, function() {
+      this.assert(suceeded);
+    });
+  },
   
   testUpdater: function() {
     this.assertEqual('', getInnerHTML('content'));

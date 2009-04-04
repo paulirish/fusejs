@@ -47,7 +47,7 @@
     };
 
     this.request = function request(url) {
-      this.url = url;
+      this.url = url || global.location.href;
       this.method = this.options.method;
       var params = Object.clone(this.options.parameters);
 
