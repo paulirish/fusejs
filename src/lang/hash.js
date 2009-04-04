@@ -12,83 +12,107 @@
   Hash.from = $H;
 
   (function() {
-    function _returnPair(key, value) {
-      var pair = [key, value];
+    function _returnPair(pair) {
+      var key, value;
+      pair = [key = pair[0], value = pair[1]];
       pair.key = key;
       pair.value = value;
       return pair;
     }
 
-    this.initialize = function initialize(object) {
-      var o = this._object = this._object || { };
-      if (Object.isHash(object))
-        for (key in object._object)o[key] = object._object[key];
+    function _set(hash, key, value) {
+      var keys = hash._keys, o = hash._object;
+      // avoid a method call to Hash#hasKey
+      if ((expando + key) in o)
+        _unsetByIndex(hash, keys.indexOf(key));
+
+      keys.push(key);
+      hash._pairs.push([key, value]);
+      hash._values.push(value);
+      o[expando + key] = value;
+      return hash;
+    }
+
+    function _setWithObject(hash, object) {
+      if (Object.isHash(object)) {
+        var pair, i = 0, pairs = object._pairs;
+        while (pair = pairs[i++]) _set(hash, pair[0], pair[1]);
+      }
       else {
         Object._each(object, function(value, key) {
-          if (Object.hasKey(object, key))
-            o[expando + key] = value;
+          if (Object.hasKey(object, key)) _set(hash, key, value);
         });
       }
-      return this;
+      return hash;
+    }
+
+    function _unsetByIndex(hash, index) {
+      var keys = hash._keys;
+      delete hash._object[keys[index]];
+      keys.splice(index, 1);
+      hash._pairs.splice(index, 1);
+      hash._values.splice(index, 1);
+    }
+
+    this.initialize = function initialize(object) {
+      return _setWithObject(this.clear(), object);
     };
 
     this._each = function _each(callback) {
-      var key, i = 0, o = this._object;
-      for (key in o) 
-        callback(_returnPair(key.slice(15), o[key]), i++, this);
+      var pair, i = 0, pairs = this._pairs;
+      while (pair = pairs[i]) callback(_returnPair(pair), i++, this);
       return this;
     };
 
     this.clear = function clear() {
-      this._object = {};
+      this._object = { };
+      this._keys   = [];
+      this._pairs  = [];
+      this._values = [];
       return this;
-    };    
+    };
 
     this.clone = function clone() {
       return new Hash(this);
     };
 
     this.contains = function contains(value, strict) {
-      var key, o = this._object;
+      var pair, i = 0, pairs = this._pairs;
       if (strict) {
-        for (key in o) if (value === o[key]) return true;
+        while (pair = pairs[i++]) if (value === pair[1]) return true;
       } else {
-        for (key in o) if (value == o[key]) return true;
+        while (pair = pairs[i++]) if (value == pair[1]) return true;
       }
       return false;
     };
 
     this.filter = function filter(callback, thisArg) {
-      var key, value, o = this._object, result = new Hash();
+      var pair, i = 0, pairs = this._pairs, result = new Hash();
       callback = callback || function(value) { return value != null };
-      for (key in o) {
-        value = o[key]; key = key.slice(15);
-        if (callback.call(thisArg, value, key, this))
-          result.set(key, value);
+
+      while (pair = pairs[i++]) {
+        if (callback.call(thisArg, pair[1], pair[0], this))
+          result.set(pair[0], pair[1]);
       }
       return result;
     };
 
     this.first = function first(callback, thisArg) {
-      var key, value, index = 0, o = this._object;
+      var pair, i = 0, pairs = this._pairs;
       if (callback == null) {
-        for (key in o)
-          return _returnPair(key.slice(15), o[key]);
+        if (pairs.length) return _returnPair(pairs[0]);
       }
       else if (typeof callback === 'function') {
-        for (key in o) {
-          value = o[key], key = key.slice(15);
-          if (callback.call(thisArg, value, key, index++, this))
-            return _returnPair(key, value);
+        while (pair = pairs[i++]) {
+          if (callback.call(thisArg, pair[1], pair[0], this))
+            return _returnPair(pair);
         }
       }
       else {
-        var count = +callback, i = 1, results = [];
+        var pair, count = +callback, i = 0, results = [];
         if (isNaN(count)) return results;
         count = count < 1 ? 1 : count;
-        for (key in o)
-          if (i++ <= count)
-            results.push(_returnPair(key.slice(15), o[key]));
+        while (i < count && (pair = pairs[i])) results[i++] = _returnPair(pair);
         return results;
       }
     };
@@ -102,14 +126,14 @@
          !pattern.source) return this.clone();
 
       callback = callback || Fuse.K;
-      var key, value, o = this._object, result = new Hash();
+      var key, pair, value, i = 0, pairs = this._pairs, result = new Hash();
+
       if (typeof pattern === 'string')
         pattern = new RegExp(RegExp.escape(pattern));
 
-      for (key in o) {
-        value = o[key]; key = key.slice(15);
-        if (pattern.match(value))
-          result.set(key, callback.call(thisArg, value, key, this));
+      while (pair = pairs[i++]) {
+        if (pattern.match(value = pair[1]))
+          result.set(key = pair[0], callback.call(thisArg, value, key, this));
       }
       return result;
     };
@@ -119,94 +143,91 @@
     };
 
     this.inspect = function inspect() {
-      var key, o = this._object, results = [];
-      for (key in o) 
-        results.push(key.slice(15).inspect() + ': ' + Object.inspect(o[key]));
+      var pair, i = 0, pairs = this._pairs, results = [];
+      while (pair = pairs[i])
+        results[i++] = pair[0].inspect() + ': ' + Object.inspect(pair[1]);
       return '#<Hash:{' + results.join(', ') + '}>';
     };
 
     this.keyOf = function keyOf(value) {
-      var key, o = this._object;
-      for (key in o) {
-        if (value === o[key])
-          return key.slice(15);
+      var pair, i = 0, pairs = this._pairs;
+      while (pair = pairs[i++]) {
+        if (value === pair[1])
+          return pair[0];
       }
       return -1;
     };
 
     this.keys = function keys() {
-      var key, results = [];
-      for (key in this._object)
-        results.push(key.slice(15));
-      return results;
+      return this._keys.clone();
     };
 
-    this.last = (function() {
-      function _separate(hash) {
-        var key, o = hash._object, results = [[], []];
-        for (key in o) {
-          results[0].push(key.slice(15));
-          results[1].push(o[key]);
+    this.last = function last(callback, thisArg) {
+      var pair, i = 0, pairs = this._pairs, length = pairs.length;
+      if (callback == null) {
+        if (length) return _returnPair(this._pairs.last());
+      }
+      else if (typeof callback === 'function') {
+        while (length--) {
+          pair = pairs[length];
+          if (callback.call(thisArg, pair[1], pair[2], this))
+            return _returnPair(pair);
         }
+      }
+      else {
+        var count = +callback, results = [];
+        if (isNaN(count)) return results;
+        count = count < 1 ? 1 : count > length ? length : count;
+        var  i = 0, pad = length - count, results = [];
+        while (i < count)
+          results[i] = _returnPair(pairs[pad + i++]);
         return results;
-      };
-
-      function last(callback, thisArg) {
-        var list = _separate(this), keys = list[0], values = list[1], length = keys.length;
-        if (callback == null) {
-          if (length) return _returnPair(keys[length - 1], values[length - 1]);
-        }
-        else if (typeof callback === 'function') {
-          while (length--)
-            if (callback.call(thisArg, values[length], keys[length], length, this))
-              return _returnPair(keys[length], values[length]);
-        }
-        else {
-          var index, pad, count = +callback, i = 0, results = [];
-          if (isNaN(count)) return results;
-          count = count < 1 ? 1 : count > length ? length : count;
-          pad = length - count;
-          while (i < count) {
-            index = pad + i++;
-            results.push(_returnPair(keys[index], values[index]));
-          }
-          return results;
-        }
-      };
-      return last;
-    })();
+      }
+    };
 
     this.map = function map(callback, thisArg) {
       if (!callback) return this;
-      var key, value, o = this._object, result = new Hash();
-      for (key in o) {
-        value = o[key]; key = key.slice(15);
-        result.set(key, callback.call(thisArg, value, key, this));
+      var key, pair, i = 0, pairs = this._pairs, result = new Hash();
+
+      if (thisArg) {
+        while (pair = pairs[i++])
+          result.set(key = pair[0], callback.call(thisArg, pair[1], key, this));
+      } else {
+        while (pair = pairs[i++])
+          result.set(key = pair[0], callback(pair[1], key, this));
       }
       return result;
     };
 
     this.merge = function merge(object) {
-      return this.clone().initialize(object);
+      return _setWithObject(this.clone(), object);
     };
 
     this.partition = function partition(callback, thisArg) {
       callback = callback || Fuse.K;
-      var key, value, o = this._object, trues = new Hash(), falses = new Hash();
-      for (key in o) {
-        value = o[key]; key = key.slice(15);
-        (callback.call(thisArg, value, key, this) ?
+      var key, value, pair, i = 0, pairs = this._pairs,
+       trues = new Hash(), falses = new Hash();
+
+      while (pair = pairs[i++])
+        (callback.call(thisArg, value = pair[1], key = pair[0], this) ?
           trues : falses).set(key, value);
-      }
       return [trues, falses];
     };
 
+    this.size = function size() {
+      return this._keys.length;
+    };
+
     this.set = function set(key, value) {
-      if (typeof key === 'string')
-        this._object[expando + key] = value;        
-      else
-        this.initialize(key);
-      return this;
+      return typeof key === 'string'
+        ? _set(this, key, value)
+        : _setWithObject(this, key);
+    };
+
+    this.toArray = function toArray() {
+      var pair, i = 0, pairs = this._pairs, results = [];
+      while (pair = pairs[i]) results[i++] = _returnPair(pair);
+      return results;
     };
 
     this.toJSON = function toJSON() {
@@ -214,8 +235,8 @@
     };
 
     this.toObject = function toObject() {
-      var key, o = this._object, object = { };
-      for (key in o) object[key.slice(15)] = o[key];
+      var pair, i = 0, pairs = this._pairs, object = { };
+      while (pair = pairs[i++]) object[pair[0]] = pair[1];
       return object;
     };
 
@@ -224,35 +245,32 @@
     };
 
     this.unset = function unset(key) {
-      var keys, i = 0, o = this._object;
-      if (arguments.length > 1)
-        key = slice.call(arguments, 0);
-
-      if (Object.isArray(keys = key))
-        while (key = keys[i++]) delete o[expando + key];
-      else delete o[expando + key];
+      var key, i = 0, keys = this._keys, o = this._object,
+       args = Object.isArray(key) ? key : arguments;
+      while (key = args[i++])  {
+         // avoid a method call to Hash#hasKey
+        if ((expando + key) in o)
+          _unsetByIndex(this, keys.indexOf(key));
+      }
       return this;
     };
 
     this.values = function values() {
-      var key, o = this._object, results = [];
-      for (key in o) results.push(o[key]);
-      return results;
+      return this._values.clone();
     };
 
     this.zip = function zip() {
       var callback = Fuse.K, args = slice.call(arguments, 0);
-      if (typeof args.last() === 'function')
-        callback = args.pop();
+      if (typeof args.last() === 'function') callback = args.pop();
 
       var result = new Hash(),
        hashes = prependList(args.map($H), this),
        length = hashes.length;
 
-      var i, key, realKey, values;
-      for (realKey in this._object) {
-        i = 0; values = []; key = realKey.slice(15);
-        while (i < length) values.push(hashes[i++]._object[realKey]);
+      var j, key, pair, i = 0, pairs = this._pairs;
+      while (pair = pairs[i++]) {
+        j = 0; values = []; key = pair[0];
+        while (j < length) values[j] = hashes[j++]._object[expando + key];
         result.set(key, callback(values, key, this));
       }
       return result;
@@ -276,6 +294,8 @@
      merge =         null,
      partition =     null,
      set =           null,
+     size =          null,
+     toArray =       null,
      toJSON =        null,
      toObject =      null,
      toQueryString = null,

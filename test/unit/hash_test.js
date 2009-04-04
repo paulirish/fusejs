@@ -87,22 +87,28 @@ new Test.Unit.Runner({
     this.assertEnumEqual([], $H().first(3));
     this.assertUndefined($H().first(function(value, key) { return value === 'C' }));
     this.assertEnumEqual(['a', 'A'], $H(Fixtures.many).first());
+
     results = $H(Fixtures.many).first(2);
     this.assertEnumEqual(['a', 'A'], results[0]);
     this.assertEnumEqual(['b', 'B'], results[1]);
+
     this.assertEnumEqual(['c', 'C'], $H(Fixtures.many).first(
       function(value, key) { return value === 'C' })
     );
+
     this.assertUndefined($H(Fixtures.many).first(
       function(value, key) { return value === 'Z' })
     );
+
     results = $H(Fixtures.many).first(-3);
     this.assertEnumEqual(['a', 'A'], results[0]);
+
     results = $H(Fixtures.many).first(1000);
     this.assertEnumEqual(['a', 'A'], results[0]);
     this.assertEnumEqual(['b', 'B'], results[1]);
     this.assertEnumEqual(['c', 'C'], results[2]);
-    this.assertEnumEqual(['d', 'D#'], results[3]);    
+    this.assertEnumEqual(['d', 'D#'], results[3]); 
+
     this.assertEnumEqual([], $H(Fixtures.many).first('r0x0r5'));
   }, 
   
@@ -241,6 +247,59 @@ new Test.Unit.Runner({
     this.assertHashEqual({a: 'A', b: 'B', c: undefined, d: 'D', z: 'Z'}, 
       h.set({ d: 'D', z: 'Z'})
     );    
+  },
+  
+  testSize: function() {
+    this.assertEqual(1, $H(Fixtures.one).size());
+    this.assertEqual(4, $H(Fixtures.many).size());
+    this.assertEqual(4, $H(Fixtures.mixed_dont_enum).size());
+    this.assertEqual(0, $H().size());
+  },
+  
+  testToArray: function() {
+    var undef, expected = [['a', 'A'], ['b', 'B'], ['c', 'C'], ['d', 'D#']];
+    this.assertEqual(expected.inspect(), $H(Fixtures.many).toArray().inspect(),
+      'Fixtures.many');
+
+    expected = [['a', 'A'], ['b', 'B'], ['toString', 'bar'], ['valueOf', '']];
+    this.assertEqual(expected.inspect(), $H(Fixtures.mixed_dont_enum).toArray().inspect(),
+      'Fixtures.mixed_dont_enum');
+
+    expected = [['quad', function(n) { return n*n }], ['plus', function(n) { return n+n }]];
+    this.assertEqual(expected.inspect(), $H(Fixtures.functions).toArray().inspect(),
+      'Fixtures.functions');
+
+    expected = [['color', ['r', 'g', 'b']]];
+    this.assertEqual(expected.inspect(), $H(Fixtures.multiple).toArray().inspect(),
+      'Fixtures.multiple');
+
+    expected = [['color', ['r', null, 'g', undef, 0]]];
+    this.assertEqual(expected.inspect(), $H(Fixtures.multiple_nil).toArray().inspect(),
+      'Fixtures.multiple_nil');
+
+    expected = [['color', [null, undef]]];
+    this.assertEqual(expected.inspect(), $H(Fixtures.multiple_all_nil).toArray().inspect(),
+      'Fixtures.multiple_all_nil');
+
+    expected = [['color', []]];
+    this.assertEqual(expected.inspect(), $H(Fixtures.multiple_empty).toArray().inspect(),
+      'Fixtures.multiple_empty');
+
+    expected = [['stuff[]', ['$', 'a', ';']]];
+    this.assertEqual(expected.inspect(), $H(Fixtures.multiple_special).toArray().inspect(),
+      'Fixtures.multiple_special');
+
+    expected = [['a', 'b'], ['c', undef]];
+    this.assertEqual(expected.inspect(), $H(Fixtures.value_undefined).toArray().inspect(),
+      'Fixtures.value_undefined');
+ 
+    expected = [['a', 'b'], ['c', null]];
+    this.assertEqual(expected.inspect(), $H(Fixtures.value_null).toArray().inspect(),
+      'Fixtures.value_null');
+
+    expected = [['a', 'b'], ['c', 0]];
+    this.assertEqual(expected.inspect(), $H(Fixtures.value_zero).toArray().inspect(),
+      'Fixtures.value_zero');
   },
   
   testToJSON: function() {

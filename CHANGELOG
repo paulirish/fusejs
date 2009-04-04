@@ -1,3 +1,5 @@
+* Add Hash#toArray and properties _prairs, _keys, and _values to optimize methods iterating over the internal hash object. [jddalton]
+
 * Add support for Mozilla's Object#__count__ property in Object.isEmpty(). [Andreas Ecker, jddalton, Nicholas Zakas]
 
 * Optimize Number#times by forking for `thisArg` and cleanup Try.these() and ObjectRange#_each. [jddalton]
