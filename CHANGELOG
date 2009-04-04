@@ -1,3 +1,6 @@
+* unit test: Add Form unit tests to ensure Fuse works with Safari's input type="search". [jddalton, malsup]
+  Originally reported on http://dev.jquery.com/ticket/4107.
+
 * Make Ajax.Request() use the window.location.href value if a falsey url is given. [Prototype LH #597] [jddalton, Spezi]
 
 * Ensure IE String#replace converts null/undefined return values to string `null`/`undefined` and add more unit tests for String#replace, String#gsub, and String#sub. [jddalton, Michael Hollauf, Samuel Lebeau]
