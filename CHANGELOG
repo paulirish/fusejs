@@ -1,3 +1,5 @@
+* Ensure IE String#replace converts null/undefined return values to string `null`/`undefined` and add more unit tests for String#replace, String#gsub, and String#sub. [jddalton, Michael Hollauf, Samuel Lebeau]
+
 * Add Hash#toArray and properties _prairs, _keys, and _values to optimize methods iterating over the internal hash object. [jddalton]
 
 * Add support for Mozilla's Object#__count__ property in Object.isEmpty(). [Andreas Ecker, jddalton, Nicholas Zakas]

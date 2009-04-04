@@ -24,6 +24,14 @@
     var __replace = this.replace;
 
     function replace(pattern, replacement) {
+      if (typeof replacement === 'function') {
+        var _replacement = replacement;
+        replacement = function() { 
+          // ensure `null` and `undefined` are returned
+          var result = _replacement.apply(null, arguments);
+          return result || String(result);
+        };
+      }
       var result = __replace.call(this, pattern, replacement);
       if (Object.isRegExp(pattern)) pattern.lastIndex = 0;
       return result;

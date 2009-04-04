@@ -21,15 +21,16 @@ new Test.Unit.Runner({
       source.gsub(/[^o]+/, function(match) {
         return match[0].toUpperCase()
       }));
+
     this.assertEqual('f2 b2 b1z',
       source.gsub(/o+/, function(match) {
         return match[0].length;
       }));
+
     this.assertEqual('f0 b0 b1z',
       source.gsub(/o+/, function(match) {
         return match[0].length % 2;
       }));
-
   },
   
   testGsubWithReplacementString: function() {
@@ -78,24 +79,94 @@ new Test.Unit.Runner({
 
   testReplace: function() {
     var source = '321abc123', expected = '321xyz123';
-    this.assertEqual(expected, source.replace(/abc/, 'xyz'),
-      'Failed with simple regexp pattern.');
-
     this.assertEqual(expected, source.replace('abc', 'xyz'),
-      'Failed with simple string pattern.');
+      'simple string pattern.');
     
     var args = [], slice = Array.prototype.slice;
     this.assertEqual('_abc_', source.replace(/\d+/g, function() {
       args.push(slice.call(arguments, 0));
       return '_';
-    }), 'Failed with function as replace.');
+    }), 'function as replace.');
 
     this.assertEnumEqual(['321', 0, '321abc123'], args[0],
       'Failed to pass the proper arguments to the replacement function.');
-    
+
     this.assertEqual(2, args.length,
       'Failed to execute the function for each replacement.');
 
+    // more regexp and function tests
+    var source = 'foo boo boz';
+    this.assertEqual('Foo boo boz',
+      source.replace(/[^o]+/, function(string) {
+        return string.toUpperCase();
+      }), 'simple regexp pattern');
+
+    this.assertEqual('Foo Boo BoZ',
+      source.replace(/[^o]+/g, function(string) {
+        return string.toUpperCase();
+      }), 'global flag');
+
+    this.assertEqual('bar boo boz',
+      source.replace(/FOO/i, function() {
+        return 'bar';
+      }), 'case insensitive flag');
+
+    this.assertEqual(source,
+      source.replace('.*', Fuse.emptyFunction), 'regular expression characters escaped');
+
+    this.assertEqual(source,
+      source.replace('X', Fuse.emptyFunction), 'no occurence to replace');
+
+    /*
+    // crashes Safari 3.4 beta
+    var test = this;
+    source.replace(/(b(?:o)(z))/, function(substring, group1, group2, offset, string) {
+      test.assertIdentical(window, this);
+      test.assertEqual(5, arguments.length);
+      test.assertEqual('boz', substring);
+      test.assertEqual('boz', group1);
+      test.assertEqual('z', group2);
+      test.assertEqual(8, offset);
+      test.assertEqual(source, string);
+    });
+    */
+
+    this.assertEqual('foo undefined boz',
+      source.replace('boo', Fuse.emptyFunction), 'undefined return value');
+
+    this.assertEqual('foo null boz',
+      source.replace('boo', function() {
+        return null;
+      }), 'null return value');
+
+    this.assertEqual('-foo boo boz',
+      source.replace(/|/, function() {
+        return '-';
+      }), 'empty matching regexp');
+
+    this.assertEqual('-f-o-o- -- -b-o-z-',
+      source.replace(/boo|/g, function() {
+        return '-';
+    }), 'empty matching regexp with global flag');
+
+    var pattern = /boo/g;
+    pattern.lastIndex = source.length;
+    this.assertEqual('foo bar boz',
+      source.replace(pattern, function() {
+        return 'bar';
+      }), 'lastIndex ignored');
+    
+    // index and source
+    var source = 'foo boo boz';
+    this.assertEqual('f1 b5 b9z', source.replace(/o+/g, function(match, index) {
+      return index;
+    }), 'Given incorrect index argument');
+
+    this.assertEqual('foo boo bofoo boo boz',
+      source.replace(/.$/, function(match, index, source) {
+        return source;
+      }), 'Given incorrect source argument');
+    
     // test empty 
     var expected, pattern,
      source = 'awesome', replacement = function() { return 'x' };
@@ -116,7 +187,14 @@ new Test.Unit.Runner({
     this.assertEqual(expected, source.replace(pattern, replacement));
   },
   
-  testSubsWithUncommonPattern: function() {
+  testSubstitutionEdgeCases: function() {
+    this.assertEqual('-a-b-c-', 'abc'.gsub('', '-'), 'empty string');
+    this.assertEqual('--b-c-', 'abc'.gsub(/a|/, '-'), 'empty matching pattern');
+    this.assertEqual('-bc', 'abc'.gsub(/A/i, '-'), 'case insensitive flag');
+    this.assertEqual('-bc', 'abc'.sub(/./g, '-'), 'sub with global flag');
+    this.assertEqual('aundefinedc', 'abc'.sub('b', Fuse.emptyFunction), '`undefined` not returned');
+    this.assertEqual('anullc', 'abc'.sub('b', function() { return null; }), '`null` not returned');
+
     // test with empty pattern (String#gsub is used by String#sub)
     var empty = new RegExp('');
     this.assertEqual('xaxbx', 'ab'.gsub('', 'x'));
@@ -306,10 +384,10 @@ new Test.Unit.Runner({
   testExtractScripts: function() {
     this.assertEnumEqual([], 'foo bar'.extractScripts());
     this.assertEnumEqual(['boo();'], ('foo <script>boo();<'+'/script>bar').extractScripts());
-    
+
     this.assertEnumEqual(['boo();','boo();\nmoo();'], 
       ('foo <script>boo();<'+'/script><script type="text/javascript">boo();\nmoo();<'+'/script>bar').extractScripts());
-      
+
     this.assertEnumEqual(['boo();','boo();\nmoo();'], 
       ('foo <script>boo();<'+'/script>blub\nblub<script type="text/javascript">boo();\nmoo();<'+'/script>bar').extractScripts());
 
@@ -317,7 +395,13 @@ new Test.Unit.Runner({
       '/script>\n--><script type="text/javascript">methodA();<' + '/script><!--\n<script>removedB();<' +
       '/script>\n--><script><' + '/script>blah<script>methodB();<' + '/script>blah<!--\n<script type="text/javascript">removedC();<' +
       '/script>\n--><script>methodC();<' + '/script>').extractScripts());
-      
+
+    this.assertEnumEqual(['\n      alert("Scripts work too");\n    '], 
+     ('\u003Cdiv id=\"testhtml"\u003E\n  \u003Cdiv\u003E\n    ' +
+      'Content successfully replaced\n    \u003Cscript\u003E\n      ' +
+      'alert("Scripts work too");\n    \u003C/script\u003E\n  \u003C /div\u003E\n' +
+      '\u003C/div\u003E\n').extractScripts());
+
     var russianChars = '//Ã?ÂºÃ?Å¸Ã?Å’Ã?ÂµÃ?Å“Ã‘Â‚Ã?Â°Ã‘Â€Ã?Å¾Ã?Â¹\n',
      longComment  = '//' + Array(7000).join('.') + '\n',
      longScript   = '\nvar foo = 1;\n' + russianChars + longComment,
