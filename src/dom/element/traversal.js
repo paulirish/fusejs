@@ -64,7 +64,7 @@
       function down(element, expression, index) {
         if (arguments.length === 1)
           return Element.firstDescendant(element);
-        return typeof expression === 'number'
+        return Fuse.Object.isNumber(expression)
           ? _getNthDescendant($(element), expression)
           : Element.select(element, expression)[index || 0];
       }
@@ -106,7 +106,7 @@
     };
 
     this.match = function match(element, selector) {
-      if (typeof selector === 'string')
+      if (Fuse.Object.isStrng(selector))
         selector = new Selector(selector);
       return selector.match($(element));
     };
@@ -147,7 +147,7 @@
     this.next = function next(element, expression, index) {
       if (arguments.length === 1)
         return Element.extend(Selector.handlers.nextElementSibling(element));
-      return typeof expression === 'number'
+      return Fuse.Object.isNumber(expression)
         ? _getNth($(element), 'nextSibling', expression)
         : Selector.findElement(Element.nextSiblings(element), expression, index);
     };
@@ -155,7 +155,7 @@
     this.previous = function previous(element, expression, index) {
       if (arguments.length === 1)
         return Element.extend(Selector.handlers.previousElementSibling(element));
-      return typeof expression === 'number'
+      return Fuse.Object.isNumber(expression)
         ? _getNth($(element), 'previousSibling', expression)
         : Selector.findElement(Element.previousSiblings(element), expression, index);   
     };
@@ -163,7 +163,7 @@
     this.up = function up(element, expression, index) {
       if (arguments.length === 1)
         return Element.extend($(element).parentNode);
-      return typeof expression === 'number'
+      return Fuse.Object.isNumber(expression)
         ? _getNth($(element), 'parentNode', expression)
         : Selector.findElement(Element.ancestors(element), expression, index);
     };

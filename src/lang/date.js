@@ -1,6 +1,6 @@
   /*------------------------------- LANG: DATE -------------------------------*/
 
-  Object._extend(Date.prototype, (function() {
+  Fuse.Date.Plugin.toJSON = (function() {
     function toJSON() {
       return '"' + this.getUTCFullYear() + '-' +
         (this.getUTCMonth() + 1).toPaddedString(2) + '-' +
@@ -9,8 +9,5 @@
         this.getUTCMinutes().toPaddedString(2) + ':' +
         this.getUTCSeconds().toPaddedString(2) + 'Z"';
     }
-
-    return {
-      'toJSON': toJSON
-    };
-  })());
+    return toJSON;
+  })();

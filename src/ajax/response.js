@@ -1,38 +1,41 @@
   /*----------------------------- AJAX: RESPONSE -----------------------------*/
 
-  Ajax.Response = Class.create({
-    'status':     0,
-    'statusText': '',
-    'getStatus':  Ajax.Request.prototype.getStatus,
-    'getHeader':  Ajax.Request.prototype.getHeader
+  Fuse.addNS('Ajax.Response', {
+    'constructor': (function() {
+      function Response(request) {
+        this.request = request;
+        var transport  = this.transport  = request.transport,
+            readyState = this.readyState = transport.readyState;
+
+        if ((readyState > 2 && !Fuse.Browser.Agent.IE) || readyState == 4) {
+          this.status       = this.getStatus();
+          this.statusText   = this.getStatusText();
+          this.responseText = Fuse.String.interpret(transport.responseText);
+          this.headerJSON   = this._getHeaderJSON();
+        }
+
+        if (readyState == 4) {
+          var xml = transport.responseXML;
+          this.responseXML  = (typeof xml === 'undefined') ? null : xml;
+          this.responseJSON = this._getResponseJSON();
+        }
+      }
+      return Response;
+    })()
   });
 
   (function() {
-    this.initialize = function initialize(request){
-      this.request = request;
-      var transport  = this.transport  = request.transport,
-          readyState = this.readyState = transport.readyState;
-
-      if ((readyState > 2 && !Fuse.Browser.Agent.IE) || readyState == 4) {
-        this.status       = this.getStatus();
-        this.statusText   = this.getStatusText();
-        this.responseText = String.interpret(transport.responseText);
-        this.headerJSON   = this._getHeaderJSON();
-      }
-
-      if (readyState == 4) {
-        var xml = transport.responseXML;
-        this.responseXML  = (typeof xml === 'undefined') ? null : xml;
-        this.responseJSON = this._getResponseJSON();
-      }
-    };
+    this.status     = 0;
+    this.statusText = '';
+    this.getStatus  = Fuse.Ajax.Request.Plugin.getStatus;
+    this.getHeader  = Fuse.Ajax.Request.Plugin.getHeader;
 
     this._getHeaderJSON = function _getHeaderJSON() {
       var json = this.getHeader('X-JSON');
       if (!json) return null;
       try {
         return json.evalJSON(this.request.options.sanitizeJSON ||
-          !Object.isSameOrigin(this.request.url));
+          !Fuse.Object.isSameOrigin(this.request.url));
       } catch (e) {
         this.request.dispatchException(e);
       }
@@ -41,12 +44,12 @@
     this._getResponseJSON = function _getResponseJSON() {
       var options = this.request.options;
       if (!options.evalJSON || (options.evalJSON != 'force' && 
-        !(this.getHeader('Content-type') || '').contains('application/json')) || 
+        !(this.getHeader('Content-type') || '').indexOf('application/json') > -1) || 
           this.responseText.blank())
             return null;
       try {
         return this.responseText.evalJSON(options.sanitizeJSON ||
-          !Object.isSameOrigin(this.request.url));
+          !Fuse.Object.isSameOrigin(this.request.url));
       } catch (e) {
         this.request.dispatchException(e);
       }
@@ -77,6 +80,5 @@
      _getResponseJSON =      null,
      getAllHeaders =         null,
      getAllResponseHeaders = null,
-     getStatusText =         null,
-     initialize =            null;
-  }).call(Ajax.Response.prototype);
+     getStatusText =         null;
+  }).call(Fuse.Ajax.Response.Plugin);

@@ -1,16 +1,19 @@
   /*---------------------------- LANG: ENUMERABLE ----------------------------*/
 
-  global.$break = { };
+  Fuse.$break = (function() {
+    function $break() { }
+    return $break;
+  })();
 
-  global.Enumerable = { };
+  Fuse.addNS('Enumerable');
 
   (function() {
     this.contains = function contains(object, strict) {
       var result = 0;
       if (strict)
-        this.each(function(value) { if (value === object && result++) throw $break; });
+        this.each(function(value) { if (value === object && result++) throw Fuse.$break; });
       else
-        this.each(function(value) { if (value == object && result++) throw $break; });
+        this.each(function(value) { if (value == object && result++) throw Fuse.$break; });
       return !!result;
     };
 
@@ -20,13 +23,13 @@
           callback.call(thisArg, value, index, iterable);
         });
       } catch (e) {
-        if (e !== $break) throw e;
+        if (e !== Fuse.$break) throw e;
       }
       return this;
     };
 
     this.eachSlice = function eachSlice(size, callback, thisArg) {
-      var index = -size, slices = [], list = this.toArray();
+      var index = -size, slices = Fuse.List(), list = this.toArray();
       if (size < 1) return list;
       while ((index += size) < list.length)
         slices[slices.length] = list.slice(index, index + size);
@@ -38,14 +41,14 @@
       var result = true;
       this.each(function(value, index, iterable) {
         if (!callback.call(thisArg, value, index, iterable)) {
-          result = false; throw $break;
+          result = false; throw Fuse.$break;
         }
       });
       return result;
     };
 
     this.filter = function filter(callback, thisArg) {
-      var results = [];
+      var results = Fuse.List();
       callback = callback || function(value) { return value != null };
       this._each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable))
@@ -57,19 +60,20 @@
     this.first = function first(callback, thisArg) {
       if (callback == null) {
         var result;
-        this.each(function(value) { result = value; throw $break; });
+        this.each(function(value) { result = value; throw Fuse.$break; });
         return result;
       }
       return this.toArray().first(callback, thisArg);
     };
 
     this.grep = function grep(pattern, callback, thisArg) {
-      if (!pattern || Object.isRegExp(pattern) &&
+      if (!pattern || Fuse.Object.isRegExp(pattern) &&
          !pattern.source) return this.toArray();
+
       callback = callback || Fuse.K;
-      var results = [];
-      if (typeof pattern === 'string')
-        pattern = new RegExp(RegExp.escape(pattern));
+      var results = Fuse.List();
+      if (Fuse.Object.isString(pattern))
+        pattern = new RegExp(Fuse.RegExp.escape(pattern));
 
       this._each(function(value, index, iterable) {
         if (pattern.match(value))
@@ -110,7 +114,7 @@
 
     this.map = function map(callback, thisArg) {
       if (!callback) return this.toArray();
-      var results = [];
+      var results = Fuse.List();
       if (thisArg) {
         this._each(function(value, index, iterable) {
           results.push(callback.call(thisArg, value, index, iterable));
@@ -147,12 +151,12 @@
 
     this.partition = function partition(callback, thisArg) {
       callback = callback || Fuse.K;
-      var trues = [], falses = [];
+      var trues = Fuse.List(), falses = Fuse.List();
       this._each(function(value, index, iterable) {
         (callback.call(thisArg, value, index, iterable) ?
           trues : falses).push(value);
       });
-      return [trues, falses];
+      return Fuse.List(trues, falses);
     };
 
     this.pluck = function pluck(property) {
@@ -170,7 +174,7 @@
       var result = false;
       this.each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable)) {
-          result = true; throw $break;
+          result = true; throw Fuse.$break;
         }
       });
       return result;
@@ -189,7 +193,7 @@
     };
 
     this.toArray = function toArray() {
-      var results = [];
+      var results = Fuse.List();
       this._each(function(value) { results.push(value) });
       return results;
     };
@@ -199,7 +203,7 @@
       if (typeof args.last() === 'function')
         callback = args.pop();
 
-      var sequences = prependList(args.map($A), this);
+      var sequences = prependList(args.map(Fuse.Util.$A), this);
       return this.map(function(value, index, iterable) {
         return callback(sequences.pluck(index), index, iterable);
       });
@@ -228,4 +232,4 @@
      sortBy =     null,
      toArray =    null,
      zip =        null;
-  }).call(Enumerable);
+  }).call(Fuse.Enumerable);

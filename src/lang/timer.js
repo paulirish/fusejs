@@ -1,10 +1,8 @@
   /*------------------------ LANG: TIMER -----------------------*/
 
-  global.Timer = Class.create();
-
-  (function() {
-    this.initialize = (function() {
-      function initialize(callback, interval) {
+  Fuse.addNS('Timer', {
+    'constructor': (function() {
+      function Timer(callback, interval) {
         this.callback     = callback;
         this.interval     = interval;
         this.executing    = false;
@@ -22,10 +20,11 @@
           }
         }
       }
+      return Timer;
+    })()
+  });
 
-      return initialize;
-    })();
-
+  (function() {
     this.execute = function execute() {
       this.callback(this);
     };
@@ -43,8 +42,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var initialize = null,
-     execute =       null,
-     start =         null,
-     stop =          null;
-  }).call(Timer.prototype);
+    var execute = null, start = null, stop = null;
+  }).call(Fuse.Timer.Plugin);

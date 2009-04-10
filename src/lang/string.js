@@ -1,8 +1,8 @@
   /*------------------------------ LANG: STRING ------------------------------*/
 
-  Object._extend(String, (function() {
+  Fuse.Object._extend(Fuse.String, (function() {
     function interpret(value) {
-      return value == null ? '' : String(value);
+      return Fuse.String(value == null ? '' : value);
     }
 
     return {
@@ -29,18 +29,18 @@
         replacement = function() { 
           // ensure `null` and `undefined` are returned
           var result = _replacement.apply(null, arguments);
-          return result || String(result);
+          return result || Fuse.String(result);
         };
       }
       var result = __replace.call(this, pattern, replacement);
-      if (Object.isRegExp(pattern)) pattern.lastIndex = 0;
+      if (Fuse.Object.isRegExp(pattern)) pattern.lastIndex = 0;
       return result;
     }
 
     // For IE
     if (Bug('STRING_REPLACE_SETS_REGEXP_LAST_INDEX'))
       this.replace = replace;
-  }).call(String.prototype);
+  }).call(Fuse.String.Plugin);
 
   (function() {
     var __replace = this.replace;
@@ -50,8 +50,8 @@
         return __replace.call(this, pattern, replacement);
 
       var isGlobal, match, source = this, result = '';
-      if (!Object.isRegExp(pattern))
-        pattern = new RegExp(RegExp.escape(String(pattern)));
+      if (!Fuse.Object.isRegExp(pattern))
+        pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)));
 
       pattern.lastIndex = 0;
       if (isGlobal = pattern.global)
@@ -73,7 +73,7 @@
         else if (!isGlobal) break;
       }
       pattern.lastIndex = 0;
-      return result + source;
+      return Fuse.String(result + source);
     }
 
     // For Safari 2 and Chrome, based on work by Dean Edwards
@@ -81,7 +81,7 @@
     if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING') ||
         Bug('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN'))
       this.replace = replace;
-  }).call(String.prototype);
+  }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/
 
@@ -89,13 +89,13 @@
     function _prepareReplacement(replacement) {
       if (typeof replacement === 'function')
         return function() { return replacement(slice.call(arguments, 0, -2)) };
-      var template = new Template(replacement);
+      var template = new Fuse.Template(replacement);
       return function() { return template.evaluate(slice.call(arguments, 0, -2)) };
     }
 
     this.gsub = function gsub(pattern, replacement) {
-      if (!Object.isRegExp(pattern))
-        pattern = new RegExp(RegExp.escape(String(pattern)), 'g');
+      if (!Fuse.Object.isRegExp(pattern))
+        pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)), 'g');
       if (!pattern.global)
         pattern = pattern.clone({ 'global': true });
       return this.replace(pattern, _prepareReplacement(replacement));
@@ -104,15 +104,15 @@
     this.sub = function sub(pattern, replacement, count) {
       count = (typeof count === 'undefined') ? 1 : count;
       if (count === 1) {
-        if (!Object.isRegExp(pattern))
-          pattern = new RegExp(RegExp.escape(String(pattern)));
+        if (!Fuse.Object.isRegExp(pattern))
+          pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)));
         if (pattern.global)
           pattern = pattern.clone({ 'global': false });
         return this.replace(pattern, _prepareReplacement(replacement));
       }
 
       if (typeof replacement !== 'function') {
-        var template = new Template(replacement);
+        var template = new Fuse.Template(replacement);
         replacement = function(match) { return template.evaluate(match) };
       }
       return this.gsub(pattern, function(match) {
@@ -123,18 +123,18 @@
 
     // prevent JScript bug with named function expressions
     var gsub = null, sub = null;
-  }).call(String.prototype);
+  }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/
 
   (function() {
     this.interpolate = function interpolate(object, pattern) {
-      return new Template(this, pattern).evaluate(object);
+      return new Fuse.Template(this, pattern).evaluate(object);
     };
 
     this.succ = function succ() {
-      return this.slice(0, this.length - 1) +
-        String.fromCharCode(this.charCodeAt(this.length - 1) + 1);
+      return Fuse.String(this.slice(0, this.length - 1) +
+        String.fromCharCode(this.charCodeAt(this.length - 1) + 1));
     };
 
     this.times = function times(count) {
@@ -167,8 +167,8 @@
           if (value) value = decodeURIComponent(value);
         } else key = pair;
 
-        if (Object.hasKey(hash, key)) {
-          if (!Object.isArray(hash[key])) hash[key] = [hash[key]];
+        if (Fuse.Object.hasKey(hash, key)) {
+          if (!Fuse.Object.isArray(hash[key])) hash[key] = [hash[key]];
           hash[key].push(value);
         }
         else hash[key] = value;
@@ -176,7 +176,8 @@
       return hash;
     };
 
-    // alias
+    // aliases
+    this.toList = this.toArray;
     this.parseQuery = this.toQueryParams;
 
     // prevent JScript bug with named function expressions
@@ -185,7 +186,7 @@
      times =          null, 
      toArray =        null,
      toQueryParams =  null;
-  }).call(String.prototype);
+  }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/
 
@@ -218,7 +219,7 @@
      isJSON =       null,
      toJSON =       null,
      unfilterJSON = null;
-  }).call(String.prototype);
+  }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/
 
@@ -245,13 +246,14 @@
         var character = String.specialChar[match];
         return character ? character : '\\u00' + match.charCodeAt().toPaddedString(2, 16);
       });
-      if (useDoubleQuotes) return '"' + escapedString.replace(/"/g, '\\"') + '"';
-      return "'" + escapedString.replace(/'/g, '\\\'') + "'";
+      return Fuse.String(useDoubleQuotes
+        ? '"' + escapedString.replace(/"/g, '\\"') + '"'
+        : "'" + escapedString.replace(/'/g, '\\\'') + "'");
     };
 
     this.scan = function scan(pattern, callback) {
       this.gsub(pattern, callback);
-      return String(this);
+      return Fuse.String(this);
     };
 
     this.startsWith = function startsWith(pattern) {
@@ -266,7 +268,7 @@
       inspect =    null,
       scan =       null,
       startsWith = null;
-  }).call(String.prototype);
+  }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/
 
@@ -282,7 +284,7 @@
     })();
 
     this.capitalize = function capitalize() {
-      return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
+      return Fuse.String(this.charAt(0).toUpperCase() + this.slice(1).toLowerCase());
     };
 
     this.dasherize = function dasherize() {
@@ -292,8 +294,9 @@
     this.truncate = function truncate(length, truncation) {
       length = length || 30;
       truncation = (typeof truncation === 'undefined') ? '...' : truncation;
-      return this.length > length ? 
-        this.slice(0, length - truncation.length) + truncation : String(this);
+      return Fuse.String(this.length > length
+        ? this.slice(0, length - truncation.length) + truncation
+        : this);
     };
 
     this.underscore = function underscore() {
@@ -306,12 +309,12 @@
      dasherize =     null,
      truncate =      null,
      underscore =    null;
-  }).call(String.prototype);
+  }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    var s = RegExp.specialChar.s,
+    var s = Fuse.RegExp.specialChar.s,
      matchTrimLeft     = new RegExp('^' + s + '+'),
      matchTrimRight    = new RegExp(s + '+$'),
      matchScripts      = new RegExp(Fuse.ScriptFragment, 'gi'),
@@ -319,8 +322,9 @@
      matchOpenTag      = /<script/i;
 
     this.extractScripts = function extractScripts() {
-      if (!matchOpenTag.test(this)) return [];
-      var match, results = [], scriptTags = this.replace(matchHTMLComments, '');
+      var results = Fuse.List();
+      if (!matchOpenTag.test(this)) return results;
+      var match, scriptTags = this.replace(matchHTMLComments, '');
       while (match = matchScripts.exec(scriptTags))
         match[1] && results.push(match[1]);
       return results;
@@ -350,7 +354,7 @@
      trim =              null,
      trimLeft =          null,
      trimRight =         null;
-  }).call(String.prototype);
+  }).call(Fuse.String.Plugin);
 
   (function() {
     this.evalScripts = function evalScripts() {
@@ -363,19 +367,19 @@
 
     // prevent JScript bug with named function expressions
     var evalScripts = null, stripTags = null;
-  }).call(String.prototype);
+  }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/
 
   (function() {
     var escapeHTML = function escapeHTML() {
       textNode.data = this;
-      return container.innerHTML.replace(/"/g, '&quot;');
+      return Fuse.String(container.innerHTML.replace(/"/g, '&quot;'));
     };
 
     var unescapeHTML = function unescapeHTML() {
       Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-      return Fuse._div.textContent;
+      return Fuse.String(Fuse._div.textContent);
     };
 
     var container = Fuse._doc.createElement('pre'),
@@ -392,7 +396,7 @@
     if ((textNode.data = '>') && container.innerHTML !== '&gt;') {
       escapeHTML = function escapeHTML() {
         textNode.data = this;
-        return container.innerHTML.replace(/"/g, '&quot;').replace(/>/g, '&gt;');
+        return Fuse.String(container.innerHTML.replace(/"/g, '&quot;').replace(/>/g, '&gt;'));
       };
     }
 
@@ -401,13 +405,13 @@
       if (Feature('ELEMENT_INNER_TEXT') && Fuse._div.firstChild.innerText === '<p>x</p>') {
         unescapeHTML = function unescapeHTML() {
           Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-          return Fuse._div.firstChild.innerText.replace(/\r/g, '');
+          return Fuse.String(Fuse._div.firstChild.innerText.replace(/\r/g, ''));
         };
       }
       else if (Fuse._div.firstChild.innerHTML === '<p>x</p>') {
         unescapeHTML = function unescapeHTML() {
           Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
-          return Fuse._div.firstChild.innerHTML;
+          return Fuse.String(Fuse._div.firstChild.innerHTML);
         };
       } else {
         unescapeHTML = function unescapeHTML() {
@@ -415,7 +419,7 @@
           var node, i = 0, results = [];
           while (node = Fuse._div.firstChild.childNodes[i++])
             results.push(node.nodeValue);
-          return results.join('');
+          return Fuse.String(results.join(''));
         };
       }
       // cleanup Fuse._div
@@ -424,4 +428,4 @@
 
     this.escapeHTML = escapeHTML;
     this.unescapeHTML = unescapeHTML;
-  }).call(String.prototype);
+  }).call(Fuse.String.Plugin);

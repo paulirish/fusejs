@@ -2,7 +2,7 @@
 
   Element.Methods.childOf = Element.Methods.descendantOf;
 
-  Hash.toQueryString = Object.toQueryString;
+  Fuse.Hash.toQueryString = Fuse.Object.toQueryString;
 
   global.$continue = new Error('"throw $continue" is deprecated, use "return" instead.');
 
@@ -134,7 +134,7 @@
 
       var getElementsByClassName = function getElementsByClassName(element, className) {
         className = className.toString().trim();
-        var elements = [], classNames = (/\s/.test(className) ? $w(className) : null);
+        var elements = [], classNames = (/\s/.test(className) ? Fuse.Util.$w(className) : null);
         if (!classNames && !className) return elements;
 
         var nodes = $(element).getElementsByTagName('*');
@@ -154,7 +154,7 @@
         getElementsByClassName = function getElementsByClassName(element, className) {
           className = className.toString().trim();
           var cond = /\s/.test(className)
-            ? $w(className).map(iter).join('')
+            ? Fuse.Util.$w(className).map(iter).join('')
             : iter(className);
 
           return cond
@@ -176,7 +176,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Element.ClassNames = Class.create(Enumerable);
+  Element.ClassNames = Fuse.Class(Fuse.Enumerable);
 
   (function() {
     this.initialize = function initialize(element) {

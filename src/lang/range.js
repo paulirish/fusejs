@@ -1,35 +1,51 @@
   /*------------------------------- LANG: RANGE ------------------------------*/
 
-  global.$R = (function() {
+  Fuse.addNS('Util');
+
+  Fuse.Util.$R = (function() {
     function $R(start, end, exclusive) {
       return new ObjectRange(start, end, exclusive);
     }
     return $R;
   })();
 
-  global.ObjectRange = Class.create(Enumerable);
+  /*--------------------------------------------------------------------------*/
 
-  (function() {
-    this._each = (function() {
+  Fuse.addNS('Range', Fuse.Enumerable, {
+    'constructor': (function() {
+      function Range(start, end, exclusive) {
+        this.start = start;
+        this.end = end;
+        this.exclusive = exclusive;
+      }
+      return Range;
+    })(),
+
+    '_each': (function() {
       function _each(callback) {
-        var i = 0, c = this.cache, value = this.start;
-        if (!c || this.start !== c.start || this.end !== c.end) {
-          c = this.cache = [];
-          c.start = this.start;
-          c.end = this.end;
+        var value = this.start.valueOf(), i = 0, c = this.cache;
+        if (!c || this.start != c.start || this.end != c.end) {
+          c = this.cache = Fuse.List();
+          c.start = value;
+          c.end = this.end.valueOf();
           c.exclusive = this.exclusive;
 
           while (_inRange(this, value)) {
             callback(value, i++, this);
             c.push(value);
-            value = value.succ();
+            value = Fuse[typeof value === 'number' ? 'Number' :
+              'String'](value).succ().valueOf();
           }
         }
         else {
           if (this.exclusive !== c.exclusive) {
             c.exclusive = this.exclusive;
             if (c.exclusive) c.pop();
-            else c.push(c.last().succ());
+            else {
+              value = c.last();
+              c.push(Fuse[typeof value === 'number' ? 'Number' :
+                'String'](value).succ().valueOf());
+            }
           }
           var length = c.length;
           while (i < length)
@@ -46,14 +62,5 @@
       }
 
       return _each;
-    })();
-
-    this.initialize = (function() {
-      function initialize(start, end, exclusive) {
-        this.start = start;
-        this.end = end;
-        this.exclusive = exclusive;
-      }
-      return initialize;
-    })();
-  }).call(ObjectRange.prototype);
+    })()
+  });

@@ -21,8 +21,8 @@
 
     this.removeClassName = function removeClassName(element, className) {
       element = $(element);
-      element.className = element.className.replace(
-        new RegExp('(^|\\s+)' + className + '(\\s+|$)'), ' ').trim();
+      element.className = Fuse.String(element.className.replace(
+        new RegExp('(^|\\s+)' + className + '(\\s+|$)'), ' ')).trim();
       return element;
     };
 
@@ -126,7 +126,7 @@
     this.setStyle = function setStyle(element, styles) {
       element = $(element);
       var key, name, elementStyle = element.style;
-      if (typeof styles === 'string') {
+      if (Fuse.Object.isString(styles)) {
         element.style.cssText += ';' + styles;
         return styles.indexOf('opacity') > -1
           ? Element.setOpacity(element, styles.match(/opacity:\s*(\d?\.?\d*)/)[1])
@@ -195,7 +195,7 @@
           // Opera 9.2x
           var getStyle = function getStyle(element, name) {
             element = $(element);
-            name = name.camelize();
+            name = Fuse.String(name).camelize();
             if (_isNull(element, name)) return null;
             var value = _getComputedStyle(element, name);
 
@@ -212,7 +212,7 @@
         else { // Firefox, Safari, Opera 9.5+
           var getStyle = function getStyle(element, name) {
             element = $(element);
-            name = name.camelize();
+            name = Fuse.String(name).camelize();
               return _isNull(element, name) ? null :
               _getComputedStyle(element, name);
           };
@@ -237,7 +237,7 @@
             return Element.getOpacity(element);
 
           element = $(element);
-          name = name.camelize();
+          name = Fuse.String(name).camelize();
           name = FLOAT_TRANSLATIONS[name] || name;
 
           // get cascaded style
@@ -265,7 +265,7 @@
             }
 
             // backup values
-            var pos = (name === 'height') ? 'top' : 'left',
+            var pos = Fuse.String(name === 'height' ? 'top' : 'left'),
              stylePos = element.style[pos], runtimePos = element.runtimeStyle[pos];
 
             // set runtimeStyle so no visible shift is seen

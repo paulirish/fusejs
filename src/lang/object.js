@@ -1,6 +1,9 @@
   /*------------------------------ LANG: OBJECT ------------------------------*/
 
-  Object._each = (function() {
+  // temporary object placeholder
+  Fuse.Object = { };
+
+  Fuse.Object._each = (function() {
     // use switch statement to avoid creating a temp variable
     var _each;
     switch (function() {
@@ -18,7 +21,7 @@
             for (key in object)
               callback(object[key], key, object);
             while(key = dontEnumProperties[i++])
-              if (Object.hasKey(object, key))
+              if (Fuse.Object.hasKey(object, key))
                  callback(object[key], key, object);
           }
           return object;
@@ -31,7 +34,7 @@
         _each = function _each(object, callback) {
           var key, keys = { };
           for (key in object) {
-            if (!Object.hasKey(keys, key)) {
+            if (!Fuse.Object.hasKey(keys, key)) {
               keys[key] = true;
               callback(object[key], key, object);
             }
@@ -50,7 +53,7 @@
     return _each;
   })();
 
-  Object._extend = (function() {
+  Fuse.Object._extend = (function() {
     function _extend(destination, source) {
       for (var key in source)
          destination[key] = source[key]; 
@@ -59,9 +62,9 @@
     return _extend;
   })();
 
-  Object.extend = (function() {
+  Fuse.Object.extend = (function() {
     function extend(destination, source) {
-      Object._each(source || { }, function(value, key) { 
+      Fuse.Object._each(source || { }, function(value, key) { 
         destination[key] = value; 
       });
       return destination;
@@ -69,7 +72,7 @@
     return extend;
   })();
 
-  Object.hasKey = (function() {
+  Fuse.Object.hasKey = (function() {
     var hasKey, hasOwnProperty = Object.prototype.hasOwnProperty;
     if (typeof hasOwnProperty !== 'function') {
       if (Feature('OBJECT__PROTO__')) {
@@ -77,7 +80,7 @@
         hasKey = function hasKey(object, property) {
           if (object == null) throw new TypeError;
           // convert primatives into objects so they work with the IN statement
-          if (typeof object !== 'object' && !Object.isFunction(object))
+          if (typeof object !== 'object' && !Fuse.Object.isFunction(object))
             object = new object.constructor(object);
 
           var result, proto = object['__proto__'];
@@ -118,16 +121,16 @@
 
   (function() {
     this.clone = function clone(object) {
-      return Object.extend({ }, object);
+      return Fuse.Object.extend({ }, object);
     };
 
     this.each = function each(object, callback, thisArg) {
       try {
-        Object._each(object, function(value, key, object) {
+        Fuse.Object._each(object, function(value, key, object) {
           callback.call(thisArg, value, key, object);
         });
       } catch (e) {
-        if (e !== $break) throw e;
+        if (e !== Fuse.$break) throw e;
       }
       return object;
     };
@@ -138,9 +141,9 @@
       if (typeof object.inspect === 'function') return object.inspect();
       if (object.constructor === Object.prototype.constructor) {
         var results = [];
-        Object._each(object, function(value, key) {
-          if (Object.hasKey(object, key))
-            results.push(key.inspect() + ': ' + Object.inspect(object[key]));
+        Fuse.Object._each(object, function(value, key) {
+          if (Fuse.Object.hasKey(object, key))
+            results.push(key.inspect() + ': ' + Fuse.Object.inspect(object[key]));
         });
         return '{' + results.join(', ') + '}';
       }
@@ -160,7 +163,7 @@
     this.isEmpty = (function() {
       var isEmpty = function isEmpty(object) {
         for (var key in object)
-          if (Object.hasKey(object, key))
+          if (Fuse.Object.hasKey(object, key))
             return false;
         return true;
       };
@@ -176,7 +179,7 @@
     })();
 
     this.isHash = function isHash(value) {
-      return value instanceof Hash;
+      return value instanceof Fuse.Hash;
     };
 
     this.isPrimitive = function isPrimitive(value) {
@@ -215,18 +218,18 @@
       var type = typeof object;
       switch (type) {
         case 'undefined':
-        case 'function':
-        case 'unknown': return;
-        case 'boolean': return object.toString();
+        case 'function' :
+        case 'unknown'  : return;
+        case 'boolean'  : return object.toString();
       }
 
       if (object === null) return 'null';
       if (typeof object.toJSON === 'function') return object.toJSON();
-      if (Object.isElement(object)) return;
+      if (Fuse.Object.isElement(object)) return;
 
       var results = [];
-      Object._each(object, function(value, key) {
-        value = Object.toJSON(value);
+      Fuse.Object._each(object, function(value, key) {
+        value = Fuse.Object.toJSON(value);
         if (typeof value !== 'undefined')
           results.push(key.toJSON() + ': ' + value);
       });
@@ -239,11 +242,11 @@
     };
 
     this.toQueryString = function toQueryString(object) {
-      var toQueryPair = Object.toQueryPair, results = [];
-      Object._each(object, function(value, key) {
+      var toQueryPair = Fuse.Object.toQueryPair, results = [];
+      Fuse.Object._each(object, function(value, key) {
         key = encodeURIComponent(key);
         if (value && typeof value === 'object') {
-          if (Object.isArray(value))
+          if (Fuse.Object.isArray(value))
             concatList(results, value.map(toQueryPair.curry(key)));
         } else results.push(toQueryPair(key, value));
       });
@@ -252,22 +255,22 @@
 
     this.keys = function keys(object) {
       // ECMA-3.1 Draft 15.2.3.14
-      if (Object.isPrimitive(object))
+      if (Fuse.Object.isPrimitive(object))
         throw new TypeError;
-      var results = [];
-      Object._each(object, function(value, key) {
-        if (Object.hasKey(object, key))
+      var results = Fuse.List();
+      Fuse.Object._each(object, function(value, key) {
+        if (Fuse.Object.hasKey(object, key))
           results.push(key);
       });
       return results;
     };
 
     this.values = function values(object) {
-      if (Object.isPrimitive(object))
+      if (Fuse.Object.isPrimitive(object))
         throw new TypeError;
-      var results = [];
-      Object._each(object, function(value, key) {
-        if (Object.hasKey(object, key))
+      var results = Fuse.List();
+      Fuse.Object._each(object, function(value, key) {
+        if (Fuse.Object.hasKey(object, key))
           results.push(value);
       });
       return results;
@@ -288,7 +291,7 @@
      toQueryString = null,
      toHTML =        null,
      values =        null;
-  }).call(Object);
+  }).call(Fuse.Object);
 
   (function() {
     // used to access the an object's internal [[Class]] property
@@ -320,4 +323,4 @@
      isNumber =   null,
      isRegExp =   null,
      isString =   null;
-  }).call(Object);
+  }).call(Fuse.Object);

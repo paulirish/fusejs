@@ -102,7 +102,7 @@
    this.clonePosition = function clonePosition(element, source, options) {
       element = $(element);
       source  = $(source);
-      options = Object._extend({
+      options = Fuse.Object._extend({
         'offsetLeft': 0,
         'offsetTop':  0,
         'setLeft':    true,
@@ -185,7 +185,7 @@
       function cumulativeOffset(element, ancestor) {
         element = Element._ensureLayout(element);
         ancestor = $(ancestor);
-        if (!Object.isElement(ancestor)) ancestor = null;
+        if (!Fuse.Object.isElement(ancestor)) ancestor = null;
 
         // offsetLeft/offsetTop properties return 0 on elements
         // with display:none, so show the element temporarily

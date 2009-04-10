@@ -1,3 +1,21 @@
+* Namespace natives Fuse.Date, Fuse.Function, Fuse.List, Fuse.Number, Fuse.RegExp and Fuse.String. [jddalton]
+  Note: Backwards compatibility warning.
+   - Moved abstract.js, deprecated.js, try.js to the Prototype emulator folder
+   - Moved Fuse.Browser object definition to broswer.js
+   - Renamed Ajax.PeriodicalUpdater to Ajax.TimedUpdate
+   - Cleaned-up private utility methods
+   - Ensure consistent use of named functions
+   - Implemented inheritable namespaces
+
+   - Change Fuse.Class()
+     * Removed Class.create() in favor of Fuse.Class(superclass/methods [, methods, ...])
+     * Allow passing a `constructor` method to Fuse.Class to use as the klass()
+     * Make the initialize() method optional and don't create it by default
+
+   - Added methods:
+     Fuse.addNS(path, superclass/methods [, methods, ...]): Add namespaces to the Fuse object
+     Fuse.Fusebox(): Return an object containing sandboxed natives
+
 * unit test: Add Form unit tests to ensure Fuse works with Safari's input type="search". [jddalton, malsup]
   Originally reported on http://dev.jquery.com/ticket/4107.
 

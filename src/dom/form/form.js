@@ -1,6 +1,8 @@
   /*---------------------------------- FORM ----------------------------------*/
 
-  global.$F = (function() {
+  Fuse.addNS('Util');
+
+  Fuse.Util.$F = (function() {
     function $F(element) {
       element = $(element);
       var s = Field.Serializers,
@@ -9,6 +11,8 @@
     }
     return $F;
   })();
+
+  /*--------------------------------------------------------------------------*/
 
   global.Form = { };
 
@@ -40,7 +44,7 @@
         isSubmitButton = type === 'submit' || isImageType;
 
         // reduce array value
-        if (Object.isArray(value) && value.length < 2)
+        if (Fuse.Object.isArray(value) && value.length < 2)
           value = value[0];
 
         if (value == null    || // controls with null/undefined values are unsuccessful
@@ -64,9 +68,9 @@
         if (!key) continue;
 
         // property exists and and belongs to result
-        if (Object.hasKey(result, key)) {
+        if (Fuse.Object.hasKey(result, key)) {
           // a key is already present; construct an array of values
-          if (!Object.isArray(result[key])) result[key] = [result[key]];
+          if (!Fuse.Object.isArray(result[key])) result[key] = [result[key]];
           result[key].push(value);
         }
         else result[key] = value;
@@ -74,7 +78,7 @@
 
       return options.hash
         ? result
-        : Object.toQueryString(result);
+        : Fuse.Object.toQueryString(result);
     };
 
     // prevent JScript bug with named function expressions
@@ -125,7 +129,7 @@
 
     this.getElements = function getElements(form) {
       form = $(form);
-      var node, results = [], i = 0,
+      var node, results = Fuse.List(), i = 0,
        nodes = $(form).getElementsByTagName('*');
       while (node = nodes[i++])
         if (node.nodeType === 1 &&
@@ -140,7 +144,7 @@
       if (!typeName && !name)
         return nodeListSlice.call(inputs, 0).map(Element.extend);
 
-      var input, results = [], i = 0;
+      var input, results = Fuse.List(), i = 0;
       while (input = inputs[i++])
         if ((!typeName || typeName === input.type) && (!name || name === input.name))
           results.push(Element.extend(input));
@@ -149,7 +153,7 @@
     };
 
     this.request = function request(form, options) {
-      form = $(form), options = Object.clone(options);
+      form = $(form), options = Fuse.Object.clone(options);
 
       var params = options.parameters, submit = options.submit,
        action = Element.readAttribute(form, 'action') || '';
@@ -159,14 +163,14 @@
       options.parameters = Form.serialize(form, { 'submit':submit, 'hash':true });
 
       if (params) {
-        if (typeof params === 'string') params = params.toQueryParams();
-        Object.extend(options.parameters, params);
+        if (Fuse.Object.isString(params)) params = params.toQueryParams();
+        Fuse.Object.extend(options.parameters, params);
       }
 
       if (Element.hasAttribute(form, 'method') && !options.method)
         options.method = form.method;
 
-      return new Ajax.Request(action, options);
+      return new Fuse.Ajax.Request(action, options);
     };
 
     this.serialize = function serialize(form, options) {
@@ -231,12 +235,12 @@
       element = $(element);
       if (!element.disabled && element.name) {
         var value = Field.getValue(element);
-        if (Object.isArray(value) && value.length < 2)
+        if (Fuse.Object.isArray(value) && value.length < 2)
           value = value[0];
         if (value != null) {
           var pair = { };
           pair[element.name] = value;
-          return Object.toQueryString(pair);
+          return Fuse.Object.toQueryString(pair);
         }
       }
       return '';
@@ -324,10 +328,11 @@
       if (value === null)
         return element.selectedIndex = -1;
 
-      var node, results = [], i = 0;
-      if (Object.isArray(value)) {
+      var node, i = 0;
+      if (Fuse.Object.isArray(value)) {
+        value = expando + value.join(expando) + expando;
         while (node = element.options[i++])
-          node.selected = value.contains(this.optionValue(node));
+          node.selected = value.indexOf(expando + this.optionValue(node) +expando) > -1;
       } else {
         while (node = element.options[i++])
           if (this.optionValue(node) === value)
@@ -341,7 +346,7 @@
     };
 
     this.selectMany = function selectMany(element) {
-      var node, results = [], i = 0;
+      var node, results = Fuse.List(), i = 0;
       if (!element.options.length) return null;
 
       while (node = element.options[i++])

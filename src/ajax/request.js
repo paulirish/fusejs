@@ -1,23 +1,26 @@
   /*---------------------------- AJAX: REQUEST -------------------------------*/
 
-  Ajax.Request = Class.create(Ajax.Base, {
-    '_complete': false
+  Fuse.addNS('Ajax.Request', Fuse.Ajax.Base, {
+    'constructor': (function() {
+      function Request(url, options) {
+        // this._super() equivalent
+        Fuse.Ajax.Base.call(this, options);
+        this.transport = Fuse.Ajax.getTransport();
+        this.request(url);
+      }
+      return Request;
+    })()
   });
 
-  Ajax.Request.Events = 
+  Fuse.Ajax.Request.Events = 
     ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
 
   (function() {
-    this.initialize = function initialize(url, options) {
-      // this._super() equivalent
-      Ajax.Base.prototype.initialize.call(this, options);
-      this.transport = Ajax.getTransport();
-      this.request(url);
-    };
+    this._complete = false;
 
     this.dispatchException = function dispatchException(exception) {
       (this.options.onException || Fuse.emptyFunction)(this, exception);
-      Ajax.Responders.dispatch('onException', this, exception);
+      Fuse.Ajax.Responders.dispatch('onException', this, exception);
     };
 
     this.evalResponse = function evalResponse() {
@@ -49,9 +52,9 @@
     this.request = function request(url) {
       this.url = url || global.location.href;
       this.method = this.options.method;
-      var params = Object.clone(this.options.parameters);
+      var params = Fuse.Object.clone(this.options.parameters);
 
-      if (!['get', 'post'].contains(this.method)) {
+      if (!/^(get|post)$/.test(this.method)) {
         // simulate other verbs over post
         params['_method'] = this.method;
         this.method = 'post';
@@ -59,21 +62,22 @@
 
       this.parameters = params;
 
-      if (params = Object.toQueryString(params)) {
+      if (params = Fuse.Object.toQueryString(params)) {
         // when GET, append parameters to URL
         if (this.method == 'get')
-          this.url += (this.url.contains('?') ? '&' : '?') + params
+          this.url += (this.url.indexOf('?') > -1 ? '&' : '?') + params
       }
 
       try {
-        var response = new Ajax.Response(this);
+        var response = new Fuse.Ajax.Response(this);
         if (this.options.onCreate) this.options.onCreate(response);
-        Ajax.Responders.dispatch('onCreate', this, response);
+        Fuse.Ajax.Responders.dispatch('onCreate', this, response);
 
         this.transport.open(this.method.toUpperCase(), this.url, 
           this.options.asynchronous);
 
-        if (this.options.asynchronous) this.respondToReadyState.bind(this).defer(1);
+        if (this.options.asynchronous)
+          Fuse.Function.defer(Fuse.Function.bind(this.respondToReadyState, this), 1);
 
         this.transport.onreadystatechange = this.onStateChange.bind(this);
         this.setRequestHeaders();
@@ -92,7 +96,7 @@
     };
 
     this.respondToReadyState = function respondToReadyState(readyState) {
-      var state = Ajax.Request.Events[readyState], response = new Ajax.Response(this);
+      var state = Fuse.Ajax.Request.Events[readyState], response = new Fuse.Ajax.Response(this);
 
       if (state == 'Complete') {
         try {
@@ -106,14 +110,14 @@
 
         var contentType = response.getHeader('Content-type');
         if (this.options.evalJS == 'force'
-            || (this.options.evalJS && Object.isSameOrigin(this.url) && contentType 
+            || (this.options.evalJS && Fuse.Object.isSameOrigin(this.url) && contentType 
             && contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;.*)?\s*$/i)))
           this.evalResponse();
       }
 
       try {
         (this.options['on' + state] || Fuse.emptyFunction)(response, response.headerJSON);
-        Ajax.Responders.dispatch('on' + state, this, response, response.headerJSON);
+        Fuse.Ajax.Responders.dispatch('on' + state, this, response, response.headerJSON);
       } catch (e) {
         this.dispatchException(e);
       }
@@ -147,11 +151,11 @@
       // user-defined headers
       var key, extras = this.options.requestHeaders;
       if (typeof extras === 'object') {
-        if (Object.isArray(extras))
+        if (Fuse.Object.isArray(extras))
           for (var i = 0, length = extras.length; i < length; i += 2) 
             headers[extras[i]] = extras[i + 1];
         else {
-          if (Object.isHash(extras)) extras = extras._object;
+          if (Fuse.Object.isHash(extras)) extras = extras._object;
           for (key in extras) headers[key] = extras[key];
         }
       }
@@ -166,14 +170,13 @@
     };
 
     // prevent JScript bug with named function expressions
-    var initialize =       null,
-     dispatchException =   null,
-     evalResponse =        null,
-     getHeader =           null,
-     getStatus =           null,
-     onStateChange =       null,
-     request =             null,
-     respondToReadyState = null,
-     setRequestHeaders =   null,
-     success =             null;
-  }).call(Ajax.Request.prototype);
+    var dispatchException = null,
+     evalResponse =         null,
+     getHeader =            null,
+     getStatus =            null,
+     onStateChange =        null,
+     request =              null,
+     respondToReadyState =  null,
+     setRequestHeaders =    null,
+     success =              null;
+  }).call(Fuse.Ajax.Request.Plugin);

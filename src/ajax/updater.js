@@ -1,43 +1,45 @@
   /*------------------------------ AJAX: UPDATER -----------------------------*/
 
-  Ajax.Updater = Class.create(Ajax.Request);
-  (function() {
-    this.initialize = function initialize(container, url, options) {
-      this.container = {
-        'success': (container.success || container),
-        'failure': (container.failure || (container.success ? null : container))
-      };
+  Fuse.addNS('Ajax.Updater', Fuse.Ajax.Request, {
+    'constructor': (function() {
+      function Updater(container, url, options) {
+        this.container = {
+          'success': (container.success || container),
+          'failure': (container.failure || (container.success ? null : container))
+        };
 
-      options = Object.clone(options);
-      var updater = this, onComplete = options.onComplete;
-      
-      options.onComplete = function(response, json) {
-        updater.updateContent(response.responseText);
-        if (typeof onComplete === 'function') onComplete(response, json);
-      };
+        options = Fuse.Object.clone(options);
+        var updater = this, onComplete = options.onComplete;
 
-      // this._super() equivalent
-      Ajax.Request.prototype.initialize.call(this, url, options);
-    };
+        options.onComplete = function(response, json) {
+          updater.updateContent(response.responseText);
+          if (typeof onComplete === 'function') onComplete(response, json);
+        };
 
-    this.updateContent = function updateContent(responseText) {
-      var receiver = this.container[this.success() ? 'success' : 'failure'], 
-          options = this.options;
-
-      if (!options.evalScripts) responseText = responseText.stripScripts();
-
-      if (receiver = $(receiver)) {
-        if (options.insertion) {
-          if (typeof options.insertion === 'string') {
-            var insertion = { }; insertion[options.insertion] = responseText;
-            receiver.insert(insertion);
-          }
-          else options.insertion(receiver, responseText);
-        } 
-        else receiver.update(responseText);
+        // this._super() equivalent
+        Fuse.Ajax.Request.call(this, url, options);
       }
-    };
+      return Updater;
+    })(),
 
-    // prevent JScript bug with named function expressions
-    var initialize = null, updateContent = null;
-  }).call(Ajax.Updater.prototype);
+    'updateContent': (function() {
+      function updateContent(responseText) {
+        var receiver = this.container[this.success() ? 'success' : 'failure'], 
+         options = this.options;
+
+        if (!options.evalScripts)
+          responseText = responseText.stripScripts();
+        if (receiver = $(receiver)) {
+          if (options.insertion) {
+            if (Fuse.Object.isString(options.insertion)) {
+              var insertion = { }; insertion[options.insertion] = responseText;
+              receiver.insert(insertion);
+            }
+            else options.insertion(receiver, responseText);
+          }
+          else receiver.update(responseText);
+        }
+      }
+      return updateContent;
+    })()
+  });

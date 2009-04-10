@@ -122,19 +122,19 @@
     T.write.checked = setChecked;
 
     // mandate flag attributes return their name
-    $w('checked disabled isMap multiple readOnly')._each(function(attr) {
+    Fuse.Util.$w('checked disabled isMap multiple readOnly')._each(function(attr) {
       T.read[attr] = getFlag(attr);
     });
 
     // mandate event attribute getter
-    $w('blur change click contextmenu dblclick error focus load keydown ' +
+    Fuse.Util.$w('blur change click contextmenu dblclick error focus load keydown ' +
        'keypress keyup mousedown mousemove mouseout mouseover mouseup ' +
        'readystatechange reset submit select unload')._each(function(attr) {
       T.read['on' + attr] = getEvent;
     });
 
     // add camel-cased attributes to name translations
-    $w('bgColor codeBase codeType cellPadding cellSpacing colSpan rowSpan ' +
+    Fuse.Util.$w('bgColor codeBase codeType cellPadding cellSpacing colSpan rowSpan ' +
        'vAlign vLink aLink dateTime accessKey tabIndex encType maxLength ' +
        'readOnly longDesc frameBorder isMap useMap noHref noResize noShade ' +
        'noWrap marginWidth marginHeight')._each(function(attr) {
@@ -177,7 +177,7 @@
 
       // get and set `style` attribute
       value = (node = label.getAttributeNode('style')) && node.value;
-      if (typeof value !== 'string' || !value.startsWith('display:block')) {
+      if (typeof value !== 'string' || value.indexOf('display:block') !== 0) {
         T.read.style  = getStyle;
         T.write.style = setStyle;
       }
@@ -188,7 +188,7 @@
         // Exclude `action` attribute because:
         // Opera 9.25 will automatically translate the URI from relative to absolute.
         // In IE this fix has the reverse effect.
-        $w('data href longDesc src')
+        Fuse.Util.$w('data href longDesc src')
           ._each(function(attr) { T.read[attr] = getExact });
       }
     })();

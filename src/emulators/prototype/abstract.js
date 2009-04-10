@@ -1,3 +1,3 @@
   /*----------------------------- LANG: ABSTRACT -----------------------------*/
 
-  global.Abstract = { };
+  Fuse.addNS('Abstract');

@@ -4,9 +4,13 @@
    * part of YUI-Ext version 0.40, distributed under the terms of an MIT-style
    * license.  Please see http://www.yui-ext.com/ for more information. */
 
-  global.$$ = function() {
+  Fuse.addNS('Util');
+
+  Fuse.Util.$$ = function() {
     return Selector.findChildElements(Fuse._doc, slice.call(arguments, 0));
   };
+
+  /*--------------------------------------------------------------------------*/
 
   if (Feature('XPATH')) {
     Fuse._doc._getElementsByXPath = function(expression, parentElement) {
@@ -20,7 +24,7 @@
     };
   }
 
-  global.Selector = Class.create((function() {
+  global.Selector = Fuse.Class((function() {
     function initialize(expression) {
       this.expression = expression.trim();
 
@@ -91,7 +95,7 @@
         for (var i = 0, m, p; p = ps[i++]; ) {
           if (m = e.match(p.regexp)) {
             this.matcher.push(typeof c[p.name] === 'function' ? c[p.name](m) :
-              new Template(c[p.name]).evaluate(m));
+              new Fuse.Template(c[p.name]).evaluate(m));
             e = e.replace(m[0], '');
             break;
           }
@@ -117,7 +121,7 @@
         for (var i = 0, m, p; p = ps[i++]; ) {
           if (m = e.match(p.regexp)) {
             this.matcher.push(typeof x[p.name] === 'function' ? x[p.name](m) : 
-              new Template(x[p.name]).evaluate(m));
+              new Fuse.Template(x[p.name]).evaluate(m));
             e = e.replace(m[0], '');
             break;
           }
@@ -142,7 +146,7 @@
             e = '#' + id + ' ' + e;
           }
 
-          results = nodeListSlice.call(root.querySelectorAll(e), 0).map(Element.extend);
+          results = Fuse.List.from(nodeListSlice.call(root.querySelectorAll(e), 0)).map(Element.extend);
           root.id = oldId;
 
           return results;
@@ -181,7 +185,7 @@
             // use the Selector.assertions methods unless the selector
             // is too complex.
             if (as[p.name]) {
-              this.tokens.push([p.name, Object.clone(m)]);
+              this.tokens.push([p.name, Fuse.Object.clone(m)]);
               e = e.replace(m[0], '');
             } else {
               // reluctantly do a document-wide search
@@ -220,7 +224,7 @@
     };
   })());
   
-  Object._extend(Selector, (function() {
+  Fuse.Object._extend(Selector, (function() {
     function findChildElements(element, expressions) {
       expressions = Selector.split(expressions.join(','));
       var results = [], h = Selector.handlers;    
@@ -248,8 +252,8 @@
 
     function split(expression) {
       var expressions = [];
-      expression.scan(/(([\w#:.~>+()\s-]|\*|\[.*?\])+)\s*(,|$)/, function(m) {
-        expressions.push(m[1].trim());
+      expression.replace(/(([\w#:.~>+()\s-]|\*|\[.*?\])+)\s*(,|$)/g, function(m) {
+        expressions.push(Fuse.String(m[1]).trim());
       });
       return expressions;
     }
@@ -262,26 +266,26 @@
     };
   })());
 
-  Object._extend(Selector, {
+  Fuse.Object._extend(Selector, {
     _cache: { },
 
     xpath: (function() {
       function attr(m) {
         m[1] = m[1].toLowerCase();
         m[3] = m[5] || m[6];
-        return new Template(Selector.xpath.operators[m[2]]).evaluate(m);
+        return new Fuse.Template(Selector.xpath.operators[m[2]]).evaluate(m);
       }
 
       function attrPresence(m) {
         m[1] = m[1].toLowerCase();
-        return new Template('[@#{1}]').evaluate(m);
+        return new Fuse.Template('[@#{1}]').evaluate(m);
       }
 
       function pseudo(m) {
         var h = Selector.xpath.pseudos[m[1]];
         if (!h) return '';
         if (typeof h === 'function') return h(m);
-        return new Template(Selector.xpath.pseudos[m[1]]).evaluate(m);
+        return new Fuse.Template(Selector.xpath.pseudos[m[1]]).evaluate(m);
       }
 
       function tagName(m) { 
@@ -331,7 +335,7 @@
               le = e;
               for (var i = 0, p, v; p = ps[i++]; ) {
                 if (m = e.match(p.regexp)) {
-                  v = typeof x[p.name] === 'function' ? x[p.name](m) : new Template(x[p.name]).evaluate(m);
+                  v = typeof x[p.name] === 'function' ? x[p.name](m) : new Fuse.Template(x[p.name]).evaluate(m);
                   exclusions.push('(' + v.substring(1, v.length - 1) + ')');
                   e = e.replace(m[0], '');
                   break;
@@ -354,7 +358,7 @@
               var b = mm[2] ? Number(mm[2]) : 0;
  
               predicate = '[((#{fragment} - #{b}) mod #{a} = 0) and ((#{fragment} - #{b}) div #{a} >= 0)]';
-              return new Template(predicate).evaluate({
+              return new Fuse.Template(predicate).evaluate({
                 fragment: fragment, a: a, b: b });
             }
           }
@@ -405,12 +409,12 @@
     criteria: (function() {
       function attr(m) {
         m[3] = (m[5] || m[6]);
-        return new Template('n = h.attr(n, r, "#{1}", "#{3}", "#{2}", c); c = false;').evaluate(m);
+        return new Fuse.Template('n = h.attr(n, r, "#{1}", "#{3}", "#{2}", c); c = false;').evaluate(m);
       }
 
       function pseudo(m) {
         if (m[6]) m[6] = m[6].replace(/"/g, '\\"');
-        return new Template('n = h.pseudo(n, "#{1}", "#{6}", r, c); c = false;').evaluate(m); 
+        return new Fuse.Template('n = h.pseudo(n, "#{1}", "#{6}", r, c); c = false;').evaluate(m); 
       }
 
       return {

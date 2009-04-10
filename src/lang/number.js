@@ -2,23 +2,23 @@
 
   (function() {
     this.abs = function abs() {
-      return Math.abs(this);
+      return Fuse.Number(Math.abs(this));
     };
 
     this.ceil = function ceil() {
-      return Math.ceil(this);
+      return Fuse.Number(Math.ceil(this));
     };
 
     this.floor = function floor() {
-      return Math.floor(this);
+      return Fuse.Number(Math.floor(this));
     };
 
     this.round = function round() {
-      return Math.round(this);
+      return Fuse.Number(Math.round(this));
     };
 
     this.succ = function succ() {
-      return this + 1;
+      return Fuse.Number(this + 1);
     };
 
     this.times = function times(callback, thisArg) {
@@ -36,12 +36,12 @@
     };
 
     this.toJSON = function toJSON() {
-      return isFinite(this) ? this.toString() : 'null';
+      return Fuse.String(isFinite(this) ? this : 'null');
     };
 
     this.toPaddedString = function toPaddedString(length, radix) {
       var string = this.toString(radix || 10);
-      return '0'.times(length - string.length) + string;
+      return Fuse.String('0').times(length - string.length).concat(string);
     };
 
     // prevent JScript bug with named function expressions
@@ -54,4 +54,4 @@
      toColorPart =    null,
      toJSON =         null,
      toPaddedString = null;
-  }).call(Number.prototype);
+  }).call(Fuse.Number.Plugin);

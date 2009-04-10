@@ -1,24 +1,23 @@
-  /*------------------------------- AJAX: BASE -------------------------------*/
+ /*------------------------------- AJAX: BASE -------------------------------*/
 
-  Ajax.Base = Class.create((function() {
-    function initialize(options) {
-      this.options = Object._extend(Object
-        .clone(Ajax.Base.defaultOptions), options);
+  Fuse.addNS('Ajax.Base', {
+    'constructor': (function() {
+      function Base(options) {
+        this.options = Fuse.Object._extend(Object
+          .clone(Ajax.Base.defaultOptions), options);
 
-      this.options.method = this.options.method.toLowerCase();
+        this.options.method = this.options.method.toLowerCase();
 
-      if (typeof this.options.parameters === 'string') 
-        this.options.parameters = this.options.parameters.toQueryParams();
-      else if (Object.isHash(this.options.parameters))
-        this.options.parameters = this.options.parameters.toObject();
-    }
+        if (typeof this.options.parameters === 'string') 
+          this.options.parameters = this.options.parameters.toQueryParams();
+        else if (Fuse.Object.isHash(this.options.parameters))
+          this.options.parameters = this.options.parameters.toObject();
+      }
+      return Base;
+    })()
+  });
 
-    return {
-      'initialize': initialize
-    };
-  })());
-
-  Ajax.Base.defaultOptions = {
+  Fuse.Ajax.Base.defaultOptions = {
     'asynchronous': true,
     'contentType':  'application/x-www-form-urlencoded',
     'encoding':     'UTF-8',

@@ -35,6 +35,6 @@
       v['get' + D] = function() { return node['client' + D] };
       return v['get' + D]();
     }
-    v.getHeight = define.curry('Height');
-    v.getWidth  = define.curry('Width');
+    v.getHeight = Fuse.Function.curry(define, 'Height');
+    v.getWidth  = Fuse.Function.curry(define, 'Width');
   })(Fuse._doc.viewport);

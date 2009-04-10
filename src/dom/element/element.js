@@ -1,13 +1,15 @@
   /*-------------------------------- ELEMENT ---------------------------------*/
 
-  global.$ = (function() {
+  Fuse.addNS('Util');
+
+  Fuse.Util.$ = global.$ = (function() {
     function $(element) {
       if (arguments.length > 1) {
         for (var i = 0, elements = [], length = arguments.length; i < length; i++)
           elements.push($(arguments[i]));
         return elements;
       }
-      if (typeof element === 'string')
+      if (Fuse.Object.isString(element))
         element = Fuse._doc.getElementById(element || expando);
       return Element.extend(element);
     }
@@ -49,9 +51,9 @@
     }
 
     if (original) {
-      // avoid Object.extend() because IE8 cannot set any
+      // avoid Fuse.Object.extend() because IE8 cannot set any
       // variable/property reference to Element.toString
-      Object._extend(global.Element, original);
+      Fuse.Object._extend(global.Element, original);
       global.Element.prototype = original.prototype;
     }
   })();
@@ -73,7 +75,7 @@
       var pair, methods = ByTag[nodeName] || Methods, length = methods.length;
       while (length--) {
         pair = methods[length];
-        if (!Object.hasKey(element, pair[0]))
+        if (!Fuse.Object.hasKey(element, pair[0]))
           element[pair[0]] = pair[1];
       }
 
@@ -96,19 +98,19 @@
     function refresh() {
       var tagName; Methods = []; ByTag = { };
 
-      Object._each(Element.Methods, function(value, key) {
+      Fuse.Object._each(Element.Methods, function(value, key) {
         if (key !== 'Simulated' && key !== 'ByTag')
-          Methods.push([key, value.methodize()]);
+          Methods.push([key, Fuse.Function.methodize(value)]);
       });
 
-      Object._each(Element.Methods.Simulated, function(value, key) {
-        Methods.push([key, value.methodize()]);
+      Fuse.Object._each(Element.Methods.Simulated, function(value, key) {
+        Methods.push([key, Fuse.Function.methodize(value)]);
       });
 
       for (tagName in Element.Methods.ByTag) {
         ByTag[tagName] = slice.call(Methods, 0);
-        Object._each(Element.Methods.ByTag[tagName], function(value, key) {
-          ByTag[tagName].push([key, value.methodize()]);
+        Fuse.Object._each(Element.Methods.ByTag[tagName], function(value, key) {
+          ByTag[tagName].push([key, Fuse.Function.methodize(value)]);
         });
       }
       revision++;
@@ -204,10 +206,10 @@
 
     function _copy(methods, destination, onlyIfAbsent) {
       onlyIfAbsent = onlyIfAbsent || false;
-      Object._each(methods, function(value, key) {
+      Fuse.Object._each(methods, function(value, key) {
         if (typeof value === 'function' && 
            (!onlyIfAbsent || !(key in destination)))
-          destination[key] = value.methodize();
+          destination[key] = Fuse.Function.methodize(value);
       });
     }
 
@@ -221,13 +223,13 @@
       tagName = tagName.toUpperCase();
       if (!Element.Methods.ByTag[tagName])
         Element.Methods.ByTag[tagName] = { };
-      Object.extend(Element.Methods.ByTag[tagName], methods);
+      Fuse.Object.extend(Element.Methods.ByTag[tagName], methods);
     }
 
     function _findDOMClass(tagName) {
       // catch most classes like HTMLUListElement and HTMLSelectElement
       var className = 'HTML' + (tagNameClassLookup[tagName] ||
-        tagName.capitalize()) + 'Element';
+        Fuse.String(tagName).capitalize()) + 'Element';
       if (global[className])
         return global[className];
       // catch element classes like HTMLLIElement
@@ -243,14 +245,14 @@
       var tagName, T = Element.Methods.ByTag;
 
       if (!methods) {
-        Object.extend(Form, Form.Methods);
-        Object.extend(Form.Element, Form.Element.Methods);
-        Object.extend(Element.Methods.ByTag, {
-          'BUTTON':   Object.clone(Form.Element.Methods),
-          'FORM':     Object.clone(Form.Methods),
-          'INPUT':    Object.clone(Form.Element.Methods),
-          'SELECT':   Object.clone(Form.Element.Methods),
-          'TEXTAREA': Object.clone(Form.Element.Methods)
+        Fuse.Object.extend(Form, Form.Methods);
+        Fuse.Object.extend(Form.Element, Form.Element.Methods);
+        Fuse.Object.extend(Element.Methods.ByTag, {
+          'BUTTON':   Fuse.Object.clone(Form.Element.Methods),
+          'FORM':     Fuse.Object.clone(Form.Methods),
+          'INPUT':    Fuse.Object.clone(Form.Element.Methods),
+          'SELECT':   Fuse.Object.clone(Form.Element.Methods),
+          'TEXTAREA': Fuse.Object.clone(Form.Element.Methods)
         });
       }
 
@@ -260,9 +262,9 @@
       }
 
       if (!tagName)
-        Object.extend(Element.Methods, methods);
+        Fuse.Object.extend(Element.Methods, methods);
       else {
-        Object.isArray(tagName)
+        Fuse.Object.isArray(tagName)
           ? tagName._each(function(name) { _extend(name, methods) })
           : _extend(tagName, methods);
       }
@@ -282,7 +284,7 @@
         elementPrototype._extendedByFuse = infiniteRevision;
       }
 
-      Object.extend(Element, Element.Methods);
+      Fuse.Object.extend(Element, Element.Methods);
       delete Element.ByTag;
 
       Element.extend.refresh();
@@ -305,7 +307,7 @@
 
   (function() {
     // TODO: Opera fails to render optgroups when set with innerHTML
-    Object._extend(this.tags, {
+    Fuse.Object._extend(this.tags, {
       'OPTGROUP': this.tags.SELECT,
       'TFOOT':    this.tags.TBODY,
       'TH':       this.tags.TD,
@@ -410,7 +412,7 @@
 
       for (var property in translation) {
         attribute = translation[property];
-        value = (element[property] || '').toString();
+        value = Fuse.String(element[property] || '');
         if (value) result += ' ' + attribute + '=' + value.inspect(true);
       }
       return result + '>';
@@ -480,9 +482,9 @@
 
     this.wrap = function wrap(element, wrapper, attributes) {
       element = $(element);
-      if (Object.isElement(wrapper))
+      if (Fuse.Object.isElement(wrapper))
         $(wrapper).writeAttribute(attributes);
-      else if (typeof wrapper === 'string')
+      else if (Fuse.Object.isString(wrapper))
         wrapper = new Element(wrapper, attributes);
       else wrapper = new Element('div', wrapper);
       if (element.parentNode)
@@ -522,7 +524,8 @@
 
     this.insert = function insert(element, insertions) {
       element = $(element);
-      var content, fragment, insertContent, position, nodeName, type = typeof insertions;
+      var content, fragment, insertContent, position, nodeName,
+       type = insertions && typeof insertions.valueOf();
       if (insertions && (type === 'string' || type === 'number' ||
           _isInsertable(insertions) || insertions.toElement || insertions.toHTML)) {
         insertions = { 'bottom': insertions };
@@ -539,7 +542,7 @@
             insertContent(element, content);
             continue;
           }
-          content = Object.toHTML(content);
+          content = Fuse.Object.toHTML(content);
         }
         else continue;
 
@@ -550,7 +553,7 @@
           element.ownerDocument, nodeName, content.stripScripts());
 
         insertContent(element, fragment);
-        content.evalScripts.bind(content).defer();
+        Fuse.Function.defer(Fuse.Function.bind(content.evalScripts, content));
       }
       return element;
     };
@@ -574,8 +577,8 @@
         if (content.toElement)
           content = content.toElement();
         else if (!_isInsertable(content)) {
-          content = Object.toHTML(content);
-          content.evalScripts.bind(content).defer();
+          content = Fuse.Object.toHTML(content);
+          Fuse.Function.defer(Fuse.Function.bind(content.evalScripts, content));
           content = _createContextualFragment(element, content.stripScripts());
         }
         _replaceElement(element, content);
@@ -588,7 +591,7 @@
     this.update = function update(element, content) {
       element = $(element);
       if (getNodeName(element) === 'SCRIPT') {
-        element.text = String.interpret(content);
+        element.text = Fuse.String.interpret(content);
       } else {
         if (content) {
           if (content.toElement)
@@ -598,9 +601,9 @@
             element.appendChild(content);
             return element;
           }
-          content = Object.toHTML(content);
+          content = Fuse.Object.toHTML(content);
           element.innerHTML = content.stripScripts();
-          content.evalScripts.bind(content).defer();
+          Fuse.Function.defer(Fuse.Function.bind(content.evalScripts, content));
         } else element.innerHTML = '';
       }
       return element;
@@ -612,7 +615,7 @@
         element = $(element);
         var nodeName = getNodeName(element), isBuggy = BUGGY[nodeName];
         if (nodeName === 'SCRIPT') {
-          element.text = String.interpret(content);
+          element.text = Fuse.String.interpret(content);
         } else {
           // remove children
           if (isBuggy) {
@@ -624,12 +627,12 @@
             if (content.toElement) content = content.toElement();
             if (_isInsertable(content)) element.appendChild(content);
             else {
-              content = Object.toHTML(content);
+              content = Fuse.Object.toHTML(content);
               if (isBuggy)
                 element.appendChild(Element._getContentFromAnonymousElement(
                   element.ownerDocument, nodeName, content.stripScripts()));
               else element.innerHTML = content.stripScripts();
-              content.evalScripts.bind(content).defer();
+              Fuse.Function.defer(Fuse.Function.bind(content.evalScripts, content));
             }
           }
         }
@@ -647,7 +650,7 @@
         BUGGY.TABLE = BUGGY.TBODY = BUGGY.TR = BUGGY.TD = 
         BUGGY.TFOOT = BUGGY.TH    = BUGGY.THEAD = 1;
 
-      if (!Object.isEmpty(BUGGY))
+      if (!Fuse.Object.isEmpty(BUGGY))
         this.update = update;
     }).call(this);
 
@@ -684,10 +687,10 @@
       }
 
       if (Bug('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT_PROPERTY_ON_INSERT')) {
-        _replaceElement = _replaceElement.wrap(wrapper);
+        _replaceElement = Fuse.Function.wrap(_replaceElement, wrapper);
 
-        $w('before top bottom after').each(function(method) {
-          this[method] = this[method].wrap(wrapper);
+        Fuse.Util.$w('before top bottom after').each(function(method) {
+          this[method] = Fuse.Function.wrap(this[method], wrapper);
         }, Element._insertionTranslations);
       }
     })();
@@ -699,7 +702,7 @@
   /*--------------------------------------------------------------------------*/
 
   // define Element#getWidth() and Element#getHeight()
-  $w('Width Height')._each(function(D) {
+  Fuse.Util.$w('Width Height')._each(function(D) {
     Element.Methods['get' + D] = (function() {
       var property = 'offset' + D;
       return function(element) {

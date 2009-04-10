@@ -1,17 +1,15 @@
-  /*-------------------------------- FEATURES --------------------------------*/
+  /*--------------------------- CAPABILITY TESTER ----------------------------*/
 
   (function() {
-    function createTester(cache) {
-      function Tester() {
-        var name, o = Tester._object, i = 0;
-      	while (name = arguments[i++]) {
-          if (typeof o[name] === 'function')
-            o[name] = o[name]();
-          if (o[name] !== true)
-            return false;
-        }
-        return true;
-      };
+    function createTester(name) {
+      var Tester = new Function('', [
+        'function ' + name + '() {',
+        'var title, o = ' + name + '._object, i = 0;',
+      	'while (title = arguments[i++]) {',
+        'if (typeof o[title] === "function") o[title] = o[title]();',
+        'if (o[title] !== true) return false;',
+        '}', 'return true;',
+        '}', 'return ' + name].join('\n'))();
 
       Tester.set = function(name, value) {
         var o = this._object;
@@ -22,19 +20,22 @@
 
       Tester.unset = function(name) {
         var o = this._object;
+        name = name.valueOf();
         if (typeof name === 'string') delete o[name];
         else {
           for (var i in name) delete o[i];
         }
       };
 
-      Tester._object = cache || { };
+      Tester._object = { };
       return Tester;
     }
 
-    Bug = Fuse.Browser.Bug = createTester();
-    Feature = Fuse.Browser.Feature = createTester();
+    Bug = createTester('Bug');
+    Feature = createTester('Feature');
   })();
+
+  /*---------------------------- BROWSER FEATURES ----------------------------*/
 
   Feature.set({
     'CREATE_ELEMENT_WITH_HTML': function() {
@@ -48,7 +49,7 @@
 
     'DOCUMENT_ALL_COLLECTION': function() {
       // true for all but Firefox
-       isHostObject(Fuse._doc, 'all');
+      isHostObject(Fuse._doc, 'all');
     },
 
     'DOCUMENT_CREATE_EVENT': function() {
@@ -156,7 +157,8 @@
     'ELEMENT_MS_CSS_FILTERS': function() {
       // true for IE
       return isHostObject(Fuse._docEl, 'filters') &&
-        typeof Fuse._docEl.style.filter === 'string';
+        typeof Fuse._docEl.style.filter === 'string' &&
+        typeof Fuse._docEl.style.opacity !== 'string';
     },
 
     'ELEMENT_REMOVE_NODE': function() {
@@ -272,7 +274,7 @@
     });
   })();
 
-  /*---------------------------------- BUGS ----------------------------------*/
+  /*------------------------------ BROWSER BUGS ------------------------------*/
 
   Bug.set({
     'ARRAY_CONCAT_ARGUMENTS_BUGGY': function() {

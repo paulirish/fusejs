@@ -73,7 +73,7 @@
          t = Element._insertionTranslations.tags[nodeName];
         if (t) {
           node.innerHTML= t[0] + html + t[1];
-          t[2].times(function() { node = node.firstChild });
+          Fuse.String(t[2]).times(function() { node = node.firstChild });
         } else node.innerHTML = html;
 
         // skip auto-inserted tbody
@@ -102,8 +102,8 @@
       return parseFloat(Element.getStyle(element, style)) || 0;
     }
 
-    $w('width height')._each(function(d) {
-      var D = d.capitalize(),
+    Fuse.Util.$w('width height')._each(function(d) {
+      var D = Fuse.String(d).capitalize(),
        pos = d === 'width' ? ['Left', 'Right'] : ['Top', 'Bottom'];
 
       Element['_getBorder' + D] = (function() {

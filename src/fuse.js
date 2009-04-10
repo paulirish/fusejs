@@ -1,11 +1,41 @@
 <%= include 'HEADER' %>
 (function(global) {
+  global.Fuse = {
+    '_body':          null,
+    '_root':          null,
+    '_scrollEl':      null,
+    '_div':           document.createElement('div'),
+    '_doc':           document,
+    '_docEl':         document.documentElement,
+    'JSONFilter':     /^\/\*-secure-([\s\S]*)\*\/\s*$/, 
+    'ScriptFragment': '<script[^>]*>([^\\x00]*?)<\/script>',
+    'Version':        '<%= FUSEJS_VERSION %>'
+  };
+
+  Fuse.emptyFunction = (function() {
+    function emptyFunction() { }
+    return emptyFunction;
+  })();
+
+  Fuse.K = (function() {
+    function K(x) { return x }
+    return K;
+  })();
+
+  Fuse._info = {
+    'body':  { 'nodeName': 'BODY', 'property': 'body' },
+    'docEl': { 'nodeName': 'HTML', 'property': 'documentElement' }
+  };
+
+  Fuse._info.root = Fuse._info.docEl;
+  Fuse._info.scrollEl = Fuse._info.body;
+
+  /*----------------------- PRIVATE VARIABLES/METHODS ------------------------*/
 
   var Bug, Feature,
    expando = '_fuse' + String(+new Date).slice(0, 10),
    slice = Array.prototype.slice,
-   userAgent = global.navigator.userAgent,
-   nodeListSlice = slice;
+   userAgent = global.navigator.userAgent;
 
   // Host objects have a range of typeof values. For example:
   // document.createElement('div').offsetParent -> unknown
@@ -29,61 +59,26 @@
   }
 
   function prependList(list, value) {
-    var result = [value], length = list.length;
-    while (length--) result[1 + length] = list[length];
-    return result;
+    var results = [value], length = list.length;
+    while (length--) results[1 + length] = list[length];
+    return results;
   }
 
-  /*---------------------------- FUSE OBJECT ---------------------------------*/
-
-  global.Fuse = {
-    '_body':     null,
-    '_root':     null,
-    '_scrollEl': null,
-    '_div':      document.createElement('div'),
-    '_doc':      document,
-    '_docEl':    document.documentElement,
-
-    Browser: {
-      Agent: {
-        'IE':     isHostObject(global, 'attachEvent') && userAgent.indexOf('Opera') === -1,
-        'Opera':  userAgent.indexOf('Opera') > -1,
-        'WebKit': userAgent.indexOf('AppleWebKit/') > -1,
-        'Gecko':  userAgent.indexOf('Gecko') > -1 && userAgent.indexOf('KHTML') === -1,
-        'MobileSafari': !!userAgent.match(/AppleWebKit.*Mobile/)
-      }
-    },
-
-    emptyFunction:  function() { },
-    JSONFilter:     /^\/\*-secure-([\s\S]*)\*\/\s*$/, 
-    K:              function(x) { return x },
-    ScriptFragment: '<script[^>]*>([^\\x00]*?)<\/script>',
-    Version:        '<%= FUSEJS_VERSION %>'
-  };
-
-  Fuse._info = {
-    'body':  { 'nodeName': 'BODY', 'property': 'body' },
-    'docEl': { 'nodeName': 'HTML', 'property': 'documentElement' }
-  };
-
-  Fuse._info.root = Fuse._info.docEl;
-  Fuse._info.scrollEl = Fuse._info.body;
-
   var getNodeName = Fuse._docEl.nodeName === 'HTML'
-    ? function(element) { return element.nodeName }
-    : function(element) { return element.nodeName.toUpperCase() };
+    ? function getNodeName(element) { return element.nodeName }
+    : function getNodeName(element) { return element.nodeName.toUpperCase() };
 
-  // based on work by Diego Perini
+  /* Based on work by Diego Perini */
   var getWindow =
     isHostObject(Fuse._doc, 'parentWindow') ?
-      function(element) {
+      function getWindow(element) {
         return getDocument(element).parentWindow || element;
       } :
     isHostObject(document, 'defaultView') && Fuse._doc.defaultView === global ?
-      function(element) {
+      function getWindow(element) {
         return getDocument(element).defaultView || element;
       } :
-    function(element) {
+    function getWindow(element) {
       // Safari 2.0.x returns `Abstract View` instead of `global`
       var frame, i = 0, doc = getDocument(element);
       if (Fuse._doc !== doc) {
@@ -97,58 +92,87 @@
   // IE throws an error when passing a nodeList to slice.call()
   // Safari 2 will return a full array with undefined values
   // Opera 9.2x will return an empty array if an element has an id of `length`
-  (function() {
-    function complex(begin, end) {
-      // IE8 throws an error when accessing a non-existant item of a StaticNodeList.
-      // TODO: Confirm using instanceof on elements causes a memory leak in IE8
-      if (this != '[object StaticNodeList]')
-        return simple.call(this, begin, end);
-      var i = 0, results = [];
-      while (typeof this[i] === 'object')
-        results[i] = this[i++];
-      return !begin && end == null ?
-        results : results.slice(begin, end);
-    }
-
-    function simple(begin, end) {
-      // Safari 2 and Opera 9.2x
+  var nodeListSlice = (function() {  
+    var nodeListSlice = function nodeListSlice(begin, end) {
       var i = 0, results = [];
       while (results[i] = this[i++]) { }
       results.length--;
       return !begin && end == null ?
-        results : results.slice(begin, end);
-    }
+        results : results.slice(begin || 0, end || results.length);
+    };
+
+    Fuse._div.innerHTML = '<div id="length"></div>';
+    Fuse._docEl.insertBefore(Fuse._div, Fuse._docEl.firstChild);
 
     try {
-      Fuse._div.innerHTML = '<div id="length"></div>';
-      Fuse._docEl.insertBefore(Fuse._div, Fuse._docEl.firstChild);
-      if (!slice.call(Fuse._div.childNodes, 0)[0])
-        nodeListSlice = simple;
+      if (slice.call(Fuse._div.childNodes, 0)[0])
+        nodeListSlice = slice;
     } catch(e) {
-      nodeListSlice = complex;
-    } finally {
-      Fuse._docEl.removeChild(Fuse._div).innerHTML = '';
+      // IE8 throws an error when accessing a non-existant item of a StaticNodeList.
+      // TODO: Confirm using instanceof on elements causes a memory leak in IE8
+      var _nodeListSlice = nodeListSlice;
+      nodeListSlice = function nodeListSlice(begin, end) {
+        if (this != '[object StaticNodeList]')
+          return _nodeListSlice.call(this, begin, end);
+        var i = 0, results = [];
+        while (typeof this[i] === 'object')
+          results[i] = this[i++];
+        return !begin && end == null ?
+          results : results.slice(begin || 0, end || results.length);
+      };
     }
+
+    Fuse._docEl.removeChild(Fuse._div).innerHTML = '';
+    return nodeListSlice;
   })();
 
-<%= include(
-   'features.js',
+  /*--------------------------- NAMESPACE UTILITY ----------------------------*/
 
-   'lang/class.js',
+  Fuse.addNS = function(path) {
+    var part, object = this, propIndex = 0, parts = path.split('.'),
+     length = parts.length, i = 0, properties = slice.call(arguments, 1);
+
+    // if parent is passed then incriment the propIndex by 1
+    if (typeof properties[0] === 'function') propIndex++;
+    properties[propIndex] = properties[propIndex] || { };
+
+    while (part = parts[i++]) {
+      if (object[part]) {
+        object = object[part];
+      } else {
+        if (i === length) {
+          // if no parent pass prepend object as parent
+          if (!propIndex) properties = prependList(properties, object);
+          object = object[part] = Fuse.Class.apply(null,
+            Fuse.Object.hasKey(properties[1], 'constructor') ? properties :
+              (properties[1].constructor = part) && properties);
+        }
+        else object = object[part] = Fuse.Class(object, { 'constructor': part });
+      }
+    }
+    return object;
+  };
+
+<%= include(
+   'browser.js',
+   'features.js',
+   'fusebox.js',
+
    'lang/object.js',
+   'lang/class.js',
+
    'lang/function.js',
-   'lang/try.js',
-   'lang/abstract.js',
-   'lang/date.js',
-   'lang/timer.js',
    'lang/enumerable.js',
    'lang/array.js',
+   'lang/date.js',
+   'lang/number.js',
    'lang/regexp.js',
    'lang/string.js',
-   'lang/template.js',
+
    'lang/hash.js',
-   'lang/number.js',
    'lang/range.js',
+   'lang/template.js',
+   'lang/timer.js',
 
    'ajax/ajax.js',
    'ajax/responders.js',
@@ -156,7 +180,7 @@
    'ajax/request.js',
    'ajax/response.js',
    'ajax/updater.js',
-   'ajax/periodical-updater.js',
+   'ajax/timed-updater.js',
 
    'dom/element/element.js',
    'dom/element/attribute.js',
@@ -174,9 +198,7 @@
    'dom/selector.js',
 
    'dom/event/event.js',
-   'dom/event/dom-loaded.js',
-
-   'deprecated.js') %>
+   'dom/event/dom-loaded.js') %>
   /*--------------------------------------------------------------------------*/
 
   Element.addMethods();

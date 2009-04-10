@@ -9,7 +9,7 @@
     Feature('ELEMENT_ATTACH_EVENT') ? 'beforeupdate' : 'keyup';
 
   // temporarily hold these helpers to avoid creating several closures.
-  Object._extend(Event.Temp = { }, (function() {
+  Fuse.Object._extend(Event.Temp = { }, (function() {
 
     function addCache(element, eventName, handler) {
       var id = getCacheID(element),
@@ -40,7 +40,7 @@
     getCacheID.id = 3;
 
     function getDOMEventName(eventName) {
-      if (eventName && eventName.contains(':'))
+      if (eventName && eventName.indexOf(':') !== -1)
         return Event.CUSTOM_EVENT_NAME;
       return eventName;
     }
@@ -55,7 +55,7 @@
       var c = Event.cache[id] = Event.cache[id] || { 'events': { } };
       c.element = c.element || element;
       return c.events[eventName] = c.events[eventName] ||
-        { 'handlers': [ ], 'dispatcher': false };
+        { 'handlers': Fuse.List(), 'dispatcher': false };
     }
 
     function removeCacheAtIndex(id, eventName, index) {
@@ -69,7 +69,7 @@
 
       // if no more events cached remove the
       // cache for the element
-      if (!Object.isEmpty(c.events)) return;
+      if (!Fuse.Object.isEmpty(c.events)) return;
       delete Event.cache[id];
     }
 
@@ -304,8 +304,8 @@
       }
       return m[methodName](event);
     }
-    m.pointerX = define.curry('pointerX');
-    m.pointerY = define.curry('pointerY');
+    m.pointerX = Fuse.Function.curry(define, 'pointerX');
+    m.pointerY = Fuse.Function.curry(define, 'pointerY');
   })(Event.Methods);
 
   /*--------------------------------------------------------------------------*/
@@ -361,12 +361,12 @@
 
     function addMethods(methods) {
       var name; Methods = [];
-      methods && Object.extend(Event.Methods, methods);
-      Object._each(Event.Methods, Event.prototype
-        ? function(value, key) { Event.prototype[key] = value.methodize() }
+      methods && Fuse.Object.extend(Event.Methods, methods);
+      Fuse.Object._each(Event.Methods, Event.prototype
+        ? function(value, key) { Event.prototype[key] = Fuse.Function.methodize(value) }
         : function(value, key) {
             if (key.indexOf('pointer') !== 0)
-              Methods.push([key, value.methodize()]);
+              Methods.push([key, Fuse.Function.methodize(value)]);
           }
       );
     }
@@ -398,12 +398,12 @@
 
       // IE8 supports Event.prototype but still needs 
       // DOM Level 2 event methods and properties.
-      if (Object.hasKey(Event.prototype, 'cancelBubble') &&
-          Object.hasKey(Event.prototype, 'returnValue') &&
-         !Object.hasKey(Event.prototype, 'stopPropagation') &&
-         !Object.hasKey(Event.prototype, 'preventDefault') &&
-         !Object.hasKey(Event.prototype, 'target') &&
-         !Object.hasKey(Event.prototype, 'currentTarget')) {
+      if (Fuse.Object.hasKey(Event.prototype, 'cancelBubble') &&
+          Fuse.Object.hasKey(Event.prototype, 'returnValue') &&
+         !Fuse.Object.hasKey(Event.prototype, 'stopPropagation') &&
+         !Fuse.Object.hasKey(Event.prototype, 'preventDefault') &&
+         !Fuse.Object.hasKey(Event.prototype, 'target') &&
+         !Fuse.Object.hasKey(Event.prototype, 'currentTarget')) {
 
         // initially add methods
         Event.addMethods();
@@ -449,7 +449,7 @@
       // handle calls from Event object
       if (this != global) {
         var element = arguments[0];
-        return (typeof element === 'string' || element.nodeType === 1)
+        return (Fuse.Object.isString(element) || element.nodeType === 1)
           ? _getCacheID($(element))
           : _getCacheID(element);
       }
@@ -476,7 +476,7 @@
 
     this.stopObserving = function stopObserving(element, eventName, handler) {
       element = $(element);
-      eventName = (typeof eventName === 'string') ? eventName : null;
+      eventName = Fuse.Object.isString(eventName) ? eventName : null;
       var id = _getCacheID(element), c = Event.cache[id];
 
       if (!c || !c.events) return element;
@@ -556,7 +556,7 @@
       if (!Fuse._doc.loaded)
         _domLoadWrapper(event);
       else if (Event.cache['1'].events['dom:loaded'])
-        return _winLoadWrapper.defer(event);
+        return Fuse.Function.defer(_winLoadWrapper, event);
       event.eventName = null;
       _winLoadDispatcher(event);
       Event.stopObserving(global, 'load');
@@ -575,9 +575,9 @@
 
   delete Event.Temp;
 
-  Object.extend(Event, Event.Methods);
+  Fuse.Object.extend(Event, Event.Methods);
 
-  Object._extend(Event, {
+  Fuse.Object._extend(Event, {
     'KEY_BACKSPACE': 8,
     'KEY_DELETE':    46,
     'KEY_DOWN':      40,
@@ -594,16 +594,16 @@
     'KEY_UP':        38
   });
 
-  Object._extend(Element.Methods, {
+  Fuse.Object._extend(Element.Methods, {
     'fire':          Event.fire,
     'getEventID':    Event.getEventID,
     'observe':       Event.observe,
     'stopObserving': Event.stopObserving
   });
 
-  Object._extend(Fuse._doc, {
+  Fuse.Object._extend(Fuse._doc, {
     'loaded':        false,
-    'fire':          Element.Methods.fire.methodize(),
-    'observe':       Element.Methods.observe.methodize(),
-    'stopObserving': Element.Methods.stopObserving.methodize()
+    'fire':          Fuse.Function.methodize(Event.fire),
+    'observe':       Fuse.Function.methodize(Event.observe),
+    'stopObserving': Fuse.Function.methodize(Event.stopObserving)
   });
