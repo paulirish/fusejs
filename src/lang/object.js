@@ -49,9 +49,8 @@
         // Safari 2
         hasKey = function hasKey(object, property) {
           if (object == null) throw new TypeError;
-          // convert primatives into objects so they work with the IN statement
-          if (typeof object !== 'object' && !Fuse.Object.isFunction(object))
-            object = new object.constructor(object);
+          // convert primatives to objects so IN operator will work
+          object = Object(object);
 
           var result, proto = object['__proto__'];
           object['__proto__'] = null;

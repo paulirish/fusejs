@@ -1,3 +1,5 @@
+* Ensure Fuse.Util.$A converts primatives into objects when used with the `in` operator. [Justin Perkins, kangax]
+
 * Cleanup and optimize element traversal methods. [jddalton]
   Note: Backwards compatibility warning.
    - Removed methods: immediateDescendants, getElementsBySelector, recursivelyCollect

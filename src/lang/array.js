@@ -7,7 +7,7 @@
       if (!iterable) return Fuse.List();
       // Safari 2.x will crash when accessing a non-existent property of a
       // node list that contains a text node unless we use the `in` operator
-      if ('toArray' in iterable) iterable = iterable.toArray();
+      if ('toArray' in Object(iterable)) iterable = iterable.toArray();
       var length = iterable.length || 0, results = new Fuse.List(length);
       while (length--) results[length] = iterable[length];
       return results;

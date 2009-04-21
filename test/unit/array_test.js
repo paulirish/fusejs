@@ -8,7 +8,20 @@ function prime(value) {
 
 new Test.Unit.Runner({
   test$A: function() {
-    this.assertEnumEqual([], $A({}));
+    var test = this, $A = Fuse.Util.$A;
+
+    this.assertEnumEqual([], $A(), 'no value');
+    this.assertEnumEqual([], $A({}), 'empty object');
+    this.assertEnumEqual(['a', 'b', 'c'], $A(['a', 'b', 'c']), 'simple array');
+    this.assertEnumEqual(['a', 'b', 'c'], $A('abc'), 'string value');
+    this.assertEnumEqual([25], $A(25), 'numeric value');
+    this.assertEnumEqual(['x'], $A({ 'toArray': function() { return ['x'] }, 'toArray');
+    this.assertEnumEqual([document.documentElement], $A(document.getElementsByTagName('HTML')),
+     'simple nodeList');
+
+    (function(){
+      test.assertEnumEqual([1, 2, 3], $A(arguments), 'arguments object');
+    })(1, 2, 3);
   },
   
   test$w: function() {
