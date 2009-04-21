@@ -3,23 +3,25 @@
   (function() {
     this.adjacent = function adjacent(element) {
       element = $(element);
-      var args = slice.call(arguments, 1),
-       parent = Element.extend(element.parentNode),
-       oldId = parent.id, newId = parent.identify();
+      var i = 0, length = arguments.length, parent = element.parentNode,
+       backup = parent.id, id = Element.identify(parent);
 
       // ensure match against siblings and not children of siblings
-      args = args.map(function(a) { return '#' + newId + '>' + a });
-      var matches = Selector.matchElements(parent.childNodes, args).without(element);
-      parent.id = oldId;
-      return matches;
+      while (i < length) queries.push('#' + id + '>' + arguments[i++]);
+      var results = Selector.matchElements(parent.childNodes, args).without(element);
+      parent.id = backup;
+      return results;
     };
 
-    this.ancestors = function ancestors(element) {
-      return Element.recursivelyCollect(element, 'parentNode');
+    this.childElements = function childElements(element) {
+      if (!(element = $(element).firstChild)) return [];
+      while (element && element.nodeType !== 1) element = element.nextSibling;
+      if (element) return prependList(Element.nextSiblings(element), element);
+      return [];
     };
 
     this.descendants = function descendants(element) {
-      return Element.select(element, '*');
+      return Element.query(element, '*');
     };
 
     this.descendantOf = (function() {
@@ -66,7 +68,7 @@
           return Element.firstDescendant(element);
         return Fuse.Object.isNumber(expression)
           ? _getNthDescendant($(element), expression)
-          : Element.select(element, expression)[index || 0];
+          : Element.query(element, expression)[index || 0];
       }
       return down;
     })();
@@ -77,62 +79,62 @@
       return Element.extend(element);
     };
 
-    this.immediateDescendants = function immediateDescendants(element) {
-      if (!(element = $(element).firstChild)) return [];
-      while (element && element.nodeType !== 1) element = element.nextSibling;
-      if (element) return prependList(Element.nextSiblings(element), element);
-      return [];
-    };
-
-    this.nextSiblings = function nextSiblings(element) {
-      return Element.recursivelyCollect(element, 'nextSibling');
-    };
-
-    this.previousSiblings = function previousSiblings(element) {
-      return Element.recursivelyCollect(element, 'previousSibling');
-    };
-
-    this.recursivelyCollect = function recursivelyCollect(element, property) {
-      element = $(element);
-      var elements = [];
-      while (element = element[property])
-        if (element.nodeType === 1)
-          elements.push(Element.extend(element));
-      return elements;
-    };
-
-    this.siblings = function siblings(element) {
-      return concatList(Element.previousSiblings(element).reverse(), Element.nextSiblings(element));
-    };
-
     this.match = function match(element, selector) {
       if (Fuse.Object.isStrng(selector))
         selector = new Selector(selector);
       return selector.match($(element));
     };
 
-    this.select = function select(element) {
+    this.query = function query(element) {
       return Selector.findChildElements($(element),
         slice.call(arguments, 1));
     };
 
-    // aliases
-    this.childElements = this.immediateDescendants;
-    this.getElementsBySelector = this.select;
+    this.siblings = function siblings(element) {
+      var results = Fuse.List(), original = element = $(element);
+      element = element.parentNode && element.firstChild;
+      while (element) {
+        if (element !== original && element.nodeType === 1)
+          results.push(Element.extend(element));
+        element = element.nextSibling;
+      }
+      return results;
+    };
 
     // prevent JScript bug with named function expressions
     var adjacent =           null,
-     ancestors =             null,
+     childElements =         null,
      descendantOf =          null,
      descendants =           null,
      firstDescendant =       null,
-     immediateDescendants =  null,
      match =                 null,
-     nextSiblings =          null,
-     previousSiblings =      null,
-     recursivelyCollect =    null,
-     select =                null,
+     query =                 null,
      siblings =              null;
+  }).call(Element.Methods);
+
+  (function() {
+    function _collect(element, property) {
+      var results = Fuse.List();
+      while (element = element[property])
+        if (element.nodeType === 1)
+          results.push(Element.extend(element));
+      return results;
+    }
+
+    this.ancestors = function ancestors(element) {
+      return _collect(element, 'parentNode');
+    };
+
+    this.nextSiblings = function nextSiblings(element) {
+      return _collect(element, 'nextSibling');
+    };
+
+    this.previousSiblings = function previousSiblings(element) {
+      return _collect(element, 'previousSibling');
+    };
+
+    // prevent JScript bug with named function expressions
+    var ancestors = null, nextSiblings = null, previousSiblings = null;
   }).call(Element.Methods);
 
   (function() {

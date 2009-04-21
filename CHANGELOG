@@ -1,3 +1,9 @@
+* Cleanup and optimize element traversal methods. [jddalton]
+  Note: Backwards compatibility warning.
+   - Removed methods: immediateDescendants, getElementsBySelector, recursivelyCollect
+   - Renamed method: select -> query
+   - Optimized Element#sibilings() method by reducing the number of function calls it makes
+
 * Correct nodeListSlice() handling of an undefined endIndex. [jddalton]
 
 * Move Enumerable methods to it's prototype. [jddalton]
