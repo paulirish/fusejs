@@ -35,10 +35,6 @@
       return this.toPaddedString(2, 16);
     };
 
-    this.toJSON = function toJSON() {
-      return Fuse.String(isFinite(this) ? this : 'null');
-    };
-
     this.toPaddedString = function toPaddedString(length, radix) {
       var string = this.toString(radix || 10);
       return Fuse.String('0').times(length - string.length).concat(string);
@@ -52,6 +48,5 @@
      succ =           null,
      times =          null,
      toColorPart =    null,
-     toJSON =         null,
      toPaddedString = null;
   }).call(Fuse.Number.Plugin);

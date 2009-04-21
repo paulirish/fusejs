@@ -270,10 +270,6 @@
       return this._keys.length;
     };
 
-    this.toJSON = function toJSON() {
-      return Fuse.Object.toJSON(this.toObject());
-    };
-
     this.toObject = function toObject() {
       var pair, i = 0, pairs = this._pairs, object = { };
       while (pair = pairs[i++]) object[pair[0]] = pair[1];
@@ -319,7 +315,6 @@
      map =           null,
      partition =     null,
      size =          null,
-     toJSON =        null,
      toObject =      null,
      toQueryString = null,
      values =        null,

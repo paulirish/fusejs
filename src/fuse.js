@@ -164,7 +164,6 @@
    'lang/function.js',
    'lang/enumerable.js',
    'lang/array.js',
-   'lang/date.js',
    'lang/number.js',
    'lang/regexp.js',
    'lang/string.js',
@@ -173,6 +172,7 @@
    'lang/range.js',
    'lang/template.js',
    'lang/timer.js',
+   'lang/json.js',
 
    'ajax/ajax.js',
    'ajax/responders.js',

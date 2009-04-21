@@ -269,27 +269,6 @@
         : Fuse.String.interpret(object);
     };
 
-    this.toJSON = function toJSON(object) {
-      switch (typeof object) {
-        case 'undefined':
-        case 'function' :
-        case 'unknown'  : return;
-        case 'boolean'  : return Fuse.String(object);
-      }
-
-      if (Fuse.Object.isElement(object)) return;
-      if (object === null) return Fuse.String(null);
-      if (typeof object.toJSON === 'function') return object.toJSON();
-
-      var results = [];
-      Fuse.Object._each(object, function(value, key) {
-        value = Fuse.Object.toJSON(value);
-        if (typeof value !== 'undefined')
-          results.push(key.toJSON() + ': ' + value);
-      });
-      return Fuse.String('{' + results.join(', ') + '}');
-    };
-
     this.toQueryPair = function toQueryPair(key, value) {
       return Fuse.String(typeof value === 'undefined' ? key :
         key + '=' + encodeURIComponent(Fuse.String.interpret(value)));
@@ -308,5 +287,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var toHTML = null, toJSON = null, toQueryPair = null, toQueryString = null;
+    var toHTML = null, toQueryPair = null, toQueryString = null;
   }).call(Fuse.Object);

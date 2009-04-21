@@ -126,14 +126,6 @@
       return this.length;
     };
 
-    this.toJSON = function toJSON() {
-      for (var value, i = 0, results = Fuse.List(), length = this.length; i < length; i++) {
-        value = Fuse.Object.toJSON(this[i]);
-        if (typeof value !== 'undefined') results.push(value);
-      }
-      return '[' + results.join(', ') + ']';
-    };
-
     this.unique = function unique() {
       for (var i = 0, results = Fuse.List(), length = this.length; i < length; i++)
         if (results.indexOf(this[i]) < 0) results.push(this[i]);
@@ -423,7 +415,6 @@
      size =        null,
      some =        null,
      sortBy =      null,
-     toJSON =      null,
      unique =      null,
      without =     null,
      zip =         null;

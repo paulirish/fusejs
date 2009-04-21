@@ -191,39 +191,6 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    this.evalJSON = function evalJSON(sanitize) {
-      var json = this.unfilterJSON();
-      try {
-        if (!sanitize || json.isJSON()) return eval('(' + json + ')');
-      } catch (e) { }
-      throw new SyntaxError('Badly formed JSON string: ' + this.inspect());
-    };
-
-    this.isJSON = function isJSON() {
-      var str = this;
-      if (str.blank()) return false;
-      str = this.replace(/\\./g, '@').replace(/"[^"\\\n\r]*"/g, '');
-      return (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/).test(str);
-    };
-
-    this.toJSON = function toJSON() {
-      return this.inspect(true);
-    };
-
-    this.unfilterJSON = function unfilterJSON(filter) {
-      return this.sub(filter || Fuse.JSONFilter, '#{1}');
-    };
-
-    // prevent JScript bug with named function expressions
-    var evalJSON =  null,
-     isJSON =       null,
-     toJSON =       null,
-     unfilterJSON = null;
-  }).call(Fuse.String.Plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  (function() {
     this.blank = function blank() {
       return /^\s*$/.test(this);
     };

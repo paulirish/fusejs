@@ -1,3 +1,5 @@
+* Move all JSON methods to json.js. [jddalton]
+
 * Cleanup object.js and array.js and add `toList` alias for `toArray` methods. [jddalton]
 
 * Namespace natives Fuse.Date, Fuse.Function, Fuse.List, Fuse.Number, Fuse.RegExp and Fuse.String. [jddalton]
