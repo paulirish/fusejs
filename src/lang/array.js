@@ -382,7 +382,7 @@
     this.toList  = this.clone;
 
     // assign any missing Enumerable methods
-    Fuse.Object.each(Fuse.Enumerable, function(value, key) {
+    Fuse.Object.each(Fuse.Enumerable.Plugin, function(value, key) {
       if (typeof Fuse.List.Plugin[key] !== 'function')
         Fuse.List.Plugin[key] = value;
     });

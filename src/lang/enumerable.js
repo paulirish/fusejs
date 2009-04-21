@@ -235,4 +235,4 @@
      sortBy =      null,
      toArray =     null,
      zip =         null;
-  }).call(Fuse.Enumerable);
+  }).call(Fuse.Enumerable.Plugin);

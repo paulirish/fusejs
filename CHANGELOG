@@ -1,3 +1,5 @@
+* Move Enumerable methods to it's prototype. [jddalton]
+
 * Make Fuse natives inherit from Fuse object. [jddalton]
 
 * Cleanup Fuse.Fusebox() and add support for Native generics. [jddalton]
