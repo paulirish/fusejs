@@ -55,7 +55,7 @@
 
       pattern.lastIndex = 0;
       if (isGlobal = pattern.global)
-        pattern = pattern.clone({ 'global': false });
+        pattern = Fuse.RegExp.clone(pattern, { 'global': false });
 
       while (match = pattern.exec(source)) {
         result += source.slice(0, match.index) +
@@ -97,7 +97,7 @@
       if (!Fuse.Object.isRegExp(pattern))
         pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)), 'g');
       if (!pattern.global)
-        pattern = pattern.clone({ 'global': true });
+        pattern = Fuse.RegExp.clone(pattern, { 'global': true });
       return this.replace(pattern, _prepareReplacement(replacement));
     };
 
@@ -107,7 +107,7 @@
         if (!Fuse.Object.isRegExp(pattern))
           pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)));
         if (pattern.global)
-          pattern = pattern.clone({ 'global': false });
+          pattern = Fuse.RegExp.clone(pattern, { 'global': false });
         return this.replace(pattern, _prepareReplacement(replacement));
       }
 

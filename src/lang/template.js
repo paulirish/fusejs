@@ -22,7 +22,7 @@
         if (!Fuse.Object.isRegExp(pattern))
           pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)));
         if (!pattern.global)
-          pattern = pattern.clone({ 'global': true });
+          pattern = Fuse.RegExp.clone(pattern, { 'global': true });
 
         return this.template.replace(pattern, function() {
           var before = arguments[1] || '';

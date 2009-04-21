@@ -90,8 +90,8 @@
   })();
 
   // replace placeholder objects with inheritable classes
-  global.Fuse = Fuse.Object._extend(Fuse.Class(
-    { 'constructor': 'Fuse' }), Fuse);
+  global.Fuse = Fuse.Class({ 'constructor': Fuse });
+  Fuse.Plugin = Fuse.prototype = Fuse.Object.prototype;
 
   Fuse.Browser = Fuse.Object._extend(Fuse.Class(Fuse,
     { 'constructor': 'Browser' }), Fuse.Browser);
@@ -99,13 +99,11 @@
   Fuse.Browser.Agent = Fuse.Object._extend(Fuse.Class(Fuse.Browser,
     { 'constructor': 'Agent' }), Fuse.Browser.Agent);
 
-  Fuse.Browser.Bug = Fuse.Object._extend(Fuse.Class(Fuse.Browser,
-    { 'constructor': Bug }), Bug);
+  Fuse.Browser.Bug = Fuse.Class(Fuse.Browser, { 'constructor': Bug });
 
-  Fuse.Browser.Feature = Fuse.Object._extend(Fuse.Class(Fuse.Browser,
-    { 'constructor': Feature }), Feature);
-
-  Fuse.Object = Fuse.Object._extend(Fuse.Class(Fuse,
-    { 'constructor': 'Object' }), Fuse.Object);
+  Fuse.Browser.Feature = Fuse.Class(Fuse.Browser, { 'constructor': Feature });
 
   Fuse.Class = Fuse.Class(Fuse, { 'constructor': Fuse.Class });
+
+  Fuse.Fusebox = Fuse.Class(Fuse,
+    { 'constructor': Fuse.Fusebox }, Fuse.Fusebox.prototype);

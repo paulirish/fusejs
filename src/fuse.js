@@ -1,16 +1,21 @@
 <%= include 'HEADER' %>
 (function(global) {
-  global.Fuse = {
-    '_body':          null,
-    '_root':          null,
-    '_scrollEl':      null,
-    '_div':           document.createElement('div'),
-    '_doc':           document,
-    '_docEl':         document.documentElement,
-    'JSONFilter':     /^\/\*-secure-([\s\S]*)\*\/\s*$/, 
-    'ScriptFragment': '<script[^>]*>([^\\x00]*?)<\/script>',
-    'Version':        '<%= FUSEJS_VERSION %>'
-  };
+  global.Fuse = (function() {
+    function Fuse() { }
+    return Fuse;
+  })();
+
+  Fuse._body =
+  Fuse._root =
+  Fuse._scrollEl = null;
+
+  Fuse._doc =   document;
+  Fuse._div =   Fuse._doc.createElement('div');
+  Fuse._docEl = Fuse._doc.documentElement;
+
+  Fuse.JSONFilter =     /^\/\*-secure-([\s\S]*)\*\/\s*$/;
+  Fuse.ScriptFragment = '<script[^>]*>([^\\x00]*?)<\/script>';
+  Fuse.Version =        '<%= FUSEJS_VERSION %>';
 
   Fuse.emptyFunction = (function() {
     function emptyFunction() { }
@@ -201,5 +206,7 @@
    'dom/event/dom-loaded.js') %>
   /*--------------------------------------------------------------------------*/
 
+  // update native generics and element methods
+  Fuse.updateGenerics();
   Element.addMethods();
 })(this);

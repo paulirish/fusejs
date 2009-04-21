@@ -1,19 +1,20 @@
   /*----------------------------- LANG: FUNCTIONS ----------------------------*/
 
   (function() {
-    this.argumentNames = function argumentNames(fn) {
-      var names = fn.toString().match(/^[\s\(]*function[^(]*\(([^)]*)\)/)[1]
+    this.argumentNames = function argumentNames() {
+      var names = this.toString().match(/^[\s\(]*function[^(]*\(([^)]*)\)/)[1]
        .replace(/\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g, '')
         .replace(/\s+/g, '').split(',');
       return names.length === 1 && !names[0] ? [] : names;
     };
 
-    this.bind = function bind(fn, thisArg) {
+    // ECMA-5 15.3.4.5
+    this.bind = this.bind || function bind(thisArg) {
       // simple bind
-      var args;
+      var args, fn = this;
       if (arguments.length < 2 ) {
         if (typeof thisArg === 'undefined')
-          return fn;
+          return this;
 
         return function() {
           return arguments.length
@@ -30,9 +31,9 @@
       };
     };
 
-    this.bindAsEventListener = function bindAsEventListener(fn, thisArg) {
+    this.bindAsEventListener = function bindAsEventListener(thisArg) {
       // simple bind
-      var args;
+      var args, fn = this;
       if (arguments.length < 2 ) {
         return function(event) {
           return fn.call(thisArg, event || getWindow(this).event);
@@ -46,9 +47,9 @@
       };
     };
 
-    this.curry = function curry(fn) {
-      if (!arguments.length) return fn;
-      var args = slice.call(arguments, 1), reset = args.length;
+    this.curry = function curry() {
+      if (!arguments.length) return this;
+      var fn = this, args = slice.call(arguments, 0), reset = args.length;
       return function() {
         args.length = reset; // reset arg length
         return arguments.length
@@ -57,29 +58,31 @@
       }
     };
 
-    this.delay = function delay(fn, timeout) { 
+    this.delay = function delay(timeout) { 
       timeout *= 1000;
-      var args = slice.call(arguments, 2); 
+      var fn = this, args = slice.call(arguments, 1); 
       return global.setTimeout(function() {
         return fn.apply(fn, args);
       }, timeout);
     };
 
-    this.defer = function defer(fn) {
-      return this.delay.apply(null,
-        concatList([fn, 0.01], arguments));
+    this.defer = function defer() {
+      return Fuse.Function.Plugin.delay.apply(this,
+        prependList(arguments, 0.01));
     };
 
-    this.methodize = function methodize(fn) {
-      if (fn._methodized) return fn._methodized;
-      return fn._methodized = function() {
+    this.methodize = function methodize() {
+      if (this._methodized) return this._methodized;
+      var fn = this;
+      return this._methodized = function() {
         return arguments.length
           ? fn.apply(null, prependList(arguments, this))
           : fn.call(null, this);
       };
     };
 
-    this.wrap = function wrap(fn, wrapper) {
+    this.wrap = function wrap(wrapper) {
+      var fn = this;
       return function() {
         return arguments.length
           ? wrapper.apply(this, prependList(arguments, fn.bind(this)))
@@ -96,4 +99,6 @@
      defer =               null,
      methodize =           null,
      wrap =                null;
-  }).call(Fuse.Function);
+  }).call(Fuse.Function.Plugin);
+
+  Fuse.Function.updateGenerics();

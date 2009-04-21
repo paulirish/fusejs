@@ -1,3 +1,7 @@
+* Make Fuse natives inherit from Fuse object. [jddalton]
+
+* Cleanup Fuse.Fusebox() and add support for Native generics. [jddalton]
+
 * Move all JSON methods to json.js. [jddalton]
 
 * Cleanup object.js and array.js and add `toList` alias for `toArray` methods. [jddalton]

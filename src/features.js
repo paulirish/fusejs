@@ -1,4 +1,4 @@
-  /*--------------------------- CAPABILITY TESTER ----------------------------*/
+  /*--------------------------- FEATURE/BUG TESTER ---------------------------*/
 
   (function() {
     function createTester(name) {
@@ -31,8 +31,8 @@
       return Tester;
     }
 
-    Bug = createTester('Bug');
-    Feature = createTester('Feature');
+    Bug = Fuse.Browser.Bug = createTester('Bug');
+    Feature = Fuse.Browser.Feature = createTester('Feature');
   })();
 
   /*---------------------------- BROWSER FEATURES ----------------------------*/
