@@ -191,12 +191,12 @@
 
     this.add = function add(classNameToAdd) {
       if (this.contains(classNameToAdd)) return;
-      this.set(this.toArray().concat(classNameToAdd).join(' '));
+      this.set(this.toList().concat(classNameToAdd).join(' '));
     };
 
     this.remove = function remove(classNameToRemove) {
       if (!this.contains(classNameToRemove)) return;
-      this.set(this.toArray().without(classNameToRemove).join(' '));
+      this.set(this.toList().without(classNameToRemove).join(' '));
     };
 
     this.set = function set(className) {
@@ -204,7 +204,7 @@
     };
 
     this.toString = function toString() {
-      return this.toArray().join(' ');
+      return this.toList().join(' ');
     };
 
     // prevent JScript bug with named function expressions

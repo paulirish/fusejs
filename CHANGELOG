@@ -1,3 +1,5 @@
+* Cleanup object.js and array.js and add `toList` alias for `toArray` methods. [jddalton]
+
 * Namespace natives Fuse.Date, Fuse.Function, Fuse.List, Fuse.Number, Fuse.RegExp and Fuse.String. [jddalton]
   Note: Backwards compatibility warning.
    - Moved abstract.js, deprecated.js, try.js to the Prototype emulator folder

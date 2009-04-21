@@ -209,7 +209,7 @@
 
     this.grep = function grep(pattern, callback, thisArg) {
       if (!pattern || Fuse.Object.isRegExp(pattern) &&
-         !pattern.source) this.toArray();
+         !pattern.source) return this.toList();
       callback = callback || Fuse.K;
       var results = Fuse.List();
       if (Fuse.Object.isString(pattern))
@@ -307,6 +307,7 @@
 
     // Opera's implementation of Array.prototype.concat treats a functions arguments
     // object as an array so we overwrite concat to fix it.
+    // ECMA-5 15.4.4.4
     if (!this.concat || Bug('ARRAY_CONCAT_ARGUMENTS_BUGGY'))
       this.concat = function concat() {
         var args = arguments, results = this.clone(this);
@@ -320,73 +321,73 @@
         return results;
       };
 
-    if (!this.every)
-      this.every = function every(callback, thisArg) {
-        callback = callback || Fuse.K;
-        for (var i = 0, length = this.length; i < length; i++)
-          if (!callback.call(thisArg, this[i], i))
-            return false;
-        return true;
-      };
+    // ECMA-5 15.4.4.16
+    this.every = this.every || function every(callback, thisArg) {
+      callback = callback || Fuse.K;
+      for (var i = 0, length = this.length; i < length; i++)
+        if (!callback.call(thisArg, this[i], i))
+          return false;
+      return true;
+    };
 
-    if (!this.filter) 
-      this.filter = function filter(callback, thisArg) {
-        callback = callback || function(value) { return value != null };
-        for (var i = 0, results = Fuse.List(), length = this.length; i < length; i++)
-          if (callback.call(thisArg, this[i], i))
-            results[results.length] = this[i];
-        return results;
-      };
+    // ECMA-5 15.4.4.20
+    this.filter = this.filter || function filter(callback, thisArg) {
+      callback = callback || function(value) { return value != null };
+      for (var i = 0, results = Fuse.List(), length = this.length; i < length; i++)
+        if (callback.call(thisArg, this[i], i))
+          results[results.length] = this[i];
+      return results;
+    };
 
-    if (!this.forEach)
-      this.forEach = function forEach(callback, thisArg) {
-        // ECMA-3.1 15.4.4.18
-        var i = 0, length = this.length;
-        if (thisArg) while (i < length)
-          callback.call(thisArg, this[i], i++, this);
-        else while (i < length) callback(this[i], i++, this);
-      };
+    // ECMA-5 15.4.4.18
+    this.forEach = this.forEach || function forEach(callback, thisArg) {
+      var i = 0, length = this.length;
+      if (thisArg) while (i < length)
+        callback.call(thisArg, this[i], i++, this);
+      else while (i < length) callback(this[i], i++, this);
+    };
 
-    if (!this.indexOf)
-      this.indexOf = function indexOf(item, fromIndex) {
-        fromIndex = fromIndex || 0;
-        var length = this.length;
-        if (fromIndex < 0) fromIndex = length + fromIndex;
-        for ( ; fromIndex < length; fromIndex++)
-          if (this[fromIndex] === item) return fromIndex;
-        return -1;
-      };
+    // ECMA-5 15.4.4.14
+    this.indexOf = this.indexOf || function indexOf(item, fromIndex) {
+      fromIndex = fromIndex || 0;
+      var length = this.length;
+      if (fromIndex < 0) fromIndex = length + fromIndex;
+      for ( ; fromIndex < length; fromIndex++)
+        if (this[fromIndex] === item) return fromIndex;
+      return -1;
+    };
 
-    if (!this.lastIndexOf)
-      this.lastIndexOf = function lastIndexOf(item, fromIndex) {
-        fromIndex = isNaN(fromIndex) ? this.length :
-          (fromIndex < 0 ? this.length + fromIndex : fromIndex) + 1;
-        var n = this.slice(0, fromIndex).reverse().indexOf(item);
-        return (n < 0) ? n : fromIndex - n - 1;
-      };
+    // ECMA-5 15.4.4.15
+    this.lastIndexOf = this.lastIndexOf || function lastIndexOf(item, fromIndex) {
+      fromIndex = isNaN(fromIndex) ? this.length :
+        (fromIndex < 0 ? this.length + fromIndex : fromIndex) + 1;
+      var n = this.slice(0, fromIndex).reverse().indexOf(item);
+      return (n < 0) ? n : fromIndex - n - 1;
+    };
 
-    if (!this.map)
-      this.map = function map(callback, thisArg) {
-        if (!callback) return this.clone();
-        var results = Fuse.List(), i = 0, length = this.length;
-        if (thisArg) while (i < length)
-          results[i] = callback.call(thisArg, this[i], i++, this);
-        else while (i < length)
-          results[i] = callback(this[i], i++, this);
-        return results;
-      };
+    // ECMA-5 15.4.4.19
+    this.map = this.map || function map(callback, thisArg) {
+      if (!callback) return this.clone();
+      var results = Fuse.List(), i = 0, length = this.length;
+      if (thisArg) while (i < length)
+        results[i] = callback.call(thisArg, this[i], i++, this);
+      else while (i < length)
+        results[i] = callback(this[i], i++, this);
+      return results;
+    };
 
-    if (!this.some)
-      this.some = function some(callback, thisArg) {
-        callback = callback || Fuse.K;
-        for (var i = 0, length = this.length; i < length; i++)
-          if (callback.call(thisArg, this[i], i, this))
-            return true;
-        return false;
-      };
+    // ECMA-5 15.4.4.17
+    this.some = this.some || function some(callback, thisArg) {
+      callback = callback || Fuse.K;
+      for (var i = 0, length = this.length; i < length; i++)
+        if (callback.call(thisArg, this[i], i, this))
+          return true;
+      return false;
+    };
 
-    // alias
-    this.toArray = this.clone;
+    // aliases
+    this.toArray = 
+    this.toList  = this.clone;
 
     // assign any missing Enumerable methods
     Fuse.Object.each(Fuse.Enumerable, function(value, key) {

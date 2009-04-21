@@ -154,6 +154,9 @@
       return results;
     };
 
+    // alias
+    this.toList = this.toArray;
+
     // prevent JScript bug with named function expressions
     var _each = null, first = null, last = null, toArray = null;
   }).call(Fuse.Hash.Plugin);

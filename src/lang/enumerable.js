@@ -29,7 +29,7 @@
     };
 
     this.eachSlice = function eachSlice(size, callback, thisArg) {
-      var index = -size, slices = Fuse.List(), list = this.toArray();
+      var index = -size, slices = Fuse.List(), list = this.toList();
       if (size < 1) return list;
       while ((index += size) < list.length)
         slices[slices.length] = list.slice(index, index + size);
@@ -63,12 +63,12 @@
         this.each(function(value) { result = value; throw Fuse.$break; });
         return result;
       }
-      return this.toArray().first(callback, thisArg);
+      return this.toList().first(callback, thisArg);
     };
 
     this.grep = function grep(pattern, callback, thisArg) {
       if (!pattern || Fuse.Object.isRegExp(pattern) &&
-         !pattern.source) return this.toArray();
+         !pattern.source) return this.toList();
 
       callback = callback || Fuse.K;
       var results = Fuse.List();
@@ -98,7 +98,7 @@
     };
 
     this.inspect = function inspect() {
-      return '#<Enumerable:' + this.toArray().inspect() + '>';
+      return '#<Enumerable:' + this.toList().inspect() + '>';
     };
 
     this.invoke = function invoke(method) {
@@ -109,11 +109,11 @@
     };
 
     this.last = function last(callback, thisArg) {
-      return this.toArray().last(callback, thisArg);
+      return this.toList().last(callback, thisArg);
     };
 
     this.map = function map(callback, thisArg) {
-      if (!callback) return this.toArray();
+      if (!callback) return this.toList();
       var results = Fuse.List();
       if (thisArg) {
         this._each(function(value, index, iterable) {
@@ -166,7 +166,7 @@
     };
 
     this.size = function size() {
-      return this.toArray().length;
+      return this.toList().length;
     };
 
     this.some = function some(callback, thisArg) {
@@ -209,27 +209,30 @@
       });
     };
 
+    // alias
+    this.toList = this.toArray;
+
     // prevent JScript bug with named function expressions
     var contains = null,
-     each =       null,
-     eachSlice =  null,
-     every =      null,
-     filter =     null,
-     first =      null,
-     grep =       null,
-     inject =     null,
-     inGroupsOf = null,
-     inspect =    null,
-     invoke =     null,
-     last =       null,
-     map =        null,
-     max =        null,
-     min =        null,
-     partition =  null,
-     pluck =      null,
-     size =       null,
-     some =       null,
-     sortBy =     null,
-     toArray =    null,
-     zip =        null;
+     each =        null,
+     eachSlice =   null,
+     every =       null,
+     filter =      null,
+     first =       null,
+     grep =        null,
+     inject =      null,
+     inGroupsOf =  null,
+     inspect =     null,
+     invoke =      null,
+     last =        null,
+     map =         null,
+     max =         null,
+     min =         null,
+     partition =   null,
+     pluck =       null,
+     size =        null,
+     some =        null,
+     sortBy =      null,
+     toArray =     null,
+     zip =         null;
   }).call(Fuse.Enumerable);
