@@ -1,3 +1,5 @@
+* Correct nodeListSlice() handling of an undefined endIndex. [jddalton]
+
 * Move Enumerable methods to it's prototype. [jddalton]
 
 * Make Fuse natives inherit from Fuse object. [jddalton]

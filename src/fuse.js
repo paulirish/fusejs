@@ -101,9 +101,8 @@
     var nodeListSlice = function nodeListSlice(begin, end) {
       var i = 0, results = [];
       while (results[i] = this[i++]) { }
-      results.length--;
-      return !begin && end == null ?
-        results : results.slice(begin || 0, end || results.length);
+      return results.length-- && !begin && end == null ? results :
+        results.slice(begin || 0, end || results.length);
     };
 
     Fuse._div.innerHTML = '<div id="length"></div>';
@@ -120,10 +119,9 @@
         if (this != '[object StaticNodeList]')
           return _nodeListSlice.call(this, begin, end);
         var i = 0, results = [];
-        while (typeof this[i] === 'object')
-          results[i] = this[i++];
-        return !begin && end == null ?
-          results : results.slice(begin || 0, end || results.length);
+        while (typeof this[i] === 'object') results[i] = this[i++];
+        return !begin && end == null ? results :
+          results.slice(begin || 0, end || results.length);
       };
     }
 
