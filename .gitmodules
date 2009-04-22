@@ -1,0 +1,12 @@
+[submodule "vendor/nwbox/nwmatcher"]
+	path = vendor/nwbox/nwmatcher
+	url = git://github.com/dperini/nwmatcher.git
+[submodule "vendor/sly"]
+	path = vendor/sly
+	url = git://github.com/digitarald/sly.git
+[submodule "vendor/slick"]
+	path = vendor/slick
+	url = git://github.com/subtleGradient/slick.git
+[submodule "vendor/sizzle"]
+	path = vendor/sizzle
+	url = git://github.com/jeresig/sizzle.git

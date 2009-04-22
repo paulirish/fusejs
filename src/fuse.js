@@ -198,7 +198,8 @@
 
    'dom/node.js',
    'dom/viewport.js',
-   'dom/selector.js',
+
+   'dom/selector/nwmatcher.js',
 
    'dom/event/event.js',
    'dom/event/dom-loaded.js') %>

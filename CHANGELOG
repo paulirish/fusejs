@@ -1,3 +1,6 @@
+* Drop Prototype selector engine and add support for NWMatcher, Sizzle, Slick, and Sly selector engines. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Ensure Fuse.Util.$A converts primatives into objects when used with the `in` operator. [Justin Perkins, kangax]
 
 * Cleanup and optimize element traversal methods. [jddalton]
