@@ -221,11 +221,11 @@
         node.parentNode : node);
     };
 
-    this.findElement = function findElement(event, expression) {
+    this.findElement = function findElement(event, selector) {
       var element = Event.element(event);
-      if (!expression) return element;
-      var elements = prependList(Element.ancestors(element), element);
-      return Selector.findElement(elements, expression, 0);
+      if (!selector) return element;
+      return Fuse.Dom.Selector.match(element, selector) ? element :
+        Element.up(element, selector);
     };
 
     this.pointer = function pointer(event) {

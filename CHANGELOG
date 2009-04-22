@@ -1,3 +1,9 @@
+* Hook up Fuse.Dom.Selector API and cleanup/optimize more of the element traversal methods. [jddalton]
+  Note: Backwards compatibility warning.
+   - Add Fuse.query() method
+   - Remove methods: adjacent
+   - Allow ancestors, childElements, descendants, nextSiblings, previousSiblings, and siblings methods to filter by selector
+
 * Drop Prototype selector engine and add support for NWMatcher, Sizzle, Slick, and Sly selector engines. [jddalton]
   Note: Backwards compatibility warning.
 
