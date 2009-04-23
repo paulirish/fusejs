@@ -1,3 +1,5 @@
+* Add Fuse.List.fromNodeList() and Fuse.List.fromArray() as a more granular option to Fuse.List.from(). [jddalton]
+
 * Hook up Fuse.Dom.Selector API and cleanup/optimize more of the element traversal methods. [jddalton]
   Note: Backwards compatibility warning.
    - Add Fuse.query() method

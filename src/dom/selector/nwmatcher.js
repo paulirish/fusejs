@@ -13,9 +13,9 @@
 
     this.select = function select(selector, context) {
       function select(selector, context) {
-        return $A(NWMatcher.select(selector, context), 0);
+        return toList(NWMatcher.select(selector, context));
       }
-      var NWMatcher = NW.Dom, $A = Fuse.Util.$A;
+      var NWMatcher = NW.Dom, toList = Fuse.List.fromNodeList;
       return (this.select = select)(selector, context);
     };
 

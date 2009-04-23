@@ -9,9 +9,9 @@
 
     this.select = (function() {
       function select(selector, context) {
-        return $A(Slick(context, selector));
+        return toList(Slick(context, selector));
       }
-      var $A = Fuse.Util.$A;
+      var toList = Fuse.List.fromNodeList;
       return select;
     })();
 

@@ -1,30 +1,43 @@
   /*------------------------------ LANG: ARRAY -------------------------------*/
 
-  Fuse.addNS('Util');
-
-  Fuse.Util.$A = (function() {
-    function $A(iterable) {
-      if (!iterable) return Fuse.List();
+  (function() {
+    this.from = function from(iterable) {
       // Safari 2.x will crash when accessing a non-existent property of a
-      // node list that contains a text node unless we use the `in` operator
-      if ('toArray' in Object(iterable)) iterable = iterable.toArray();
-      var length = iterable.length || 0, results = new Fuse.List(length);
+      // node list, not in the document, that contains a text node unless we
+      // use the `in` operator
+      if (!iterable) return Fuse.List();
+      if ('toArray' in Object(iterable)) return iterable.toArray();
+      var length = iterable.length || 0, results = Fuse.List(length);
       while (length--) results[length] = iterable[length];
       return results;
     }
-    return $A;
-  })();
+
+    this.fromArray = function fromArray(array) {
+      return Fuse.List.apply(null, array);
+    };
+
+    this.fromNodeList = function fromNodeList(nodeList) {
+      return nodeListSlice(nodeList, 0);
+    };
+
+    // prevent JScript bug with named function expressions
+    var from = null, fromArray = null, fromNodeList = null;
+  }).call(Fuse.List);
+
+  /*--------------------------------------------------------------------------*/
+
+  Fuse.addNS('Util');
+
+  Fuse.Util.$A = Fuse.List.from;
 
   Fuse.Util.$w = (function() {
-   function $w(string) {
+    function $w(string) {
       if (typeof string !== 'string') return Fuse.List();
       string = Fuse.String(string).trim();
       return string ? string.split(/\s+/) : Fuse.List();
     }
     return $w;
   })();
-
-  Fuse.List.from = Fuse.Util.$A;
 
   /*--------------------------------------------------------------------------*/
 
