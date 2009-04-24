@@ -219,8 +219,11 @@
       this.updateGenerics();
 
       // remove iframe if used
-      if (Fuse.Fusebox.createSandbox.mode === 'iframe')
-        sandbox = Fuse._docEl.removeChild(Fuse._docEl.firstChild);
+      (function() {
+        var createSandbox = Fuse.Fusebox.createSandbox, cache = createSandbox.cache;
+        if (createSandbox.mode === 'iframe')
+          (sandbox = cache[cache.length -1]).parentNode.removeChild(sandbox);
+      })();
 
       // clear sandbox reference
       sandbox = null;
@@ -300,11 +303,11 @@
       createSandbox.mode = 'activeX';
     }
     else if (!Feature('OBJECT__PROTO__')) {
+      var head = Fuse._doc.getElementsByTagName('HEAD')[0];
       createSandbox = function createSandbox() {
         var transport = Fuse._doc.createElement('iframe');
-        transport.id = expando;
         transport.style.cssText = 'position:absolute;visibility:hidden;left:-20px;width:0;height:0;overflow:hidden';
-        Fuse._docEl.insertBefore(transport, Fuse._docEl.firstChild);
+        head.insertBefore(transport, head.firstChild);
 
         var doc = global.frames[0].document;
         doc.open();

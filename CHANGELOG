@@ -1,3 +1,5 @@
+* Append iframes, used when creating a Fusebox, to the HEAD instead of the HTML element. [jddalton]
+
 * Remove nodeListSlice() and add `results` argument to prependList() allowing it to set the results initial value. [jddalton]
 
 * Add Fuse.List.fromNodeList() and Fuse.List.fromArray() as a more granular option to Fuse.List.from(). [jddalton]
