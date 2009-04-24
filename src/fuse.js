@@ -63,8 +63,10 @@
     return list;
   }
 
-  function prependList(list, value) {
-    var results = [value], length = list.length;
+  function prependList(list, value, results) {
+    // allow a pre-sugared array to be passed
+    (results = results || [])[0] = value;
+    var length = list.length;
     while (length--) results[1 + length] = list[length];
     return results;
   }
@@ -93,41 +95,6 @@
       }
       return global;
     };
-
-  // IE throws an error when passing a nodeList to slice.call()
-  // Safari 2 will return a full array with undefined values
-  // Opera 9.2x will return an empty array if an element has an id of `length`
-  var nodeListSlice = (function() {  
-    var nodeListSlice = function nodeListSlice(begin, end) {
-      var i = 0, results = [];
-      while (results[i] = this[i++]) { }
-      return results.length-- && !begin && end == null ? results :
-        results.slice(begin || 0, end || results.length);
-    };
-
-    Fuse._div.innerHTML = '<div id="length"></div>';
-    Fuse._docEl.insertBefore(Fuse._div, Fuse._docEl.firstChild);
-
-    try {
-      if (slice.call(Fuse._div.childNodes, 0)[0])
-        nodeListSlice = slice;
-    } catch(e) {
-      // IE8 throws an error when accessing a non-existant item of a StaticNodeList.
-      // TODO: Confirm using instanceof on elements causes a memory leak in IE8
-      var _nodeListSlice = nodeListSlice;
-      nodeListSlice = function nodeListSlice(begin, end) {
-        if (this != '[object StaticNodeList]')
-          return _nodeListSlice.call(this, begin, end);
-        var i = 0, results = [];
-        while (typeof this[i] === 'object') results[i] = this[i++];
-        return !begin && end == null ? results :
-          results.slice(begin || 0, end || results.length);
-      };
-    }
-
-    Fuse._docEl.removeChild(Fuse._div).innerHTML = '';
-    return nodeListSlice;
-  })();
 
   /*--------------------------- NAMESPACE UTILITY ----------------------------*/
 

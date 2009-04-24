@@ -229,8 +229,7 @@
     // clean scope
     var Bug = null, Feature = null, concatList = null, expando = null,
      getDocument = null, getNodeName = null, getWindow = null, isHostObject = null,
-     nodeListSlice = null, prependList = null, slice = null, userAgent = null,
-     window = null;
+     prependList = null, slice = null, userAgent = null, window = null;
 
     return Fusebox;
   })();

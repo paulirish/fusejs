@@ -289,12 +289,12 @@
       if (typeof args.last() === 'function') callback = args.pop();
 
       var result = new Fuse.Hash(),
-       hashes = prependList(args.map($H), this),
+       hashes = prependList(Fuse.List.Plugin.map.call(args, $H), this);
        length = hashes.length;
 
       var j, key, pair, i = 0, pairs = this._pairs;
       while (pair = pairs[i++]) {
-        j = 0; values = []; key = pair[0];
+        j = 0; values = Fuse.List(); key = pair[0];
         while (j < length) values[j] = hashes[j++]._object[expando + key];
         result.set(key, callback(values, key, this));
       }

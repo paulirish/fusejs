@@ -15,7 +15,7 @@
       while (element && element.nodeType !== 1) element = element.nextSibling;
       if (!element) return Fuse.List();
       return !selector || selector && Fuse.Dom.Selector.match(element, selector)
-        ? prependList(Element.nextSiblings(element, selector), element)
+        ? prependList(Element.nextSiblings(element, selector), element, Fuse.List())
         : Element.nextSiblings(element, selector);
     };
 

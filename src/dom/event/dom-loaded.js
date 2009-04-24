@@ -31,11 +31,11 @@
 
     function getSheetElements() {
       var i = 0, link, links = Fuse._doc.getElementsByTagName('LINK'),
-       results = nodeListSlice(Fuse._doc.getElementsByTagName('STYLE'));
+       results = Fuse.List.fromNodeList(Fuse._doc.getElementsByTagName('STYLE'));
       while (link = links[i++]) results.push(link);
       return results;
     }
-    
+
     function getSheetObjects(elements) {
       for (var i = 0, results = [], element, sheet; element = elements[i++]; ) {
         sheet = getSheet(element);

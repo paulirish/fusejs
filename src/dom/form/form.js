@@ -140,15 +140,21 @@
 
     this.getInputs = function getInputs(form, typeName, name) {
       form = $(form);
-      var inputs = form.getElementsByTagName('input');
-      if (!typeName && !name)
-        return nodeListSlice.call(inputs, 0).map(Element.extend);
+      var input, inputs = form.getElementsByTagName('input'),
+       results = Fuse.List(), i = 0;
 
-      var input, results = Fuse.List(), i = 0;
-      while (input = inputs[i++])
-        if ((!typeName || typeName === input.type) && (!name || name === input.name))
-          results.push(Element.extend(input));
-
+      if (!typeName && !name) {
+        while (input = inputs[i]) results[i++] = Element.extend(input);
+      }
+      else if (typeName && !name) {
+        while (input = inputs[i++])
+          if (typeName === input.type) results.push(Element.extend(input));
+      }
+      else {
+        while (input = inputs[i++])
+          if ((!typeName || typeName === input.type) && (!name || name === input.name))
+            results.push(Element.extend(input));
+      }
       return results;
     };
 

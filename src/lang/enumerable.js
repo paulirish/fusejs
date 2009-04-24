@@ -200,12 +200,13 @@
 
     this.zip = function zip() {
       var callback = Fuse.K, args = slice.call(arguments, 0);
-      if (typeof args.last() === 'function')
-        callback = args.pop();
+      if (typeof args.last() === 'function') callback = args.pop();
 
-      var sequences = prependList(args.map(Fuse.Util.$A), this);
+      var collection = prependList(Fuse.List.Plugin.map.call(args, Fuse.Util.$A),
+        this, Fuse.List());
+
       return this.map(function(value, index, iterable) {
-        return callback(sequences.pluck(index), index, iterable);
+        return callback(collection.pluck(index), index, iterable);
       });
     };
 
