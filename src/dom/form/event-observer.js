@@ -6,13 +6,13 @@
     (function() {
       this.initialize = function initialize(element, callback) {
         this.element = $(element);
-        this.onElementEvent = this.onElementEvent.bind(this);
+        this.onElementEvent = Fuse.Function.bind(this.onElementEvent, this);
 
         if (getNodeName(this.element) === 'FORM')
           return this.registerFormCallbacks();
 
         var member, name = element.name, i = 0;
-        this.group = (name && $$(element.nodeName +
+        this.group = (name && Fuse.query(element.nodeName +
           '[name="' + name + '"]')) || [element];
 
         this.callback = callback;

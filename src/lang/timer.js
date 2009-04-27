@@ -6,7 +6,7 @@
         this.callback     = callback;
         this.interval     = interval;
         this.executing    = false;
-        this.onTimerEvent = onTimerEvent.bind(this);
+        this.onTimerEvent = Fuse.Function.bind(onTimerEvent, this);
       }
 
       function onTimerEvent() {

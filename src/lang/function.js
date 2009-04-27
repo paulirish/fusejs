@@ -5,7 +5,7 @@
       var names = this.toString().match(/^[\s\(]*function[^(]*\(([^)]*)\)/)[1]
        .replace(/\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g, '')
         .replace(/\s+/g, '').split(',');
-      return names.length === 1 && !names[0] ? [] : names;
+      return names.length === 1 && !names[0] ? Fuse.List() : names;
     };
 
     // ECMA-5 15.3.4.5
@@ -82,11 +82,11 @@
     };
 
     this.wrap = function wrap(wrapper) {
-      var fn = this;
+      var fn = this, bind = Fuse.Function.Plugin.bind;
       return function() {
         return arguments.length
-          ? wrapper.apply(this, prependList(arguments, fn.bind(this)))
-          : wrapper.call(this, fn.bind(this));
+          ? wrapper.apply(this, prependList(arguments, bind.call(fn, this)))
+          : wrapper.call(this, bind.call(fn, this));
       }
     };
 

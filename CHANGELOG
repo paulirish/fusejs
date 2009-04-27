@@ -1,3 +1,5 @@
+* Ensure Array#_each returns the array it iterates over and correct overlooked native to Fuse.<native> conversions in the source. [jddalton]
+
 * Append iframes, used when creating a Fusebox, to the HEAD instead of the HTML element. [jddalton]
 
 * Remove nodeListSlice() and add `results` argument to prependList() allowing it to set the results initial value. [jddalton]

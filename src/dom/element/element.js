@@ -5,7 +5,7 @@
   Fuse.Util.$ = global.$ = (function() {
     function $(element) {
       if (arguments.length > 1) {
-        for (var i = 0, elements = [], length = arguments.length; i < length; i++)
+        for (var i = 0, elements = Fuse.List(), length = arguments.length; i < length; i++)
           elements.push($(arguments[i]));
         return elements;
       }
@@ -358,7 +358,7 @@
     };
 
     this.empty = function empty(element) {
-      return $(element).innerHTML.blank();
+      return Fuse.String($(element).innerHTML).blank();
     };
 
     this.getDimensions = function getDimensions(element) {

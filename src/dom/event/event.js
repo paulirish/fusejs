@@ -108,7 +108,7 @@
       // DOM Level 0
       function(element, eventName, handler) {
         var attrName = 'on' + getDOMEventName(eventName);
-        if (!eventName.contains(':') && element[attrName] === handler)
+        if (!eventName.indexOf(':') !== -1 && element[attrName] === handler)
           element[attrName] = null;
       },
 

@@ -10,17 +10,17 @@
          .clone(this.constructor.defaultOptions), options);
   
         this.onStop = this.options.onStop;
-        this.onTimerEvent = this.start.bind(this);
+        this.onTimerEvent = Fuse.Function.bind(this.start, this);
   
         this.updater = { };
         this.container = container;
         this.url = url;
   
         var onComplete = this.options.onComplete;
-        this.options.onComplete = (function(response, json) {
+        this.options.onComplete = Fuse.Function.bind(function(response, json) {
           this.updateComplete(response);
           if (Fuse.Object.isFunction(onComplete)) onComplete(response, json);
-        }).bind(this);
+        }, this);
   
         this.start();
       }

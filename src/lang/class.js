@@ -39,7 +39,7 @@
       while (props = properties[i++]) klass.addMethods(props);
 
       klass.superclass = parent;
-      klass.subclasses = [];
+      klass.subclasses = Fuse.List();
       klass.Plugin = klass.prototype;
       klass.Plugin.constructor = klass;
       return klass;
@@ -76,8 +76,8 @@
             return result;
           };
 
-          method.valueOf  = __method.valueOf.bind(__method);
-          method.toString = __method.toString.bind(__method);
+          method.valueOf  = Fuse.Function.bind(__method.valueOf, __method);
+          method.toString = Fuse.Function.bind(__method.toString, __method);
         }
         prototype[key] = method;
       });

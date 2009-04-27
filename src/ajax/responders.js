@@ -21,8 +21,8 @@
         m = responder[name];
         if (!(this.responders[name] || Fuse.List())
             .first(function(c) { return c.__method === m })) {
-          (handler = m.bind(responder)).__method = m;
-          if (!this.responders[name]) this.responders[name] = [];
+          (handler = Fuse.Function.bind(m, responder)).__method = m;
+          if (!this.responders[name]) this.responders[name] = Fuse.List();
           this.responders[name].push(handler);
         }
       }

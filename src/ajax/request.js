@@ -79,7 +79,7 @@
         if (this.options.asynchronous)
           Fuse.Function.defer(Fuse.Function.bind(this.respondToReadyState, this), 1);
 
-        this.transport.onreadystatechange = this.onStateChange.bind(this);
+        this.transport.onreadystatechange = Fuse.Function.bind(this.onStateChange, this);
         this.setRequestHeaders();
 
         this.body = this.method == 'post' ? (this.options.postBody || params) : null;

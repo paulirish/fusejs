@@ -62,6 +62,7 @@
   (function() {
     this._each = function _each(callback) {
       this.forEach(callback);
+      return this;
     };
 
     this.clear = function clear() {

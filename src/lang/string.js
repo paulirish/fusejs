@@ -49,7 +49,7 @@
       if (typeof replacement !== 'function')
         return __replace.call(this, pattern, replacement);
 
-      var isGlobal, match, source = this, result = '';
+      var isGlobal, match, source = String(this), result = '';
       if (!Fuse.Object.isRegExp(pattern))
         pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)));
 
