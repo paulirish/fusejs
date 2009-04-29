@@ -12,11 +12,15 @@
     };
 
     this.select = function select(selector, context) {
-      function select(selector, context) {
-        return toList(NWMatcher.select(selector, context));
-      }
-      var NWMatcher = NW.Dom, toList = Fuse.List.fromNodeList;
-      return (this.select = select)(selector, context);
+      var select, NWMatcher = NW.Dom, toList = Fuse.List.fromNodeList;
+      return (this.select = select = Feature('ELEMENT_EXTENSIONS')
+        ? function select(selector, context) {
+            return toList(NWMatcher.select(selector, context));
+          }
+        : function select(selector, context) {
+            return toList(NWMatcher.select(selector, context)).map(Element.extend);
+          }
+       )(selector, context);
     };
 
     // prevent JScript bug with named function expressions

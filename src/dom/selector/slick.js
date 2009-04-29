@@ -8,13 +8,16 @@
     };
 
     this.select = (function() {
-      function select(selector, context) {
-        return toList(Slick(context, selector));
-      }
-      var toList = Fuse.List.fromNodeList;
-      return select;
+      var select, toList = Fuse.List.fromNodeList;
+      return select = Feature('ELEMENT_EXTENSIONS')
+        ? function select(selector, context) {
+            return toList(Slick(context, selector));
+          }
+        : function select(selector, context) {
+            return toList(Slick(context, selector)).map(Element.extend);
+          };
     })();
 
     // prevent JScript bug with named function expressions
-    var match = null
+    var match = null;
   }).call(Fuse.Dom.Selector);
