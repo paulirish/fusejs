@@ -35,7 +35,7 @@
         parent.subclasses.push(klass);
       }
 
-      i = 0;
+      klass.superclass = parent; i = 0;
       while (props = properties[i++]) klass.addMethods(props);
 
       klass.superclass = parent;

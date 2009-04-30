@@ -1,3 +1,5 @@
+* Fix a regression bug in Fuse.Class that stopped access to a class's `_super` method. [jddalton]
+
 * Ensure Fuse.Dom.Selector.select() adapters return extended elements in IE. [jddalton]
 
 * Ensure Array#_each returns the array it iterates over and correct overlooked native to Fuse.<native> conversions in the source. [jddalton]
