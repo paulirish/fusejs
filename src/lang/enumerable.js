@@ -166,7 +166,7 @@
     };
 
     this.size = function size() {
-      return this.toList().length;
+      return Fuse.Number(this.toList().length);
     };
 
     this.some = function some(callback, thisArg) {
@@ -194,7 +194,7 @@
 
     this.toArray = function toArray() {
       var results = Fuse.List();
-      this._each(function(value) { results.push(value) });
+      this._each(function(value, index) { results[index] = value });
       return results;
     };
 

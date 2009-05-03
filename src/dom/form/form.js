@@ -31,7 +31,7 @@
 
       var element, key, value, type,
        isImageType, isSubmitButton, submitSerialized,
-       i = 0, result = { }, submit = options.submit;
+       i = 0, result = Fuse.Object(), submit = options.submit;
 
       /* http://www.w3.org/TR/html401/interact/forms.html#successful-controls */
       while (element = elements[i++]) {

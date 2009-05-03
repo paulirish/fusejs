@@ -16,7 +16,7 @@
        ec = getOrCreateCache(id, element, eventName);
 
       // bail if handler is already exists
-      if (ec.handlers.indexOf(handler) !== -1)
+      if (Fuse.List.Plugin.indexOf.call(ec.handlers, handler) != -1)
         return false;
 
       ec.handlers.unshift(handler);
@@ -40,7 +40,7 @@
     getCacheID.id = 3;
 
     function getDOMEventName(eventName) {
-      if (eventName && eventName.indexOf(':') !== -1)
+      if (eventName && eventName.indexOf(':') != -1)
         return Event.CUSTOM_EVENT_NAME;
       return eventName;
     }
@@ -55,7 +55,7 @@
       var c = Event.cache[id] = Event.cache[id] || { 'events': { } };
       c.element = c.element || element;
       return c.events[eventName] = c.events[eventName] ||
-        { 'handlers': Fuse.List(), 'dispatcher': false };
+        { 'handlers': [], 'dispatcher': false };
     }
 
     function removeCacheAtIndex(id, eventName, index) {
@@ -108,7 +108,7 @@
       // DOM Level 0
       function(element, eventName, handler) {
         var attrName = 'on' + getDOMEventName(eventName);
-        if (!eventName.indexOf(':') !== -1 && element[attrName] === handler)
+        if (!eventName.indexOf(':') != -1 && element[attrName] === handler)
           element[attrName] = null;
       },
 
@@ -365,7 +365,7 @@
       Fuse.Object._each(Event.Methods, Event.prototype
         ? function(value, key) { Event.prototype[key] = Fuse.Function.methodize(value) }
         : function(value, key) {
-            if (key.indexOf('pointer') !== 0)
+            if (key.indexOf('pointer') != 0)
               Methods.push([key, Fuse.Function.methodize(value)]);
           }
       );
@@ -497,11 +497,10 @@
         return element;
       }
 
-      var dispatcher = ec.dispatcher,
-       foundAt = (typeof handler === 'number') ?
-         handler : ec.handlers.indexOf(handler);
+      var dispatcher = ec.dispatcher, foundAt = Fuse.Object.isNumber(handler) ?
+        handler : Fuse.List.Plugin.indexOf.call(ec.handlers, handler);
 
-      if (foundAt === -1) return element;
+      if (foundAt == -1) return element;
       _removeCacheAtIndex(id, eventName, foundAt);
 
       if (!Event.cache[id] || !Event.cache[id].events[eventName])

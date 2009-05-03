@@ -1,3 +1,5 @@
+* Remove strict equality operators when checking indexOf() results because they fail on Fuse.Number instances and correct more overlooked native to Fuse.<native> conversions. [jddalton]
+
 * Optimize Fuse.Function statics and add a method name cache to Fuse.Fusebox#updateGenerics. [jddalton]
 
 * Refactor Fuse.Fusebox() and add the ACTIVE_X_OBJECT feature test. [jddalton]

@@ -132,7 +132,7 @@
 
     this.intersect = function intersect(array) {
       for (var i = 0, results = Fuse.List(), length = array.length; i < length; i++)
-        if (this.indexOf(array[i]) !== -1 && results.indexOf(array[i]) === -1)
+        if (this.indexOf(array[i]) != -1 && results.indexOf(array[i]) == -1)
           results.push(array[i]);
       return results;
     };
@@ -155,19 +155,19 @@
     };
 
     this.size = function size() {
-      return this.length;
+      return Fuse.Number(this.length);
     };
 
     this.unique = function unique() {
       for (var i = 0, results = Fuse.List(), length = this.length; i < length; i++)
-        if (results.indexOf(this[i]) < 0) results.push(this[i]);
+        if (results.indexOf(this[i]) == -1) results.push(this[i]);
       return results.length && results || this;
     };
 
     this.without = function without() {
       var results = Fuse.List(), i = 0, length = this.length, args = slice.call(arguments, 0);
       for ( ; i < length; i++)
-        if (args.indexOf(this[i]) === -1) results.push(this[i]);
+        if (args.indexOf(this[i]) == -1) results.push(this[i]);
       return results;
     };
 
@@ -188,7 +188,7 @@
         var _contains = contains;
         contains = function contains(object, strict) {
           // attempt a fast strict search first
-          var result = this.indexOf(object) > -1;
+          var result = this.indexOf(object) != -1;
           if (strict || result) return result;
           return _contains.call(this, object);
         };
@@ -237,7 +237,7 @@
       callback = callback || Fuse.K;
       var results = Fuse.List();
       if (Fuse.Object.isString(pattern))
-        pattern = new RegExp(RegExp.escape(pattern));
+        pattern = new RegExp(Fuse.RegExp.escape(pattern));
 
       for (var i = 0, length = this.length; i < length; i++)
         if (pattern.match(this[i]))
@@ -247,13 +247,12 @@
 
     this.max = function max(callback, thisArg) {
       var result;
-      if (!callback) {
+      if (!callback && (callback = Fuse.K)) {
         // John Resig's fast Array max|min:
         // http://ejohn.org/blog/fast-javascript-maxmin
         result = Math.max.apply(Math, this);
         if (!isNaN(result)) return result;
       }
-      result = null; callback = Fuse.K;
       for (var i = 0, length = this.length, value; i < length; i++) {
         value = callback.call(thisArg, this[i], i, this);
         if (result == null || value >= result)
@@ -264,11 +263,10 @@
 
     this.min = function min(callback, thisArg) {
       var result;
-      if (!callback) {
+      if (!callback && (callback = Fuse.K)) {
         result = Math.min.apply(Math, this);
         if (!isNaN(result)) return result;
       }
-      result = null; callback = Fuse.K;
       for (var i = 0, length = this.length, value; i < length; i++) {
         value = callback.call(thisArg, this[i], i, this);
         if (result == null || value < result)
@@ -283,7 +281,7 @@
       for (var i = 0, length = this.length; i < length; i++)
         (callback.call(thisArg, this[i], i, this) ?
           trues : falses).push(this[i]);
-      return [trues, falses];
+      return Fuse.List(trues, falses);
     };
 
     this.pluck = function pluck(property) {
@@ -377,8 +375,8 @@
       var length = this.length;
       if (fromIndex < 0) fromIndex = length + fromIndex;
       for ( ; fromIndex < length; fromIndex++)
-        if (this[fromIndex] === item) return fromIndex;
-      return -1;
+        if (this[fromIndex] === item) return Fuse.Number(fromIndex);
+      return Fuse.Number(-1);
     };
 
     // ECMA-5 15.4.4.15
@@ -386,7 +384,7 @@
       fromIndex = isNaN(fromIndex) ? this.length :
         (fromIndex < 0 ? this.length + fromIndex : fromIndex) + 1;
       var n = this.slice(0, fromIndex).reverse().indexOf(item);
-      return (n < 0) ? n : fromIndex - n - 1;
+      return (n < 0) ? n : Fuse.Number(fromIndex - n - 1);
     };
 
     // ECMA-5 15.4.4.19

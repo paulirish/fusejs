@@ -97,7 +97,7 @@
     };
 
     this.clone = function clone(object) {
-      return Fuse.Object.extend({ }, object);
+      return Fuse.Object.extend(Fuse.Object(), object);
     };
 
     this.each = function each(object, callback, thisArg) {
@@ -112,7 +112,7 @@
     };
 
     this.extend = function extend(destination, source) {
-      Fuse.Object._each(source || { }, function(value, key) { 
+      Fuse.Object._each(source || Fuse.Object(), function(value, key) { 
         destination[key] = value; 
       });
       return destination;

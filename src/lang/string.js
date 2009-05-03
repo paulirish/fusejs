@@ -146,7 +146,7 @@
     };
 
     this.toQueryParams = function toQueryParams(separator) {
-      var match = this.split('?'), hash = { };
+      var match = this.split('?'), hash = Fuse.Object();
       if (match.length > 1 && !match[1]) return hash;
 
       (match = (match = match[1] || match[0]).split('#')) &&
@@ -159,9 +159,9 @@
       for ( ; i < length; i++) {
         value = undef;
         index = (pair = pairs[i]).indexOf('=');
-        if (!pair || index === 0) continue;
+        if (!pair || index == 0) continue;
 
-        if(index !== -1) {
+        if (index != -1) {
           key = decodeURIComponent(pair.slice(0, index));
           value = pair.slice(index + 1);
           if (value) value = decodeURIComponent(value);
@@ -224,7 +224,7 @@
     };
 
     this.startsWith = function startsWith(pattern) {
-      return this.indexOf(pattern) === 0;
+      return this.indexOf(pattern) == 0;
     };
 
     // prevent JScript bug with named function expressions

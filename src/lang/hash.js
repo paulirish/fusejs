@@ -234,7 +234,7 @@
         if (value === pair[1])
           return pair[0];
       }
-      return -1;
+      return Fuse.Number(-1);
     };
 
     this.keys = function keys() {
@@ -263,15 +263,15 @@
       while (pair = pairs[i++])
         (callback.call(thisArg, value = pair[1], key = pair[0], this) ?
           trues : falses).set(key, value);
-      return [trues, falses];
+      return Fuse.List(trues, falses);
     };
 
     this.size = function size() {
-      return this._keys.length;
+      return Fuse.Number(this._keys.length);
     };
 
     this.toObject = function toObject() {
-      var pair, i = 0, pairs = this._pairs, object = { };
+      var pair, i = 0, pairs = this._pairs, object = Fuse.Object();
       while (pair = pairs[i++]) object[pair[0]] = pair[1];
       return object;
     };

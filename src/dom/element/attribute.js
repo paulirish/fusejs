@@ -177,7 +177,7 @@
 
       // get and set `style` attribute
       value = (node = label.getAttributeNode('style')) && node.value;
-      if (typeof value !== 'string' || value.indexOf('display:block') !== 0) {
+      if (typeof value !== 'string' || value.indexOf('display:block') != 0) {
         T.read.style  = getStyle;
         T.write.style = setStyle;
       }
