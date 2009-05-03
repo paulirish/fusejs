@@ -1,3 +1,5 @@
+* Optimize Fuse.Function statics and add a method name cache to Fuse.Fusebox#updateGenerics. [jddalton]
+
 * Refactor Fuse.Fusebox() and add the ACTIVE_X_OBJECT feature test. [jddalton]
 
 * Fix a regression bug in Fuse.Class that stopped access to a class's `_super` method. [jddalton]

@@ -386,7 +386,7 @@
     return _wrapAccessorMethods;
   })();
 
-  /*--------------------------------------------------------------------------*/  
+  /*--------------------------------------------------------------------------*/
 
   Fuse.Fusebox.prototype.updateGenerics = (function() {
     function _createGeneric(methodName) {
@@ -398,19 +398,21 @@
     }
 
     function updateGenerics() {
-      var j, n, names, object, i = 0, natives = arguments.length ? arguments :
-        ['Array', 'Date', 'Function', 'Number', 'RegExp', 'String'];
+      var c, j, n, names, object, cache = updateGenerics.cache, i = 0,
+       natives = arguments.length ? arguments : ['Array', 'Date', 'Function', 'Number', 'RegExp', 'String'];
       while (n = natives[i++]) {
+        c = cache[n] || (cache[n] = { });
         object = this[n];
         names  = Fuse.Fusebox.MethodNames[n];
         while (name = names[j++])
-          if (object.prototype[name])
-            object[name] = _createGeneric(name);
+          if (!c[name] && object.prototype[name])
+            object[name] = c[name] = _createGeneric(name);
         for (name in object.prototype)
-          if (name !== 'constructor' && name !== 'prototype' && name !== 'Plugin')
-            object[name] = _createGeneric(name);
+          if (!c[name] && name !== 'constructor' && name !== 'prototype' && name !== 'Plugin')
+            object[name] = c[name] = _createGeneric(name);
       }
     }
+    updateGenerics.cache = { };
     return updateGenerics;
   })();
 
