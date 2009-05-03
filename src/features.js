@@ -38,6 +38,11 @@
   /*---------------------------- BROWSER FEATURES ----------------------------*/
 
   Feature.set({
+    'ACTIVE_X_OBJECT': function() {
+      // true for IE
+      return isHostObject(global, 'ActiveXObject');
+    },
+
     'CREATE_ELEMENT_WITH_HTML': function() {
       try { // true for IE
         var div = Fuse._doc.createElement('<div id="x">');

@@ -3,241 +3,50 @@
   Fuse.Fusebox = (function() {
     function Fusebox() {
       if (this === Fuse) return new Fuse.Fusebox();
-      var sandbox = Fuse.Fusebox.createSandbox() || global;
 
-      // wrap native constructors
-      this.Array = (function() {
-        var Array, fn = sandbox.Array, slice = fn.prototype.slice;
-        return Array = !Fuse.Browser.Feature('OBJECT__PROTO__')
-         ? function Array(count) {
-             return arguments.length === 1 ? new fn(count) : slice.call(arguments, 0);
-           }
-         : function Array(count) {
-             var r = arguments.length === 1 ? new fn(count) : slice.call(arguments, 0);
-             r['__proto__'] = Array.Plugin;
-             return r;
-           };
-      })();
+      // Chrome, IE, and Opera Array accessors return sugared arrays so we skip wrapping them
+      var sandbox = Fuse.Fusebox._createSandbox(), skip = Fuse.Fusebox._wrapAccessorMethods.skip.Array;
+      if (sandbox && !(new sandbox.Array().slice(0) instanceof global.Array))
+        skip.concat = skip.filter = skip.slice = 1;
 
-      // ECMA-5 15.4.3.2
-      this.Array.isArray = sandbox.Array.isArray || (function() {
-        function isArray(value) {
-         return toString.call(value) === '[object Array]';
-        }
-        var toString = sandbox.Object.prototype.toString;
-        return isArray;
-      })();
+      function Fusebox(sandbox) {
+        if (this === Fuse) return new Fuse.Fusebox();
+        sandbox = sandbox || Fuse.Fusebox._createSandbox() || global;
 
-      this.Date = (function() {
-        var String = sandbox.String, Number = sandbox.Number,
-         fn = sandbox.Date, now = null, parse = null, UTC = null;
+        Fuse.Fusebox._createNatives.call(this, sandbox);
+        Fuse.Fusebox._createStatics.call(this, sandbox);
+        Fuse.Fusebox._wrapAccessorMethods.call(this, sandbox);
 
-        var Date = !Fuse.Browser.Feature('OBJECT__PROTO__')
-          ? function Date(year, month, date, hours, minutes, seconds, ms) {
-              return this != Date
-                ? new fn(year, month, date, hours, minutes, seconds, ms)
-                : new String(new fn);
-            }
-          : function Date(year, month, date, hours, minutes, seconds, ms) {
-             if (this != Date) {
-               var r = new fn(year, month, date, hours, minutes, seconds, ms);
-               r['__proto__'] = Date.Plugin;
-             } else {
-               var r = String(new fn);
-               r['__proto__'] = Date.Plugin;
-             }
-             return r;
-           };
+        // assign prototype properties, Plugin alias, and updateGenerics method
+        var n, i = 0, natives = ['Array', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String'];
+        while (n = natives[i++]) {
+          this[n].constructor = this;
+          this[n].prototype.constructor = this[n];
+          this[n].Plugin = this[n].prototype;
 
-        // ECMA-5 15.9.4.4
-        Date.now = fn.now
-          ? function now() { return Number(fn.now()) }
-          : function now() { return Number(+new Date) };
-
-        // ECMA-5 15.9.4.2
-        Date.parse = function parse(dateString) {
-          return Number(fn.parse(dateString));
-        };
-
-        // ECMA-5 15.9.4.3
-        Date.UTC = function UTC() {
-          return Number(fn.UTC.apply(fn, arguments));
-        };
-
-        return Date;
-      })();
-
-      this.Function = (function() {
-        var Function, fn = sandbox.Function;
-        return Function = !Fuse.Browser.Feature('OBJECT__PROTO__')
-          ? function Function() { return fn.apply(null, arguments) }
-          : function Function() {
-              var r = fn.apply(null, arguments); 
-              r['__proto__'] = Function.Plugin;
-              return r;
-            };
-      })();
-
-      this.Object = (function() {
-        function Object() {
-          var r = new fn;
-          r['__proto__'] = Object.Plugin;
-          return r;
-        }
-        var fn = sandbox.Object;
-        return Fuse.Browser.Feature('OBJECT__PROTO__') ? Object : fn;
-      })();
-
-      this.Number = (function() {
-        var fn = sandbox.Number;
-        var Number = !Fuse.Browser.Feature('OBJECT__PROTO__')
-          ? function Number(value) { return new fn(value) }
-          : function Number(value) {
-              var r = new fn(value);
-              r['__proto__'] = Number.Plugin;
-              return r;
-            };
-
-        // add psyudo constants
-        Number.MAX_VALUE         = fn.MAX_VALUE;
-        Number.MIN_VALUE         = fn.MIN_VALUE;
-        Number.NaN               = fn.NaN;
-        Number.NEGATIVE_INFINITY = fn.NEGATIVE_INFINITY;
-        Number.POSITIVE_INFINITY = fn.POSITIVE_INFINITY;
-        return Number;
-      })();
-
-      this.RegExp = (function() {
-        var RegExp, fn = sandbox.RegExp;
-        return RegExp = !Fuse.Browser.Feature('OBJECT__PROTO__')
-          ? function RegExp(pattern, flags) { return new fn(pattern, flags) }
-          : function RegExp(pattern, flags) {
-              var r = new fn(pattern, flags);
-              r['__proto__'] = RegExp.Plugin;
-              return r;
-            }
-      })();
-
-      this.String = (function() {
-        var fn = sandbox.String, fromCharCode = null;
-        var String = !Fuse.Browser.Feature('OBJECT__PROTO__')
-          ? function String(value) { return new fn(value) }
-          : function String(value) {
-              var r = new fn(value);
-              r['__proto__'] = String.Plugin;
-              return r;
-            };
-
-        String.fromCharCode = function fromCharCode() {
-          return String(fn.fromCharCode.apply(fn, arguments));
-        };
-        return String;
-      })();
-
-      (function() {
-        function _createUpdateGenerics(nativeName) {
-          return new Function('', [
+          if (n !== 'Object') this[n].updateGenerics = new Function('', [
             'function updateGenerics() {',
-            'this.constructor.updateGenerics("' + nativeName + '");',
+            'this.constructor.updateGenerics("' + n + '");',
             '}', 'return updateGenerics;'].join('\n'))();
         }
 
-        function _createWrapper(fusebox, nativeName, methodName) {
-          var type = _getReturnType(methodName, nativeName);
-          return new Function('', [
-            'var ' + type + ' = this.' + type + ',',
-            'fn = this.' + nativeName + '.prototype.' + methodName + ';',
-            'function ' + methodName + '() {',
-              (type === 'Array'
-                ? 'return ' + type + '.apply(null, arguments.length ?' +
-                  'fn.apply(this, arguments) : fn.call(this));'
-                : 'return new ' + type + '(' +
-                  'arguments.length ? fn.apply(this, arguments) : fn.call(this));'),
-            '}', 'return ' + methodName].join('\n')).call(fusebox);
-        }
+        // remove iframe if used
+        var item, o = Fuse.Fusebox._createSandbox;
+        o.mode === 'IFRAME' && (item = o.cache[o.cache.length -1]) && item.parentNode.removeChild(item);
 
-        function _getReturnType(methodName, defaultType) {
-          if (/ndexOf|Date|Day|Hour|Minutes|econds|Time|Year|^(charCodeAt|search|push|unshift)$/.test(methodName))
-            return 'Number';
-          if (/String|^(join|charAt)$/.test(methodName))
-            return 'String';
-          if (/^(exec|match|split)$/.test(methodName))
-            return 'Array';
-          return defaultType;
-        }
+        this.updateGenerics();
+      }
 
-        function _populateNativePrototype(fusebox, nativeName) {
-          var name, names, i = 0;
-          if (names = Fuse.Fusebox.MethodNames[nativeName]) {
-            while(name = names[i++])
-              if (sandbox[nativeName].prototype[name])
-                fusebox[nativeName].prototype[name] = sandbox[nativeName].prototype[name];
-          }
-        }
+      // copy properties over
+      Fusebox.prototype = Fuse.Fusebox.prototype;
+      (function(i) { for (i in this) Fusebox[i] = this[i]; }).call(Fuse.Fusebox);
 
-        var _shouldSkipName = (function() {
-          var lookup = {
-            'Array':  { 'reduce': 1, 'reduceRight': 1 },
-            'RegExp': { 'test': 1 }
-          };
-
-          // Chrome, IE, and Opera Array accessors return sugared objects
-          if (!(this.Array().slice(0) instanceof global.Array))
-            lookup.Array.concat = lookup.Array.filter = lookup.Array.slice = 1;
-
-          return function(nativeName, methodName) {
-            return methodName === 'valueOf' || lookup[nativeName] &&
-              lookup[nativeName][methodName];
-          };
-        }).call(this);
-
-        // create Plugin alias, set constructor, anb add updateGenerics to the wrappers
-        var n, names, i = 0;
-        while (n = arguments[i++]) {
-          if (Fuse.Browser.Feature('OBJECT__PROTO__')) {
-            if (n === 'Object') this[n].Plugin = this[n].prototype;
-            else this[n].Plugin = this[n].prototype = new this.Object;
-            _populateNativePrototype(this, n);
-          }
-          else this[n].Plugin = this[n].prototype = sandbox[n].prototype;
-
-          this[n].constructor = this;
-          this[n].Plugin.constructor = this[n];
-          if (n !== 'Object') this[n].updateGenerics = _createUpdateGenerics(n);
-        }
-
-        // wrap native methods to ensure they return sugared objects
-        for (n in Fuse.Fusebox.AccessorNames) {
-          i = 0; names = Fuse.Fusebox.AccessorNames[n];
-          while (name = names[i++])
-            if (!_shouldSkipName(n, name) && this[n].prototype[name])
-              this[n].prototype[name] = _createWrapper(this, n, name);
-        }
-      }).call(this, 'Object', 'Array', 'Date', 'Function', 'Number', 'RegExp', 'String');
-
-      // add generics
-      this.updateGenerics();
-
-      // remove iframe if used
-      (function() {
-        var createSandbox = Fuse.Fusebox.createSandbox, cache = createSandbox.cache;
-        if (createSandbox.mode === 'iframe')
-          (sandbox = cache[cache.length -1]).parentNode.removeChild(sandbox);
-      })();
-
-      // clear sandbox reference
-      sandbox = null;
+      return new (Fuse.Fusebox = Fusebox)(sandbox);
     }
-
-    // clean scope
-    var Bug = null, Feature = null, concatList = null, expando = null,
-     getDocument = null, getNodeName = null, getWindow = null, isHostObject = null,
-     prependList = null, slice = null, userAgent = null, window = null;
-
     return Fusebox;
   })();
 
-  /*--------------------------------------------------------------------------*/  
+  /*--------------------------------------------------------------------------*/
 
   // create lists of methods belonging to natives
   (function() {
@@ -284,27 +93,18 @@
 
   }).call(Fuse.Fusebox.MethodNames = { }, Fuse.Fusebox.AccessorNames);
 
-  /*-------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
-  Fuse.Fusebox.createSandbox = (function() {
-    var createSandbox = function createSandbox() { return false };
-    createSandbox.mode = '__proto__';
+  Fuse.Fusebox._createSandbox = (function() {
+    var _createSandbox, isFileProtocol = global.location &&
+      (global.location.href || '').indexOf('file:') === 0;
 
-    if (Feature('ActiveXObject')) {
-      createSandbox = function createSandbox() {
-        var transport = new ActiveXObject('htmlfile');
-        transport.open();
-        transport.write('<script>document.domain="' + Fuse._doc.domain + 
-          '";document.global = this;<\/script>'); 
-        transport.close();
-        createSandbox.cache.push(transport);
-        return transport.global;
-      };
-      createSandbox.mode = 'activeX';
-    }
-    else if (!Feature('OBJECT__PROTO__')) {
+    if (Fuse._doc && isHostObject(Fuse._doc, 'createElement') &&
+       (Feature('ACTIVE_X_OBJECT') && isFileProtocol ||
+        Feature('OBJECT__PROTO__') && !isFileProtocol)) {
+
       var head = Fuse._doc.getElementsByTagName('HEAD')[0];
-      createSandbox = function createSandbox() {
+      (_createSandbox = function _createSandbox() {
         var transport = Fuse._doc.createElement('iframe');
         transport.style.cssText = 'position:absolute;visibility:hidden;left:-20px;width:0;height:0;overflow:hidden';
         head.insertBefore(transport, head.firstChild);
@@ -317,16 +117,276 @@
         var result = Fuse[expando];
         delete Fuse[expando];
 
-        createSandbox.cache.push(transport);
+        _createSandbox.cache.push(transport);
         return result;
-      };
-      createSandbox.mode = 'iframe';
+      }).mode = 'IFRAME';
     }
-    createSandbox.cache = [];
-    return createSandbox;
+    else if (Feature('ACTIVE_X_OBJECT')) {
+      (_createSandbox = function _createSandbox() {
+        var transport = new ActiveXObject('htmlfile');
+        transport.open();
+        transport.write('<script>document.domain="' + Fuse._doc.domain + '";document.global = this;<\/script>'); 
+        transport.close();
+        _createSandbox.cache.push(transport);
+        return transport.global;
+      }).mode = 'ACTIVE_X';
+    }
+    else if (Feature('OBJECT__PROTO__'))
+     (_createSandbox = function _createSandbox() { return false }).mode = '__PROTO__';
+
+    else throw new Error('Fuse.Fusebox() failed to create sandbox.');
+
+    _createSandbox.cache = [];
+    return _createSandbox;
   })();
 
   /*--------------------------------------------------------------------------*/
+
+  Fuse.Fusebox._createStatics = (function() {
+    function _createStatics(sandbox) {
+      // ECMA-5 15.4.3.2
+      this.Array.isArray = sandbox.Array.isArray || (function(toString) {
+        function isArray(value) { return toString.call(value) === '[object Array]' }
+        return isArray;
+      })(sandbox.Object.prototype.toString);
+
+      (function(fn, Number) {
+        // ECMA-5 15.9.4.4
+        this.now = fn.now
+          ? function now() { return Number(fn.now()) }
+          : function now() { return Number(new Date().getTime()) };
+
+        // ECMA-5 15.9.4.2
+        this.parse = function parse(dateString) {
+          return Number(fn.parse(dateString));
+        };
+
+        // ECMA-5 15.9.4.3
+        this.UTC = function UTC() {
+          return Number(fn.UTC.apply(fn, arguments));
+        };
+
+        // prevent JScript bug with named function expressions
+        var now = null, parse = null, UTC = null;
+      }).call(this.Date, sandbox.Date, this.Number);
+
+      (function(fn) {
+        this.MAX_VALUE         = fn.MAX_VALUE;
+        this.MIN_VALUE         = fn.MIN_VALUE;
+        this.NaN               = fn.NaN;
+        this.NEGATIVE_INFINITY = fn.NEGATIVE_INFINITY;
+        this.POSITIVE_INFINITY = fn.POSITIVE_INFINITY;
+      }).call(this.Number, sandbox.Number);
+
+      this.String.fromCharCode = (function(fn, String) {
+        function fromCharCode() { return String(fn.fromCharCode.apply(fn, arguments)) }
+        return fromCharCode;
+      })(sandbox.String, this.String);
+
+      sandbox = null;
+    }
+    return _createStatics;
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
+  Fuse.Fusebox._createNatives = (function() {
+    var _createNatives = function _createNatives(sandbox) {
+      this.Array = (function(fn, slice) {
+        var Array = Fuse.Fusebox._wrapAccessorMethods.skip.Array.slice
+          ? function Array(length) {
+              return arguments.length === 1 ? new fn(length) : slice.call(arguments, 0);
+            }
+          : function Array(length) {
+              if (arguments.length === 1) return fn(length);
+              else {
+                var result = new fn();
+                result.push.apply(result, arguments);
+                return result;
+              }
+            };
+        Array.prototype = fn.prototype;
+        return Array;
+      })(sandbox.Array, sandbox.Array.prototype.slice);
+
+      this.Date = (function(fn, String) {
+        function Date(year, month, date, hours, minutes, seconds, ms) {
+          return this !== Date
+            ? new fn(year, month, date, hours, minutes, seconds, ms)
+            : String(new fn);
+        }
+        Date.prototype = fn.prototype;
+        return Date;
+      })(sandbox.Date, this.String);
+
+      this.Function = (function(fn) {
+        function Function(argN, body) { return fn.apply(null, arguments) }
+        Function.prototype = fn.prototype;
+        return Function;
+      })(sandbox.Function);
+
+      this.Object = sandbox.Object;
+
+      this.Number = (function(fn) {
+        function Number(value) { return new fn(value) }
+        Number.prototype = fn.prototype;
+        return Number;
+      })(sandbox.Number);
+
+      this.RegExp = (function(fn) {
+        function RegExp(pattern, flags) { return new fn(pattern, flags) }
+        RegExp.prototype = fn.prototype;
+        return RegExp;
+      })(sandbox.RegExp);
+
+      this.String = (function(fn) {
+        function String(value) { return new fn(value) }
+        String.prototype = fn.prototype;
+        return String;
+      })(sandbox.String);
+
+      sandbox = null;
+    };
+
+    if (Fuse.Fusebox._createSandbox.mode === '__PROTO__') {
+      _createNatives = function _createNatives(sandbox) {
+        this.Array = (function(fn, slice) {
+          function Array(length) {
+            var result = arguments.length === 1 ? new fn(length) : slice.call(arguments, 0);
+            result['__proto__'] = Array.prototype;
+            return result;
+          }
+          Array.prototype['__proto__'] = fn.prototype;
+          return Array;
+        })(sandbox.Array, sandbox.Array.prototype.slice);
+
+        this.Date = (function(fn, String) {
+          function Date(year, month, date, hours, minutes, seconds, ms) {
+            var result;
+            if (this != Date) {
+              result = new fn(year, month, date, hours, minutes, seconds, ms);
+              result['__proto__'] = Date.prototype;
+            } else result = String(new fn);
+            return result;
+          }
+          Date.prototype['__proto__'] = fn.prototype;
+          return Date;
+        })(sandbox.Date, this.String);
+
+        this.Function = (function(fn) {
+          function Function(argN, body) {
+            var result = fn.apply(null, arguments); 
+            result['__proto__'] = Function.prototype;
+            return result;
+          }
+          Function.prototype['__proto__'] = fn.prototype;
+          return Function;
+        })(sandbox.Function);
+
+        // ECMA-5 15.2.1.1
+        this.Object = (function(fn, Number, String) {
+          function Object(value) {
+            if (this === Object && value != null) {
+              switch (typeof value) {
+                case 'boolean': return new Boolean(value);
+                case 'number':  return Number(value);
+                case 'string':  return String(value);
+                default: return value;
+              }
+            }
+            var result = new fn;
+            result['__proto__'] = Object.prototype;
+            return result;
+          }
+          Object.prototype['__proto__'] = fn.prototype;
+          return Object;
+        })(sandbox.Object, this.Number, this.String);
+
+        this.Number = (function(fn) {
+          function Number(value) {
+            var result = new fn(value);
+            result['__proto__'] = Number.prototype;
+            return result;
+          }
+          Number.prototype['__proto__'] = fn.prototype;
+          return Number;
+        })(sandbox.Number);
+
+        this.RegExp = (function(fn) {
+          function RegExp(pattern, flags) {
+            var result = new fn(pattern, flags);
+            result['__proto__'] = RegExp.prototype;
+            return result;
+          }
+          RegExp.prototype['__proto__'] = fn.prototype;
+          return RegExp;
+        })(sandbox.RegExp);
+
+        this.String = (function(fn) {
+          function String(value) {
+            var result = new fn(value);
+            result['__proto__'] = String.prototype;
+            return result;
+          }
+          String.prototype['__proto__'] = fn.prototype;
+          return String;
+        })(sandbox.String);
+
+        sandbox = null;
+      };
+    }
+
+    // clean scope
+    var Bug = null, Feature = null, concatList = null, document = null,
+     expando = null, getDocument = null, getNodeName = null, getWindow = null,
+     global = null, isHostObject = null, prependList = null, slice = null,
+     userAgent = null, window = null;
+
+    return _createNatives;
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
+  Fuse.Fusebox._wrapAccessorMethods = (function() {
+    function _wrapAccessorMethods() {
+      var i, name, names, type, natives = Fuse.Fusebox.AccessorNames,
+       skip = _wrapAccessorMethods.skip;
+      for (n in natives) {
+        i = 0; names = natives[n];
+        while (name = names[i++]) {
+          if ((name === 'valueOf' || skip[n] && skip[n][name]) ||
+              !this[n].prototype[name]) continue;
+          type = n;
+          if (/ndexOf|Date|Day|Hour|Minutes|econds|Time|Year|^(charCodeAt|search|push|unshift)$/.test(name))
+            type = 'Number';
+          else if (/String|^(join|charAt)$/.test(name))
+            type = 'String';
+          else if (/^(exec|match|split)$/.test(name))
+            type = 'Array';
+
+          this[n].prototype[name] = new Function('', [
+            'var ' + type + ' = this.' + type + ',',
+            'fn = this.' + n + '.prototype.' + name + ';',
+            'function ' + name + '() {',
+              (type === 'Array'
+                ? 'return ' + type + '.apply(null, arguments.length ?' +
+                  'fn.apply(this, arguments) : fn.call(this));'
+                : 'return new ' + type + '(' +
+                  'arguments.length ? fn.apply(this, arguments) : fn.call(this));'),
+            '}', 'return ' + name].join('\n')).call(this);
+        }
+      }
+    }
+
+    _wrapAccessorMethods.skip = {
+      'Array':  { 'reduce': 1, 'reduceRight': 1 },
+      'RegExp': { 'test': 1 }
+    };
+
+    return _wrapAccessorMethods;
+  })();
+
+  /*--------------------------------------------------------------------------*/  
 
   Fuse.Fusebox.prototype.updateGenerics = (function() {
     function _createGeneric(methodName) {
