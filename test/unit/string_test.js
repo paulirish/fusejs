@@ -1,22 +1,22 @@
 new Test.Unit.Runner({
-  testInterpret: function(){
-    this.assertIdentical('true', String.interpret(true));
-    this.assertIdentical('123',  String.interpret(123));
-    this.assertIdentical('foo bar', String.interpret('foo bar'));
-    this.assertIdentical(
-      'object string',
-      String.interpret({ toString: function(){ return 'object string' } }));
 
-    this.assertIdentical('0', String.interpret(0));
-    this.assertIdentical('false', String.interpret(false));
-    this.assertIdentical('', String.interpret(undefined));
-    this.assertIdentical('', String.interpret(null));
-    this.assertIdentical('', String.interpret(''));
+  'testInterpret': function(){
+    this.assertEqual('true',    Fuse.String.interpret(true));
+    this.assertEqual('123',     Fuse.String.interpret(123));
+    this.assertEqual('foo bar', Fuse.String.interpret('foo bar'));
+    this.assertEqual('object string',
+      Fuse.String.interpret({ 'toString': function(){ return 'object string' } }));
+
+    this.assertEqual('0',     Fuse.String.interpret(0));
+    this.assertEqual('false', Fuse.String.interpret(false));
+    this.assertEqual('',      Fuse.String.interpret(undef));
+    this.assertEqual('',      Fuse.String.interpret(null));
+    this.assertEqual('',      Fuse.String.interpret(''));
   },
 
-  testGsubWithReplacementFunction: function() {
-    var source = 'foo boo boz';
-    
+  'testGsubWithReplacementFunction': function() {
+    var source = Fuse.String('foo boo boz');
+
     this.assertEqual('Foo Boo BoZ',
       source.gsub(/[^o]+/, function(match) {
         return match[0].toUpperCase()
@@ -32,56 +32,61 @@ new Test.Unit.Runner({
         return match[0].length % 2;
       }));
   },
-  
-  testGsubWithReplacementString: function() {
-    var source = 'foo boo boz';
-    
+
+  'testGsubWithReplacementString': function() {
+    var source = Fuse.String('foo boo boz');
+
     this.assertEqual('foobooboz',
       source.gsub(/\s+/, ''));
-    this.assertEqual('  z', 
+    this.assertEqual('  z',
       source.gsub(/(.)(o+)/, ''));
-      
-    this.assertEqual('ウィメンズ2007<br/>クルーズコレクション', 
-      'ウィメンズ2007\nクルーズコレクション'.gsub(/\n/,'<br/>'));
-    this.assertEqual('ウィメンズ2007<br/>クルーズコレクション', 
-      'ウィメンズ2007\nクルーズコレクション'.gsub('\n','<br/>'));
+
+    this.assertEqual('ウィメンズ2007<br/>クルーズコレクション',
+      Fuse.String('ウィメンズ2007\nクルーズコレクション').gsub(/\n/,'<br/>'));
+
+    this.assertEqual('ウィメンズ2007<br/>クルーズコレクション',
+      Fuse.String('ウィメンズ2007\nクルーズコレクション').gsub('\n','<br/>'));
   },
-  
-  testGsubWithReplacementTemplateString: function() {
-    var source = 'foo boo boz';
-    
+
+  'testGsubWithReplacementTemplateString': function() {
+    var source = Fuse.String('foo boo boz');
+
     this.assertEqual('-oo-#{1}- -oo-#{1}- -o-#{1}-z',
       source.gsub(/(.)(o+)/, '-#{2}-\\#{1}-'));
+
     this.assertEqual('-foo-f- -boo-b- -bo-b-z',
       source.gsub(/(.)(o+)/, '-#{0}-#{1}-'));
+
     this.assertEqual('-oo-f- -oo-b- -o-b-z',
       source.gsub(/(.)(o+)/, '-#{2}-#{1}-'));
+
     this.assertEqual('  z',
-      source.gsub(/(.)(o+)/, '#{3}'));      
+      source.gsub(/(.)(o+)/, '#{3}'));
   },
 
-  testGsubEscapesRegExpSpecialCharacters: function() {
+  'testGsubEscapesRegExpSpecialCharacters': function() {
     this.assertEqual('happy Smyle',
-      'happy :-)'.gsub(':-)', 'Smyle'));
-    this.assertEqual('sad Frwne',
-      'sad >:($'.gsub('>:($', 'Frwne'));
+      Fuse.String('happy :-)').gsub(':-)', 'Smyle'));
 
-    this.assertEqual('ab', 'a|b'.gsub('|', ''));
-    this.assertEqual('ab', 'ab(?:)'.gsub('(?:)', ''));
-    this.assertEqual('ab', 'ab()'.gsub('()', ''));
-    this.assertEqual('ab', 'ab'.gsub('^', ''));
-    this.assertEqual('ab', 'a?b'.gsub('?', ''));
-    this.assertEqual('ab', 'a+b'.gsub('+', ''));
-    this.assertEqual('ab', 'a*b'.gsub('*', ''));
-    this.assertEqual('ab', 'a{1}b'.gsub('{1}', ''));
-    this.assertEqual('ab', 'a.b'.gsub('.', ''));
+    this.assertEqual('sad Frwne',
+      Fuse.String('sad >:($').gsub('>:($', 'Frwne'));
+
+    this.assertEqual('ab', Fuse.String('a|b').gsub('|', ''));
+    this.assertEqual('ab', Fuse.String('ab(?:)').gsub('(?:)', ''));
+    this.assertEqual('ab', Fuse.String('ab()').gsub('()', ''));
+    this.assertEqual('ab', Fuse.String('ab').gsub('^', ''));
+    this.assertEqual('ab', Fuse.String('a?b').gsub('?', ''));
+    this.assertEqual('ab', Fuse.String('a+b').gsub('+', ''));
+    this.assertEqual('ab', Fuse.String('a*b').gsub('*', ''));
+    this.assertEqual('ab', Fuse.String('a{1}b').gsub('{1}', ''));
+    this.assertEqual('ab', Fuse.String('a.b').gsub('.', ''));
   },
 
-  testReplace: function() {
-    var source = '321abc123', expected = '321xyz123';
+  'testReplace': function() {
+    var source = Fuse.String('321abc123'), expected = '321xyz123';
     this.assertEqual(expected, source.replace('abc', 'xyz'),
       'simple string pattern.');
-    
+
     var args = [], slice = Array.prototype.slice;
     this.assertEqual('_abc_', source.replace(/\d+/g, function() {
       args.push(slice.call(arguments, 0));
@@ -95,7 +100,7 @@ new Test.Unit.Runner({
       'Failed to execute the function for each replacement.');
 
     // more regexp and function tests
-    var source = 'foo boo boz';
+    var source = Fuse.String('foo boo boz');
     this.assertEqual('Foo boo boz',
       source.replace(/[^o]+/, function(string) {
         return string.toUpperCase();
@@ -112,10 +117,12 @@ new Test.Unit.Runner({
       }), 'case insensitive flag');
 
     this.assertEqual(source,
-      source.replace('.*', Fuse.emptyFunction), 'regular expression characters escaped');
+      source.replace('.*', Fuse.emptyFunction),
+      'regular expression characters escaped');
 
     this.assertEqual(source,
-      source.replace('X', Fuse.emptyFunction), 'no occurence to replace');
+      source.replace('X', Fuse.emptyFunction),
+      'no occurence to replace');
 
     /*
     // crashes Safari 3.4 beta
@@ -155,9 +162,9 @@ new Test.Unit.Runner({
       source.replace(pattern, function() {
         return 'bar';
       }), 'lastIndex ignored');
-    
+
     // index and source
-    var source = 'foo boo boz';
+    var source = Fuse.String('foo boo boz');
     this.assertEqual('f1 b5 b9z', source.replace(/o+/g, function(match, index) {
       return index;
     }), 'Given incorrect index argument');
@@ -166,17 +173,17 @@ new Test.Unit.Runner({
       source.replace(/.$/, function(match, index, source) {
         return source;
       }), 'Given incorrect source argument');
-    
-    // test empty 
+
+    // test empty
     var expected, pattern,
-     source = 'awesome', replacement = function() { return 'x' };
+     source = Fuse.String('awesome'), replacement = function() { return 'x' };
 
     expected = 'xxsxoxmxex'; pattern = new RegExp('(awe|)', 'g');
     this.assertEqual(expected, source.replace(pattern, replacement));
 
     expected = 'awesomex'; pattern = new RegExp('(awe|)$', 'g');
     this.assertEqual(expected, source.replace(pattern, replacement));
-    
+
     expected = 'xawesome'; pattern = /()/;
     this.assertEqual(expected, source.replace(pattern, replacement));
 
@@ -186,111 +193,140 @@ new Test.Unit.Runner({
     pattern = new RegExp('','g');
     this.assertEqual(expected, source.replace(pattern, replacement));
   },
-  
-  testSubstitutionEdgeCases: function() {
-    this.assertEqual('-a-b-c-', 'abc'.gsub('', '-'), 'empty string');
-    this.assertEqual('--b-c-', 'abc'.gsub(/a|/, '-'), 'empty matching pattern');
-    this.assertEqual('-bc', 'abc'.gsub(/A/i, '-'), 'case insensitive flag');
-    this.assertEqual('-bc', 'abc'.sub(/./g, '-'), 'sub with global flag');
-    this.assertEqual('aundefinedc', 'abc'.sub('b', Fuse.emptyFunction), '`undefined` not returned');
-    this.assertEqual('anullc', 'abc'.sub('b', function() { return null; }), '`null` not returned');
+
+  'testSubstitutionEdgeCases': function() {
+    var source = Fuse.String('abc');
+
+    this.assertEqual('-a-b-c-',
+      source.gsub('', '-'),
+      'empty string');
+
+    this.assertEqual('--b-c-',
+      source.gsub(/a|/, '-'),
+      'empty matching pattern');
+
+    this.assertEqual('-bc',
+      source.gsub(/A/i, '-'),
+      'case insensitive flag');
+
+    this.assertEqual('-bc',
+      source.sub(/./g, '-'),
+      'sub with global flag');
+
+    this.assertEqual('anullc',
+      source.sub('b', function() { return null }),
+      '`null` not returned');
+
+    this.assertEqual('aundefinedc',
+      source.sub('b', Fuse.emptyFunction),
+      '`undefined` not returned');
 
     // test with empty pattern (String#gsub is used by String#sub)
+    source = Fuse.String('ab');
     var empty = new RegExp('');
-    this.assertEqual('xaxbx', 'ab'.gsub('', 'x'));
-    this.assertEqual('xaxbx', 'ab'.gsub(empty, 'x'));
-    this.assertEqual('xab',   'ab'.sub('', 'x'));
 
-    this.assertEqual('abc', 'anullc'.sub(null, 'b'));
-    this.assertEqual('abc', 'aundefinedc'.gsub(window.undefined, 'b'));
-    this.assertEqual('abc', 'a0c'.sub(0, 'b'));
-    this.assertEqual('abc', 'atruec'.gsub(true, 'b'));
-    this.assertEqual('abc', 'afalsec'.sub(false, 'b'));
-    
-    this.assertEqual('---a---b---', 'ab'.gsub(empty, '-#{0}-#{1}-'));
-    this.assertEqual('++a++b++', 'ab'.gsub('', function(match) {
+    this.assertEqual('xaxbx', source.gsub('', 'x'));
+    this.assertEqual('xaxbx', source.gsub(empty, 'x'));
+    this.assertEqual('xab',   source.sub('', 'x'));
+
+    this.assertEqual('abc', Fuse.String('anullc').sub(null, 'b'));
+    this.assertEqual('abc', Fuse.String('aundefinedc').gsub(undef, 'b'));
+    this.assertEqual('abc', Fuse.String('a0c').sub(0, 'b'));
+    this.assertEqual('abc', Fuse.String('atruec').gsub(true, 'b'));
+    this.assertEqual('abc', Fuse.String('afalsec').sub(false, 'b'));
+
+    this.assertEqual('---a---b---', source.gsub(empty, '-#{0}-#{1}-'));
+    this.assertEqual('++a++b++',    source.gsub('', function(match) {
       return '+' + match[0] + '+';
     }));
 
     // test using the global flag (should not hang)
-    this.assertEqual('abc', 'axc'.sub(/x/g, 'b'));
-    this.assertEqual('abbacadabba', 'axxacadaxxa'.gsub(/x/g, 'b'));
-    this.assertEqual('abbacadabba', 'axxacadaxxa'.gsub(new RegExp('x','g'), 'b'));
+    this.assertEqual('abc',         Fuse.String('axc').sub(/x/g, 'b'));
+    this.assertEqual('abbacadabba', Fuse.String('axxacadaxxa').gsub(/x/g, 'b'));
+    this.assertEqual('abbacadabba', Fuse.String('axxacadaxxa').gsub(new RegExp('x','g'), 'b'));
   },
-  
-  testSubWithReplacementFunction: function() {
-    var source = 'foo boo boz';
+
+  'testSubWithReplacementFunction': function() {
+    var source = Fuse.String('foo boo boz');
 
     this.assertEqual('Foo boo boz',
       source.sub(/[^o]+/, function(match) {
         return match[0].toUpperCase()
       }), 1);
+
     this.assertEqual('Foo Boo boz',
       source.sub(/[^o]+/, function(match) {
         return match[0].toUpperCase()
       }, 2), 2);
+
     this.assertEqual(source,
       source.sub(/[^o]+/, function(match) {
         return match[0].toUpperCase()
       }, 0), 0);
+
     this.assertEqual(source,
       source.sub(/[^o]+/, function(match) {
         return match[0].toUpperCase()
       }, -1), -1);
   },
-  
-  testSubWithReplacementString: function() {
-    var source = 'foo boo boz';
-    
+
+  'testSubWithReplacementString': function() {
+    var source = Fuse.String('foo boo boz');
+
     this.assertEqual('oo boo boz',
       source.sub(/[^o]+/, ''));
+
     this.assertEqual('oooo boz',
       source.sub(/[^o]+/, '', 2));
+
     this.assertEqual('-f-oo boo boz',
       source.sub(/[^o]+/, '-#{0}-'));
+
     this.assertEqual('-f-oo- b-oo boz',
       source.sub(/[^o]+/, '-#{0}-', 2));
   },
-  
-  testScan: function() {
-    var source = 'foo boo boz', results = [];
-    var str = source.scan(/[o]+/, function(match) {
+
+  'testScan': function() {
+    var source  = Fuse.String('foo boo boz');
+    var results = [];
+    var str     = source.scan(/[o]+/, function(match) {
       results.push(match[0].length);
     });
+
     this.assertEnumEqual([2, 2, 1], results);
     this.assertEqual(source, source.scan(/x/, this.fail));
-    this.assert(typeof str == 'string');
-  },
-  
-  testToArray: function() {
-    this.assertEnumEqual([],''.toArray());
-    this.assertEnumEqual(['a'],'a'.toArray());
-    this.assertEnumEqual(['a','b'],'ab'.toArray());
-    this.assertEnumEqual(['f','o','o'],'foo'.toArray());
+    this.assert(Fuse.Object.isString(str));
   },
 
-  /* 
+  'testToArray': function() {
+    this.assertEnumEqual([],            Fuse.String('').toArray());
+    this.assertEnumEqual(['a'],         Fuse.String('a').toArray());
+    this.assertEnumEqual(['a','b'],     Fuse.String('ab').toArray());
+    this.assertEnumEqual(['f','o','o'], Fuse.String('foo').toArray());
+  },
+
+  /*
     Note that camelize() differs from its Rails counterpart,
     as it is optimized for dealing with JavaScript object
     properties in conjunction with CSS property names:
      - Looks for dashes, not underscores
      - CamelCases first word if there is a front dash
   */
-  testCamelize: function() {
-    this.assertEqual('', ''.camelize());
-    this.assertEqual('', '-'.camelize());
-    this.assertEqual('foo', 'foo'.camelize());
-    this.assertEqual('foo_bar', 'foo_bar'.camelize());
-    this.assertEqual('FooBar', '-foo-bar'.camelize());
-    this.assertEqual('FooBar', 'FooBar'.camelize());
-    
-    this.assertEqual('fooBar', 'foo-bar'.camelize());
-    this.assertEqual('borderBottomWidth', 'border-bottom-width'.camelize());
-    
-    this.assertEqual('classNameTest','class-name-test'.camelize());
-    this.assertEqual('classNameTest','className-test'.camelize());
-    this.assertEqual('classNameTest','class-nameTest'.camelize());
-    
+  'testCamelize': function() {
+    this.assertEqual('',        Fuse.String('').camelize());
+    this.assertEqual('',        Fuse.String('-').camelize());
+    this.assertEqual('foo',     Fuse.String('foo').camelize());
+    this.assertEqual('foo_bar', Fuse.String('foo_bar').camelize());
+    this.assertEqual('FooBar',  Fuse.String('-foo-bar').camelize());
+    this.assertEqual('FooBar',  Fuse.String('FooBar').camelize());
+
+    this.assertEqual('fooBar',  Fuse.String('foo-bar').camelize());
+    this.assertEqual('borderBottomWidth', Fuse.String('border-bottom-width').camelize());
+
+    this.assertEqual('classNameTest', Fuse.String('class-name-test').camelize());
+    this.assertEqual('classNameTest', Fuse.String('className-test').camelize());
+    this.assertEqual('classNameTest', Fuse.String('class-nameTest').camelize());
+
     /*
     this.benchmark(function(){
       'class-name-test'.camelize();
@@ -298,481 +334,389 @@ new Test.Unit.Runner({
     */
   },
 
-  testCapitalize: function() {
-    this.assertEqual('',''.capitalize());
-    this.assertEqual('Ä','ä'.capitalize());
-    this.assertEqual('A','A'.capitalize());
-    this.assertEqual('Hello','hello'.capitalize());
-    this.assertEqual('Hello','HELLO'.capitalize());
-    this.assertEqual('Hello','Hello'.capitalize());
-    this.assertEqual('Hello world','hello WORLD'.capitalize());
-  },  
-    
-  testUnderscore: function() {
-    this.assertEqual('', ''.underscore());
-    this.assertEqual('_', '-'.underscore());
-    this.assertEqual('foo', 'foo'.underscore());
-    this.assertEqual('foo', 'Foo'.underscore());
-    this.assertEqual('foo_bar', 'foo_bar'.underscore());
-    this.assertEqual('border_bottom', 'borderBottom'.underscore());
-    this.assertEqual('border_bottom_width', 'borderBottomWidth'.underscore());
-    this.assertEqual('border_bottom_width', 'border-Bottom-Width'.underscore());      
+  'testCapitalize': function() {
+    this.assertEqual('',      Fuse.String('').capitalize());
+    this.assertEqual('Ä',    Fuse.String('ä').capitalize());
+    this.assertEqual('A',     Fuse.String('A').capitalize());
+    this.assertEqual('Hello', Fuse.String('hello').capitalize());
+    this.assertEqual('Hello', Fuse.String('HELLO').capitalize());
+    this.assertEqual('Hello', Fuse.String('Hello').capitalize());
+    this.assertEqual('Hello world', Fuse.String('hello WORLD').capitalize());
   },
-  
-  testDasherize: function() {
-    this.assertEqual('', ''.dasherize());
-    this.assertEqual('foo', 'foo'.dasherize());
-    this.assertEqual('Foo', 'Foo'.dasherize());
-    this.assertEqual('foo-bar', 'foo-bar'.dasherize());
-    this.assertEqual('border-bottom-width', 'border_bottom_width'.dasherize());
+
+  'testUnderscore': function() {
+    this.assertEqual('',    Fuse.String('').underscore());
+    this.assertEqual('_',   Fuse.String('-').underscore());
+    this.assertEqual('foo', Fuse.String('foo').underscore());
+    this.assertEqual('foo', Fuse.String('Foo').underscore());
+    this.assertEqual('foo_bar', Fuse.String('foo_bar').underscore());
+
+    this.assertEqual('border_bottom',       Fuse.String('borderBottom').underscore());
+    this.assertEqual('border_bottom_width', Fuse.String('borderBottomWidth').underscore());
+    this.assertEqual('border_bottom_width', Fuse.String('border-Bottom-Width').underscore());
   },
-  
-  testTruncate: function() {
-    var source = 'foo boo boz foo boo boz foo boo boz foo boo boz';
+
+  'testDasherize': function() {
+    this.assertEqual('',        Fuse.String('').dasherize());
+    this.assertEqual('foo',     Fuse.String('foo').dasherize());
+    this.assertEqual('Foo',     Fuse.String('Foo').dasherize());
+    this.assertEqual('foo-bar', Fuse.String('foo-bar').dasherize());
+    this.assertEqual('border-bottom-width',
+      Fuse.String('border_bottom_width').dasherize());
+  },
+
+  'testTruncate': function() {
+    var source = Fuse.String('foo boo boz foo boo boz foo boo boz foo boo boz');
+
     this.assertEqual(source, source.truncate(source.length));
     this.assertEqual('foo boo boz foo boo boz foo...', source.truncate(0));
     this.assertEqual('fo...', source.truncate(5));
     this.assertEqual('foo b', source.truncate(5, ''));
-    
-    this.assert(typeof 'foo'.truncate(5) == 'string');
-    this.assert(typeof 'foo bar baz'.truncate(5) == 'string');
+
+    this.assert(Fuse.Object.isString(Fuse.String('foo').truncate(5)));
+    this.assert(Fuse.Object.isString(Fuse.String('foo bar baz').truncate(5)));
   },
-  
-  testTrim: function() {
-    this.assertEqual('hello world', '   hello world  '.trim());
-    this.assertEqual('hello world', 'hello world'.trim());
-    this.assertEqual('hello  \n  world', '  hello  \n  world  '.trim());
-    this.assertEqual('', ' '.trim());
+
+  'testTrim': function() {
+    this.assertEqual('hello world',      Fuse.String('   hello world  ').trim());
+    this.assertEqual('hello world',      Fuse.String('hello world').trim());
+    this.assertEqual('hello  \n  world', Fuse.String('  hello  \n  world  ').trim());
+    this.assertEqual('',                 Fuse.String(' ').trim());
 
     // Ensure trim removes all whitespace and line terminators
     // IE doesn't understand '\v' so replace it with '\x0B'
-    this.assertEqual('hello', ' \n\r\t\x0B\f\xA0 hello \xA0\n \r\t\f\x0B'.trim());
+    this.assertEqual('hello', Fuse.String(' \n\r\t\x0B\f\xA0 hello \xA0\n \r\t\f\x0B').trim());
   },
 
-  testTrimLeft: function() {
-    this.assertEqual('hello world  ', '   hello world  '.trimLeft());
-    this.assertEqual('hello world', 'hello world'.trimLeft());
-    this.assertEqual('hello  \n  world  ', '  hello  \n  world  '.trimLeft());
-    this.assertEqual('', ' '.trimLeft());
-    this.assertEqual('hello', ' \n\r\t\x0B\f\xA0 hello'.trimLeft());
+  'testTrimLeft': function() {
+    this.assertEqual('hello world  ',      Fuse.String('   hello world  ').trimLeft());
+    this.assertEqual('hello world',        Fuse.String('hello world').trimLeft());
+    this.assertEqual('hello  \n  world  ', Fuse.String('  hello  \n  world  ').trimLeft());
+    this.assertEqual('',                   Fuse.String(' ').trimLeft());
+    this.assertEqual('hello', Fuse.String(' \n\r\t\x0B\f\xA0 hello').trimLeft());
   },
 
-  testTrimRight: function() {
-    this.assertEqual('   hello world', '   hello world  '.trimRight());
-    this.assertEqual('hello world', 'hello world'.trimRight());
-    this.assertEqual('  hello  \n  world', '  hello  \n  world  '.trimRight());
-    this.assertEqual('', ' '.trimRight());
-    this.assertEqual('hello', 'hello \xA0\n \r\t\f\x0B'.trimRight());
+  'testTrimRight': function() {
+    this.assertEqual('   hello world',     Fuse.String('   hello world  ').trimRight());
+    this.assertEqual('hello world',        Fuse.String('hello world').trimRight());
+    this.assertEqual('  hello  \n  world', Fuse.String('  hello  \n  world  ').trimRight());
+    this.assertEqual('',                   Fuse.String(' ').trimRight());
+    this.assertEqual('hello', Fuse.String('hello \xA0\n \r\t\f\x0B').trimRight());
   },
 
-  testStripTags: function() {
-    this.assertEqual('hello world', 'hello world'.stripTags());
-    this.assertEqual('hello world', 'hello <span>world</span>'.stripTags());
-    this.assertEqual('hello world', '<a href="#" onclick="moo!">hello</a> world'.stripTags());
-    this.assertEqual('hello world', 'h<b><em>e</em></b>l<i>l</i>o w<span class="moo" id="x"><b>o</b></span>rld'.stripTags());
-    this.assertEqual('hello world', 'hello wor<input type="text" value="foo>bar">ld'.stripTags());
-
-    this.assertEqual('1\n2', '1\n2'.stripTags());
+  'testStripTags': function() {
+    this.assertEqual('hello world', Fuse.String('hello world').stripTags());
+    this.assertEqual('hello world', Fuse.String('hello <span>world</span>').stripTags());
+    this.assertEqual('hello world', Fuse.String('<a href="#" onclick="moo!">hello</a> world').stripTags());
+    this.assertEqual('hello world', Fuse.String('h<b><em>e</em></b>l<i>l</i>o w<span class="moo" id="x"><b>o</b></span>rld').stripTags());
+    this.assertEqual('hello world', Fuse.String('hello wor<input type="text" value="foo>bar">ld').stripTags());
+    this.assertEqual('1\n2',        Fuse.String('1\n2').stripTags());
   },
-  
-  testStripScripts: function() {
-    this.assertEqual('foo bar', 'foo bar'.stripScripts());
-    this.assertEqual('foo bar', ('foo <script>boo();<'+'/script>bar').stripScripts());
-    this.assertEqual('foo bar', ('foo <script type="text/javascript">boo();\nmoo();<'+'/script>bar').stripScripts());
+
+  'testStripScripts': function() {
+    this.assertEqual('foo bar', Fuse.String('foo bar').stripScripts());
+    this.assertEqual('foo bar', Fuse.String('foo <script>boo();<\/script>bar').stripScripts());
+    this.assertEqual('foo bar', Fuse.String('foo <script type="text/javascript">boo();\nmoo();<\/script>bar').stripScripts());
   },
-  
-  testExtractScripts: function() {
-    this.assertEnumEqual([], 'foo bar'.extractScripts());
-    this.assertEnumEqual(['boo();'], ('foo <script>boo();<'+'/script>bar').extractScripts());
 
-    this.assertEnumEqual(['boo();','boo();\nmoo();'], 
-      ('foo <script>boo();<'+'/script><script type="text/javascript">boo();\nmoo();<'+'/script>bar').extractScripts());
+  'testExtractScripts': function() {
+    this.assertEnumEqual([],         Fuse.String('foo bar').extractScripts());
+    this.assertEnumEqual(['boo();'], Fuse.String('foo <script>boo();<\/script>bar').extractScripts());
 
-    this.assertEnumEqual(['boo();','boo();\nmoo();'], 
-      ('foo <script>boo();<'+'/script>blub\nblub<script type="text/javascript">boo();\nmoo();<'+'/script>bar').extractScripts());
+    this.assertEnumEqual(['boo();','boo();\nmoo();'],
+      Fuse.String('foo <script>boo();<\/script><script type="text/javascript">boo();\nmoo();<\/script>bar').extractScripts());
 
-    this.assertEnumEqual(['methodA();', 'methodB();','methodC();'], ('blah<!--\n<script>removedA();<' +
-      '/script>\n--><script type="text/javascript">methodA();<' + '/script><!--\n<script>removedB();<' +
-      '/script>\n--><script><' + '/script>blah<script>methodB();<' + '/script>blah<!--\n<script type="text/javascript">removedC();<' +
-      '/script>\n--><script>methodC();<' + '/script>').extractScripts());
+    this.assertEnumEqual(['boo();','boo();\nmoo();'],
+      Fuse.String('foo <script>boo();<\/script>blub\nblub<script type="text/javascript">boo();\nmoo();<\/script>bar').extractScripts());
 
-    this.assertEnumEqual(['\n      alert("Scripts work too");\n    '], 
-     ('\u003Cdiv id=\"testhtml"\u003E\n  \u003Cdiv\u003E\n    ' +
-      'Content successfully replaced\n    \u003Cscript\u003E\n      ' +
-      'alert("Scripts work too");\n    \u003C/script\u003E\n  \u003C /div\u003E\n' +
-      '\u003C/div\u003E\n').extractScripts());
+    this.assertEnumEqual(['methodA();', 'methodB();','methodC();'],
+      Fuse.String('blah<!--\n<script>removedA();<\/script>\n-->' +
+        '<script type="text/javascript">methodA();<\/script>' +
+        '<!--\n<script>removedB();<\/script>\n-->' +
+        '<script></script>blah<script>methodB();<\/script>blah' +
+        '<!--\n<script type="text/javascript">removedC();<\/script>\n-->' +
+        '<script>methodC();<\/script>').extractScripts());
+
+    this.assertEnumEqual(['\n      alert("Scripts work too");\n    '],
+      Fuse.String('\u003Cdiv id=\"testhtml"\u003E\n  \u003Cdiv\u003E\n    ' +
+        'Content successfully replaced\n    \u003Cscript\u003E\n      ' +
+        'alert("Scripts work too");\n    \u003C/script\u003E\n  \u003C /div\u003E\n' +
+        '\u003C/div\u003E\n').extractScripts());
 
     var russianChars = '//�?º�?Ÿ�?Œ�?µ�?œÑ�?°Ñ�?ž�?¹\n',
-     longComment  = '//' + Array(7000).join('.') + '\n',
-     longScript   = '\nvar foo = 1;\n' + russianChars + longComment,
-     longString   = 'foo <script type="text/javascript">'+ longScript + '<'+'/script> bar';
-    this.assertEnumEqual([longScript], longString.extractScripts());
+     longComment = '//' + Array(7000).join('.') + '\n',
+     longScript  = '\nvar foo = 1;\n' + russianChars + longComment,
+     longString  = 'foo <script type="text/javascript">' + longScript + '<'+'/script> bar';
+    this.assertEnumEqual([longScript], Fuse.String(longString).extractScripts());
 
     /*
     var str = 'foo <script>boo();<'+'/script>blub\nblub<script type="text/javascript">boo();\nmoo();<'+'/script>bar';
     this.benchmark(function() { str.extractScripts() }, 1000);
     */
   },
-  
-  testEvalScripts: function() {
+
+  'testEvalScripts': function() {
     this.assertEqual(0, evalScriptsCounter);
-    
-    ('foo <script>evalScriptsCounter++<'+'/script>bar').evalScripts();
+
+    Fuse.String('foo <script>evalScriptsCounter++<\/script>bar').evalScripts();
     this.assertEqual(1, evalScriptsCounter);
-    
+
     var stringWithScripts = '';
-    (3).times(function(){ stringWithScripts += 'foo <script>evalScriptsCounter++<'+'/script>bar' });
-    stringWithScripts.evalScripts();
+    Fuse.Number(3).times(function(){ stringWithScripts += 'foo <script>evalScriptsCounter++<\/script>bar' });
+    Fuse.String(stringWithScripts).evalScripts();
+
     this.assertEqual(4, evalScriptsCounter);
   },
-  
-  testEscapeHTML: function() {
-    this.assertEqual('foo bar', 'foo bar'.escapeHTML());
-    this.assertEqual('foo &lt;span&gt;bar&lt;/span&gt;', 'foo <span>bar</span>'.escapeHTML());
-    this.assertEqual('foo ß bar', 'foo ß bar'.escapeHTML());
-    
-    this.assertEqual('ウィメンズ2007\nクルーズコレクション', 
-      'ウィメンズ2007\nクルーズコレクション'.escapeHTML());
-      
+
+  'testEscapeHTML': function() {
+    this.assertEqual('foo bar',    Fuse.String('foo bar').escapeHTML());
+    this.assertEqual('foo ß bar', Fuse.String('foo ß bar').escapeHTML());
+
+    this.assertEqual('foo &lt;span&gt;bar&lt;/span&gt;',
+      Fuse.String('foo <span>bar</span>').escapeHTML());
+
+    this.assertEqual('ウィメンズ2007\nクルーズコレクション',
+      Fuse.String('ウィメンズ2007\nクルーズコレクション').escapeHTML());
+
     this.assertEqual('a&lt;a href=&quot;blah&quot;&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g',
-      'a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g'.escapeHTML());
-    
+      Fuse.String('a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g').escapeHTML());
+
     this.assertEqual(largeTextEscaped, largeTextUnescaped.escapeHTML());
-    
-    this.assertEqual('&amp;', '&'.escapeHTML());
-    this.assertEqual('1\n2', '1\n2'.escapeHTML());
-    
+
+    this.assertEqual('&amp;', Fuse.String('&').escapeHTML());
+    this.assertEqual('1\n2',  Fuse.String('1\n2').escapeHTML());
+
     /* this.benchmark(function() { largeTextUnescaped.escapeHTML() }, 1000); */
   },
-  
-  testUnescapeHTML: function() {
-    this.assertEqual('foo bar', 'foo bar'.unescapeHTML());
-    this.assertEqual('foo <span>bar</span>', 'foo &lt;span&gt;bar&lt;/span&gt;'.unescapeHTML());
-    this.assertEqual('foo ß bar', 'foo ß bar'.unescapeHTML());
-    
+
+  'testUnescapeHTML': function() {
+    this.assertEqual('foo bar',
+      Fuse.String('foo bar').unescapeHTML());
+
+    this.assertEqual('foo <span>bar</span>',
+      Fuse.String('foo &lt;span&gt;bar&lt;/span&gt;').unescapeHTML());
+
+    this.assertEqual('foo ß bar',
+      Fuse.String('foo ß bar').unescapeHTML());
+
     this.assertEqual('a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g',
-      'a&lt;a href="blah"&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g'.unescapeHTML());
-    
+      Fuse.String('a&lt;a href="blah"&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g').unescapeHTML());
+
     this.assertEqual(largeTextUnescaped, largeTextEscaped.unescapeHTML());
-    
-    this.assertEqual('test \xfa', 'test &uacute;'.unescapeHTML());
-    this.assertEqual('1\n2', '1\n2'.unescapeHTML());
-    this.assertEqual('Pride & Prejudice', '<h1>Pride &amp; Prejudice</h1>'.unescapeHTML());
-    
-    var sameInSameOut = '"&lt;" means "<" in HTML';
+
+    this.assertEqual('test \xfa',
+      Fuse.String('test &uacute;').unescapeHTML());
+
+    this.assertEqual('1\n2',
+      Fuse.String('1\n2').unescapeHTML());
+
+    this.assertEqual('Pride & Prejudice',
+      Fuse.String('<h1>Pride &amp; Prejudice</h1>').unescapeHTML());
+
+    var sameInSameOut = Fuse.String('"&lt;" means "<" in HTML');
     this.assertEqual(sameInSameOut, sameInSameOut.escapeHTML().unescapeHTML());
-    
+
     /* this.benchmark(function() { largeTextEscaped.unescapeHTML() }, 1000); */
   },
-  
-  testTemplateEvaluation: function() {
-    var source = '<tr><td>#{name}</td><td>#{age}</td></tr>';
-    var person = {name: 'Sam', age: 21};
-    var template = new Template(source);
-    
-    this.assertEqual('<tr><td>Sam</td><td>21</td></tr>',
-      template.evaluate(person));
-    this.assertEqual('<tr><td></td><td></td></tr>',
-      template.evaluate({}));
+
+  'testInterpolate': function() {
+    var subject = { 'name': 'Stephan' },
+     pattern    = /(^|.|\r|\n)(#\((.*?)\))/;
+
+    this.assertEqual('#{name}: Stephan',
+      Fuse.String('\\#{name}: #{name}').interpolate(subject));
+
+    this.assertEqual('#(name): Stephan',
+      Fuse.String('\\#(name): #(name)').interpolate(subject, pattern));
   },
 
-  testTemplateEvaluationWithEmptyReplacement: function() {
-    var template = new Template('##{}');
-    this.assertEqual('#', template.evaluate());
-    this.assertEqual('#', template.evaluate(null));
-    this.assertEqual('#', template.evaluate({}));
-    this.assertEqual('#', template.evaluate({foo: 'bar'}));
-
-    template = new Template('#{}');
-    this.assertEqual('', template.evaluate({}));
-  },
-
-  testTemplateEvaluationWithFalses: function() {
-    var source = '<tr><td>#{zero}</td><td>#{_false}</td><td>#{undef}</td><td>#{_null}</td><td>#{empty}</td></tr>';
-    var falses = {zero:0, _false:false, undef:undefined, _null:null, empty:""};
-    var template = new Template(source);
-    
-    this.assertEqual('<tr><td>0</td><td>false</td><td></td><td></td><td></td></tr>',
-      template.evaluate(falses));
-  },
-
-  testTemplateEvaluationWithNested: function() {
-    var source  = '#{name} #{manager.name} #{manager.age} #{manager.undef} #{manager.age.undef} #{colleagues.first.name}';
-    var man = function(options){
-      Object.extend(this, options);
-    };
-    
-    man.prototype.gender = 'Male';
-    
-    var worker = new man({
-      'colleagues': { 'first': { 'name': 'Mark' } },
-      'manager': new man({ 'name': 'John', 'age': 29 }),
-      'name': 'Stephan',
-      'age': 22
-    });
-    
-    this.assertEqual('Stephan', new Template('#{name}').evaluate(worker));
-    this.assertEqual('John', new Template('#{manager.name}').evaluate(worker));
-    this.assertEqual('29', new Template('#{manager.age}').evaluate(worker));
-    this.assertEqual('', new Template('#{manager.undef}').evaluate(worker));
-    this.assertEqual('', new Template('#{manager.age.undef}').evaluate(worker));
-    this.assertEqual('Mark', new Template('#{colleagues.first.name}').evaluate(worker));
-    this.assertEqual('Stephan John 29   Mark', new Template(source).evaluate(worker));
-    
-    // test inherited properties
-    this.assertEqual('', new Template('#{manager.gender}').evaluate(worker),
-      'Template should not evaluate inherited properties.');
-  },
-
-  testTemplateEvaluationWithIndexing: function() {
-    var source = '#{0} = #{[0]} - #{1} = #{[1]} - #{[2][0]} - #{[2].name} - #{first[0]} - #{[first][0]} - #{[\\]]} - #{first[\\]]}';
-    var subject = [ 'zero', 'one', [ 'two-zero' ] ];
-    subject[2].name = 'two-zero-name';
-    subject.first = subject[2];
-    subject[']'] = '\\';
-    subject.first[']'] = 'first\\';
-    this.assertEqual('zero', new Template('#{[0]}').evaluate(subject));
-    this.assertEqual('one', new Template('#{[1]}').evaluate(subject));
-    this.assertEqual('two-zero', new Template('#{[2][0]}').evaluate(subject));
-    this.assertEqual('two-zero-name', new Template('#{[2].name}').evaluate(subject));
-    this.assertEqual('two-zero', new Template('#{first[0]}').evaluate(subject));
-    this.assertEqual('\\', new Template('#{[\\]]}').evaluate(subject));
-    this.assertEqual('first\\', new Template('#{first[\\]]}').evaluate(subject));
-    this.assertEqual('empty - empty2', new Template('#{[]} - #{m[]}').evaluate({ '': 'empty', m: {'': 'empty2'}}));
-    this.assertEqual('zero = zero - one = one - two-zero - two-zero-name - two-zero - two-zero - \\ - first\\', new Template(source).evaluate(subject));
-  },
-
-  testTemplateToTemplateReplacements: function() {
-    var source = 'My name is #{name}, my job is #{job}';
-    var subject = {
-      name: 'Stephan',
-      getJob: function() { return 'Web developer'; },
-      toTemplateReplacements: function() { return { name: this.name, job: this.getJob() } }
-    };
-    this.assertEqual('My name is Stephan, my job is Web developer', new Template(source).evaluate(subject));
-    
-    // test null return value of toTemplateReplacements()
-    source = 'My name is "#{name}", my job is "#{job}"';
-    subject = { toTemplateReplacements: Fuse.K };
-    this.assertEqual('My name is "", my job is ""', new Template(source).evaluate(subject));
-    
-    source = 'My name is "\\#{name}", my job is "\\#{job}"';
-    this.assertEqual('My name is "#{name}", my job is "#{job}"', new Template(source).evaluate(subject));
-  },
-
-  testTemplateEvaluationCombined: function() {
-    var source = '#{name} is #{age} years old, managed by #{manager.name}, #{manager.age}.\n' +
-      'Colleagues include #{colleagues[0].name} and #{colleagues[1].name}.';
-    var subject = {
-      name: 'Stephan', age: 22,
-      manager: { name: 'John', age: 29 },
-      colleagues: [ { name: 'Mark' }, { name: 'Indy' } ]
-    };
-    this.assertEqual('Stephan is 22 years old, managed by John, 29.\n' +
-      'Colleagues include Mark and Indy.',
-      new Template(source).evaluate(subject));
-  },
-
-  testInterpolate: function() {
-    var subject = { name: 'Stephan' };
-    var pattern = /(^|.|\r|\n)(#\((.*?)\))/;
-    this.assertEqual('#{name}: Stephan', '\\#{name}: #{name}'.interpolate(subject));
-    this.assertEqual('#(name): Stephan', '\\#(name): #(name)'.interpolate(subject, pattern));
-  },
-
-  testToQueryParams: function() {
+  'testToQueryParams': function() {
     // only the query part
-    var undef, result = { 'a':undef, 'b':'c' };
-    this.assertHashEqual({}, ''.toQueryParams(), 'empty query');
-    this.assertHashEqual({}, 'foo?'.toQueryParams(), 'empty query with URL');
-    this.assertHashEqual(result, 'foo?a&b=c'.toQueryParams(), 'query with URL');
-    this.assertHashEqual(result, 'foo?a&b=c#fragment'.toQueryParams(), 'query with URL and fragment');
-    this.assertHashEqual(result, 'a;b=c'.toQueryParams(';'), 'custom delimiter');
+    var result = { 'a':undef, 'b':'c' };
 
-    this.assertHashEqual({ 'a':undef }, 'a'.toQueryParams(), 'key without value');
-    this.assertHashEqual({ 'a':'b' },  'a=b&=c'.toQueryParams(), 'empty key');
-    this.assertHashEqual({ 'a':'b', 'c':'' }, 'a=b&c='.toQueryParams(), 'empty value');
+    this.assertHashEqual({ },
+      Fuse.String('').toQueryParams(),
+      'empty query');
 
-    this.assertHashEqual({ 'a':'b', 'c':undef },
-      Object.toQueryString('a=b&c'.toQueryParams()).toQueryParams(),
-        'cross-convert containing an undefined value');
+    this.assertHashEqual({ },
+      Fuse.String('foo?').toQueryParams(),
+      'empty query with URL');
+
+    this.assertHashEqual(result,
+      Fuse.String('foo?a&b=c').toQueryParams(),
+      'query with URL');
+
+    this.assertHashEqual(result,
+      Fuse.String('foo?a&b=c#fragment').toQueryParams(),
+      'query with URL and fragment');
+
+    this.assertHashEqual(result,
+      Fuse.String('a;b=c').toQueryParams(';'),
+      'custom delimiter');
+
+    this.assertHashEqual({ 'a': undef },
+      Fuse.String('a').toQueryParams(),
+      'key without value');
+
+    this.assertHashEqual({ 'a': 'b' },
+      Fuse.String('a=b&=c').toQueryParams(),
+      'empty key');
+
+    this.assertHashEqual({ 'a': 'b', 'c': '' },
+      Fuse.String('a=b&c=').toQueryParams(),
+      'empty value');
+
+    this.assertHashEqual({ 'a': 'b', 'c': undef },
+      Fuse.Object.toQueryString(Fuse.String('a=b&c').toQueryParams()).toQueryParams(),
+      'cross-convert containing an undefined value');
 
     this.assertHashEqual({'a b':'c', 'd':'e f', 'g':'h' },
-      'a%20b=c&d=e%20f&g=h'.toQueryParams(), 'proper decoding');
-    this.assertHashEqual({ 'a':'b=c=d' }, 'a=b=c=d'.toQueryParams(), 'multiple equal signs');
-    this.assertHashEqual({ 'a':'b', c:'d' }, '&a=b&&&c=d'.toQueryParams(), 'proper splitting');
-    
-    this.assertEnumEqual($w('r g b'), 'col=r&col=g&col=b'.toQueryParams()['col'],
-      'collection without square brackets');
-    var msg = 'empty values inside collection';
-    this.assertEnumEqual(['r', '', 'b'], 'c=r&c=&c=b'.toQueryParams()['c'], msg);
-    this.assertEnumEqual(['', 'blue'],   'c=&c=blue'.toQueryParams()['c'],  msg);
-    this.assertEnumEqual(['blue', ''],   'c=blue&c='.toQueryParams()['c'],  msg);
-    
-    this.assertHashEqual(Fixtures.mixed_dont_enum, 'a=A&b=B&toString=bar&valueOf='.toQueryParams(),
-      'Should not iterate over inherited properties.');  
-  },
-  
-  testInspect: function() {
-    this.assertEqual('\'\'', ''.inspect());
-    this.assertEqual('\'test\'', 'test'.inspect());
-    this.assertEqual('\'test \\\'test\\\' "test"\'', 'test \'test\' "test"'.inspect());
-    this.assertEqual('\"test \'test\' \\"test\\"\"', 'test \'test\' "test"'.inspect(true));
-    this.assertEqual('\'\\b\\t\\n\\f\\r"\\\\\'', '\b\t\n\f\r"\\'.inspect());
-    this.assertEqual('\"\\b\\t\\n\\f\\r\\"\\\\\"', '\b\t\n\f\r"\\'.inspect(true));
-    this.assertEqual('\'\\b\\t\\n\\f\\r\'', '\x08\x09\x0a\x0c\x0d'.inspect());
-    this.assertEqual('\'\\u001a\'', '\x1a'.inspect());
-  },
-  
-  testInclude: function() {
-    this.assert('hello world'.contains('h'));
-    this.assert('hello world'.contains('hello'));
-    this.assert('hello world'.contains('llo w'));
-    this.assert('hello world'.contains('world'));      
-    this.assert(!'hello world'.contains('bye'));
-    this.assert(!''.contains('bye'));
-  },
-  
-  testStartsWith: function() {
-    this.assert('hello world'.startsWith('h'));
-    this.assert('hello world'.startsWith('hello'));
-    this.assert(!'hello world'.startsWith('bye'));
-    this.assert(!''.startsWith('bye'));
-    this.assert(!'hell'.startsWith('hello'));
-  },
-  
-  testEndsWith: function() {
-    this.assert('hello world'.endsWith('d'));
-    this.assert('hello world'.endsWith(' world'));
-    this.assert(!'hello world'.endsWith('planet'));
-    this.assert(!''.endsWith('planet'));
-    this.assert('hello world world'.endsWith(' world'));
-    this.assert(!'z'.endsWith('az'));
+      Fuse.String('a%20b=c&d=e%20f&g=h').toQueryParams(),
+      'proper decoding');
 
-    this.assert('hello world'.endsWith(''), 'failed empty string test');
-    this.assertRaise('TypeError', function() { 'hello world'.endsWith() },
+    this.assertHashEqual({ 'a':'b=c=d' },
+      Fuse.String('a=b=c=d').toQueryParams(),
+      'multiple equal signs');
+
+    this.assertHashEqual({ 'a':'b', c:'d' },
+      Fuse.String('&a=b&&&c=d').toQueryParams(),
+      'proper splitting');
+
+    this.assertEnumEqual($w('r g b'),
+      Fuse.String('col=r&col=g&col=b').toQueryParams()['col'],
+      'collection without square brackets');
+
+    var msg = 'empty values inside collection';
+
+    this.assertEnumEqual(['r', '', 'b'],
+      Fuse.String('c=r&c=&c=b').toQueryParams()['c'], msg);
+
+    this.assertEnumEqual(['', 'blue'],
+      Fuse.String('c=&c=blue').toQueryParams()['c'],  msg);
+
+    this.assertEnumEqual(['blue', ''],
+      Fuse.String('c=blue&c=').toQueryParams()['c'],  msg);
+
+    this.assertHashEqual(Fixtures.mixed_dont_enum,
+      Fuse.String('a=A&b=B&toString=bar&valueOf=').toQueryParams(),
+      'Should not iterate over inherited properties.');
+  },
+
+  'testInspect': function() {
+    this.assertEqual('\'\'',
+      Fuse.String('').inspect());
+
+    this.assertEqual('\'test\'',
+      Fuse.String('test').inspect());
+
+    this.assertEqual('\'test \\\'test\\\' "test"\'',
+      Fuse.String('test \'test\' "test"').inspect());
+
+    this.assertEqual('\"test \'test\' \\"test\\"\"',
+      Fuse.String('test \'test\' "test"').inspect(true));
+
+    this.assertEqual('\'\\b\\t\\n\\f\\r"\\\\\'',
+      Fuse.String('\b\t\n\f\r"\\').inspect());
+
+    this.assertEqual('\"\\b\\t\\n\\f\\r\\"\\\\\"',
+      Fuse.String('\b\t\n\f\r"\\').inspect(true));
+
+    this.assertEqual('\'\\b\\t\\n\\f\\r\'',
+      Fuse.String('\x08\x09\x0a\x0c\x0d').inspect());
+
+    this.assertEqual('\'\\u001a\'',
+      Fuse.String('\x1a').inspect());
+  },
+
+  'testInclude': function() {
+    this.assert(Fuse.String('hello world').contains('h'));
+    this.assert(Fuse.String('hello world').contains('hello'));
+    this.assert(Fuse.String('hello world').contains('llo w'));
+    this.assert(Fuse.String('hello world').contains('world'));
+
+    this.assert(!Fuse.String('hello world').contains('bye'));
+    this.assert(!Fuse.String('').contains('bye'));
+  },
+
+  'testStartsWith': function() {
+    this.assert(Fuse.String('hello world').startsWith('h'));
+    this.assert(Fuse.String('hello world').startsWith('hello'));
+
+    this.assert(!Fuse.String('hello world').startsWith('bye'));
+    this.assert(!Fuse.String('').startsWith('bye'));
+    this.assert(!Fuse.String('hell').startsWith('hello'));
+  },
+
+  'testEndsWith': function() {
+    this.assert(Fuse.String('hello world').endsWith('d'));
+    this.assert(Fuse.String('hello world').endsWith(' world'));
+    this.assert(Fuse.String('hello world world').endsWith(' world'));
+
+    this.assert(!Fuse.String('hello world').endsWith('planet'));
+    this.assert(!Fuse.String('').endsWith('planet'));
+    this.assert(!Fuse.String('z').endsWith('az'));
+
+    this.assert(Fuse.String('hello world').endsWith(''),
+      'failed empty string test');
+
+    this.assertRaise('TypeError',
+      function() { Fuse.String('hello world').endsWith() },
       'failed to raise error when passed a non string pattern');
   },
-  
-  testBlank: function() {
-    this.assert(''.blank());
-    this.assert(' '.blank());
-    this.assert('\t\r\n '.blank());
-    this.assert(!'a'.blank());
-    this.assert(!'\t y \n'.blank());
-  },
-  
-  testEmpty: function() {
-    this.assert(''.empty());
-    this.assert(!' '.empty());
-    this.assert(!'\t\r\n '.empty());
-    this.assert(!'a'.empty());
-    this.assert(!'\t y \n'.empty());
-  },
-  
-  testSucc: function() {
-    this.assertEqual('b', 'a'.succ());
-    this.assertEqual('B', 'A'.succ());
-    this.assertEqual('1', '0'.succ());
-    this.assertEqual('abce', 'abcd'.succ());
-    this.assertEqual('{', 'z'.succ());
-    this.assertEqual(':', '9'.succ());
+
+  'testBlank': function() {
+    this.assert(Fuse.String('').blank());
+    this.assert(Fuse.String(' ').blank());
+    this.assert(Fuse.String('\t\r\n ').blank());
+
+    this.assert(!Fuse.String('a').blank());
+    this.assert(!Fuse.String('\t y \n').blank());
   },
 
-  testTimes: function() {
+  'testEmpty': function() {
+    this.assert(Fuse.String('').empty());
 
-    this.assertEqual('', ''.times(0));
-    this.assertEqual('', ''.times(5));
-    this.assertEqual('', 'a'.times(-1));
-    this.assertEqual('', 'a'.times(0));
-    this.assertEqual('a', 'a'.times(1));
-    this.assertEqual('aa', 'a'.times(2));
-    this.assertEqual('aaaaa', 'a'.times(5));
-    this.assertEqual('foofoofoofoofoo', 'foo'.times(5));
-    this.assertEqual('', 'foo'.times(-5));
-    
+    this.assert(!Fuse.String(' ').empty());
+    this.assert(!Fuse.String('\t\r\n ').empty());
+    this.assert(!Fuse.String('a').empty());
+    this.assert(!Fuse.String('\t y \n').empty());
+  },
+
+  'testSucc': function() {
+    this.assertEqual('b',    Fuse.String('a').succ());
+    this.assertEqual('B',    Fuse.String('A').succ());
+    this.assertEqual('1',    Fuse.String('0').succ());
+    this.assertEqual('abce', Fuse.String('abcd').succ());
+    this.assertEqual('{',    Fuse.String('z').succ());
+    this.assertEqual(':',    Fuse.String('9').succ());
+  },
+
+  'testTimes': function() {
+    this.assertEqual('',      Fuse.String('').times(0));
+    this.assertEqual('',      Fuse.String('').times(5));
+    this.assertEqual('',      Fuse.String('a').times(-1));
+    this.assertEqual('',      Fuse.String('a').times(0));
+    this.assertEqual('a',     Fuse.String('a').times(1));
+    this.assertEqual('aa',    Fuse.String('a').times(2));
+    this.assertEqual('aaaaa', Fuse.String('a').times(5));
+
+    this.assertEqual('foofoofoofoofoo', Fuse.String('foo').times(5));
+    this.assertEqual('', Fuse.String('foo').times(-5));
+
     /*
     window.String.prototype.oldTimes = function(count) {
       var result = '';
       for (var i = 0; i < count; i++) result += this;
       return result;
     };
-    
+
     this.benchmark(function() {
       'foo'.times(15);
     }, 1000, 'new: ');
-    
+
     this.benchmark(function() {
       'foo'.oldTimes(15);
     }, 1000, 'previous: ');
     */
-  },
-  
-  testToJSON: function() {
-    this.assertEqual('\"\"', ''.toJSON());
-    this.assertEqual('\"test\"', 'test'.toJSON());
-  },
-  
-  testIsJSON: function() {
-    this.assert(!''.isJSON());
-    this.assert(!'     '.isJSON());
-    this.assert('""'.isJSON());
-    this.assert('"foo"'.isJSON());
-    this.assert('{}'.isJSON());
-    this.assert('[]'.isJSON());
-    this.assert('null'.isJSON());
-    this.assert('123'.isJSON());
-    this.assert('true'.isJSON());
-    this.assert('false'.isJSON());
-    this.assert('"\\""'.isJSON());
-    this.assert(!'\\"'.isJSON());
-    this.assert(!'new'.isJSON());
-    this.assert(!'\u0028\u0029'.isJSON());
-    // we use '@' as a placeholder for characters authorized only inside brackets,
-    // so this tests make sure it is not considered authorized elsewhere.
-    this.assert(!'@'.isJSON());
-  },
-
-  testEvalJSON: function() {
-    var valid = '{"test": \n\r"hello world!"}';
-    var invalid = '{"test": "hello world!"';
-    var dangerous = '{});attackTarget = "attack succeeded!";({}';
-
-    // use smaller huge string size for KHTML
-    var size = navigator.userAgent.contains('KHTML') ? 20 : 100;
-    var longString = '"' + '123456789\\"'.times(size * 10) + '"';
-    var object = '{' + longString + ': ' + longString + '},';
-    var huge = '[' + object.times(size) + '{"test": 123}]';
-    
-    this.assertEqual('hello world!', valid.evalJSON().test);
-    this.assertEqual('hello world!', valid.evalJSON(true).test);
-    this.assertRaise('SyntaxError', function() { invalid.evalJSON() });
-    this.assertRaise('SyntaxError', function() { invalid.evalJSON(true) });
-
-    attackTarget = "scared";
-    dangerous.evalJSON();
-    this.assertEqual("attack succeeded!", attackTarget);
-    
-    attackTarget = "Not scared!";
-    this.assertRaise('SyntaxError', function(){dangerous.evalJSON(true)});
-    this.assertEqual("Not scared!", attackTarget);
-
-    this.assertEqual('hello world!', ('/*-secure- \r  \n ' + valid + ' \n  */').evalJSON().test);
-    var temp = Fuse.JSONFilter;
-    Fuse.JSONFilter = /^\/\*([\s\S]*)\*\/$/; // test custom delimiters.
-    this.assertEqual('hello world!', ('/*' + valid + '*/').evalJSON().test);
-    Fuse.JSONFilter = temp;
-    
-    this.assertMatch(123, huge.evalJSON(true).last().test);
-    
-    this.assertEqual('', '""'.evalJSON());
-    this.assertEqual('foo', '"foo"'.evalJSON());
-    this.assert('object', typeof '{}'.evalJSON());
-    this.assert(Object.isArray('[]'.evalJSON()));
-    this.assertNull('null'.evalJSON());
-    this.assert(123, '123'.evalJSON());
-    this.assertIdentical(true, 'true'.evalJSON());
-    this.assertIdentical(false, 'false'.evalJSON());
-    this.assertEqual('"', '"\\""'.evalJSON());
   }
 });

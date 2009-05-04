@@ -61,6 +61,7 @@ JavaScriptTestTask.new(:test_units => [:build_unit_tests]) do |t|
   
   t.mount("/dist")
   t.mount("/test")
+  t.mount("/vendor")
   
   Dir.mkdir(FUSEJS_TMP_DIR) unless File.exist?(FUSEJS_TMP_DIR)
   

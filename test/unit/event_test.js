@@ -1,86 +1,90 @@
-var documentLoaded = document.loaded;
-
 new Test.Unit.Runner({
-  
+
   // test firing an event and observing it on the element it's fired from
-  testCustomEventFiring: function() {
-    var span = $("span"), fired = false, observer = function(event) {
+  'testCustomEventFiring': function() {
+    var span = $('span'), fired = false;
+
+    var observer = Fuse.Function.bind(function(event) {
       this.assertEqual(span, event.element());
       this.assertEqual(1, event.memo.index);
       fired = true;
-    }.bind(this);
-    
-    span.observe("test:somethingHappened", observer);
-    span.fire("test:somethingHappened", { index: 1 });
+    }, this);
+
+    span.observe('test:somethingHappened', observer);
+    span.fire('test:somethingHappened', { 'index': 1 });
     this.assert(fired);
-    
+
     fired = false;
-    span.fire("test:somethingElseHappened");
+    span.fire('test:somethingElseHappened');
     this.assert(!fired);
-    
-    span.stopObserving("test:somethingHappened", observer);
-    span.fire("test:somethingHappened");
+
+    span.stopObserving('test:somethingHappened', observer);
+    span.fire('test:somethingHappened');
     this.assert(!fired);
   },
-  
+
   // test firing an event and observing it on a containing element
-  testCustomEventBubbling: function() {
-    var span = $("span"), outer = $("outer"), fired = false, observer = function(event) {
+  'testCustomEventBubbling': function() {
+    var span = $('span'), outer = $('outer'), fired = false;
+    var observer = Fuse.Function.bind(function(event) {
       this.assertEqual(span, event.element());
       fired = true;
-    }.bind(this);
-    
-    outer.observe("test:somethingHappened", observer);
-    span.fire("test:somethingHappened");
+    }, this);
+
+    outer.observe('test:somethingHappened', observer);
+    span.fire('test:somethingHappened');
     this.assert(fired);
-    
+
     fired = false;
-    span.fire("test:somethingElseHappened");
+    span.fire('test:somethingElseHappened');
     this.assert(!fired);
-    
-    outer.stopObserving("test:somethingHappened", observer);
-    span.fire("test:somethingHappened");
+
+    outer.stopObserving('test:somethingHappened', observer);
+    span.fire('test:somethingHappened');
     this.assert(!fired);
   },
-  
-  testCustomEventCanceling: function() {
-    var span = $("span"), outer = $("outer"), inner = $("inner");
-    var fired = false, stopped = false;
 
+  'testCustomEventCanceling': function() {
     function outerObserver(event) {
       fired = span == event.element();
     }
-    
+
     function innerObserver(event) {
       event.stop();
       stopped = true;
     }
-    
-    inner.observe("test:somethingHappened", innerObserver);
-    outer.observe("test:somethingHappened", outerObserver);
-    span.fire("test:somethingHappened");
+
+    var span = $('span'), outer = $('outer'), inner = $('inner');
+    var fired = false, stopped = false;
+
+    inner.observe('test:somethingHappened', innerObserver);
+    outer.observe('test:somethingHappened', outerObserver);
+    span.fire('test:somethingHappened');
+
     this.assert(stopped);
     this.assert(!fired);
-    
+
     fired = stopped = false;
-    inner.stopObserving("test:somethingHappened", innerObserver);
-    span.fire("test:somethingHappened");
+    inner.stopObserving('test:somethingHappened', innerObserver);
+    span.fire('test:somethingHappened');
+
     this.assert(!stopped);
     this.assert(fired);
-    
-    outer.stopObserving("test:somethingHappened", outerObserver);
+
+    outer.stopObserving('test:somethingHappened', outerObserver);
   },
 
-  testEventAddMethods: function() {
+  'testEventAddMethods': function() {
     Event.addMethods({ 'hashBrowns': function() { return 'hash browns' } });
     var event = $('span').fire('test:somethingHappened');
     this.assertRespondsTo('hashBrowns', event);
-    
+
     // only test `toString` addition if events don't have it
-    if (!Event.prototype || !Object.hasKey(Event.prototype, 'toString')) {
+    if (!Event.prototype || !Fuse.Object.hasKey(Event.prototype, 'toString')) {
 
       Event.addMethods({ 'toString': function() { return '[Fuse Event]' } });
       event = $('span').fire('test:somethingHappened');
+
       this.assertEqual('[Fuse Event]', event.toString(),
         'Failed to extend element with a toString method.');
 
@@ -92,123 +96,136 @@ new Test.Unit.Runner({
     }
   },
 
-  testEventObjectIsExtended: function() { 
+  'testEventObjectIsExtended': function() {
     var span = $('span'), event, observedEvent,
      observer = function(e) { observedEvent = e };
 
     span.observe('test:somethingHappened', observer);
     event = span.fire('test:somethingHappened');
+
     this.assertRespondsTo('stop', event, 'Failed to extend event object.');
     span.stopObserving('test:somethingHappened', observer);
 
     event = span.fire('test:somethingHappenedButNoOneIsListening');
     this.assertRespondsTo('stop', event, 'Failed to extend event with no observers');
   },
-  
-  testEventObserversAreBoundToTheObservedElement: function() {
-    var span = $("span"), target, observer = function() { target = this };
-    
-    span.observe("test:somethingHappened", observer);
-    span.fire("test:somethingHappened");
-    span.stopObserving("test:somethingHappened", observer);
+
+  'testEventObserversAreBoundToTheObservedElement': function() {
+    var span = $('span'), target, observer = function() { target = this };
+
+    span.observe('test:somethingHappened', observer);
+    span.fire('test:somethingHappened');
+    span.stopObserving('test:somethingHappened', observer);
+
     this.assertEqual(span, target);
     target = null;
-    
-    var outer = $("outer");
-    outer.observe("test:somethingHappened", observer);
-    span.fire("test:somethingHappened");
-    outer.stopObserving("test:somethingHappened", observer);
+
+    var outer = $('outer');
+    outer.observe('test:somethingHappened', observer);
+    span.fire('test:somethingHappened');
+    outer.stopObserving('test:somethingHappened', observer);
+
     this.assertEqual(outer, target);
   },
-  
-  testMultipleCustomEventObserversWithTheSameHandler: function() {
-    var span = $("span"), count = 0, observer = function() { count++ };
-    
-    span.observe("test:somethingHappened", observer);
-    span.observe("test:somethingElseHappened", observer);
-    span.fire("test:somethingHappened");
+
+  'testMultipleCustomEventObserversWithTheSameHandler': function() {
+    var span = $('span'), count = 0, observer = function() { count++ };
+
+    span.observe('test:somethingHappened', observer);
+    span.observe('test:somethingElseHappened', observer);
+    span.fire('test:somethingHappened');
+
     this.assertEqual(1, count);
-    span.fire("test:somethingElseHappened");
+    span.fire('test:somethingElseHappened');
+
     this.assertEqual(2, count);
-    span.stopObserving("test:somethingHappened", observer); 
-    span.stopObserving("test:somethingElseHappened", observer);   
+    span.stopObserving('test:somethingHappened', observer);
+    span.stopObserving('test:somethingElseHappened', observer);
   },
-  
-  testStopObservingWithoutArguments: function() {
-    var span = $("span"), count = 0, observer = function() { count++ };
-    
-    span.observe("test:somethingHappened", observer);
-    span.observe("test:somethingElseHappened", observer);
+
+  'testStopObservingWithoutArguments': function() {
+    var span = $('span'), count = 0, observer = function() { count++ };
+
+    span.observe('test:somethingHappened', observer);
+    span.observe('test:somethingElseHappened', observer);
     span.stopObserving();
-    span.fire("test:somethingHappened");
+    span.fire('test:somethingHappened');
+
     this.assertEqual(0, count);
-    span.fire("test:somethingElseHappened");
+
+    span.fire('test:somethingElseHappened');
     this.assertEqual(0, count);
-    
+
     this.assertEqual(window, Event.stopObserving(window));
-    
+
     // test element with no observers
     this.assertNothingRaised(function() { $(document.body).stopObserving() });
   },
-  
-  testStopObservingWithNoneStringEventName: function() {
-    this.assertNothingRaised(function() { [$("span"), $("outer")].each(Event.stopObserving) });
+
+  'testStopObservingWithNoneStringEventName': function() {
+    this.assertNothingRaised(function() {
+      Fuse.List($('span'), $('outer')).each(Event.stopObserving);
+    });
   },
-  
-  testStopObservingWithoutHandlerArgument: function() {
-    var span = $("span"), count = 0, observer = function() { count++ };
-    
-    span.observe("test:somethingHappened", observer);
-    span.observe("test:somethingElseHappened", observer);
-    span.stopObserving("test:somethingHappened");
-    span.fire("test:somethingHappened");
+
+  'testStopObservingWithoutHandlerArgument': function() {
+    var span = $('span'), count = 0, observer = function() { count++ };
+
+    span.observe('test:somethingHappened', observer);
+    span.observe('test:somethingElseHappened', observer);
+    span.stopObserving('test:somethingHappened');
+    span.fire('test:somethingHappened');
+
     this.assertEqual(0, count);
-    span.fire("test:somethingElseHappened");
+    span.fire('test:somethingElseHappened');
+
     this.assertEqual(1, count);
-    span.stopObserving("test:somethingElseHappened");
-    span.fire("test:somethingElseHappened");
+    span.stopObserving('test:somethingElseHappened');
+    span.fire('test:somethingElseHappened');
+
     this.assertEqual(1, count);
-    
+
     // test element with no observers
-    this.assertNothingRaised(function() { $(document.body).stopObserving("test:somethingHappened") });
+    this.assertNothingRaised(
+      function() { $(document.body).stopObserving('test:somethingHappened') });
   },
-  
-  testStopObservingRemovesHandlerFromCache: function() {
-    var span = $("span"), observer = function() { }, eventID;
-    
-    span.observe("test:somethingHappened", observer);
+
+  'testStopObservingRemovesHandlerFromCache': function() {
+    var span = $('span'), observer = function() { }, eventID;
+
+    span.observe('test:somethingHappened', observer);
     eventID = span.getEventID();
-    
+
     this.assert(Event.cache[eventID]);
-    this.assert(Object.isArray(Event.cache[eventID]
-      .events["test:somethingHappened"].handlers));
-    
+    this.assert(Fuse.List.isArray(Event.cache[eventID]
+      .events['test:somethingHappened'].handlers));
+
     this.assertEqual(1, Event.cache[eventID]
-      .events["test:somethingHappened"].handlers.length);
-    
-    span.stopObserving("test:somethingHappened", observer);
+      .events['test:somethingHappened'].handlers.length);
+
+    span.stopObserving('test:somethingHappened', observer);
     this.assert(!Event.cache[eventID]);
   },
-  
-  testObserveAndStopObservingAreChainable: function() {
-    var span = $("span"), observer = function() { };
 
-    this.assertEqual(span, span.observe("test:somethingHappened", observer));
-    this.assertEqual(span, span.stopObserving("test:somethingHappened", observer));
+  'testObserveAndStopObservingAreChainable': function() {
+    var span = $('span'), observer = function() { };
 
-    span.observe("test:somethingHappened", observer);
-    this.assertEqual(span, span.stopObserving("test:somethingHappened"));
+    this.assertEqual(span, span.observe('test:somethingHappened', observer));
+    this.assertEqual(span, span.stopObserving('test:somethingHappened', observer));
 
-    span.observe("test:somethingHappened", observer);
+    span.observe('test:somethingHappened', observer);
+    this.assertEqual(span, span.stopObserving('test:somethingHappened'));
+
+    span.observe('test:somethingHappened', observer);
     this.assertEqual(span, span.stopObserving());
     this.assertEqual(span, span.stopObserving()); // assert it again, after there are no observers
 
-    span.observe("test:somethingHappened", observer);
-    this.assertEqual(span, span.observe("test:somethingHappened", observer)); // try to reuse the same observer
+    span.observe('test:somethingHappened', observer);
+    this.assertEqual(span, span.observe('test:somethingHappened', observer)); // try to reuse the same observer
     span.stopObserving();
   },
 
-  testObserveInsideHandlers: function() {
+  'testObserveInsideHandlers': function() {
     var fired = false, observer = function(event) { fired = true };
 
     // first observer should execute and attach a new observer
@@ -228,59 +245,71 @@ new Test.Unit.Runner({
     document.stopObserving('test:somethingHappened');
   },
 
-  testStopObservingInsideHandlers: function() {
+  'testStopObservingInsideHandlers': function() {
     var fired = false, observer = function(event) { fired = true };
 
     // first observer should execute and stopObserving should not
     // effect this round of execution.
     document.observe('test:somethingHappened', function() {
       document.stopObserving('test:somethingHappened', observer);
-    });
-    document.observe('test:somethingHappened', observer);
+    }).observe('test:somethingHappened', observer);
 
     // Gecko and WebKit will fail this test at the moment (1.02.09)
     document.fire('test:somethingHappened');
+
     this.assert(fired, 'observer should NOT have been stopped');
 
     fired = false;
     document.fire('test:somethingHappened');
     document.stopObserving('test:somethingHappened');
+
     this.assert(!fired, 'observer should have been stopped');
   },
 
-  testDocumentLoaded: function() {
+  'testDocumentLoaded': function() {
     this.assert(!documentLoaded);
     this.assert(document.loaded);
   },
-  
-  testCssLoadedBeforeDocumentContentLoadedFires: function() {
+
+  'testCssLoadedBeforeDocumentContentLoadedFires': function() {
     this.assert(eventResults.contentLoaded.cssLoadCheck);
   },
-  
-  testDocumentContentLoadedEventFiresBeforeWindowLoad: function() {
-    this.assert(eventResults.contentLoaded, "contentLoaded");
-    this.assert(eventResults.contentLoaded.endOfDocument, "contentLoaded.endOfDocument");
-    this.assert(!eventResults.contentLoaded.windowLoad, "!contentLoaded.windowLoad");
-    this.assert(eventResults.windowLoad, "windowLoad");
-    this.assert(eventResults.windowLoad.endOfDocument, "windowLoad.endOfDocument");
-    this.assert(eventResults.windowLoad.contentLoaded, "windowLoad.contentLoaded");
-  },
-  
-  testEventStopped: function() {
-    var span = $("span"), event;
 
-    span.observe("test:somethingHappened", function() { });
-    event = span.fire("test:somethingHappened");
-    this.assert(!event.stopped, "event.stopped should be false with an empty observer");
-    span.stopObserving("test:somethingHappened");
-    
-    span.observe("test:somethingHappened", function(e) { e.stop() });
-    event = span.fire("test:somethingHappened");
-    this.assert(event.stopped, "event.stopped should be true for an observer that calls stop");
-    span.stopObserving("test:somethingHappened");
+  'testDocumentContentLoadedEventFiresBeforeWindowLoad': function() {
+    this.assert(eventResults.contentLoaded, 'contentLoaded');
+    this.assert(eventResults.contentLoaded.endOfDocument,
+      'contentLoaded.endOfDocument');
+
+    this.assert(eventResults.windowLoad, 'windowLoad');
+    this.assert(eventResults.windowLoad.endOfDocument,
+      'windowLoad.endOfDocument');
+    this.assert(eventResults.windowLoad.contentLoaded,
+      'windowLoad.contentLoaded');
+
+    this.assert(!eventResults.contentLoaded.windowLoad,
+      '!contentLoaded.windowLoad');
   },
-  
-  testEventElement: function() {
+
+  'testEventStopped': function() {
+    var span = $('span'), event;
+
+    span.observe('test:somethingHappened', function() { });
+    event = span.fire('test:somethingHappened');
+
+    this.assert(!event.stopped,
+      'event.stopped should be false with an empty observer');
+
+    span.stopObserving('test:somethingHappened');
+    span.observe('test:somethingHappened', function(e) { e.stop() });
+    event = span.fire('test:somethingHappened');
+
+    this.assert(event.stopped,
+      'event.stopped should be true for an observer that calls stop');
+
+    span.stopObserving('test:somethingHappened');
+  },
+
+  'testEventElement': function() {
     this.assert(eventResults.windowLoad.eventElement,
       'window `onload` event.element() should not be null. (some WebKit versions may return null)');
 
@@ -311,7 +340,7 @@ new Test.Unit.Runner({
     });
   },
 
-  testEventCurrentTarget: function() {
+  'testEventCurrentTarget': function() {
     this.assert(eventResults.windowLoad.eventCurrentTarget,
       'window `onload` event.currentTarget should not be null. (some WebKit versions may return null)');
 
@@ -321,112 +350,72 @@ new Test.Unit.Runner({
     //this.assertIdentical(window, eventResults.windowLoad.eventCurrentTarget,
       //'window `onload` event.currentTarget should be `window`');
   },
-  
-  testEventTarget: function() {
+
+  'testEventTarget': function() {
     this.assert(eventResults.windowLoad.eventTarget,
       'window `onload` event.target should not be null. (some WebKit versions may return null)');
 
     this.assert(eventResults.contentLoaded.eventTarget,
       'document `dom:loaded` event.target should not be null. (some WebKit versions may return null)');
- 
+
     //this.assertIdentical(window, eventResults.windowLoad.eventTarget,
       //'window `onload` event.target should be `window`');
   },
-  
-  testEventFindElement: function() {
-    var span = $("span"), event;
-    event = span.fire("test:somethingHappened");
-    this.assertElementMatches(event.findElement(), 'span#span');
-    this.assertElementMatches(event.findElement('span'), 'span#span');
-    this.assertElementMatches(event.findElement('p'), 'p#inner');
+
+  'testEventFindElement': function() {
+    var span = $('span'), event;
+    event = span.fire('test:somethingHappened');
+
+    this.assertElementMatches(event.findElement(),
+      'span#span');
+
+    this.assertElementMatches(event.findElement('span'),
+      'span#span');
+
+    this.assertElementMatches(event.findElement('p'),
+      'p#inner');
+
+    this.assertElementMatches(event.findElement('.does_not_exist, span'),
+      'span#span');
+
     this.assertEqual(null, event.findElement('div.does_not_exist'));
-    this.assertElementMatches(event.findElement('.does_not_exist, span'), 'span#span');
   },
-  
-  testEventIDDuplication: function() {
+
+  'testEventIDDuplication': function() {
     var element = $('container').down();
-    element.observe("test:somethingHappened", Fuse.emptyFunction);
-    
+    element.observe('test:somethingHappened', Fuse.emptyFunction);
+
     var elementID = element.getEventID(),
      clone = $(element.cloneNode(true));
      cloneID = clone.getEventID()
-    
+
     this.assertNotEqual(elementID, cloneID);
+
     $('container').innerHTML += $('container').innerHTML;
+
     this.assertNotEqual(elementID, $('container').down());
     this.assertNotEqual(elementID, $('container').down(1));
   },
-  
-  testDocumentAndWindowEventID: function() {
-    [document, window].each(function(object) {
-      Event.observe(object, "test:somethingHappened", Fuse.emptyFunction);
+
+  'testDocumentAndWindowEventID': function() {
+    Fuse.List(document, window).each(function(object) {
+      Event.observe(object, 'test:somethingHappened', Fuse.emptyFunction);
+
       this.assertUndefined(object._prototypeEventID);
-      Event.stopObserving(object, "test:somethingHappened");
+
+      Event.stopObserving(object, 'test:somethingHappened');
     }, this);
   },
-  
-  testObserverExecutionOrder: function() {
-    var span = $("span"), result = '';
-    ['a', 'b', 'c', 'd']._each(function(n) {
-      span.observe("test:somethingHappened", function() { result += n })
+
+  'testObserverExecutionOrder': function() {
+    var span = $('span'), result = '';
+    Fuse.List('a', 'b', 'c', 'd').each(function(n) {
+      span.observe('test:somethingHappened', function() { result += n })
     });
-    
-    span.fire("test:somethingHappened");
-    span.stopObserving("test:somethingHappened");
+
+    span.fire('test:somethingHappened');
+    span.stopObserving('test:somethingHappened');
+
     this.assertEqual('abcd', result);
-  }
-});
-
-document.observe('dom:loaded', function(event) {
-  var body = $(document.body);
-
-  eventResults.contentLoaded = {
-    'endOfDocument':      eventResults.endOfDocument,
-    'windowLoad':         eventResults.windowLoad,
-    'cssLoadCheck':       $('css_load_check').getStyle('height') == '100px',
-    'eventTarget':        event.target,
-    'eventCurrentTarget': event.currentTarget,
-    'eventElement':       false
-  };
-
-  Object.extend(eventResults.eventElement, { 
-    'imageOnLoadBug':   false,
-    'imageOnErrorBug':  false,
-    'contentLoadedBug': false
-  });
-
-  body.insert(new Element('img', { id:'img_load_test' }));  
-  $('img_load_test').observe('load', function(e) {
-    if (e.element() !== this) 
-      eventResults.eventElement.imageOnLoadBug = true;
-  }).writeAttribute('src', '../fixtures/logo.gif');
-
-  body.insert(new Element('img', { id:'img_error_test' }));  
-  $('img_error_test').observe('error', function(e) {
-    if (e.element() !== this) 
-      eventResults.eventElement.imageOnErrorBug = true;
-  }).writeAttribute('src', 'http://www.fusejs.com/xyz.gif');
-  
-  try {
-    eventResults.contentLoaded.eventElement = event.element();
-  } catch(e) {
-    eventResults.eventElement.contentLoadedBug = true;
-  }
-});
-
-Event.observe(window, 'load', function(event) {
-  eventResults.windowLoad = {
-    'endOfDocument':      eventResults.endOfDocument,
-    'contentLoaded':      eventResults.contentLoaded,
-    'eventCurrentTarget': event.currentTarget,
-    'eventTarget':        event.target,
-    'eventElement':       false
-  };
-
-  try {
-    eventResults.windowLoad.eventElement = event.element();
-    eventResults.eventElement.windowOnLoadBug = false;
-  } catch(e) {
-    eventResults.eventElement.windowOnLoadBug = true;
   }
 });

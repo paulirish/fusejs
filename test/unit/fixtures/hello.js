@@ -1,1 +1,1 @@
-$("content").update("<H2>Hello world!</H2>");
+$('content').update('<H2>Hello world!</H2>');

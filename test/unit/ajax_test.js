@@ -1,426 +1,464 @@
-var extendDefault = function(options) {
-  return Object.extend({
-    asynchronous: false,
-    method: 'get',
-    onException: function(e) { throw e; }
-  }, options);
-};
-
 new Test.Unit.Runner({
-  setup: function() {
+
+  'setup': function() {
     $('content').update('');
     $('content2').update('');
   },
-  
-  teardown: function() {
+
+  'teardown': function() {
     // hack to cleanup responders
-    Ajax.Responders.responders = {
-      'onCreate':   [ function() { Ajax.activeRequestCount++ } ],
-      'onComplete': [ function() { Ajax.activeRequestCount-- } ]
+    Fuse.Ajax.Responders.responders = {
+      'onCreate':   Fuse.List(function() { Fuse.Ajax.activeRequestCount++ } ),
+      'onComplete': Fuse.List(function() { Fuse.Ajax.activeRequestCount-- } )
     };
   },
-  
-  testSynchronousRequest: function() {
+
+  'testSynchronousRequest': function() {
     this.assertEqual('', getInnerHTML('content'));
-    
-    this.assertEqual(0, Ajax.activeRequestCount);
-    new Ajax.Request("../fixtures/hello.js", {
-      asynchronous: false,
-      method: 'GET',
-      evalJS: 'force'
+    this.assertEqual(0,  Fuse.Ajax.activeRequestCount);
+
+    Fuse.Ajax.Request('../fixtures/hello.js', {
+      'asynchronous': false,
+      'method':      'GET',
+      'evalJS':      'force'
     });
-    this.assertEqual(0, Ajax.activeRequestCount);
-    
-    var h2 = $("content").firstChild;
+
+    this.assertEqual(0, Fuse.Ajax.activeRequestCount);
+
+    var h2 = $('content').firstChild;
     this.assertEqual('hello world!', getInnerHTML(h2));
   },
-  
-  testAsynchronousRequest: function() {
+
+  'testAsynchronousRequest': function() {
     this.assertEqual('', getInnerHTML('content'));
-    
-    new Ajax.Request("../fixtures/hello.js", {
-      asynchronous: true,
-      method: 'get',
-      evalJS: 'force'
+
+    Fuse.Ajax.Request('../fixtures/hello.js', {
+      'asynchronous': true,
+      'method':      'get',
+      'evalJS':      'force'
     });
+
     this.wait(1000, function() {
-      var h2 = $("content").firstChild;
+      var h2 = $('content').firstChild;
       this.assertEqual('hello world!', getInnerHTML(h2));
     });
   },
 
-  testRequestWithNoUrl: function() {
+  'testRequestWithNoUrl': function() {
     var test = this,  suceeded = false;
-    new Ajax.Request(null, {
-      asynchronous: true,
-      method: 'get',
-      onSuccess: function() {
-        suceeded = true;
+    Fuse.Ajax.Request(null, {
+      'asynchronous': true,
+      'method':      'get',
+      'onSuccess':   function() { suceeded = true }
+    });
+
+    this.wait(1000, function() { this.assert(suceeded) });
+  },
+
+  'testUpdater': function() {
+    this.assertEqual('', getInnerHTML('content'));
+
+    Fuse.Ajax.Updater('content', '../fixtures/content.html', { 'method': 'get' });
+
+    this.wait(1000, function() {
+      this.assertEqual(sentence, getInnerHTML('content'));
+
+      $('content').update('');
+      this.assertEqual('', getInnerHTML('content'));
+
+      Fuse.Ajax.Updater({ 'success': 'content', 'failure': 'content2' },
+        '../fixtures/content.html', { 'method': 'get', 'parameters': { 'pet': 'monkey' } });
+
+      Fuse.Ajax.Updater('', '../fixtures/content.html',
+        { 'method': 'get', 'parameters': 'pet=monkey' });
+
+      this.wait(1000, function() {
+        this.assertEqual(sentence, getInnerHTML('content'));
+        this.assertEqual('', getInnerHTML('content2'));
+      });
+    });
+  },
+
+  'testUpdaterWithInsertion': function() {
+    $('content').update();
+
+    Fuse.Ajax.Updater('content', '../fixtures/content.html', {
+      'method':   'get',
+      'insertion': function(element, content) {
+        Element.insert(element, { 'top': content });
       }
     });
 
     this.wait(1000, function() {
-      this.assert(suceeded);
-    });
-  },
-  
-  testUpdater: function() {
-    this.assertEqual('', getInnerHTML('content'));
-    
-    new Ajax.Updater("content", "../fixtures/content.html", { method:'get' });
-    
-    this.wait(1000, function() {
       this.assertEqual(sentence, getInnerHTML('content'));
-      
-      $('content').update('');
-      this.assertEqual('', getInnerHTML('content'));
-       
-      new Ajax.Updater({ success:"content", failure:"content2" },
-        "../fixtures/content.html", { method:'get', parameters:{ pet:'monkey' } });
-      
-      new Ajax.Updater("", "../fixtures/content.html", { method:'get', parameters:"pet=monkey" });
-      
-      this.wait(1000, function() {
-        this.assertEqual(sentence, getInnerHTML('content'));
-        this.assertEqual("", getInnerHTML('content2'));
-      });
-    }); 
-  },
-  
-  testUpdaterWithInsertion: function() {
-    $('content').update();
-    new Ajax.Updater("content", "../fixtures/content.html", { method:'get', insertion: Insertion.Top });
-    this.wait(1000, function() {
-      this.assertEqual(sentence, getInnerHTML('content'));
+ 
       $('content').update();
-      new Ajax.Updater("content", "../fixtures/content.html", { method:'get', insertion: 'bottom' });      
+      Fuse.Ajax.Updater('content','../fixtures/content.html',
+        { 'method': 'get', 'insertion': 'bottom' });
+
       this.wait(1000, function() {
         this.assertEqual(sentence, getInnerHTML('content'));
-        
+
         $('content').update();
-        new Ajax.Updater("content", "../fixtures/content.html", { method:'get', insertion: 'after' });      
+        Fuse.Ajax.Updater('content', '../fixtures/content.html',
+          { 'method': 'get', 'insertion': 'after' });
+
         this.wait(1000, function() {
           this.assertEqual('five dozen', getInnerHTML($('content').next()));
         });
       });
     });
   },
-  
-  testUpdaterOptions: function() {
+
+  'testUpdaterOptions': function() {
     var options = {
-      method: 'get',
-      asynchronous: false,
-      evalJS: 'force',
-      onComplete: Fuse.emptyFunction
-    }
-    var request = new Ajax.Updater("content", "../fixtures/hello.js", options);
-    request.options.onComplete = function() {};
+      'method':       'get',
+      'asynchronous': false,
+      'evalJS':       'force',
+      'onComplete':   Fuse.emptyFunction
+    };
+
+    var request = Fuse.Ajax.Updater('content', '../fixtures/hello.js', options);
+    request.options.onComplete = function() { };
     this.assertIdentical(Fuse.emptyFunction, options.onComplete);
   },
-  
-  testResponders: function(){
+
+  'testResponders': function(){
     // check for internal responder
     var count = 0;
-    for (var i in Ajax.Responders.responders) count++;
+    for (var i in Fuse.Ajax.Responders.responders) count++;
     this.assertEqual(2, count);
-    
-    var dummyResponder = {
-      onComplete: function(req) { /* dummy */ }
-    };
-    
-    Ajax.Responders.register(dummyResponder);
-    this.assertEqual(2, Ajax.Responders.responders['onComplete'].length);
-    
+
+    var dummyResponder = { 'onComplete': function(req) { /* dummy */ } };
+
+    Fuse.Ajax.Responders.register(dummyResponder);
+    this.assertEqual(2, Fuse.Ajax.Responders.responders['onComplete'].length);
+
     // don't add twice
-    Ajax.Responders.register(dummyResponder);
-    this.assertEqual(2, Ajax.Responders.responders['onComplete'].length);
-    
-    Ajax.Responders.unregister(dummyResponder);
-    this.assertEqual(1, Ajax.Responders.responders['onComplete'].length);
-    
+    Fuse.Ajax.Responders.register(dummyResponder);
+    this.assertEqual(2, Fuse.Ajax.Responders.responders['onComplete'].length);
+
+    Fuse.Ajax.Responders.unregister(dummyResponder);
+    this.assertEqual(1, Fuse.Ajax.Responders.responders['onComplete'].length);
+
     var responder = {
-      onCreate:   function(req){ responderCounter++ },
-      onLoading:  function(req){ responderCounter++ },
-      onComplete: function(req){ responderCounter++ }
+      'onCreate':   function(req){ responderCounter++ },
+      'onLoading':  function(req){ responderCounter++ },
+      'onComplete': function(req){ responderCounter++ }
     };
-    Ajax.Responders.register(responder);
-    
+
+    Fuse.Ajax.Responders.register(responder);
+
     this.assertEqual(0, responderCounter);
-    this.assertEqual(0, Ajax.activeRequestCount);
-    new Ajax.Request("../fixtures/content.html", { method:'get', parameters:"pet=monkey" });
+    this.assertEqual(0, Fuse.Ajax.activeRequestCount);
+
+    Fuse.Ajax.Request('../fixtures/content.html',
+      { 'method': 'get', 'parameters': 'pet=monkey' });
+
     this.assertEqual(1, responderCounter);
-    this.assertEqual(1, Ajax.activeRequestCount);
-    
-    this.wait(1000,function() {
+    this.assertEqual(1, Fuse.Ajax.activeRequestCount);
+
+    this.wait(1000, function() {
       this.assertEqual(3, responderCounter);
-      this.assertEqual(0, Ajax.activeRequestCount);
+      this.assertEqual(0, Fuse.Ajax.activeRequestCount);
     });
   },
-  
-  testEvalResponseShouldBeCalledBeforeOnComplete: function() {
+
+  'testEvalResponseShouldBeCalledBeforeOnComplete': function() {
     if (this.isRunningFromRake) {
       this.assertEqual('', getInnerHTML('content'));
-    
-      this.assertEqual(0, Ajax.activeRequestCount);
-      new Ajax.Request("../fixtures/hello.js", extendDefault({
-        onComplete: function(response) { this.assertNotEqual('', getInnerHTML('content')) }.bind(this)
-      }));
-      this.assertEqual(0, Ajax.activeRequestCount);
-    
-      var h2 = $("content").firstChild;
+      this.assertEqual(0,  Fuse.Ajax.activeRequestCount);
+
+      Fuse.Ajax.Request('../fixtures/hello.js',
+        extendDefault({
+          'onComplete': Fuse.Function.bind(function(response) {
+            this.assertNotEqual('', getInnerHTML('content')) }, this)
+        }));
+
+      this.assertEqual(0, Fuse.Ajax.activeRequestCount);
+
+      var h2 = $('content').firstChild;
       this.assertEqual('hello world!', getInnerHTML(h2));
-    } else {
-      this.info(message);
     }
+    else this.info(message);
   },
-  
-  testContentTypeSetForSimulatedVerbs: function() {
+
+  'testContentTypeSetForSimulatedVerbs': function() {
     if (this.isRunningFromRake) {
-      new Ajax.Request('/inspect', extendDefault({
-        method: 'put',
-        contentType: 'application/bogus',
-        onComplete: function(response) {
+      Fuse.Ajax.Request('/inspect', extendDefault({
+        'method':      'put',
+        'contentType': 'application/bogus',
+        'onComplete':  Fuse.Function.bind(function(response) {
           this.assertEqual('application/bogus; charset=UTF-8', response.responseJSON.headers['content-type']);
-        }.bind(this)
+        }, this)
       }));
-    } else {
-      this.info(message);
     }
+    else this.info(message);
   },
-  
-  testOnCreateCallback: function() {
-    new Ajax.Request("../fixtures/content.html", extendDefault({
-      onCreate: function(transport) { this.assertEqual(0, transport.readyState) }.bind(this),
-      onComplete: function(transport) { this.assertNotEqual(0, transport.readyState) }.bind(this)
-    }));
-  },
-  
-  testEvalJS: function() {
-    if (this.isRunningFromRake) {
-      
-      $('content').update();
-      new Ajax.Request("/response", extendDefault({
-        parameters: Fixtures.js,
-        onComplete: function(transport) { 
-          var h2 = $("content").firstChild;
-          this.assertEqual('hello world!', getInnerHTML(h2));
-        }.bind(this)
-      }));
-      
-      $('content').update();
-      new Ajax.Request("/response", extendDefault({
-        evalJS: false,
-        parameters: Fixtures.js,
-        onComplete: function(transport) { 
-          this.assertEqual('', getInnerHTML('content'));
-        }.bind(this)
-      }));
-    } else {
-      this.info(message);
-    }
-    
-    $('content').update();
-    new Ajax.Request("../fixtures/hello.js", extendDefault({
-      evalJS: 'force',
-      onComplete: function(transport) { 
-        var h2 = $("content").firstChild;
-        this.assertEqual('hello world!', getInnerHTML(h2));
-      }.bind(this)
+
+  'testOnCreateCallback': function() {
+    Fuse.Ajax.Request('../fixtures/content.html',
+      extendDefault({
+        'onCreate': Fuse.Function.bind(
+          function(response) { this.assertEqual(0, response.readyState) }, this),
+        'onComplete': Fuse.Function.bind(
+          function(response) { this.assertNotEqual(0, response.readyState) }, this)
     }));
   },
 
-  testCallbacks: function() {
+  'testEvalJS': function() {
+    if (this.isRunningFromRake) {
+      $('content').update();
+
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'parameters': Fixtures.js,
+          'onComplete': Fuse.Function.bind(function(response) {
+            var h2 = $('content').firstChild;
+            this.assertEqual('hello world!', getInnerHTML(h2));
+          }, this)
+      }));
+
+      $('content').update();
+
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'evalJS':     false,
+          'parameters': Fixtures.js,
+          'onComplete': Fuse.Function.bind(function(response) {
+            this.assertEqual('', getInnerHTML('content'));
+          }, this)
+      }));
+    }
+    else this.info(message);
+
+    $('content').update();
+
+    Fuse.Ajax.Request('../fixtures/hello.js',
+      extendDefault({
+        'evalJS':     'force',
+        'onComplete': Fuse.Function.bind(function(response) {
+          var h2 = $('content').firstChild;
+          this.assertEqual('hello world!', getInnerHTML(h2));
+        }, this)
+    }));
+  },
+
+  'testCallbacks': function() {
     var options = extendDefault({
-      onCreate: function(transport) { this.assertInstanceOf(Ajax.Response, transport) }.bind(this)
+      'onCreate': Fuse.Function.bind(
+        function(response) { this.assertInstanceOf(Fuse.Ajax.Response, response) }, this)
     });
-    
-    Ajax.Request.Events.each(function(state){
+
+    Fuse.Ajax.Request.Events.each(function(state){
       options['on' + state] = options.onCreate;
     });
 
-    new Ajax.Request("../fixtures/content.html", options);
+    Fuse.Ajax.Request('../fixtures/content.html', options);
   },
 
-  testResponseText: function() {
-    new Ajax.Request("../fixtures/empty.html", extendDefault({
-      onComplete: function(transport) { this.assertEqual('', transport.responseText) }.bind(this)
+  'testResponseText': function() {
+    Fuse.Ajax.Request('../fixtures/empty.html',
+      extendDefault({
+        'onComplete': Fuse.Function.bind(
+          function(response) { this.assertEqual('', response.responseText) }, this)
     }));
-    
-    new Ajax.Request("../fixtures/content.html", extendDefault({
-      onComplete: function(transport) { this.assertEqual(sentence, transport.responseText.toLowerCase()) }.bind(this)
+
+    Fuse.Ajax.Request('../fixtures/content.html',
+      extendDefault({
+        'onComplete': Fuse.Function.bind(
+          function(response) { this.assertEqual(sentence, response.responseText.toLowerCase()) }, this)
     }));
   },
-  
-  testResponseXML: function() {
+
+  'testResponseXML': function() {
     if (this.isRunningFromRake) {
-      new Ajax.Request("/response", extendDefault({
-        parameters: Fixtures.xml,
-        onComplete: function(transport) { 
-          this.assertEqual('foo', transport.responseXML.getElementsByTagName('name')[0].getAttribute('attr'))
-        }.bind(this)
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'parameters': Fixtures.xml,
+          'onComplete': Fuse.Function.bind(function(response) {
+            this.assertEqual('foo', response.responseXML.getElementsByTagName('name')[0].getAttribute('attr'))
+          }, this)
       }));
-    } else {
-      this.info(message);
     }
+    else this.info(message);
   },
-      
-  testResponseJSON: function() {
+
+  'testResponseJSON': function() {
     if (this.isRunningFromRake) {
-      new Ajax.Request("/response", extendDefault({
-        parameters: Fixtures.json,
-        onComplete: function(transport) { this.assertEqual(123, transport.responseJSON.test) }.bind(this)
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'parameters': Fixtures.json,
+          'onComplete': Fuse.Function.bind(
+            function(response) { this.assertEqual(123, response.responseJSON.test) }, this)
       }));
-      
-      new Ajax.Request("/response", extendDefault({
-        parameters: {
-          'Content-Length': 0,
-          'Content-Type': 'application/json'
-        },
-        onComplete: function(transport) { this.assertNull(transport.responseJSON) }.bind(this)
+
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'parameters': {
+            'Content-Length': 0,
+            'Content-Type':   'application/json'
+          },
+          'onComplete': Fuse.Function.bind(
+            function(response) { this.assertNull(response.responseJSON) }, this)
       }));
-      
-      new Ajax.Request("/response", extendDefault({
-        evalJSON: false,
-        parameters: Fixtures.json,
-        onComplete: function(transport) { this.assertNull(transport.responseJSON) }.bind(this)
+
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'evalJSON':   false,
+          'parameters': Fixtures.json,
+          'onComplete': Fuse.Function.bind(
+            function(response) { this.assertNull(response.responseJSON) }, this)
       }));
-    
-      new Ajax.Request("/response", extendDefault({
-        parameters: Fixtures.jsonWithoutContentType,
-        onComplete: function(transport) { this.assertNull(transport.responseJSON) }.bind(this)
+
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'parameters': Fixtures.jsonWithoutContentType,
+          'onComplete': Fuse.Function.bind(
+            function(response) { this.assertNull(response.responseJSON) }, this)
       }));
-    
-      new Ajax.Request("/response", extendDefault({
-        sanitizeJSON: true,
-        parameters: Fixtures.invalidJson,
-        onException: function(request, error) {
-          this.assert(error.message.contains('Badly formed JSON string'));
-          this.assertInstanceOf(Ajax.Request, request);
-        }.bind(this)
+
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'sanitizeJSON': true,
+          'parameters':   Fixtures.invalidJson,
+          'onException':  Fuse.Function.bind(function(request, error) {
+            this.assert(Fuse.String.contains(error.message, 'Badly formed JSON string'));
+            this.assertInstanceOf(Fuse.Ajax.Request, request);
+          }, this)
       }));
-    } else {
-      this.info(message);
     }
-    
-    new Ajax.Request("../fixtures/data.json", extendDefault({
-      evalJSON: 'force',
-      onComplete: function(transport) { this.assertEqual(123, transport.responseJSON.test) }.bind(this)
+    else this.info(message);
+
+    Fuse.Ajax.Request('../fixtures/data.json',
+      extendDefault({
+        'evalJSON':   'force',
+        'onComplete': Fuse.Function.bind(
+          function(response) { this.assertEqual(123, response.responseJSON.test) }, this)
     }));
   },
-  
-  testHeaderJSON: function() {
+
+  'testHeaderJSON': function() {
     function decode(value) {
       return decodeURIComponent(escape(value));
     }
-    
-    if (this.isRunningFromRake) {
-      new Ajax.Request("/response", extendDefault({
-        parameters: Fixtures.headerJson,
-        onComplete: function(transport, json) {
-          // Normally you should set the proper encoding charset on your page
-          // such as charset=ISO-8859-7 and handle decoding on the serverside.
-          // PHP server-side ex:
-          // $value = utf8_decode($_GET['X-JSON']);
-          // or for none superglobals values
-          // $value = utf8_decode(urldecode($encoded));
-          var expected = 'hello #\u00E9\u00E0 '; // hello #éà
-          this.assertEqual(expected, decode(transport.headerJSON.test));
-          this.assertEqual(expected, decode(json.test));
-        }.bind(this)
-      }));
-    
-      new Ajax.Request("/response", extendDefault({
-        onComplete: function(transport, json) { 
-          this.assertNull(transport.headerJSON)
-          this.assertNull(json)
-        }.bind(this)
-      }));
-    } else {
-      this.info(message);
-    }
-  },
-  
-  testGetHeader: function() {
-    if (this.isRunningFromRake) {
-     new Ajax.Request("/response", extendDefault({
-        parameters: { 'X-TEST': 'some value' },
-        onComplete: function(transport) {
-          this.assertEqual('some value', transport.getHeader('X-Test'));
-          this.assertNull(transport.getHeader('X-Inexistant'));
-        }.bind(this)
-      }));
-    } else {
-      this.info(message);
-    }
-  },
-  
-  testParametersCanBeHash: function() {
-    if (this.isRunningFromRake) {
-      new Ajax.Request("/response", extendDefault({
-        parameters: $H({ "one": "two", "three": "four" }),
-        onComplete: function(transport) {
-          this.assertEqual("two", transport.getHeader("one"));
-          this.assertEqual("four", transport.getHeader("three"));
-          this.assertNull(transport.getHeader("toObject"));
-        }.bind(this)
-      }));
-    } else {
-      this.info(message);
-    }
-  },
-  
-  testRequestHeaders: function() {
-    if (this.isRunningFromRake) {
-      this.assertNothingRaised(function() {
-        new Ajax.Request('/response', extendDefault({
-          'requestHeaders': ['X-Foo', 'foo', 'X-Bar', 'bar']
-        }));
-      });
 
-      this.assertNothingRaised(function() {
-        new Ajax.Request('/response', extendDefault({
-          'requestHeaders': { 'X-Foo':'foo', 'X-Bar':'bar' }
-        }));
-      });
+    if (this.isRunningFromRake) {
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'parameters': Fixtures.headerJson,
+          'onComplete': Fuse.Function.bind(function(response, json) {
+            // Normally you should set the proper encoding charset on your page
+            // such as charset=ISO-8859-7 and handle decoding on the serverside.
+            // PHP server-side ex:
+            // $value = utf8_decode($_GET['X-JSON']);
+            // or for none superglobals values
+            // $value = utf8_decode(urldecode($encoded));
+            var expected = 'hello #\u00E9\u00E0 '; // hello #éà
+            this.assertEqual(expected, decode(response.headerJSON.test));
+            this.assertEqual(expected, decode(json.test));
+          }, this)
+      }));
 
-      this.assertNothingRaised(function() {
-        new Ajax.Request('/response', extendDefault({
-          'requestHeaders': $H({ 'X-Foo':'foo', 'X-Bar':'bar' })
-        }));
-      });
-    } 
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'onComplete': Fuse.Function.bind(function(response, json) {
+            this.assertNull(response.headerJSON)
+            this.assertNull(json)
+          }, this)
+      }));
+    }
     else this.info(message);
   },
-  
-  testIsSameOrigin: function() {
+
+  'testGetHeader': function() {
     if (this.isRunningFromRake) {
-      var isSameOrigin = Object.isSameOrigin;
-      Object.isSameOrigin = function() { return false };
+     Fuse.Ajax.Request('/response',
+       extendDefault({
+         'parameters': { 'X-TEST': 'some value' },
+         'onComplete': Fuse.Function.bind(function(response) {
+            this.assertEqual('some value', response.getHeader('X-Test'));
+            this.assertNull(response.getHeader('X-Inexistant'));
+          }, this)
+      }));
+    }
+    else this.info(message);
+  },
 
-      $("content").update('same origin policy');
-      new Ajax.Request("/response", extendDefault({
-        parameters: Fixtures.js,
-        onComplete: function(transport) { 
-          this.assertEqual('same origin policy', getInnerHTML('content'));
-        }.bind(this)
+  'testParametersCanBeHash': function() {
+    if (this.isRunningFromRake) {
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'parameters': $H({ 'one': 'two', 'three': 'four' }),
+          'onComplete': Fuse.Function.bind(function(response) {
+            this.assertEqual('two',  response.getHeader('one'));
+            this.assertEqual('four', response.getHeader('three'));
+            this.assertNull(response.getHeader('toObject'));
+          }, this)
+      }));
+    }
+    else this.info(message);
+  },
+
+  'testRequestHeaders': function() {
+    if (this.isRunningFromRake) {
+      this.assertNothingRaised(function() {
+        Fuse.Ajax.Request('/response',
+          extendDefault({
+            'requestHeaders': ['X-Foo', 'foo', 'X-Bar', 'bar']
+        }));
+      });
+
+      this.assertNothingRaised(function() {
+        Fuse.Ajax.Request('/response',
+          extendDefault({
+            'requestHeaders': { 'X-Foo': 'foo', 'X-Bar': 'bar' }
+        }));
+      });
+
+      this.assertNothingRaised(function() {
+        Fuse.Ajax.Request('/response',
+          extendDefault({
+            'requestHeaders': $H({ 'X-Foo': 'foo', 'X-Bar': 'bar' })
+        }));
+      });
+    }
+    else this.info(message);
+  },
+
+  'testIsSameOrigin': function() {
+    if (this.isRunningFromRake) {
+      var isSameOrigin = Fuse.Object.isSameOrigin;
+      Fuse.Object.isSameOrigin = function() { return false };
+
+      $('content').update('same origin policy');
+
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'parameters': Fixtures.js,
+          'onComplete': Fuse.Function.bind(function(response) {
+            this.assertEqual('same origin policy', getInnerHTML('content'));
+          }, this)
       }));
 
-      new Ajax.Request("/response", extendDefault({
-        parameters: Fixtures.invalidJson,
-        onException: function(request, error) {
-          this.assert(error.message.contains('Badly formed JSON string'));
-        }.bind(this)
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'parameters':  Fixtures.invalidJson,
+          'onException': Fuse.Function.bind(function(request, error) {
+            this.assert(Fuse.String.contains(error.message, 'Badly formed JSON string'));
+          }, this)
       }));
 
-      new Ajax.Request("/response", extendDefault({
-        parameters: { 'X-JSON': '{});window.attacked = true;({}' },
-        onException: function(request, error) {
-          this.assert(error.message.contains('Badly formed JSON string'));
-        }.bind(this)
+      Fuse.Ajax.Request('/response',
+        extendDefault({
+          'parameters':  { 'X-JSON': '{});window.attacked = true;({}' },
+          'onException': Fuse.Function.bind(function(request, error) {
+            this.assert(Fuse.String.contains(error.message, 'Badly formed JSON string'));
+          }, this)
       }));
 
       // restore original method
-      Object.isSameOrigin = isSameOrigin;
+      Fuse.Object.isSameOrigin = isSameOrigin;
     }
     else this.info(message);
   }

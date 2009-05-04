@@ -1,3 +1,5 @@
+* unit test: Rewrite all unit tests to support the Fuse namespace changes. [jddalton]
+
 * Fix Fuse.Date instanceof detection and make Fuse.Object conform to ECMA specification when passing a null or undefined value. [jddalton]
 
 * Remove strict equality operators when checking indexOf() results because they fail on Fuse.Number instances and correct more overlooked native to Fuse.<native> conversions. [jddalton]

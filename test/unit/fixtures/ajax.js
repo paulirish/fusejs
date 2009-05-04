@@ -1,13 +1,25 @@
+function extendDefault(options) {
+  return Fuse.Object.extend({
+    'asynchronous': false,
+    'method':      'get',
+    'onException': function(e) { throw e; }
+  }, options);
+}
+
+function getInnerHTML(id) {
+  var element = $(id);
+  return Fuse.String(!element ? '' :
+    $(id).innerHTML.toString().toLowerCase().replace(/[\r\n\t]/g, ''));
+}
+
 var responderCounter = 0,
  message  = 'You must be running your tests from rake to test this feature.',
  sentence = 'pack my box with <em>five dozen</em> liquor jugs! ' +
    'oh, how <strong>quickly</strong> daft jumping zebras vex...';
 
-function getInnerHTML(id) {
-  return $(id).innerHTML.toString().toLowerCase().replace(/[\r\n\t]/g, '');
-}
+/*--------------------------------------------------------------------------*/
 
-Fixtures = {
+var Fixtures = {
   'js': {
     'responseBody': '$("content").update("<H2>Hello world!</H2>");', 
     'Content-Type': '           text/javascript     '

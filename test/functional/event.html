@@ -6,15 +6,16 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <link rel="stylesheet" href="event.css" type="text/css" />
   <script src="../../dist/fuse.js" type="text/javascript"></script>
+  <script src="../../vendor/nwbox/nwmatcher/src/nwmatcher.js"></script>
   <script type="text/javascript">
     Element.addMethods({
-      passed: function(el, message) {
+      'passed': function(el, message) {
         el = $(el);
         el.className = 'passed';
         (el.down('span') || el).update(message || 'Test passed!');
       },
       
-      failed: function(el, message) {
+      'failed': function(el, message) {
         el = $(el);
         el.className = 'failed';
         (el.down('span') || el).update(message || 'Test failed');
@@ -25,7 +26,7 @@
       var line, all = [];
       for (prop in obj) {
         if (typeof obj[prop] == 'function' || /^[A-Z]|[XY]$/.test(prop)) continue;
-        line = prop + ": " + Object.inspect(obj[prop]);
+        line = Fuse.String(prop + ': ' + Fuse.Object.inspect(obj[prop]));
         all.push(line.escapeHTML());
       }
       $('log').update(all.join('<br />'));
@@ -113,9 +114,9 @@
   <span class="button" id="left">left</span> <span class="button" id="middle">middle</span> <span class="button" id="right">right</span></p>
   
   <script type="text/javascript">
-    $w('left middle right').each(function(button) {
+    Fuse.Util.$w('left middle right').each(function(button) {
       Event.observe(button, 'mousedown', function(e) {
-        if (Event['is' + this.id.capitalize() + 'Click'](e))
+        if (Event['is' + Fuse.String(this.id).capitalize() + 'Click'](e))
           this.passed('Squeak!')
         else this.failed('OH NO!');
         log(e);
@@ -218,25 +219,26 @@
   <p id="bind"><code>bindAsEventListener()</code> test</p>
   
   <script type="text/javascript">
-    $('bind').observe('click', function(e, str, arr){
-      var el = $('bind')
-      try {
-        if (arguments.length != 3) throw arguments.length + ' arguments: ' + $A(arguments).inspect()
-        if (str != 'foo') throw 'wrong string: ' + str
-        if (arr.constructor != Array) throw '3rd parameter is not an array'
-        el.passed();
-      }
-      catch (err) { el.failed(err.toString()) }
-      log(e);
-    }.bindAsEventListener(document.body, 'foo', [1,2,3]))
+    $('bind').observe('click', Fuse.Function.bindAsEventListener(
+      function(e, str, arr){
+        var el = $('bind')
+        try {
+          if (arguments.length != 3) throw arguments.length + ' arguments: ' + $A(arguments).inspect()
+          if (str != 'foo') throw 'wrong string: ' + str
+          if (arr.constructor != Array) throw '3rd parameter is not an array'
+          el.passed();
+        }
+        catch (err) { el.failed(err.toString()) }
+        log(e);
+      }, document.body, 'foo', [1,2,3]));
   </script>
   
-  <p id="obj_inspect"><code>Object.inspect(event)</code> test</p>
+  <p id="obj_inspect"><code>Fuse.Object.inspect(event)</code> test</p>
   
   <script type="text/javascript">
     $('obj_inspect').observe('click', function(e){
       var el = $('obj_inspect')
-      try { el.passed(Object.inspect(e)) }
+      try { el.passed(Fuse.Object.inspect(e)) }
       catch (err) { el.failed('Failed! Error thrown') }
       log(e);
     })
@@ -262,11 +264,11 @@
   <script type="text/javascript">
     (function() {
       var el = $('observer_order'), count = 0;
-      (2).times(function(n) {
-        el.observe("click", function(evt) { count = n; log(evt); })
+      Fuse.Number(2).times(function(n) {
+        el.observe('click', function(evt) { count = n; log(evt); })
       });
-      el.observe("click", function() {
-        (function() { (count == 1) ? el.passed() : el.failed() }).defer();
+      el.observe('click', function() {
+        Fuse.Function.defer(function() { (count == 1) ? el.passed() : el.failed() });
       });
     })();
   </script>
@@ -277,7 +279,7 @@
        <input type="text" value="" />
      </p>
   </form>
-  
+
   <script type="text/javascript">
     (function() {
       var count = 0,
@@ -287,7 +289,7 @@
       new Field.EventObserver(input, function(){ count++ });
       input.observe('change', function() {
         this.stopObserving('change', arguments.callee);
-        (function() { el[count ? 'passed' : 'failed']() }).defer();
+        Fuse.Function.defer(function() { el[count ? 'passed' : 'failed']() });
       });
     })();
   </script>
@@ -305,12 +307,12 @@
     (function() {
       var count = 0,
        el = $('field_event_observer_group'),
-       radios = el.select('input[type="radio"]');
+       radios = Fuse.List.from(el.query('input[type="radio"]'));
 
       new Field.EventObserver(radios[1], function(){ count++ });
       radios.invoke('observe', 'click', function() {
         radios.invoke('stopObserving', 'click', arguments.callee);
-        (function() { el[count ? 'passed' : 'failed']() }).defer();
+        Fuse.Function.defer(function() { el[count ? 'passed' : 'failed']() });
       });
     })();
   </script>

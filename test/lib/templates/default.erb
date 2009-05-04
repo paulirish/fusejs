@@ -5,7 +5,18 @@
   <title>FuseJS Unit test file | <%= @title %></title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <script src="../../../dist/fuse.js" type="text/javascript"></script>
+  <script src="../../../vendor/nwbox/nwmatcher/src/nwmatcher.js" type="text/javascript"></script>
   <script src="../../lib/assets/unittest.js" type="text/javascript"></script>
+  <script type="text/javascript" charset="utf-8">
+    var undef,
+     $    = Fuse.Util.$,
+     $$   = Fuse.Util.$$,
+     $A   = Fuse.Util.$A,
+     $F   = Fuse.Util.$F,
+     $H   = Fuse.Util.$H,
+     $R   = Fuse.Util.$R,
+     $w   = Fuse.Util.$w;
+  </script>
   <link rel="stylesheet" href="../../lib/assets/test.css" type="text/css" />
   
   <% if @css_fixtures_filename %>

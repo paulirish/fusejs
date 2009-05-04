@@ -1,25 +1,35 @@
+function prime(value) {
+  for (var i = 2; i < value; i++)
+    if (value % i == 0) return false;
+  return true;
+}
+
+var globalArgsTest = 'nothing to see here';
+
+/*--------------------------------------------------------------------------*/
+
 var Fixtures = {
-  People: [
+  'People': Fuse.List(
     { 'name': 'Joe Gornick',       'nickname': 'juanbond' },
     { 'name': 'John David Dalton', 'nickname': 'jdd' },
     { 'name': 'Diego Perini',      'nickname': 'dperini' },
     { 'name': 'Juriy Zaytsev',     'nickname': 'kangax' }
-  ],
+  ),
   
-  Nicknames: $w('juanbond jdd dperini kangax'),
+  'Nicknames': Fuse.Util.$w('juanbond jdd dperini kangax'),
   
-  Emoticons: $w(';-) ;-( :-) :-P'),
+  'Emoticons': Fuse.Util.$w(';-) ;-( :-) :-P'),
   
-  Basic: [1, 2, 3],
+  'Basic': Fuse.List(1, 2, 3),
   
-  Primes: [
+  'Primes': Fuse.List(
      1,  2,  3,  5,  7,  11, 13, 17, 19, 23,
     29, 31, 37, 41, 43,  47, 53, 59, 61, 67,
     71, 73, 79, 83, 89,  97
-  ],
+  ),
   
-  Z: []
+  'Z': Fuse.List()
 };
 
-for (var i = 1; i <= 100; i++)
+for (var i = 1; i < 101; i++)
   Fixtures.Z.push(i);
