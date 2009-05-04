@@ -200,7 +200,7 @@
           : function Array(length) {
               if (arguments.length === 1) return fn(length);
               else {
-                var result = new fn();
+                var result = new fn;
                 result.push.apply(result, arguments);
                 return result;
               }
@@ -211,7 +211,7 @@
 
       this.Date = (function(fn, String) {
         function Date(year, month, date, hours, minutes, seconds, ms) {
-          return this !== Date
+          return this instanceof Date
             ? new fn(year, month, date, hours, minutes, seconds, ms)
             : String(new fn);
         }
@@ -225,7 +225,13 @@
         return Function;
       })(sandbox.Function);
 
-      this.Object = sandbox.Object;
+      this.Object = (function(fn) {
+        function Object(value) {
+          return value == null ? new fn : fn(value);
+        }
+        Object.prototype = fn.prototype;
+        return Object;
+      })(sandbox.Object);
 
       this.Number = (function(fn) {
         function Number(value) { return new fn(value) }
@@ -263,7 +269,7 @@
         this.Date = (function(fn, String) {
           function Date(year, month, date, hours, minutes, seconds, ms) {
             var result;
-            if (this != Date) {
+            if (this instanceof Date) {
               result = new fn(year, month, date, hours, minutes, seconds, ms);
               result['__proto__'] = Date.prototype;
             } else result = String(new fn);
@@ -286,7 +292,7 @@
         // ECMA-5 15.2.1.1
         this.Object = (function(fn, Number, String) {
           function Object(value) {
-            if (this === Object && value != null) {
+            if (value != null) {
               switch (typeof value) {
                 case 'boolean': return new Boolean(value);
                 case 'number':  return Number(value);
