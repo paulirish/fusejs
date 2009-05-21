@@ -1,3 +1,5 @@
+* Add support for Peppy and Dojo Acme JavaScript CSS Selector engines and update other engines. [jddalton] 
+
 * Correct many coding issues related to the unit test rewrites. [jddalton]
   Note: Backwards compatibility warning.
    - Reduce repeated code by creating/removing aliases:

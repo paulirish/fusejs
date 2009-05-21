@@ -10,3 +10,6 @@
 [submodule "vendor/sizzle"]
 	path = vendor/sizzle
 	url = git://github.com/jeresig/sizzle.git
+[submodule "vendor/peppy"]
+	path = vendor/peppy
+	url = git://github.com/jdonaghue/Peppy.git
