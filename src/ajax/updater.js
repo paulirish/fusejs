@@ -3,6 +3,9 @@
   Fuse.addNS('Ajax.Updater', Fuse.Ajax.Request, {
     'constructor': (function() {
       function Updater(container, url, options) {
+        if (!(this instanceof Updater))
+          return new Updater(container, url, options);
+
         this.container = {
           'success': (container.success || container),
           'failure': (container.failure || (container.success ? null : container))

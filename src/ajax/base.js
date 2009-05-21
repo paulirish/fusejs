@@ -3,14 +3,14 @@
   Fuse.addNS('Ajax.Base', {
     'constructor': (function() {
       function Base(options) {
-        this.options = Fuse.Object._extend(Object
-          .clone(Ajax.Base.defaultOptions), options);
+        this.options = Fuse.Object._extend(Fuse.Object
+          .clone(Fuse.Ajax.Base.defaultOptions), options);
 
         this.options.method = this.options.method.toLowerCase();
 
-        if (typeof this.options.parameters === 'string') 
-          this.options.parameters = this.options.parameters.toQueryParams();
-        else if (Fuse.Object.isHash(this.options.parameters))
+        if (Fuse.Object.isString(this.options.parameters))
+          this.options.parameters = Fuse.String(this.options.parameters).toQueryParams();
+        else if (this.options.parameters instanceof Fuse.Hash)
           this.options.parameters = this.options.parameters.toObject();
       }
       return Base;

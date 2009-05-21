@@ -7,6 +7,10 @@
     return query;
   })();
 
+  Fuse.addNS('Util');
+
+  Fuse.Util.$$ = Fuse.query;
+
   /*--------------------------------------------------------------------------*/
 
   (function() {
@@ -14,13 +18,17 @@
       if (!(element = $(element).firstChild)) return Fuse.List();
       while (element && element.nodeType !== 1) element = element.nextSibling;
       if (!element) return Fuse.List();
+
+      selector = selector && selector.length && selector;
       return !selector || selector && Fuse.Dom.Selector.match(element, selector)
         ? prependList(Element.nextSiblings(element, selector), element, Fuse.List())
         : Element.nextSiblings(element, selector);
     };
 
     this.match = function match(element, selector) {
-      return Fuse.Dom.Selector.match($(element), selector);
+      return Fuse.Object.isString(selector)
+        ? Fuse.Dom.Selector.match($(element), selector)
+        : selector.match($(element));
     };
 
     this.query = function query(element, selector) {
@@ -29,8 +37,9 @@
 
     this.siblings = function siblings(element, selector) {
       var results = Fuse.List(), original = element = $(element);
-      element = element.parentNode && element.firstChild;
-      if (selector) {
+      element = element.parentNode && element.parentNode.firstChild;
+
+      if (selector && selector.length) {
         var match = Fuse.Dom.Selector.match;
         while (element) {
           if (element !== original && element.nodeType === 1 && match(element, selector))
@@ -57,7 +66,7 @@
     this.descendants = (function() {
       var descendants = function descendants(element, selector) {
         var node, i = 0, results = Fuse.List(), nodes = $(element).getElementsByTagName('*');
-        if (selector) {
+        if (selector && selector.length) {
           var match = Fuse.Dom.Selector.match;
           while (node = nodes[i++])
             if (match(element, selector))
@@ -70,7 +79,7 @@
       if (Bug('GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES')) {
         descendants = function descendants(element, selector) {
           var node, i = 0, results = Fuse.List(), nodes = $(element).getElementsByTagName('*');
-          if (selector) {
+          if (selector && selector.length) {
             var match = Fuse.Dom.Selector.match;
             while (node = nodes[i++])
               if (node.nodeType === 1 && match(element, selector))
@@ -148,7 +157,9 @@
         } else index = index || 0;
 
         var nodes = $(element).getElementsByTagName('*');
-        return selector ? _getNthBySelector(nodes, selector, index) : _getNth(nodes, index);
+        return selector && selector.length
+          ? _getNthBySelector(nodes, selector, index)
+          : _getNth(nodes, index);
       }
       return down;
     })();
@@ -174,7 +185,7 @@
         index = selector; selector = null;
       } else index = index || 0;
 
-      if (selector) {
+      if (selector && selector.length) {
         var match = Fuse.Dom.Selector.match;
         while (element = element[property])
           if (element.nodeType === 1 && match(element, selector) && count++ === index)
@@ -210,7 +221,7 @@
     function _collect(element, property, selector) {
       element = $(element);
       var results = Fuse.List();
-      if (selector) {
+      if (selector && selector.length) {
         var match = Fuse.Dom.Selector.match;
         while (element = element[property])
           if (element.nodeType === 1 && match(element, selector))

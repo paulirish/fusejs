@@ -4,18 +4,22 @@
 
   (function() {
     this.match = function match(element, selector) {
-      return Slick.match(element, selector);
+      return slick.match(element, String(selector || ''));
     };
 
     this.select = (function() {
-      var select, toList = Fuse.List.fromNodeList;
-      return select = Feature('ELEMENT_EXTENSIONS')
-        ? function select(selector, context) {
-            return toList(Slick(context, selector));
-          }
-        : function select(selector, context) {
-            return toList(Slick(context, selector)).map(Element.extend);
-          };
+      var select = function select(selector, context) {
+        return toList(slick(context || Fuse._doc, String(selector || '')))
+          .map(Element.extend);
+      };
+
+      if (Feature('ELEMENT_EXTENSIONS'))
+        select = function select(selector, context) {
+          return toList(slick(context || Fuse._doc, String(selector || '')));
+        };
+
+      var toList = Fuse.List.fromNodeList;
+      return select;
     })();
 
     // prevent JScript bug with named function expressions

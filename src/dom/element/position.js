@@ -3,7 +3,7 @@
   (function() {
     this.makeAbsolute = function makeAbsolute(element) {
       element = $(element);
-      if (Element.getStyle(element, 'position') === 'absolute')
+      if (Element.getStyle(element, 'position') == 'absolute')
         return element;
 
       var s = element.style,
@@ -36,7 +36,7 @@
 
     this.undoAbsolute = function undoAbsolute(element) {
       element = $(element);
-      if (Element.getStyle(element, 'position') === 'relative')
+      if (Element.getStyle(element, 'position') == 'relative')
         return element;
       if (typeof element._originalTop === 'undefined')
         throw new Error('Element#makeAbsolute must be called first.');
@@ -60,7 +60,7 @@
       element = $(element);
       if (element._overflow) return element;
       element._overflow = Element.getStyle(element, 'overflow') || 'auto';
-      if (element._overflow !== 'hidden')
+      if (element._overflow != 'hidden')
         element.style.overflow = 'hidden';
       return element;
     };
@@ -76,7 +76,7 @@
     this.makePositioned = function makePositioned(element) {
       element = $(element);
       var pos = Element.getStyle(element, 'position');
-      if (!pos || pos === 'static') {
+      if (!pos || pos == 'static') {
         element._madePositioned = true;
         element.style.position  = 'relative';
         // Opera returns the offset relative to the positioning context, when an
@@ -111,7 +111,19 @@
         'setHeight':  true
       }, options);
 
-      var s = element.style;
+      var elementBackupStyle, sourceBackupStyle,
+       s = element.style,
+       isElementVisible = Element.isVisible(element),
+       isSourceVisible = Element.isVisible(source);
+
+       if (!isSourceVisible) {
+         sourceBackupStyle = source.style.cssText;
+         source.style.cssText += ';display:block;visibility:hidden;';
+       }
+       if (!isElementVisible) {
+         elementBackupStyle = { 'display': s.display, 'visibility': s.visibility };
+         s.cssText += ';display:block;visibility:hidden;';
+       }
 
       // Get element size without border or padding then add
       // the difference between the source and element padding/border
@@ -139,11 +151,11 @@
 
       var p, position = Element.getStyle(element, 'position');
 
-      var delta = position === 'relative'
+      var delta = position == 'relative'
         ? Element.cumulativeOffset(element)
         : [0, 0];
 
-      if (position === 'absolute' && Element.descendantOf(element, source)) {
+      if (position == 'absolute' && Element.descendantOf(element, source)) {
         p = Element.cumulativeOffset(element, source);
         p[0] *= -1; p[1] *= -1;
       } else p = Element.cumulativeOffset(source);
@@ -151,6 +163,14 @@
       // set position
       if (options.setLeft) s.left = (p[0] - delta[0] + options.offsetLeft) + 'px';
       if (options.setTop)  s.top  = (p[1] - delta[1] + options.offsetTop)  + 'px';
+      
+      if (!isSourceVisible)
+        source.style.cssText = sourceBackupStyle;
+      if (!isElementVisible) {
+        s.display = elementBackupStyle.display;
+        s.visibility = elementBackupStyle.visibility;
+      }
+
       return element;
     };
 
@@ -173,8 +193,8 @@
             valueT += parseFloat(Element.getStyle(offsetParent, 'borderTopWidth'))  || 0;
             valueL += parseFloat(Element.getStyle(offsetParent, 'borderLeftWidth')) || 0;
           }
-          if (position === 'fixed' || offsetParent && (offsetParent === ancestor ||
-             (BODY_OFFSETS_INHERIT_ITS_MARGINS && position === 'absolute' && 
+          if (position == 'fixed' || offsetParent && (offsetParent === ancestor ||
+             (BODY_OFFSETS_INHERIT_ITS_MARGINS && position == 'absolute' && 
               getNodeName(offsetParent) === 'BODY'))) {
             break;
           }
@@ -240,7 +260,7 @@
           valueL += element.scrollLeft || 0;
 
           if (element === scrollEl ||
-              Element.getStyle(element, 'position') === 'fixed') {
+              Element.getStyle(element, 'position') == 'fixed') {
             break;
           }
         }
@@ -264,7 +284,7 @@
         valueL += element.offsetLeft || 0;
         element = Element.getOffsetParent(element);
       } while (element && getNodeName(element) !== 'BODY' &&
-          Element.getStyle(element, 'position') === 'static');
+          Element.getStyle(element, 'position') == 'static');
 
       return Element._returnOffset(valueL, valueT);
     },

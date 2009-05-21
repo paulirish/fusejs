@@ -4,7 +4,7 @@
 
   Fuse.Util.$R = (function() {
     function $R(start, end, exclusive) {
-      return new ObjectRange(start, end, exclusive);
+      return Fuse.Range(start, end, exclusive);
     }
     return $R;
   })();
@@ -14,6 +14,9 @@
   Fuse.addNS('Range', Fuse.Enumerable, {
     'constructor': (function() {
       function Range(start, end, exclusive) {
+        if (!(this instanceof Range))
+          return new Range(start, end, exclusive);
+
         this.start = start;
         this.end = end;
         this.exclusive = exclusive;

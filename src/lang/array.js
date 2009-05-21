@@ -2,17 +2,19 @@
 
   (function() {
     this.from = function from(iterable) {
+      if (!iterable || iterable == '') return Fuse.List();
+
       // Safari 2.x will crash when accessing a non-existent property of a
       // node list, not in the document, that contains a text node unless we
       // use the `in` operator
-      if (!iterable) return Fuse.List();
-      if ('toArray' in Object(iterable)) return iterable.toArray();
-      return Fuse.List.fromNodeList(iterable);
-    }
+      var object = Fuse.Object(iterable);
+      if ('toArray' in object) return object.toArray();
+      if ('item' in iterable)  return Fuse.List.fromNodeList(iterable);
 
-    this.fromArray = function fromArray(array) {
-      return Fuse.List.apply(null, array);
-    };
+      var length = iterable.length || 0, results = Fuse.List(length);
+      while (length--) results[length] = iterable[length];
+      return results;
+    }
 
     this.fromNodeList = (function() {
       function fromNodeList(nodeList) {
@@ -39,7 +41,7 @@
     })();
 
     // prevent JScript bug with named function expressions
-    var from = null, fromArray = null;
+    var from = null;
   }).call(Fuse.List);
 
   /*--------------------------------------------------------------------------*/
@@ -50,9 +52,9 @@
 
   Fuse.Util.$w = (function() {
     function $w(string) {
-      if (typeof string !== 'string') return Fuse.List();
-      string = Fuse.String(string).trim();
-      return string ? string.split(/\s+/) : Fuse.List();
+      if (!Fuse.Object.isString(string)) return Fuse.List();
+      string = Fuse.String.Plugin.trim.call(string);
+      return string != '' ? string.split(/\s+/) : Fuse.List();
     }
     return $w;
   })();
@@ -76,7 +78,7 @@
 
     this.compact = function compact(falsy) {
       for (var i = 0, results = Fuse.List(), length = this.length; i < length; i++)
-        if (!(this[i] == null || falsy && !this[i]))
+        if (!(this[i] == null || falsy && (!this[i] || this[i] == '')))
           results.push(this[i]);
       return results;
     };
@@ -110,8 +112,8 @@
 
     this.flatten = function flatten() {
       for (var i = 0, results = Fuse.List(), length = this.length; i < length; i++) {
-        if (Fuse.Object.isArray(this[i])) 
-          concatList(results, this[i].flatten());
+        if (Fuse.List.isArray(this[i])) 
+          concatList(results, Fuse.List.Plugin.flatten.call(this[i]));
         else results.push(this[i]);
       }
       return results;
@@ -127,7 +129,7 @@
     };
 
     this.inspect = function inspect() {
-      return '[' + this.map(Fuse.Object.inspect).join(', ') + ']';
+      return '[' + Fuse.List.Plugin.map.call(this, Fuse.Object.inspect).join(', ') + ']';
     };
 
     this.intersect = function intersect(array) {
@@ -165,9 +167,10 @@
     };
 
     this.without = function without() {
-      var results = Fuse.List(), i = 0, length = this.length, args = slice.call(arguments, 0);
+      var results = Fuse.List(), args = slice.call(arguments, 0),
+       i = 0, indexOf = Fuse.List.Plugin.indexOf, length = this.length;
       for ( ; i < length; i++)
-        if (args.indexOf(this[i]) == -1) results.push(this[i]);
+        if (indexOf.call(args, this[i]) == -1) results.push(this[i]);
       return results;
     };
 
@@ -232,7 +235,7 @@
     };
 
     this.grep = function grep(pattern, callback, thisArg) {
-      if (!pattern || Fuse.Object.isRegExp(pattern) &&
+      if (!pattern || pattern == '' || Fuse.Object.isRegExp(pattern) &&
          !pattern.source) return this.toList();
       callback = callback || Fuse.K;
       var results = Fuse.List();
@@ -240,7 +243,7 @@
         pattern = new RegExp(Fuse.RegExp.escape(pattern));
 
       for (var i = 0, length = this.length; i < length; i++)
-        if (pattern.match(this[i]))
+        if (pattern.test(this[i]))
           results[results.length] = callback.call(thisArg, this[i], i, this);
       return results;
     };
@@ -252,6 +255,7 @@
         // http://ejohn.org/blog/fast-javascript-maxmin
         result = Math.max.apply(Math, this);
         if (!isNaN(result)) return result;
+        result = null;
       }
       for (var i = 0, length = this.length, value; i < length; i++) {
         value = callback.call(thisArg, this[i], i, this);
@@ -266,6 +270,7 @@
       if (!callback && (callback = Fuse.K)) {
         result = Math.min.apply(Math, this);
         if (!isNaN(result)) return result;
+        result = null;
       }
       for (var i = 0, length = this.length, value; i < length; i++) {
         value = callback.call(thisArg, this[i], i, this);
@@ -303,29 +308,16 @@
 
     this.zip = function zip() {
       var callback = Fuse.K, args = slice.call(arguments, 0);
-      if (typeof args.last() === 'function')
+      if (typeof Fuse.List.Plugin.last.call(args) === 'function')
         callback = args.pop();
 
       var results = Fuse.List(), i = 0, length = this.length,
-       collection = prependList(this.map.call(args, Fuse.Util.$A), this, Fuse.List());
+       collection = prependList(Fuse.List.Plugin.map.call(args, Fuse.Util.$A), this, Fuse.List());
       while (i < length) results[i] = callback(collection.pluck(i), i++, this);
       return results;
     };
 
     /* Use native browser JS 1.6 implementations if available */
-
-    // wrap some native methods to make the callback argument optional
-    (function() {
-      var m, i = 0, methods = 'every filter map some'.split(' ');
-      while (m = methods[i++]) {
-        if (this[m] && !this['_' + m])
-          this[m] = new Function('', [
-            'this._' + m +' = this.' + m + ';',
-            'function ' + m + '(callback, thisArg) {',
-            'return this._' + m + '(callback || Fuse.K, thisArg);',
-            '} return ' + m].join('\n')).call(this);
-      }
-    }).call(this);
 
     // Opera's implementation of Array.prototype.concat treats a functions arguments
     // object as an array so we overwrite concat to fix it.
@@ -334,7 +326,7 @@
       this.concat = function concat() {
         var args = arguments, results = this.clone(this);
         for (var i = 0, length = args.length; i < length; i++) {
-          if (Fuse.Object.isArray(args[i])) {
+          if (Fuse.List.isArray(args[i])) {
             for (var j = 0, subLen = args[i].length; j < subLen; j++)
               results.push(args[i][j]);
           }
@@ -344,7 +336,7 @@
       };
 
     // ECMA-5 15.4.4.16
-    this.every = this.every || function every(callback, thisArg) {
+    if (!this.every) this.every = function every(callback, thisArg) {
       callback = callback || Fuse.K;
       for (var i = 0, length = this.length; i < length; i++)
         if (!callback.call(thisArg, this[i], i))
@@ -353,7 +345,7 @@
     };
 
     // ECMA-5 15.4.4.20
-    this.filter = this.filter || function filter(callback, thisArg) {
+    if (!this.filter) this.filter = function filter(callback, thisArg) {
       callback = callback || function(value) { return value != null };
       for (var i = 0, results = Fuse.List(), length = this.length; i < length; i++)
         if (callback.call(thisArg, this[i], i))
@@ -362,7 +354,7 @@
     };
 
     // ECMA-5 15.4.4.18
-    this.forEach = this.forEach || function forEach(callback, thisArg) {
+    if (!this.forEach) this.forEach = function forEach(callback, thisArg) {
       var i = 0, length = this.length;
       if (thisArg) while (i < length)
         callback.call(thisArg, this[i], i++, this);
@@ -370,7 +362,7 @@
     };
 
     // ECMA-5 15.4.4.14
-    this.indexOf = this.indexOf || function indexOf(item, fromIndex) {
+    if (!this.indexOf) this.indexOf = function indexOf(item, fromIndex) {
       fromIndex = fromIndex || 0;
       var length = this.length;
       if (fromIndex < 0) fromIndex = length + fromIndex;
@@ -380,7 +372,7 @@
     };
 
     // ECMA-5 15.4.4.15
-    this.lastIndexOf = this.lastIndexOf || function lastIndexOf(item, fromIndex) {
+    if (!this.lastIndexOf) this.lastIndexOf = function lastIndexOf(item, fromIndex) {
       fromIndex = isNaN(fromIndex) ? this.length :
         (fromIndex < 0 ? this.length + fromIndex : fromIndex) + 1;
       var n = this.slice(0, fromIndex).reverse().indexOf(item);
@@ -388,8 +380,8 @@
     };
 
     // ECMA-5 15.4.4.19
-    this.map = this.map || function map(callback, thisArg) {
-      if (!callback) return this.clone();
+    if (!this.map) this.map = function map(callback, thisArg) {
+      if (!callback) return Fuse.List.Plugin.clone.call(this);
       var results = Fuse.List(), i = 0, length = this.length;
       if (thisArg) while (i < length)
         results[i] = callback.call(thisArg, this[i], i++, this);
@@ -399,7 +391,7 @@
     };
 
     // ECMA-5 15.4.4.17
-    this.some = this.some || function some(callback, thisArg) {
+    if (!this.some) this.some = function some(callback, thisArg) {
       callback = callback || Fuse.K;
       for (var i = 0, length = this.length; i < length; i++)
         if (callback.call(thisArg, this[i], i, this))

@@ -17,7 +17,7 @@
       return !!result;
     };
 
-    this.each = function(callback, thisArg) {
+    this.each = function each(callback, thisArg) {
       try {
         this._each(function(value, index, iterable) {
           callback.call(thisArg, value, index, iterable);
@@ -67,7 +67,7 @@
     };
 
     this.grep = function grep(pattern, callback, thisArg) {
-      if (!pattern || Fuse.Object.isRegExp(pattern) &&
+      if (!pattern || pattern == '' || Fuse.Object.isRegExp(pattern) &&
          !pattern.source) return this.toList();
 
       callback = callback || Fuse.K;
@@ -76,7 +76,7 @@
         pattern = new RegExp(Fuse.RegExp.escape(pattern));
 
       this._each(function(value, index, iterable) {
-        if (pattern.match(value))
+        if (pattern.test(value))
           results.push(callback.call(thisArg, value, index, iterable));
       });
       return results;
@@ -200,10 +200,11 @@
 
     this.zip = function zip() {
       var callback = Fuse.K, args = slice.call(arguments, 0);
-      if (typeof args.last() === 'function') callback = args.pop();
+      if (typeof Fuse.List.Plugin.last.call(args) === 'function')
+        callback = args.pop();
 
       var collection = prependList(Fuse.List.Plugin.map.call(args, Fuse.Util.$A),
-        this, Fuse.List());
+        this.toArray(), Fuse.List());
 
       return this.map(function(value, index, iterable) {
         return callback(collection.pluck(index), index, iterable);

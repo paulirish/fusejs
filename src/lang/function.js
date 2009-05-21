@@ -2,10 +2,10 @@
 
   (function() {
     this.argumentNames = function argumentNames(fn) {
-      var names = fn.toString().match(/^[\s\(]*function[^(]*\(([^)]*)\)/)[1]
+      var names = Fuse.String(fn).match(/^[\s\(]*function[^(]*\(([^)]*)\)/)[1]
        .replace(/\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g, '')
         .replace(/\s+/g, '').split(',');
-      return names.length === 1 && !names[0] ? [] : names;
+      return names.length === 1 && !names[0].length ? Fuse.List() : names;
     };
 
     // ECMA-5 15.3.4.5
@@ -53,7 +53,7 @@
     };
 
     this.curry = function curry(fn) {
-      if (!arguments.length) return fn;
+      if (arguments.length === 1) return fn;
       var args = slice.call(arguments, 1), reset = args.length;
       return function() {
         args.length = reset; // reset arg length
@@ -73,7 +73,7 @@
 
     this.defer = function defer(fn) {
       return Fuse.Function.delay.apply(null,
-        concatList([fn, 0.01], arguments));
+        concatList([fn, 0.01], slice.call(arguments, 1)));
     };
 
     this.methodize = function methodize(fn) {

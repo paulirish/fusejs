@@ -3,6 +3,9 @@
   Fuse.addNS('Ajax.Request', Fuse.Ajax.Base, {
     'constructor': (function() {
       function Request(url, options) {
+        if (!(this instanceof Request))
+          return new Request(url, options);
+
         // this._super() equivalent
         Fuse.Ajax.Base.call(this, options);
         this.transport = Fuse.Ajax.getTransport();
@@ -13,7 +16,9 @@
   });
 
   Fuse.Ajax.Request.Events = 
-    ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
+    Fuse.List('Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete');
+
+  /*--------------------------------------------------------------------------*/
 
   (function() {
     this._complete = false;
@@ -25,16 +30,16 @@
 
     this.evalResponse = function evalResponse() {
       try {
-        return eval((this.transport.responseText || '').unfilterJSON());
+        return eval(Fuse.String(this.transport.responseText || '').unfilterJSON());
       } catch (e) {
         this.dispatchException(e);
       }
     };
 
     this.getHeader = function getHeader(name) {
-      try {
-        return this.transport.getResponseHeader(name) || null;
-      } catch (e) { return null }
+      var result = null;
+      try { result = this.transport.getResponseHeader(name) || null } catch (e) { }
+      return result === null ? null : Fuse.String(result);
     };
 
     this.getStatus = function getStatus() {
@@ -50,9 +55,9 @@
     };
 
     this.request = function request(url) {
-      this.url = url || global.location.href;
+      this.url    = Fuse.String(url || global.location.href);
       this.method = this.options.method;
-      var params = Fuse.Object.clone(this.options.parameters);
+      var params  = Fuse.Object.clone(this.options.parameters);
 
       if (!/^(get|post)$/.test(this.method)) {
         // simulate other verbs over post
@@ -64,8 +69,9 @@
 
       if (params = Fuse.Object.toQueryString(params)) {
         // when GET, append parameters to URL
-        if (this.method == 'get')
-          this.url += (this.url.indexOf('?') > -1 ? '&' : '?') + params
+        if (this.method === 'get')
+          this.url = Fuse.String(this.url +
+            (this.url.indexOf('?') > -1 ? '&' : '?') + params);
       }
 
       try {
@@ -82,7 +88,7 @@
         this.transport.onreadystatechange = Fuse.Function.bind(this.onStateChange, this);
         this.setRequestHeaders();
 
-        this.body = this.method == 'post' ? (this.options.postBody || params) : null;
+        this.body = this.method === 'post' ? String(this.options.postBody || params) : null;
         this.transport.send(this.body);
 
         /* Force Firefox to handle ready state 4 for synchronous requests */
@@ -108,7 +114,7 @@
           this.dispatchException(e);
         }
 
-        var contentType = response.getHeader('Content-type');
+        var contentType = String(response.getHeader('Content-type'));
         if (this.options.evalJS == 'force'
             || (this.options.evalJS && Fuse.Object.isSameOrigin(this.url) && contentType 
             && contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;.*)?\s*$/i)))
@@ -144,18 +150,18 @@
          * Content-length header. See Mozilla Bugzilla #246651. 
          */
         if (this.transport.overrideMimeType &&
-            (userAgent.match(/Gecko\/(\d{4})/) || [0,2005])[1] < 2005)
-              headers['Connection'] = 'close';
+           (userAgent.match(/Gecko\/(\d{4})/) || [0,2005])[1] < 2005)
+          headers['Connection'] = 'close';
       }
 
       // user-defined headers
       var key, extras = this.options.requestHeaders;
       if (typeof extras === 'object') {
-        if (Fuse.Object.isArray(extras))
+        if (Fuse.List.isArray(extras))
           for (var i = 0, length = extras.length; i < length; i += 2) 
             headers[extras[i]] = extras[i + 1];
         else {
-          if (Fuse.Object.isHash(extras)) extras = extras._object;
+          if (extras instanceof Fuse.Hash) extras = extras._object;
           for (key in extras) headers[key] = extras[key];
         }
       }

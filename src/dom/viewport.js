@@ -32,7 +32,7 @@
       // Opera  < 9.5, Quirks mode -> body
       // Others -> docEl
       node = node || ('clientWidth' in Fuse._doc ? Fuse._doc : Fuse._root);
-      v['get' + D] = function() { return node['client' + D] };
+      v['get' + D] = function() { return Fuse.Number(node['client' + D]) };
       return v['get' + D]();
     }
     v.getHeight = Fuse.Function.curry(define, 'Height');

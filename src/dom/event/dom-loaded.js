@@ -100,11 +100,19 @@
     },
 
     getStyle = function(element, styleName) {
-      return (getStyle = Feature('ELEMENT_CURRENT_STYLE')
-        ? function(element, styleName) { return element.currentStyle[styleName] }
-        : function(element, styleName) { return element.ownerDocument.defaultView
-            .getComputedStyle(element, null)[styleName] }
-      )(element, styleName);
+      if (Feature('ELEMENT_COMPUTED_STYLE'))
+        getStyle = function(element, styleName) {
+          var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
+          return (style || element.style)[styleName];
+        };
+      else if (Feature('ELEMENT_CURRENT_STYLE'))
+        getStyle = function(element, styleName) {
+          return (element.currentStyle || element.style)[styleName];
+        };
+      else getStyle = function(element, styleName) {
+        return element.style[styleName];
+      };
+      return getStyle(element, styleName);
     },
 
     getSheet = function(element) {
@@ -204,7 +212,7 @@
     // is framed. Fallback on document readyState.
     if (!Feature('ELEMENT_ADD_EVENT_LISTENER') &&
         Feature('ELEMENT_DO_SCROLL') && global == global.top) {
-      // Diego Perini's IEContentLoaded
+      // based on Diego Perini's IEContentLoaded
       // http://javascript.nwbox.com/IEContentLoaded/
       checkDomLoadedState = function() {
         try { Fuse._docEl.doScroll('left') } catch(e) { return }

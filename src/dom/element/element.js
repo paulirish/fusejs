@@ -40,12 +40,13 @@
       global.Element = function(tagName, attributes) {
         // setAttribute is broken in IE when setting name and type attributes
         // see: http://msdn.microsoft.com/en-us/library/ms536389.aspx
+        tagName = tagName.toUpperCase();
         if (attributes && (attributes.name || attributes.type)) {
           tagName = '<' + tagName +
            (attributes.name ? ' name="' + attributes.name + '"' : '') +
             (attributes.type ? ' type="' + attributes.type + '"' : '') + '>';
           delete attributes.name; delete attributes.type;
-        } else tagName = tagName.toUpperCase();
+        }
         return createElement(tagName, attributes);
       };
     }
@@ -156,6 +157,8 @@
     return extend;
   })();
 
+  /*--------------------------------------------------------------------------*/
+
   Element.addMethods = (function() {
     // add HTMLElement for Safari 2
     if (Feature('OBJECT__PROTO__') && !Feature('HTML_ELEMENT_CLASS')) {
@@ -244,7 +247,7 @@
     return function(methods) {
       var tagName, T = Element.Methods.ByTag;
 
-      if (!methods) {
+      if (arguments.length < 2) {
         Fuse.Object.extend(Form, Form.Methods);
         Fuse.Object.extend(Form.Element, Form.Element.Methods);
         Fuse.Object.extend(Element.Methods.ByTag, {
@@ -254,17 +257,15 @@
           'SELECT':   Fuse.Object.clone(Form.Element.Methods),
           'TEXTAREA': Fuse.Object.clone(Form.Element.Methods)
         });
-      }
-
-      if (arguments.length === 2) {
+      } else {
         tagName = methods;
         methods = arguments[1];
       }
 
-      if (!tagName)
+      if (!tagName || tagName == '')
         Fuse.Object.extend(Element.Methods, methods);
       else {
-        Fuse.Object.isArray(tagName)
+        Fuse.List.isArray(tagName)
           ? tagName._each(function(name) { _extend(name, methods) })
           : _extend(tagName, methods);
       }
@@ -379,14 +380,14 @@
         // Many browsers report offsetParent as null if the element's
         // style is display:none.
         if (Element.isFragment(element) || element.nodeType === 9 || END_ON_NODE[nodeName] ||
-           !element.offsetParent && Element.getStyle(element, 'display') !== 'none')
+           !element.offsetParent && Element.getStyle(element, 'display') != 'none')
           return null;
 
         while (element = element.parentNode) {
           nodeName = getNodeName(element);
           if (END_ON_NODE[nodeName]) break;
           if (OFFSET_PARENTS[nodeName] ||
-              Element.getStyle(element, 'position') !== 'static')
+              Element.getStyle(element, 'position') != 'static')
             return Element.extend(element);
         }
         return Element.extend(getDocument(original).body);
@@ -396,26 +397,27 @@
 
     this.identify = function identify(element) {
       var id = Element.readAttribute(element, 'id');
-      if (id) return id;
+      if (id.length) return id;
 
       var ownerDoc = element.ownerDocument;
       do { id = 'anonymous_element_' + Element.idCounter++ }
       while (ownerDoc.getElementById(id));
       Element.writeAttribute(element, 'id', id);
-      return id;
+      return Fuse.String(id);
     };
 
     this.inspect = function inspect(element) {
       element = $(element);
-      var attribute, value, result = '<' + element.nodeName.toLowerCase(),
-       translation = { 'id':'id', 'className':'class' };
+      var attribute, property, value,
+       result = '<' + element.nodeName.toLowerCase(),
+       translation = { 'id': 'id', 'className': 'class' };
 
-      for (var property in translation) {
+      for (property in translation) {
         attribute = translation[property];
-        value = Fuse.String(element[property] || '');
-        if (value) result += ' ' + attribute + '=' + value.inspect(true);
+        value = element[property] || '';
+        if (value) result += ' ' + attribute + '=' + Fuse.String(value).inspect(true);
       }
-      return result + '>';
+      return Fuse.String(result + '>');
     };
 
     this.isFragment = (function() {
@@ -470,14 +472,14 @@
 
     this.toggle = function toggle(element) {
       var element = $(element);
-      return Element[element.offsetHeight === 0 || element.offsetWidth === 0 ?
+      return Element[!element.offsetHeight || !element.offsetWidth ?
         'show' : 'hide'](element);
     };
 
     this.isVisible = function isVisible(element) {
       // In IE hidden TR elements still have an offsetWidth
       var element = $(element);
-      return !(element.offsetHeight === 0 || element.offsetWidth === 0)
+      return !(!element.offsetHeight || !element.offsetWidth);
     };
 
     this.wrap = function wrap(element, wrapper, attributes) {
@@ -516,7 +518,7 @@
     function _isInsertable(node) {
       return _isInsertable.nodeType[node.nodeType];
     }
-    _isInsertable.nodeType = { '1':1, '3':1, '8':1, '10':1, '11':1 };
+    _isInsertable.nodeType = { '1': 1, '3': 1, '8': 1, '10': 1, '11': 1 };
 
     function _replaceElement(element, node) {
       element.parentNode.replaceChild(node, element);
@@ -524,10 +526,11 @@
 
     this.insert = function insert(element, insertions) {
       element = $(element);
-      var content, fragment, insertContent, position, nodeName,
-       type = insertions && typeof insertions.valueOf();
-      if (insertions && (type === 'string' || type === 'number' ||
-          _isInsertable(insertions) || insertions.toElement || insertions.toHTML)) {
+      var content, fragment, insertContent, position, nodeName;
+
+      if (insertions && (Fuse.Object.isString(insertions) ||
+          Fuse.Object.isNumber(insertions) || _isInsertable(insertions) ||
+          insertions.toElement || insertions.toHTML)) {
         insertions = { 'bottom': insertions };
       }
 
@@ -536,7 +539,7 @@
         position = position.toLowerCase();
         insertContent = Element._insertionTranslations[position];
 
-        if (content) {
+        if (content && content != '') {
           if (content.toElement) content = content.toElement();
           if (_isInsertable(content)) {
             insertContent(element, content);
@@ -572,7 +575,7 @@
 
       function replace(element, content) {
         element = $(element);
-        if (!content)
+        if (!content || content == '')
           return element.parentNode.removeChild(element);
         if (content.toElement)
           content = content.toElement();
@@ -593,7 +596,7 @@
       if (getNodeName(element) === 'SCRIPT') {
         element.text = Fuse.String.interpret(content);
       } else {
-        if (content) {
+        if (content && content != '') {
           if (content.toElement)
             content = content.toElement();
           if (_isInsertable(content)) {
@@ -623,7 +626,7 @@
               element.removeChild(element.lastChild);
           } else element.innerHTML = '';
 
-          if (content) {
+          if (content && content != '') {
             if (content.toElement) content = content.toElement();
             if (_isInsertable(content)) element.appendChild(content);
             else {
@@ -718,7 +721,7 @@
           s.cssText = backup;
         }
         else result = element[property];
-        return result;
+        return Fuse.Number(result);
       };
     })();
   });

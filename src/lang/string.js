@@ -26,7 +26,7 @@
     function replace(pattern, replacement) {
       if (typeof replacement === 'function') {
         var _replacement = replacement;
-        replacement = function() { 
+        replacement = function() {
           // ensure `null` and `undefined` are returned
           var result = _replacement.apply(null, arguments);
           return result || Fuse.String(result);
@@ -49,18 +49,21 @@
       if (typeof replacement !== 'function')
         return __replace.call(this, pattern, replacement);
 
-      var isGlobal, match, source = String(this), result = '';
+      var isGlobal, match, index = 0, result = '', source = String(this);
       if (!Fuse.Object.isRegExp(pattern))
-        pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)));
+        pattern = new RegExp(Fuse.RegExp.escape(String(pattern)));
+      else {
+        isGlobal = pattern.global;
+        pattern = new RegExp(pattern.source,
+          (pattern.ignoreCase && 'i' || '') + (pattern.multiline  && 'm' || ''));
+      }
 
       pattern.lastIndex = 0;
-      if (isGlobal = pattern.global)
-        pattern = Fuse.RegExp.clone(pattern, { 'global': false });
-
       while (match = pattern.exec(source)) {
         result += source.slice(0, match.index) +
-          replacement.apply(null, concatList(match, [match.index, source]));
+          replacement.apply(null, concatList(match, [index += match.index, source]));
         source = source.slice(match.index + match[0].length);
+        index += match[0].length;
 
         if (isGlobal && !match[0]) {
           result += source.slice(0, 1);
@@ -138,7 +141,7 @@
     };
 
     this.times = function times(count) {
-      return count < 1 ? '' : new Array(count + 1).join(this);
+      return Fuse.String(count < 1 ? '' : new Array(count + 1).join(this));
     };
 
     this.toArray = function toArray() {
@@ -146,7 +149,7 @@
     };
 
     this.toQueryParams = function toQueryParams(separator) {
-      var match = this.split('?'), hash = Fuse.Object();
+      var match = String(this).split('?'), hash = Fuse.Object();
       if (match.length > 1 && !match[1]) return hash;
 
       (match = (match = match[1] || match[0]).split('#')) &&
@@ -168,7 +171,7 @@
         } else key = pair;
 
         if (Fuse.Object.hasKey(hash, key)) {
-          if (!Fuse.Object.isArray(hash[key])) hash[key] = [hash[key]];
+          if (!Fuse.List.isArray(hash[key])) hash[key] = [hash[key]];
           hash[key].push(value);
         }
         else hash[key] = value;
@@ -183,7 +186,7 @@
     // prevent JScript bug with named function expressions
     var interpolate = null,
      succ =           null,
-     times =          null, 
+     times =          null,
      toArray =        null,
      toQueryParams =  null;
   }).call(Fuse.String.Plugin);
@@ -205,16 +208,18 @@
 
     this.endsWith = function endsWith(pattern) {
       var d = this.length - pattern.length;
-      return d >= 0 && this.lastIndexOf(pattern) === d;
+      return d >= 0 && this.lastIndexOf(pattern) == d;
     };
 
     this.inspect = function inspect(useDoubleQuotes) {
       var escapedString = this.replace(/[\x00-\x1f\\]/g, function(match) {
-        var character = String.specialChar[match];
-        return character ? character : '\\u00' + match.charCodeAt().toPaddedString(2, 16);
+        var character = Fuse.String.specialChar[match];
+        return character ?
+          character :
+          '\\u00' + Fuse.Number(match.charCodeAt(0)).toPaddedString(2, 16);
       });
       return Fuse.String(useDoubleQuotes
-        ? '"' + escapedString.replace(/"/g, '\\"') + '"'
+        ? '"' + escapedString.replace(/"/g, '\\"')  + '"'
         : "'" + escapedString.replace(/'/g, '\\\'') + "'");
     };
 
@@ -304,15 +309,15 @@
     if (!this.trim)
       this.trim = function trim() {
         // keep this method as simple as possible, avoid extraneous method calls
-        return this.replace(matchTrimLeft, '').replace(matchTrimRight, '');
+        return Fuse.String(this).replace(matchTrimLeft, '').replace(matchTrimRight, '');
       };
     if (!this.trimLeft)
       this.trimLeft = function trimLeft() {
-        return this.replace(matchTrimLeft, '');
+        return Fuse.String(this).replace(matchTrimLeft, '');
       };
     if (!this.trimRight)
       this.trimRight = function trimRight() {
-        return this.replace(matchTrimRight, '');
+        return Fuse.String(this).replace(matchTrimRight, '');
       };
 
     // prevent JScript bug with named function expressions
@@ -325,7 +330,7 @@
 
   (function() {
     this.evalScripts = function evalScripts() {
-      return this.extractScripts().map(function(script) { return eval(script) });
+      return this.extractScripts().map(function(script) { return eval(String(script)) });
     };
 
     this.stripTags = function stripTags() {

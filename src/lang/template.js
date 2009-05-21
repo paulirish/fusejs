@@ -3,7 +3,10 @@
   Fuse.addNS('Template', {
     'constructor': (function() {
       function Template(template, pattern) {
-        this.template = template.toString();
+        if (!(this instanceof Template))
+          return new Template(template, pattern);
+
+        this.template = Fuse.String(template);
         this.pattern = pattern || Fuse.Template.Pattern;
       }
       return Template;
@@ -38,7 +41,7 @@
           if (match == null) return before;
 
           while (match != null) {
-            comp  = match[1].startsWith('[') ? match[2].replace(/\\]/g, ']') : match[1];
+            comp  = match[1].indexOf('[') === 0 ? match[2].replace(/\\]/g, ']') : match[1];
             value = ctx[comp];
             if (!Fuse.Object.hasKey(ctx, comp) || value == null) {
               value = ''; break;

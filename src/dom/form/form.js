@@ -44,7 +44,7 @@
         isSubmitButton = type === 'submit' || isImageType;
 
         // reduce array value
-        if (Fuse.Object.isArray(value) && value.length < 2)
+        if (Fuse.List.isArray(value) && value.length < 2)
           value = value[0];
 
         if (value == null    || // controls with null/undefined values are unsuccessful
@@ -70,7 +70,7 @@
         // property exists and and belongs to result
         if (Fuse.Object.hasKey(result, key)) {
           // a key is already present; construct an array of values
-          if (!Fuse.Object.isArray(result[key])) result[key] = [result[key]];
+          if (!Fuse.List.isArray(result[key])) result[key] = [result[key]];
           result[key].push(value);
         }
         else result[key] = value;
@@ -140,6 +140,9 @@
 
     this.getInputs = function getInputs(form, typeName, name) {
       form = $(form);
+      typeName = String(typeName || '');
+      name = String(typeName || '');
+
       var input, inputs = form.getElementsByTagName('input'),
        results = Fuse.List(), i = 0;
 
@@ -162,14 +165,14 @@
       form = $(form), options = Fuse.Object.clone(options);
 
       var params = options.parameters, submit = options.submit,
-       action = Element.readAttribute(form, 'action') || '';
+       action = Element.readAttribute(form, 'action') || Fuse.String('');
       delete options.submit;
 
       if (action.blank()) action = global.location.href;
       options.parameters = Form.serialize(form, { 'submit':submit, 'hash':true });
 
       if (params) {
-        if (Fuse.Object.isString(params)) params = params.toQueryParams();
+        if (Fuse.Object.isString(params)) params = Fuse.String(params).toQueryParams();
         Fuse.Object.extend(options.parameters, params);
       }
 
@@ -241,7 +244,7 @@
       element = $(element);
       if (!element.disabled && element.name) {
         var value = Field.getValue(element);
-        if (Fuse.Object.isArray(value) && value.length < 2)
+        if (Fuse.List.isArray(value) && value.length < 2)
           value = value[0];
         if (value != null) {
           var pair = { };
@@ -335,7 +338,7 @@
         return element.selectedIndex = -1;
 
       var node, i = 0;
-      if (Fuse.Object.isArray(value)) {
+      if (Fuse.List.isArray(value)) {
         value = expando + value.join(expando) + expando;
         while (node = element.options[i++])
           node.selected = value.indexOf(expando + this.optionValue(node) +expando) > -1;

@@ -19,15 +19,14 @@
       if (T.read[name])
         result = T.read[name](element, name);
       else result = (result = element.getAttributeNode(name)) && result.value;
-      return result || '';
+      return Fuse.String(result || '');
     };
 
     this.writeAttribute = function writeAttribute(element, name, value) {
       element = $(element);
-      var node, contentName, attr,
-       attributes = { }, T = Element.Attribute;
+      var node, contentName, attr, attributes = { }, T = Element.Attribute;
 
-      if (typeof name !== 'string') attributes = name;
+      if (!Fuse.Object.isString(name)) attributes = name;
       else attributes[name] = (typeof value === 'undefined') ? true : value;
 
       for (attr in attributes) {
@@ -45,7 +44,7 @@
           if (ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS &&
               Element.hasAttribute(element, name))
             element.removeAttribute(contentName);
-          element.setAttribute(contentName, value);
+          element.setAttribute(contentName, String(value));
         }
       }
       return element;
@@ -109,12 +108,12 @@
           attr = element.ownerDocument.createAttribute(name);
           element.setAttributeNode(attr);
         }
-        attr.value = value;
+        attr.value = String(value);
       };
     }
 
     function setStyle(element, value) {
-      element.style.cssText = value || '';
+      element.style.cssText = String(value || '');
     }
 
     // mandate getter / setters

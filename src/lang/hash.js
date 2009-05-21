@@ -4,7 +4,7 @@
 
   Fuse.Util.$H = (function() {
     function $H(object) {
-      return new Fuse.Hash(object);
+      return Fuse.Hash(object);
     }
     return $H;
   })();
@@ -12,21 +12,31 @@
   /*--------------------------------------------------------------------------*/
 
   Fuse.addNS('Hash', Fuse.Enumerable, (function() {
-    function _set(hash, key, value) {
-      var keys = hash._keys, o = hash._object;
-      // avoid a method call to Hash#hasKey
-      if ((expando + key) in o)
-        _unsetByIndex(hash, keys.indexOf(key));
+    function _indexOfKey(hash, key) {
+      key = String(key);
+      var index = 0, keys = hash._keys, length = keys.length;
+      for ( ; index < length; index++)
+        if (keys[index] == key) return index;
+    }
 
-      keys.push(key);
-      hash._pairs.push([key, value]);
+    function _set(hash, key, value) {
+      if (!key.length) return hash;
+      var expandoKey = expando + key, keys = hash._keys, o = hash._object;
+
+      // avoid a method call to Hash#hasKey
+      if (expandoKey in o)
+        _unsetByIndex(hash, _indexOfKey(hash, key));
+
+      keys.push(key = Fuse.String(key));
+
+      hash._pairs.push(Fuse.List(key, value));
       hash._values.push(value);
-      o[expando + key] = value;
+      hash._object[expandoKey] = value;
       return hash;
     }
 
     function _setWithObject(hash, object) {
-      if (Fuse.Object.isHash(object)) {
+      if (object instanceof Fuse.Hash) {
         var pair, i = 0, pairs = object._pairs;
         while (pair = pairs[i++]) _set(hash, pair[0], pair[1]);
       }
@@ -40,7 +50,8 @@
 
     function _unsetByIndex(hash, index) {
       var keys = hash._keys;
-      delete hash._object[keys[index]];
+      delete hash._object[expando + keys[index]];
+
       keys.splice(index, 1);
       hash._pairs.splice(index, 1);
       hash._values.splice(index, 1);
@@ -49,6 +60,8 @@
     return {
       'constructor': (function() {
         function Hash(object) {
+          if (!(this instanceof Hash))
+            return new Hash(object);
           return _setWithObject(this.clear(), object);
         }
         return Hash;
@@ -72,12 +85,12 @@
 
       'unset': (function() {
         function unset(key) {
-          var key, i = 0, keys = this._keys, o = this._object,
-           args = Fuse.Object.isArray(key) ? key : arguments;
-          while (key = args[i++])  {
-             // avoid a method call to Hash#hasKey
+          var i = 0, o = this._object,
+           keys = Fuse.List.isArray(key) ? key : arguments;
+
+          while (key = keys[i++])  {
             if ((expando + key) in o)
-              _unsetByIndex(this, keys.indexOf(key));
+              _unsetByIndex(this, _indexOfKey(this, key));
           }
           return this;
         }
@@ -165,15 +178,15 @@
 
   (function() {
     this.clear = function clear() {
-      this._object = { };
-      this._keys   = [];
-      this._pairs  = [];
-      this._values = [];
+      this._object   = { };
+      this._keys     = Fuse.List();
+      this._pairs    = Fuse.List();
+      this._values   = Fuse.List();
       return this;
     };
 
     this.clone = function clone() {
-      return new Fuse.Hash(this);
+      return Fuse.Hash(this);
     };
 
     this.contains = function contains(value, strict) {
@@ -202,7 +215,7 @@
     };
 
     this.grep = function grep(pattern, callback, thisArg) {
-      if (!pattern || Fuse.Object.isRegExp(pattern) &&
+      if (!pattern || pattern == '' || Fuse.Object.isRegExp(pattern) &&
          !pattern.source) return this.clone();
 
       callback = callback || Fuse.K;
@@ -211,7 +224,7 @@
         pattern = new RegExp(Fuse.RegExp.escape(pattern));
 
       while (pair = pairs[i++]) {
-        if (pattern.match(value = pair[1]))
+        if (pattern.test(value = pair[1]))
           result.set(key = pair[0], callback.call(thisArg, value, key, this));
       }
       return result;
@@ -238,7 +251,7 @@
     };
 
     this.keys = function keys() {
-      return this._keys.clone();
+      return Fuse.List.fromArray(this._keys);
     };
 
     this.map = function map(callback, thisArg) {
@@ -270,6 +283,10 @@
       return Fuse.Number(this._keys.length);
     };
 
+    this.toArray = function toArray() {
+      return Fuse.List.fromArray(this._pairs);
+    };
+
     this.toObject = function toObject() {
       var pair, i = 0, pairs = this._pairs, object = Fuse.Object();
       while (pair = pairs[i++]) object[pair[0]] = pair[1];
@@ -281,15 +298,16 @@
     };
 
     this.values = function values() {
-      return this._values.clone();
+      return Fuse.List.fromArray(this._values);
     };
 
     this.zip = function zip() {
       var callback = Fuse.K, args = slice.call(arguments, 0);
-      if (typeof args.last() === 'function') callback = args.pop();
+      if (typeof Fuse.List.Plugin.last.call(args) === 'function')
+        callback = args.pop();
 
       var result = new Fuse.Hash(),
-       hashes = prependList(Fuse.List.Plugin.map.call(args, $H), this);
+       hashes = prependList(Fuse.List.Plugin.map.call(args, $H), this),
        length = hashes.length;
 
       var j, key, pair, i = 0, pairs = this._pairs;
@@ -315,6 +333,7 @@
      map =           null,
      partition =     null,
      size =          null,
+     toArray =       null,
      toObject =      null,
      toQueryString = null,
      values =        null,

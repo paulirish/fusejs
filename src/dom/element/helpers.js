@@ -2,9 +2,9 @@
 
   (function() {
     this._returnOffset = function _returnOffset(left, top) {
-      var result  = [left, top];
-      result.left = left;
-      result.top  = top;
+      var result  = Fuse.List(Fuse.Number(left), Fuse.Number(top));
+      result.left = result[0];
+      result.top  = result[1];
       return result;
     };
 
@@ -20,7 +20,7 @@
 
     this._ensureLayout = function _ensureLayout(element) {
       element = $(element);
-      if (Element.getStyle(element, 'position') === 'static' &&
+      if (Element.getStyle(element, 'position') == 'static' &&
         !Element._hasLayout(element)) element.style.zoom = 1;
       return element;
     };
@@ -73,7 +73,7 @@
          t = Element._insertionTranslations.tags[nodeName];
         if (t) {
           node.innerHTML= t[0] + html + t[1];
-          Fuse.String(t[2]).times(function() { node = node.firstChild });
+          Fuse.Number(t[2]).times(function() { node = node.firstChild });
         } else node.innerHTML = html;
 
         // skip auto-inserted tbody
@@ -88,10 +88,10 @@
     })();
 
     // prevent JScript bug with named function expressions
-    var _ensureLayout =     null,
-     _getCssDimensions =    null,
-     _hasLayout =           null, 
-     _returnOffset =        null;
+    var _ensureLayout =  null,
+     _getCssDimensions = null,
+     _hasLayout =        null, 
+     _returnOffset =     null;
   }).call(Element);
 
   // define Element._getCssHeight(), Element._getCssWidth(),
@@ -104,7 +104,7 @@
 
     Fuse.Util.$w('width height')._each(function(d) {
       var D = Fuse.String(d).capitalize(),
-       pos = d === 'width' ? ['Left', 'Right'] : ['Top', 'Bottom'];
+       pos = d == 'width' ? ['Left', 'Right'] : ['Top', 'Bottom'];
 
       Element['_getBorder' + D] = (function() {
         var a = 'border' + pos[0] + 'Width', b = 'border' + pos[1] + 'Width';

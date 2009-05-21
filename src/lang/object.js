@@ -78,7 +78,7 @@
       hasKey = function hasKey(object, property) {
         if (object == null) throw new TypeError;
         if(object == global) {
-          return property in object && 
+          return property in object &&
             object[property] !== Object.prototype[property];
         }
         return _hasKey(object, property);
@@ -92,7 +92,7 @@
   (function() {
     this._extend = function _extend(destination, source) {
       for (var key in source)
-         destination[key] = source[key]; 
+         destination[key] = source[key];
       return destination;
     };
 
@@ -112,35 +112,16 @@
     };
 
     this.extend = function extend(destination, source) {
-      Fuse.Object._each(source || Fuse.Object(), function(value, key) { 
-        destination[key] = value; 
-      });
+      if (source) {
+        Fuse.Object._each(source, function(value, key) {
+          destination[key] = value;
+        });
+      }
       return destination;
     };
 
-    this.inspect = function inspect(object) {
-      if (object) {
-        if (typeof object.inspect === 'function')
-          return object.inspect();
-        if (object.constructor === Object.prototype.constructor) {
-          var results = [];
-          Fuse.Object._each(object, function(value, key) {
-            if (Fuse.Object.hasKey(object, key))
-              results.push(Fuse.String(key).inspect() + ': ' + Fuse.Object.inspect(object[key]));
-          });
-          return Fuse.String('{' + results.join(', ') + '}');
-        }
-      }
-      try {
-        return Fuse.String(object);
-      } catch (e) {
-        if (e.constructor === global.RangeError) return Fuse.String('...');
-        throw e;
-      }
-    };
-
     // ECMA-5 15.2.3.14
-    this.keys = this.keys || function keys(object) {
+    if (!this.keys) this.keys = function keys(object) {
       if (Fuse.Object.isPrimitive(object))
         throw new TypeError;
       var results = Fuse.List();
@@ -167,7 +148,6 @@
      clone =      null,
      each =       null,
      extend =     null,
-     inspect =    null,
      keys =       null,
      values =     null;
   }).call(Fuse.Object);
@@ -177,6 +157,29 @@
   (function() {
     // used to access the an object's internal [[Class]] property
     var toString = Object.prototype.toString;
+
+    this.inspect = function inspect(value) {
+      if (value != null) {
+        var string, object = Fuse.Object(value);
+        if (typeof object.inspect === 'function')
+          return object.inspect();
+        try { string = toString.call(object) } catch (e) { };
+        if (string === '[object Object]') {
+          var results = [];
+          Fuse.Object._each(object, function(value, key) {
+            if (Fuse.Object.hasKey(object, key))
+              results.push(Fuse.String(key).inspect() + ': ' + Fuse.Object.inspect(object[key]));
+          });
+          return Fuse.String('{' + results.join(', ') + '}');
+        }
+      }
+      try {
+        return Fuse.String(value);
+      } catch (e) {
+        if (e.constructor === global.RangeError) return Fuse.String('...');
+        throw e;
+      }
+    };
 
     this.isArray = function isArray(value) {
       return Fuse.List.isArray(value);
@@ -234,8 +237,8 @@
        parts = String(url).match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^/:$]+)(?:\:(\d+))?/) || [];
 
       return !parts[0] || (parts[1] === protocol &&
-        parts[2].endsWith(domain) && (parts[3] || 
-          defaultPort) === (global.location.port || defaultPort));
+        Fuse.String.Plugin.endsWith.call(parts[2], domain) &&
+          (parts[3] || defaultPort) === (global.location.port || defaultPort));
     };
 
     this.isString = function isString(value) {
@@ -247,7 +250,8 @@
     };
 
     // prevent JScript bug with named function expressions
-    var isArray =   null,
+    var inspect =   null,
+     isArray =      null,
      isElement =    null,
      isFunction =   null,
      isHash =       null,
@@ -264,27 +268,32 @@
   (function() {
     this.toHTML = function toHTML(object) {
       return object && typeof object.toHTML === 'function'
-        ? object.toHTML()
+        ? Fuse.String(object.toHTML())
         : Fuse.String.interpret(object);
     };
 
-    this.toQueryPair = function toQueryPair(key, value) {
-      return Fuse.String(typeof value === 'undefined' ? key :
-        key + '=' + encodeURIComponent(Fuse.String.interpret(value)));
-    };
+    this.toQueryString = (function() {
+      function toQueryPair(key, value) {
+        return Fuse.String(typeof value === 'undefined' ? key :
+          key + '=' + encodeURIComponent(Fuse.String.interpret(value)));
+      }
 
-    this.toQueryString = function toQueryString(object) {
-      var toQueryPair = Fuse.Object.toQueryPair, results = Fuse.List();
-      Fuse.Object._each(object, function(value, key) {
-        key = encodeURIComponent(key);
-        if (value && typeof value === 'object') {
-          if (Fuse.Object.isArray(value))
-            concatList(results, value.map(toQueryPair.curry(key)));
-        } else results.push(toQueryPair(key, value));
-      });
-      return results.join('&');
-    };
+      function toQueryString(object) {
+        var results = Fuse.List();
+        Fuse.Object._each(object, function(value, key) {
+          key = encodeURIComponent(key);
+          if (value && typeof value === 'object') {
+            if (Fuse.List.isArray(value)) {
+              var i = results.length, j = 0, length = i + value.length;
+              while (i < length) results[i++] = toQueryPair(key, value[j++]);
+            }
+          } else results.push(toQueryPair(key, value));
+        });
+        return results.join('&');
+      }
+      return toQueryString;
+    })();
 
     // prevent JScript bug with named function expressions
-    var toHTML = null, toQueryPair = null, toQueryString = null;
+    var toHTML = null;
   }).call(Fuse.Object);

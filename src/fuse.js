@@ -71,21 +71,17 @@
     return results;
   }
 
-  var getNodeName = Fuse._docEl.nodeName === 'HTML'
-    ? function getNodeName(element) { return element.nodeName }
-    : function getNodeName(element) { return element.nodeName.toUpperCase() };
+  var getNodeName = (function() {
+    var getNodeName =
+      function getNodeName(element) { return element.nodeName.toUpperCase() };
+    if (Fuse._docEl.nodeName === 'HTML')
+      getNodeName = function getNodeName(element) { return element.nodeName };
+    return getNodeName;
+  })();
 
   /* Based on work by Diego Perini */
-  var getWindow =
-    isHostObject(Fuse._doc, 'parentWindow') ?
-      function getWindow(element) {
-        return getDocument(element).parentWindow || element;
-      } :
-    isHostObject(document, 'defaultView') && Fuse._doc.defaultView === global ?
-      function getWindow(element) {
-        return getDocument(element).defaultView || element;
-      } :
-    function getWindow(element) {
+  var getWindow = (function() {
+    var getWindow = function getWindow(element) {
       // Safari 2.0.x returns `Abstract View` instead of `global`
       var frame, i = 0, doc = getDocument(element);
       if (Fuse._doc !== doc) {
@@ -95,6 +91,18 @@
       }
       return global;
     };
+
+    if (isHostObject(Fuse._doc, 'parentWindow')) {
+      getWindow = function getWindow(element) {
+        return getDocument(element).parentWindow || element;
+      };
+    } else if (isHostObject(document, 'defaultView') && Fuse._doc.defaultView === global) {
+      getWindow = function getWindow(element) {
+        return getDocument(element).defaultView || element;
+      };
+    }
+    return getWindow;
+  })();
 
   /*--------------------------- NAMESPACE UTILITY ----------------------------*/
 

@@ -3,6 +3,9 @@
   Fuse.addNS('Timer', {
     'constructor': (function() {
       function Timer(callback, interval) {
+        if (!(this instanceof Timer))
+          return new Timer(callback, interval);
+
         this.callback     = callback;
         this.interval     = interval;
         this.executing    = false;

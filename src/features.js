@@ -316,7 +316,7 @@
       // check scroll coords
       var scrollTop = docEl.scrollTop;
       Bug.set('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT',
-        ++docEl.scrollTop === scrollTop + 1);
+        ++docEl.scrollTop && docEl.scrollTop === scrollTop + 1);
       docEl.scrollTop = scrollTop;
 
       // cleanup
@@ -422,7 +422,8 @@
 
     'REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY': function() {
       // true for Webkit and IE
-      return !!'\x09\x0B\x0C\x20\xA0\x0A\x0D\u2028\u2029\u1680\u180e\u2000-\u200a\u202f\u205f\u3000'
+      return true;
+      !!'\x09\x0B\x0C\x20\xA0\x0A\x0D\u2028\u2029\u1680\u180e\u2000-\u200a\u202f\u205f\u3000'
         .replace(/\s+/, '').length;
     },
 
@@ -447,10 +448,10 @@
 
     'STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN': function() {
       // true for Chrome
-      var str = 'xy', replacement = function() { return 'o' };
-      return !(str.replace(/()/g, 'o') === 'oxoyo' &&
-        str.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
-        str.replace(/(y|)/g, replacement) === 'oxoo');
+      var string = 'xy', replacement = function() { return 'o' };
+      return !(string.replace(/()/g, 'o') === 'oxoyo' &&
+        string.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
+        string.replace(/(y|)/g, replacement) === 'oxoo');
     },
 
     'STRING_REPLACE_SETS_REGEXP_LAST_INDEX': function() {

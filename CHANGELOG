@@ -1,3 +1,40 @@
+* Correct many coding issues related to the unit test rewrites. [jddalton]
+  Note: Backwards compatibility warning.
+   - Reduce repeated code by creating/removing aliases:
+     * Ajax.Response#getAllHeaders -> Ajax.Response#getAllResponseHeaders
+     * Ajax.Response#getResponseHeader -> Ajax.Response#getHeader
+     * Fuse.Util.$$() -> Fuse.query()
+     * Remove Fuse.RegExp#match alias of Fuse.RegExp#test
+ 
+   - New Fixes/Optimizations
+     * Make Fuse.Class, Fuse.Range and others perform as if by a new expression when they, the constructors, are called as a function.
+     * Ensure, for IE, that Element#writeAttribute coerces values to strings before setting them. [kangax]
+     * Make more methods return extended natives
+     * Address Element#clonePosition issue with hidden elements in Safari 2.x (needs refining)
+     * Optimize Element#getOpacity by avoiding calls to Element#getStyle
+     * Add Fusebox Array.create() and Array.fromArray() methods
+     * Ensure NWMatcher, Sizzle, Slick, and Sly engines will run against selector unit tests
+     * Make Fusebox String() returns an empty string when called with no argument given
+     * Ensure Fusebox Array#filter, Array#every, Array#map, and Array#some are only wrapped once
+     * Correct behavior of Fusebox Object when called as a function
+     * Reduce code needed for "__proto__" support in Fuse.Fusebox._createNatives()
+     * Make Fuse.Fusebox(mode) accept a mode argument to allow devs to choose the method in which a sandbox is created
+     * Create the Field.EventObserver, Form.EventObserver, Field.TimedObserver, and Form.TimedObserver constructors using named functions for better debugging
+     * Make Fuse.Fusebox#updateGenerics use Fuse.Object._each() when available
+     * Ensure IF statements and others checking for empty strings will work with those created by Fuse.String()
+     * Make getStyle() dom-load helper fallback on element.style when needed
+     * Make Fuse.Object.inspect() work with Fusebox Object objects
+     * Add Fuse.Hash#toArray() to take advantage of the Hash rewrite
+     * Make Array.Plugin methods inspect, map, without, and zip work with a generic `this` value
+     * Make Enumerable#zip, Hash#zip work with a generic `this` value
+
+   - Regression Bug Fixes:
+     * Change getWindow(), getNodeName(), Fusebox Date.now() and JSON methods coding pattern to work in Safari 2
+     * Ensure Fuse.List.from() works correctly for non array objects
+     * Fix Fuse.Function.defer() and Fuse.Function.curry()
+     * Make Fuse.Class() work in Safari 2.x
+     * Make Fuse.RegExp.specialChar.s work in Safari 2.x
+
 * unit test: Rewrite all unit tests to support the Fuse namespace changes. [jddalton]
 
 * Fix Fuse.Date instanceof detection and make Fuse.Object conform to ECMA specification when passing a null or undefined value. [jddalton]

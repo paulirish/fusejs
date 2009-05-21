@@ -223,7 +223,7 @@
 
     this.findElement = function findElement(event, selector) {
       var element = Event.element(event);
-      if (!selector) return element;
+      if (!selector || selector == null) return element;
       return Fuse.Dom.Selector.match(element, selector) ? element :
         Element.up(element, selector);
     };
@@ -489,7 +489,7 @@
         while (length--) Event.stopObserving(element, eventName, length);
         return element;
       }
-      else if (!eventName) {
+      else if (!eventName || eventName == '') {
         // If both the event name and the handler are omitted,
         // we stop observing _all_ handlers on the element.
         for (var eventName in c.events)

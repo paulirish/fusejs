@@ -2,7 +2,8 @@
 
   (function() {
     this.classNames = function classNames(element) {
-      return new Element.ClassNames(element);
+      var results = Fuse.String($(element).className).split(/\s+/);
+      return results[0].length ? results : Fuse.List();
     };
 
     this.hasClassName = function hasClassName(element, className) {
@@ -33,14 +34,23 @@
 
     this.getOpacity = (function() {
       var getOpacity = function getOpacity(element) {
-        return Element.getStyle(element, 'opacity');
+        return Fuse.Number(parseFloat($(element).style.opacity));
       };
 
-      if (Feature('ELEMENT_MS_CSS_FILTERS')) {
+      if (Feature('ELEMENT_COMPUTED_STYLE')) {
         getOpacity = function getOpacity(element) {
-          var value = (Element.getStyle(element, 'filter') || '').match(/alpha\(opacity=(.*)\)/);
-          if (value && value[1]) return parseFloat(value[1]) / 100;
-          return 1.0;
+          element = $(element);
+          var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
+          return Fuse.Number(
+            parseFloat(style ? style.opacity : element.style.opacity));
+        };
+      }
+      else if (Feature('ELEMENT_MS_CSS_FILTERS')) {
+        getOpacity = function getOpacity(element) {
+          element = $(element);
+          var s = element.currentStyle || element.style,
+            value = s['filter'].match(/alpha\(opacity=(.*)\)/);
+          return Fuse.Number(value && value[1] ? parseFloat(value[1]) / 100 : 1.0);
         };
       }
       return getOpacity;
@@ -49,17 +59,17 @@
     this.setOpacity = (function() {
       var setOpacity = function setOpacity(element, value) {
         element = $(element);
-        element.style.opacity = (value === 1 || value === '') ? '' : 
-        (value < 0.00001) ? 0 : value;
+        element.style.opacity = (value == 1 || value == '' && Fuse.Object.isString(value)) ? '' :
+          (value < 0.00001) ? '0' : value;
         return element;
       };
 
-      if (Fuse.Browser.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d)/) || [])[1] < 5) {
+      if (Fuse.Browser.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d+)/) || [])[1] < 500) {
         var _setOpacity = setOpacity;
         setOpacity = function setOpacity(element, value) {
           element = _setOpacity(element, value);
           // TODO: Is this really needed or the best approach ?
-          if (value === 1) {
+          if (value == 1) {
             if (getNodeName(element) === 'IMG' && element.width) {
               element.width++; element.width--;
             } else try {
@@ -73,8 +83,9 @@
       else if (Fuse.Browser.Agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
         setOpacity = function setOpacity(element, value) {
           element = $(element);
-          element.style.opacity = (value === 1) ? 0.999999 : 
-            (value === '') ? '' : (value < 0.00001) ? 0 : value;
+          element.style.opacity = (value == 1) ? 0.999999 : 
+            (value == '' && Fuse.Object.isString(value)) ? '' :
+              (value < 0.00001) ? 0 : value;
           return element;
         };
       }
@@ -90,7 +101,7 @@
           // strip alpha
           filter = filter.replace(/alpha\([^)]*\)/gi, '');
 
-          if (value === 1 || value === '') {
+          if (value == 1 || value == '' && Fuse.Object.isString(value)) {
             if (filter) style.filter = filter;
             else style.removeAttribute('filter');
             return element;
@@ -156,8 +167,9 @@
         }
 
         function _getResult(name, value) {
-          if (name === 'opacity') return value ? parseFloat(value) : 1.0;
-          return value === 'auto' || value === '' ? null : value;
+          if (name == 'opacity')
+            return Fuse.String(value === '1' ? '1.0' : parseFloat(value) || '0');
+          return value === 'auto' || value === '' ? null : Fuse.String(value);
         }
 
         function _isNull(element, name) {
@@ -203,10 +215,10 @@
             // dimensions, so we subtract padding and borders from the value
             if (DIMENSION_NAMES[name]) {
               var D = name.capitalize(), dim = parseFloat(value) || 0;
-              if (dim !== element['offset' + D]) return dim + 'px';
-              return Element['_getCss' + D](element) + 'px';
+              if (dim !== element['offset' + D]) return Fuse.String(dim + 'px');
+              return Fuse.String(Element['_getCss' + D](element) + 'px');
             }
-            return value;
+            return Fuse.String(value);
           };
         }
         else { // Firefox, Safari, Opera 9.5+
@@ -214,7 +226,7 @@
             element = $(element);
             name = Fuse.String(name).camelize();
               return _isNull(element, name) ? null :
-              _getComputedStyle(element, name);
+              Fuse.String(_getComputedStyle(element, name));
           };
         }
         return getStyle;
@@ -233,18 +245,23 @@
         span.innerHTML = 'M';
 
         function getStyle(element, name) {
-          if (name === 'opacity')
-            return Element.getOpacity(element);
+          var value;
+          if (name == 'opacity') {
+            value = String(Element.getOpacity(element));
+            if (value.indexOf('.') < 0) value += '.0';
+            return Fuse.String(value);
+          }
 
           element = $(element);
           name = Fuse.String(name).camelize();
           name = FLOAT_TRANSLATIONS[name] || name;
 
           // get cascaded style
-          var s = element.currentStyle || element.style, value = s[name];
+          var s = element.currentStyle || element.style;
+          value = s[name];
           if (value === 'auto') {
             if (DIMENSION_NAMES[name] && s.display !== 'none')
-              return element['offset' + name.capitalize()] + 'px';
+              return Fuse.String(element['offset' + name.capitalize()] + 'px');
             return null;
           }
 
@@ -253,7 +270,7 @@
           // Inspired by Dean Edwards' comment
           // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
           if (/^\d+(\.\d+)?(?!px)[%a-z]+$/i.test(value)) {
-            if (name === 'fontSize') {
+            if (name == 'fontSize') {
               var unit = value.match(/\D+$/)[0];
               if (unit === '%') {
                 var size = element.appendChild(span).offsetHeight;
@@ -265,7 +282,7 @@
             }
 
             // backup values
-            var pos = Fuse.String(name === 'height' ? 'top' : 'left'),
+            var pos = Fuse.String(name == 'height' ? 'top' : 'left'),
              stylePos = element.style[pos], runtimePos = element.runtimeStyle[pos];
 
             // set runtimeStyle so no visible shift is seen
@@ -277,7 +294,7 @@
             element.style[pos] = stylePos;
             element.runtimeStyle[pos] = runtimePos;
           }
-          return value;
+          return Fuse.String(value);
         }
         return getStyle;
       })();

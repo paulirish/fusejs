@@ -3,6 +3,9 @@
   Fuse.addNS('Ajax.TimedUpdater', Fuse.Ajax.Base, {
     'constructor': (function() {
       function TimedUpdater(container, url, options) {
+        if (!(this instanceof TimedUpdater))
+          return new TimedUpdater(container, url, options);
+
         // this._super() equivalent
         Fuse.Ajax.Base.call(this, options);
   

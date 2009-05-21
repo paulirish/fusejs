@@ -13,30 +13,31 @@
       return '[' + results.join(', ') + ']';
     };
 
-    Fuse.Object.toJSON = function toJSON(object) {
-      switch (typeof object) {
+    Fuse.Object.toJSON = function toJSON(value) {
+      switch (typeof value) {
         case 'undefined':
         case 'function' :
         case 'unknown'  : return;
-        case 'boolean'  : return Fuse.String(object);
+        case 'boolean'  : return Fuse.String(value);
       }
 
-      if (Fuse.Object.isElement(object)) return;
-      if (object === null) return Fuse.String(null);
+      if (value === null) return Fuse.String(null);
+      var object = Fuse.Object(value);
       if (typeof object.toJSON === 'function') return object.toJSON();
+      if (Fuse.Object.isElement(value)) return;
 
       var results = [];
       Fuse.Object._each(object, function(value, key) {
         value = Fuse.Object.toJSON(value);
         if (typeof value !== 'undefined')
-          results.push(key.toJSON() + ': ' + value);
+          results.push(Fuse.String(key).toJSON() + ': ' + value);
       });
       return Fuse.String('{' + results.join(', ') + '}');
     };
 
     // ECMA-5 15.9.5.44
-    Fuse.Date.Plugin.toJSON = Fuse.Date.Plugin.toJSON ||
-      function toJSON() {
+    if (!Fuse.Date.Plugin.toJSON)
+      Fuse.Date.Plugin.toJSON = function toJSON() {
         return Fuse.String('"' + this.getUTCFullYear() + '-' +
           Fuse.Number(this.getUTCMonth() + 1).toPaddedString(2) + '-' +
           this.getUTCDate().toPaddedString(2)    + 'T' +
@@ -46,15 +47,15 @@
       };
 
     // ECMA-5 15.7.4.8
-    Fuse.Number.Plugin.toJSON = Fuse.Number.Plugin.toJSON ||
-      function toJSON() {
+    if (!Fuse.Number.Plugin.toJSON)
+      Fuse.Number.Plugin.toJSON = function toJSON() {
         return Fuse.String(isFinite(this) ? this : 'null');
       };
 
     // ECMA-5 15.5.4.21
-    Fuse.String.Plugin.toJSON = Fuse.String.Plugin.toJSON ||
-      function toJSON() {
-        return this.inspect(true);
+    if (!Fuse.String.Plugin.toJSON)
+      Fuse.String.Plugin.toJSON = function toJSON() {
+        return Fuse.String(this).inspect(true);
       };
 
     // prevent JScript bug with named function expressions
@@ -66,22 +67,24 @@
   // complementary JSON methods for String.Plugin
   (function() {
     this.evalJSON = function evalJSON(sanitize) {
-      var json = this.unfilterJSON();
+      var string = Fuse.String(this), json = string.unfilterJSON();
       try {
-        if (!sanitize || json.isJSON()) return eval('(' + json + ')');
+        if (!sanitize || json.isJSON())
+          return eval('(' + String(json) + ')');
       } catch (e) { }
-      throw new SyntaxError('Badly formed JSON string: ' + this.inspect());
+      throw new SyntaxError('Badly formed JSON string: ' + string.inspect());
     };
 
     this.isJSON = function isJSON() {
-      var str = this;
-      if (str.blank()) return false;
-      str = this.replace(/\\./g, '@').replace(/"[^"\\\n\r]*"/g, '');
-      return (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/).test(str);
+      var string = Fuse.String(this);
+      if (string.blank(string)) return false;
+      string = string.replace(/\\./g, '@').replace(/"[^"\\\n\r]*"/g, '');
+      return (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/).test(string);
     };
 
     this.unfilterJSON = function unfilterJSON(filter) {
-      return this.sub(filter || Fuse.JSONFilter, '#{1}');
+      var match = String(this).match(filter || Fuse.JSONFilter);
+      return Fuse.String(match && match.length === 2 ? match[1] : this);
     };
 
     // prevent JScript bug with named function expressions
