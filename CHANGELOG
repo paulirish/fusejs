@@ -1,3 +1,7 @@
+* Add Fuse.String#lastIndexOf if missing from the sandboxed String. [jddalton]
+
+* Allow Fusebox to remove the iframes used to create the native sandboxes in Opera 9.5-10a. [jddalton]
+
 * Add support for Peppy and Dojo Acme JavaScript CSS Selector engines and update other engines. [jddalton] 
 
 * Correct many coding issues related to the unit test rewrites. [jddalton]

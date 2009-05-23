@@ -223,6 +223,30 @@
         : "'" + escapedString.replace(/'/g, '\\\'') + "'");
     };
 
+    // ECMA-5 15.5.4.8
+    // TODO: try to optimize
+    if (!this.lastIndexOf)
+      this.lastIndexOf = function lastIndexOf(searchString) {
+        searchString = String(searchString);
+        var string = String(this),
+         pos = Number(arguments[1]),
+         len = string.length,
+         searchLen = searchString.length;
+
+        if (searchLen > len) return -1;
+        if (isNaN(pos)) pos = Infinity;
+        if (pos < 0)    pos = 0;
+        if (pos > len)  pos = len;
+        if (pos > len - searchLen)
+          pos = len - searchLen;
+        pos++;
+
+        while (pos--)
+          if (string.slice(pos, pos + searchLen) === searchString)
+            return pos;
+        return -1;
+      };
+
     this.scan = function scan(pattern, callback) {
       this.gsub(pattern, callback);
       return Fuse.String(this);
@@ -233,13 +257,14 @@
     };
 
     // prevent JScript bug with named function expressions
-    var blank =    null,
-      contains =   null,
-      empty =      null,
-      endsWith =   null,
-      inspect =    null,
-      scan =       null,
-      startsWith = null;
+    var blank =     null,
+      contains =    null,
+      empty =       null,
+      endsWith =    null,
+      inspect =     null,
+      lastIndexOf = null,
+      scan =        null,
+      startsWith =  null;
   }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/

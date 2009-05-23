@@ -638,6 +638,28 @@ new Test.Unit.Runner({
     this.assert(!Fuse.String('').contains('bye'));
   },
 
+  'testLastIndexOf': function() {
+    // tests based on the V8 project's String.prototype.lastIndexOf unit tests
+    var source = 'test test test';
+    this.assertEqual(5,  source.lastIndexOf('test', 5));
+    this.assertEqual(5,  source.lastIndexOf('test', 6));
+    this.assertEqual(0,  source.lastIndexOf('test', 4));
+    this.assertEqual(0,  source.lastIndexOf('test', 0));
+    this.assertEqual(10, source.lastIndexOf('test'));
+    this.assertEqual(-1, source.lastIndexOf('notpresent'));
+    this.assertEqual(-1, source.lastIndexOf());
+    this.assertEqual(10, source.lastIndexOf('test', 'string'));
+
+    // Chrome fails this test
+    this.assertEqual(0, source.lastIndexOf('test', -1), 'Chrome fails this test.');
+    //this.assertEqual(1,  new Fuse.String().lastIndexOf.length); 
+
+    for (var i = source.length + 10; i >= 0; i--) {
+      var expected = i < source.length ? i : source.length;
+      this.assertEqual(expected, source.lastIndexOf('', i));
+    }
+  },
+
   'testStartsWith': function() {
     this.assert(Fuse.String('hello world').startsWith('h'));
     this.assert(Fuse.String('hello world').startsWith('hello'));

@@ -4,14 +4,15 @@
     function Fusebox() {
       if (this === Fuse) return new Fuse.Fusebox();
 
-      var _cleanup = function() {
+      function _cleanup(object) {
         if (Fuse.Fusebox.mode === 'IFRAME') {
-          var cache   = Fuse.Fusebox._createSandbox.cache,
-           iframeEl   = cache[cache.length -1],
-           parentNode = iframeEl && iframeEl.parentNode;
-          parentNode && parentNode.removeChild(iframeEl);
+          var cache = Fuse.Fusebox._createSandbox.cache,
+           iframeEl = object || cache[cache.length -1];
+          iframeEl.parentNode.removeChild(iframeEl);
         }
-      };
+      }
+
+      var _postProcess = function() { };
 
       function Fusebox(sandbox) {
         if (this === Fuse) return new Fuse.Fusebox();
@@ -20,6 +21,8 @@
         // use call to avoid polluting the scope of the called 
         // methods with another varaiable
         Fuse.Fusebox._createNatives.call(this, sandbox);
+        _postProcess(this);
+
         Fuse.Fusebox._createStatics.call(this, sandbox);
         Fuse.Fusebox._wrapAccessorMethods.call(this, sandbox);
 
@@ -52,35 +55,48 @@
         if (Fuse.Fusebox.mode !== 'IFRAME') throw e;
       }
 
-      if (Fuse.Fusebox.mode === 'IFRAME') {
-        try {
-          // Opera 9.5+ will error if we remove the iframe and try to access the sandbox.
-          _cleanup();
-          if (!sandbox.Array) throw new Error;
+      if (Fuse.Fusebox.mode === 'IFRAME')
+        (function(Array) {
+          // remove iframe from the document and nullify sandbox variable in
+          // case it was corrupted by Opera
+          sandbox && _cleanup(Fuse.Fusebox._createSandbox.cache.pop());
+          sandbox = null;
 
           // Safari 3+ will fail to extend iframe sandboxed natives before the
-          // dom has loaded
-          sandbox.Array.prototype.x = 1;
-          if (!sandbox.Array().x)
-            throw new Error;
-          delete sandbox.Array.prototype.x;
-        }
-        catch(e) {
-          // cleanup cache
-          sandbox && Fuse.Fusebox._createSandbox.cache.pop();
+          // dom has loaded. Catches Safari 2.0.2 and lower as well because sandbox
+          // will be undefined
+          try {
+            Array.prototype.x = 1;
+            if (!Array().x) throw new Error;
+            delete Array.prototype.x;
+          }
+          catch(e) {
+            // switch to "__proto__" powered sandboxes if available 
+            if (Feature('OBJECT__PROTO__')) {
+              Fuse.Fusebox.mode = 'OBJECT__PROTO__';
+              sandbox = Fuse.Fusebox._createSandbox();
+              Array = sandbox.Array;
+            } else throw e;
+          }
 
-          // switch to "__proto__" powered sandboxes if available or try leaving
-          // the iframe attached to the document
-          if (Feature('OBJECT__PROTO__'))
-            Fuse.Fusebox.mode = 'OBJECT__PROTO__';
-          else _cleanup = Fuse.emptyFunction;
-
-          sandbox = Fuse.Fusebox._createSandbox();
-        }
-      }
+          // Opera 9.5 - 10a throws a security error when calling Array#map or String#lastIndexOf
+          // Opera 9.5 - 9.64 will error by simply calling the methods.
+          // Opera 10 will error when first accessing the contentDocument of 
+          // another iframe and then accessing the methods.
+          if (Array.prototype.map) {
+            _cleanup(Fuse.Fusebox._createIframeObject().frameElement);
+            try { new Array().map(Fuse.K) } catch (e) {
+              _postProcess = function(fusebox) {
+                fusebox.Array.prototype.map =
+                fusebox.String.prototype.lastIndexOf = null;
+              };
+            }
+          }
+        })(sandbox && sandbox.Array);
 
       // Chrome, IE, and Opera's Array accessors return sugared arrays so we skip wrapping them
-      if (sandbox && !(new sandbox.Array().slice(0) instanceof global.Array))
+      sandbox = sandbox || Fuse.Fusebox._createSandbox();
+      if (!(new sandbox.Array().slice(0) instanceof global.Array))
         Fuse.Fusebox._wrapAccessorMethods.skip.Array = { 'concat': 1, 'filter': 1, 'slice': 1 };
 
       // copy original properties to lazy loaded Fusebox and then replace
@@ -144,6 +160,40 @@
 
   /*--------------------------------------------------------------------------*/
 
+  Fuse.Fusebox._createIframeObject = (function() {
+    function _createIframeObject(content) {
+      var iframeDoc, i = 0,
+       frame = false,
+       frames = global.frames,
+       iframeEl = Fuse._doc.createElement('iframe'),
+       parentNode = Fuse._body || head,
+       id = 'iframe_' + expando + counter++;
+
+      iframeEl.id = id;
+      iframeEl.style.cssText = 'position:absolute;left:-1000px;width:0;height:0;overflow:hidden';
+      parentNode.insertBefore(iframeEl, parentNode.firstChild);
+
+      if (frames[0]) {
+        while (frame = frames[i++]) {
+          if (frame.frameElement.id === id) {
+            iframeDoc = frame.document; break;
+          }
+        }
+        if (content) {
+          iframeDoc.open();
+          iframeDoc.write(content);
+          iframeDoc.close();
+        }
+      }
+      return frame;
+    }
+
+    var counter = 0, head = Fuse._doc.getElementsByTagName('HEAD')[0];
+    return _createIframeObject;
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
   Fuse.Fusebox._createSandbox = (function() {
     function _createSandbox(mode) {
       var cache = Fuse.Fusebox._createSandbox.cache;
@@ -157,28 +207,12 @@
           return htmlfile.global;
 
         case 'IFRAME':
-          var frame, iframeDoc, i = 0,
-           frames = global.frames,
-           iframeEl = Fuse._doc.createElement('iframe');
-           parentNode = Fuse._body || head;
-
-          iframeEl.id = expando;
-          iframeEl.style.cssText = 'position:absolute;visibility:hidden;left:-20px;width:0;height:0;overflow:hidden';
-          parentNode.insertBefore(iframeEl, parentNode.firstChild);
-
-          if (frames[0]) {
-            while (frame = frames[i++])
-              if (frame.frameElement.id === expando)
-                iframeDoc = frame.document;
-  
-            iframeDoc.open();
-            iframeDoc.write('<script>parent.Fuse.' + expando + ' = this;<\/script>');
-            iframeDoc.close();
-
+          var frame = Fuse.Fusebox._createIframeObject('<script>parent.Fuse.' +
+            expando + ' = this;<\/script>');
+          if (frame) {
             var result = Fuse[expando];
             delete Fuse[expando];
-
-            cache.push(iframeEl);
+            cache.push(frame.frameElement);
             return result;
           }
           break;
@@ -188,8 +222,9 @@
       throw new Error('Fuse failed to create a sandbox.');
     }
 
+    // IE requires the iframe/htmlfile remain in the cache or it will be
+    // marked for garbage collection
     _createSandbox.cache = [];
-    var head = Fuse._doc.getElementsByTagName('HEAD')[0];
     return _createSandbox;
   })();
 
@@ -207,8 +242,8 @@
     if (Feature('ACTIVE_X_OBJECT') && !isFileProtocol)
       return 'ACTIVE_X_OBJECT';
 
-    // Yes this is a harmless browser sniff to give a performance boost. If you
-    // have a problem with it please contact us and we can have a good cry about it.
+    // Yes this is a harmless browser sniff to give a potential performance boost.
+    // If you have a problem with it please contact us and we can have a good cry about it.
     if (Feature('OBJECT__PROTO__') && !(Fuse.Browser.Agent.WebKit && isIframeSupported))
       return 'OBJECT__PROTO__';
 
@@ -440,7 +475,7 @@
 
       // Opera and Chrome still need a convienence wrapper for filter
       // so that it supports an undefined callback
-      if (skip.Array && skip.Array.filter) (function() {
+      if (this.Array.prototype.filter && skip.Array && skip.Array.filter) (function() {
         this.filter = new Function('fn', [
           'function filter(callback, thisArg) {',
           'return fn.call(this, callback || function(value) { return value != null }, thisArg);',
@@ -466,15 +501,15 @@
 
           // compile wrapper code
           code = [
-            'var ' + type + ' = this.' + type + ',',
-            'fn = this.' + n + '.prototype.' + name + ';',
+            'var ' + type + ' = this.' + type + ';',
+            'var fn = this.' + n + '.prototype.' + name + ';',
             'function ' + name + '() {',
             'var args = arguments;'];
 
           // ensure a sugared array is returned when needed
           if (type === 'Array') {
             if (/^(RegExp|String)$/.test(n)) {
-              code[0] += ' String = this.String,';
+              code.unshift('var String = this.String;');
 
               if (/^(exec|match)$/.test(name)) code.push(
                 'var results = args.length ? fn.apply(this, args) : fn.call(this);',
