@@ -318,6 +318,10 @@
      matchHTMLComments = new RegExp('<!--' + s + '*' + Fuse.ScriptFragment + s + '*-->', 'gi'),
      matchOpenTag      = /<script/i;
 
+    this.evalScripts = function evalScripts() {
+      return this.extractScripts().map(function(script) { return eval(String(script)) });
+    };
+
     this.extractScripts = function extractScripts() {
       var results = Fuse.List();
       if (!matchOpenTag.test(this)) return results;
@@ -346,25 +350,36 @@
       };
 
     // prevent JScript bug with named function expressions
-    var extractScripts = null,
-     stripScripts =      null,
-     trim =              null,
-     trimLeft =          null,
-     trimRight =         null;
-  }).call(Fuse.String.Plugin);
+    var evalScripts = null,
+     extractScripts = null,
+     stripScripts =   null,
+     trim =           null,
+     trimLeft =       null,
+     trimRight =      null;
+  }).call(Fuse.String.Plugin); 
 
-  (function() {
-    this.evalScripts = function evalScripts() {
-      return this.extractScripts().map(function(script) { return eval(String(script)) });
-    };
+  // Information on parsing tags can be found at
+  // http://www.w3.org/TR/REC-xml-names/#ns-using
+  Fuse.String.Plugin.stripTags = (function() {
+    var matchTags = (function() {
+      var name   = '\\w+',
+       space     = '[\\x20\\x09\\x0D\\x0A]',
+       eq        = space + '?=' + space + '?',
+       charRef   = '&#[0-9]+;',
+       entityRef = '&' + name + ';',
+       reference = entityRef + '|' + charRef,
+       attValue  = '"(?:[^<&"]|' + reference + ')*"|\'(?:[^<&\']|' + reference + ')*\'',
+       attribute = '(?:' + name + eq + attValue + '|' + name + ')';
 
-    this.stripTags = function stripTags() {
-      return this.replace(/<("[^"]*"|'[^']*'|[^'">])+>/g, '');
-    };
+      return new RegExp('<'+ name + '(?:' + space + attribute + ')*' + space + '?/?>|' +
+        '</' + name + space + '?>', 'g');
+    })();
 
-    // prevent JScript bug with named function expressions
-    var evalScripts = null, stripTags = null;
-  }).call(Fuse.String.Plugin);
+    function stripTags() {
+      return this.replace(matchTags, '');
+    }
+    return stripTags;
+  })();
 
   /*--------------------------------------------------------------------------*/
 

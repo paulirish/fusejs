@@ -1,3 +1,5 @@
+* Make Fuse.String#stripTags more closely follow the W3C specification. [Prototype LH #674] [igor, jddalton, kangax]
+
 * Add Fuse.String#lastIndexOf if missing from the sandboxed String. [jddalton]
 
 * Allow Fusebox to remove the iframes used to create the native sandboxes in Opera 9.5-10a. [jddalton]
