@@ -16,32 +16,14 @@
       return results;
     }
 
-    this.fromNodeList = (function() {
-      function fromNodeList(nodeList) {
-        var i = 0, results = Fuse.List();
-        while (results[i] = nodeList[i++]) { }
-        return results.length-- && results;
-      }
-
-      try {
-        // IE8 throws an error when accessing a non-existant item of a StaticNodeList
-        Feature('SELECTORS_API') && Fuse._div.querySelectorAll('x')[1];
-      } catch(e) {
-        fromNodeList = function fromNodeList(nodeList) {
-          var i = 0, length = nodeList.length, results = Fuse.List();
-          if (typeof length !== 'number') {
-            while (typeof nodeList[i] === 'object') results[i] = nodeList[i++];
-          } else {
-            while (i < length) results[i] = nodeList[i++];
-          }
-          return results;
-        };
-      }
-      return fromNodeList;
-    })();
+    this.fromNodeList = function fromNodeList(nodeList) {
+      var i = 0, results = Fuse.List();
+      while (results[i] = nodeList[i++]) { }
+      return results.length-- && results;
+    };
 
     // prevent JScript bug with named function expressions
-    var from = null;
+    var from = null, fromNodeList = null;
   }).call(Fuse.List);
 
   /*--------------------------------------------------------------------------*/
