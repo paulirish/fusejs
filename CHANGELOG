@@ -1,3 +1,5 @@
+* Optimize Fuse.Template by converting the pattern once during instanciation. [jddalton, Samuel Lebeau]
+
 * Make Fuse.String#stripTags more closely follow the W3C specification. [Prototype LH #674] [igor, jddalton, kangax]
 
 * Add Fuse.String#lastIndexOf if missing from the sandboxed String. [jddalton]

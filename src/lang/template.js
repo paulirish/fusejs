@@ -7,7 +7,13 @@
           return new Template(template, pattern);
 
         this.template = Fuse.String(template);
-        this.pattern = pattern || Fuse.Template.Pattern;
+
+        pattern = pattern || Fuse.Template.Pattern;
+        if (!Fuse.Object.isRegExp(pattern))
+          pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)));
+        if (!pattern.global)
+          pattern = Fuse.RegExp.clone(pattern, { 'global': true });
+        this.pattern = pattern;
       }
       return Template;
     })(),
@@ -21,23 +27,17 @@
             object = object.toObject();
         }
 
-        var pattern = this.pattern;
-        if (!Fuse.Object.isRegExp(pattern))
-          pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)));
-        if (!pattern.global)
-          pattern = Fuse.RegExp.clone(pattern, { 'global': true });
-
-        return this.template.replace(pattern, function() {
-          var before = arguments[1] || '';
-          if (before === '\\') return arguments[2];
+        return this.template.replace(this.pattern, function(match, before, escaped, expr) {
+          before = before || '';
+          if (before === '\\') return escaped;
           if (object == null) return before;
 
           // adds support for dot and bracket notation
           var comp, ctx = object, 
            value   = ctx,
-           expr    = arguments[3],
-           pattern = /^([^.[]+|\[((?:.*?[^\\])?)\])(\.|\[|$)/,
-           match   = pattern.exec(expr);
+           pattern = /^([^.[]+|\[((?:.*?[^\\])?)\])(\.|\[|$)/;
+
+          match = pattern.exec(expr);
           if (match == null) return before;
 
           while (match != null) {
