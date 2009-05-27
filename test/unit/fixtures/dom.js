@@ -64,30 +64,36 @@ function preservingBrowserDimensions(callback) {
 // Parsing and serializing XML
 // http://developer.mozilla.org/En/Parsing_and_serializing_XML
 // http://www.van-steenbeek.net/?q=explorer_domparser_parsefromstring
-if (typeof(DOMParser) === 'undefined') {
-  DOMParser = function() { };
+(function(global) {
+  function DOMParser() { }
+
   DOMParser.prototype.parseFromString = (function() {
-    if (typeof(ActiveXObject) !== 'undefined') {
-      return function(str, contentType) {
-        var xmldata = new ActiveXObject('MSXML.DomDocument');
-        xmldata.async = false;
-        xmldata.loadXML(str);
-        return xmldata;
-      };
-    }
-    return function(str, contentType) {
-      var transport = Ajax.getTransport();
-      if (!contentType)
-        contentType = 'application/xml';
- 
-      transport.open('GET', 'data:' + contentType + ';charset=utf-8,' + encodeURIComponent(str), false);
+    var parseFromString = function parseFromString(string, contentType) {
+      var transport = Fuse.Ajax.getTransport();
+      if (!contentType) contentType = 'application/xml';
+      transport.open('GET', 'data:' + contentType + ';charset=utf-8,' +
+        encodeURIComponent(string), false);
+
       if (typeof transport.overrideMimeType !== 'undefined')
         transport.overrideMimeType(contentType);
       transport.send(null);
       return transport.responseXML;
     };
+
+    if (Fuse.Browser.Feature('ACTIVE_X_OBJECT')) {
+      parseFromString = function parseFromString(string, contentType) {
+        var xmldata = new ActiveXObject('MSXML.DomDocument');
+        xmldata.async = false;
+        xmldata.loadXML(string);
+        return xmldata;
+      };
+    }
+    return parseFromString;
   })();
-}
+
+  if (!global.DOMParser)
+    global.DOMParser = DOMParser;
+})(this);
 
 /*--------------------------------------------------------------------------*/
 

@@ -1,3 +1,5 @@
+* unit test: Fix Ajax reference in the emulated DOMParser object. [jddalton]
+
 * Make Fuse.RegExp() calls as a function instead of with a new expression. [jddalton]
 
 * Escape a forward slash in the regexp pattern of Fuse.Object.isSameOrigin(). [Diego Perini, jddalton]
