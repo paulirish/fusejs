@@ -43,7 +43,7 @@
         'multiline':  this.multiline
       }, options);
 
-      return new Fuse.RegExp(this.source,
+      return Fuse.RegExp(this.source,
         (options.global     ? 'g' : '') +
         (options.ignoreCase ? 'i' : '') +
         (options.multiline  ? 'm' : ''));

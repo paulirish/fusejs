@@ -1,3 +1,5 @@
+* Make Fuse.RegExp() calls as a function instead of with a new expression. [jddalton]
+
 * Escape a forward slash in the regexp pattern of Fuse.Object.isSameOrigin(). [Diego Perini, jddalton]
 
 * Remove unneeded Chrome fix for Fuse.String#replace as well as the STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN feature detection. [jddalton]

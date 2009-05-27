@@ -106,7 +106,7 @@
 
     this.gsub = function gsub(pattern, replacement) {
       if (!Fuse.Object.isRegExp(pattern))
-        pattern = new Fuse.RegExp(Fuse.RegExp.escape(pattern), 'g');
+        pattern = Fuse.RegExp(Fuse.RegExp.escape(pattern), 'g');
       if (!pattern.global)
         pattern = Fuse.RegExp.clone(pattern, { 'global': true });
       return this.replace(pattern, _prepareReplacement(replacement));
@@ -116,7 +116,7 @@
       count = (typeof count === 'undefined') ? 1 : count;
       if (count === 1) {
         if (!Fuse.Object.isRegExp(pattern))
-          pattern = new Fuse.RegExp(Fuse.RegExp.escape(pattern));
+          pattern = Fuse.RegExp(Fuse.RegExp.escape(pattern));
         if (pattern.global)
           pattern = Fuse.RegExp.clone(pattern, { 'global': false });
         return this.replace(pattern, _prepareReplacement(replacement));
