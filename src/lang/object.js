@@ -234,7 +234,7 @@
       // http://www.iana.org/assignments/port-numbers
       var domain = Fuse._doc.domain, protocol = global.location.protocol,
        defaultPort = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80,
-       parts = String(url).match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^/:$]+)(?:\:(\d+))?/) || [];
+       parts = String(url).match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/) || [];
 
       return !parts[0] || (parts[1] === protocol &&
         Fuse.String.Plugin.endsWith.call(parts[2], domain) &&
