@@ -90,8 +90,7 @@
 
     // primarily for Safari 2.0.2 and lower, based on work by Dean Edwards
     // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
-    if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING') ||
-        Bug('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN'))
+    if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING'))
       this.replace = replace;
   }).call(Fuse.String.Plugin);
 
