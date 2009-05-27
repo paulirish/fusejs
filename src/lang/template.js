@@ -10,7 +10,7 @@
 
         pattern = pattern || Fuse.Template.Pattern;
         if (!Fuse.Object.isRegExp(pattern))
-          pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)));
+          pattern = new Fuse.RegExp(Fuse.RegExp.escape(pattern));
         if (!pattern.global)
           pattern = Fuse.RegExp.clone(pattern, { 'global': true });
         this.pattern = pattern;

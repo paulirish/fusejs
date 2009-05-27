@@ -42,44 +42,53 @@
       this.replace = replace;
   }).call(Fuse.String.Plugin);
 
+  // ECMA-5 15.5.4.11
   (function() {
-    var __replace = this.replace;
+    var __replace = this.replace,
+     exec = RegExp.prototype.exec;
 
     function replace(pattern, replacement) {
       if (typeof replacement !== 'function')
         return __replace.call(this, pattern, replacement);
 
-      var isGlobal, match, index = 0, result = '', source = String(this);
       if (!Fuse.Object.isRegExp(pattern))
-        pattern = new RegExp(Fuse.RegExp.escape(String(pattern)));
-      else {
-        isGlobal = pattern.global;
-        pattern = new RegExp(pattern.source,
-          (pattern.ignoreCase && 'i' || '') + (pattern.multiline  && 'm' || ''));
-      }
+        pattern = new RegExp(Fuse.RegExp.escape(pattern));
 
-      pattern.lastIndex = 0;
-      while (match = pattern.exec(source)) {
-        result += source.slice(0, match.index) +
-          replacement.apply(null, concatList(match, [index += match.index, source]));
-        source = source.slice(match.index + match[0].length);
-        index += match[0].length;
+      // set pattern.lastIndex to 0 before we perform string operations
+      var match, index = 0, nonGlobal = !pattern.global,
+       lastIndex = pattern.lastIndex = 0,
+       result = '', source = String(this),
+       srcLength = source.length;
 
-        if (isGlobal && !match[0]) {
-          result += source.slice(0, 1);
-          source  = source.slice(1);
-          if (!source) {
-            if (!match.index) result += replacement.apply(null, match);
-            break;
-          }
+      while (match = exec.call(pattern, source)) {
+        index = match.index;
+        result += source.slice(lastIndex, index);
+
+        // set lastIndex before replacement call to avoid potential
+        // pattern.lastIndex tampering
+        lastIndex = pattern.lastIndex;
+        result += replacement.apply(null, concatList(match, [index, source]));
+
+        if (nonGlobal) {
+          pattern.lastIndex = lastIndex = index + match[0].length;
+          break;
         }
-        else if (!isGlobal) break;
+        // handle empty pattern matches like /()/g
+        if (lastIndex === index) {
+          if (lastIndex === srcLength) break;
+          result += source.charAt(lastIndex++);
+        }
+        pattern.lastIndex = lastIndex;
       }
-      pattern.lastIndex = 0;
-      return Fuse.String(result + source);
+
+      // append the remaining source to the result
+      if (lastIndex < srcLength)
+        result += source.slice(lastIndex, srcLength);
+
+      return Fuse.String(result);
     }
 
-    // For Safari 2 and Chrome, based on work by Dean Edwards
+    // primarily for Safari 2.0.2 and lower, based on work by Dean Edwards
     // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
     if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING') ||
         Bug('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN'))
@@ -98,7 +107,7 @@
 
     this.gsub = function gsub(pattern, replacement) {
       if (!Fuse.Object.isRegExp(pattern))
-        pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)), 'g');
+        pattern = new Fuse.RegExp(Fuse.RegExp.escape(pattern), 'g');
       if (!pattern.global)
         pattern = Fuse.RegExp.clone(pattern, { 'global': true });
       return this.replace(pattern, _prepareReplacement(replacement));
@@ -108,7 +117,7 @@
       count = (typeof count === 'undefined') ? 1 : count;
       if (count === 1) {
         if (!Fuse.Object.isRegExp(pattern))
-          pattern = new Fuse.RegExp(Fuse.RegExp.escape(String(pattern)));
+          pattern = new Fuse.RegExp(Fuse.RegExp.escape(pattern));
         if (pattern.global)
           pattern = Fuse.RegExp.clone(pattern, { 'global': false });
         return this.replace(pattern, _prepareReplacement(replacement));

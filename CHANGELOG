@@ -1,3 +1,5 @@
+* Optimize Fuse.String#replace and ensure it follows specification with regard to setting the pattern.lastIndex. [jddalton, Samuel Lebeau]
+
 * Remove unneeded IE8 RC1 fork in Fuse.List.fromNodeList(). [Diego Perini]
 
 * Optimize Fuse.Template by converting the pattern once during instanciation. [jddalton, Samuel Lebeau]
