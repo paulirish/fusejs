@@ -1,3 +1,5 @@
+* Ensure Fuse.Object.inspect() avoids treating DOM nodes as generic Object objects. [jddalton]
+
 * unit test: Fix Ajax reference in the emulated DOMParser object. [jddalton]
 
 * Make Fuse.RegExp() calls as a function instead of with a new expression. [jddalton]

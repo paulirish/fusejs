@@ -160,19 +160,30 @@
 
     this.inspect = function inspect(value) {
       if (value != null) {
-        var string, object = Fuse.Object(value);
+        var object = Fuse.Object(value);
         if (typeof object.inspect === 'function')
           return object.inspect();
-        try { string = toString.call(object) } catch (e) { };
-        if (string === '[object Object]') {
-          var results = [];
-          Fuse.Object._each(object, function(value, key) {
-            if (Fuse.Object.hasKey(object, key))
-              results.push(Fuse.String(key).inspect() + ': ' + Fuse.Object.inspect(object[key]));
-          });
-          return Fuse.String('{' + results.join(', ') + '}');
-        }
+
+        // Attempt to avoid inspecting DOM nodes.
+        // IE treats nodes like objects:
+        // IE7 and below are missing the node's constructor property 
+        // IE8 node constructors are typeof "object"
+        try {
+          var string = toString.call(object), constructor = object.constructor;
+          if (string === '[object Object]' && constructor &&
+              typeof constructor !== 'object') {
+            var results = [];
+            Fuse.Object._each(object, function(value, key) {
+              if (Fuse.Object.hasKey(object, key))
+                results.push(Fuse.String(key).inspect() + ': ' +
+                  Fuse.Object.inspect(object[key]));
+            });
+            return Fuse.String('{' + results.join(', ') + '}');
+          }
+        } catch (e) { }
       }
+
+      // try coercing to string
       try {
         return Fuse.String(value);
       } catch (e) {
