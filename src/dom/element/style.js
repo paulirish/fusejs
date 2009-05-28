@@ -225,8 +225,7 @@
           var getStyle = function getStyle(element, name) {
             element = $(element);
             name = Fuse.String(name).camelize();
-              return _isNull(element, name) ? null :
-              Fuse.String(_getComputedStyle(element, name));
+            return _isNull(element, name) ? null : _getComputedStyle(element, name);
           };
         }
         return getStyle;
