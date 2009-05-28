@@ -100,19 +100,15 @@
     },
 
     getStyle = function(element, styleName) {
-      if (Feature('ELEMENT_COMPUTED_STYLE'))
-        getStyle = function(element, styleName) {
-          var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
-          return (style || element.style)[styleName];
-        };
-      else if (Feature('ELEMENT_CURRENT_STYLE'))
-        getStyle = function(element, styleName) {
-          return (element.currentStyle || element.style)[styleName];
-        };
-      else getStyle = function(element, styleName) {
-        return element.style[styleName];
-      };
-      return getStyle(element, styleName);
+      return (getStyle = Feature('ELEMENT_COMPUTED_STYLE')
+        ? function(element, styleName) {
+            var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
+            return (style || element.style)[styleName];
+          }
+        : function(element, styleName) {
+            return (element.currentStyle || element.style)[styleName];
+          }
+      )(element, styleName);
     },
 
     getSheet = function(element) {

@@ -1,3 +1,5 @@
+* Make Element#isVisible() return true when an element has height or width and is not display="none". [jQuery Trac #4512] [Brandon Aaron, jddalton, qiuzj, vbabiy86]
+
 * Allow Fuse.Function methods to pass an array, ['methodName', context], as the `fn` argument to help methods work with lazy loaded methods. [jddalton]
 
 * Ensure Fuse.Object.inspect() avoids treating DOM nodes as generic Object objects. [jddalton]

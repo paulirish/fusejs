@@ -451,6 +451,15 @@
       var pattern = /x/;
       'oxo'.replace(pattern, '');
       return !!pattern.lastIndex;
+    },
+
+    'TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN': function() {
+      // true for IE7 and lower
+      Fuse._div.innerHTML = '<table><tbody style="display:none"><tr style="width:1px"><td></td></tr></tbody></table>';
+      Fuse._body.appendChild(Fuse._div);
+      var result = !!Fuse._div.firstChild.firstChild.offsetWidth;
+      Fuse._body.removeChild(Fuse._div);
+      return result;
     }
   });
 

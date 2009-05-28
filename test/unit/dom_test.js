@@ -423,15 +423,29 @@ new Test.Unit.Runner({
   },
 
   'testElementIsVisible': function(){
-    this.assertNotEqual('none', $('test-visible').style.display);
-    this.assertEqual('none',    $('test-hidden').style.display);
+    this.assertNotEqual('none', $('test-visible').style.display,
+      'sanity check');
 
-    this.assert($('test-visible').isVisible());
+    this.assertEqual('none', $('test-hidden').style.display,
+      'sanity check');
 
-    this.assert(!$('test-hidden').isVisible());
-    this.assert(!$('test-hidden-by-size').isVisible());
-    this.assert(!$('test-nested-hidden-visible').isVisible());
-    this.assert(!Element.isVisible('test-nestee-hidden-visible'));
+    this.assert($('test-visible').isVisible(),
+      $('test-visible').inspect());
+
+    this.assert(!$('test-hidden').isVisible(),
+      $('test-hidden').inspect());
+
+    this.assert(!$('test-hidden-by-size').isVisible(),
+      $('test-hidden-by-size').inspect());
+
+    this.assert(!$('test-nested-hidden-visible').isVisible(),
+      $('test-nested-hidden-visible').inspect());
+
+    this.assert(!Element.isVisible('test-nestee-hidden-visible'),
+      $('test-nestee-hidden-visible').inspect());
+
+    this.assert(!(new Element('div')).isVisible(),
+      'element fragment');
   },
 
   'testElementToggle': function(){

@@ -471,16 +471,49 @@
     };
 
     this.toggle = function toggle(element) {
-      var element = $(element);
-      return Element[!element.offsetHeight || !element.offsetWidth ?
-        'show' : 'hide'](element);
+      return Element[Element.isVisible(element) ?
+        'hide' : 'show'](element);
     };
 
-    this.isVisible = function isVisible(element) {
-      // In IE hidden TR elements still have an offsetWidth
-      var element = $(element);
-      return !(!element.offsetHeight || !element.offsetWidth);
-    };
+    this.isVisible = (function() {
+      function isVisible(element) {
+        if (!Fuse._body) return false;
+
+        var isVisible = function isVisible(element) {
+          // handles IE and the fallback solution
+          element = $(element);
+          var style = element.currentStyle;
+          return style !== null && (style || element.style).display !== 'none' &&
+            !!(element.offsetHeight || element.offsetWidth);
+        };
+
+        if (Feature('ELEMENT_COMPUTED_STYLE')) {
+          isVisible = function isVisible(element) {
+            element = $(element);
+            var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
+            return !!(style && (element.offsetHeight || element.offsetWidth));
+          };
+        }
+        if (Bug('TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN')) {
+          var _isVisible = isVisible;
+          isVisible = function isVisible(element) {
+            element = $(element);
+            if (_isVisible(element)) {
+              var nodeName = getNodeName(element);
+              if ((nodeName === 'THEAD' || nodeName === 'TBODY' || nodeName === 'TR') &&
+                 (element = element.parentNode))
+                return Element.isVisible(element);
+              return true;
+            }
+            return false;
+          };
+        }
+        // update API hooks
+        Element.isVisible = Element.Methods.isVisible = isVisible;
+        return isVisible(element);
+      }
+      return isVisible;
+    })();
 
     this.wrap = function wrap(element, wrapper, attributes) {
       element = $(element);
