@@ -126,7 +126,7 @@
             // executing, make sure the event.eventName matches the eventName.
             if (!Event || !Event.extend || (event.eventName &&
                 event.eventName !== eventName)) return false;
-            // shallow copy handlers to avoid issues with nested 
+            // shallow copy handlers to avoid issues with nested
             // observe/stopObserving
             var c = Event.cache[id], ec = c.events[eventName],
              handlers = slice.call(ec.handlers, 0), length = handlers.length;
@@ -363,10 +363,12 @@
       var name; Methods = [];
       methods && Fuse.Object.extend(Event.Methods, methods);
       Fuse.Object._each(Event.Methods, Event.prototype
-        ? function(value, key) { Event.prototype[key] = Fuse.Function.methodize(value) }
-        : function(value, key) {
+        ? function(value, key, object) {
+            Event.prototype[key] = Fuse.Function.methodize([key, object]);
+          }
+        : function(value, key, object) {
             if (key.indexOf('pointer') != 0)
-              Methods.push([key, Fuse.Function.methodize(value)]);
+              Methods.push([key, Fuse.Function.methodize([key, object])]);
           }
       );
     }
@@ -396,7 +398,7 @@
       if (!Event.prototype)
         Event.prototype = Event.Temp.createEvent(Fuse._doc)['__proto__'];
 
-      // IE8 supports Event.prototype but still needs 
+      // IE8 supports Event.prototype but still needs
       // DOM Level 2 event methods and properties.
       if (Fuse.Object.hasKey(Event.prototype, 'cancelBubble') &&
           Fuse.Object.hasKey(Event.prototype, 'returnValue') &&
@@ -602,7 +604,7 @@
 
   Fuse.Object._extend(Fuse._doc, {
     'loaded':        false,
-    'fire':          Fuse.Function.methodize(Event.fire),
-    'observe':       Fuse.Function.methodize(Event.observe),
-    'stopObserving': Fuse.Function.methodize(Event.stopObserving)
+    'fire':          Fuse.Function.methodize(['fire', Event]),
+    'observe':       Fuse.Function.methodize(['observe', Event]),
+    'stopObserving': Fuse.Function.methodize(['stopObserving', Event])
   });

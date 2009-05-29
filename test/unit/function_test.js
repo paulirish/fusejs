@@ -19,7 +19,7 @@ new Test.Unit.Runner({
 
     this.assertEnumEqual(['one'],
       argumentNames(function(one) { }));
- 
+
     this.assertEnumEqual(['one', 'two', 'three'],
       argumentNames(function(one, two, three) { }));
 
@@ -59,33 +59,49 @@ new Test.Unit.Runner({
        bind(methodWithArguments, { 'hi': 'withBindArgsAndArgs' }, 'arg1', 'arg2')('arg3', 'arg4'));
 
     // ensure private arg array is reset
-    var bound =  bind(methodWithArguments, { 'hi': 'with' }, 'arg1', 'arg2');
+    var bound =  bind(methodWithArguments, { 'hi': 'withBindArgs' }, 'arg1', 'arg2');
     bound('arg3', 'arg4');
-    this.assertEqual('with,arg1,arg2', bound());
-  },
+    this.assertEqual('withBindArgs,arg1,arg2', bound());
+
+    // test lazy defined syntax support
+    var lazy = { 'test': function() { return 'old' } };
+    bound = bind(['test', lazy], { 'hi': 'withBindArgsAndArgs' }, 'arg1', 'arg2');
+    lazy.test = methodWithArguments;
+
+    this.assertEqual('withBindArgsAndArgs,arg1,arg2,arg3,arg4',
+      bound('arg3', 'arg4'), 'lazy defined method');
+    },
 
   'testFunctionBindAsEventListener': function() {
-    var call, div, eventTest, i, tobj,
-     bind = Fuse.Function.bind,
+    var bind = Fuse.Function.bind,
      bindAsEventListener = Fuse.Function.bindAsEventListener;
 
-    for (i = 0; i < 10; ++i) {
-      div = document.createElement('div');
-      div.id = 'test-' + i;
-      document.body.appendChild(div);
+    var tobj = new TestObj();
+    var eventTest = { 'test': true };
 
-      tobj = new TestObj();
-      eventTest = { 'test': true };
+    var call = bindAsEventListener(tobj.assertingEventHandler, tobj,
+      bind(this.assertEqual, this, eventTest),
+      bind(this.assertEqual, this, arg1),
+      bind(this.assertEqual, this, arg2),
+      bind(this.assertEqual, this, arg3),
+      arg1, arg2, arg3);
 
-      call = bindAsEventListener(tobj.assertingEventHandler, tobj,
-        bind(this.assertEqual, this, eventTest),
-        bind(this.assertEqual, this, arg1),
-        bind(this.assertEqual, this, arg2),
-        bind(this.assertEqual, this, arg3),
-        arg1, arg2, arg3);
+    call(eventTest);
 
-      call(eventTest);
-    }
+    var lazy = {
+      'test': bind(function() { 
+        this.assert(false, 'lazy bindAsEventListener');
+      }, this)
+    };
+
+    var bound = bindAsEventListener(['test', lazy], this, 'arg1', 'arg2');
+    lazy.test = function(event, arg1, arg2) {
+      this.assert(event);
+      this.assertEqual('arg1', arg1);
+      this.assertEqual('arg2', arg2);
+    };
+
+    bound(true);
   },
 
   'testFunctionCurry': function() {
@@ -103,23 +119,45 @@ new Test.Unit.Runner({
     // ensure private arg array is reset
     curried('arg2', 'arg3');
     this.assertEqual('arg1', curried());
+
+    // test lazy defined syntax support
+    var lazy = { 'test': function() { return 'old' } };
+    curried = curry(['test', lazy], 'arg1', 'arg2');
+    lazy.test = methodWithArguments;
+
+    this.assertEqual('arg1,arg2,arg3,arg4',
+      curried('arg3', 'arg4'), 'lazy defined method');
   },
 
   'testFunctionDelay': function() {
-    function delayedFunction() { window.delayed = true; };
-    function delayedFunctionWithArgs() { window.delayedWithArgs = $A(arguments).join(' '); };
+    function delayedFunction() { window.delayed = true };
+    function delayedFunctionWithArgs() { window.delayedWithArgs = $A(arguments).join(' ') };
+    function lazyDelayedFunctionWithArgs() { window.lazyDelayed = $A(arguments).join(' ') };
 
     var delay = Fuse.Function.delay;
-    window.delayed = undef;
+    window.delayed = window.lazyDelayed = undef;
 
     delay(delayedFunction, 0.8);
     delay(delayedFunctionWithArgs, 0.8, 'hello', 'world');
 
+    // test lazy defined syntax support
+    var lazy = { 'test': function() { window.lazyDelayed = 'old' } };
+    delay(['test', lazy], 0.8, 'lazy', 'delayed');
+    lazy.test = lazyDelayedFunctionWithArgs;
+
+    // still undefined after calling delay
     this.assertUndefined(window.delayed);
+    this.assertUndefined(window.lazyDelayed);
 
     this.wait(1000, function() {
-      this.assert(window.delayed);
-      this.assertEqual('hello world', window.delayedWithArgs);
+      this.assert(window.delayed,
+        'with no arguments');
+
+      this.assertEqual('hello world', window.delayedWithArgs,
+        'with arguments');
+
+      this.assertEqual('lazy delayed', lazyDelayed,
+        'lazy defined method');
     });
   },
 
@@ -145,21 +183,45 @@ new Test.Unit.Runner({
     this.assertEqual('Hello',       Fuse.String('hello').capitalize());
 
     Fuse.String.Plugin.capitalize = temp;
+
+    // test lazy defined syntax support
+    var lazy = { 'test': function() { window.lazyDelayed = 'old' } };
+    var wrapped = wrap(['test', lazy], function(proceed) {
+      return proceed().toUpperCase();
+    });
+
+    lazy.test = sayHello;
+    this.assertEqual('HELLO WORLD', wrapped(), 'lazy defined method');
   },
 
   'testFunctionDefer': function() {
     function deferredFunction() { window.deferred = true }
+    function deferredFunctionWithArgs() { window.deferredWithArgs = $A(arguments).join(' ') };
+    function lazyDefferedFunctionWithArgs() { window.lazyDeffered = $A(arguments).join(' ') };
 
     var defer = Fuse.Function.defer;
-    window.deferred = undef;
+    window.deferred = window.lazyDeferred = undef;
 
     defer(deferredFunction);
+
+    // test lazy defined syntax support
+    var lazy = { 'test': function() { window.lazyDeferred = 'old' } };
+    defer(['test', lazy], 0.8, 'lazy', 'deffered');
+    lazy.test = lazyDefferedFunctionWithArgs;
+
+    // still undefined after calling defer
     this.assertUndefined(window.deferred);
+    this.assertUndefined(window.lazyDeferred);
 
     this.wait(50, function() {
       function deferredFunction2(arg) { window.deferredValue = arg };
 
-      this.assert(window.deferred);
+      this.assert(window.deferred,
+        'with no arguments');
+
+      this.assertEqual('lazy delayed', lazyDelayed,
+        'lazy defined method');
+
       window.deferredValue = 0;
 
       defer(deferredFunction2, 'test');
@@ -175,8 +237,15 @@ new Test.Unit.Runner({
     var Foo = { 'bar': function(baz) { return baz } };
     var baz = { 'quux': methodize(Foo.bar) };
 
-    this.assertEqual(methodize(Foo.bar), baz.quux);
+    this.assertEqual(baz.quux, methodize(Foo.bar));
     this.assertEqual(baz, Foo.bar(baz));
     this.assertEqual(baz, baz.quux());
+
+    // test lazy defined syntax support
+    var lazy = { 'test': function() { return 'old' } };
+    lazy.methodized = methodize(['test', lazy]);
+    lazy.test = Fuse.K;
+
+    this.assertEqual(lazy, lazy.methodized(), 'lazy defined method');
   }
 });

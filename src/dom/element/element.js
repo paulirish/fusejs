@@ -99,19 +99,19 @@
     function refresh() {
       var tagName; Methods = []; ByTag = { };
 
-      Fuse.Object._each(Element.Methods, function(value, key) {
+      Fuse.Object._each(Element.Methods, function(value, key, object) {
         if (key !== 'Simulated' && key !== 'ByTag')
-          Methods.push([key, Fuse.Function.methodize(value)]);
+          Methods.push([key, Fuse.Function.methodize([key, object])]);
       });
 
-      Fuse.Object._each(Element.Methods.Simulated, function(value, key) {
-        Methods.push([key, Fuse.Function.methodize(value)]);
+      Fuse.Object._each(Element.Methods.Simulated, function(value, key, object) {
+        Methods.push([key, Fuse.Function.methodize([key, object])]);
       });
 
       for (tagName in Element.Methods.ByTag) {
         ByTag[tagName] = slice.call(Methods, 0);
-        Fuse.Object._each(Element.Methods.ByTag[tagName], function(value, key) {
-          ByTag[tagName].push([key, Fuse.Function.methodize(value)]);
+        Fuse.Object._each(Element.Methods.ByTag[tagName], function(value, key, object) {
+          ByTag[tagName].push([key, Fuse.Function.methodize([key, object])]);
         });
       }
       revision++;
@@ -212,7 +212,7 @@
       Fuse.Object._each(methods, function(value, key) {
         if (typeof value === 'function' && 
            (!onlyIfAbsent || !(key in destination)))
-          destination[key] = Fuse.Function.methodize(value);
+          destination[key] = Fuse.Function.methodize([key, methods]);
       });
     }
 

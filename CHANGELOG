@@ -1,3 +1,5 @@
+* Allow Fuse.Function methods to pass an array, ['methodName', context], as the `fn` argument to help methods work with lazy loaded methods. [jddalton]
+
 * Ensure Fuse.Object.inspect() avoids treating DOM nodes as generic Object objects. [jddalton]
 
 * unit test: Fix Ajax reference in the emulated DOMParser object. [jddalton]

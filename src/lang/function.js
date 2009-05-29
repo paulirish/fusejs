@@ -11,10 +11,17 @@
     // ECMA-5 15.3.4.5
     this.bind = (function() {
       var bind = function bind(fn, thisArg) {
+        // allows lazy loading the target method
+        var f, context, name;
+        if (Fuse.Object.isArray(fn)) {
+          name = fn[0]; context = fn[1];
+        } else f = fn;
+
         // simple bind
         if (arguments.length < 3 ) {
           if (typeof thisArg === 'undefined') return fn;
           return function() {
+            var fn = f || context[name];
             return arguments.length
               ? fn.apply(thisArg, arguments)
               : fn.call(thisArg);
@@ -23,50 +30,71 @@
         // bind with curry
         var args = slice.call(arguments, 2); reset = args.length;
         return function() {
-        	args.length = reset; // reset arg length
+          args.length = reset; // reset arg length
+          var fn = f || context[name];
           return fn.apply(thisArg, arguments.length ?
             concatList(args, arguments) : args);
         };
       };
-
+      // native support
       if (typeof this.prototype.bind === 'function') {
         bind = function bind(fn, thisArg) {
-          return Fuse.Function.prototype.bind.call(fn, thisArg);
+          return Fuse.Function.prototype.bind.call(f || thisArg[name], thisArg);
         };
       }
       return bind;
     }).call(this);
 
     this.bindAsEventListener = function bindAsEventListener(fn, thisArg) {
+      // allows lazy loading the target method
+      var f, context, name;
+      if (Fuse.Object.isArray(fn)) {
+        name = fn[0]; context = fn[1];
+      } else f = fn;
+
       // simple bind
       if (arguments.length < 3 ) {
         return function(event) {
-          return fn.call(thisArg, event || getWindow(this).event);
+          return (f || context[name]).call(thisArg, event || getWindow(this).event);
         };
       }
       // bind with curry
       var args = slice.call(arguments, 2);
       return function(event) {
-        return fn.apply(thisArg,
+        return (f || context[name]).apply(thisArg,
           prependList(args, event || getWindow(this).event));
       };
     };
 
     this.curry = function curry(fn) {
+      // allows lazy loading the target method
+      var f, context, name;
+      if (Fuse.Object.isArray(fn)) {
+        name = fn[0]; context = fn[1]; fn = context[name];
+      } else f = fn;
+
       if (arguments.length === 1) return fn;
       var args = slice.call(arguments, 1), reset = args.length;
       return function() {
         args.length = reset; // reset arg length
+        var fn = f || context[name];
         return arguments.length
           ? fn.apply(this, concatList(args, arguments))
           : fn.apply(this, args);
       }
     };
 
-    this.delay = function delay(fn, timeout) { 
+    this.delay = function delay(fn, timeout) {
       timeout *= 1000;
-      var args = slice.call(arguments, 2); 
+      var f, context, name, args = slice.call(arguments, 2);
+
+      // allows lazy loading the target method
+      if (Fuse.Object.isArray(fn)) {
+        name = fn[0]; context = fn[1];
+      } else f = fn;
+
       return global.setTimeout(function() {
+        var fn = f || context[name];
         return fn.apply(fn, args);
       }, timeout);
     };
@@ -77,20 +105,32 @@
     };
 
     this.methodize = function methodize(fn) {
-      if (fn._methodized) return fn._methodized;
-      return fn._methodized = function() {
+      // allows lazy loading the target method
+      var f, context, name;
+      if (Fuse.Object.isArray(fn)) {
+        name = fn[0]; context = fn[1]; fn = context[name];
+      } else f = fn;
+
+      return fn._methodized || (fn._methodized = function() {
+        var fn = f || context[name];
         return arguments.length
           ? fn.apply(null, prependList(arguments, this))
           : fn.call(null, this);
-      };
+      });
     };
 
     this.wrap = function wrap(fn, wrapper) {
-      var bind = Fuse.Function.Plugin.bind;
+      // allows lazy loading the target method
+      var f, context, name, bind = Fuse.Function.bind;
+      if (Fuse.Object.isArray(fn)) {
+        name = fn[0]; context = fn[1];
+      } else f = fn;
+
       return function() {
+        var fn = f || context[name];
         return arguments.length
-          ? wrapper.apply(this, prependList(arguments, bind.call(fn, this)))
-          : wrapper.call(this, bind.call(fn, this));
+          ? wrapper.apply(this, prependList(arguments, bind(fn, this)))
+          : wrapper.call(this, bind(fn, this));
       }
     };
 
