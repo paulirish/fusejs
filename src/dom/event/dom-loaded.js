@@ -3,29 +3,33 @@
   // Support for the "dom:loaded" event is based on work by Dan Webb, 
   // Matthias Miller, Dean Edwards, John Resig and Diego Perini.
   (function() {
-    function createPoller(method) {
+    function Poller(method) {
+      var poller = this, defer = Fuse.Function.defer;
       var callback = function() {
-        if (!method()) pollerID = Fuse.Function.defer(callback);
+        if (!method() && poller.id != null)
+          poller.id = defer(callback);
       };
-      clearPoller();
-      return pollerID = Fuse.Function.defer(callback);
+      this.id = defer(callback);
     }
 
-    function clearPoller() {
-      pollerID != null && global.clearTimeout(pollerID);
-    }
+    Poller.prototype.clear = function() {
+      this.id != null && (this.id = global.clearTimeout(this.id));
+    };
 
     function cssDoneLoading() {
       return (isCssLoaded = function() { return true })();
     }
 
     function fireDomLoadedEvent() {
-      clearPoller();
+      readyStatePoller.clear();
+      cssPoller && cssPoller.clear();
+
       if (Fuse._doc.loaded) return;
       return Event.fire(Fuse._doc, 'dom:loaded');
     }
 
     function checkCssAndFire() {
+      if (Fuse._doc.loaded) return fireDomLoadedEvent();
       return !!(isCssLoaded() && fireDomLoadedEvent());
     }
 
@@ -50,19 +54,19 @@
       return results;
     }
 
-    var pollerID,
+    var cssPoller, readyStatePoller,
 
     checkDomLoadedState = function(event) {
-      if (Fuse._doc.loaded) clearPoller();
+      if (Fuse._doc.loaded) readyStatePoller.clear();
       else if (event && event.type === 'DOMContentLoaded' ||
-          /loaded|complete/.test(Fuse._doc.readyState)) {
+          /^(loaded|complete)$/.test(Fuse._doc.readyState)) {
+        readyStatePoller.clear();
         Fuse._doc.stopObserving('readystatechange', respondToReadyState);
-        if (!checkCssAndFire()) createPoller(checkCssAndFire);
+        if (!checkCssAndFire()) cssPoller = new Poller(checkCssAndFire);
       }
     },
 
     respondToReadyState = function(event) {
-      clearPoller();
       checkDomLoadedState(event);
     },
 
@@ -79,6 +83,8 @@
             return collection;
           }
         : function(collection, sheet) {
+            // Catch errors on partially loaded elements. Firefox may also
+            // error when accessing css rules of sources using the file:// protocol
             try {
               var ss, rules = getRules(sheet), length = rules.length;
             } catch(e) {
@@ -218,9 +224,7 @@
     else if (Feature('ELEMENT_ADD_EVENT_LISTENER'))
       Fuse._doc.observe('DOMContentLoaded', respondToReadyState);
 
-    // remove poller if other options are available
+    // readystate and poller are used (first one to complete wins)
     Fuse._doc.observe('readystatechange', respondToReadyState);
-
-    // worst case create poller and window onload observer
-    createPoller(checkDomLoadedState);
+    readyStatePoller = new Poller(checkDomLoadedState);
   })();

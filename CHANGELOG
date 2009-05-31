@@ -1,3 +1,5 @@
+* Ensure pollers used in the dom-loaded solution stop polling when not needed and stop the IE doScroll poller when doScroll() is successful or document readyState is `complete`. [Diego Perini, jddalton]
+
 * Make Element#isVisible() return true when an element has height or width and is not display="none". [jQuery Trac #4512] [Brandon Aaron, jddalton, qiuzj, vbabiy86]
 
 * Allow Fuse.Function methods to pass an array, ['methodName', context], as the `fn` argument to help methods work with lazy loaded methods. [jddalton]
