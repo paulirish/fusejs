@@ -1,3 +1,5 @@
+* Optimize Element._getContentFromAnonymousElement() by replacing a Fuse.Number#times call with a while-loop. [jddalton, kangax]
+
 * Optimize NWMatcher by passing a Fuse.List to its select() method and update other engines. [Diego Perini, jddalton]
 
 * Ensure pollers used in the dom-loaded solution stop polling when not needed and stop the IE doScroll poller when doScroll() is successful or document readyState is `complete`. [Diego Perini, jddalton]

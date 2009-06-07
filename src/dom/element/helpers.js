@@ -72,8 +72,9 @@
         var cache = getCache(ownerDoc), node = cache.node,
          t = Element._insertionTranslations.tags[nodeName];
         if (t) {
+          var times = t[2];
           node.innerHTML= t[0] + html + t[1];
-          Fuse.Number(t[2]).times(function() { node = node.firstChild });
+          while (times--) node = node.firstChild;
         } else node.innerHTML = html;
 
         // skip auto-inserted tbody
