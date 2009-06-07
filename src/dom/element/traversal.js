@@ -105,6 +105,7 @@
 
       if (Feature('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
         descendantOf = function descendantOf(element, ancestor) {
+          /* DOCUMENT_POSITION_CONTAINS = 0x08 */
           element = $(element); ancestor = $(ancestor);
           return (element.compareDocumentPosition(ancestor) & 8) === 8;
         };

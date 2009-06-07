@@ -396,6 +396,8 @@
     })();
 
     this.identify = function identify(element) {
+      // use readAttribute to avoid issues with form elements and
+      // child controls with ids/names of "id"
       var id = Element.readAttribute(element, 'id');
       if (id.length) return id;
 
@@ -434,6 +436,15 @@
           var nodeType = element.nodeType;
           return nodeType === 11 || (nodeType === 1 &&
             element.ownerDocument.all[element.sourceIndex] !== element);
+        };
+      }
+      if (Feature('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
+        isFragment = function isFragment(element) {
+          /* DOCUMENT_POSITION_DISCONNECTED = 0x01 */
+          element = $(element);
+          var nodeType = element.nodeType;
+          return nodeType === 11 || (nodeType === 1 &&
+            (element.ownerDocument.compareDocumentPosition(element) & 1) === 1);
         };
       }
       return isFragment;
