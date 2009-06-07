@@ -446,6 +446,22 @@ new Test.Unit.Runner({
 
     this.assert(!(new Element('div')).isVisible(),
       'element fragment');
+
+    this.assert(!$('dimensions-tr').hide().isVisible(),
+      'hidden TR element');
+    $('dimensions-tr').show();
+
+    $('dimensions-table').hide();
+    this.assert(!$('dimensions-tbody').isVisible(),
+      'non-hidden TBODY element inside hidden TABLE');
+
+    this.assert(!$('dimensions-tr').isVisible(),
+      'non-hidden TR element inside hidden TABLE');
+
+    this.assert(!$('dimensions-td').isVisible(),
+      'non-hidden TD element inside hidden TABLE');
+
+    $('dimensions-table').show();
   },
 
   'testElementToggle': function(){

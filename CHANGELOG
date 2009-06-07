@@ -1,3 +1,5 @@
+* unit test: Add tests for table elements to the Element#isVisible unit tests. [jddalton]
+
 * Optimize Element._getContentFromAnonymousElement() by replacing a Fuse.Number#times call with a while-loop. [jddalton, kangax]
 
 * Optimize NWMatcher by passing a Fuse.List to its select() method and update other engines. [Diego Perini, jddalton]
