@@ -36,7 +36,7 @@ new Test.Unit.Runner({
       ).inject(Fuse.List(), function(properties, prop) {
         prop = Fuse.String(prop);
         if (!self.screen && prop.contains('self.screen') ||
-            !document.body && prop.contains('document.body')) return;
+            !document.body && prop.contains('document.body')) return properties;
 
         properties.push(prop);
         if (prop.contains('.body') && document.documentElement)

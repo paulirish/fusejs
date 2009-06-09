@@ -1,3 +1,5 @@
+* unit test: Correct a return statement in the DOM unit test `setup` method. [Ihab Awad, Tobie Langel]
+
 * Optimize Element#isFragment to use Element#compareDocumentPosition if available. [Diego Perini, jddalton]
 
 * unit test: Add tests for table elements to the Element#isVisible unit tests. [jddalton]
