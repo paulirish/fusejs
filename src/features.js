@@ -74,7 +74,7 @@
 
     'DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT': function() {
       if (Feature('DOCUMENT_RANGE'))
-        return isHostObject(Fuse._doc.createRange, 'createContextualFragment');
+        return isHostObject(Fuse._doc.createRange(), 'createContextualFragment');
     },
 
     'DOCUMENT_STYLE_SHEETS_COLLECTION': function() {

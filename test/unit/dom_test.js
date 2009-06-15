@@ -781,6 +781,14 @@ new Test.Unit.Runner({
     Element.replace('testform-replace', '<form></form>');
     this.assertEqual('<p>some text</p><form></form><p>some text</p>',
       getInnerHTML('testform-replace-container'));
+
+    // test replace on fragments
+    var div = new Element('div').update('<div></div>');
+    this.assertNothingRaised(function(){ div.down().replace('<span></span>') },
+      'errored on a fragment');
+
+    this.assertEqual('SPAN', div.firstChild.nodeName.toUpperCase(),
+      'wrong results on a fragment');
   },
 
   'testElementReplaceWithScriptElement': function() {

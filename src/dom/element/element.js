@@ -606,16 +606,28 @@
     };
 
     this.replace = (function() {
-      var _createContextualFragment = Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT') ?
-        function(element, content) {
-          var range = element.ownerDocument.createRange();
-          range.selectNode(element);
-          return range.createContextualFragment(content);
-        } :
-        function(element, content) {
-          return Element._getContentFromAnonymousElement(element.ownerDocument,
-            getNodeName(element.parentNode), content);
-        };
+      var _createContextualFragment = function(element, content) {
+        return Element._getContentFromAnonymousElement(element.ownerDocument,
+          getNodeName(element.parentNode), content);
+      };
+
+      if (Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT'))
+        (function(fn) {
+          _createContextualFragment = function(element, content) {
+            try {
+              // Konqueror throws when trying to create a fragment from
+              // incompatible markup such as table rows. Similar to IE's issue
+              // with setting table's innerHTML.
+
+              // WebKit and KHTML throw when creating contextual fragments from orphaned elements
+              var range = element.ownerDocument.createRange();
+              range.selectNode(element);
+              return range.createContextualFragment(content);
+            } catch (e) {
+              return fn(element, content);
+            }
+          };
+        })(_createContextualFragment);
 
       function replace(element, content) {
         element = $(element);
