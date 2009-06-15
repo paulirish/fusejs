@@ -97,6 +97,8 @@
     };
 
     this.clone = function clone(object) {
+      if (object && typeof object.clone === 'function')
+        return object.clone();
       return Fuse.Object.extend(Fuse.Object(), object);
     };
 

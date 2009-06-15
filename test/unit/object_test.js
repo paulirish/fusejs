@@ -89,6 +89,10 @@ new Test.Unit.Runner({
 
     this.assertHashEqual({ 'foo': 'foo' }, clone,
       'Optimizing Fuse.Object.clone perf using prototyping doesn\'t allow properties to be deleted.');
+
+    this.assertEqual('custom',
+      Fuse.Object.clone({ 'clone': function() { return 'custom' } }),
+      'Custom clone method on object.');
   },
 
   'testObjectInspect': function() {
