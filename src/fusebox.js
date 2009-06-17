@@ -18,7 +18,7 @@
         if (this === Fuse) return new Fuse.Fusebox();
         sandbox = sandbox || Fuse.Fusebox._createSandbox();
 
-        // use call to avoid polluting the scope of the called 
+        // use call to avoid polluting the scope of the called
         // methods with another varaiable
         Fuse.Fusebox._createNatives.call(this, sandbox);
         _postProcess(this);
@@ -71,7 +71,7 @@
             delete Array.prototype.x;
           }
           catch(e) {
-            // switch to "__proto__" powered sandboxes if available 
+            // switch to "__proto__" powered sandboxes if available
             if (Feature('OBJECT__PROTO__')) {
               Fuse.Fusebox.mode = 'OBJECT__PROTO__';
               sandbox = Fuse.Fusebox._createSandbox();
@@ -81,7 +81,7 @@
 
           // Opera 9.5 - 10a throws a security error when calling Array#map or String#lastIndexOf
           // Opera 9.5 - 9.64 will error by simply calling the methods.
-          // Opera 10 will error when first accessing the contentDocument of 
+          // Opera 10 will error when first accessing the contentDocument of
           // another iframe and then accessing the methods.
           if (Array.prototype.map) {
             _cleanup(Fuse.Fusebox._createIframeObject().frameElement);
@@ -235,23 +235,18 @@
     var isFileProtocol = global.location &&
       (global.location.href || '').indexOf('file:') === 0;
 
-    var isIframeSupported = Fuse._doc && isHostObject(global, 'frames') &&
-      isHostObject(Fuse._doc, 'createElement');
-
     // avoids the htmlfile activeX warning when served from the file protocol
     if (Feature('ACTIVE_X_OBJECT') && !isFileProtocol)
       return 'ACTIVE_X_OBJECT';
 
-    // Yes this is a harmless browser sniff to give a potential performance boost.
-    // If you have a problem with it please contact us and we can have a good cry about it.
-    if (Feature('OBJECT__PROTO__') && !(Fuse.Browser.Agent.WebKit && isIframeSupported))
-      return 'OBJECT__PROTO__';
+    if (Feature('OBJECT__PROTO__')) return 'OBJECT__PROTO__';
 
-    // check "OBJECT__PROTO__" first because Firefox will permanently screw up 
+    // check "OBJECT__PROTO__" first because Firefox will permanently screw up
     // other iframes on the page if an iframe is inserted before the dom has loaded
-    if (isIframeSupported) return 'IFRAME';
+    if (Fuse._doc && isHostObject(global, 'frames') &&
+        isHostObject(Fuse._doc, 'createElement')) return 'IFRAME';
   })();
-  
+
   /*--------------------------------------------------------------------------*/
 
   Fuse.Fusebox._createStatics = (function() {
@@ -432,7 +427,7 @@
         this[n] = new Function('fn', [
           'function ' + n + '() {',
           'var result = arguments.length ?',
-          'fn.apply(null, arguments) : fn.call(null);',
+          'fn.apply(null, arguments) : fn();',
           'result["__proto__"] = ' + n + '.prototype;',
           'return result; }',
           n + '.prototype["__proto__"] = fn.prototype;',
@@ -568,7 +563,7 @@
 
     function updateGenerics() {
       var c, j, n, names, object, i = 0,
-       cache = Fuse.Fusebox.prototype.updateGenerics.cache, 
+       cache = Fuse.Fusebox.prototype.updateGenerics.cache,
        forIn = Fuse.Object && Fuse.Object._each || _forIn,
        natives = arguments.length ? arguments : _natives;
 

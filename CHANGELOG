@@ -1,3 +1,5 @@
+* Fix Chrome issue with iframe sandboxes by using the __proto__ mode by default. [jddalton]
+
 * Fixed Konqueror Element#replace bug in _createContextualFragment() that threw errors when passed incompatible markup. [jddalton, kangax]
 
 * Allow objects to execute their own `clone` method when passed to Fuse.Object.clone(). [jddalton]
