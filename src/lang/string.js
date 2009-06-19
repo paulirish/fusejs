@@ -236,6 +236,7 @@
     if (!this.lastIndexOf)
       this.lastIndexOf = function lastIndexOf(searchString) {
         searchString = String(searchString);
+
         var string = String(this),
          pos = Number(arguments[1]),
          len = string.length,
@@ -248,7 +249,6 @@
         if (pos > len - searchLen)
           pos = len - searchLen;
         pos++;
-
         while (pos--)
           if (string.slice(pos, pos + searchLen) === searchString)
             return pos;
@@ -282,6 +282,7 @@
       function _replacer(match, captured) {
         return captured.toUpperCase();
       }
+
       function camelize() {
         return this.replace(/\-(\w|$)/g, _replacer);
       }
@@ -319,9 +320,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    var matchTrimLeft  = Fuse.RegExp('^\\s+'),
-     matchTrimRight    = Fuse.RegExp('\\s+$'),
-     matchScripts      = RegExp(Fuse.ScriptFragment, 'gi'),
+    var matchScripts   = RegExp(Fuse.ScriptFragment, 'gi'),
      matchHTMLComments = Fuse.RegExp('<!--\\s*' + Fuse.ScriptFragment + '\\s*-->', 'gi'),
      matchOpenTag      = /<script/i;
 
@@ -342,28 +341,55 @@
       return this.replace(matchScripts, '');
     };
 
+    // prevent JScript bug with named function expressions
+    var evalScripts = null, extractScripts = null, stripScripts = null;
+  }).call(Fuse.String.Plugin);
+
+  /*--------------------------------------------------------------------------*/
+
+  (function() {
+    var sMap = Fuse.RegExp.specialCharMap.s;
+
+    // ECMA-5 15.5.4.20
     if (!this.trim)
       this.trim = function trim() {
-        // keep this method as simple as possible, avoid extraneous method calls
-        return Fuse.String(this).replace(matchTrimLeft, '').replace(matchTrimRight, '');
+        if (this == null) throw new TypeError;
+        var string = String(this), start = -1, end = string.length;
+
+        if (!end) return Fuse.String(string);
+        while (sMap[string.charAt(++start)]);
+        if (start === end) return Fuse.String('');
+
+        while (sMap[string.charAt(--end)]);
+        return Fuse.String(string.slice(start, end + 1));
       };
+
+    // non-standard
     if (!this.trimLeft)
       this.trimLeft = function trimLeft() {
-        return Fuse.String(this).replace(matchTrimLeft, '');
+        if (this == null) throw new TypeError;
+        var string = String(this), start = -1;
+
+        if (!string) return Fuse.String(string);
+        while (sMap[string.charAt(++start)]);
+        return Fuse.String(string.slice(start));
       };
+
     if (!this.trimRight)
       this.trimRight = function trimRight() {
-        return Fuse.String(this).replace(matchTrimRight, '');
+        if (this == null) throw new TypeError;
+        var string = String(this), end = string.length;
+
+        if (!end) return Fuse.String(string);
+        while (sMap[string.charAt(--end)]);
+        return Fuse.String(string.slice(0, end + 1));
       };
 
     // prevent JScript bug with named function expressions
-    var evalScripts = null,
-     extractScripts = null,
-     stripScripts =   null,
-     trim =           null,
-     trimLeft =       null,
-     trimRight =      null;
-  }).call(Fuse.String.Plugin); 
+    var trim = null, trimLeft = null, trimRight = null;
+  }).call(Fuse.String.Plugin);
+
+  /*--------------------------------------------------------------------------*/
 
   // Information on parsing tags can be found at
   // http://www.w3.org/TR/REC-xml-names/#ns-using
