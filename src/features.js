@@ -420,13 +420,6 @@
       return result;
     },
 
-    'REGEXP_WHITESPACE_CHARACTER_CLASS_BUGGY': function() {
-      // true for Webkit and IE
-      return true;
-      !!'\x09\x0B\x0C\x20\xA0\x0A\x0D\u2028\u2029\u1680\u180e\u2000-\u200a\u202f\u205f\u3000'
-        .replace(/\s+/, '').length;
-    },
-
     'SELECTORS_API_CASE_INSENSITIVE_CLASSNAME': function() {
       // Safari 3 before 3.1.2 treat class names
       // case-insensitively in quirks mode.

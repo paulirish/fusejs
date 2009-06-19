@@ -356,8 +356,53 @@
       })(sandbox.Number);
 
       this.RegExp = (function(fn) {
-        function RegExp(pattern, flags) { return new fn(pattern, flags) }
+        var RegExp = function RegExp(pattern, flags) { return new fn(pattern, flags) };
+
+        // versions of WebKit and IE have non-spec-conforming /\s/
+        // so we emulate it (see: ECMA-5 15.10.2.12)
+        // http://www.unicode.org/Public/UNIDATA/PropList.txt
+        var specialCharMap = {
+          's': {
+            /* whitespace */
+            '\x09': 1, '\x0B': 1, '\x0C': 1, '\x20': 1, '\xA0': 1,
+
+            /* line terminators */
+            '\x0A': 1, '\x0D': 1, '\u2028': 1, '\u2029': 1,
+
+            /* unicode category "Zs" space separators */
+            '\u1680': 1, '\u180e': 1, '\u2000': 1, '\u2001': 1, '\u2002': 1, '\u2003': 1,
+            '\u2004': 1, '\u2005': 1, '\u2006': 1, '\u2007': 1, '\u2008': 1, '\u2009': 1,
+            '\u200a': 1, '\u202f': 1, '\u205f': 1, '\u3000': 1
+          }
+        };
+
+        var s = (function() {
+          var result = ['\\s'];
+          for (character in specialCharMap.s)
+            if (character.replace(/\s/, '').length)
+              result.push('\\u' +('0000' + character.charCodeAt(0).toString(16)).slice(-4));
+          return result.length > 1 ? '(' + result.join('|') + ')' : result[0];
+        })();
+
+        if (s !== '\\s') {
+          var toString = sandbox.Object.prototype.toString;
+          RegExp = function RegExp(pattern, flags) {
+            if (toString.call(pattern) === '[object RegExp]') {
+              if (pattern.global || pattern.ignoreCase || pattern.multiline)
+                throw new TypeError;
+              if (pattern.source.indexOf('\\s') > -1)
+                pattern = pattern.source.replace(/\\s/g, s);
+            }
+            else pattern = String(pattern).replace(/\\s/g, s);
+
+            return new fn(pattern, flags);
+          };
+        } else s = null;
+
         RegExp.prototype = fn.prototype;
+        RegExp.specialCharMap = specialCharMap;
+
+        specialCharMap = null;
         return RegExp;
       })(sandbox.RegExp);
 
@@ -422,7 +467,7 @@
       fn.call(this, sandbox);
 
       // wrap native constructors to add __proto__ support
-      var n, i = 0, natives = ['Array', 'Function', 'Number', 'RegExp', 'String'];
+      var n, i = 0, natives = ['Array', 'Function', 'Number', 'String'];
       while (n = natives[i++])
         this[n] = new Function('fn', [
           'function ' + n + '() {',
@@ -456,6 +501,17 @@
         Object.prototype['__proto__'] = fn.prototype;
         return Object;
       })(this.Object);
+
+      this.RegExp = (function(fn) {
+        function RegExp(pattern, flags) {
+          var result = fn(pattern, flags);
+          result['__proto__'] = RegExp.prototype;
+          return result;
+        }
+        RegExp.prototype['__proto__'] = fn.prototype;
+        RegExp.specialCharMap = fn.specialCharMap;
+        return RegExp;
+      })(this.RegExp);
     }
 
     return _createNatives;

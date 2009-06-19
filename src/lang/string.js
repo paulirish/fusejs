@@ -319,11 +319,10 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    var s = Fuse.RegExp.specialChar.s,
-     matchTrimLeft     = new RegExp('^' + s + '+'),
-     matchTrimRight    = new RegExp(s + '+$'),
-     matchScripts      = new RegExp(Fuse.ScriptFragment, 'gi'),
-     matchHTMLComments = new RegExp('<!--' + s + '*' + Fuse.ScriptFragment + s + '*-->', 'gi'),
+    var matchTrimLeft  = Fuse.RegExp('^\\s+'),
+     matchTrimRight    = Fuse.RegExp('\\s+$'),
+     matchScripts      = RegExp(Fuse.ScriptFragment, 'gi'),
+     matchHTMLComments = Fuse.RegExp('<!--\\s*' + Fuse.ScriptFragment + '\\s*-->', 'gi'),
      matchOpenTag      = /<script/i;
 
     this.evalScripts = function evalScripts() {
