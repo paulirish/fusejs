@@ -1,3 +1,5 @@
+* Ensure String#lastIndexOf returns Fuse.Number() values and make string methods conform to spec by cohercing `this` to a string and throwing if `this` is null/undefined. [jddalton]
+
 * Optimize Fuse.String#trim. [jQuery Trac #2279] [Ariel Flesler, DarkRyder, jddalton, phpmyforum, Steven Levithan]
 
 * Make Fuseboxed RegExp constructor automatically fix buggy "\s" character matches in regexp patterns. [jddalton]

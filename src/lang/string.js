@@ -51,6 +51,8 @@
       if (typeof replacement !== 'function')
         return __replace.call(this, pattern, replacement);
 
+      if (this == null) throw new TypeError;
+
       if (!Fuse.Object.isRegExp(pattern))
         pattern = new RegExp(Fuse.RegExp.escape(pattern));
 
@@ -105,6 +107,8 @@
     }
 
     this.gsub = function gsub(pattern, replacement) {
+      if (this == null) throw new TypeError;
+
       if (!Fuse.Object.isRegExp(pattern))
         pattern = Fuse.RegExp(Fuse.RegExp.escape(pattern), 'g');
       if (!pattern.global)
@@ -113,6 +117,8 @@
     };
 
     this.sub = function sub(pattern, replacement, count) {
+      if (this == null) throw new TypeError;
+
       count = (typeof count === 'undefined') ? 1 : count;
       if (count === 1) {
         if (!Fuse.Object.isRegExp(pattern))
@@ -140,23 +146,28 @@
 
   (function() {
     this.interpolate = function interpolate(object, pattern) {
+      if (this == null) throw new TypeError;
       return new Fuse.Template(this, pattern).evaluate(object);
     };
 
     this.succ = function succ() {
+      if (this == null) throw new TypeError;
       return Fuse.String(this.slice(0, this.length - 1) +
         String.fromCharCode(this.charCodeAt(this.length - 1) + 1));
     };
 
     this.times = function times(count) {
+      if (this == null) throw new TypeError;
       return Fuse.String(count < 1 ? '' : new Array(count + 1).join(this));
     };
 
     this.toArray = function toArray() {
-      return this.split('');
+      if (this == null) throw new TypeError;
+      return Fuse.String(this).split('');
     };
 
     this.toQueryParams = function toQueryParams(separator) {
+      if (this == null) throw new TypeError;
       var match = String(this).split('?'), hash = Fuse.Object();
       if (match.length > 1 && !match[1]) return hash;
 
@@ -203,24 +214,30 @@
 
   (function() {
     this.blank = function blank() {
+      if (this == null) throw new TypeError;
       return /^\s*$/.test(this);
     };
 
     this.contains = function contains(pattern) {
-      return this.indexOf(pattern) > -1;
+      if (this == null) throw new TypeError;
+      return String(this).indexOf(pattern) > -1;
     };
 
     this.empty = function empty() {
-      return !this.length;
+      if (this == null) throw new TypeError;
+      return !String(this).length;
     };
 
     this.endsWith = function endsWith(pattern) {
-      var d = this.length - pattern.length;
-      return d >= 0 && this.lastIndexOf(pattern) == d;
+      if (this == null) throw new TypeError;
+      var string = String(this), d = string.length - pattern.length;
+      return d >= 0 && string.lastIndexOf(pattern) == d;
     };
 
     this.inspect = function inspect(useDoubleQuotes) {
-      var escapedString = this.replace(/[\x00-\x1f\\]/g, function(match) {
+      if (this == null) throw new TypeError;
+
+      var escapedString = Fuse.String(this).replace(/[\x00-\x1f\\]/g, function(match) {
         var character = Fuse.String.specialChar[match];
         return character ?
           character :
@@ -235,6 +252,7 @@
     // TODO: try to optimize
     if (!this.lastIndexOf)
       this.lastIndexOf = function lastIndexOf(searchString) {
+        if (this == null) throw new TypeError;
         searchString = String(searchString);
 
         var string = String(this),
@@ -242,26 +260,28 @@
          len = string.length,
          searchLen = searchString.length;
 
-        if (searchLen > len) return -1;
+        if (searchLen > len) return Fuse.Number(-1);
         if (isNaN(pos)) pos = Infinity;
         if (pos < 0)    pos = 0;
         if (pos > len)  pos = len;
-        if (pos > len - searchLen)
-          pos = len - searchLen;
+        if (pos > len - searchLen) pos = len - searchLen;
+
         pos++;
         while (pos--)
           if (string.slice(pos, pos + searchLen) === searchString)
-            return pos;
-        return -1;
+            return Fuse.Number(pos);
+        return Fuse.Number(-1);
       };
 
     this.scan = function scan(pattern, callback) {
-      this.gsub(pattern, callback);
+      if (this == null) throw new TypeError;
+      Fuse.String(this).gsub(pattern, callback); // gsub for backcompat
       return Fuse.String(this);
     };
 
     this.startsWith = function startsWith(pattern) {
-      return this.indexOf(pattern) == 0;
+      if (this == null) throw new TypeError;
+      return String(this).indexOf(pattern) == 0;
     };
 
     // prevent JScript bug with named function expressions
@@ -284,30 +304,40 @@
       }
 
       function camelize() {
-        return this.replace(/\-(\w|$)/g, _replacer);
+        if (this == null) throw new TypeError;
+        return Fuse.String(this).replace(/\-(\w|$)/g, _replacer);
       }
       return camelize;
     })();
 
     this.capitalize = function capitalize() {
-      return Fuse.String(this.charAt(0).toUpperCase() + this.slice(1).toLowerCase());
+      if (this == null) throw new TypeError;
+      var string = String(this);
+      return Fuse.String(string.charAt(0).toUpperCase() + string.slice(1).toLowerCase());
     };
 
     this.dasherize = function dasherize() {
-      return this.replace(/_/g,'-');
+      if (this == null) throw new TypeError;
+      return Fuse.String(String(this).replace(/_/g,'-'));
     };
 
     this.truncate = function truncate(length, truncation) {
+      if (this == null) throw new TypeError;
+      var string = String(this);
+
       length = length || 30;
       truncation = (typeof truncation === 'undefined') ? '...' : truncation;
-      return Fuse.String(this.length > length
-        ? this.slice(0, length - truncation.length) + truncation
-        : this);
+      return Fuse.String(string.length > length
+        ? string.slice(0, length - truncation.length) + truncation
+        : string);
     };
 
     this.underscore = function underscore() {
-      return this.replace(/::/g, '/').replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-        .replace(/([a-z\d])([A-Z])/g, '$1_$2').replace(/-/g,'_').toLowerCase();
+      if (this == null) throw new TypeError;
+      return Fuse.String(String(this).replace(/::/g, '/')
+        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+        .replace(/([a-z\d])([A-Z])/g, '$1_$2')
+        .replace(/-/g,'_').toLowerCase());
     };
 
     // prevent JScript bug with named function expressions
@@ -325,20 +355,24 @@
      matchOpenTag      = /<script/i;
 
     this.evalScripts = function evalScripts() {
-      return this.extractScripts().map(function(script) { return eval(String(script)) });
+      if (this == null) throw new TypeError;
+      return Fuse.String(this).extractScripts().map(function(script) { return eval(String(script)) });
     };
 
     this.extractScripts = function extractScripts() {
-      var results = Fuse.List();
-      if (!matchOpenTag.test(this)) return results;
-      var match, scriptTags = this.replace(matchHTMLComments, '');
+      if (this == null) throw new TypeError;
+      var string = Fuse.String(this), results = Fuse.List();
+
+      if (!matchOpenTag.test(string)) return results;
+      var match, scriptTags = string.replace(matchHTMLComments, '');
       while (match = matchScripts.exec(scriptTags))
         match[1] && results.push(match[1]);
       return results;
     };
 
     this.stripScripts = function stripScripts() {
-      return this.replace(matchScripts, '');
+      if (this == null) throw new TypeError;
+      return Fuse.String(this).replace(matchScripts, '');
     };
 
     // prevent JScript bug with named function expressions
@@ -409,7 +443,8 @@
     })();
 
     function stripTags() {
-      return this.replace(matchTags, '');
+      if (this == null) throw new TypeError;
+      return Fuse.String(String(this).replace(matchTags, ''));
     }
     return stripTags;
   })();
@@ -418,17 +453,20 @@
 
   (function() {
     var escapeHTML = function escapeHTML() {
-      textNode.data = this;
+      if (this == null) throw new TypeError;
+      textNode.data = String(this);
       return Fuse.String(container.innerHTML.replace(/"/g, '&quot;'));
     };
 
     var unescapeHTML = function unescapeHTML() {
-      Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+      if (this == null) throw new TypeError;
+      Fuse._div.innerHTML = '<pre>' + proto.stripTags.call(this) + '</pre>';
       return Fuse.String(Fuse._div.textContent);
     };
 
-    var container = Fuse._doc.createElement('pre'),
-     textNode = container.appendChild(Fuse._doc.createTextNode(''));
+    var proto  = Fuse.String.prototype,
+     container = Fuse._doc.createElement('pre'),
+     textNode  = container.appendChild(Fuse._doc.createTextNode(''));
 
     // Safari 2.x has issues with escaping html inside a "pre"
     // element so we use the deprecated "xmp" element instead.
@@ -440,7 +478,8 @@
     // Safari 3.x has issues with escaping the ">" character
     if ((textNode.data = '>') && container.innerHTML !== '&gt;') {
       escapeHTML = function escapeHTML() {
-        textNode.data = this;
+        if (this == null) throw new TypeError;
+        textNode.data = String(this);
         return Fuse.String(container.innerHTML.replace(/"/g, '&quot;').replace(/>/g, '&gt;'));
       };
     }
@@ -449,18 +488,21 @@
       Fuse._div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;</pre>';
       if (Feature('ELEMENT_INNER_TEXT') && Fuse._div.firstChild.innerText === '<p>x</p>') {
         unescapeHTML = function unescapeHTML() {
-          Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+          if (this == null) throw new TypeError;
+          Fuse._div.innerHTML = '<pre>' + proto.stripTags.call(this) + '</pre>';
           return Fuse.String(Fuse._div.firstChild.innerText.replace(/\r/g, ''));
         };
       }
       else if (Fuse._div.firstChild.innerHTML === '<p>x</p>') {
         unescapeHTML = function unescapeHTML() {
-          Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+          if (this == null) throw new TypeError;
+          Fuse._div.innerHTML = '<pre>' + proto.stripTags.call(this) + '</pre>';
           return Fuse.String(Fuse._div.firstChild.innerHTML);
         };
       } else {
         unescapeHTML = function unescapeHTML() {
-          Fuse._div.innerHTML = '<pre>' + this.stripTags() + '</pre>';
+          if (this == null) throw new TypeError;
+          Fuse._div.innerHTML = '<pre>' + proto.stripTags.call(this) + '</pre>';
           var node, i = 0, results = [];
           while (node = Fuse._div.firstChild.childNodes[i++])
             results.push(node.nodeValue);
