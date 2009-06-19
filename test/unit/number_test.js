@@ -25,6 +25,12 @@ new Test.Unit.Runner({
     this.assertEqual('010',  Fuse.Number(10).toPaddedString(3));
     this.assertEqual('100',  Fuse.Number(100).toPaddedString(3));
     this.assertEqual('1000', Fuse.Number(1000).toPaddedString(3));
+
+    this.assertEqual('00000012', Fuse.Number(12).toPaddedString(8),
+      'length longer than default pad');
+
+    this.assertEqual('12', Fuse.Number(12).toPaddedString(1),
+      'shorter than default pad');
   },
 
   'testNumberTimes': function() {

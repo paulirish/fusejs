@@ -35,10 +35,17 @@
       return this.toPaddedString(2, 16);
     };
 
-    this.toPaddedString = function toPaddedString(length, radix) {
-      var string = this.toString(radix || 10);
-      return Fuse.String('0').times(length - string.length).concat(string);
-    };
+    this.toPaddedString = (function() {
+      function toPaddedString(length, radix) {
+        var string = this.toString(radix || 10);
+        if (length <= string.length) return Fuse.String(string);
+        if (length > pad.length) pad = new Array(length + 1).join('0');
+        return Fuse.String((pad + string).slice(-length));
+      }
+
+      var pad = '000000';
+      return toPaddedString;
+    })();
 
     // prevent JScript bug with named function expressions
     var abs =         null,
@@ -47,6 +54,5 @@
      round =          null,
      succ =           null,
      times =          null,
-     toColorPart =    null,
-     toPaddedString = null;
+     toColorPart =    null;
   }).call(Fuse.Number.Plugin);
