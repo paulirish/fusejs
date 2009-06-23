@@ -61,13 +61,9 @@
       else if (event && event.type === 'DOMContentLoaded' ||
           /^(loaded|complete)$/.test(Fuse._doc.readyState)) {
         readyStatePoller.clear();
-        Fuse._doc.stopObserving('readystatechange', respondToReadyState);
+        Fuse._doc.stopObserving('readystatechange', checkDomLoadedState);
         if (!checkCssAndFire()) cssPoller = new Poller(checkCssAndFire);
       }
-    },
-
-    respondToReadyState = function(event) {
-      checkDomLoadedState(event);
     },
 
     addImports = function(collection, sheet) {
@@ -217,14 +213,21 @@
       // based on Diego Perini's IEContentLoaded
       // http://javascript.nwbox.com/IEContentLoaded/
       checkDomLoadedState = function() {
-        try { Fuse._docEl.doScroll('left') } catch(e) { return }
-        fireDomLoadedEvent();
+        if (Fuse._doc.loaded) readyStatePoller.clear();
+        else {
+          if (Fuse._doc.readyState === 'complete')
+            fireDomLoadedEvent();
+          else {
+            try { Fuse._div.doScroll() } catch(e) { return }
+            fireDomLoadedEvent();
+          }
+        }
       };
     }
     else if (Feature('ELEMENT_ADD_EVENT_LISTENER'))
-      Fuse._doc.observe('DOMContentLoaded', respondToReadyState);
+      Fuse._doc.observe('DOMContentLoaded', checkDomLoadedState);
 
     // readystate and poller are used (first one to complete wins)
-    Fuse._doc.observe('readystatechange', respondToReadyState);
+    Fuse._doc.observe('readystatechange', checkDomLoadedState);
     readyStatePoller = new Poller(checkDomLoadedState);
   })();
