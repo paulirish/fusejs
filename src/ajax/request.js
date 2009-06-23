@@ -15,7 +15,7 @@
     })()
   });
 
-  Fuse.Ajax.Request.Events = 
+  Fuse.Ajax.Request.Events =
     Fuse.List('Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete');
 
   /*--------------------------------------------------------------------------*/
@@ -47,7 +47,7 @@
     this.getStatus = function getStatus() {
       try {
         return this.transport.status || 0;
-      } catch (e) { return 0 } 
+      } catch (e) { return 0 }
     };
 
     this.onStateChange = function onStateChange() {
@@ -81,7 +81,7 @@
         if (this.options.onCreate) this.options.onCreate(response);
         Fuse.Ajax.Responders.dispatch('onCreate', this, response);
 
-        this.transport.open(this.method.toUpperCase(), this.url, 
+        this.transport.open(this.method.toUpperCase(), this.url,
           this.options.asynchronous);
 
         if (this.options.asynchronous)
@@ -118,7 +118,7 @@
 
         var contentType = String(response.getHeader('Content-type'));
         if (this.options.evalJS == 'force'
-            || (this.options.evalJS && Fuse.Object.isSameOrigin(this.url) && contentType 
+            || (this.options.evalJS && Fuse.Object.isSameOrigin(this.url) && contentType
             && contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;.*)?\s*$/i)))
           this.evalResponse();
       }
@@ -149,7 +149,7 @@
 
         /* Force "Connection: close" for older Mozilla browsers to work
          * around a bug where XMLHttpRequest sends an incorrect
-         * Content-length header. See Mozilla Bugzilla #246651. 
+         * Content-length header. See Mozilla Bugzilla #246651.
          */
         if (this.transport.overrideMimeType &&
            (userAgent.match(/Gecko\/(\d{4})/) || [0,2005])[1] < 2005)
@@ -159,16 +159,20 @@
       // user-defined headers
       var key, extras = this.options.requestHeaders;
       if (typeof extras === 'object') {
-        if (Fuse.List.isArray(extras))
-          for (var i = 0, length = extras.length; i < length; i += 2) 
+        if (Fuse.List.isArray(extras)) {
+          for (var i = 0, length = extras.length; i < length; i += 2)
             headers[extras[i]] = extras[i + 1];
+        }
+        else if (extras instanceof Fuse.Hash) {
+          var i = 0, pairs = extras._pairs;
+          while (pair = pairs[i++]) headers[pair[0]] = pair[1];
+        }
         else {
-          if (extras instanceof Fuse.Hash) extras = extras._object;
           for (key in extras) headers[key] = extras[key];
         }
       }
 
-      for (key in headers) 
+      for (key in headers)
         this.transport.setRequestHeader(key, headers[key]);
     };
 

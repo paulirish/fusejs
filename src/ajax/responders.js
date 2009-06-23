@@ -17,6 +17,9 @@
 
     this.register = function register(responder) {
       var m, handler, name;
+      if (responder instanceof Fuse.Hash)
+        resonder = responder.toObject();
+
       for (name in responder) {
         m = responder[name];
         if (!(this.responders[name] || Fuse.List())

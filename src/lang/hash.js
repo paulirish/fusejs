@@ -288,9 +288,9 @@
     };
 
     this.toObject = function toObject() {
-      var pair, i = 0, pairs = this._pairs, object = Fuse.Object();
-      while (pair = pairs[i++]) object[pair[0]] = pair[1];
-      return object;
+      var pair, i = 0, pairs = this._pairs, result = Fuse.Object();
+      while (pair = pairs[i++]) result[pair[0]] = pair[1];
+      return result;
     };
 
     this.toQueryString = function toQueryString() {

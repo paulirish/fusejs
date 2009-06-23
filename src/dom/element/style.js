@@ -137,12 +137,16 @@
     this.setStyle = function setStyle(element, styles) {
       element = $(element);
       var key, name, elementStyle = element.style;
+
       if (Fuse.Object.isString(styles)) {
         element.style.cssText += ';' + styles;
         return styles.indexOf('opacity') > -1
           ? Element.setOpacity(element, styles.match(/opacity:\s*(\d?\.?\d*)/)[1])
           : element;
       }
+      if (styles instanceof Fuse.Hash)
+        styles = styles.toObject();
+
       for (key in styles) {
         name = FLOAT_TRANSLATIONS[key] || key;
         if (name === 'opacity') Element.setOpacity(element, styles[key]);

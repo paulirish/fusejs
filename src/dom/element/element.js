@@ -572,10 +572,14 @@
       element = $(element);
       var content, fragment, insertContent, position, nodeName;
 
-      if (insertions && (Fuse.Object.isString(insertions) ||
-          Fuse.Object.isNumber(insertions) || _isInsertable(insertions) ||
-          insertions.toElement || insertions.toHTML)) {
-        insertions = { 'bottom': insertions };
+      if (insertions) {
+        if (insertions instanceof Fuse.Hash)
+          insertions = insertions.toObject();
+
+        if (Fuse.Object.isString(insertions) ||
+            Fuse.Object.isNumber(insertions) || _isInsertable(insertions) ||
+            insertions.toElement || insertions.toHTML)
+          insertions = { 'bottom': insertions };
       }
 
       for (position in insertions) {
