@@ -28,7 +28,7 @@
         var _replacement = replacement;
         replacement = function() {
           // ensure `null` and `undefined` are returned
-          var result = _replacement.apply(null, arguments);
+          var result = _replacement.apply(global, arguments);
           return result || Fuse.String(result);
         };
       }
@@ -69,7 +69,7 @@
         // set lastIndex before replacement call to avoid potential
         // pattern.lastIndex tampering
         lastIndex = pattern.lastIndex;
-        result += replacement.apply(null, concatList(match, [index, source]));
+        result += replacement.apply(global, concatList(match, [index, source]));
 
         if (nonGlobal) {
           pattern.lastIndex = lastIndex = index + match[0].length;

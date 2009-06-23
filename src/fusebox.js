@@ -344,7 +344,7 @@
       })(sandbox.Array, this);
 
       this.Function = (function(fn) {
-        function Function(argN, body) { return fn.apply(null, arguments) }
+        function Function(argN, body) { return fn.apply(global, arguments) }
         Function.prototype = fn.prototype;
         return Function;
       })(sandbox.Function);
@@ -469,14 +469,14 @@
       // wrap native constructors to add __proto__ support
       var n, i = 0, natives = ['Array', 'Function', 'Number', 'String'];
       while (n = natives[i++])
-        this[n] = new Function('fn', [
+        this[n] = new Function('global,fn', [
           'function ' + n + '() {',
           'var result = arguments.length ?',
-          'fn.apply(null, arguments) : fn();',
+          'fn.apply(global, arguments) : fn();',
           'result["__proto__"] = ' + n + '.prototype;',
           'return result; }',
           n + '.prototype["__proto__"] = fn.prototype;',
-          'return ' + n].join('\n'))(this[n]);
+          'return ' + n].join('\n'))(global, this[n]);
 
       i = n = natives = null;
 

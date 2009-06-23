@@ -121,7 +121,7 @@
         if (i === length) {
           // if no parent pass prepend object as parent
           if (!propIndex) properties = prependList(properties, object);
-          object = object[part] = Fuse.Class.apply(null,
+          object = object[part] = Fuse.Class.apply(global,
             Fuse.Object.hasKey(properties[1], 'constructor') ? properties :
               (properties[1].constructor = part) && properties);
         }

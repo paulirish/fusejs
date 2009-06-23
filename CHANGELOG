@@ -1,3 +1,5 @@
+* Pass global instead of null to Function#call and Function#apply. [jddalton]
+
 * Remove respondToReadyState() from the dom-loaded solution, tweak the `doScroll` approach, and ensure `readyState` and `doScroll` approaches continue until one succeeds. [Hedger Wang, jddalton, Thomas Aylott]
 
 * Make Fuse.Array.Plugin methods use bitwise shift operators >>> and >> instead of parseInt(). [Ben Laurie, jddalton]

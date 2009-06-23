@@ -100,7 +100,7 @@
     };
 
     this.defer = function defer(fn) {
-      return Fuse.Function.delay.apply(null,
+      return Fuse.Function.delay.apply(global,
         concatList([fn, 0.01], slice.call(arguments, 1)));
     };
 
@@ -114,8 +114,8 @@
       return fn._methodized || (fn._methodized = function() {
         var fn = f || context[name];
         return arguments.length
-          ? fn.apply(null, prependList(arguments, this))
-          : fn.call(null, this);
+          ? fn.apply(global, prependList(arguments, this))
+          : fn.call(global, this);
       });
     };
 
@@ -153,13 +153,13 @@
     while (name = names[i++]) {
       cache.Function[name] = this[name];
       if (this.prototype[name] !== 'function') {
-        this.prototype[name] = new Function('', [
+        this.prototype[name] = new Function('global', [
           'var object = Fuse.Function, slice = Array.prototype.slice;',
           'function ' + name + '() {',
           'return arguments.length',
-          '? object.' + name + '.apply(null, [this].concat(slice.call(arguments, 0)))',
-          ': object.' + name + '.call(null, this);',
-          '}', 'return ' + name].join('\n'))();
+          '? object.' + name + '.apply(global, [this].concat(slice.call(arguments, 0)))',
+          ': object.' + name + '.call(global, this);',
+          '}', 'return ' + name].join('\n'))(global);
       }
     }
   }).call(Fuse.Function);
