@@ -1,3 +1,5 @@
+* Ensure String primatives are passed to eval(). [jddalton]
+
 * Optmized Fuse.Number#toPaddedString by avoiding costly method calls. [jddalton]
 
 * Ensure String#lastIndexOf returns Fuse.Number() values and make string methods conform to spec by cohercing `this` to a string and throwing if `this` is null/undefined. [jddalton]

@@ -742,7 +742,7 @@
           else scripts = getByTagName(node, 'SCRIPT');
         }
         proceed(element, node);
-        while (scripts[i]) global.eval(scripts[i++].text);
+        while (scripts[i]) global.eval(String(scripts[i++].text));
       }
 
       if (Bug('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT_PROPERTY_ON_INSERT')) {

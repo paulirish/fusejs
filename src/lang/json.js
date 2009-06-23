@@ -70,7 +70,7 @@
       var string = Fuse.String(this), json = string.unfilterJSON();
       try {
         if (!sanitize || json.isJSON())
-          return eval('(' + String(json) + ')');
+          return global.eval('(' + String(json) + ')');
       } catch (e) { }
       throw new SyntaxError('Badly formed JSON string: ' + string.inspect());
     };

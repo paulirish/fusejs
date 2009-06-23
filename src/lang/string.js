@@ -356,7 +356,9 @@
 
     this.evalScripts = function evalScripts() {
       if (this == null) throw new TypeError;
-      return Fuse.String(this).extractScripts().map(function(script) { return eval(String(script)) });
+      return Fuse.String(this).extractScripts().map(function(script) {
+        return global.eval(String(script));
+      });
     };
 
     this.extractScripts = function extractScripts() {
