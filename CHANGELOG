@@ -1,3 +1,5 @@
+* Make Fuse.Array.Plugin methods use bitwise shift operators >>> and >> instead of parseInt(). [Ben Laurie, jddalton]
+
 * Ensure String primatives are passed to eval(). [jddalton]
 
 * Optmized Fuse.Number#toPaddedString by avoiding costly method calls. [jddalton]

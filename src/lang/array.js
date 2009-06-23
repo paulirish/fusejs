@@ -11,7 +11,7 @@
       if ('toArray' in object) return object.toArray();
       if ('item' in iterable)  return Fuse.Array.fromNodeList(iterable);
 
-      var length = parseInt(iterable.length, 10) || 0, results = Fuse.Array(length);
+      var length = iterable.length >>> 0, results = Fuse.Array(length);
       while (length--) if (length in object) results[length] = iterable[length];
       return results;
     }
@@ -54,7 +54,7 @@
     this.clear = function clear() {
       var object = Fuse.Object(this);
       if (!Fuse.Object.isArray(object)) {
-        var length = parseInt(object.length, 10) || 0;
+        var length = object.length >>> 0;
         while (length--) if (length in object) delete object[length];
       }
       object.length = 0;
@@ -70,7 +70,7 @@
 
     this.compact = function compact(falsy) {
       var i = 0, results = Fuse.Array(), object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       if (falsy) {
         for ( ; i < length; i++)
@@ -93,7 +93,7 @@
 
     this.first = function first(callback, thisArg) {
       var i = 0, object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       if (callback == null) {
         for ( ; i < length; i++)
@@ -116,7 +116,7 @@
 
     this.flatten = function flatten() {
       var i = 0, isArray = Fuse.Array.isArray, results = Fuse.Array(),
-       object = Fuse.Object(this), length = parseInt(object.length, 10) || 0;
+       object = Fuse.Object(this), length = object.length >>> 0;
 
       for ( ; i < length; i++) {
         if (isArray(object[i]))
@@ -128,7 +128,7 @@
 
     this.insert = function insert(index, value) {
       var object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       if (length < index) object.length = index;
       if (index < 0) index = length;
@@ -140,7 +140,7 @@
 
     this.inspect = function inspect() {
       var i = 0, results = result = [], object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       while (length--) results[length] = Fuse.Object.inspect(object[length]);
       return '[' + results.join(', ') + ']';
@@ -148,7 +148,7 @@
 
     this.intersect = function intersect(array) {
       var item, i = 0, indexOf = proto.indexOf, results = Fuse.Array(),
-       object = Fuse.Object(this), length = parseInt(object.length, 10) || 0;
+       object = Fuse.Object(this), length = object.length >>> 0;
 
       for ( ; i < length; i++) {
         item = array[i];
@@ -160,8 +160,7 @@
     };
 
     this.last = function last(callback, thisArg) {
-      var object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+      var object = Fuse.Object(this), length = object.length >>> 0;
 
       if (callback == null)
         return object[length && length - 1];
@@ -180,12 +179,12 @@
     };
 
     this.size = function size() {
-      return Fuse.Number(parseInt(Fuse.Object(this).length, 10) || 0);
+      return Fuse.Number(Fuse.Object(this).length >>> 0);
     };
 
     this.unique = function unique() {
       var i = 0, results = Fuse.Array(), object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       for ( ; i < length; i++)
         if (i in object && results.indexOf(object[i]) == -1)
@@ -196,7 +195,7 @@
     this.without = function without() {
       var i = 0, args = slice.call(arguments, 0), indexOf = proto.indexOf,
        results = Fuse.Array(), object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       for ( ; i < length; i++)
         if (i in object && indexOf.call(args, object[i]) == -1)
@@ -208,8 +207,7 @@
 
     this.contains = (function() {
       var contains = function contains(value, strict) {
-        var object = Fuse.Object(this),
-         length = parseInt(object.length, 10) || 0;
+        var object = Fuse.Object(this), length = object.length >>> 0;
 
         if (strict) {
           while (length--)
@@ -237,8 +235,7 @@
 
     this.inject = (function() {
       var inject = function inject(accumulator, callback, thisArg) {
-        var i = 0, object = Fuse.Object(this),
-         length = parseInt(object.length, 10) || 0;
+        var i = 0, object = Fuse.Object(this), length = object.length >>> 0;
 
         if (thisArg) {
           for ( ; i < length; i++) if (i in object)
@@ -265,7 +262,7 @@
 
     this.invoke = function invoke(method) {
       var args, i = 0, results = Fuse.Array(), object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       if (arguments.length < 2) {
         while (length--) if (length in object)
@@ -284,7 +281,7 @@
 
       callback = callback || Fuse.K;
       var item, i = 0, results = Fuse.Array(), object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       if (Fuse.Object.isString(pattern))
         pattern = new RegExp(Fuse.RegExp.escape(pattern));
@@ -305,8 +302,7 @@
         result = null;
       }
 
-      var value, i = 0, object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+      var value, i = 0, object = Fuse.Object(this), length = object.length >>> 0;
       for ( ; i < length; i++) {
         if (i in object) {
           value = callback.call(thisArg, object[i], i, object);
@@ -325,8 +321,7 @@
         result = null;
       }
 
-      var value, i = 0, object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+      var value, i = 0, object = Fuse.Object(this), length = object.length >>> 0;
       for ( ; i < length; i++) {
         if (i in object) {
           value = callback.call(thisArg, object[i], i, object);
@@ -340,7 +335,7 @@
     this.partition = function partition(callback, thisArg) {
       callback = callback || Fuse.K;
       var i = 0, trues = Fuse.Array(), falses = Fuse.Array(),
-       object = Fuse.Object(this), length = parseInt(object.length, 10) || 0;
+       object = Fuse.Object(this), length = object.length >>> 0;
 
       for ( ; i < length; i++) if (i in object)
         (callback.call(thisArg, object[i], i, object) ?
@@ -350,7 +345,7 @@
 
     this.pluck = function pluck(property) {
       var i = 0, results = Fuse.Array(), object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       for ( ; i < length; i++) if (i in object)
         results[i] = object[i][property];
@@ -360,7 +355,7 @@
     this.sortBy = function sortBy(callback, thisArg) {
       callback = callback || Fuse.K;
       var value, results = Fuse.Array(), object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       while (length--) {
         value = object[length];
@@ -376,7 +371,7 @@
     this.zip = function zip() {
       var i = 0, results = Fuse.Array(), callback = Fuse.K,
        args = slice.call(arguments, 0), object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       if (typeof proto.last.call(args) === 'function')
         callback = args.pop();
@@ -411,9 +406,7 @@
       callback = callback || Fuse.K;
       if (!Fuse.Object.isFunction(callback)) throw new TypeError;
 
-      var i = 0, object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
-
+      var i = 0, object = Fuse.Object(this), length = object.length >>> 0;
       for ( ; i < length; i++)
         if (i in object && !callback.call(thisArg, object[i], i, object))
           return false;
@@ -426,7 +419,7 @@
       if (!Fuse.Object.isFunction(callback)) throw new TypeError;
 
       var i = 0, results = Fuse.Array(), object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       for ( ; i < length; i++)
         if (i in object && callback.call(thisArg, object[i], i, object))
@@ -438,9 +431,7 @@
     if (!this.forEach) this.forEach = function forEach(callback, thisArg) {
       if (!Fuse.Object.isFunction(callback)) throw new TypeError;
 
-      var i = 0, object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
-
+      var i = 0, object = Fuse.Object(this), length = object.length >>> 0;
       if (thisArg) {
         for ( ; i < length; i++)
           i in object && callback.call(thisArg, object[i], i, object);
@@ -452,8 +443,8 @@
 
     // ECMA-5 15.4.4.14
     if (!this.indexOf) this.indexOf = function indexOf(item, fromIndex) {
-      fromIndex = parseInt(fromIndex, 10) || 0;
-      var object = Fuse.Object(this), length = parseInt(object.length, 10) || 0;
+      fromIndex = fromIndex >> 0;
+      var object = Fuse.Object(this), length = object.length >>> 0;
       if (fromIndex < 0) fromIndex = length + fromIndex;
 
       // ECMA-5 draft oversight, should use [[HasProperty]] instead of [[Get]]
@@ -465,11 +456,8 @@
 
     // ECMA-5 15.4.4.15
     if (!this.lastIndexOf) this.lastIndexOf = function lastIndexOf(item, fromIndex) {
-      var object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
-
-      fromIndex = arguments.length === 2 ?
-        parseInt(fromIndex, 10) || 0 : length;
+      var object = Fuse.Object(this), length = object.length >>> 0;
+      fromIndex = arguments.length === 2 ? fromIndex >> 0 : length;
 
       if (!length) return Fuse.Number(-1);
       if (fromIndex > length) fromIndex = length - 1;
@@ -487,7 +475,7 @@
       if (!Fuse.Object.isFunction(callback)) throw new TypeError;
 
       var i = 0, results = Fuse.Array(), object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
+       length = object.length >>> 0;
 
       if (thisArg) {
         for ( ; i < length; i++)
@@ -504,9 +492,7 @@
       callback = callback || Fuse.K;
       if (!Fuse.Object.isFunction(callback)) throw new TypeError;
 
-      var i = 0, object = Fuse.Object(this),
-       length = parseInt(object.length, 10) || 0;
-
+      var i = 0, object = Fuse.Object(this), length = object.length >>> 0;
       for ( ; i < length; i++)
         if (i in object && callback.call(thisArg, object[i], i, object))
           return true;
