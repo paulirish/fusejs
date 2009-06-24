@@ -62,6 +62,7 @@
         // Other
         hasKey = function hasKey(object, property) {
           if (object == null) throw new TypeError;
+          object = Object(object);
           return object[property] !== object.constructor.prototype[property];
         };
       }
