@@ -36,7 +36,9 @@
     function getSheetElements() {
       var i = 0, link, links = Fuse._doc.getElementsByTagName('LINK'),
        results = Fuse.List.fromNodeList(Fuse._doc.getElementsByTagName('STYLE'));
-      while (link = links[i++]) results.push(link);
+      while (link = links[i++])
+        if (link.rel.toLowerCase() === 'stylesheet')
+          results.push(link);
       return results;
     }
 

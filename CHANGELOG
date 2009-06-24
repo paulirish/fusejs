@@ -1,3 +1,5 @@
+* Ensure LINK elements collected in the dom-loaded solution have a `rel` attribute of `stylesheet` (case-insensitive). [jddalton, Simo Kinnunen]
+
 * Allow Element#insert, Element#setStyle, Element#writeAttribute, Fuse.Ajax.Request#setRequestHeaders, and Fuse.Ajax.Responders#register to accept a Fuse.Hash object. [Prototype LH #718] [jddalton, Matthew Guscott]
 
 * Pass global instead of null to Function#call and Function#apply. [jddalton]
