@@ -447,7 +447,7 @@
     }
 
     // clean scope
-    var Bug = null, Feature = null, concatList = null, document = null,
+    var $ = null, $$ = null, Bug = null, Feature = null, concatList = null, document = null,
      expando = null, getDocument = null, getNodeName = null, getWindow = null,
      global = null, isHostObject = null, prependList = null, slice = null,
      userAgent = null, window = null;

@@ -2,7 +2,7 @@
 
   Fuse.addNS('Util');
 
-  Fuse.Util.$ = global.$ = (function() {
+  $ = Fuse.Util.$ = (function() {
     function $(element) {
       if (arguments.length > 1) {
         for (var i = 0, elements = Fuse.List(), length = arguments.length; i < length; i++)

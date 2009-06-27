@@ -37,11 +37,6 @@ h2 a:hover { color:blue }
 a:visited { color:blue }
 a:hover { color:red }
 
-iframe {
-  width: 600px;
-  height: 400px;
-}
-
 .subtest {
   margin-top:-0.5em;
 }

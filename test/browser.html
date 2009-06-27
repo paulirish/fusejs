@@ -1,225 +1,226 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
-  <head>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <title>FuseJS object browser</title>
-    <style type="text/css" media="screen">
-      body {
-        font-family: Lucida Grande, Verdana, sans-serif;
-        font-size: 13px;
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<title>FuseJS: Object browser</title>
+<style type="text/css" media="screen">
+  body {
+    font-family: Lucida Grande, Verdana, sans-serif;
+    font-size: 13px;
+  }
+
+  .inspector {
+    margin: 1%;
+    float: left;
+    width: 31%;
+    border: 1px solid #ccc;
+    background-color: white;
+  }
+
+  .inspector h2 {
+    font-size: 13px;
+    margin: 0;
+    text-align: center;
+    padding: 5px;
+    background-color: #e6e6e6;
+    border-bottom: 1px solid #999;
+  }
+
+  .inspector ul {
+    height: 200px;
+    overflow: auto;
+    margin: 0;
+    padding-left: 0;
+  }
+
+  .inspector li {
+    cursor: pointer;
+    list-style-type: none;
+    padding: 2px 5px 2px 30px;
+    color: #333;
+  }
+
+  .inspector li.selected {
+    background-color: #888;
+    color: #fff;
+  }
+
+  .inspector.active li.selected {
+    background-color: #1a76fd;
+    color: #fff;
+  }
+
+  #path, #value {
+    width: 97%;
+    margin: 1%;
+  }
+
+  #path {
+    margin-bottom: 0;
+    border: 1px solid #ccc;
+    border-bottom: 1px solid #999;
+    background-color: #e6e6e6;
+  }
+
+  #value {
+    margin-top: 0;
+    border: 1px solid #ccc;
+    border-top: none;
+    overflow: auto;
+  }
+
+  #path_content, #value_content {
+    display: block;
+    padding: 15px 30px 15px 30px;
+  }
+</style>
+<script type="text/javascript" src="../dist/fuse.js"></script>
+<script type="text/javascript">
+  var $ = Fuse.Util.$;
+
+  var Browser = Fuse.Class({
+    'initialize': function(element, name, value, options) {
+      this.element = $(element);
+      this.name    = name;
+      this.value   = value;
+      this.history = Fuse.List();
+      Fuse.Object.extend(this, options);
+      this.reset();
+    },
+
+    'reset': function() {
+      this.go(this.name, this.value);
+    },
+
+    'refresh': function() {
+      var elements = this.history.slice(-3).pluck('element');
+
+      Fuse.Util.$A(this.element.childNodes).each(function(element) {
+        if (element && !elements.contains(element))
+          this.element.removeChild(element);
+      }, this);
+
+      var children = Fuse.Util.$A(this.element.childNodes);
+      elements.each(function(element, index) {
+        Element.removeClassName(element, 'active');
+        var child = children[index];
+        if (!child)
+          this.element.appendChild(element);
+        else if (!element.parentNode)
+          this.element.insertBefore(element, child);
+      }, this);
+
+      this.setTitle();
+      this.setValue();
+    },
+
+    'setTitle': function() {
+      if (this.titleElement)
+        this.titleElement.innerHTML =
+          this.history.pluck('name').invoke('escapeHTML').join('.');
+    },
+
+    'setValue': function() {
+      if (this.valueElement)
+        this.valueElement.innerHTML =
+          this.currentValue().escapeHTML() + '&nbsp;';
+    },
+
+    'currentValue': function() {
+      try {
+        return Fuse.Object.inspect(this.current());
+      } catch (e) {
+        return Fuse.String('(Internal Function)');
       }
+    },
 
-      .inspector {
-        margin: 1%;
-        float: left;
-        width: 31%;
-        border: 1px solid #ccc;
-        background-color: white;
-      }
+    'current': function() {
+      return this.history.last().value;
+    },
 
-      .inspector h2 {
-        font-size: 13px;
-        margin: 0;
-        text-align: center;
-        padding: 5px;
-        background-color: #e6e6e6;
-        border-bottom: 1px solid #999;
-      }
+    'go': function(name, value) {
+      var from = this.history.last();
+      this.history.push(new Inspector(this, name, value));
+      this.refresh();
+      if (from)
+        Element.addClassName(from.element, 'active');
+    }
+  });
 
-      .inspector ul {
-        height: 200px;
-        overflow: auto;
-        margin: 0;
-        padding-left: 0;
-      }
+  var Inspector = Fuse.Class({
+    'initialize': function(browser, name, value) {
+      this.browser = browser;
+      this.name    = Fuse.String(name);
+      this.value   = value;
+      this.id      = 'inspector_' + new Date().getTime();
+      this.history = this.browser.history.toArray();
+      this.history.push(this);
+      this.createElement();
+      this.populate();
+    },
 
-      .inspector li {
-        cursor: pointer;
-        list-style-type: none;
-        padding: 2px 5px 2px 30px;
-        color: #333;
-      }
+    'properties': function() {
+      var properties = Fuse.List();
+      for (var property in this.value)
+        properties.push(property);
+      properties.sort();
+      return properties;
+    },
 
-      .inspector li.selected {
-        background-color: #888;
-        color: #fff;
-      }
+    'createElement': function() {
+      var element = document.createElement('div');
+      element.className = 'inspector';
+      element.id = this.id;
+      this.element = element;
 
-      .inspector.active li.selected {
-        background-color: #1a76fd;
-        color: #fff;
-      }
+      var title = document.createElement('h2');
+      title.innerHTML = Fuse.String(this.name).escapeHTML();
+      this.titleElement = title;
 
-      #path, #value {
-        width: 97%;
-        margin: 1%;
-      }
+      var list = document.createElement('ul');
+      this.listElement = list;
 
-      #path {
-        margin-bottom: 0;
-        border: 1px solid #ccc;
-        border-bottom: 1px solid #999;
-        background-color: #e6e6e6;
-      }
+      element.appendChild(title);
+      element.appendChild(list);
+    },
 
-      #value {
-        margin-top: 0;
-        border: 1px solid #ccc;
-        border-top: none;
-        overflow: auto;
-      }
+    'populate': function() {
+      this.properties().each(function(property) {
+        var li = document.createElement('li');
+        li.innerHTML = Fuse.String(property).escapeHTML();
+        li.onclick   = Fuse.Function.bind(this.select, this, li);
+        li._property = property;
+        this.listElement.appendChild(li);
+      }, this);
+    },
 
-      #path_content, #value_content {
-        display: block;
-        padding: 15px 30px 15px 30px;
-      }
+    'select': function(element) {
+      this.unselect();
+      Element.addClassName(element, 'selected');
+      this.selectedProperty = element;
+      this.browser.history = this.history.toArray();
+      this.browser.go(element._property, this.value[element._property]);
+    },
 
-    </style>    
-    <script type="text/javascript" src="../dist/fuse.js"></script>
-    <script type="text/javascript">
-      var Browser = Fuse.Class({
-        'initialize': function(element, name, value, options) {
-          this.element = $(element);
-          this.name    = name;
-          this.value   = value;
-          this.history = Fuse.List();
-          Fuse.Object.extend(this, options);
-          this.reset();
-        },
-
-        'reset': function() {
-          this.go(this.name, this.value);
-        },
-
-        'refresh': function() {
-          var elements = this.history.slice(-3).pluck('element');
-
-          Fuse.Util.$A(this.element.childNodes).each(function(element) {
-            if (element && !elements.contains(element))
-              this.element.removeChild(element);
-          }, this);
-
-          var children = Fuse.Util.$A(this.element.childNodes);
-          elements.each(function(element, index) {
-            Element.removeClassName(element, 'active');
-            var child = children[index];
-            if (!child)
-              this.element.appendChild(element);
-            else if (!element.parentNode)
-              this.element.insertBefore(element, child);
-          }, this);
-
-          this.setTitle();
-          this.setValue();
-        },
-
-        'setTitle': function() {
-          if (this.titleElement)
-            this.titleElement.innerHTML =
-              this.history.pluck('name').invoke('escapeHTML').join('.');
-        },
-
-        'setValue': function() {
-          if (this.valueElement)
-            this.valueElement.innerHTML = 
-              this.currentValue().escapeHTML() + '&nbsp;';
-        },
-
-        'currentValue': function() {
-          try {
-            return Fuse.Object.inspect(this.current());
-          } catch (e) {
-            return Fuse.String('(Internal Function)');
-          }
-        },
-
-        'current': function() {
-          return this.history.last().value;
-        },
-
-        'go': function(name, value) {
-          var from = this.history.last();
-          this.history.push(new Inspector(this, name, value));
-          this.refresh();
-          if (from) 
-            Element.addClassName(from.element, 'active');
-        }
-      });
-
-      var Inspector = Fuse.Class({
-        'initialize': function(browser, name, value) {
-          this.browser = browser;
-          this.name    = Fuse.String(name);
-          this.value   = value;
-          this.id      = 'inspector_' + new Date().getTime();
-          this.history = this.browser.history.toArray();
-          this.history.push(this);
-          this.createElement();
-          this.populate();
-        },
-
-        'properties': function() {
-          var properties = Fuse.List();
-          for (var property in this.value)
-            properties.push(property);
-          properties.sort();
-          return properties;
-        },
-
-        'createElement': function() {
-          var element = document.createElement('div');
-          element.className = 'inspector';
-          element.id = this.id;
-          this.element = element;
-
-          var title = document.createElement('h2');
-          title.innerHTML = Fuse.String(this.name).escapeHTML();
-          this.titleElement = title;
-
-          var list = document.createElement('ul');
-          this.listElement = list;
-
-          element.appendChild(title);
-          element.appendChild(list);          
-        },
-
-        'populate': function() {
-          this.properties().each(function(property) {
-            var li = document.createElement('li');
-            li.innerHTML = Fuse.String(property).escapeHTML();
-            li.onclick   = Fuse.Function.bind(this.select, this, li);
-            li._property = property;
-            this.listElement.appendChild(li);
-          }, this);
-        },
-
-        'select': function(element) {
-          this.unselect();
-          Element.addClassName(element, 'selected');
-          this.selectedProperty = element;
-          this.browser.history = this.history.toArray();
-          this.browser.go(element._property, this.value[element._property]);
-        },
-
-        'unselect': function() {
-          if (this.selectedProperty)
-            Element.removeClassName(this.selectedProperty, 'selected');
-          this.selectedProperty = null;
-        }
-      });
-    </script>
-  </head>
-  <body>
-    <div id="browser_wrapper">
-      <div id="browser"></div>
-      <div style="clear: left"></div>
-    </div>
-    <h1 id="path"><span id="path_content"></span></h1>
-    <pre id="value"><div id="value_content"></div></pre>
-    <script type="text/javascript">
-      new Browser('browser', 'window', window,
-        { 'titleElement': $('path_content'), 'valueElement': $('value_content') });
-    </script>
-  </body>
+    'unselect': function() {
+      if (this.selectedProperty)
+        Element.removeClassName(this.selectedProperty, 'selected');
+      this.selectedProperty = null;
+    }
+  });
+</script>
+</head>
+<body>
+  <div id="browser_wrapper">
+    <div id="browser"></div>
+    <div style="clear: left"></div>
+  </div>
+  <h1 id="path"><span id="path_content"></span></h1>
+  <pre id="value"><div id="value_content"></div></pre>
+  <script type="text/javascript">
+    new Browser('browser', 'window', window,
+      { 'titleElement': $('path_content'), 'valueElement': $('value_content') });
+  </script>
+</body>
 </html>

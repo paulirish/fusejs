@@ -172,7 +172,7 @@
 
                     // if styleSheet was still loading when test rule
                     // was added it will have removed the rule.
-                    if (rules[lastIndex].cssText.indexOf(c.className) > -1) {
+                    if (rules[lastIndex].selectorText.indexOf(c.className) > -1) {
                       done = false;
 
                       // if the styleSheet has only the test rule then skip
@@ -210,21 +210,27 @@
     // Ensure the document is not in a frame because
     // doScroll() will not throw an error when the document
     // is framed. Fallback on document readyState.
-    if (!Feature('ELEMENT_ADD_EVENT_LISTENER') &&
-        Feature('ELEMENT_DO_SCROLL') && global == global.top) {
-      // based on Diego Perini's IEContentLoaded
+    if (!Feature('ELEMENT_ADD_EVENT_LISTENER') && Feature('ELEMENT_DO_SCROLL')) {
+
+      // Avoid a potential browser hang when checking global.top (thanks Rich Dougherty)
+      // Checking global.frameElement could throw if not accessible.
+      var isFramed = true;
+      try { isFramed = global.frameElement != null } catch(e) { }
+
+      // Derived with permission from Diego Perini's IEContentLoaded
       // http://javascript.nwbox.com/IEContentLoaded/
-      checkDomLoadedState = function() {
-        if (Fuse._doc.loaded) readyStatePoller.clear();
-        else {
-          if (Fuse._doc.readyState === 'complete')
-            fireDomLoadedEvent();
+      if (!isFramed)
+        checkDomLoadedState = function() {
+          if (Fuse._doc.loaded) readyStatePoller.clear();
           else {
-            try { Fuse._div.doScroll() } catch(e) { return }
-            fireDomLoadedEvent();
+            if (Fuse._doc.readyState === 'complete')
+              fireDomLoadedEvent();
+            else {
+              try { Fuse._div.doScroll() } catch(e) { return }
+              fireDomLoadedEvent();
+            }
           }
-        }
-      };
+        };
     }
     else if (Feature('ELEMENT_ADD_EVENT_LISTENER'))
       Fuse._doc.observe('DOMContentLoaded', checkDomLoadedState);

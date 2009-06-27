@@ -488,13 +488,14 @@
         // If an event name is passed without a handler,
         // we stop observing all handlers of that type.
         var length = ec.handlers.length;
-        while (length--) Event.stopObserving(element, eventName, length);
+        if (!length) Event.stopObserving(element, eventName, 0);
+        else while (length--) Event.stopObserving(element, eventName, length);      
         return element;
       }
       else if (!eventName || eventName == '') {
         // If both the event name and the handler are omitted,
         // we stop observing _all_ handlers on the element.
-        for (var eventName in c.events)
+        for (eventName in c.events)
           Event.stopObserving(element, eventName);
         return element;
       }
@@ -556,8 +557,9 @@
       event = event || global.event;
       if (!Fuse._doc.loaded)
         _domLoadWrapper(event);
-      else if (Event.cache['1'].events['dom:loaded'])
+      else if (Event.cache['2'] && Event.cache['2'].events['dom:loaded'])
         return Fuse.Function.defer(_winLoadWrapper, event);
+
       event.eventName = null;
       _winLoadDispatcher(event);
       Event.stopObserving(global, 'load');

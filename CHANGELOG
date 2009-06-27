@@ -1,3 +1,11 @@
+* Remove the dollar sign method from the global namespace. [jddalton]
+
+* Ensure Event cache is cleared when there are no event handlers and fix a typo in _winLoadWrapper(). [jddalton]
+
+* Make the dom-loaded solution rely on cross-browser rules[n].selectorText instead of rules[n].cssText. [jddalton]
+
+* Avoid an edge-case massive delay in the dom-loaded solution by using global.frameElement instead of global.top. [jQuery Trac #4787] [jddalton, Rich Dougherty]
+
 * Make Fuse.Number methods follow spec and work with a generic `this` as well as optimize the math methods. [jddalton]
 
 * Rename Fuse.String#dasherize to `hyphenate`, variables used in String methods from `hash` to `object`, and Fuse.Class private `_emptyFunction` to `_subclass`. [jddalton, kangax, Valerio Proietti]
