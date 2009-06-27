@@ -164,6 +164,14 @@ new Test.Unit.Runner({
     });
   },
 
+  'testRespondersCanBeHash': function(){
+    var hashResponder = $H({ 'onComplete': function(req) { /* dummy */ } });
+
+    Fuse.Ajax.Responders.register(hashResponder);
+    this.assertEqual(2, Fuse.Ajax.Responders.responders['onComplete'].length);
+    Fuse.Ajax.Responders.unregister(hashResponder);
+  },
+
   'testEvalResponseShouldBeCalledBeforeOnComplete': function() {
     if (this.isRunningFromRake) {
       this.assertEqual('', getInnerHTML('content'));
@@ -407,21 +415,21 @@ new Test.Unit.Runner({
           extendDefault({
             'requestHeaders': ['X-Foo', 'foo', 'X-Bar', 'bar']
         }));
-      });
+      }, 'requestHeaders as array');
 
       this.assertNothingRaised(function() {
         Fuse.Ajax.Request('/response',
           extendDefault({
             'requestHeaders': { 'X-Foo': 'foo', 'X-Bar': 'bar' }
         }));
-      });
+      }, 'requestHeaders as object');
 
       this.assertNothingRaised(function() {
         Fuse.Ajax.Request('/response',
           extendDefault({
             'requestHeaders': $H({ 'X-Foo': 'foo', 'X-Bar': 'bar' })
         }));
-      });
+      }, 'requestHeaders as hash object');
     }
     else this.info(message);
   },

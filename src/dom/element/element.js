@@ -574,7 +574,7 @@
 
       if (insertions) {
         if (insertions instanceof Fuse.Hash)
-          insertions = insertions.toObject();
+          insertions = insertions._object;
 
         if (Fuse.Object.isString(insertions) ||
             Fuse.Object.isNumber(insertions) || _isInsertable(insertions) ||

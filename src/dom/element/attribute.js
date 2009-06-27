@@ -26,7 +26,7 @@
       element = $(element);
       var node, contentName, attr, attributes = { }, T = Element.Attribute;
 
-      if (name instanceof Fuse.Hash) attributes = name.toObject();
+      if (name instanceof Fuse.Hash) attributes = name._object;
       else if (!Fuse.Object.isString(name)) attributes = name;
       else attributes[name] = (typeof value === 'undefined') ? true : value;
 

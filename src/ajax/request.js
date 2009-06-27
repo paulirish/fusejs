@@ -163,11 +163,8 @@
           for (var i = 0, length = extras.length; i < length; i += 2)
             headers[extras[i]] = extras[i + 1];
         }
-        else if (extras instanceof Fuse.Hash) {
-          var i = 0, pairs = extras._pairs;
-          while (pair = pairs[i++]) headers[pair[0]] = pair[1];
-        }
         else {
+          if (extras instanceof Fuse.Hash) extras = extras._object;
           for (key in extras) headers[key] = extras[key];
         }
       }

@@ -6,10 +6,16 @@ new Test.Unit.Runner({
      template  = Fuse.Template(source);
 
     this.assertEqual('<tr><td>Sam</td><td>21</td></tr>',
-      template.evaluate(person));
+      template.evaluate(person),
+      'Regular object');
+      
+    this.assertEqual('<tr><td>Sam</td><td>21</td></tr>',
+      template.evaluate($H(person)),
+      'Hash object');
 
     this.assertEqual('<tr><td></td><td></td></tr>',
-      template.evaluate({ }));
+      template.evaluate({ }),
+      'Empty object');
   },
 
   'testTemplateEvaluationWithEmptyReplacement': function() {

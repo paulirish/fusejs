@@ -8,10 +8,11 @@
 
         this.options.method = this.options.method.toLowerCase();
 
-        if (Fuse.Object.isString(this.options.parameters))
-          this.options.parameters = Fuse.String(this.options.parameters).toQueryParams();
-        else if (this.options.parameters instanceof Fuse.Hash)
-          this.options.parameters = this.options.parameters.toObject();
+        var params = this.options.parameters;
+        if (Fuse.Object.isString(params))
+          this.options.parameters = Fuse.String(params).toQueryParams();
+        else if (params instanceof Fuse.Hash)
+          this.options.parameters = params.toObject();
       }
       return Base;
     })()

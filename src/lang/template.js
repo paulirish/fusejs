@@ -21,7 +21,9 @@
     'evaluate': (function() {
       function evaluate(object) {
         if (object) {
-          if (typeof object.toTemplateReplacements === 'function')
+          if (object instanceof Fuse.Hash)
+            object = object._object;
+          else if (typeof object.toTemplateReplacements === 'function')
             object = object.toTemplateReplacements();
           else if (typeof object.toObject === 'function')
             object = object.toObject();

@@ -1,3 +1,5 @@
+* Optimize Hash objects by adding a Fuse.Hash#_data property and correct the Fuse.Hash#_object property. [jddalton]
+
 * Use 1 * foo to more quickly coerce data to numbers instead of +foo. [kangax]
 
 * Change Array method internals from Fuse.Object -> Object usage and throw a TypeError if `this` is null/undefined. [jddalton]

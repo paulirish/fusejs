@@ -145,7 +145,7 @@
           : element;
       }
       if (styles instanceof Fuse.Hash)
-        styles = styles.toObject();
+        styles = styles._object;
 
       for (key in styles) {
         name = FLOAT_TRANSLATIONS[key] || key;

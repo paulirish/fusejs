@@ -21,17 +21,19 @@
 
     function _set(hash, key, value) {
       if (!key.length) return hash;
-      var expandoKey = expando + key, keys = hash._keys, o = hash._object;
+      var data = hash._data, expandoKey = expando + key, keys = hash._keys;
 
       // avoid a method call to Hash#hasKey
-      if (expandoKey in o)
+      if (expandoKey in data)
         _unsetByIndex(hash, _indexOfKey(hash, key));
 
       keys.push(key = Fuse.String(key));
 
       hash._pairs.push(Fuse.List(key, value));
       hash._values.push(value);
-      hash._object[expandoKey] = value;
+
+      hash._data[expandoKey] =
+      hash._object[key] = value;
       return hash;
     }
 
@@ -50,7 +52,8 @@
 
     function _unsetByIndex(hash, index) {
       var keys = hash._keys;
-      delete hash._object[expando + keys[index]];
+      delete hash._data[expando + keys[index]];
+      delete hash._object[keys[index]];
 
       keys.splice(index, 1);
       hash._pairs.splice(index, 1);
@@ -85,11 +88,11 @@
 
       'unset': (function() {
         function unset(key) {
-          var i = 0, o = this._object,
+          var data = this._data, i = 0,
            keys = Fuse.List.isArray(key) ? key : arguments;
 
           while (key = keys[i++])  {
-            if ((expando + key) in o)
+            if ((expando + key) in data)
               _unsetByIndex(this, _indexOfKey(this, key));
           }
           return this;
@@ -130,7 +133,7 @@
         }
       }
       else {
-        var pair, count = +callback, i = 0, results = Fuse.List();
+        var pair, count = 1 * callback, i = 0, results = Fuse.List();
         if (isNaN(count)) return results;
         count = count < 1 ? 1 : count;
         while (i < count && (pair = pairs[i])) results[i++] = _returnPair(pair);
@@ -151,7 +154,7 @@
         }
       }
       else {
-        var count = +callback, results = Fuse.List();
+        var count = 1 * callback, results = Fuse.List();
         if (isNaN(count)) return results;
         count = count < 1 ? 1 : count > length ? length : count;
         var  i = 0, pad = length - count;
@@ -178,6 +181,7 @@
 
   (function() {
     this.clear = function clear() {
+      this._data     = { };
       this._object   = { };
       this._keys     = Fuse.List();
       this._pairs    = Fuse.List();
@@ -211,7 +215,7 @@
     };
 
     this.get = function get(key) {
-      return this._object[expando + key];
+      return this._data[expando + key];
     };
 
     this.grep = function grep(pattern, callback, thisArg) {
@@ -231,7 +235,7 @@
     };
 
     this.hasKey = function hasKey(key) {
-      return (expando + key) in this._object;
+      return (expando + key) in this._data;
     };
 
     this.inspect = function inspect() {
@@ -294,7 +298,7 @@
     };
 
     this.toQueryString = function toQueryString() {
-      return Fuse.Object.toQueryString(this.toObject());
+      return Fuse.Object.toQueryString(this._object);
     };
 
     this.values = function values() {
@@ -313,7 +317,7 @@
       var j, key, pair, i = 0, pairs = this._pairs;
       while (pair = pairs[i++]) {
         j = 0; values = Fuse.List(); key = pair[0];
-        while (j < length) values[j] = hashes[j++]._object[expando + key];
+        while (j < length) values[j] = hashes[j++]._data[expando + key];
         result.set(key, callback(values, key, this));
       }
       return result;

@@ -292,29 +292,40 @@ new Test.Unit.Runner({
 
   'testElementMethodInsert': function() {
     $('element-insertions-main').insert({ 'before':'some text before' });
-
     this.assert(
-      getInnerHTML('element-insertions-container').startsWith('some text before'));
+      getInnerHTML('element-insertions-container').startsWith('some text before'),
+      'before');
+
+    $('element-insertions-container').removeChild($('element-insertions-container').firstChild);
+    $('element-insertions-main').insert($H({ 'before':'some more text before' }));
+    this.assert(
+      getInnerHTML('element-insertions-container').startsWith('some more text before'),
+      'before with hash object');
 
     $('element-insertions-main').insert({ 'after': 'some text after'});
     this.assert(
-      getInnerHTML('element-insertions-container').endsWith('some text after'));
+      getInnerHTML('element-insertions-container').endsWith('some text after'),
+      'after');
 
     $('element-insertions-main').insert({ 'top': 'some text top'});
     this.assert(
-      getInnerHTML('element-insertions-main').startsWith('some text top'));
+      getInnerHTML('element-insertions-main').startsWith('some text top'),
+      'top');
 
     $('element-insertions-main').insert({ 'bottom': 'some text bottom'});
     this.assert(
-      getInnerHTML('element-insertions-main').endsWith('some text bottom'));
+      getInnerHTML('element-insertions-main').endsWith('some text bottom'),
+      'bottom');
 
     $('element-insertions-main').insert('some more text at the bottom');
     this.assert(
-      getInnerHTML('element-insertions-main').endsWith('some more text at the bottom'));
+      getInnerHTML('element-insertions-main').endsWith('some more text at the bottom'),
+      'more inserted at bottom');
 
     $('element-insertions-main').insert({ 'TOP': 'some text uppercase top' });
     this.assert(
-      getInnerHTML('element-insertions-main').startsWith('some text uppercase top'));
+      getInnerHTML('element-insertions-main').startsWith('some text uppercase top'),
+      'TOP (uppercase position)');
 
     $('element-insertions-multiple-main').insert({
       'top': '1', 'bottom': 2, 'before': new Element('p').update('3'), 'after': '4'
@@ -1225,13 +1236,19 @@ new Test.Unit.Runner({
   },
 
   'testElementSetStyle': function() {
-    Element.setStyle('style_test_3',{ 'left': '2px' });
-    this.assertEqual('2px', $('style_test_3').style.left);
+    Element.setStyle('style_test_3', { 'left': '2px' });
+    this.assertEqual('2px', $('style_test_3').style.left,
+      'style object left');
 
-    Element.setStyle('style_test_3',{ marginTop: '1px' });
-    this.assertEqual('1px', $('style_test_3').style.marginTop);
+    Element.setStyle('style_test_3', { 'marginTop': '1px' });
+    this.assertEqual('1px', $('style_test_3').style.marginTop,
+      'style object margin top');
 
-    $('style_test_3').setStyle({ marginTop: '2px', left: '-1px' });
+    Element.setStyle('style_test_3', { 'marginTop': '3px' });
+    this.assertEqual('3px', $('style_test_3').style.marginTop,
+      'style hash object margin-top');
+
+    $('style_test_3').setStyle({ 'marginTop': '2px', 'left': '-1px' });
     this.assertEqual('-1px', $('style_test_3').style.left);
     this.assertEqual('2px',  $('style_test_3').style.marginTop);
     this.assertEqual('none', $('style_test_3').getStyle('float'));
@@ -1586,26 +1603,6 @@ new Test.Unit.Runner({
     this.assertEqual(element, element.writeAttribute('id', 'write_attribute_test'));
     this.assertEqual('write_attribute_test', element.id);
 
-    this.assertEqual('http://fusejs.com/', $('write_attribute_link')
-      .writeAttribute({ 'href': 'http://fusejs.com/', title: 'Home of Fuse' }).href);
-
-    this.assertEqual('Home of Fuse', $('write_attribute_link').title);
-
-    var element2 = Element.extend(document.createElement('p'));
-    element2.writeAttribute('id', 'write_attribute_without_hash');
-    this.assertEqual('write_attribute_without_hash', element2.id);
-
-    element2.writeAttribute('animal', 'cat');
-    this.assertEqual('cat', element2.readAttribute('animal'));
-
-    $('attributes_with_issues_form').writeAttribute('encType', 'multipart/form-data');
-    this.assertEqual('multipart/form-data',
-      $('attributes_with_issues_form').readAttribute('encType'));
-
-    var theForm = new Element('form',
-      { 'name':'encTypeForm', 'method':'post', 'action':'myPage.php', 'enctype':'multipart/form-data' });
-    this.assertEqual('multipart/form-data', theForm.readAttribute('encType'));
-
     // test null/undefined name argument
     this.assertIdentical(element, element.writeAttribute(),
       'Failed when passing no name.');
@@ -1617,6 +1614,20 @@ new Test.Unit.Runner({
       'Failed when passing an undefined name.');
 
     element.remove();
+
+    var element2 = Element.extend(document.createElement('p'));
+    element2.writeAttribute('id', 'write_attribute_without_hash');
+    this.assertEqual('write_attribute_without_hash', element2.id);
+
+    element2.writeAttribute('animal', 'cat');
+    this.assertEqual('cat', element2.readAttribute('animal'));
+
+    element2.writeAttribute($H({ 'id': 'write_from_hash' }));
+    this.assertEqual('write_from_hash', element2.id);
+
+    this.assertEqual('http://fusejs.com/', $('write_attribute_link')
+      .writeAttribute({ 'href': 'http://fusejs.com/', 'title': 'Home of Fuse' }).href);
+    this.assertEqual('Home of Fuse', $('write_attribute_link').title);
   },
 
   'testElementWriteAttributeWithBooleans': function() {
@@ -1699,6 +1710,14 @@ new Test.Unit.Runner({
 
     var iframe = new Element('iframe', { 'frameborder': 0 });
     this.assertEqual(0, parseInt(iframe.readAttribute('frameborder')));
+
+    $('attributes_with_issues_form').writeAttribute('encType', 'multipart/form-data');
+    this.assertEqual('multipart/form-data',
+      $('attributes_with_issues_form').readAttribute('encType'));
+
+    var theForm = new Element('form',
+      { 'name':'encTypeForm', 'method':'post', 'action':'myPage.php', 'enctype':'multipart/form-data' });
+    this.assertEqual('multipart/form-data', theForm.readAttribute('encType'));
   },
 
   'testElementWriteAttributeWithCustom': function() {

@@ -18,7 +18,7 @@
     this.register = function register(responder) {
       var m, handler, name;
       if (responder instanceof Fuse.Hash)
-        resonder = responder.toObject();
+        responder = responder._object;
 
       for (name in responder) {
         m = responder[name];
@@ -32,7 +32,11 @@
     };
 
     this.unregister = function unregister(responder) {
-      for (var name in responder)
+      var name;
+      if (responder instanceof Fuse.Hash)
+        responder = responder._object;
+
+      for (name in responder)
         this.responders[name] = (this.responders[name] || Fuse.List())
          .filter(function(c) { return c.__method !== responder[name] });
     };
