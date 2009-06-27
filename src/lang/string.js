@@ -168,12 +168,12 @@
 
     this.toQueryParams = function toQueryParams(separator) {
       if (this == null) throw new TypeError;
-      var match = String(this).split('?'), hash = Fuse.Object();
-      if (match.length > 1 && !match[1]) return hash;
+      var match = String(this).split('?'), object = Fuse.Object();
+      if (match.length > 1 && !match[1]) return object;
 
       (match = (match = match[1] || match[0]).split('#')) &&
         (match = match[0].split(' ')[0]);
-      if (!match) return hash;
+      if (!match) return object;
 
       var pair, key, value, undef, index, i = 0,
        pairs = match.split(separator || '&'), length = pairs.length;
@@ -189,13 +189,13 @@
           if (value) value = decodeURIComponent(value);
         } else key = pair;
 
-        if (Fuse.Object.hasKey(hash, key)) {
-          if (!Fuse.List.isArray(hash[key])) hash[key] = [hash[key]];
-          hash[key].push(value);
+        if (Fuse.Object.hasKey(object, key)) {
+          if (!Fuse.List.isArray(object[key])) object[key] = [object[key]];
+          object[key].push(value);
         }
-        else hash[key] = value;
+        else object[key] = value;
       }
-      return hash;
+      return object;
     };
 
     // aliases
@@ -256,7 +256,7 @@
         searchString = String(searchString);
 
         var string = String(this),
-         pos = Number(arguments[1]),
+         pos = 1 * arguments[1], // fast coerce to number
          len = string.length,
          searchLen = searchString.length;
 
@@ -316,7 +316,7 @@
       return Fuse.String(string.charAt(0).toUpperCase() + string.slice(1).toLowerCase());
     };
 
-    this.dasherize = function dasherize() {
+    this.hyphenate = function hyphenate() {
       if (this == null) throw new TypeError;
       return Fuse.String(String(this).replace(/_/g,'-'));
     };
@@ -342,7 +342,7 @@
 
     // prevent JScript bug with named function expressions
     var capitalize = null,
-     dasherize =     null,
+     hyphenate =     null,
      truncate =      null,
      underscore =    null;
   }).call(Fuse.String.Plugin);

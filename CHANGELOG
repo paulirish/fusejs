@@ -1,3 +1,6 @@
+* Rename Fuse.String#dasherize to `hyphenate`, variables used in String methods from `hash` to `object`, and Fuse.Class private `_emptyFunction` to `_subclass`. [jddalton, kangax, Valerio Proietti]
+  Note: Backwards compatibility warning.
+
 * Optimize Hash objects by adding a Fuse.Hash#_data property and correct the Fuse.Hash#_object property. [jddalton]
 
 * Use 1 * foo to more quickly coerce data to numbers instead of +foo. [kangax]

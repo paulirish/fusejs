@@ -356,13 +356,13 @@ new Test.Unit.Runner({
     this.assertEqual('border_bottom_width', Fuse.String('border-Bottom-Width').underscore());
   },
 
-  'testDasherize': function() {
-    this.assertEqual('',        Fuse.String('').dasherize());
-    this.assertEqual('foo',     Fuse.String('foo').dasherize());
-    this.assertEqual('Foo',     Fuse.String('Foo').dasherize());
-    this.assertEqual('foo-bar', Fuse.String('foo-bar').dasherize());
+  'testHyphenate': function() {
+    this.assertEqual('',        Fuse.String('').hyphenate());
+    this.assertEqual('foo',     Fuse.String('foo').hyphenate());
+    this.assertEqual('Foo',     Fuse.String('Foo').hyphenate());
+    this.assertEqual('foo-bar', Fuse.String('foo-bar').hyphenate());
     this.assertEqual('border-bottom-width',
-      Fuse.String('border_bottom_width').dasherize());
+      Fuse.String('border_bottom_width').hyphenate());
   },
 
   'testTruncate': function() {

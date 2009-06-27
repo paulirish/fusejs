@@ -2,7 +2,7 @@
   /* Based on work by Alex Arnell, Joey Hurst, John Resig, and Prototype core */
 
   Fuse.Class = (function() {
-    var _emptyFunction = function() { };
+    var _subclass = function() { };
 
     function _createNamedClass(name) {
       return new Function('', [
@@ -32,9 +32,8 @@
 
       if (parent) {
         // note: Safari 2, inheritance won't work with subclass = new Function;
-        var subclass = _emptyFunction;
-        subclass.prototype = parent.prototype;
-        klass.prototype = new subclass;
+        _subclass.prototype = parent.prototype;
+        klass.prototype = new _subclass;
         parent.subclasses.push(klass);
       }
 
