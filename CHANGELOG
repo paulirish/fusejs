@@ -1,3 +1,5 @@
+* Change Array method internals from Fuse.Object -> Object usage and throw a TypeError if `this` is null/undefined. [jddalton]
+
 * Ensure the `object` argument of Fuse.Object.hasKey() is coerced to an object in all forks of the method. [jddalton] 
 
 * Ensure LINK elements collected in the dom-loaded solution have a `rel` attribute of `stylesheet` (case-insensitive). [jddalton, Simo Kinnunen]
