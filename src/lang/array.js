@@ -115,9 +115,7 @@
             return object[i];
       }
       else {
-        // Fast numeric type conversion:
-        // http://www.jibbering.com/faq/faq_notes/type_convert.html#tcNumber
-        var count = +callback;
+        var count = 1 * callback; // fast coerce to number
         if (isNaN(count)) return Fuse.Array();
         count = count < 1 ? 1 : count > length ? length : count;
         return proto.slice.call(object, 0, count);
@@ -185,7 +183,7 @@
             return object[length];
       }
       else {
-        var results = Fuse.Array(), count = +callback;
+        var results = Fuse.Array(), count = 1 * callback;
         if (isNaN(count)) return results;
 
         count = count < 1 ? 1 : count > length ? length : count;
