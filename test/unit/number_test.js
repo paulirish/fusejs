@@ -15,6 +15,8 @@ new Test.Unit.Runner({
     this.assertEqual('00', Fuse.Number(0).toColorPart());
     this.assertEqual('0a', Fuse.Number(10).toColorPart());
     this.assertEqual('ff', Fuse.Number(255).toColorPart());
+    this.assertEqual('ff', Fuse.Number.toColorPart('255'),
+      'non-number value');
   },
 
   'testNumberToPaddedString': function() {
@@ -29,8 +31,14 @@ new Test.Unit.Runner({
     this.assertEqual('00000012', Fuse.Number(12).toPaddedString(8),
       'length longer than default pad');
 
-    this.assertEqual('12', Fuse.Number(12).toPaddedString(1),
+    this.assertEqual('12',  Fuse.Number(12).toPaddedString(1),
       'shorter than default pad');
+
+    this.assertEqual('100', Fuse.Number.toPaddedString('100', 3),
+      'non-number value');
+
+    this.assertEqual('00',  Fuse.Number.toPaddedString('abc', 2),
+      'non-number value');
   },
 
   'testNumberTimes': function() {
@@ -41,5 +49,10 @@ new Test.Unit.Runner({
     results = [];
     Fuse.Number(5).times(function(i) { results.push(i * this.i) }, { 'i': 2 });
     this.assertEnumEqual([0, 2, 4, 6, 8], results);
+
+    results = [];
+    Fuse.Number.times('5', function(i) { results.push(i) });
+    this.assertEnumEqual([0, 1, 2, 3, 4], results,
+      'non-number value');
   }
 });

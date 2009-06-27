@@ -1,3 +1,5 @@
+* Make Fuse.Number methods follow spec and work with a generic `this` as well as optimize the math methods. [jddalton]
+
 * Rename Fuse.String#dasherize to `hyphenate`, variables used in String methods from `hash` to `object`, and Fuse.Class private `_emptyFunction` to `_subclass`. [jddalton, kangax, Valerio Proietti]
   Note: Backwards compatibility warning.
 
