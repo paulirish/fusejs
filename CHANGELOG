@@ -1,3 +1,5 @@
+* Optimize Element.hasAttribute() by forking if Element#hasAttribute exists. [jddalton, kangax]
+
 * Memoize heavily used Fuse.String methods `capitalize` and `camelize`. [jddalton, kangax]
 
 * Make the Fuse.Class wrapper used for this._super only perform __method.call(this) when no arguments are passed. [jddalton]

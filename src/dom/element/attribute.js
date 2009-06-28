@@ -64,11 +64,12 @@
 
   Element.hasAttribute = (function() {
     function hasAttribute(element, attribute) {
-      if (element.hasAttribute)
-        return element.hasAttribute(attribute);
-      return Element.Simulated.hasAttribute(element, attribute);
+      return element.hasAttribute(attribute);
     }
-    return hasAttribute;
+
+    if (isHostObject(Fuse._docEl, 'hasAttribute'))
+      return hasAttribute;
+    return Element.Methods.Simulated.hasAttribute;
   })();
 
   /*--------------------------------------------------------------------------*/
