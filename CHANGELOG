@@ -1,3 +1,5 @@
+* Memoize heavily used Fuse.String methods `capitalize` and `camelize`. [jddalton, kangax]
+
 * Make the Fuse.Class wrapper used for this._super only perform __method.call(this) when no arguments are passed. [jddalton]
 
 * Remove the dollar sign method from the global namespace. [jddalton]

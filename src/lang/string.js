@@ -305,16 +305,25 @@
 
       function camelize() {
         if (this == null) throw new TypeError;
-        return Fuse.String(this).replace(/\-(\w|$)/g, _replacer);
+        var cached, string = String(this), expandoKey = expando + string;
+        if (cached = _cache[expandoKey]) return cached;
+        return (_cache[expandoKey] = Fuse.String(string).replace(/\-(\w|$)/g, _replacer));
       }
+      var _cache = { };
       return camelize;
     })();
 
-    this.capitalize = function capitalize() {
-      if (this == null) throw new TypeError;
-      var string = String(this);
-      return Fuse.String(string.charAt(0).toUpperCase() + string.slice(1).toLowerCase());
-    };
+    this.capitalize = (function() {
+      function capitalize() {
+        if (this == null) throw new TypeError;
+        var cached, string = String(this), expandoKey = expando + string;
+        if (cached = _cache[expandoKey]) return cached;
+        return (_cache[expandoKey] = Fuse.String(string.charAt(0).toUpperCase() +
+          string.slice(1).toLowerCase()));
+      }
+      var _cache = { };
+      return capitalize;
+    })();
 
     this.hyphenate = function hyphenate() {
       if (this == null) throw new TypeError;
@@ -341,10 +350,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var capitalize = null,
-     hyphenate =     null,
-     truncate =      null,
-     underscore =    null;
+    var hyphenate = null, truncate = null, underscore = null;
   }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/
