@@ -70,9 +70,9 @@
             this._super = ancestor[key];
 
             // execute and capture the result
-            if (arguments.length > 1)
-              result = __method.apply(this, arguments);
-            else result = __method.call(this, arguments[0]);
+            result = arguments.length
+              ? __method.apply(this, arguments)
+              : __method.call(this);
 
             // restore backup and return result
             this._super = backup;
