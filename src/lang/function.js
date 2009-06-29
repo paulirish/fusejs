@@ -157,8 +157,8 @@
           'var object = Fuse.Function, slice = Array.prototype.slice;',
           'function ' + name + '() {',
           'return arguments.length',
-          '? object.' + name + '.apply(global, [this].concat(slice.call(arguments, 0)))',
-          ': object.' + name + '.call(global, this);',
+          '? object.' + name + '.apply(object, [this].concat(slice.call(arguments, 0)))',
+          ': object.' + name + '.call(object, this);',
           '}', 'return ' + name].join('\n'))(global);
       }
     }

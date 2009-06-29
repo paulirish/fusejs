@@ -1,3 +1,5 @@
+* Ensure Fuse.Function, when used as a constructor, makes the default value of `this` equal to the document global and change the `thisArg` assigned by wrappers in Fuse.Fusebox and Fuse.Function. [jddalton]
+
 * Optimize Fuse.String#camelize by using while-loops instead of String#replace. [jddalton, kangax]
 
 * Optimize Element.hasAttribute() by forking if Element#hasAttribute exists. [jddalton, kangax]

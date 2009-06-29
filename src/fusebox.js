@@ -151,7 +151,7 @@
       'toLocaleString toLocaleTimeString toString toTimeString toUTCString ' +
       'valueOf').split(' '));
 
-    this.Function = this.Function.concat('apply', 'call', 'toString', 'valueOf');
+    this.Function = this.Function.concat('toString', 'valueOf');
     this.Number   = this.Number.concat('toLocaleString', 'toString', 'valueOf');
     this.RegExp   = this.RegExp.concat('test', 'toString', 'valueOf');
     this.String   = this.String.concat('toString', 'valueOf');
@@ -344,7 +344,25 @@
       })(sandbox.Array, this);
 
       this.Function = (function(fn) {
-        function Function(argN, body) { return fn.apply(global, arguments) }
+        function Function(argN, body) {
+          var result, args = slice.call(arguments, 0), originalBody = args.pop();
+          body = originalBody;
+          argN = args.join(',');
+
+          // ensure we aren't in strict mode
+          if (body && body.search(/^\s*(['"])use strict(( |,)?[^\1]+?)?\1/i) < 0)
+            body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
+
+          result = global.Function(argN, body);
+          result[expando] = fn('global, result',
+            'var sandbox = this; return function() { return result.apply(this == sandbox ? global : this, arguments) }'
+          )(global, result);
+
+          result[expando].toString = function toString() { return originalBody };
+
+          var toString = null;
+          return result[expando];
+        }
         Function.prototype = fn.prototype;
         return Function;
       })(sandbox.Function);
@@ -447,10 +465,9 @@
     }
 
     // clean scope
-    var $ = null, $$ = null, Bug = null, Feature = null, concatList = null, document = null,
-     expando = null, getDocument = null, getNodeName = null, getWindow = null,
-     global = null, isHostObject = null, prependList = null, slice = null,
-     userAgent = null, window = null;
+    var $ = null, $$ = null, Bug = null, Feature = null, concatList = null,
+     document = null, getDocument = null, getNodeName = null, getWindow = null,
+     isHostObject = null, prependList = null, userAgent = null, window = null;
 
     return _createNatives;
   })();
@@ -472,7 +489,7 @@
         this[n] = new Function('global,fn', [
           'function ' + n + '() {',
           'var result = arguments.length ?',
-          'fn.apply(global, arguments) : fn();',
+          'fn.apply(this, arguments) : fn.call(this);',
           'result["__proto__"] = ' + n + '.prototype;',
           'return result; }',
           n + '.prototype["__proto__"] = fn.prototype;',
