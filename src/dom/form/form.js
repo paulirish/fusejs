@@ -345,7 +345,7 @@
       } else {
         while (node = element.options[i++])
           if (this.optionValue(node) === value)
-            return node.selected = true;
+            return (node.selected = true);
       }
     };
 

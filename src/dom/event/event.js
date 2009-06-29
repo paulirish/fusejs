@@ -21,7 +21,7 @@
 
       ec.handlers.unshift(handler);
       if (ec.dispatcher) return false;
-      return ec.dispatcher = createDispatcher(id, eventName);
+      return (ec.dispatcher = createDispatcher(id, eventName));
     }
 
     function getCacheID(element) {
@@ -54,8 +54,8 @@
     function getOrCreateCache(id, element, eventName) {
       var c = Event.cache[id] = Event.cache[id] || { 'events': { } };
       c.element = c.element || element;
-      return c.events[eventName] = c.events[eventName] ||
-        { 'handlers': [], 'dispatcher': false };
+      return (c.events[eventName] = c.events[eventName] ||
+        { 'handlers': [], 'dispatcher': false });
     }
 
     function removeCacheAtIndex(id, eventName, index) {

@@ -115,7 +115,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    return absolutize =             null,
+    var absolutize =                null,
      clone =                        null,
      overlap =                      null,
      prepare =                      null,
