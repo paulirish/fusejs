@@ -299,15 +299,19 @@
 
   (function() {
     this.camelize = (function() {
-      function _replacer(match, captured) {
-        return captured.toUpperCase();
-      }
-
       function camelize() {
         if (this == null) throw new TypeError;
         var cached, string = String(this), expandoKey = expando + string;
         if (cached = _cache[expandoKey]) return cached;
-        return (_cache[expandoKey] = Fuse.String(string).replace(/\-(\w|$)/g, _replacer));
+
+        var parts = string.split('-'), length = parts.length;
+        if (length === 1) return Fuse.String(parts[0]);
+
+        while (length-- > 1)
+          parts[length] = parts[length].charAt(0).toUpperCase() + parts[length].slice(1);
+        if (string.charAt(0) === '-')
+          parts[0] = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+        return (_cache[expandoKey] = Fuse.String(parts.join('')));
       }
       var _cache = { };
       return camelize;

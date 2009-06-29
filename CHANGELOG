@@ -1,3 +1,5 @@
+* Optimize Fuse.String#camelize by using while-loops instead of String#replace. [jddalton, kangax]
+
 * Optimize Element.hasAttribute() by forking if Element#hasAttribute exists. [jddalton, kangax]
 
 * Memoize heavily used Fuse.String methods `capitalize` and `camelize`. [jddalton, kangax]
