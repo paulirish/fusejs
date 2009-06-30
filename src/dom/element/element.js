@@ -130,27 +130,21 @@
       })(extend);
     }
 
-    // In IE8, APPLET and OBJECT elements don't inherit from their prototypes
-    if (Feature('ELEMENT_EXTENSIONS')) {
-      (function(APPLET_BUGGY, OBJECT_BUGGY) {
-        if (!(APPLET_BUGGY || OBJECT_BUGGY)) return;
-        var _extend = extend,
-         BUGGY = { 'APPLET': APPLET_BUGGY, 'OBJECT': OBJECT_BUGGY };
-
-        extend = (function() {
-          function extend(element) {
-            var nodeName = element && getNodeName(element);
-            if (BUGGY[nodeName]) {
-              return (typeof element._extendedByFuse !== 'undefined' &&
-                element._extendedByFuse() >= revision) ?
-                  element : _extendElement(element, nodeName);
-            }
-            return _extend(element);
+    // In IE8 APPLET, EMBED, and OBJECT elements don't inherit from their prototypes
+    if (Bug('ELEMENT_OBJECT_AND_RELATIVES_FAILS_TO_INHERIT_FROM_PROTOTYPE')) {
+      extend = (function(_extend) {
+        function extend(element) {
+          var nodeName = element && getNodeName(element);
+          if (BUGGY[nodeName]) {
+            return (typeof element._extendedByFuse !== 'undefined' &&
+              element._extendedByFuse() >= revision) ?
+                element : _extendElement(element, nodeName);
           }
-          return extend;
-        })();
-      })(Bug('ELEMENT_APPLET_FAILS_TO_INHERIT_FROM_PROTOTYPE'),
-         Bug('ELEMENT_OBJECT_FAILS_TO_INHERIT_FROM_PROTOTYPE'));
+          return _extend(element);
+        }
+        var BUGGY = { 'APPLET': 1, 'EMBED': 1, 'OBJECT': 1 };
+        return extend;
+      })(extend);
     }
 
     extend.refresh = refresh;

@@ -1097,37 +1097,56 @@ new Test.Unit.Runner({
   },
 
   'testElementExtend': function() {
-    var element = $('element_extend_test');
+    // add dummy simulated method
+    Element.Methods.Simulated.simulatedMethod = Fuse.K;
+    Element.addMethods();
 
+    var element = $('element_extend_test');
     this.assertRespondsTo('show', element);
 
     var XHTML_TAGS = $w(
       'a abbr acronym address applet area '+
       'b bdo big blockquote br button caption '+
       'cite code col colgroup dd del dfn div dl dt '+
-      'em fieldset form h1 h2 h3 h4 h5 h6 hr '+
+      'em embed fieldset form h1 h2 h3 h4 h5 h6 hr '+
       'i iframe img input ins kbd label legend li '+
       'map object ol optgroup option p param pre q samp '+
       'script select small span strong style sub sup '+
       'table tbody td textarea tfoot th thead tr tt ul var');
 
     XHTML_TAGS.each(function(tag) {
-      var element = document.createElement(tag);
-      this.assertEqual(element, Element.extend(element));
+      var element = document.createElement(tag),
+       nodeName = element.nodeName.toUpperCase();
+
+      this.assertEqual(element, Element.extend(element),
+        nodeName + ' failed to return from Element.extend()');
+
+      // test if elements are extended
       this.assertRespondsTo('show', element,
-        element.nodeName.toUpperCase() + ' failed to be extended.');
+        nodeName + ' failed to be extended.');
+
+      // test if elements are extended with simulated methods
+      this.assertRespondsTo('simulatedMethod', element,
+        nodeName + ' failed to to be extended with simulated methods.');
     }, this);
 
+    // ensure text nodes don't get extended
     Fuse.List(null, '', 'a', 'aa').each(function(content) {
       var textnode = document.createTextNode(content);
       this.assertEqual(textnode, Element.extend(textnode));
-      this.assert(typeof textnode['show'] == 'undefined');
+      this.assert(typeof textnode['show'] === 'undefined');
     }, this);
 
-    // Don't extend XML documents
+    // don't extend XML documents
     var xmlDoc = (new DOMParser()).parseFromString('<note><to>Sam</to></note>', 'text/xml');
     Element.extend(xmlDoc.firstChild);
     this.assertUndefined(xmlDoc.firstChild._extendedByFuse);
+
+    // remove dummy simulated method
+    delete Element.Methods.Simulated.simulatedMethod;
+    var proto = (window.HTMLElement || window.Element).prototype;
+    if (proto) delete proto.simulatedMethod;
+    Element.addMethods();
   },
 
   'testElementExtendReextendsDiscardedNodes': function() {
