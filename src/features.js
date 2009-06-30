@@ -390,6 +390,25 @@
       return result;
     },
 
+    'ELEMENT_OBJECT_AND_RELATIVES_FAILS_TO_INHERIT_FROM_PROTOTYPE': function() {
+      // IE8 bugs:
+      // Must reference Element as a property of global when assigning
+      // properties to its prototype or it will create a seperate instance
+      // for Element and global.Element.
+
+      // HTMLObjectElement, HTMLAppletElement and HTMLEmbedElement objects
+      // don't inherit from their prototypes. Creating an APPLET element
+      // will alert a warning message if Java is not installed.
+      if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
+        var element = Fuse._doc.createElement('object'),
+         prototype = global.Element.prototype;
+        prototype[expando] = true;
+        var result = !element[expando];
+        delete prototype[expando];
+        return result;
+      }
+    },
+
     'ELEMENT_PROPERTIES_ARE_ATTRIBUTES': function() {
       // true for IE
       var div = Fuse._div;
@@ -525,29 +544,3 @@
       })
     };
   })());
-
-  if (Feature('ELEMENT_CLASS')) {
-    Bug.set((function() {
-      function createElementInheritableTest(nodeName) {
-        return function() {
-          // IE8 bug:
-          // Must reference Element as a property of global when assigning
-          // properties to its prototype or it will create a seperate instance
-          // for Element and global.Element.
-          var element = Fuse._doc.createElement(nodeName),
-           prototype = global.Element.prototype;
-          prototype[expando] = true;
-          var result = !element[expando];
-          delete prototype[expando];
-          return result;
-        };
-      }
-
-      return {
-        'ELEMENT_APPLET_FAILS_TO_INHERIT_FROM_PROTOTYPE':
-          createElementInheritableTest('applet'),
-        'ELEMENT_OBJECT_FAILS_TO_INHERIT_FROM_PROTOTYPE':
-          createElementInheritableTest('object')
-      };
-    })());
-  }

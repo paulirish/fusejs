@@ -1,3 +1,5 @@
+* Avoid an alert in IE8 when testing for ELEMENT_OBJECT_AND_RELATIVES_FAILS_TO_INHERIT_FROM_PROTOTYPE and Java is not installed. [Prototype LH #668] [Andrew Dupont, jddalton, kangax, orv]
+
 * Wrap variable assignments in return statements with parentheses to ensure Chrome 1 support. [jddalton]
 
 * Ensure Fuse.Function, when used as a constructor, makes the default value of `this` equal to the document global and change the `thisArg` assigned by wrappers in Fuse.Fusebox and Fuse.Function. [jddalton]
