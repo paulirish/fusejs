@@ -1,7 +1,5 @@
   /*----------------------------- SELECTOR: SLY ------------------------------*/
 
-  Fuse.addNS('Dom.Selector');
-
   (function() {
     this.match = function match(element, selector) {
       return Sly(String(selector || '')).match(element);

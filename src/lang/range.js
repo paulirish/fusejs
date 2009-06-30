@@ -1,16 +1,5 @@
   /*------------------------------- LANG: RANGE ------------------------------*/
 
-  Fuse.addNS('Util');
-
-  Fuse.Util.$R = (function() {
-    function $R(start, end, exclusive) {
-      return Fuse.Range(start, end, exclusive);
-    }
-    return $R;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
   Fuse.addNS('Range', Fuse.Enumerable, {
     'constructor': (function() {
       function Range(start, end, exclusive) {
@@ -67,3 +56,9 @@
       return _each;
     })()
   });
+
+  /*--------------------------------------------------------------------------*/
+
+  Fuse.addNS('Util');
+
+  Fuse.Util.$R = Fuse.Range;

@@ -1,7 +1,5 @@
   /*----------------------------- SELECTOR: ACME -----------------------------*/
 
-  Fuse.addNS('Dom.Selector');
-
   (function() {
     this.match = function match(element, selector) {
       var item, i = 0,

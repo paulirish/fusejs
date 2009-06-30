@@ -1,3 +1,7 @@
+* Optimize property lookup speeds by storing references to longer namespaced objects and simplifying method aliases. [jddalton]
+
+* Make Fusebox fallback on Fuse._docEl instead of document HEAD when inserting an iframe. [jddalton]
+
 * Ensure IE8 EMBED elements are extended manually and APPLET/EMBED/OBJECT elements are extended by Element.Simulated methods. [Prototype LH #681] [jddalton, kangax, Nick Stakenburg]
 
 * Avoid an alert in IE8 when testing for ELEMENT_OBJECT_AND_RELATIVES_FAILS_TO_INHERIT_FROM_PROTOTYPE and Java is not installed. [Prototype LH #668] [Andrew Dupont, jddalton, kangax, orv]

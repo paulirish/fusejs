@@ -37,7 +37,7 @@
 
   /*----------------------- PRIVATE VARIABLES/METHODS ------------------------*/
 
-  var $, $$, Bug, Feature,
+  var $, Bug, Feature,
    expando = '_fuse' + String(1 * new Date).slice(0, 10),
    slice = Array.prototype.slice,
    userAgent = global.navigator.userAgent;

@@ -1,7 +1,5 @@
   /*---------------------------- SELECTOR: SLICK -----------------------------*/
 
-  Fuse.addNS('Dom.Selector');
-
   (function() {
     this.match = function match(element, selector) {
       return slick.match(element, String(selector || ''));

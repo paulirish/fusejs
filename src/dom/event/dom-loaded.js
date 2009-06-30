@@ -1,4 +1,4 @@
-  /*---------------------------- EVENT: DOM-LOADED ----------------------------*/
+  /*--------------------------- EVENT: DOM-LOADED ----------------------------*/
 
   // Support for the "dom:loaded" event is based on work by Dan Webb, 
   // Matthias Miller, Dean Edwards, John Resig and Diego Perini.
@@ -59,6 +59,8 @@
     var cssPoller, readyStatePoller,
 
     checkDomLoadedState = function(event) {
+      // Not sure if readyState is ever `loaded` in Safari 2.x but
+      // we check to be on the safe side
       if (Fuse._doc.loaded) readyStatePoller.clear();
       else if (event && event.type === 'DOMContentLoaded' ||
           /^(loaded|complete)$/.test(Fuse._doc.readyState)) {
@@ -205,7 +207,7 @@
           })();
     };
 
-    /*--------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------*/
 
     // Ensure the document is not in a frame because
     // doScroll() will not throw an error when the document

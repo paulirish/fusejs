@@ -1,7 +1,5 @@
   /*---------------------------- SELECTOR: SIZZLE ----------------------------*/
 
-  Fuse.addNS('Dom.Selector');
-
   (function() {
     this.match = function match(element, selector) {
       return Sizzle(String(selector || ''), null, null, [element]).length === 1;

@@ -166,7 +166,7 @@
        frame = false,
        frames = global.frames,
        iframeEl = Fuse._doc.createElement('iframe'),
-       parentNode = Fuse._body || head,
+       parentNode = Fuse._body || Fuse._docEl,
        id = 'iframe_' + expando + counter++;
 
       iframeEl.id = id;
@@ -188,7 +188,7 @@
       return frame;
     }
 
-    var counter = 0, head = Fuse._doc.getElementsByTagName('HEAD')[0];
+    var counter = 0;
     return _createIframeObject;
   })();
 
@@ -465,9 +465,9 @@
     }
 
     // clean scope
-    var $ = null, $$ = null, Bug = null, Feature = null, concatList = null,
-     document = null, getDocument = null, getNodeName = null, getWindow = null,
-     isHostObject = null, prependList = null, userAgent = null, window = null;
+    var $ = null, Bug = null, Feature = null, concatList = null, document = null,
+     getDocument = null, getNodeName = null, getWindow = null, isHostObject = null,
+     prependList = null, userAgent = null, window = null;
 
     return _createNatives;
   })();

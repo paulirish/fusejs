@@ -1,7 +1,5 @@
   /*--------------------------- SELECTOR: NWMATCHER --------------------------*/
 
-  Fuse.addNS('Dom.Selector');
-
   (function() {
     this.match = function match(element, selector) {
       function match(element, selector) {

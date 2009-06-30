@@ -11,8 +11,8 @@
             return this.registerFormCallbacks();
 
           var member, name = element.name, i = 0;
-          this.group = (name && Fuse.query(element.nodeName +
-            '[name="' + name + '"]')) || [element];
+          this.group = (name && Selector.select(element.nodeName +
+            '[name="' + name + '"]', getDocument(this.element))) || [element];
 
           this.callback = callback;
           this.lastValue = this.getValue();
@@ -20,6 +20,7 @@
           while (member = this.group[i++])
             this.registerCallback(member);
         }
+        var Selector = Fuse.Dom.Selector;
         return BaseEventObserver;
       })()
     });

@@ -1,16 +1,5 @@
   /*------------------------------- LANG: HASH -------------------------------*/
 
-  Fuse.addNS('Util');
-
-  Fuse.Util.$H = (function() {
-    function $H(object) {
-      return Fuse.Hash(object);
-    }
-    return $H;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
   Fuse.addNS('Hash', Fuse.Enumerable, (function() {
     function _indexOfKey(hash, key) {
       key = String(key);
@@ -102,8 +91,6 @@
     };
   })());
 
-  Fuse.Hash.from = Fuse.Util.$H;
-
   /*--------------------------------------------------------------------------*/
 
   (function() {
@@ -179,7 +166,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function() {
+  (function($H) {
     this.clear = function clear() {
       this._data     = { };
       this._object   = { };
@@ -190,7 +177,7 @@
     };
 
     this.clone = function clone() {
-      return Fuse.Hash(this);
+      return $H(this);
     };
 
     this.contains = function contains(value, strict) {
@@ -204,7 +191,7 @@
     };
 
     this.filter = function filter(callback, thisArg) {
-      var pair, i = 0, pairs = this._pairs, result = new Fuse.Hash();
+      var pair, i = 0, pairs = this._pairs, result = new $H();
       callback = callback || function(value) { return value != null };
 
       while (pair = pairs[i++]) {
@@ -223,7 +210,7 @@
          !pattern.source) return this.clone();
 
       callback = callback || Fuse.K;
-      var key, pair, value, i = 0, pairs = this._pairs, result = new Fuse.Hash();
+      var key, pair, value, i = 0, pairs = this._pairs, result = new $H();
       if (Fuse.Object.isString(pattern))
         pattern = new RegExp(Fuse.RegExp.escape(pattern));
 
@@ -260,7 +247,7 @@
 
     this.map = function map(callback, thisArg) {
       if (!callback) return this;
-      var key, pair, i = 0, pairs = this._pairs, result = new Fuse.Hash();
+      var key, pair, i = 0, pairs = this._pairs, result = new $H();
 
       if (thisArg) {
         while (pair = pairs[i++])
@@ -275,7 +262,7 @@
     this.partition = function partition(callback, thisArg) {
       callback = callback || Fuse.K;
       var key, value, pair, i = 0, pairs = this._pairs,
-       trues = new Fuse.Hash(), falses = new Fuse.Hash();
+       trues = new $H(), falses = new $H();
 
       while (pair = pairs[i++])
         (callback.call(thisArg, value = pair[1], key = pair[0], this) ?
@@ -310,7 +297,7 @@
       if (typeof Fuse.List.Plugin.last.call(args) === 'function')
         callback = args.pop();
 
-      var result = new Fuse.Hash(),
+      var result = new $H(),
        hashes = prependList(Fuse.List.Plugin.map.call(args, $H), this),
        length = hashes.length;
 
@@ -342,4 +329,10 @@
      toQueryString = null,
      values =        null,
      zip =           null;
-  }).call(Fuse.Hash.Plugin);
+  }).call(Fuse.Hash.Plugin, Fuse.Hash);
+
+  /*--------------------------------------------------------------------------*/
+
+  Fuse.addNS('Util');
+
+  Fuse.Util.$H = Fuse.Hash.from = Fuse.Hash;
