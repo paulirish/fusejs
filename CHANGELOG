@@ -83,8 +83,6 @@
 
 * Escape a forward slash in the regexp pattern of Fuse.Object.isSameOrigin(). [Diego Perini, jddalton]
 
-* Remove unneeded Chrome fix for Fuse.String#replace as well as the STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN feature detection. [jddalton]
-
 * Optimize Fuse.String#replace and ensure it follows specification with regard to setting the pattern.lastIndex. [jddalton, Samuel Lebeau]
 
 * Remove unneeded IE8 RC1 fork in Fuse.List.fromNodeList(). [Diego Perini]

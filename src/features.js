@@ -439,6 +439,14 @@
       return 'a'.replace(/a/, func) === String(func);
     },
 
+    'STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN': function() {
+      // true for Chrome
+      var string = 'xy', replacement = function() { return 'o' };
+      return !(string.replace(/()/g, 'o') === 'oxoyo' &&
+        string.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
+        string.replace(/(y|)/g, replacement) === 'oxoo');
+    },
+
     'STRING_REPLACE_SETS_REGEXP_LAST_INDEX': function() {
       // true for IE
       var pattern = /x/;
