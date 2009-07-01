@@ -29,7 +29,7 @@
         replacement = function() {
           // ensure `null` and `undefined` are returned
           var result = _replacement.apply(global, arguments);
-          return result || Fuse.String(result);
+          return result || String(result);
         };
       }
       var result = __replace.call(this, pattern, replacement);
@@ -95,6 +95,48 @@
     if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING') ||
         Bug('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN'))
       this.replace = replace;
+  }).call(Fuse.String.Plugin);
+
+  /*--------------------------------------------------------------------------*/
+
+  // ECMA-5 15.5.4.8
+  (function() {
+    function lastIndexOf(searchString) {
+      if (this == null) throw new TypeError;
+      searchString = String(searchString);
+
+      var string = String(this),
+       pos = 1 * arguments[1], // fast coerce to number
+       len = string.length,
+       searchLen = searchString.length;
+
+      if (searchLen > len) return Fuse.Number(-1);
+      if (pos < 0) pos = 0;
+      else if (isNaN(pos) || pos > len - searchLen) pos = len - searchLen;
+      if (!searchLen) return Fuse.Number(pos);
+
+      pos++;
+      while (pos--)
+        if (string.slice(pos, pos + searchLen) === searchString)
+          return Fuse.Number(pos);
+      return Fuse.Number(-1);
+    }
+
+    if (!this.lastIndexOf)
+      this.lastIndexOf = lastIndexOf;
+  }).call(Fuse.String.Plugin);
+
+  (function() {
+    var __lastIndexOf = this.lastIndexOf;
+
+    function lastIndexOf(searchString) {
+      var pos = 1 * arguments[1];
+      return __lastIndexOf.call(this, searchString, pos < 0 ? 0 : pos);
+    }
+
+    // For Chome 1 and 2
+    if (Bug('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION'))
+      this.lastIndexOf = lastIndexOf;
   }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -249,31 +291,6 @@
         : "'" + escapedString.replace(/'/g, '\\\'') + "'");
     };
 
-    // ECMA-5 15.5.4.8
-    // TODO: try to optimize
-    if (!this.lastIndexOf)
-      this.lastIndexOf = function lastIndexOf(searchString) {
-        if (this == null) throw new TypeError;
-        searchString = String(searchString);
-
-        var string = String(this),
-         pos = 1 * arguments[1], // fast coerce to number
-         len = string.length,
-         searchLen = searchString.length;
-
-        if (searchLen > len) return Fuse.Number(-1);
-        if (isNaN(pos)) pos = Infinity;
-        if (pos < 0)    pos = 0;
-        if (pos > len)  pos = len;
-        if (pos > len - searchLen) pos = len - searchLen;
-
-        pos++;
-        while (pos--)
-          if (string.slice(pos, pos + searchLen) === searchString)
-            return Fuse.Number(pos);
-        return Fuse.Number(-1);
-      };
-
     this.scan = function scan(pattern, callback) {
       if (this == null) throw new TypeError;
       Fuse.String(this).gsub(pattern, callback); // gsub for backcompat
@@ -291,7 +308,6 @@
       empty =       null,
       endsWith =    null,
       inspect =     null,
-      lastIndexOf = null,
       scan =        null,
       startsWith =  null;
   }).call(Fuse.String.Plugin);

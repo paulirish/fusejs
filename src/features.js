@@ -452,6 +452,11 @@
       return result;
     },
 
+    'STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION': function() {
+       // true for Chrome 1 and 2
+       return 'x'.lastIndexOf('x', -1) !== 0;
+    },
+
     'STRING_REPLACE_COHERSE_FUNCTION_TO_STRING': function() {
       // true for Safari 2
       var func = function() { return '' };
@@ -459,7 +464,7 @@
     },
 
     'STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN': function() {
-      // true for Chrome
+      // true for Chrome 1
       var string = 'xy', replacement = function() { return 'o' };
       return !(string.replace(/()/g, 'o') === 'oxoyo' &&
         string.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
