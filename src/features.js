@@ -457,6 +457,16 @@
        return 'x'.lastIndexOf('x', -1) !== 0;
     },
 
+    'STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX': function() {
+      // true for IE
+      var string = 'oxo', data = [], pattern = /x/;
+      string.replace(pattern, '');
+      data[0] = !!pattern.lastIndex;
+      string.match(pattern);
+      data[1] = !!pattern.lastIndex;
+      return data[0] || data[1];
+    },
+
     'STRING_REPLACE_COHERSE_FUNCTION_TO_STRING': function() {
       // true for Safari 2
       var func = function() { return '' };
@@ -469,13 +479,6 @@
       return !(string.replace(/()/g, 'o') === 'oxoyo' &&
         string.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
         string.replace(/(y|)/g, replacement) === 'oxoo');
-    },
-
-    'STRING_REPLACE_SETS_REGEXP_LAST_INDEX': function() {
-      // true for IE
-      var pattern = /x/;
-      'oxo'.replace(pattern, '');
-      return !!pattern.lastIndex;
     },
 
     'TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN': function() {

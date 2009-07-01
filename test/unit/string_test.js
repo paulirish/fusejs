@@ -82,6 +82,20 @@ new Test.Unit.Runner({
     this.assertEqual('ab', Fuse.String('a.b').gsub('.', ''));
   },
 
+  'testMatch': function() {
+    var source = Fuse.String('oxo'), pattern = /x/g;
+    source.match(pattern);
+
+    this.assertEqual(0, pattern.lastIndex,
+      'wrongly set lastIndex on global pattern');
+
+    pattern = /x/;
+    source.match(pattern);
+
+    this.assertEqual(0, pattern.lastIndex,
+      'wrongly set lastIndex on non-global pattern');
+  },
+
   'testReplace': function() {
     var source = Fuse.String('321abc123'), expected = '321xyz123';
     this.assertEqual(expected, source.replace('abc', 'xyz'),

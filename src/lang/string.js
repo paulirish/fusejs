@@ -38,7 +38,7 @@
     }
 
     // For IE
-    if (Bug('STRING_REPLACE_SETS_REGEXP_LAST_INDEX'))
+    if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX'))
       this.replace = replace;
   }).call(Fuse.String.Plugin);
 
@@ -137,6 +137,23 @@
     // For Chome 1 and 2
     if (Bug('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION'))
       this.lastIndexOf = lastIndexOf;
+  }).call(Fuse.String.Plugin);
+
+  /*--------------------------------------------------------------------------*/
+
+  // ECMA-5 15.5.4.10
+  (function() {
+    var __match = this.match;
+
+    function match(pattern) {
+      var result = __match.call(this, pattern);
+      if (Fuse.Object.isRegExp(pattern)) pattern.lastIndex = 0;
+      return result;
+    }
+
+    // For IE
+    if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX'))
+      this.match = match;
   }).call(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/

@@ -1,3 +1,5 @@
+* Fix IE bug where Fuse.String#match(pattern) incorrectly sets the pattern's `lastIndex` property. [jddalton]
+
 * Optimize Fuse.String#lastIndexOf and fix a Chrome bug where negative positions aren't set to 0. [jddalton]
 
 * Optimize property lookup speeds by storing references to longer namespaced objects and simplifying method aliases. [jddalton]
