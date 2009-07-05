@@ -515,7 +515,7 @@ new Test.Unit.Runner({
     this.assertEqual('ウィメンズ2007\nクルーズコレクション',
       Fuse.String('ウィメンズ2007\nクルーズコレクション').escapeHTML());
 
-    this.assertEqual('a&lt;a href=&quot;blah&quot;&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g',
+    this.assertEqual('a&lt;a href="blah"&gt;blub&lt;/a&gt;b&lt;span&gt;&lt;div&gt;&lt;/div&gt;&lt;/span&gt;cdef&lt;strong&gt;!!!!&lt;/strong&gt;g',
       Fuse.String('a<a href="blah">blub</a>b<span><div></div></span>cdef<strong>!!!!</strong>g').escapeHTML());
 
     this.assertEqual(largeTextEscaped, largeTextUnescaped.escapeHTML());
@@ -545,10 +545,12 @@ new Test.Unit.Runner({
       Fuse.String('test &uacute;').unescapeHTML());
 
     this.assertEqual('1\n2',
-      Fuse.String('1\n2').unescapeHTML());
+      Fuse.String('1\n2').unescapeHTML(),
+      'Failed with newlines');
 
-    this.assertEqual('Pride & Prejudice',
-      Fuse.String('<h1>Pride &amp; Prejudice</h1>').unescapeHTML());
+    this.assertEqual('<h1>Pride & Prejudice</h1>',
+      Fuse.String('<h1>Pride &amp; Prejudice</h1>').unescapeHTML(),
+      'Failed on string containing unescaped tags');
 
     var sameInSameOut = Fuse.String('"&lt;" means "<" in HTML');
     this.assertEqual(sameInSameOut, sameInSameOut.escapeHTML().unescapeHTML());

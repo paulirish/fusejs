@@ -471,9 +471,9 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // Information on parsing tags can be found at
-  // http://www.w3.org/TR/REC-xml-names/#ns-using
-  Fuse.String.Plugin.stripTags = (function() {
+  (function() {
+    // Information on parsing tags can be found at
+    // http://www.w3.org/TR/REC-xml-names/#ns-using
     var matchTags = (function() {
       var name   = '\\w+',
        space     = '[\\x20\\x09\\x0D\\x0A]',
@@ -488,77 +488,87 @@
         '</' + name + space + '?>', 'g');
     })();
 
-    function stripTags() {
-      if (this == null) throw new TypeError;
-      return Fuse.String(String(this).replace(matchTags, ''));
-    }
-    return stripTags;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  (function() {
-    var escapeHTML = function escapeHTML() {
-      if (this == null) throw new TypeError;
-      textNode.data = String(this);
-      return Fuse.String(container.innerHTML.replace(/"/g, '&quot;'));
-    };
-
-    var unescapeHTML = function unescapeHTML() {
-      if (this == null) throw new TypeError;
-      Fuse._div.innerHTML = '<pre>' + proto.stripTags.call(this) + '</pre>';
-      return Fuse.String(Fuse._div.textContent);
-    };
-
-    var proto  = Fuse.String.prototype,
-     container = Fuse._doc.createElement('pre'),
-     textNode  = container.appendChild(Fuse._doc.createTextNode(''));
-
-    // Safari 2.x has issues with escaping html inside a "pre"
-    // element so we use the deprecated "xmp" element instead.
-    if ((textNode.data = '&') && container.innerHTML !== '&amp;') {
-      container = Fuse._doc.createElement('xmp');
-      textNode = container.appendChild(Fuse._doc.createTextNode(''));
-    }
-
-    // Safari 3.x has issues with escaping the ">" character
-    if ((textNode.data = '>') && container.innerHTML !== '&gt;') {
-      escapeHTML = function escapeHTML() {
+    this.escapeHTML = (function() {
+      var escapeHTML = function escapeHTML() {
         if (this == null) throw new TypeError;
         textNode.data = String(this);
-        return Fuse.String(container.innerHTML.replace(/"/g, '&quot;').replace(/>/g, '&gt;'));
+        return Fuse.String(container.innerHTML);
       };
-    }
 
-    if (!Feature('ELEMENT_TEXT_CONTENT')) {
-      Fuse._div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;</pre>';
-      if (Feature('ELEMENT_INNER_TEXT') && Fuse._div.firstChild.innerText === '<p>x</p>') {
-        unescapeHTML = function unescapeHTML() {
+      var container = Fuse._doc.createElement('pre'),
+       textNode = container.appendChild(Fuse._doc.createTextNode(''));
+
+      // Safari 2.x has issues with escaping html inside a "pre"
+      // element so we use the deprecated "xmp" element instead.
+      if ((textNode.data = '&') && container.innerHTML !== '&amp;') {
+        container = Fuse._doc.createElement('xmp');
+        textNode = container.appendChild(Fuse._doc.createTextNode(''));
+      }
+
+      // Safari 3.x has issues with escaping the ">" character
+      if ((textNode.data = '>') && container.innerHTML !== '&gt;') {
+        escapeHTML = function escapeHTML() {
           if (this == null) throw new TypeError;
-          Fuse._div.innerHTML = '<pre>' + proto.stripTags.call(this) + '</pre>';
-          return Fuse.String(Fuse._div.firstChild.innerText.replace(/\r/g, ''));
+          textNode.data = String(this);
+          return Fuse.String(container.innerHTML.replace(/>/g, '&gt;'));
         };
       }
-      else if (Fuse._div.firstChild.innerHTML === '<p>x</p>') {
-        unescapeHTML = function unescapeHTML() {
-          if (this == null) throw new TypeError;
-          Fuse._div.innerHTML = '<pre>' + proto.stripTags.call(this) + '</pre>';
-          return Fuse.String(Fuse._div.firstChild.innerHTML);
-        };
-      } else {
-        unescapeHTML = function unescapeHTML() {
-          if (this == null) throw new TypeError;
-          Fuse._div.innerHTML = '<pre>' + proto.stripTags.call(this) + '</pre>';
-          var node, i = 0, results = [];
-          while (node = Fuse._div.firstChild.childNodes[i++])
-            results.push(node.nodeValue);
-          return Fuse.String(results.join(''));
+      return escapeHTML;
+    })();
+
+    this.unescapeHTML = (function() {
+      var div = Fuse._div, tags = [],
+       matchToken = new RegExp(expando + '\\d+' + expando, 'g');
+
+      function _swapTagsToTokens(tag) {
+        var length = tags.length;
+        tags.push(tag);
+        return expando + length + expando;
+      }
+
+      function _swapTokensToTags(token) {
+        return tags[token.slice(15).slice(0, -15)];
+      }
+
+      function unescapeHTML() {
+        if (this == null) throw new TypeError;
+        var result, string = String(this);
+
+        // tokenize tags before setting innerHTML then swap them after
+        tags.length = 0;
+        if (string.indexOf('<') > -1) string = string.replace(matchTags, _swapTagsToTokens);
+        div.innerHTML = '<pre>' + string + '</pre>';
+
+        result = Fuse.String(_unescape());
+        return tags.length
+          ? result.replace(matchToken, _swapTokensToTags)
+          : result;
+      }
+
+      var _unescape = function() { return div.textContent };
+      if (!Feature('ELEMENT_TEXT_CONTENT')) {
+        div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;</pre>';
+        if (Feature('ELEMENT_INNER_TEXT') && div.firstChild.innerText === '<p>x</p>')
+          _unescape = function() { return div.firstChild.innerText.replace(/\r/g, '') };
+        else if (div.firstChild.innerHTML === '<p>x</p>')
+          _unescape = function() { return div.firstChild.innerHTML };
+        else _unescape = function() {
+          var node, nodes = div.firstChild.childNodes, parts = [], i = 0;
+          while (node = nodes[i++]) parts.push(node.nodeValue);
+          return parts.join('');
         };
       }
-      // cleanup Fuse._div
-      Fuse._div.innerHTML = '';
-    }
+      return unescapeHTML;
+    })();
 
-    this.escapeHTML = escapeHTML;
-    this.unescapeHTML = unescapeHTML;
+    this.stripTags = (function() {
+      function stripTags() {
+        if (this == null) throw new TypeError;
+        return Fuse.String(String(this).replace(matchTags, ''));
+      }
+      return stripTags;
+    })();
+
+    // cleanup
+    Fuse._div.innerHTML = '';
   }).call(Fuse.String.Plugin);
