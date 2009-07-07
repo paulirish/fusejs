@@ -505,22 +505,37 @@ new Test.Unit.Runner({
     this.assertEqual(97,  Fixtures.Primes.max());
 
     this.assertEqual(2,
-      Fuse.List(-9, -8, -7, -6, -4, -3, -2,  0, -1,  2).max());
+      Fuse.List(-9, -8, -7, -6, -4, -3, -2,  0, -1,  2).max(),
+      'failed with negative and positive numbers');
     
     this.assertEqual('kangax',
-      Fixtures.Nicknames.max()); // ?s > ?U
+      Fixtures.Nicknames.max(),
+      'failed comparing string values'); // ?s > ?U
 
     this.assertEqual(2, Fuse.List.Plugin.max.call(Fixtures.Object),
       'called with an object as the `this` value');
+
+    this.assertEqual('c',
+      Fuse.List('a', 'b', 'c', 'd').max(
+      function(value) { return value.charCodeAt(0) % 4 }),
+      'comparing string with callback');
   },
 
   'testMin': function() {
     this.assertEqual(1, Fixtures.Z.min());
     this.assertEqual(0, Fuse.List(1, 2, 3, 4, 5, 6, 7, 8, 0, 9).min());
-    this.assertEqual('dperini', Fixtures.Nicknames.min()); // ?U < ?h
+
+    this.assertEqual('dperini',
+      Fixtures.Nicknames.min(),
+      'failed comparing string values'); // ?U < ?h
 
     this.assertEqual(0, Fuse.List.Plugin.min.call(Fixtures.Object),
       'called with an object as the `this` value');
+
+    this.assertEqual('d',
+      Fuse.List('a', 'b', 'c', 'd').min(
+      function(value) { return value.charCodeAt(0) % 4 }),
+      'comparing string with callback');
   },
 
   'testPartition': function() {

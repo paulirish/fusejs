@@ -278,14 +278,33 @@ new Test.Unit.Runner({
   'testMax': function() {
     this.assertEqual(100, Fixtures.Z.max());
     this.assertEqual(97,  Fixtures.Primes.max());
-    this.assertEqual(2,   new EnumObject([-9, -8, -7, -6, -4, -3, -2,  0, -1,  2]).max());
-    this.assertEqual('sam-', Fixtures.Nicknames.max()); // ?s > ?U
+
+    this.assertEqual(2,
+      new EnumObject([-9, -8, -7, -6, -4, -3, -2,  0, -1,  2]).max(),
+      'failed with negative and positive numbers');
+
+    this.assertEqual('sam-',
+      Fixtures.Nicknames.max(),
+      'failed comparing string values'); // ?s > ?U
+
+    this.assertEqual('c',
+      new EnumObject(['a', 'b', 'c', 'd']).max(
+      function(value) { return value.charCodeAt(0) % 4 }),
+      'comparing string with callback');
   },
 
   'testMin': function() {
     this.assertEqual(1, Fixtures.Z.min());
     this.assertEqual(0, new EnumObject([1, 2, 3, 4, 5, 6, 7, 8, 0, 9]).min());
-    this.assertEqual('Ulysses', Fixtures.Nicknames.min()); // ?U < ?h
+
+    this.assertEqual('Ulysses',
+      Fixtures.Nicknames.min(),
+      'failed comparing string values'); // ?U < ?h
+
+    this.assertEqual('d',
+       new EnumObject(['a', 'b', 'c', 'd']).min(
+      function(value) { return value.charCodeAt(0) % 4 }),
+      'comparing string with callback');
   },
 
   'testPartition': function() {

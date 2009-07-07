@@ -1,3 +1,5 @@
+* Ensure `max` and `min` methods of Fuse.List and Fuse.Enumerable don't return augmented values when using callbacks. [jddalton]
+
 * Optimize Fuse.Range `max`, `min`, 'size', and `toArray` methods. [Prototype LH #117] [jddalton, Michael M Slusarz]
 
 * Stop escaping quotes in Fuse.String#escapeHTML and stop stripping tags in Fuse.String#unescapeHTML. [Prototype LH #722, #729] [jddalton, mck, SWilk, T.J. Crowder, Tobie Langel] 

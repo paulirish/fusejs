@@ -129,22 +129,24 @@
 
     this.max = function max(callback, thisArg) {
       callback = callback || Fuse.K;
-      var result;
+      var comparable, max, result;
       this._each(function(value, index, iterable) {
-        value = callback.call(thisArg, value, index, iterable);
-        if (result == null || value >= result)
-          result = value;
+        comparable = callback.call(thisArg, value, index, iterable);
+        if (max == null || comparable > max) {
+          max = comparable; result = value;
+        }
       });
       return result;
     };
 
     this.min = function min(callback, thisArg) {
       callback = callback || Fuse.K;
-      var result;
+      var comparable, min, result;
       this._each(function(value, index, iterable) {
-        value = callback.call(thisArg, value, index, iterable);
-        if (result == null || value < result)
-          result = value;
+        comparable = callback.call(thisArg, value, index, iterable);
+        if (min == null || comparable < min) {
+          min = comparable; result = value;
+        }
       });
       return result;
     };

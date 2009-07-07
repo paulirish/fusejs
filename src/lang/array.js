@@ -314,22 +314,25 @@
 
     this.max = function max(callback, thisArg) {
       if (this == null) throw new TypeError;
-      var result;
-      
+
+      var result, undef;
       if (!callback && (callback = Fuse.K) && Fuse.Object.isArray(this)) {
         // John Resig's fast Array max|min:
         // http://ejohn.org/blog/fast-javascript-maxmin
         result = Math.max.apply(Math, this);
         if (!isNaN(result)) return result;
-        result = null;
+        result = undef;
       }
 
-      var value, i = 0, object = Object(this), length = object.length >>> 0;
+      var comparable, max, value, i = 0,
+       object = Object(this), length = object.length >>> 0;
+
       for ( ; i < length; i++) {
         if (i in object) {
-          value = callback.call(thisArg, object[i], i, object);
-          if (result == null || value >= result)
-            result = value;
+          comparable = callback.call(thisArg, value = object[i], i, object);
+          if (max == null || comparable > max) {
+            max = comparable; result = value;
+          }
         }
       }
       return result;
@@ -337,20 +340,23 @@
 
     this.min = function min(callback, thisArg) {
       if (this == null) throw new TypeError;
-      var result;
 
+      var result, undef;
       if (!callback && (callback = Fuse.K) && Fuse.Object.isArray(this)) {
         result = Math.min.apply(Math, this);
         if (!isNaN(result)) return result;
-        result = null;
+        result = undef;
       }
 
-      var value, i = 0, object = Object(this), length = object.length >>> 0;
+      var comparable, min, value, i = 0,
+       object = Object(this), length = object.length >>> 0;
+
       for ( ; i < length; i++) {
         if (i in object) {
-          value = callback.call(thisArg, object[i], i, object);
-          if (result == null || value < result)
-            result = value;
+          comparable = callback.call(thisArg, value = object[i], i, object);
+          if (min == null || comparable < min) {
+            min = comparable; result = value;
+          }
         }
       }
       return result;
