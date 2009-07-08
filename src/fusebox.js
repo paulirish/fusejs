@@ -446,18 +446,20 @@
       this.Object = (function(fn, self) {
         function Object(value) {
           if (value != null) {
-            switch (typeof value) {
-              case 'boolean': return new Boolean(value);
-              case 'number':  return self.Number(value);
-              case 'string':  return self.String(value);
-              default: return self.Array.isArray(value) && value.constructor !== self.Array
-                ? self.Array.fromArray(value)
-                : value;
+            switch (toString.call(value)) {
+              case '[object Boolean]': return new Boolean(value);
+              case '[object Number]':  return self.Number(value);
+              case '[object String]':  return self.String(value);
+              case '[object Array]':
+                if (value.constructor !== self.Array)
+                  return self.Array.fromArray(value);
             }
+            return value;
           }
           return new fn;
         }
         Object.prototype = fn.prototype;
+        var toString = fn.prototype.toString;
         return Object;
       })(sandbox.Object, this);
 

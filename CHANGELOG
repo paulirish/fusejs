@@ -1,3 +1,5 @@
+* Ensure that Fuse.Object() converts native objects as well as primitives to Fuseboxed natives. [jddalton]
+
 * Ensure `max` and `min` methods of Fuse.List and Fuse.Enumerable don't return augmented values when using callbacks. [jddalton]
 
 * Optimize Fuse.Range `max`, `min`, 'size', and `toArray` methods. [Prototype LH #117] [jddalton, Michael M Slusarz]

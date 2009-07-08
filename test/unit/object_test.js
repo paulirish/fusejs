@@ -1,5 +1,22 @@
 new Test.Unit.Runner({
 
+  'testObjectConstructorAsMethod': function() {
+    this.assertRespondsTo('max', Fuse.Object([0, 1]),
+      'convert array to Fuse.List');
+
+    this.assertRespondsTo('floor', Fuse.Object(22.8),
+      'convert primitive number to Fuse.Number');
+
+    this.assertRespondsTo('floor', Fuse.Object(Number(22.8)),
+      'convert number object to Fuse.Number');
+
+    this.assertRespondsTo('capitalize', Fuse.Object('x'),
+      'convert primitive string to Fuse.String');
+
+    this.assertRespondsTo('capitalize', Fuse.Object(String('x')),
+      'convert string object to Fuse.String');
+  },
+
   'testObjectEach': function() {
     function klass() { this.toString = 1 }
 
