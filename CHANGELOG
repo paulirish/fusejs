@@ -1,3 +1,5 @@
+* Add Ext.DomQuery support and allow the active css engine to be dynamically set in the unit tests. [jddalton]
+
 * Ensure that Fuse.Object() converts native objects as well as primitives to Fuseboxed natives. [jddalton]
 
 * Ensure `max` and `min` methods of Fuse.List and Fuse.Enumerable don't return augmented values when using callbacks. [jddalton]

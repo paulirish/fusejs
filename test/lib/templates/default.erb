@@ -17,16 +17,13 @@
      $R   = Fuse.Util.$R,
      $w   = Fuse.Util.$w;
   </script>
+  
   <link rel="stylesheet" href="../../lib/assets/test.css" type="text/css" />
-  
-  <% if @css_fixtures_filename %>
-    <link rel="stylesheet" href="../fixtures/<%= @css_fixtures_filename %>" type="text/css" charset="utf-8" />
-  <% end %>
-  
-  <% if @js_fixtures_filename %>
-    <script src="../fixtures/<%= @js_fixtures_filename %>" type="text/javascript" charset="utf-8"></script>
-  <% end %>
-
+<% if @css_fixtures_filename %>
+  <link rel="stylesheet" href="../fixtures/<%= @css_fixtures_filename %>" type="text/css" charset="utf-8" />
+<% end %><% if @js_fixtures_filename %>
+  <script src="../fixtures/<%= @js_fixtures_filename %>" type="text/javascript" charset="utf-8"></script>
+<% end %>
   <script src="../<%= @js_filename %>" type="text/javascript"></script>
 </head>
 <body>
