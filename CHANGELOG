@@ -1,3 +1,6 @@
+* Make Fuse.Timer() operate on milliseconds instead of seconds and allow setting the millisecond `multiplier` via an options object as the third argument. [FuseJS LH #26] [kitsg, jddalton, Joe Gornick]
+  Note: Backwards compatibility warning.
+
 * unit test: Fix minor Safari 2.x bugs in functional event tests.
 
 * Rename Fuse.Ajax.Base and Fuse.Ajax.TimedUpdater `defaultOptions` object to `options` and fix options related bugs in Fuse.Ajax.TimedUpdater. [jddalton, Joe Gornick, kitsg]
