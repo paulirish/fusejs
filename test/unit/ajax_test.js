@@ -13,10 +13,23 @@ new Test.Unit.Runner({
     };
   },
 
-  'testSynchronousRequest': function() {
-    this.assertEqual('', getInnerHTML('content'));
-    this.assertEqual(0,  Fuse.Ajax.activeRequestCount);
+  'testBaseDefaultOptions': function() {
+    var backup = Fuse.Object.clone(Fuse.Ajax.Base.options);
+    Fuse.Object.extend(Fuse.Ajax.Base.options,  {
+      'method': 'get',
+      'evalJS': 'force',
+      'asynchronous': false
+    });
 
+    Fuse.Ajax.Request('../fixtures/hello.js');
+    var h2 = $('content').firstChild;
+    this.assertEqual('hello world!', getInnerHTML(h2));
+
+    // restore
+    Fuse.Ajax.Base.options = backup;
+  },
+
+  'testSynchronousRequest': function() {
     Fuse.Ajax.Request('../fixtures/hello.js', {
       'asynchronous': false,
       'method':      'GET',
@@ -30,8 +43,6 @@ new Test.Unit.Runner({
   },
 
   'testAsynchronousRequest': function() {
-    this.assertEqual('', getInnerHTML('content'));
-
     Fuse.Ajax.Request('../fixtures/hello.js', {
       'asynchronous': true,
       'method':      'get',
@@ -56,8 +67,6 @@ new Test.Unit.Runner({
   },
 
   'testUpdater': function() {
-    this.assertEqual('', getInnerHTML('content'));
-
     Fuse.Ajax.Updater('content', '../fixtures/content.html', { 'method': 'get' });
 
     this.wait(1000, function() {
@@ -80,8 +89,6 @@ new Test.Unit.Runner({
   },
 
   'testUpdaterWithInsertion': function() {
-    $('content').update();
-
     Fuse.Ajax.Updater('content', '../fixtures/content.html', {
       'method':   'get',
       'insertion': function(element, content) {
@@ -118,9 +125,10 @@ new Test.Unit.Runner({
       'onComplete':   Fuse.emptyFunction
     };
 
-    var request = Fuse.Ajax.Updater('content', '../fixtures/hello.js', options);
+    var request = Fuse.Ajax.Updater('content', '../fixtures/content.html', options);
     request.options.onComplete = function() { };
-    this.assertIdentical(Fuse.emptyFunction, options.onComplete);
+    this.assertIdentical(Fuse.emptyFunction, options.onComplete,
+      'failed to clone options object');
   },
 
   'testResponders': function(){
@@ -469,5 +477,46 @@ new Test.Unit.Runner({
       Fuse.Object.isSameOrigin = isSameOrigin;
     }
     else this.info(message);
+  },
+
+  'testTimedUpdater': function() {
+    var updater = Fuse.Ajax.TimedUpdater('content', '../fixtures/content.html', {
+      'method': 'get'
+    });
+
+    this.wait(3000, function() {
+      this.assertEqual(sentence, getInnerHTML('content'));
+      $('content').update();
+
+      this.wait(3000, function() {
+        this.assertEqual(sentence, getInnerHTML('content'));
+        updater.stop();
+      });
+    });
+  },
+
+  'testTimedUpdaterDefaultOptions': function() {
+    var backup = Fuse.Object.clone(Fuse.Ajax.TimedUpdater.options);
+    Fuse.Object.extend(Fuse.Ajax.TimedUpdater.options,  {
+      'method': 'get',
+      'asynchronous': false,
+      'frequency': 3
+    });
+
+    var updater = Fuse.Ajax.TimedUpdater('content', '../fixtures/content.html');
+    $('content').update();
+
+    this.wait(2500, function() {
+      this.assertEqual('', getInnerHTML('content'));
+
+      this.wait(1000, function() {
+        this.assertEqual(sentence, getInnerHTML('content'));
+        $('content').update();
+        updater.stop();
+      });
+    });
+    
+    // restore
+    Fuse.Ajax.TimedUpdater.options = backup;
   }
 });

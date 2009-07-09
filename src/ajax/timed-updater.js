@@ -6,25 +6,25 @@
         if (!(this instanceof TimedUpdater))
           return new TimedUpdater(container, url, options);
 
+        options = Fuse.Object._extend(Fuse.Object
+         .clone(this.constructor.options), options);
+
         // this._super() equivalent
         Fuse.Ajax.Base.call(this, options);
-  
-        options = Fuse.Object._extend(Object
-         .clone(this.constructor.defaultOptions), options);
-  
+
         this.onStop = this.options.onStop;
         this.onTimerEvent = Fuse.Function.bind(this.start, this);
-  
+
         this.updater = { };
         this.container = container;
         this.url = url;
-  
+
         var onComplete = this.options.onComplete;
         this.options.onComplete = Fuse.Function.bind(function(response, json) {
           this.updateComplete(response);
           if (Fuse.Object.isFunction(onComplete)) onComplete(response, json);
         }, this);
-  
+
         this.start();
       }
       return TimedUpdater;
@@ -57,7 +57,7 @@
     var updateComplete = null, start = null, stop = null;
   }).call(Fuse.Ajax.TimedUpdater.Plugin);
 
-  Fuse.Ajax.TimedUpdater.defaultOptions = {
+  Fuse.Ajax.TimedUpdater.options = {
     'decay':     1,
     'frequency': 2,
     'maxDecay':  Infinity

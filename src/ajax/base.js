@@ -4,7 +4,7 @@
     'constructor': (function() {
       function Base(options) {
         this.options = Fuse.Object._extend(Fuse.Object
-          .clone(Fuse.Ajax.Base.defaultOptions), options);
+          .clone(Fuse.Ajax.Base.options), options);
 
         this.options.method = this.options.method.toLowerCase();
 
@@ -18,7 +18,7 @@
     })()
   });
 
-  Fuse.Ajax.Base.defaultOptions = {
+  Fuse.Ajax.Base.options = {
     'asynchronous': true,
     'contentType':  'application/x-www-form-urlencoded',
     'encoding':     'UTF-8',
