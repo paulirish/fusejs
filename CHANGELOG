@@ -1,3 +1,5 @@
+* unit test: Fix minor Safari 2.x bugs in functional event tests.
+
 * Rename Fuse.Ajax.Base and Fuse.Ajax.TimedUpdater `defaultOptions` object to `options` and fix options related bugs in Fuse.Ajax.TimedUpdater. [jddalton, Joe Gornick, kitsg]
   Note: Backwards compatibility warning.
 

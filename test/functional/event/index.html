@@ -225,9 +225,9 @@
       function(e, str, arr){
         var el = $('bind')
         try {
-          if (arguments.length != 3) throw arguments.length + ' arguments: ' + $A(arguments).inspect()
-          if (str != 'foo') throw 'wrong string: ' + str
-          if (arr.constructor != Array) throw '3rd parameter is not an array'
+          if (arguments.length != 3) throw arguments.length + ' arguments: ' + $A(arguments).inspect();
+          if (str != 'foo') throw 'wrong string: ' + str;
+          if (arr.constructor != Array) throw '3rd parameter is not an array';
           el.passed();
         }
         catch (err) { el.failed(err.toString()) }
