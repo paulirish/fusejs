@@ -3,9 +3,9 @@
   (function() {
     var BaseTimedObserver = Fuse.Class(Fuse.Timer, {
       'constructor': (function() {
-        function BaseTimedObserver(element, interval, callback) {
+        function BaseTimedObserver(element, callback, interval, options) {
           // this._super() equivalent
-          Fuse.Timer.call(this, callback, interval);
+          Fuse.Timer.call(this, callback, interval, options);
 
           this.element = $(element);
           this.lastValue = this.getValue();
@@ -26,15 +26,15 @@
       })()
     });
 
-  /*--------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------*/
 
     Field.Observer = 
     Field.TimedObserver = Fuse.Class(BaseTimedObserver, {
       'constructor': (function() {
-        function FieldTimedObserver(element, interval, callback) {
+        function FieldTimedObserver(element, callback, interval, options) {
           if (!(this instanceof FieldTimedObserver))
-            return new FieldTimedObserver(element, interval, callback);
-          BaseTimedObserver.call(this, element, interval, callback);
+            return new FieldTimedObserver(element, callback, interval, options);
+          BaseTimedObserver.call(this, element, callback, interval, options);
         }
         return FieldTimedObserver;
       })(),
@@ -48,10 +48,10 @@
     Form.Observer = 
     Form.TimedObserver = Fuse.Class(BaseTimedObserver, {
       'constructor': (function() {
-        function FormTimedObserver(element, interval, callback) {
+        function FormTimedObserver(element, callback, interval, options) {
           if (!(this instanceof FormTimedObserver))
-            return new FormTimedObserver(element, interval, callback);
-          BaseTimedObserver.call(this, element, interval, callback);
+            return new FormTimedObserver(element, callback, interval, options);
+          BaseTimedObserver.call(this, element, callback, interval, options);
         }
         return FormTimedObserver;
       })(),

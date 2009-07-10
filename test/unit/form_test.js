@@ -58,8 +58,8 @@ new Test.Unit.Runner({
     var timedCounter = 0;
 
     // first part: regular field
-    var observer = new Form.Element.Observer('input_enabled', 0.5,
-      function() { ++timedCounter });
+    var observer = new Form.Element.Observer('input_enabled',
+      function() { ++timedCounter }, 0.5);
 
     // test it's unchanged yet
     this.assertEqual(0, timedCounter);
@@ -84,12 +84,12 @@ new Test.Unit.Runner({
 
     // second part: multiple-select
     Fuse.List(1, 2, 3).each(function(index) {
-      $('multiSel1_opt' + index).selected = (1 == index);
+      $('multiSel1_opt' + index).selected = 1 == index;
     });
 
     timedCounter = 0;
-    observer = new Form.Element.Observer('multiSel1', 0.5,
-      function() { ++timedCounter });
+    observer = new Form.Element.Observer( 'multiSel1',
+      function() { ++timedCounter }, 0.5);
 
     // test it's unchanged yet
     this.assertEqual(0, timedCounter);
@@ -119,8 +119,8 @@ new Test.Unit.Runner({
     var timedCounter = 0;
 
     // should work the same way was Form.Element.Observer
-    var observer = new Form.Observer('form', 0.5,
-      function(form, value) { ++timedCounter });
+    var observer = new Form.Observer('form', 
+      function(form, value) { ++timedCounter }, 0.5);
 
     // test it's unchanged yet
     this.assertEqual(0, timedCounter);
