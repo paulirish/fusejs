@@ -18,11 +18,19 @@
       function onTimerEvent() {
         if (!this.executing) {
           this.executing = true;
-          try { this.execute() }
-          catch (e) { throw e; }
-          finally {
-            if (this.timerID !== null) this.start();
+
+          // IE6 bug with try/finally, the finally does not get executed if the
+          // exception is uncaught. So instead we set the flags and start the
+          // timer before throwing the error.
+          try {
+            this.execute();
             this.executing = false;
+            if (this.timerID !== null) this.start();
+          }
+          catch (e) {
+            this.executing = false;
+            if (this.timerID !== null) this.start();
+            throw e;
           }
         }
       }

@@ -1,3 +1,5 @@
+* Fix IE6 try-catch-finally bug in Fuse.Timer class and unit tests. [Prototype LH #696] [jddalton, xucia, Yaffle]
+
 * Changed the argument order in Form.TimedObserver and Field.TimedObserver to `element, callback, interval, options` for a more consistent API. [jddalton]
   Note: Backwards compatibility warning.
 

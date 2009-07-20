@@ -34,7 +34,7 @@ function isIframeDocument(doc) {
 function isIframeAccessible() {
   try {
     return !!getIframeDocument().body;
-  } catch(e) {
+  } catch (e) {
     return false;
   }
 }
@@ -49,13 +49,20 @@ function preservingBrowserDimensions(callback) {
   window.resizeTo(640, 480);
 
   var resized = document.viewport.getDimensions();
-  original.width += 640 - resized.width, original.height += 480 - resized.height;
+  original.width += 640 - resized.width;
+  original.height += 480 - resized.height;
 
+  window.resizeTo(original.width, original.height);
+
+  // IE6 bug with try/finally, the finally does not get executed if the
+  // exception is uncaught. So instead we resize the window before throwing the error.
   try {
-    window.resizeTo(original.width, original.height);
     callback();
-  } finally {
     window.resizeTo(original.width, original.height);
+  }
+  catch (e) {
+    window.resizeTo(original.width, original.height);
+    throw e;
   }
 }
 

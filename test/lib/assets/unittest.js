@@ -575,14 +575,20 @@ Test.Unit.Testcase = Fuse.Class(Test.Unit.Assertions, {
 
   'run': function(rethrow) {
     try {
+      // IE6 bug with try/finally, the finally does not get executed if the
+      // exception is uncaught. So instead we perform the teardown check before
+      // throwing the error.
       try {
         if (!this.isWaiting) this.setup();
         this.isWaiting = false;
         this.test();
-      } finally {
-        if (!this.isWaiting) {
+        if (!this.isWaiting)
           this.teardown();
-        }
+      }
+      catch (e) {
+        if (!this.isWaiting)
+          this.teardown();
+        throw e;
       }
     }
     catch(e) {
