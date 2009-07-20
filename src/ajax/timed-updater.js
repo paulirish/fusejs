@@ -7,7 +7,7 @@
           return new TimedUpdater(container, url, options);
 
         options = Fuse.Object._extend(Fuse.Object
-         .clone(this.constructor.options), options);
+          .clone(this.constructor.options), options);
 
         // this._super() equivalent
         Fuse.Ajax.Base.call(this, options);
