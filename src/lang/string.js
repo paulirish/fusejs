@@ -370,13 +370,17 @@
 
     this.truncate = function truncate(length, truncation) {
       if (this == null) throw new TypeError;
-      var string = String(this);
+      var endIndex, string = String(this);
 
-      length = length || 30;
-      truncation = (typeof truncation === 'undefined') ? '...' : truncation;
-      return Fuse.String(string.length > length
-        ? string.slice(0, length - truncation.length) + truncation
-        : string);
+      length = 1 * length;
+      if (isNaN(length)) length = 30;
+
+      if (length < string.length) {
+        truncation = truncation == null ? '...' : String(truncation);
+        endIndex = length - truncation.length;
+        string = endIndex > 0 ? string.slice(0, endIndex) + truncation : truncation;
+      }
+      return Fuse.String(string);
     };
 
     this.underscore = function underscore() {

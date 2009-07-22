@@ -1,3 +1,5 @@
+* Make Fuse.String#truncate work with zero and null lengths. [jddalton]
+
 * Optimize Fuse.String#camelize and cleanup Fuse.String#capitalize. [fearphage, jddalton]
 
 * Fix incorrect usage of Fuse.String#unfilterJSON in Fuse.Ajax.Request#evalResponse and optimize Fuse.String#unfilterJSON and Fuse.String#isJSON. [jddalton, Samuel Lebeau]

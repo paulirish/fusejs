@@ -405,15 +405,32 @@ new Test.Unit.Runner({
   },
 
   'testTruncate': function() {
-    var source = Fuse.String('foo boo boz foo boo boz foo boo boz foo boo boz');
+    var undef,
+     source = Fuse.String('foo boo boz foo boo boz foo boo boz foo boo boz');
 
-    this.assertEqual(source, source.truncate(source.length));
-    this.assertEqual('foo boo boz foo boo boz foo...', source.truncate(0));
-    this.assertEqual('fo...', source.truncate(5));
-    this.assertEqual('foo b', source.truncate(5, ''));
+    this.assertEqual(source, source.truncate(source.length),
+      'truncate length equal to string length');
 
-    this.assert(Fuse.Object.isString(Fuse.String('foo').truncate(5)));
-    this.assert(Fuse.Object.isString(Fuse.String('foo bar baz').truncate(5)));
+    this.assertEqual('...', source.truncate(0),
+      'truncate length of 0');
+
+    this.assertEqual('foo boo boz foo boo boz foo...', source.truncate(undef),
+      'truncate with undefined length');
+
+    this.assertEqual('foo boo boz foo boo boz foo...', source.truncate('xyz'),
+      'truncate with non-numeric length');
+
+    this.assertEqual('fo...', source.truncate(5),
+      'basic truncate');
+
+    this.assertEqual('foo b', source.truncate(5, ''),
+      'truncate with custom truncation text');
+
+    this.assert(Fuse.Object.isString(Fuse.String('foo').truncate(5)),
+     'non truncated result is not a string');
+
+    this.assert(Fuse.Object.isString(Fuse.String('foo bar baz').truncate(5)),
+      'truncated result is not a string');
   },
 
   'testTrim': function() {
