@@ -31,7 +31,7 @@
     this.evalResponse = function evalResponse() {
       try {
         var text = this.transport.responseText || '';
-        if (text) text = Fuse.String(text).unfilterJSON(text);
+        if (text) text = Fuse.String.unfilterJSON(text);
         return global.eval(String(text));
       } catch (e) {
         this.dispatchException(e);

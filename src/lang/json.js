@@ -67,6 +67,7 @@
   // complementary JSON methods for String.Plugin
   (function() {
     this.evalJSON = function evalJSON(sanitize) {
+      if (this == null) throw new TypeError;
       var string = Fuse.String(this), json = string.unfilterJSON();
       try {
         if (!sanitize || json.isJSON())
@@ -76,15 +77,17 @@
     };
 
     this.isJSON = function isJSON() {
-      var string = Fuse.String(this);
-      if (string.blank(string)) return false;
+      if (this == null) throw new TypeError;
+      var string = String(this);
+      if (/^\s*$/.test(string)) return false;
+
       string = string.replace(/\\./g, '@').replace(/"[^"\\\n\r]*"/g, '');
       return (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/).test(string);
     };
 
     this.unfilterJSON = function unfilterJSON(filter) {
-      var match = String(this).match(filter || Fuse.JSONFilter);
-      return Fuse.String(match && match.length === 2 ? match[1] : this);
+      if (this == null) throw new TypeError;
+      return Fuse.String(String(this).replace(filter || Fuse.JSONFilter, '$1'));
     };
 
     // prevent JScript bug with named function expressions
