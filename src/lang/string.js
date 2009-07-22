@@ -333,33 +333,33 @@
 
   (function() {
     this.camelize = (function() {
+      function _toUpperCase(match, character) {
+        return character ? character.toUpperCase() : '';
+      }
+
       function camelize() {
         if (this == null) throw new TypeError;
-        var cached, string = String(this), expandoKey = expando + string;
-        if (cached = _cache[expandoKey]) return cached;
-
-        var parts = string.split('-'), length = parts.length;
-        if (length === 1) return Fuse.String(parts[0]);
-
-        while (length-- > 1)
-          parts[length] = parts[length].charAt(0).toUpperCase() + parts[length].slice(1);
-        if (string.charAt(0) === '-')
-          parts[0] = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-        return (_cache[expandoKey] = Fuse.String(parts.join('')));
+        var string = String(this), expandoKey = expando + string;
+        return cache[expandoKey] ||
+          (cache[expandoKey] = _replace.call(string, matchHyphenated, _toUpperCase));
       }
-      var _cache = { };
+
+      var _replace = Fuse.String.Plugin.replace,
+       cache = { },
+       matchHyphenated = /\-+(.)?/g;
+
       return camelize;
     })();
 
     this.capitalize = (function() {
       function capitalize() {
         if (this == null) throw new TypeError;
-        var cached, string = String(this), expandoKey = expando + string;
-        if (cached = _cache[expandoKey]) return cached;
-        return (_cache[expandoKey] = Fuse.String(string.charAt(0).toUpperCase() +
-          string.slice(1).toLowerCase()));
+        var string = String(this), expandoKey = expando + string;
+        return cache[expandoKey] ||
+          (cache[expandoKey] = Fuse.String(string.charAt(0).toUpperCase() +
+            string.slice(1).toLowerCase()));
       }
-      var _cache = { };
+      var cache = { };
       return capitalize;
     })();
 

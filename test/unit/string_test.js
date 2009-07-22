@@ -327,22 +327,44 @@ new Test.Unit.Runner({
      - CamelCases first word if there is a front dash
   */
   'testCamelize': function() {
-    this.assertEqual('',        Fuse.String('').camelize());
-    this.assertEqual('',        Fuse.String('-').camelize());
-    this.assertEqual('foo',     Fuse.String('foo').camelize());
-    this.assertEqual('foo_bar', Fuse.String('foo_bar').camelize());
-    this.assertEqual('FooBar',  Fuse.String('-foo-bar').camelize());
-    this.assertEqual('FooBar',  Fuse.String('FooBar').camelize());
+    this.assertEqual('', Fuse.String('').camelize(),
+      'Empty string');
 
-    this.assertEqual('fooBar',  Fuse.String('foo-bar').camelize());
-    this.assertEqual('borderBottomWidth', Fuse.String('border-bottom-width').camelize());
+    this.assertEqual('', Fuse.String('-').camelize(),
+      'Hyphen only');
 
-    this.assertEqual('classNameTest', Fuse.String('class-name-test').camelize());
-    this.assertEqual('classNameTest', Fuse.String('className-test').camelize());
-    this.assertEqual('classNameTest', Fuse.String('class-nameTest').camelize());
+    this.assertEqual('foo', Fuse.String('foo').camelize(),
+      'String with no hyphens');
+
+    this.assertEqual('foo_bar', Fuse.String('foo_bar').camelize(),
+      'String with an underscore');
+
+    this.assertEqual('fooBar',  Fuse.String('foo-bar').camelize(),
+      'String with one hyphen');
+ 
+    this.assertEqual('borderBottomWidth', Fuse.String('border-bottom-width').camelize(),
+      'String simulating style property');
+
+    this.assertEqual('classNameTest', Fuse.String('class-name-test').camelize(),
+      'String simulating className (1)');
+
+    this.assertEqual('classNameTest', Fuse.String('className-test').camelize(),
+      'String simulating className (2)');
+
+    this.assertEqual('classNameTest', Fuse.String('class-nameTest').camelize(),
+      'String simulating className (2)');
+
+    this.assertEqual('FooBar',  Fuse.String('---foo-bar').camelize(),
+      'String with multiple leading hyphens');
+
+    this.assertEqual('FooBar',  Fuse.String('---foo---bar---').camelize(),
+      'String containing groups of hyphens');
+
+    this.assertEqual('FooBar',  Fuse.String('FooBar').camelize(),
+      'String pre-camelized');
 
     this.assertEqual('toString', Fuse.String('toString').camelize(),
-      'Built-in Object.prototype.* members should not interfere');
+      'Built-in Object.prototype.* members should not interfere with internal cache');
 
     /*
     this.benchmark(function(){
