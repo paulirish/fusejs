@@ -1,3 +1,5 @@
+* Change to HTML 4.01 Transitional doctype and escape closing tags in the source in the off chance that it is embeded in a page instead of an external js file. [jddalton]
+
 * Make Fuse.String#truncate work with zero and null lengths. [jddalton]
 
 * Optimize Fuse.String#camelize and cleanup Fuse.String#capitalize. [fearphage, jddalton]

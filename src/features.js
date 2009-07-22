@@ -261,7 +261,7 @@
      // true for all but IE and Safari 2
      ELEMENT_CONTAINS = isHostObject(docEl, 'contains');
 
-    div.innerHTML = '<div></div><div><div></div></div>';
+    div.innerHTML = '<div><\/div><div><div><\/div><\/div>';
 
     // ensure children collection only contains direct descendants
     if (ELEMENT_CHILDREN_NODELIST)
@@ -433,7 +433,7 @@
     'ELEMENT_TABLE_INNERHTML_INSERTS_TBODY': function() {
       // true for IE and Firefox 3
       var div = Fuse._div;
-      div.innerHTML = '<table><tr><td></td></tr></table>';
+      div.innerHTML = '<table><tr><td><\/td><\/tr><\/table>';
       var result = getNodeName(div.firstChild.firstChild) === 'TBODY';
       div.innerHTML = '';
       return result;
@@ -445,7 +445,7 @@
       var div = Fuse._div, result = false;
       if (Feature('SELECTORS_API')) {
         div.id = expando;
-        div.innerHTML = '<span class="X"></span>';
+        div.innerHTML = '<span class="X"><\/span>';
         result = div.querySelector('#'+ expando +' .x') !== null;
         div.id = div.innerHTML = '';
       }
@@ -483,7 +483,7 @@
 
     'TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN': function() {
       // true for IE7 and lower
-      Fuse._div.innerHTML = '<table><tbody style="display:none"><tr style="width:1px"><td></td></tr></tbody></table>';
+      Fuse._div.innerHTML = '<table><tbody style="display:none"><tr style="width:1px"><td><\/td><\/tr><\/tbody><\/table>';
       Fuse._body.appendChild(Fuse._div);
       var result = !!Fuse._div.firstChild.firstChild.offsetWidth;
       Fuse._body.removeChild(Fuse._div);
@@ -509,22 +509,22 @@
 
     return {
       'ELEMENT_COLGROUP_INNERHTML_BUGGY': createInnerHTMLTest(
-        '<table><colgroup></colgroup><tbody></tbody></table>',
-        '<col/><col/>', 'colgroup'
+        '<table><colgroup><\/colgroup><tbody><\/tbody><\/table>',
+        '<col><col>', 'colgroup'
       ),
 
       'ELEMENT_OPTGROUP_INNERHTML_BUGGY': createInnerHTMLTest(
-        '<select><optgroup></optgroup></select>',
-        '<option>x</option>', 'optgroup'
+        '<select><optgroup><\/optgroup><\/select>',
+        '<option>x<\/option>', 'optgroup'
       ),
 
       'ELEMENT_SELECT_INNERHTML_BUGGY': createInnerHTMLTest(
-        '<select><option></option></select>', '<option>x</option>'
+        '<select><option><\/option><\/select>', '<option>x<\/option>'
       ),
 
       'ELEMENT_TABLE_INNERHTML_BUGGY': createInnerHTMLTest(
         // left out tbody to test if it's auto inserted
-        '<table><tr><td></td></tr></table>', '<tr><td><p>x</p></td></tr>'
+        '<table><tr><td><\/td><\/tr><\/table>', '<tr><td><p>x<\/p><\/td><\/tr>'
       )
     };
   })());
@@ -533,7 +533,7 @@
     function createCommentTest(conditional) {
       return function() {
         var div = Fuse._div;
-        div.innerHTML = '<p>x</p><!--y-->';
+        div.innerHTML = '<p>x<\/p><!--y-->';
         var result = conditional(div);
         div.innerHTML = '';
         return result;

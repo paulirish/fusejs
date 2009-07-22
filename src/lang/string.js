@@ -541,7 +541,7 @@
         // tokenize tags before setting innerHTML then swap them after
         tags.length = 0;
         if (string.indexOf('<') > -1) string = string.replace(matchTags, _swapTagsToTokens);
-        div.innerHTML = '<pre>' + string + '</pre>';
+        div.innerHTML = '<pre>' + string + '<\/pre>';
 
         result = Fuse.String(_unescape());
         return tags.length
@@ -551,10 +551,10 @@
 
       var _unescape = function() { return div.textContent };
       if (!Feature('ELEMENT_TEXT_CONTENT')) {
-        div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;</pre>';
-        if (Feature('ELEMENT_INNER_TEXT') && div.firstChild.innerText === '<p>x</p>')
+        div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;<\/pre>';
+        if (Feature('ELEMENT_INNER_TEXT') && div.firstChild.innerText === '<p>x<\/p>')
           _unescape = function() { return div.firstChild.innerText.replace(/\r/g, '') };
-        else if (div.firstChild.innerHTML === '<p>x</p>')
+        else if (div.firstChild.innerHTML === '<p>x<\/p>')
           _unescape = function() { return div.firstChild.innerHTML };
         else _unescape = function() {
           var node, nodes = div.firstChild.childNodes, parts = [], i = 0;
