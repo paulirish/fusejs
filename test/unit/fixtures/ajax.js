@@ -12,8 +12,7 @@ function getInnerHTML(id) {
     $(id).innerHTML.toString().toLowerCase().replace(/[\r\n\t]/g, ''));
 }
 
-var responderCounter = 0,
- message  = 'You must be running your tests from rake to test this feature.',
+var message  = 'You must be running your tests from rake to test this feature.',
  sentence = 'pack my box with <em>five dozen</em> liquor jugs! ' +
    'oh, how <strong>quickly</strong> daft jumping zebras vex...';
 

@@ -7,20 +7,25 @@
           return new Response(request);
 
         this.request = request;
-        var transport = this.transport = request.transport,
-         readyState = this.readyState = transport.readyState;
+        var readyState = this.readyState = request.readyState,
+         transport = this.transport = request.transport;
 
-        if ((readyState > 2 && !Fuse.Browser.Agent.IE) || readyState == 4) {
-          this.status       = this.getStatus();
-          this.statusText   = this.getStatusText();
-          this.responseText = Fuse.String.interpret(transport.responseText);
-          this.headerJSON   = this._getHeaderJSON();
+        if (this.aborted = request._aborted) {
+          this.status = transport.readyState > 1 ? this.getStatus() : 0;
         }
+        else {
+          if ((readyState > 2 && !Fuse.Browser.Agent.IE) || readyState === 4) {
+            this.status       = this.getStatus();
+            this.statusText   = this.getStatusText();
+            this.responseText = Fuse.String.interpret(transport.responseText);
+            this.headerJSON   = this._getHeaderJSON();
 
-        if (readyState == 4) {
-          var xml = transport.responseXML;
-          this.responseXML  = typeof xml === 'undefined' ? null : xml;
-          this.responseJSON = this._getResponseJSON();
+            if (readyState === 4) {
+              var xml = transport.responseXML;
+              this.responseXML  = typeof xml === 'undefined' ? null : xml;
+              this.responseJSON = this._getResponseJSON();
+            }
+          }
         }
       }
       return Response;

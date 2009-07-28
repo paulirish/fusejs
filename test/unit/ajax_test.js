@@ -55,6 +55,29 @@ new Test.Unit.Runner({
     });
   },
 
+  'testRequestAbort': function() {
+    var abortCallbackFired, failureCallbackFired, responseAborted;
+
+    var request = Fuse.Ajax.Request('../fixtures/hello.js', {
+      'method': 'get',
+      'evalJS': 'force',
+      'onAbort': function() { abortCallbackFired = true },
+      'onFailure': function() { failureCallbackFired = true },
+      'onComplete': function(response) { responseAborted = response.aborted }
+    });
+
+    request.abort();
+
+    this.assert(abortCallbackFired,
+      'onAbort failed to fire');
+
+    this.assert(failureCallbackFired,
+      'onFailure failed to fire');
+
+    this.assert(responseAborted,
+      'failed to set response.aborted flag');
+  },
+
   'testRequestWithNoUrl': function() {
     var test = this,  suceeded = false;
     Fuse.Ajax.Request(null, {
@@ -132,43 +155,57 @@ new Test.Unit.Runner({
   },
 
   'testResponders': function(){
-    // check for internal responder
-    var count = 0;
-    for (var i in Fuse.Ajax.Responders.responders) count++;
-    this.assertEqual(2, count);
+    var count = 0, responderCounter = 0,
+     dummyResponder = { 'onComplete': function() { /* dummy */ } };
 
-    var dummyResponder = { 'onComplete': function(req) { /* dummy */ } };
+    var responder = {
+      'onCreate':   function() { responderCounter++ },
+      'onLoaded':   function() { responderCounter++ },
+      'onComplete': function() { responderCounter++ }
+    };
+
+    // check for internal responder
+    for (var i in Fuse.Ajax.Responders.responders) count++;
+    this.assertEqual(2, count,
+      'Failed default responders count');
 
     Fuse.Ajax.Responders.register(dummyResponder);
-    this.assertEqual(2, Fuse.Ajax.Responders.responders['onComplete'].length);
+    this.assertEqual(2, Fuse.Ajax.Responders.responders['onComplete'].length,
+      'Failed to register an `onComplete` responder');
 
     // don't add twice
     Fuse.Ajax.Responders.register(dummyResponder);
-    this.assertEqual(2, Fuse.Ajax.Responders.responders['onComplete'].length);
+    this.assertEqual(2, Fuse.Ajax.Responders.responders['onComplete'].length,
+      'Added a duplicate responder');
 
     Fuse.Ajax.Responders.unregister(dummyResponder);
-    this.assertEqual(1, Fuse.Ajax.Responders.responders['onComplete'].length);
+    this.assertEqual(1, Fuse.Ajax.Responders.responders['onComplete'].length,
+      'Failed to unregister an `onComplete` responder');
 
-    var responder = {
-      'onCreate':   function(req){ responderCounter++ },
-      'onLoading':  function(req){ responderCounter++ },
-      'onComplete': function(req){ responderCounter++ }
-    };
-
+    // ensure responders are called
     Fuse.Ajax.Responders.register(responder);
 
-    this.assertEqual(0, responderCounter);
-    this.assertEqual(0, Fuse.Ajax.activeRequestCount);
+    this.assertEqual(0, responderCounter,
+      'Responders executed too soon');
+
+    this.assertEqual(0, Fuse.Ajax.activeRequestCount,
+      'There should be no active requests');
 
     Fuse.Ajax.Request('../fixtures/content.html',
       { 'method': 'get', 'parameters': 'pet=monkey' });
 
-    this.assertEqual(1, responderCounter);
-    this.assertEqual(1, Fuse.Ajax.activeRequestCount);
+    this.assert(responderCounter > 0,
+      'The `onCreate` responder failed');
+
+    this.assertEqual(1, Fuse.Ajax.activeRequestCount,
+      'There should be only one active request');
 
     this.wait(1000, function() {
-      this.assertEqual(3, responderCounter);
-      this.assertEqual(0, Fuse.Ajax.activeRequestCount);
+      this.assertEqual(3, responderCounter,
+        'Incorrect number of responders fired');
+
+      this.assertEqual(0, Fuse.Ajax.activeRequestCount,
+        'activeRequestCount failed clear itself');
     });
   },
 
