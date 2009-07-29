@@ -120,7 +120,7 @@
         }
       }
       else {
-        var pair, count = 1 * callback, i = 0, results = Fuse.List();
+        var count = 1 * callback, results = Fuse.List();
         if (isNaN(count)) return results;
         count = count < 1 ? 1 : count;
         while (i < count && (pair = pairs[i])) results[i++] = _returnPair(pair);
@@ -144,7 +144,7 @@
         var count = 1 * callback, results = Fuse.List();
         if (isNaN(count)) return results;
         count = count < 1 ? 1 : count > length ? length : count;
-        var  i = 0, pad = length - count;
+        var  pad = length - count;
         while (i < count)
           results[i] = _returnPair(pairs[pad + i++]);
         return results;

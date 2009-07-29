@@ -202,14 +202,15 @@
           });
         }
 
+        var getStyle;
         if (!Feature('ELEMENT_COMPUTED_STYLE')) {
-          var getStyle = function getStyle(element, name) {
+          getStyle = function getStyle(element, name) {
             return _getStyleValue(element, name);
           };
         }
         else if (Bug('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX')) {
           // Opera 9.2x
-          var getStyle = function getStyle(element, name) {
+          getStyle = function getStyle(element, name) {
             element = $(element);
             name = Fuse.String(name).camelize();
             if (_isNull(element, name)) return null;
@@ -226,7 +227,7 @@
           };
         }
         else { // Firefox, Safari, Opera 9.5+
-          var getStyle = function getStyle(element, name) {
+          getStyle = function getStyle(element, name) {
             element = $(element);
             name = Fuse.String(name).camelize();
             return _isNull(element, name) ? null : _getComputedStyle(element, name);

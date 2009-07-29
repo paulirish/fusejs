@@ -35,7 +35,7 @@
   (function() {
     this.status       = 0;
     this.statusText   = '';
-    this.responseText = null,
+    this.responseText = null;
     this.getStatus    = Fuse.Ajax.Request.Plugin.getStatus;
     this.getHeader    = Fuse.Ajax.Request.Plugin.getHeader;
 

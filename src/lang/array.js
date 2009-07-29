@@ -14,7 +14,7 @@
       var length = iterable.length >>> 0, results = Fuse.Array(length);
       while (length--) if (length in object) results[length] = iterable[length];
       return results;
-    }
+    };
 
     this.fromNodeList = function fromNodeList(nodeList) {
       var i = 0, results = Fuse.Array();

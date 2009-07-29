@@ -142,14 +142,14 @@
             while (node = nodes[i++])
               if (node.nodeType === 1 && count++ === index)
                 return Element.extend(node);
-          }
+          };
 
           _getNthBySelector = function(nodes, selectors, index) {
             var count = 0, i = 0, match = Selector.match;
             while (node = nodes[i++])
               if (node.nodeType === 1 && match(node, selectors) && count++ === index)
                 return Element.extend(node);
-          }
+          };
         }
 
         function down(element, selectors, index) {

@@ -308,7 +308,7 @@
         };
 
         // prevent JScript bug with named function expressions
-        var now = null, parse = null, UTC = null;
+        var parse = null, UTC = null;
       }).call(this.Date, sandbox.Date, this.Number);
 
       (function(fn) {

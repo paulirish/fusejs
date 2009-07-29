@@ -231,7 +231,7 @@
                info = Fuse._info,
                rect = element.getBoundingClientRect(),
                root = doc[info.root.property],
-               scrollEl = doc[info.scrollEl.property],
+               scrollEl = doc[info.scrollEl.property];
 
               valueT = Math.round(rect.top)  -
                 (root.clientTop  || 0) + (scrollEl.scrollTop  || 0);

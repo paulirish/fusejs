@@ -270,7 +270,7 @@
       }
 
       if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
-        var klass, tagName, infiniteRevision = function() { return Infinity };
+        var klass, infiniteRevision = function() { return Infinity };
         for (tagName in Element.Methods.ByTag) {
           klass = _findDOMClass(tagName);
           if (typeof klass === 'undefined') continue;
