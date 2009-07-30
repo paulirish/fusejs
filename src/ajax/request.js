@@ -128,7 +128,8 @@
       try {
         // attach onreadystatechange event after open() to avoid some browsers
         // firing duplicate readyState events
-        this.transport.open(method.toUpperCase(), url, options.asynchronous);
+        this.transport.open(method.toUpperCase(), url, options.asynchronous,
+          options.username, options.password);
         this.transport.onreadystatechange = this.onStateChange;
         this.setRequestHeaders();
 

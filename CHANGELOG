@@ -1,3 +1,5 @@
+* Add support for passing username and password to allow Ajax HTTP authentication. [FuseJS LH #48] [jQuery Trac #2570, #2865] [jddalton, kai, Mark Caudill, mikeg]
+
 * Change Fuse.Ajax.Request.Event names to those defined by the W3C XMLHttpRequest draft. [jddalton]
   Note: Backwards compatibility warning.
 
