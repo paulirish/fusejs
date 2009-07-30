@@ -10,17 +10,18 @@
         var readyState = this.readyState = request.readyState,
          transport = this.transport = request.transport;
 
-        if (this.aborted = request._aborted) {
-          this.status = transport.readyState > 1 ? this.getStatus() : 0;
+        if (this.aborted = request.aborted) {
+          if (transport.readyState > 1)
+            this.status = this.getStatus();
         }
         else {
-          if ((readyState > 2 && !Fuse.Browser.Agent.IE) || readyState === 4) {
+          if ((readyState > 2 && !Fuse.Browser.Agent.IE) || readyState == 4) {
             this.status       = this.getStatus();
             this.statusText   = this.getStatusText();
             this.responseText = Fuse.String.interpret(transport.responseText);
             this.headerJSON   = this._getHeaderJSON();
 
-            if (readyState === 4) {
+            if (readyState == 4) {
               var xml = transport.responseXML;
               this.responseXML  = typeof xml === 'undefined' ? null : xml;
               this.responseJSON = this._getResponseJSON();
@@ -33,8 +34,8 @@
   });
 
   (function() {
-    this.status       = 0;
-    this.statusText   = '';
+    this.status       = Fuse.Number(0);
+    this.statusText   = Fuse.String('');
     this.responseText = null;
     this.getStatus    = Fuse.Ajax.Request.Plugin.getStatus;
     this.getHeader    = Fuse.Ajax.Request.Plugin.getHeader;
@@ -51,29 +52,31 @@
     };
 
     this._getResponseJSON = function _getResponseJSON() {
-      var options = this.request.options;
+      var request = this.request, options = request.options,
+       responseText = this.responseText;
+
       if (!options.evalJSON || (options.evalJSON != 'force' && 
          (this.getHeader('Content-type') || '').indexOf('application/json') < 0 || 
-          !this.responseText || this.responseText.blank()))
+          !responseText || responseText.blank()))
             return null;
       try {
-        return this.responseText.evalJSON(options.sanitizeJSON ||
-          !Fuse.Object.isSameOrigin(this.request.url));
+        return responseText.evalJSON(options.sanitizeJSON ||
+          !Fuse.Object.isSameOrigin(request.url));
       } catch (e) {
-        this.request.dispatchException(e);
+        request.dispatchException(e);
       }
     };
 
     this.getAllResponseHeaders = function getAllResponseHeaders() {
-      var result = null;
+      var result;
       try { result = this.transport.getAllResponseHeaders() } catch (e) { }
-      return result === null ? null : Fuse.String(result);
+      return result ? Fuse.String(result) : null;
     };
 
     this.getStatusText = function getStatusText() {
-      var result = '';
-      try { result = this.transport.statusText || '' } catch (e) { }
-      return Fuse.String(result);
+      var result;
+      try { result = this.transport.statusText } catch (e) { }
+      return Fuse.String(result || '');
     };
 
     // aliases

@@ -56,23 +56,38 @@ new Test.Unit.Runner({
   },
 
   'testRequestAbort': function() {
-    var abortCallbackFired, failureCallbackFired, responseAborted;
+    var responseAborted, fired = { };
+
+    Fuse.Ajax.Responders.register({
+      'onFailure': function() { fired.failureResponder = true },
+      'onSuccess': function() { fired.successResponder = true }
+    });
 
     var request = Fuse.Ajax.Request('../fixtures/hello.js', {
-      'method': 'get',
-      'evalJS': 'force',
-      'onAbort': function() { abortCallbackFired = true },
-      'onFailure': function() { failureCallbackFired = true },
+      'method':    'get',
+      'evalJS':    'force',
+      'onAbort':    function() { fired.abort   = true },
+      'onFailure':  function() { fired.failure = true },
+      'onSuccess':  function() { fired.success = true },
       'onComplete': function(response) { responseAborted = response.aborted }
     });
 
     request.abort();
 
-    this.assert(abortCallbackFired,
-      'onAbort failed to fire');
+    this.assert(fired.abort,
+      'onAbort request event failed to fire');
 
-    this.assert(failureCallbackFired,
-      'onFailure failed to fire');
+    this.assert(!fired.failure,
+      'onFailure request event should not fire');
+
+    this.assert(!fired.success,
+      'onSuccess request should not fire');
+
+    this.assert(!fired.failureResponder,
+      'onFailure responder event should not fire');
+
+    this.assert(!fired.successResponder,
+      'onSuccess responder should not fire');
 
     this.assert(responseAborted,
       'failed to set response.aborted flag');
@@ -155,20 +170,14 @@ new Test.Unit.Runner({
   },
 
   'testResponders': function(){
-    var count = 0, responderCounter = 0,
+    var i, count = 0,
      dummyResponder = { 'onComplete': function() { /* dummy */ } };
 
-    var responder = {
-      'onCreate':   function() { responderCounter++ },
-      'onLoaded':   function() { responderCounter++ },
-      'onComplete': function() { responderCounter++ }
-    };
-
     // check for internal responder
-    for (var i in Fuse.Ajax.Responders.responders) count++;
-    this.assertEqual(2, count,
-      'Failed default responders count');
+    for (i in Fuse.Ajax.Responders.responders) count++;
+    this.assertEqual(2, count, 'Failed default responders count');
 
+    // ensure register() works
     Fuse.Ajax.Responders.register(dummyResponder);
     this.assertEqual(2, Fuse.Ajax.Responders.responders['onComplete'].length,
       'Failed to register an `onComplete` responder');
@@ -178,12 +187,23 @@ new Test.Unit.Runner({
     this.assertEqual(2, Fuse.Ajax.Responders.responders['onComplete'].length,
       'Added a duplicate responder');
 
+    // ensure unregister() works
     Fuse.Ajax.Responders.unregister(dummyResponder);
     this.assertEqual(1, Fuse.Ajax.Responders.responders['onComplete'].length,
       'Failed to unregister an `onComplete` responder');
 
+
     // ensure responders are called
-    Fuse.Ajax.Responders.register(responder);
+    var responderCounter = 0,
+     increaseCounter = function() { responderCounter++ };
+
+    Fuse.Ajax.Responders.register({
+      'onCreate':   increaseCounter,
+      'onLoaded':   increaseCounter,
+      'onSuccess':  increaseCounter,
+      'on200':      increaseCounter,
+      'onComplete': increaseCounter
+    });
 
     this.assertEqual(0, responderCounter,
       'Responders executed too soon');
@@ -191,8 +211,11 @@ new Test.Unit.Runner({
     this.assertEqual(0, Fuse.Ajax.activeRequestCount,
       'There should be no active requests');
 
-    Fuse.Ajax.Request('../fixtures/content.html',
-      { 'method': 'get', 'parameters': 'pet=monkey' });
+    Fuse.Ajax.Request('../fixtures/content.html', {
+      'method':     'get',
+      'parameters': 'pet=monkey',
+      'on200' :      function() { }
+    });
 
     this.assert(responderCounter > 0,
       'The `onCreate` responder failed');
@@ -201,7 +224,7 @@ new Test.Unit.Runner({
       'There should be only one active request');
 
     this.wait(1000, function() {
-      this.assertEqual(3, responderCounter,
+      this.assertEqual(5, responderCounter,
         'Incorrect number of responders fired');
 
       this.assertEqual(0, Fuse.Ajax.activeRequestCount,

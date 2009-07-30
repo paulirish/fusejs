@@ -1,3 +1,7 @@
+* Ensure onSuccess/onFailure responders are fired regardless of provided request options.onXXX status callbacks. [Prototype LH #334] [Darrin Holst, jddalton] 
+
+* Skip global/request onSuccess/onFailure events if the request is aborted. [Diego Perini, fearphage, jddalton]
+
 * Add missing semicolons, reduce multiple variable declarations, and remove wrongly placed commas. [Diego Perini]
 
 * Add Fuse.Ajax.Request#abort method and ensure all XHR readyState events are fired once. [Prototype LH #124] [FuseJS LH #36] [Diego Perini, fearphage, jddalton, Mark Caudill]
