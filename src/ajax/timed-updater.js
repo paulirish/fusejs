@@ -11,36 +11,45 @@
 
         // this._super() equivalent
         Fuse.Ajax.Base.call(this, options);
+        options = this.options;
 
-        this.onStop = this.options.onStop;
+        this.onStop = options.onStop;
         this.onTimerEvent = Fuse.Function.bind(this.start, this);
 
         this.updater = { };
         this.container = container;
         this.url = url;
 
-        var onComplete = this.options.onComplete;
-        this.options.onComplete = Fuse.Function.bind(function(response, json) {
-          this.updateComplete(response);
-          if (Fuse.Object.isFunction(onComplete)) onComplete(response, json);
+        // dynamically set readyState eventName to allow for easy customization
+        var callbackName = 'on' + Request.Events[4],
+         onDone = options[callbackName];
+
+        options[callbackName] = Fuse.Function.bind(function(response, json) {
+          if (!response.aborted) {
+            this.updateDone(response);
+            onDone && onDone(response, json);
+          }
         }, this);
 
         this.start();
       }
+
+      var Request = Fuse.Ajax.Request;
       return TimedUpdater;
     })()
   });
 
   (function() {
-    this.updateComplete = function updateComplete(response) {
-      if (this.options.decay) {
+    this.updateDone = function updateDone(response) {
+      var options = this.options;
+      if (options.decay) {
         this.decay = (response.responseText == this.lastText ?
-          this.decay * this.options.decay : this.options.decay);
+          this.decay * options.decay : options.decay);
 
         this.lastText = response.responseText;
       }
       this.timer = Fuse.Function.delay(this.onTimerEvent,
-        Math.min(this.decay * this.options.frequency || this.options.maxDecay));
+        Math.min(this.decay * options.frequency || options.maxDecay));
     };
 
     this.start = function start() {
@@ -48,13 +57,13 @@
     };
 
     this.stop = function stop() {
-      this.updater.options.onComplete = undefined;
+      this.updater.abort();
       global.clearTimeout(this.timer);
-      (this.onStop || Fuse.emptyFunction).apply(this, arguments);
+      this.onStop && this.onStop.apply(this, arguments);
     };
 
     // prevent JScript bug with named function expressions
-    var updateComplete = null, start = null, stop = null;
+    var updateDone = null, start = null, stop = null;
   }).call(Fuse.Ajax.TimedUpdater.Plugin);
 
   Fuse.Ajax.TimedUpdater.options = {

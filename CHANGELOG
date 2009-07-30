@@ -1,3 +1,6 @@
+* Change Fuse.Ajax.Request.Event names to those defined by the W3C XMLHttpRequest draft. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Ensure onSuccess/onFailure responders are fired regardless of provided request options.onXXX status callbacks. [Prototype LH #334] [Darrin Holst, jddalton] 
 
 * Skip global/request onSuccess/onFailure events if the request is aborted. [Diego Perini, fearphage, jddalton]

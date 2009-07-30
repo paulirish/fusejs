@@ -5,8 +5,8 @@
   // TODO: Utilize custom events for responders
   (function() {
     this.responders = {
-      'onCreate':   Fuse.List( function() { Ajax.activeRequestCount++ } ),
-      'onComplete': Fuse.List( function() { Ajax.activeRequestCount-- } )
+      'onCreate': Fuse.List(function() { Ajax.activeRequestCount++ }),
+      'onDone':   Fuse.List(function() { Ajax.activeRequestCount-- })
     };
 
     this.dispatch = function dispatch(handlerName, request, transport, json) {

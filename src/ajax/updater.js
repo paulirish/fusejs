@@ -12,16 +12,19 @@
         };
 
         options = Fuse.Object.clone(options);
-        var updater = this, onComplete = options.onComplete;
+        var updater = this, callbackName = 'on' + Request.Events[4],
+         onDone = options[callbackName];
 
-        options.onComplete = function(response, json) {
+        options[callbackName] = function(response, json) {
           updater.updateContent(response.responseText);
-          if (typeof onComplete === 'function') onComplete(response, json);
+          onDone && onDone(response, json);
         };
 
         // this._super() equivalent
         Fuse.Ajax.Request.call(this, url, options);
       }
+
+      var Request = Fuse.Ajax.Request;
       return Updater;
     })(),
 

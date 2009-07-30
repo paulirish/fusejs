@@ -18,7 +18,7 @@
   });
 
   Fuse.Ajax.Request.Events =
-    Fuse.List('Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete');
+    Fuse.List('Unsent', 'Opened', 'HeadersRecieved', 'Loading', 'Done'); 
 
   /*--------------------------------------------------------------------------*/
 
