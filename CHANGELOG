@@ -4,7 +4,7 @@
 
 * Add missing semicolons, reduce multiple variable declarations, and remove wrongly placed commas. [Diego Perini]
 
-* Add Fuse.Ajax.Request#abort method and ensure all XHR readyState events are fired once. [Prototype LH #124] [FuseJS LH #36] [Diego Perini, fearphage, jddalton, Mark Caudill]
+* Add Fuse.Ajax.Request#abort method and ensure all XHR readyState events are fired once. [Prototype LH #124] [FuseJS LH #36, #38] [Diego Perini, fearphage, jddalton, Mark Caudill]
 
 * Change to HTML 4.01 Transitional doctype and escape closing tags in the source in the off chance that it is embeded in a page instead of an external js file. [jddalton]
 
