@@ -15,9 +15,9 @@
         var updater = this, callbackName = 'on' + Request.Events[4],
          onDone = options[callbackName];
 
-        options[callbackName] = function(response, json) {
-          updater.updateContent(response.responseText);
-          onDone && onDone(response, json);
+        options[callbackName] = function(request, json) {
+          updater.updateContent(request.responseText);
+          onDone && onDone(request, json);
         };
 
         // this._super() equivalent
@@ -30,7 +30,7 @@
 
     'updateContent': (function() {
       function updateContent(responseText) {
-        var receiver = this.container[this.success() ? 'success' : 'failure'], 
+        var receiver = this.container[this.isSuccess() ? 'success' : 'failure'],
          options = this.options;
 
         if (!options.evalScripts)

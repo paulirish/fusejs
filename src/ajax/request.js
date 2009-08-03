@@ -6,55 +6,52 @@
         if (!(this instanceof Request))
           return new Request(url, options);
 
-        // this._super() equivalent
-        Fuse.Ajax.Base.call(this, options);
-
         this.transport = Fuse.Ajax.getTransport();
         this.onStateChange = Fuse.Function.bind(this.onStateChange, this);
-        this.request(url);
+        this.request(url, options);
       }
       return Request;
     })()
   });
 
   Fuse.Ajax.Request.Events =
-    Fuse.List('Unsent', 'Opened', 'HeadersRecieved', 'Loading', 'Done'); 
+    Fuse.List('Unsent', 'Opened', 'HeadersRecieved', 'Loading', 'Done');
 
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    this.readyState = 0;
+    this.aborted      = false;
+    this.readyState   = Fuse.Number(0);
+    this.responseText = Fuse.String('');
+    this.status       = Fuse.Number(0);
+    this.statusText   = Fuse.String('');
+
+    this.headerJSON = this.responseJSON = this.responseXML = null;
 
     this.abort = function abort() {
-      var result = false; 
+      var transport = this.transport;
       if (this.readyState != 4) {
         try {
           // clear onreadystatechange handler to stop some browsers calling
           // it when the request is aborted
-          this.transport.onreadystatechange = Fuse.emptyFunction;
-          this.transport.abort();
+          transport.onreadystatechange = Fuse.emptyFunction;
+          transport.abort();
 
           // skip to complete readyState
           this.aborted = true;
           this.setReadyState(4);
-          result = true;
         }
-        catch (e) {
-          this.transport.onreadystatechange = this.onStateChange;
-          this.dispatchException(e);
-        }
+        catch (e) { }
       }
-      return result;
     };
 
-    this.dispatch = function dispatch(eventName, callback, response) {
-      response = response || new Fuse.Ajax.Response(this);
+    this.dispatch = function dispatch(eventName, callback) {
       try {
-        callback && callback(response, response.headerJSON);
+        callback && callback(this, this.headerJSON);
       } catch (e) {
         this.dispatchException(e);
       }
-      Fuse.Ajax.Responders.dispatch(eventName, this, response);
+      Fuse.Ajax.Responders.dispatch(eventName, this, this.headerJSON);
     };
 
     this.dispatchException = function dispatchException(exception) {
@@ -63,14 +60,10 @@
       Fuse.Ajax.Responders.dispatch('onException', this, exception);
     };
 
-    this.evalResponse = function evalResponse() {
-      try {
-        var text = this.transport.responseText || '';
-        if (text) text = Fuse.String.unfilterJSON(text);
-        return global.eval(String(text));
-      } catch (e) {
-        this.dispatchException(e);
-      }
+    this.getAllHeaders = function getAllHeaders() {
+      var result;
+      try { result = this.transport.getAllResponseHeaders() } catch (e) { }
+      return Fuse.String(result || '');
     };
 
     this.getHeader = function getHeader(name) {
@@ -79,45 +72,28 @@
       return result ? Fuse.String(result) : null;
     };
 
-    this.getStatus = function getStatus() {
-      var result = 0;
-      try { result = this.transport.status || 0 } catch (e) { }
-      return Fuse.Number(result);
-    };
-
     this.onStateChange = function onStateChange(event, forceState) {
       // ensure all states are fired and only fired once per change
-      var endState = this.transport.readyState;
-      if (this.readyState < 4) {
-        if (forceState != null) this.readyState = forceState - 1;
-        if (this.readyState < endState) {
-          while (this.readyState < endState)
-            this.setReadyState(this.readyState + 1);
-        }
+      var endState = this.transport.readyState, readyState = this.readyState;
+      if (readyState < 4) {
+        if (forceState != null) readyState = forceState - 1;
+        while (readyState < endState)
+          this.setReadyState(++readyState);
       }
     };
 
-    this.request = function request(url) {
-      var body,
-       options    = this.options,
-       method     = options.method,
-       params     = this.parameters = Fuse.Object.clone(options.parameters),
-       url        = Fuse.String(url || global.location.href),
-       transport  = this.transport;
+    this.request = function request(url, options) {
+      // treat request() as the constructor and call Base as $super
+      // if first call or new options are passed
+      if (!this.options || options)
+        Fuse.Ajax.Base.call(this, url, options);
 
-      if (!/^(get|post)$/.test(method)) {
-        // simulate other verbs over post
-        params['_method'] = method;
-        method = 'post';
-      }
-      this.method = Fuse.String(method);
-
-      if (params = Fuse.Object.toQueryString(params)) {
-        // when GET, append parameters to URL
-        if (method == 'get')
-          url = url + (url.indexOf('?') > -1 ? '&' : '?') + params;
-      }
-      this.url = Fuse.String(url);
+      var key,
+       options   = this.options,
+       async     = options.asynchronous,
+       body      = this.body,
+       headers   = options.headers,
+       transport = this.transport;
 
       // fire onCreate callbacks
       this.dispatch('onCreate', options.onCreate);
@@ -128,18 +104,19 @@
       try {
         // attach onreadystatechange event after open() to avoid some browsers
         // firing duplicate readyState events
-        this.transport.open(method.toUpperCase(), url, options.asynchronous,
+        transport.open(this.method.toUpperCase(), this.url, async,
           options.username, options.password);
-        this.transport.onreadystatechange = this.onStateChange;
-        this.setRequestHeaders();
+        transport.onreadystatechange = this.onStateChange;
 
-        body = method == 'post' ? String(options.postBody || params) : null;
-        this.body = body && Fuse.String(body);
+        // set headers
+        for (key in headers)
+          transport.setRequestHeader(key, headers[key]);
 
-        this.transport.send(body);
+        // if body is a string ensure it's a primitive
+        transport.send(Fuse.Object.isString(body) ? String(body) : body);
 
         // force Firefox to handle readyState 4 for synchronous requests
-        if (!options.asynchronous) this.onStateChange();
+        if (!async) this.onStateChange();
       }
       catch (e) {
         this.dispatchException(e);
@@ -147,37 +124,102 @@
     };
 
     this.setReadyState = function setReadyState(readyState) {
-      this.readyState = readyState;
-
       var eventName, successOrFailure, i = 0,
-       eventNames = [], 
+       eventNames = [],
        skipped    = { },
+       aborted    = this.aborted,
        options    = this.options,
-       response   = Fuse.Ajax.Response(this),
-       aborted    = response.aborted,
-       status     = response.status;
+       url        = this.url,
+       transport  = this.transport;
 
-      if (aborted) eventNames.push('Abort');
+      // clear response values on readyState 0 or aborted requests
+      if (readyState == 0 || aborted) {
+        this.headerJSON = this.responseJSON = this.responseXML = null;
+        this.responseText = Fuse.String('');
+      }
 
-      if (readyState == 4) {
-        // remove event handler to avoid memory leak in IE
-        this.transport.onreadystatechange = Fuse.emptyFunction;
-        eventNames.push(String(status));
+      if (readyState == 2) {
+        // exit if no headers and wait for state 3 to fire states 2 and 3
+        if (this.getAllHeaders() == '' && transport.readyState === 2)
+          return;
 
-        // dont call global/request onSuccess/onFailure callbacks on aborted requests
-        successOrFailure = this.success() ? 'Success' : 'Failure';
-        if (!aborted) eventNames.push(successOrFailure);
+        this.readyState = Fuse.Number(readyState);
 
-        // skip success/failure handlers if status handler exists
-        skipped['on' + (options['on' + status] ?
-          successOrFailure : status)] = 1;
+        // set headerJSON
+        var json = this.getHeader('X-JSON');
+        if (json && json != '') {
+          try {
+            this.headerJSON = json.evalJSON(options.sanitizeJSON ||
+              !Fuse.Object.isSameOrigin(url));
+          } catch (e) {
+            this.dispatchException(e);
+          }
+        }
+      }
+      else if (readyState > 2) {
 
-        // handle returned javascript
-        var contentType = response.getHeader('Content-type');
-        if (!aborted && (options.evalJS == 'force' || options.evalJS &&
-            Fuse.Object.isSameOrigin(this.url) && contentType &&
-            contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;.*)?\s*$/i)))
-          this.evalResponse();
+        this.readyState = Fuse.Number(readyState);
+
+        // set status
+        try { this.status = Fuse.Number(transport.status || 0) } catch (e) { }
+
+        // set statusText
+        try { this.statusText = Fuse.String(transport.statusText || '') } catch (e) { }
+
+        // set responseText
+        if (!aborted)
+          this.responseText = Fuse.String.interpret(transport.responseText);
+
+        if (readyState == 4) {
+          var responseXML,
+           contentType = this.getHeader('Content-type') || '',
+           evalJS = options.evalJS,
+           evalJSON = options.evalJSON,
+           responseText = this.responseText,
+           status = String(this.status);
+
+          if (aborted) {
+            eventNames.push('Abort', status);
+          }
+          else {
+            // don't call global/request onSuccess/onFailure callbacks on aborted requests
+            successOrFailure = this.isSuccess() ? 'Success' : 'Failure';
+            eventNames.push(status, successOrFailure);
+
+            // skip success/failure request events if status handler exists
+            skipped['on' + (options['on' + status] ?
+              successOrFailure : status)] = 1;
+
+            // remove event handler to avoid memory leak in IE
+            transport.onreadystatechange = Fuse.emptyFunction;
+
+            // set responseXML
+            responseXML = transport.responseXML;
+            if (responseXML) this.responseXML = responseXML;
+
+            // set responseJSON
+            if (evalJSON == 'force' || (evalJSON && !responseText.blank() &&
+                contentType.indexOf('application/json') > -1)) {
+              try {
+                this.responseJSON = responseText.evalJSON(options.sanitizeJSON ||
+                  !Fuse.Object.isSameOrigin(url));
+              } catch (e) {
+                this.dispatchException(e);
+              }
+            }
+
+            // eval javascript
+            if (responseText && (evalJS == 'force' || evalJS &&
+                Fuse.Object.isSameOrigin(url) &&
+                contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i))) {
+              try {
+                global.eval(String(Fuse.String.unfilterJSON(responseText)));
+              } catch (e) {
+                this.dispatchException(e);
+              }
+            }
+          }
+        }
       }
 
       // add readyState to the list of events to dispatch
@@ -185,64 +227,23 @@
 
       while (eventName = eventNames[i++]) {
         eventName = 'on' + eventName;
-        this.dispatch(eventName, !skipped[eventName] && options[eventName], response);
+        this.dispatch(eventName, !skipped[eventName] && options[eventName]);
       }
     };
 
-    this.setRequestHeaders = function setRequestHeaders() {
-      var options = this.options, encoding = options.encoding;
-
-      var headers = {
-        'Accept':           'text/javascript, text/html, application/xml, text/xml, */*',
-        'X-Fuse-Version':   Fuse.Version,
-        'X-Requested-With': 'XMLHttpRequest'
-      };
-
-      if (this.method == 'post') {
-        headers['Content-type'] = options.contentType +
-          (encoding ? '; charset=' + encoding : '');
-
-        /* Force "Connection: close" for older Mozilla browsers to work
-         * around a bug where XMLHttpRequest sends an incorrect
-         * Content-length header. See Mozilla Bugzilla #246651.
-         */
-        if (this.transport.overrideMimeType &&
-           (userAgent.match(/Gecko\/(\d{4})/) || [0,2005])[1] < 2005)
-          headers['Connection'] = 'close';
-      }
-
-      // user-defined headers
-      var key, extras = options.requestHeaders;
-      if (typeof extras === 'object') {
-        if (Fuse.List.isArray(extras)) {
-          for (var i = 0, length = extras.length; i < length; i += 2)
-            headers[extras[i]] = extras[i + 1];
-        }
-        else {
-          if (extras instanceof Fuse.Hash) extras = extras._object;
-          for (key in extras) headers[key] = extras[key];
-        }
-      }
-
-      for (key in headers)
-        this.transport.setRequestHeader(key, headers[key]);
-    };
-
-    this.success = function success() {
-      var status = this.getStatus();
+    this.isSuccess = function isSuccess() {
+      var status = this.status;
       return status == 0 || (status >= 200 && status < 300);
     };
 
     // prevent JScript bug with named function expressions
-    var abort =             null,
-     dispatch =             null,
-     dispatchException =    null,
-     evalResponse =         null,
-     getHeader =            null,
-     getStatus =            null,
-     onStateChange =        null,
-     request =              null,
-     setReadyState =        null,
-     setRequestHeaders =    null,
-     success =              null;
+    var abort =          null,
+     dispatch =          null,
+     dispatchException = null,
+     getHeader =         null,
+     getAllHeaders =     null,
+     isSuccess =         null,
+     onStateChange =     null,
+     request =           null,
+     setReadyState =     null;
   }).call(Fuse.Ajax.Request.Plugin);

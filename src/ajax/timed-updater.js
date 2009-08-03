@@ -10,7 +10,7 @@
           .clone(this.constructor.options), options);
 
         // this._super() equivalent
-        Fuse.Ajax.Base.call(this, options);
+        Fuse.Ajax.Base.call(this, url, options);
         options = this.options;
 
         this.onStop = options.onStop;
@@ -24,10 +24,10 @@
         var callbackName = 'on' + Request.Events[4],
          onDone = options[callbackName];
 
-        options[callbackName] = Fuse.Function.bind(function(response, json) {
-          if (!response.aborted) {
-            this.updateDone(response);
-            onDone && onDone(response, json);
+        options[callbackName] = Fuse.Function.bind(function(request, json) {
+          if (!request.aborted) {
+            this.updateDone(request);
+            onDone && onDone(request, json);
           }
         }, this);
 
@@ -40,13 +40,13 @@
   });
 
   (function() {
-    this.updateDone = function updateDone(response) {
-      var options = this.options;
+    this.updateDone = function updateDone(request) {
+      var options = this.options, responseText = request.responseText;
       if (options.decay) {
-        this.decay = (response.responseText == this.lastText ?
+        this.decay = (responseText == this.lastText ?
           this.decay * options.decay : options.decay);
 
-        this.lastText = response.responseText;
+        this.lastText = responseText;
       }
       this.timer = Fuse.Function.delay(this.onTimerEvent,
         Math.min(this.decay * options.frequency || options.maxDecay));

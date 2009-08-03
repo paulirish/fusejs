@@ -1,3 +1,17 @@
+* Merge Fuse.Ajax.Response into Fuse.Ajax.Request. [FuseJS LH #41, #43, #49] [jddalton, Mark Caudill]
+  Note: Backwards compatibility warning.
+    - Reduce memory use and optimize performance
+    - Ensure all xhr readyStates are fired
+    - Ensure headers are available in state 2
+    - Set response text/JSON/XML to null/empty string when xhr is aborted
+    - Fuse.Ajax.Base constructor accepts `url` as the first argument and `options` as the second
+    - Fuse.Ajax.Base normalizes all options
+    - Users may set the default headers at Fuse.Ajax.Base.options.headers
+    - Renamed Fuse.Ajax.Request methods `success` to `isSuccess`
+    - Removed Fuse.Ajax.Request methods `setRequestHeaders`, `evalResponse`, and `getStatus`
+    - Removed all browser sniffs from Fuse.Ajax
+    - Removed an old bug fix for Firefox versions lower than 1.5 (it caused bugs with xhr HTTP authentication)
+
 * Add support for passing username and password to allow Ajax HTTP authentication. [FuseJS LH #48] [jQuery Trac #2570, #2865] [jddalton, kai, Mark Caudill, mikeg]
 
 * Change Fuse.Ajax.Request.Event names to those defined by the W3C XMLHttpRequest draft. [jddalton]

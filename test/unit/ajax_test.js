@@ -56,7 +56,7 @@ new Test.Unit.Runner({
   },
 
   'testRequestAbort': function() {
-    var responseAborted, fired = { };
+    var abortedFlag, fired = { };
 
     Fuse.Ajax.Responders.register({
       'onFailure': function() { fired.failureResponder = true },
@@ -66,10 +66,10 @@ new Test.Unit.Runner({
     var request = Fuse.Ajax.Request('../fixtures/hello.js', {
       'method':    'get',
       'evalJS':    'force',
-      'onAbort':    function() { fired.abort   = true },
-      'onFailure':  function() { fired.failure = true },
-      'onSuccess':  function() { fired.success = true },
-      'onDone':     function(response) { responseAborted = response.aborted }
+      'onAbort':   function() { fired.abort   = true },
+      'onFailure': function() { fired.failure = true },
+      'onSuccess': function() { fired.success = true },
+      'onDone':    function(request) { abortedFlag = request.aborted }
     });
 
     request.abort();
@@ -89,16 +89,15 @@ new Test.Unit.Runner({
     this.assert(!fired.successResponder,
       'onSuccess responder should not fire');
 
-    this.assert(responseAborted,
-      'failed to set response.aborted flag');
+    this.assert(abortedFlag,
+      'failed to set request.aborted flag');
   },
 
   'testRequestWithNoUrl': function() {
     var test = this,  suceeded = false;
     Fuse.Ajax.Request(null, {
-      'asynchronous': true,
-      'method':      'get',
-      'onSuccess':   function() { suceeded = true }
+      'method':    'get',
+      'onSuccess': function() { suceeded = true }
     });
 
     this.wait(1000, function() { this.assert(suceeded) });
@@ -136,7 +135,7 @@ new Test.Unit.Runner({
 
     this.wait(1000, function() {
       this.assertEqual(sentence, getInnerHTML('content'));
- 
+
       $('content').update();
       Fuse.Ajax.Updater('content','../fixtures/content.html',
         { 'method': 'get', 'insertion': 'bottom' });
@@ -247,7 +246,7 @@ new Test.Unit.Runner({
 
       Fuse.Ajax.Request('../fixtures/hello.js',
         extendDefault({
-          'onDone': Fuse.Function.bind(function(response) {
+          'onDone': Fuse.Function.bind(function() {
             this.assertNotEqual('', getInnerHTML('content')) }, this)
         }));
 
@@ -264,8 +263,8 @@ new Test.Unit.Runner({
       Fuse.Ajax.Request('/inspect', extendDefault({
         'method':      'put',
         'contentType': 'application/bogus',
-        'onDone':      Fuse.Function.bind(function(response) {
-          this.assertEqual('application/bogus; charset=UTF-8', response.responseJSON.headers['content-type']);
+        'onDone':      Fuse.Function.bind(function(request) {
+          this.assertEqual('application/bogus; charset=UTF-8', request.responseJSON.headers['content-type']);
         }, this)
       }));
     }
@@ -276,9 +275,9 @@ new Test.Unit.Runner({
     Fuse.Ajax.Request('../fixtures/content.html',
       extendDefault({
         'onCreate': Fuse.Function.bind(
-          function(response) { this.assertEqual(0, response.readyState) }, this),
+          function(request) { this.assertEqual(0, request.readyState) }, this),
         'onDone': Fuse.Function.bind(
-          function(response) { this.assertNotEqual(0, response.readyState) }, this)
+          function(request) { this.assertNotEqual(0, request.readyState) }, this)
     }));
   },
 
@@ -289,7 +288,7 @@ new Test.Unit.Runner({
       Fuse.Ajax.Request('/response',
         extendDefault({
           'parameters': Fixtures.js,
-          'onDone': Fuse.Function.bind(function(response) {
+          'onDone': Fuse.Function.bind(function() {
             var h2 = $('content').firstChild;
             this.assertEqual('hello world!', getInnerHTML(h2));
           }, this)
@@ -301,7 +300,7 @@ new Test.Unit.Runner({
         extendDefault({
           'evalJS':     false,
           'parameters': Fixtures.js,
-          'onDone': Fuse.Function.bind(function(response) {
+          'onDone': Fuse.Function.bind(function() {
             this.assertEqual('', getInnerHTML('content'));
           }, this)
       }));
@@ -313,7 +312,7 @@ new Test.Unit.Runner({
     Fuse.Ajax.Request('../fixtures/hello.js',
       extendDefault({
         'evalJS':     'force',
-        'onDone': Fuse.Function.bind(function(response) {
+        'onDone': Fuse.Function.bind(function() {
           var h2 = $('content').firstChild;
           this.assertEqual('hello world!', getInnerHTML(h2));
         }, this)
@@ -323,7 +322,8 @@ new Test.Unit.Runner({
   'testCallbacks': function() {
     var options = extendDefault({
       'onCreate': Fuse.Function.bind(
-        function(response) { this.assertInstanceOf(Fuse.Ajax.Response, response) }, this)
+        function(request) { this.assertInstanceOf(Fuse.Ajax.Request, request,
+          'request object is not passed to callbacks') }, this)
     });
 
     Fuse.Ajax.Request.Events.each(function(state){
@@ -337,13 +337,13 @@ new Test.Unit.Runner({
     Fuse.Ajax.Request('../fixtures/empty.html',
       extendDefault({
         'onDone': Fuse.Function.bind(
-          function(response) { this.assertEqual('', response.responseText) }, this)
+          function(request) { this.assertEqual('', request.responseText) }, this)
     }));
 
     Fuse.Ajax.Request('../fixtures/content.html',
       extendDefault({
         'onDone': Fuse.Function.bind(
-          function(response) { this.assertEqual(sentence, response.responseText.toLowerCase()) }, this)
+          function(request) { this.assertEqual(sentence, request.responseText.toLowerCase()) }, this)
     }));
   },
 
@@ -352,8 +352,8 @@ new Test.Unit.Runner({
       Fuse.Ajax.Request('/response',
         extendDefault({
           'parameters': Fixtures.xml,
-          'onDone': Fuse.Function.bind(function(response) {
-            this.assertEqual('foo', response.responseXML.getElementsByTagName('name')[0].getAttribute('attr'))
+          'onDone': Fuse.Function.bind(function(request) {
+            this.assertEqual('foo', request.responseXML.getElementsByTagName('name')[0].getAttribute('attr'))
           }, this)
       }));
     }
@@ -366,7 +366,7 @@ new Test.Unit.Runner({
         extendDefault({
           'parameters': Fixtures.json,
           'onDone': Fuse.Function.bind(
-            function(response) { this.assertEqual(123, response.responseJSON.test) }, this)
+            function(request) { this.assertEqual(123, request.responseJSON.test) }, this)
       }));
 
       Fuse.Ajax.Request('/response',
@@ -376,7 +376,7 @@ new Test.Unit.Runner({
             'Content-Type':   'application/json'
           },
           'onDone': Fuse.Function.bind(
-            function(response) { this.assertNull(response.responseJSON) }, this)
+            function(request) { this.assertNull(request.responseJSON) }, this)
       }));
 
       Fuse.Ajax.Request('/response',
@@ -384,14 +384,14 @@ new Test.Unit.Runner({
           'evalJSON':   false,
           'parameters': Fixtures.json,
           'onDone': Fuse.Function.bind(
-            function(response) { this.assertNull(response.responseJSON) }, this)
+            function(request) { this.assertNull(request.responseJSON) }, this)
       }));
 
       Fuse.Ajax.Request('/response',
         extendDefault({
           'parameters': Fixtures.jsonWithoutContentType,
           'onDone': Fuse.Function.bind(
-            function(response) { this.assertNull(response.responseJSON) }, this)
+            function(request) { this.assertNull(request.responseJSON) }, this)
       }));
 
       Fuse.Ajax.Request('/response',
@@ -410,7 +410,7 @@ new Test.Unit.Runner({
       extendDefault({
         'evalJSON':   'force',
         'onDone': Fuse.Function.bind(
-          function(response) { this.assertEqual(123, response.responseJSON.test) }, this)
+          function(request) { this.assertEqual(123, request.responseJSON.test) }, this)
     }));
   },
 
@@ -423,7 +423,7 @@ new Test.Unit.Runner({
       Fuse.Ajax.Request('/response',
         extendDefault({
           'parameters': Fixtures.headerJson,
-          'onDone': Fuse.Function.bind(function(response, json) {
+          'onDone': Fuse.Function.bind(function(request, json) {
             // Normally you should set the proper encoding charset on your page
             // such as charset=ISO-8859-7 and handle decoding on the serverside.
             // PHP server-side ex:
@@ -431,15 +431,15 @@ new Test.Unit.Runner({
             // or for none superglobals values
             // $value = utf8_decode(urldecode($encoded));
             var expected = 'hello #\u00E9\u00E0 '; // hello #éà
-            this.assertEqual(expected, decode(response.headerJSON.test));
+            this.assertEqual(expected, decode(request.headerJSON.test));
             this.assertEqual(expected, decode(json.test));
           }, this)
       }));
 
       Fuse.Ajax.Request('/response',
         extendDefault({
-          'onDone': Fuse.Function.bind(function(response, json) {
-            this.assertNull(response.headerJSON)
+          'onDone': Fuse.Function.bind(function(request, json) {
+            this.assertNull(request.headerJSON)
             this.assertNull(json)
           }, this)
       }));
@@ -452,9 +452,9 @@ new Test.Unit.Runner({
      Fuse.Ajax.Request('/response',
        extendDefault({
          'parameters': { 'X-TEST': 'some value' },
-         'onDone': Fuse.Function.bind(function(response) {
-            this.assertEqual('some value', response.getHeader('X-Test'));
-            this.assertNull(response.getHeader('X-Inexistant'));
+         'onDone': Fuse.Function.bind(function(request) {
+            this.assertEqual('some value', request.getHeader('X-Test'));
+            this.assertNull(request.getHeader('X-Nonexistent'));
           }, this)
       }));
     }
@@ -466,10 +466,10 @@ new Test.Unit.Runner({
       Fuse.Ajax.Request('/response',
         extendDefault({
           'parameters': $H({ 'one': 'two', 'three': 'four' }),
-          'onDone': Fuse.Function.bind(function(response) {
-            this.assertEqual('two',  response.getHeader('one'));
-            this.assertEqual('four', response.getHeader('three'));
-            this.assertNull(response.getHeader('toObject'));
+          'onDone': Fuse.Function.bind(function(request) {
+            this.assertEqual('two',  request.getHeader('one'));
+            this.assertEqual('four', request.getHeader('three'));
+            this.assertNull(request.getHeader('toObject'));
           }, this)
       }));
     }
@@ -512,7 +512,7 @@ new Test.Unit.Runner({
       Fuse.Ajax.Request('/response',
         extendDefault({
           'parameters': Fixtures.js,
-          'onDone': Fuse.Function.bind(function(response) {
+          'onDone': Fuse.Function.bind(function() {
             this.assertEqual('same origin policy', getInnerHTML('content'));
           }, this)
       }));
@@ -575,7 +575,7 @@ new Test.Unit.Runner({
         updater.stop();
       });
     });
-    
+
     // restore
     Fuse.Ajax.TimedUpdater.options = backup;
   }

@@ -156,7 +156,6 @@
    'ajax/responders.js',
    'ajax/base.js',
    'ajax/request.js',
-   'ajax/response.js',
    'ajax/updater.js',
    'ajax/timed-updater.js',
 
