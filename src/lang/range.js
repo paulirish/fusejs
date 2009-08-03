@@ -100,7 +100,7 @@
 
     // prevent JScript bug with named function expressions
     var _each = null, size = null, toArray = null;
-  }).call(Fuse.Range.Plugin)
+  }).call(Fuse.Range.Plugin);
 
   /*--------------------------------------------------------------------------*/
   
