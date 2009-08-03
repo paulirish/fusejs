@@ -1,3 +1,5 @@
+* Allow Fuse.Ajax.Responders.dispatch() to continue dispatching events even though one or more responder has thrown an error. [Dean Edwards, jddalton, John Resig]
+
 * Merge Fuse.Ajax.Response into Fuse.Ajax.Request. [FuseJS LH #41, #43, #49] [jddalton, Mark Caudill]
   Note: Backwards compatibility warning.
     - Reduce memory use and optimize performance
