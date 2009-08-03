@@ -15,7 +15,7 @@
   });
 
   Fuse.Ajax.Request.Events =
-    Fuse.List('Unsent', 'Opened', 'HeadersRecieved', 'Loading', 'Done');
+    Fuse.List('Unsent', 'Opened', 'HeadersReceived', 'Loading', 'Done');
 
   /*--------------------------------------------------------------------------*/
 
@@ -88,8 +88,9 @@
       if (!this.options || options)
         Fuse.Ajax.Base.call(this, url, options);
 
+      options = this.options;
+
       var key,
-       options   = this.options,
        async     = options.asynchronous,
        body      = this.body,
        headers   = options.headers,
