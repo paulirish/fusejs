@@ -20,6 +20,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
+    this._useStatus   = true;
     this.aborted      = false;
     this.readyState   = Fuse.Number(0);
     this.responseText = Fuse.String('');
@@ -94,7 +95,15 @@
        async     = options.asynchronous,
        body      = this.body,
        headers   = options.headers,
-       transport = this.transport;
+       matchHTTP = /^https?:/,
+       transport = this.transport,
+       url       = String(this.url);
+
+      // non-http requests don't use http status codes
+      // return true if request url is http(s) or, if relative, the pages url is http(s)
+      this._useStatus = matchHTTP.test(url) ||
+        (url.slice(0, 6).indexOf(':') === -1 ?
+          matchHTTP.test(global.location.protocol) : false);
 
       // fire onCreate callbacks
       this.dispatch('onCreate', options.onCreate);
@@ -105,7 +114,7 @@
       try {
         // attach onreadystatechange event after open() to avoid some browsers
         // firing duplicate readyState events
-        transport.open(this.method.toUpperCase(), this.url, async,
+        transport.open(this.method.toUpperCase(), url, async,
           options.username, options.password);
         transport.onreadystatechange = this.onStateChange;
 
@@ -125,27 +134,52 @@
     };
 
     this.setReadyState = function setReadyState(readyState) {
-      var eventName, successOrFailure, i = 0,
+      var eventName, status, statusText, successOrFailure, i = 0,
        eventNames = [],
        skipped    = { },
        aborted    = this.aborted,
        options    = this.options,
-       url        = this.url,
-       transport  = this.transport;
+       transport  = this.transport,
+       url        = this.url;
+
+      // exit if no headers and wait for state 3 to fire states 2 and 3
+      if (readyState == 2 && this.getAllHeaders() == '' &&
+        transport.readyState === 2) return;
+
+      this.readyState = Fuse.Number(readyState);
 
       // clear response values on readyState 0 or aborted requests
       if (readyState == 0 || aborted) {
         this.headerJSON = this.responseJSON = this.responseXML = null;
         this.responseText = Fuse.String('');
+        this.status       = Fuse.Number(0);
+        this.statusText   = Fuse.String('');
+      }
+      else if (readyState > 1 ) {
+        // Request status/statusText have really bad cross-browser consistency.
+        // Monsur Hossain has done an exceptional job cataloging the cross-browser
+        // differences.
+        // http://monsur.com/blog/2007/12/28/xmlhttprequest-status-codes/
+        // http://blogs.msdn.com/ieinternals/archive/2009/07/23/The-IE8-Native-XMLHttpRequest-Object.aspx
+
+        // Assume Firefox is throwing an error accessing status/statusText
+        // caused by a 408 request timeout
+        try {
+          status = transport.status;
+          statusText = transport.statusText;
+        } catch(e) {
+          status = 408;
+          statusText = 'Request Timeout';
+        }
+
+        // IE will return 1223 for 204 no content
+        this.status = Fuse.Number(status == 1223 ? 204 : status);
+
+        // set statusText
+        this.statusText = Fuse.String(statusText);
       }
 
       if (readyState == 2) {
-        // exit if no headers and wait for state 3 to fire states 2 and 3
-        if (this.getAllHeaders() == '' && transport.readyState === 2)
-          return;
-
-        this.readyState = Fuse.Number(readyState);
-
         // set headerJSON
         var json = this.getHeader('X-JSON');
         if (json && json != '') {
@@ -158,15 +192,6 @@
         }
       }
       else if (readyState > 2) {
-
-        this.readyState = Fuse.Number(readyState);
-
-        // set status
-        try { this.status = Fuse.Number(transport.status || 0) } catch (e) { }
-
-        // set statusText
-        try { this.statusText = Fuse.String(transport.statusText || '') } catch (e) { }
-
         // set responseText
         if (!aborted)
           this.responseText = Fuse.String.interpret(transport.responseText);
@@ -176,8 +201,10 @@
            contentType = this.getHeader('Content-type') || '',
            evalJS = options.evalJS,
            evalJSON = options.evalJSON,
-           responseText = this.responseText,
-           status = String(this.status);
+           responseText = this.responseText;
+
+          // typecast status to string
+          status = String(status);
 
           if (aborted) {
             eventNames.push('Abort', status);
@@ -233,8 +260,12 @@
     };
 
     this.isSuccess = function isSuccess() {
+      // http status code definitions
+      // http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
       var status = this.status;
-      return status == 0 || (status >= 200 && status < 300);
+      return this._useStatus
+        ? (status >= 200 && status < 300 || status == 304)
+        : status == 0;
     };
 
     // prevent JScript bug with named function expressions

@@ -1,3 +1,11 @@
+* Catch Firefox error when accessing Fuse.Ajax.Request#status caused by status 408 Request Timeout. [jddalton, Monsur Hossain]
+
+* Count Fuse.Ajax.Request#status 304 as a successful request. [Prototype LH #331] [jddalton, Kenneth Kin Lum]
+
+* Translate IE's incorrect Fuse.Ajax.Request#status 1223 to 204. [FuseJS LH #40] [jQuery Trac #1450 ] [Prototype LH #49, #129] [amartone, jddalton, Ken Snyder, Mark Caudill, Monsur Hossain]
+
+* Only count a Fuse.Ajax.Request#status of 0 as successful for non-http requests. [Prototype LH #49] [jddalton, Mark, Caudill, Radek Pech]
+
 * Allow Fuse.Ajax.Responders.dispatch() to continue dispatching events even though one or more responder has thrown an error. [Dean Edwards, jddalton, John Resig]
 
 * Merge Fuse.Ajax.Response into Fuse.Ajax.Request. [FuseJS LH #41, #43, #49] [jddalton, Mark Caudill]
