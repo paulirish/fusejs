@@ -53,11 +53,6 @@ if(typeof dojo != "undefined"){
 					return id; // DomNode
 				}
 			},
-			isString: function(item){
-				// summary: 
-				//		is item a string?
-				return (typeof item == "string"); // Boolean
-			},
 			// the default document to search
 			doc: document,
 			// the constructor for node list objects returned from query()
@@ -143,10 +138,10 @@ if(typeof dojo != "undefined"){
 	// 					d.isWebKit; // float
 	// 					d.doc ; // document element
 	var qlc = d._NodeListCtor = 		d.NodeList;
-	var isString = 		d.isString;
 
 	var getDoc = function(){ return d.doc; };
-	var cssCaseBug = (d.isWebKit && ((getDoc().compatMode) == "BackCompat"));
+	// NOTE(alex): the spec is idiotic. CSS queries should ALWAYS be case-sensitive, but nooooooo
+	var cssCaseBug = ((d.isWebKit||d.isMozilla) && ((getDoc().compatMode) == "BackCompat"));
 
 	////////////////////////////////////////////////////////////////////////
 	// Global utilities
@@ -1015,7 +1010,6 @@ if(typeof dojo != "undefined"){
 				// isAlien check. Workaround for Prototype.js being totally evil/dumb.
 				/\{\s*\[native code\]\s*\}/.test(String(ecs)) && 
 				query.classes.length &&
-				// WebKit bug where quirks-mode docs select by class w/o case sensitivity
 				!cssCaseBug
 			){
 				// it's a class-based query and we've got a fast way to run it.
@@ -1532,10 +1526,10 @@ if(typeof dojo != "undefined"){
 		if(query.constructor == qlc){
 			return query;
 		}
-		if(!isString(query)){
+		if(typeof query != "string"){ // inline'd type check
 			return new qlc(query); // dojo.NodeList
 		}
-		if(isString(root)){
+		if(typeof root == "string"){ // inline'd type check
 			root = d.byId(root);
 			if(!root){ return new qlc(); }
 		}
@@ -1600,11 +1594,11 @@ if(!dojo["query"]){
 				return query;
 			}
 
-			if(!dojo.isString(query)){
+			if(typeof query != "string"){ // inline'd type check
 				return new d._NodeListCtor(query); // dojo.NodeList
 			}
 
-			if(dojo.isString(root)){
+			if(typeof root == "string"){ // inline'd type check
 				root = dojo.byId(root);
 				if(!root){ return new d._NodeListCtor(); }
 			}
