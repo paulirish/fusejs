@@ -541,16 +541,63 @@ new Test.Unit.Runner({
 
   'testTimedUpdater': function() {
     var updater = Fuse.Ajax.TimedUpdater('content', '../fixtures/content.html', {
-      'method': 'get'
+      'asynchronous': false,
+      'method': 'get',
+      'frequency': 0.5
     });
 
-    this.wait(3000, function() {
-      this.assertEqual(sentence, getInnerHTML('content'));
+    // clear after initial synchronous request
+    $('content').update();
+
+    this.wait(600, function() {
+      this.assertEqual(sentence, getInnerHTML('content'),
+        'updater.decay of 1 failed');
       $('content').update();
 
-      this.wait(3000, function() {
-        this.assertEqual(sentence, getInnerHTML('content'));
+      this.wait(1000, function() {
+        this.assertEqual(sentence, getInnerHTML('content'),
+          'updater.decay of 2 failed');
         updater.stop();
+      });
+    });
+  },
+
+  'testTimedUpdaterMaxDecay': function() {
+    var updater = Fuse.Ajax.TimedUpdater('content', '../fixtures/content.html', {
+      'asynchronous': false,
+      'method': 'get',
+      'decay': 2,
+      'frequency': 0.5,
+      'maxDecay': 4
+    });
+
+    $('content').update();
+
+    // decay 1 * 0.5
+    this.wait(600, function() {
+      this.assertEqual(sentence, getInnerHTML('content'),
+        'updater.decay of 1 failed');
+      $('content').update();
+
+      // decay 2 * 0.5
+      this.wait(1000, function() {
+        this.assertEqual(sentence, getInnerHTML('content'),
+          'updater.decay of 2 failed');
+        $('content').update();
+
+        // decay 4 * 0.5 (max)
+        this.wait(2000, function() {
+          this.assertEqual(sentence, getInnerHTML('content'),
+            'updater.decay of 4 failed');
+          $('content').update();
+
+          // decay 4 * 0.5 (2 seconds before decay of 8)
+          this.wait(2000, function() {
+            this.assertEqual(sentence, getInnerHTML('content'),
+              'updater.maxDecay of 4 was not enforced');
+            updater.stop();
+          });
+        });
       });
     });
   },
@@ -558,20 +605,21 @@ new Test.Unit.Runner({
   'testTimedUpdaterDefaultOptions': function() {
     var backup = Fuse.Object.clone(Fuse.Ajax.TimedUpdater.options);
     Fuse.Object.extend(Fuse.Ajax.TimedUpdater.options,  {
-      'method': 'get',
       'asynchronous': false,
+      'method': 'get',
       'frequency': 3
     });
 
     var updater = Fuse.Ajax.TimedUpdater('content', '../fixtures/content.html');
     $('content').update();
 
-    this.wait(2500, function() {
-      this.assertEqual('', getInnerHTML('content'));
+    this.wait(2100, function() {
+      this.assertEqual('', getInnerHTML('content'),
+        'default updater.frequency of 3 was not used');
 
       this.wait(1000, function() {
-        this.assertEqual(sentence, getInnerHTML('content'));
-        $('content').update();
+        this.assertEqual(sentence, getInnerHTML('content'),
+          'default updater.frequency of 3 failed');
         updater.stop();
       });
     });

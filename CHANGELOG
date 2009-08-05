@@ -1,3 +1,5 @@
+* Fix Fuse.Ajax.TimedUpdater#maxDecay and add relevant unit tests. [Prototype LH #419] [Casey Watson, jddalton]
+
 * Catch Firefox error when accessing Fuse.Ajax.Request#status caused by status 408 Request Timeout. [jddalton, Monsur Hossain]
 
 * Count Fuse.Ajax.Request#status 304 as a successful request. [Prototype LH #331] [jddalton, Kenneth Kin Lum]
