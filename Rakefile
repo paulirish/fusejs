@@ -77,7 +77,7 @@ JavaScriptTestTask.new(:test_units => [:build_unit_tests]) do |t|
   end
 end
 
-task :build_unit_tests do
+task :build_unit_tests => [:dist] do
   Dir[File.join('test', 'unit', '*_test.js')].each do |file|
     PageBuilder.new(file, 'fuse.erb').render
   end

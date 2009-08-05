@@ -1,3 +1,5 @@
+* Tweaked a line in the Rakefile to automatically run `rake dist` before running `rake build_unit_tests`. [kitsg]
+
 * unit test: Change Fuse.Ajax.Request `onComplete` callback to `onDone` in the html template and update Fuse.Dom.Selector tests to reflect the changed doctype. [jddalton]
 
 * unit test: Add Fuse version number to the html templates. [jddalton, Tobie Langel]
