@@ -117,8 +117,8 @@ new Test.Unit.Runner({
   },
 
   'testSelectorWithUniversalAndHyphenTokenizedAttributeValue': function() {
-    this.assertEnumEqual([$('item_3')], $$('*[xml:lang|="es"]'));
-    this.assertEnumEqual([$('item_3')], $$('*[xml:lang|="ES"]'));
+    this.assertEnumEqual([$('item_3')], $$('*[xml:lang|="en"]'));
+    this.assertEnumEqual([$('item_3')], $$('*[xml:lang|="EN"]'));
   },
 
   'testSelectorWithTagNameAndNegatedAttributeValue': function() {
@@ -266,13 +266,13 @@ new Test.Unit.Runner({
 
   'testSelectorWithNamespacedAttributes': function() {
     if (Fuse.Browser.Feature('XPATH')) {
-      this.assertUndefined(new Selector('html[xml:lang]').xpath);
+      this.assertUndefined(new Selector('html div[xml:lang]').xpath);
       this.assertUndefined(new Selector('body p[xml:lang]').xpath);
     }
     else this.info('Could not test XPath bypass: no XPath to begin with!');
 
-    this.assertElementsMatch($$('[xml:lang]'),  'html', '#item_3');
-    this.assertElementsMatch($$('*[xml:lang]'), 'html', '#item_3');
+    this.assertElementsMatch($$('[xml:lang]'), '#item_3', 'div');
+    this.assertElementsMatch($$('*[xml:lang]'), '#item_3', '#namespace_attr');
   },
 
   'testSelectorWithChild': function() {
@@ -584,10 +584,10 @@ new Test.Unit.Runner({
   'testCommasFor$$': function() {
     // using NWMatcher the next two asserts would return document ordered lists of matching elements
     this.assertEnumEqual($('p', 'link_1', 'list', 'item_1', 'item_3', 'troubleForm'),
-      $$('#list, .first,*[xml:lang="es-us"] , #troubleForm'));
+      $$('#list, .first,*[xml:lang="en-us"] , #troubleForm'));
 
     this.assertEnumEqual($('p', 'link_1', 'list', 'item_1', 'item_3', 'troubleForm'),
-      $$('#list, .first,', '*[xml:lang="es-us"] , #troubleForm'));
+      $$('#list, .first,', '*[xml:lang="en-us"] , #troubleForm'));
 
     this.assertEnumEqual($('commaParent', 'commaChild'),
       $$('form[title*="commas,"], input[value="#commaOne,#commaTwo"]'));

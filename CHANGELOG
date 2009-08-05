@@ -1,3 +1,7 @@
+* unit test: Change Fuse.Ajax.Request `onComplete` callback to `onDone` in the html template and update Fuse.Dom.Selector tests to reflect the changed doctype. [jddalton]
+
+* unit test: Add Fuse version number to the html templates. [jddalton, Tobie Langel]
+
 * Fix Fuse.Ajax.TimedUpdater#maxDecay and add relevant unit tests. [Prototype LH #419] [Casey Watson, jddalton]
 
 * Catch Firefox error when accessing Fuse.Ajax.Request#status caused by status 408 Request Timeout. [jddalton, Monsur Hossain]
@@ -53,7 +57,7 @@
 * Make Fuse.Timer() operate on milliseconds instead of seconds and allow setting the millisecond `multiplier` via an options object as the third argument. [FuseJS LH #26] [kitsg, jddalton, Joe Gornick]
   Note: Backwards compatibility warning.
 
-* unit test: Fix minor Safari 2.x bugs in functional event tests.
+* unit test: Fix minor Safari 2.x bugs in functional event tests. [jddalton]
 
 * Rename Fuse.Ajax.Base and Fuse.Ajax.TimedUpdater `defaultOptions` object to `options` and fix options related bugs in Fuse.Ajax.TimedUpdater. [jddalton, Joe Gornick, kitsg]
   Note: Backwards compatibility warning.
