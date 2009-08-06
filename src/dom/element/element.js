@@ -18,49 +18,56 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // cache Element capabilities before overwriting the Element object
+  // Cache Element capabilities before overwriting the Element object
   Feature('ELEMENT_EXTENSIONS');
   Feature('ELEMENT_SPECIFIC_EXTENSIONS');
 
+  // For speed we don't normalize tagName case.
+  // There is the potential for cache.div, cache.DIV, cache['<div name="x">']
+  // Please stick to either all uppercase or lowercase tagNames.
+  //
+  // IE7 and below need to use the sTag of createElement to set the `name` attribute
+  // http://msdn.microsoft.com/en-us/library/ms536389.aspx
+  //
+  // IE fails to set the BUTTON element's `type` attribute without using the sTag
+  // http://dev.rubyonrails.org/ticket/10548
   (function() {
-    var original = global.Element;
+    var cache, original = global.Element;
 
     function createElement(tagName, attributes) {
-      if (!Element.cache[tagName])
-        Element.cache[tagName] = Element.extend(Fuse._doc.createElement(tagName));
-      return Element.writeAttribute(Element.cache[tagName]
-        .cloneNode(false), attributes);
+      var element = cache[tagName];
+      if (!element)
+        element = cache[tagName] = Element.extend(Fuse._doc.createElement(tagName));
+      element = element.cloneNode(false);  
+      return attributes
+        ? Element.writeAttribute(element, attributes)
+        : element;
     }
-
-    global.Element = function(tagName, attributes) {
-      return createElement(tagName.toUpperCase(), attributes);
-    };
 
     if (Feature('CREATE_ELEMENT_WITH_HTML')) {
       global.Element = function(tagName, attributes) {
-        // setAttribute is broken in IE when setting name and type attributes
-        // see: http://msdn.microsoft.com/en-us/library/ms536389.aspx
-        tagName = tagName.toUpperCase();
-        if (attributes && (attributes.name || attributes.type)) {
+        var name, type;
+        if (attributes && ((name = attributes.name) || (type = attributes.type))) {
           tagName = '<' + tagName +
-           (attributes.name ? ' name="' + attributes.name + '"' : '') +
-            (attributes.type ? ' type="' + attributes.type + '"' : '') + '>';
+            (name ? ' name="' + name + '"' : '') +
+            (type ? ' type="' + type + '"' : '') + '>';
           delete attributes.name; delete attributes.type;
         }
         return createElement(tagName, attributes);
       };
     }
+    else global.Element = createElement;
 
+    // Avoid Fuse.Object.extend() because IE8 cannot set any variable/property
+    // reference to Element.toString.
     if (original) {
-      // avoid Fuse.Object.extend() because IE8 cannot set any
-      // variable/property reference to Element.toString
       Fuse.Object._extend(global.Element, original);
       global.Element.prototype = original.prototype;
     }
-  })();
 
-  Element.cache = { };
-  Element.idCounter = 1;
+    cache = global.Element.cache = { };
+    global.Element.idCounter = 1;
+  })();
 
   /*--------------------------------------------------------------------------*/
 
