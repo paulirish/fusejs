@@ -635,7 +635,7 @@ Test.Unit.Testcase = Fuse.Class(Test.Unit.Assertions, {
 
   'benchmark': function(operation, iterations) {
     var startAt = new Date();
-    (iterations || 1).times(operation);
+    Fuse.Number(iterations || 1).times(operation);
     var timeTaken = ((new Date())-startAt);
     this.info((arguments[2] || 'Operation') + ' finished ' +
        iterations + ' iterations in ' + (timeTaken/1000) + 's' );
