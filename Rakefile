@@ -60,6 +60,7 @@ JavaScriptTestTask.new(:test_units => [:build_unit_tests]) do |t|
   browsers_to_test = ENV['BROWSERS'] && ENV['BROWSERS'].split(',')
   
   t.mount("/dist")
+  t.mount("/src")
   t.mount("/test")
   t.mount("/vendor")
   

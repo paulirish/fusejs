@@ -1,3 +1,5 @@
+* Rethrow errors when `onException` callbacks are not provided for Fuse.Ajax.Request instances. [Prototype LH #634] [jddalton, Spezi]
+
 * unit test: Fix bug in Test.Unit.Testcase#benchmark failing to use Fuse.Number#times. [jddalton]
 
 * Add `timeout` option and `onTimeout` event callbacks to Fuse.Ajax.Request. [FuseJS LH #37] [Prototype LH #220] [jddalton, Laurent Fortin, Mark Caudill]

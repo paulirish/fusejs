@@ -47,6 +47,7 @@
       function loadScriptFile(url) {
         Fuse.Ajax.Request(url, {
           'method': 'get',
+          'evalJS': false,
           'asynchronous': false,
           'onDone': function(response) {
             insertScript(response.responseText);

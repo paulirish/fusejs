@@ -61,6 +61,9 @@
       var callback = this.options.onException;
       callback && callback(this, exception);
       Fuse.Ajax.Responders.dispatch('onException', this, exception);
+
+      // throw error if not caught by a request onException handler
+      if (!callback) throw exception;
     };
 
     this.getAllHeaders = function getAllHeaders() {
