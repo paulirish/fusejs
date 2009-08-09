@@ -60,7 +60,8 @@ new Test.Unit.Runner({
 
     Fuse.Ajax.Responders.register({
       'onFailure': function() { fired.failureResponder = true },
-      'onSuccess': function() { fired.successResponder = true }
+      'onSuccess': function() { fired.successResponder = true },
+      'onAbort':   function() { fired.abortResponder   = true }
     });
 
     var request = Fuse.Ajax.Request('../fixtures/hello.js', {
@@ -83,6 +84,9 @@ new Test.Unit.Runner({
     this.assert(!fired.success,
       'onSuccess request should not fire');
 
+    this.assert(fired.abortResponder,
+      'onAbort responder event failed to fire');
+
     this.assert(!fired.failureResponder,
       'onFailure responder event should not fire');
 
@@ -91,6 +95,70 @@ new Test.Unit.Runner({
 
     this.assert(abortedFlag,
       'failed to set request.aborted flag');
+  },
+
+  'testRequestTimeout': function() {
+    var timedoutFlag, fired = { };
+
+    Fuse.Ajax.Responders.register({
+      'onFailure': function() { fired.failureResponder = true },
+      'onSuccess': function() { fired.successResponder = true },
+      'onTimeout': function() { fired.timeoutResponder = true }
+    });
+
+    var request = Fuse.Ajax.Request('../fixtures/hello.js?delay=1', {
+      'method':    'get',
+      'timeout':   10, // ms
+      'onTimeout': function() { fired.timeout = true },
+      'onDone':    function(request) { timedoutFlag = request.timedout }
+    });
+
+    this.wait(50, function() {
+      this.assert(fired.timeout,
+        'onTimeout request event failed to fire');
+
+      this.assert(!fired.failure,
+        'onFailure request event should not fire');
+
+      this.assert(!fired.success,
+        'onSuccess request should not fire');
+
+      this.assert(fired.timeoutResponder,
+        'onTimeout responder event failed to fire');
+
+      this.assert(!fired.failureResponder,
+        'onFailure responder event should not fire');
+
+      this.assert(!fired.successResponder,
+        'onSuccess responder should not fire');
+
+      this.assert(timedoutFlag,
+        'failed to set request.timedout flag');
+
+
+      // test timerMultiplier
+      request.abort();
+      fired.timeout = false;
+
+      request.request('../fixtures/hello.js?delay=3', {
+        'method':    'get',
+        'timerMultiplier': 1000,
+        'timeout':   0.5, // seconds
+        'onTimeout': function() { fired.timeout = true }
+      });
+
+      this.wait(50, function() {
+        this.assert(!fired.timeout,
+          'options.timerMultiplier was ignored onTimeout request event shouldn\'t have fired yet');
+
+        this.wait(500, function() {
+          this.assert(fired.timeout,
+            'options.timerMultiplier was ignored onTimeout request event never fired');
+
+          request.abort();
+        });
+      });
+    });
   },
 
   'testRequestWithNoUrl': function() {
@@ -158,7 +226,6 @@ new Test.Unit.Runner({
     var options = {
       'method':       'get',
       'asynchronous': false,
-      'evalJS':       'force',
       'onDone':       Fuse.emptyFunction
     };
 

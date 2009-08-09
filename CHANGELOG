@@ -1,3 +1,5 @@
+* Add `timeout` option and `onTimeout` event callbacks to Fuse.Ajax.Request. [FuseJS LH #37] [Prototype LH #220] [jddalton, Laurent Fortin, Mark Caudill]
+
 * Optimize the Element constructor giving it a massive performance boost in all browsers. [FuseJS LH #50] [Diego Perini, jddalton]
 
 * Tweaked a line in the Rakefile to automatically run `rake dist` before running `rake build_unit_tests`. [kitsg]

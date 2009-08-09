@@ -8,6 +8,7 @@
 
         this.transport = Fuse.Ajax.getTransport();
         this.onStateChange = Fuse.Function.bind(this.onStateChange, this);
+        this.onTimeout = Fuse.Function.bind(this.onTimeout, this);
         this.request(url, options);
       }
       return Request;
@@ -20,29 +21,30 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
+    var matchHTTP = /^https?:/;
+
     this._useStatus   = true;
+    this._timerID     = null;
     this.aborted      = false;
     this.readyState   = Fuse.Number(0);
     this.responseText = Fuse.String('');
     this.status       = Fuse.Number(0);
     this.statusText   = Fuse.String('');
+    this.timedout     = false;
 
     this.headerJSON = this.responseJSON = this.responseXML = null;
 
     this.abort = function abort() {
       var transport = this.transport;
       if (this.readyState != 4) {
-        try {
-          // clear onreadystatechange handler to stop some browsers calling
-          // it when the request is aborted
-          transport.onreadystatechange = Fuse.emptyFunction;
-          transport.abort();
+        // clear onreadystatechange handler to stop some browsers calling
+        // it when the request is aborted
+        transport.onreadystatechange = Fuse.emptyFunction;
+        transport.abort();
 
-          // skip to complete readyState
-          this.aborted = true;
-          this.setReadyState(4);
-        }
-        catch (e) { }
+        // skip to complete readyState and flag it as aborted
+        this.aborted = true;
+        this.setReadyState(4);
       }
     };
 
@@ -73,6 +75,18 @@
       return result ? Fuse.String(result) : null;
     };
 
+    this.onTimeout = function onTimeout() {
+      var transport = this.transport;
+      if (this.readyState != 4) {
+        transport.onreadystatechange = Fuse.emptyFunction;
+        transport.abort();
+
+        // skip to complete readyState and flag it as timedout
+        this.timedout = true;
+        this.setReadyState(4);
+      }
+    };
+
     this.onStateChange = function onStateChange(event, forceState) {
       // ensure all states are fired and only fired once per change
       var endState = this.transport.readyState, readyState = this.readyState;
@@ -95,15 +109,29 @@
        async     = options.asynchronous,
        body      = this.body,
        headers   = options.headers,
-       matchHTTP = /^https?:/,
+       timeout   = options.timeout,
        transport = this.transport,
        url       = String(this.url);
+
+      // reset flags
+      this.aborted = this.timedout = false;
+
+      // reset response values
+      this.headerJSON   = this.responseJSON = this.responseXML = null;
+      this.readyState   = Fuse.Number(0);
+      this.responseText = Fuse.String('');
+      this.status       = Fuse.Number(0);
+      this.statusText   = Fuse.String('');
 
       // non-http requests don't use http status codes
       // return true if request url is http(s) or, if relative, the pages url is http(s)
       this._useStatus = matchHTTP.test(url) ||
         (url.slice(0, 6).indexOf(':') === -1 ?
           matchHTTP.test(global.location.protocol) : false);
+
+      // start timeout timer if provided
+      if (timeout != null)
+        this._timerID = setTimeout(this.onTimeout, timeout * this.timerMultiplier);
 
       // fire onCreate callbacks
       this.dispatch('onCreate', options.onCreate);
@@ -134,11 +162,12 @@
     };
 
     this.setReadyState = function setReadyState(readyState) {
-      var eventName, status, statusText, successOrFailure, i = 0,
+      var eventName, json, status, statusText, successOrFailure, i = 0,
+       aborted    = this.aborted,
        eventNames = [],
        skipped    = { },
-       aborted    = this.aborted,
        options    = this.options,
+       timedout   = this.timedout,
        transport  = this.transport,
        url        = this.url;
 
@@ -148,9 +177,9 @@
 
       this.readyState = Fuse.Number(readyState);
 
-      // clear response values on readyState 0 or aborted requests
-      if (readyState == 0 || aborted) {
-        this.headerJSON = this.responseJSON = this.responseXML = null;
+      // clear response values on aborted/timedout requests
+      if (aborted || timedout) {
+        this.headerJSON   = this.responseJSON = this.responseXML = null;
         this.responseText = Fuse.String('');
         this.status       = Fuse.Number(0);
         this.statusText   = Fuse.String('');
@@ -177,12 +206,15 @@
 
         // set statusText
         this.statusText = Fuse.String(statusText);
-      }
 
-      if (readyState == 2) {
-        // set headerJSON
-        var json = this.getHeader('X-JSON');
-        if (json && json != '') {
+        // set responseText
+        if (readyState > 2) {
+          // IE will throw an error when accessing responseText in state 3
+          try { this.responseText = Fuse.String.interpret(transport.responseText) } catch (e) { }
+        }
+        else if (readyState == 2 &&
+            (json = this.getHeader('X-JSON')) && json != '') {
+          // set headerJSON
           try {
             this.headerJSON = json.evalJSON(options.sanitizeJSON ||
               !Fuse.Object.isSameOrigin(url));
@@ -191,60 +223,65 @@
           }
         }
       }
-      else if (readyState > 2) {
-        // set responseText
-        if (!aborted)
-          this.responseText = Fuse.String.interpret(transport.responseText);
 
-        if (readyState == 4) {
-          var responseXML,
-           contentType = this.getHeader('Content-type') || '',
-           evalJS = options.evalJS,
-           evalJSON = options.evalJSON,
-           responseText = this.responseText;
+      if (readyState == 4) {
+        var responseXML,
+         contentType = this.getHeader('Content-type') || '',
+         evalJS = options.evalJS,
+         evalJSON = options.evalJSON,
+         responseText = this.responseText,
+         timerID = this._timerID;
 
-          // typecast status to string
-          status = String(status);
+        // typecast status to string
+        status = String(status);
 
-          if (aborted) {
-            eventNames.push('Abort', status);
-          }
-          else {
-            // don't call global/request onSuccess/onFailure callbacks on aborted requests
-            successOrFailure = this.isSuccess() ? 'Success' : 'Failure';
-            eventNames.push(status, successOrFailure);
+        // clear timeout timer
+        if (timerID != null) {
+          global.clearTimeout(timerID);
+          this._timerID = null;
+        }
 
-            // skip success/failure request events if status handler exists
-            skipped['on' + (options['on' + status] ?
-              successOrFailure : status)] = 1;
+        if (aborted) {
+          eventNames.push('Abort', status);
+        }
+        else if (timedout) {
+          eventNames.push('Timeout', status);
+        }
+        else {
+          // don't call global/request onSuccess/onFailure callbacks on aborted/timedout requests
+          successOrFailure = this.isSuccess() ? 'Success' : 'Failure';
+          eventNames.push(status, successOrFailure);
 
-            // remove event handler to avoid memory leak in IE
-            transport.onreadystatechange = Fuse.emptyFunction;
+          // skip success/failure request events if status handler exists
+          skipped['on' + (options['on' + status] ?
+            successOrFailure : status)] = 1;
 
-            // set responseXML
-            responseXML = transport.responseXML;
-            if (responseXML) this.responseXML = responseXML;
+          // remove event handler to avoid memory leak in IE
+          transport.onreadystatechange = Fuse.emptyFunction;
 
-            // set responseJSON
-            if (evalJSON == 'force' || (evalJSON && !responseText.blank() &&
-                contentType.indexOf('application/json') > -1)) {
-              try {
-                this.responseJSON = responseText.evalJSON(options.sanitizeJSON ||
-                  !Fuse.Object.isSameOrigin(url));
-              } catch (e) {
-                this.dispatchException(e);
-              }
+          // set responseXML
+          responseXML = transport.responseXML;
+          if (responseXML) this.responseXML = responseXML;
+
+          // set responseJSON
+          if (evalJSON == 'force' || (evalJSON && !responseText.blank() &&
+              contentType.indexOf('application/json') > -1)) {
+            try {
+              this.responseJSON = responseText.evalJSON(options.sanitizeJSON ||
+                !Fuse.Object.isSameOrigin(url));
+            } catch (e) {
+              this.dispatchException(e);
             }
+          }
 
-            // eval javascript
-            if (responseText && (evalJS == 'force' || evalJS &&
-                Fuse.Object.isSameOrigin(url) &&
-                contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i))) {
-              try {
-                global.eval(String(Fuse.String.unfilterJSON(responseText)));
-              } catch (e) {
-                this.dispatchException(e);
-              }
+          // eval javascript
+          if (responseText && (evalJS == 'force' || evalJS &&
+              Fuse.Object.isSameOrigin(url) &&
+              contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i))) {
+            try {
+              global.eval(String(Fuse.String.unfilterJSON(responseText)));
+            } catch (e) {
+              this.dispatchException(e);
             }
           }
         }
@@ -276,6 +313,7 @@
      getAllHeaders =     null,
      isSuccess =         null,
      onStateChange =     null,
+     onTimeout =         null,
      request =           null,
      setReadyState =     null;
   }).call(Fuse.Ajax.Request.Plugin);

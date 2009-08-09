@@ -70,6 +70,10 @@
             (encoding ? '; charset=' + encoding : '');
         }
 
+        // set default timeout multiplier
+        this.timerMultiplier = options.timerMultiplier ||
+          Fuse.Timer && Fuse.Timer.options.multiplier || 1;
+
         // Playing it safe here, even though we could not reproduce this bug,
         // jQuery tickets #2570, #2865 report versions of Opera will display a
         // login prompt when passing null-like values for username/password when
