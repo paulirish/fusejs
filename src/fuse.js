@@ -17,7 +17,18 @@
   Fuse.ScriptFragment = '<script[^>]*>([^\\x00]*?)<\/script>';
   Fuse.Version =        '<%= FUSEJS_VERSION %>';
 
-  Fuse.debug = false;
+  // set the debug flag based on script debug query parameter
+  Fuse.debug = (function() {
+    var script, i = 0,
+     matchDebug = /(^|&)debug=(1|true)(&|$)/,
+     matchFilename = /(^|\/)fuse\.js\?/,
+     scripts = Fuse._doc.getElementsByTagName('script');
+
+    while (script = scripts[i++])
+      if (matchFilename.test(script.src) &&
+          matchDebug.test(script.src.split('?')[1])) return true;
+    return false;
+  })();
 
   Fuse.emptyFunction = (function() {
     function emptyFunction() { }
