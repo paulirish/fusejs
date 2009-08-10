@@ -1,3 +1,5 @@
+* Namespace Fuse.Exception added to use Firebug or to throw an exception via the Fuse.debug flag. [FuseJS LH #52] [jddalton, Mark Caudill]
+
 * Rethrow errors when `onException` callbacks are not provided for Fuse.Ajax.Request instances. [Prototype LH #634] [jddalton, Spezi]
 
 * unit test: Fix bug in Test.Unit.Testcase#benchmark failing to use Fuse.Number#times. [jddalton]

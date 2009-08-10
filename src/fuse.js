@@ -17,6 +17,8 @@
   Fuse.ScriptFragment = '<script[^>]*>([^\\x00]*?)<\/script>';
   Fuse.Version =        '<%= FUSEJS_VERSION %>';
 
+  Fuse.debug = false;
+
   Fuse.emptyFunction = (function() {
     function emptyFunction() { }
     return emptyFunction;
@@ -138,6 +140,7 @@
 
    'lang/object.js',
    'lang/class.js',
+   'lang/exception.js',
 
    'lang/function.js',
    'lang/enumerable.js',
