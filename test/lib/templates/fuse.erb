@@ -27,6 +27,18 @@
     }
 
     document.observe('dom:loaded', function() {
+      function refresh() {
+        var loc = window.location;
+        loc.href = loc.protocol + '//' + loc.hostname + loc.pathname +
+          '?engine=' + engineEl.options[engineEl.selectedIndex].text +
+          '&debug='  + $F(debugEl);
+      }
+
+      function getQueryParam(key, defaultValue) {
+        var pattern = new RegExp('[?&]' + key + '=([^&]+)');
+        return (window.location.href.match(pattern) || [0, defaultValue])[1];
+      }
+
       function insertScript(text) {
         var script = document.createElement('script');
         script.type = 'text/javascript';
@@ -55,27 +67,37 @@
         });
       }
 
-      var index, item, i = 0,
-       head     = document.getElementsByTagName('HEAD')[0],
-       expando  = '_fuse' + String(1 * new Date).slice(0, 10),
-       engine   = (window.location.href.match(/[?&]engine=([^&]+)/) || ['', 'NWMatcher'])[1],
-       engineEl = $('selector-engine'),
-       choices  = engineEl.options;
+      var engineItem, i = 0,
+       head        = document.getElementsByTagName('HEAD')[0],
+       debug       = getQueryParam('debug', '0') == 1,
+       debugEl     = $('debug-switch'),
+       expando     = '_fuse' + String(1 * new Date).slice(0, 10),
+       engine      = getQueryParam('engine', 'NWMatcher'),
+       engineEl    = $('selector-engine'),
+       engineItems = engineEl.options;
 
-      while (item = choices[i++]) {
-        if (item.text === engine) {
-          engineEl.selectedIndex = index = i - 1; break;
+      // set active debug state in it's dropdown list
+      debugEl.setValue(debug ? '1' : '0');
+
+      // set active css engine in it's dropdown list
+      while (engineItem = engineItems[i++]) {
+        if (engineItem.text === engine) {
+          engineItems[engineEl.selectedIndex = i - 1];
+          break;
         }
       }
 
-      loadScriptFile('../../../vendor/' + choices[index].value);
-      loadScriptFile('../../../src/dom/selector/' + choices[index].text.toLowerCase() + '.js');
+      // set debug flag
+      Fuse.debug = debug;
 
-      engineEl.observe('change', function() {
-        var loc = window.location;
-        loc.href = loc.protocol + '//' + loc.hostname + loc.pathname + '?engine=' +
-          this.options[this.selectedIndex].text;
-      });
+      // load selector engine and Fuse engine adapter
+      var engine
+      loadScriptFile('../../../vendor/' + engineItem.value);
+      loadScriptFile('../../../src/dom/selector/' + engineItem.text.toLowerCase() + '.js');
+
+      // attach event handlers to config controls
+      debugEl.observe('change', refresh);
+      engineEl.observe('change', refresh);
     });
   </script>
 
@@ -92,7 +114,9 @@
 
 <!-- CSS wizards feel free to clean this up -->
 <h2 style="display:inline;"><%= @title %></h2>
-<span style="margin-left:10px;">( Selector Engine:
+
+<!-- CSS Selector Engine List -->
+<span style="margin-left:10px;">Selector Engine:
 <select id="selector-engine">
   <option value="acme/acme.js">Acme</option>
   <option value="domquery/DomQuery.js">DomQuery</option>
@@ -101,7 +125,15 @@
   <option value="sizzle/sizzle.js">Sizzle</option>
   <option value="slick/slick.js">Slick</option>
   <option value="sly/Sly.js">Sly</option>
-</select> )
+</select>
+</span>
+
+<!-- Debug Switch -->
+<span style="margin-left:10px;">Debug Mode:
+<select id="debug-switch">
+  <option value="0">Off</option>
+  <option value="1">On</option>
+</select>
 </span>
 
 <!-- This file is programmatically generated. Do not attempt to modify it. Instead, modify <%= @fixtures_filename %> -->
