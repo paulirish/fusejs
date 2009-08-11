@@ -1,3 +1,5 @@
+* Fix bug in Fuse.Object.isSameOrigin() that allowed urls ending with the same domain name to pass. [jddalton]
+
 * Ensure Fuse.Object.toQueryString() only enumerates over an object's own direct properties. [Prototype LH #126] [jddalton, kitsg, Peter Gyongyosi]
 
 * unit test: Add option to dynamically set the Fuse.debug flag in the test template. [jddalton]

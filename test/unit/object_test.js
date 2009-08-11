@@ -342,9 +342,6 @@ new Test.Unit.Runner({
   },
 
   'testObjectIsSameOrigin': function() {
-    var isSameOrigin = Fuse.Object.isSameOrigin,
-     domain = 'www.example.com';
-
     this.assert(Fuse.Object.isSameOrigin(null), 'null');
     this.assert(Fuse.Object.isSameOrigin(), 'undefined');
     this.assert(Fuse.Object.isSameOrigin(''), 'empty string');
@@ -354,21 +351,45 @@ new Test.Unit.Runner({
     this.assert(!Fuse.Object.isSameOrigin('http://example.com'), 'http://example.com');
 
     // test typecasting the url argument as a string
-    this.assertNothingRaised(function() { Fuse.Object.isSameOrigin(window.location) }, 'Error casting url as a string');
-    this.assert(Fuse.Object.isSameOrigin({ 'toString': function() { return window.location.href } }), 'Error casting url as a string');
+    this.assertNothingRaised(
+      function() { Fuse.Object.isSameOrigin(window.location) },
+      'Error casting url as a string');
+
+    this.assert(Fuse.Object.isSameOrigin(
+      { 'toString': function() { return window.location.href } }),
+      'Error casting url as a string');
+
 
     // simulate document.domain changes
+    var isSameOrigin = Fuse.Object.isSameOrigin,
+     docDomain = 'www.example.com',
+     protocol = 'http:';
+
     Fuse.Object.isSameOrigin = function(url) {
-      var parts = String(url).match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^/:$]+)(?:\:(\d+))?/);
-      return Fuse.String.Plugin.endsWith.call(parts[2], domain);
+      var domainIndex, urlDomain,
+       result       = true,
+       defaultPort  = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80,
+       parts        = String(url).match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/) || [];
+
+      if (parts[0]) {
+        urlDomain = parts[2];
+        domainIndex = urlDomain.indexOf(docDomain);
+        result = parts[1] === protocol &&
+          domainIndex > -1 && (!domainIndex || urlDomain.charAt(domainIndex -1) == '.') &&
+            (parts[3] || defaultPort) === (window.location.port || defaultPort);
+      }
+      return result;
     };
 
     this.assert(!Fuse.Object.isSameOrigin('http://sub.example.com'),
-      'domain www.example.com allows http://sub.example.com');
+      'domain www.example.com shouldn\'t allow http://sub.example.com');
 
-    domain = 'example.com';
+    docDomain = 'example.com';
     this.assert(Fuse.Object.isSameOrigin('http://sub.example.com'),
       'domain example.com won\'t allow http://sub.example.com');
+
+    this.assert(!Fuse.Object.isSameOrigin('http://www.prefix-example.com'),
+      'domain example.com shouldn\'t allow http://www.prefix-example.com');
 
     Fuse.Object.isSameOrigin = isSameOrigin;
   },

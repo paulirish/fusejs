@@ -246,13 +246,21 @@
     this.isSameOrigin = function isSameOrigin(url) {
       // https://developer.mozilla.org/En/Same_origin_policy_for_JavaScript
       // http://www.iana.org/assignments/port-numbers
-      var domain = Fuse._doc.domain, protocol = global.location.protocol,
-       defaultPort = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80,
-       parts = String(url).match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/) || [];
+      var domainIndex, urlDomain,
+       result       = true,
+       docDomain    = Fuse._doc.domain,
+       protocol     = global.location.protocol,
+       defaultPort  = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80,
+       parts        = String(url).match(/([^:]+:)\/\/(?:[^:]+(?:\:[^@]+)?@)?([^\/:$]+)(?:\:(\d+))?/) || [];
 
-      return !parts[0] || (parts[1] === protocol &&
-        Fuse.String.Plugin.endsWith.call(parts[2], domain) &&
-          (parts[3] || defaultPort) === (global.location.port || defaultPort));
+      if (parts[0]) {
+        urlDomain = parts[2];
+        domainIndex = urlDomain.indexOf(docDomain);
+        result = parts[1] === protocol &&
+          domainIndex > -1 && (!domainIndex || urlDomain.charAt(domainIndex -1) == '.') &&
+            (parts[3] || defaultPort) === (global.location.port || defaultPort);
+      }
+      return result;
     };
 
     this.isString = function isString(value) {
