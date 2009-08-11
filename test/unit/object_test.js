@@ -79,10 +79,16 @@ new Test.Unit.Runner({
 
   'testObjectToQueryString': function() {
     this.assertEqual('a=A&b=B&c=C&d=D%23',
-      Fuse.Object.toQueryString({ 'a':'A', 'b':'B', 'c':'C', 'd':'D#' }));
+      Fuse.Object.toQueryString({ 'a':'A', 'b':'B', 'c':'C', 'd':'D#' }),
+      'Failed with simple object');
 
     this.assertEqual('a=A&b=B&toString=bar&valueOf=',
-      Fuse.Object.toQueryString(Fixtures.mixed_dont_enum));
+      Fuse.Object.toQueryString(Fixtures.mixed_dont_enum),
+      'Failed to enumerate over shadowed properties like `toString` and `valueOf`');
+
+    this.assertEqual('0=a&1=b&2=c',
+      Fuse.Object.toQueryString(Fuse.List('a', 'b', 'c')),
+      'Enumerated over inherited properties');
   },
 
   'testObjectClone': function() {

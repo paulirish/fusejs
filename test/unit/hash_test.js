@@ -392,6 +392,10 @@ new Test.Unit.Runner({
 
     this.assertEqual('a=A&b=B&toString=bar&valueOf=',
       $H(Fixtures.mixed_dont_enum).toQueryString());
+
+    this.assertEqual('0=a&1=b&2=c',
+      $H(Fuse.List('a', 'b', 'c')).toQueryString(),
+      'Enumerated over inherited properties');
   },
 
   'testUnset': function() {

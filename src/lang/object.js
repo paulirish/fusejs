@@ -293,18 +293,22 @@
       }
 
       function toQueryString(object) {
-        var results = Fuse.List();
-        Fuse.Object._each(object, function(value, key) {
-          key = encodeURIComponent(key);
-          if (value && typeof value === 'object') {
-            if (Fuse.List.isArray(value)) {
-              var i = results.length, j = 0, length = i + value.length;
-              while (i < length) results[i++] = toQueryPair(key, value[j++]);
-            }
-          } else results.push(toQueryPair(key, value));
+        var Obj = Fuse.Object, hasKey = Obj.hasKey, results = Fuse.List();
+
+        Obj._each(object, function(value, key) {
+          if (hasKey(object, key)) {
+            key = encodeURIComponent(key);
+            if (value && typeof value === 'object') {
+              if (Fuse.List.isArray(value)) {
+                var i = results.length, j = 0, length = i + value.length;
+                while (i < length) results[i++] = toQueryPair(key, value[j++]);
+              }
+            } else results.push(toQueryPair(key, value));
+          }
         });
         return results.join('&');
       }
+
       return toQueryString;
     })();
 

@@ -1,3 +1,5 @@
+* Ensure Fuse.Object.toQueryString() only enumerates over an object's own direct properties. [Prototype LH #126] [jddalton, kitsg, Peter Gyongyosi]
+
 * unit test: Add option to dynamically set the Fuse.debug flag in the test template. [jddalton]
 
 * Fuse.debug flag set based on query string parameters in script tag [jddalton, Thomas Fuchs, Mark Caudill]
