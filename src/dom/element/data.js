@@ -48,18 +48,18 @@
         data.set(key, value = defaultValue);
       return value;
     }
-    
+
     function set(element, key, value) {
       var element = $(element), uid = _getUniqueID(element);
       _getData(uid).set(key, value);
       return element;
     }
-    
+
     function unset(element, key) {
       var uid = _getUniqueID(element);
       return _getData(uid).unset(key);
     }
-    
+
     return {
 
     };

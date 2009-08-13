@@ -5,7 +5,7 @@
       'constructor': (function() {
         function BaseEventObserver(element, callback) {
           this.element = $(element);
-          this.onElementEvent = Fuse.Function.bind(this.onElementEvent, this);
+          this.onElementEvent = bind(this.onElementEvent, this);
 
           if (getNodeName(this.element) === 'FORM')
             return this.registerFormCallbacks();
@@ -25,15 +25,15 @@
       })()
     });
 
-    (function() {
-      this.onElementEvent = function onElementEvent() {
+    (function(proto) {
+      proto.onElementEvent = function onElementEvent() {
         var value = this.getValue();
         if (this.lastValue === value) return;
         this.callback(this.element, value);
         this.lastValue = value;
       };
 
-      this.registerCallback = function registerCallback(element) {
+      proto.registerCallback = function registerCallback(element) {
         if (!element.type) return;
         var eventName = 'change', type = element.type;
         if (type === 'checkbox' || type === 'radio')
@@ -41,14 +41,14 @@
         Event.observe(element, eventName, this.onElementEvent);
       };
 
-      this.registerFormCallbacks = function registerFormCallbacks() {
+      proto.registerFormCallbacks = function registerFormCallbacks() {
         var element, elements = Form.getElements(this.element), i= 0;
         while (element = elements[i++]) this.registerCallback(element);
       };
 
       // prevent JScript bug with named function expressions
       var onElementEvent = null, registerCallback = null, registerFormCallbacks = null;
-    }).call(BaseEventObserver.Plugin);
+    })(BaseEventObserver.Plugin);
 
   /*--------------------------------------------------------------------------*/
 
@@ -65,10 +65,10 @@
       'getValue': (function() {
         function getValue() {
           if (this.group.length === 1)
-            return Form.Element.getValue(this.element);
+            return Field.getValue(this.element);
           var member, value, i = 0;
           while (member = this.group[i++])
-            if (value = Form.Element.getValue(member))
+            if (value = Field.getValue(member))
               return value;
         }
         return getValue;

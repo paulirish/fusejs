@@ -2,18 +2,18 @@
 
   (function() {
     Fuse.Hash.Plugin.toJSON = function toJSON() {
-      return Fuse.Object.toJSON(this.toObject());
+      return Obj.toJSON(this._object);
     };
 
     Fuse.List.Plugin.toJSON = function toJSON() {
       for (var value, i = 0, results = Fuse.List(), length = this.length; i < length; i++) {
-        value = Fuse.Object.toJSON(this[i]);
+        value = Obj.toJSON(this[i]);
         if (typeof value !== 'undefined') results.push(value);
       }
       return '[' + results.join(', ') + ']';
     };
 
-    Fuse.Object.toJSON = function toJSON(value) {
+    Obj.toJSON = function toJSON(value) {
       switch (typeof value) {
         case 'undefined':
         case 'function' :
@@ -24,11 +24,11 @@
       if (value === null) return Fuse.String(null);
       var object = Fuse.Object(value);
       if (typeof object.toJSON === 'function') return object.toJSON();
-      if (Fuse.Object.isElement(value)) return;
+      if (isElement(value)) return;
 
       var results = [];
-      Fuse.Object._each(object, function(value, key) {
-        value = Fuse.Object.toJSON(value);
+      eachKey(object, function(value, key) {
+        value = Obj.toJSON(value);
         if (typeof value !== 'undefined')
           results.push(Fuse.String(key).toJSON() + ': ' + value);
       });
@@ -65,10 +65,11 @@
   /*--------------------------------------------------------------------------*/
 
   // complementary JSON methods for String.Plugin
-  (function() {
-    this.evalJSON = function evalJSON(sanitize) {
+  (function(proto) {
+    proto.evalJSON = function evalJSON(sanitize) {
       if (this == null) throw new TypeError;
       var string = Fuse.String(this), json = string.unfilterJSON();
+
       try {
         if (!sanitize || json.isJSON())
           return global.eval('(' + String(json) + ')');
@@ -76,7 +77,7 @@
       throw new SyntaxError('Badly formed JSON string: ' + string.inspect());
     };
 
-    this.isJSON = function isJSON() {
+    proto.isJSON = function isJSON() {
       if (this == null) throw new TypeError;
       var string = String(this);
       if (/^\s*$/.test(string)) return false;
@@ -85,11 +86,11 @@
       return (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/).test(string);
     };
 
-    this.unfilterJSON = function unfilterJSON(filter) {
+    proto.unfilterJSON = function unfilterJSON(filter) {
       if (this == null) throw new TypeError;
       return Fuse.String(String(this).replace(filter || Fuse.JSONFilter, '$1'));
     };
 
     // prevent JScript bug with named function expressions
     var evalJSON = null, isJSON = null, unfilterJSON = null;
-  }).call(Fuse.String.Plugin);
+  })(Fuse.String.Plugin);

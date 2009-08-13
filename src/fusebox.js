@@ -85,7 +85,7 @@
           // another iframe and then accessing the methods.
           if (Array.prototype.map) {
             _cleanup(Fuse.Fusebox._createIframeObject().frameElement);
-            try { new Array().map(Fuse.K) } catch (e) {
+            try { new Array().map(K) } catch (e) {
               _postProcess = function(fusebox) {
                 fusebox.Array.prototype.map =
                 fusebox.String.prototype.lastIndexOf = null;
@@ -639,7 +639,7 @@
     function updateGenerics() {
       var c, j, n, names, object, i = 0,
        cache = Fuse.Fusebox.prototype.updateGenerics.cache,
-       forIn = Fuse.Object && Fuse.Object._each || _forIn,
+       forIn = eachKey || _forIn,
        natives = arguments.length ? arguments : _natives;
 
       // iterate over native constructors

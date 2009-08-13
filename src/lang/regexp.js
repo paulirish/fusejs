@@ -2,14 +2,15 @@
 
   Fuse.RegExp.escape = (function() {
     function escape(string) {
-      return Fuse.String(string).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
+      return Fuse.String(String(string).replace(matchSpecialChars, '\\$1'));
     }
+    var matchSpecialChars = /([.*+?^=!:${}()|[\]\/\\])/g;
     return escape;
   })();
 
-  (function() {
-    this.clone = function clone(options) {
-      options = Fuse.Object._extend({
+  (function(proto) {
+    proto.clone = function clone(options) {
+      options = _extend({
         'global':     this.global,
         'ignoreCase': this.ignoreCase,
         'multiline':  this.multiline
@@ -22,8 +23,8 @@
     };
 
     // alias
-    this.match = this.test;
+    proto.match = proto.test;
 
     // prevent JScript bug with named function expressions
     var clone = null;
-  }).call(Fuse.RegExp.Plugin);
+  })(Fuse.RegExp.Plugin);

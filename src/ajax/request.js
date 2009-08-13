@@ -7,8 +7,8 @@
           return new Request(url, options);
 
         this.transport = Fuse.Ajax.getTransport();
-        this.onStateChange = Fuse.Function.bind(this.onStateChange, this);
-        this.onTimeout = Fuse.Function.bind(this.onTimeout, this);
+        this.onStateChange = bind(this.onStateChange, this);
+        this.onTimeout = bind(this.onTimeout, this);
         this.request(url, options);
       }
       return Request;
@@ -39,7 +39,7 @@
       if (this.readyState != 4) {
         // clear onreadystatechange handler to stop some browsers calling
         // it when the request is aborted
-        transport.onreadystatechange = Fuse.emptyFunction;
+        transport.onreadystatechange = emptyFunction;
         transport.abort();
 
         // skip to complete readyState and flag it as aborted
@@ -81,7 +81,7 @@
     this.onTimeout = function onTimeout() {
       var transport = this.transport;
       if (this.readyState != 4) {
-        transport.onreadystatechange = Fuse.emptyFunction;
+        transport.onreadystatechange = emptyFunction;
         transport.abort();
 
         // skip to complete readyState and flag it as timedout
@@ -154,7 +154,7 @@
           transport.setRequestHeader(key, headers[key]);
 
         // if body is a string ensure it's a primitive
-        transport.send(Fuse.Object.isString(body) ? String(body) : body);
+        transport.send(isString(body) ? String(body) : body);
 
         // force Firefox to handle readyState 4 for synchronous requests
         if (!async) this.onStateChange();
@@ -219,8 +219,7 @@
             (json = this.getHeader('X-JSON')) && json != '') {
           // set headerJSON
           try {
-            this.headerJSON = json.evalJSON(options.sanitizeJSON ||
-              !Fuse.Object.isSameOrigin(url));
+            this.headerJSON = json.evalJSON(options.sanitizeJSON || !isSameOrigin(url));
           } catch (e) {
             this.dispatchException(e);
           }
@@ -260,7 +259,7 @@
             successOrFailure : status)] = 1;
 
           // remove event handler to avoid memory leak in IE
-          transport.onreadystatechange = Fuse.emptyFunction;
+          transport.onreadystatechange = emptyFunction;
 
           // set responseXML
           responseXML = transport.responseXML;
@@ -271,7 +270,7 @@
               contentType.indexOf('application/json') > -1)) {
             try {
               this.responseJSON = responseText.evalJSON(options.sanitizeJSON ||
-                !Fuse.Object.isSameOrigin(url));
+                !isSameOrigin(url));
             } catch (e) {
               this.dispatchException(e);
             }
@@ -279,7 +278,7 @@
 
           // eval javascript
           if (responseText && (evalJS == 'force' || evalJS &&
-              Fuse.Object.isSameOrigin(url) &&
+              isSameOrigin(url) &&
               contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i))) {
             try {
               global.eval(String(Fuse.String.unfilterJSON(responseText)));

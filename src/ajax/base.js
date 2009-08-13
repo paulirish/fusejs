@@ -17,11 +17,11 @@
 
         // clone default options/headers and overwrite with user options
         delete defaultOptions.headers;
-        defaultOptions = Fuse.Object.clone(defaultOptions);
+        defaultOptions = clone(defaultOptions);
         Fuse.Ajax.Base.options.headers = defaultHeaders;
 
-        defaultOptions.headers = Fuse.Object.clone(defaultHeaders);
-        options = this.options = Fuse.Object._extend(defaultOptions, options);
+        defaultOptions.headers = clone(defaultHeaders);
+        options = this.options = _extend(defaultOptions, options);
 
         var encoding = options.encoding,
          headers = options.headers,
@@ -36,11 +36,11 @@
         }
 
         // convert string/hash parameters to an object
-        if (Fuse.Object.isString(params))
+        if (isString(params))
           params = Fuse.String(params).toQueryParams();
         else if (params instanceof Fuse.Hash)
           params = params.toObject();
-        else params = Fuse.Object.clone(params);
+        else params = clone(params);
 
         // simulate other verbs over post
         if (!/^(get|post)$/.test(method)) {
@@ -49,13 +49,13 @@
         }
 
         // when GET request, append parameters to URL
-        queryString = Fuse.Object.toQueryString(params);
+        queryString = Obj.toQueryString(params);
         if ( method == 'get' && queryString != '')
           url += (url.indexOf('?') > -1 ? '&' : '?') + queryString;
 
         // add in user defined array/hash/object headers over the default
         if (typeof customHeaders === 'object') {
-          if (Fuse.List.isArray(customHeaders)) {
+          if (isArray(customHeaders)) {
             for (var i = 0, length = customHeaders.length; i < length; i += 2)
               headers[customHeaders[i]] = customHeaders[i + 1];
           } else {

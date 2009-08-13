@@ -1,9 +1,8 @@
 <%= include 'HEADER' %>
 (function(global) {
-  global.Fuse = (function() {
-    function Fuse() { }
-    return Fuse;
-  })();
+
+  var Fuse =
+  global.Fuse = function Fuse() { };
 
   Fuse._body =
   Fuse._root =
@@ -12,6 +11,14 @@
   Fuse._doc =   document;
   Fuse._div =   Fuse._doc.createElement('div');
   Fuse._docEl = Fuse._doc.documentElement;
+
+  Fuse._info = {
+    'body':  { 'nodeName': 'BODY', 'property': 'body' },
+    'docEl': { 'nodeName': 'HTML', 'property': 'documentElement' }
+  };
+
+  Fuse._info.root = Fuse._info.docEl;
+  Fuse._info.scrollEl = Fuse._info.body;
 
   Fuse.JSONFilter =     /^\/\*-secure-([\s\S]*)\*\/\s*$/;
   Fuse.ScriptFragment = '<script[^>]*>([^\\x00]*?)<\/script>';
@@ -30,30 +37,30 @@
     return false;
   })();
 
-  Fuse.emptyFunction = (function() {
-    function emptyFunction() { }
-    return emptyFunction;
-  })();
-
-  Fuse.K = (function() {
-    function K(x) { return x }
-    return K;
-  })();
-
-  Fuse._info = {
-    'body':  { 'nodeName': 'BODY', 'property': 'body' },
-    'docEl': { 'nodeName': 'HTML', 'property': 'documentElement' }
-  };
-
-  Fuse._info.root = Fuse._info.docEl;
-  Fuse._info.scrollEl = Fuse._info.body;
-
   /*----------------------- PRIVATE VARIABLES/METHODS ------------------------*/
 
-  var $, Bug, Feature,
+  var $, Bug, Feature, Obj, Func, _extend, bind, clone, defer, undef,
+   eachKey, hasKey, inspect, isArray, isElement, isEmpty, isHash, isFunction,
+   isNumber, isPrimitive, isSameOrigin, isString, isRegExp, isUndefined,
+
+   emptyFunction =
+   Fuse.emptyFunction = function emptyFunction() { },
+
+   K =
+   Fuse.K = function K(x) { return x },
+
+   // a unqiue 15 char id used throughout Fuse
    expando = '_fuse' + String(1 * new Date).slice(0, 10),
-   slice = Array.prototype.slice,
+
+   // a quick way to copy an array slice.call(array, 0)
+   slice = global.Array.prototype.slice,
+
+   // used to access the an object's internal [[Class]] property
+   toString = Object.prototype.toString,
+
+   // used for some required browser sniffing
    userAgent = global.navigator.userAgent;
+
 
   // Host objects have a range of typeof values. For example:
   // document.createElement('div').offsetParent -> unknown
@@ -63,7 +70,7 @@
     return type === 'function' || type === 'object' || type === 'unknown';
   }
 
-  function getDocument(element) { // assume element is not null
+  function getDocument(element) {
     // Check for `ownerDocument` first because an element of a document fragment
     // will have a `document` property that is NOT the pages document object.
     return element.ownerDocument || element.document ||
@@ -84,44 +91,44 @@
     return results;
   }
 
-  var getNodeName = (function() {
-    var getNodeName =
-      function getNodeName(element) { return element.nodeName.toUpperCase() };
-    if (Fuse._docEl.nodeName === 'HTML')
-      getNodeName = function getNodeName(element) { return element.nodeName };
-    return getNodeName;
-  })();
+  var getNodeName =
+    function getNodeName(element) { return element.nodeName.toUpperCase() };
+  if (Fuse._docEl.nodeName === 'HTML')
+    getNodeName = function getNodeName(element) { return element.nodeName };
 
-  /* Based on work by Diego Perini */
-  var getWindow = (function() {
-    var getWindow = function getWindow(element) {
-      // Safari 2.0.x returns `Abstract View` instead of `global`
-      var frame, i = 0, doc = getDocument(element);
-      if (Fuse._doc !== doc) {
-        while (frame = global.frames[i++]) {
-          if (frame.document === doc) return frame;
-        }
+  // based on work by Diego Perini
+  var getWindow = function getWindow(element) {
+    // Safari 2.0.x returns `Abstract View` instead of `global`
+    var frame, i = 0, doc = getDocument(element), frames = global.frames;
+    if (Fuse._doc !== doc) {
+      while (frame = frames[i++]) {
+        if (frame.document === doc) return frame;
       }
-      return global;
-    };
-
-    if (isHostObject(Fuse._doc, 'parentWindow')) {
-      getWindow = function getWindow(element) {
-        return getDocument(element).parentWindow || element;
-      };
-    } else if (isHostObject(document, 'defaultView') && Fuse._doc.defaultView === global) {
-      getWindow = function getWindow(element) {
-        return getDocument(element).defaultView || element;
-      };
     }
-    return getWindow;
-  })();
+    return global;
+  };
+
+  if (isHostObject(Fuse._doc, 'parentWindow')) {
+    getWindow = function getWindow(element) {
+      return getDocument(element).parentWindow || element;
+    };
+  }
+  else if (isHostObject(document, 'defaultView') && Fuse._doc.defaultView === global) {
+    getWindow = function getWindow(element) {
+      return getDocument(element).defaultView || element;
+    };
+  }
 
   /*--------------------------- NAMESPACE UTILITY ----------------------------*/
 
   Fuse.addNS = function(path) {
-    var part, object = this, propIndex = 0, parts = path.split('.'),
-     length = parts.length, i = 0, properties = slice.call(arguments, 1);
+    var part, i = 0,
+     global     = Fuse._global,
+     object     = this,
+     propIndex  = 0,
+     parts      = path.split('.'),
+     length     = parts.length,
+     properties = slice.call(arguments, 1);
 
     // if parent is passed then incriment the propIndex by 1
     if (typeof properties[0] === 'function') propIndex++;
@@ -135,7 +142,7 @@
           // if no parent pass prepend object as parent
           if (!propIndex) properties = prependList(properties, object);
           object = object[part] = Fuse.Class.apply(global,
-            Fuse.Object.hasKey(properties[1], 'constructor') ? properties :
+            hasKey(properties[1], 'constructor') ? properties :
               (properties[1].constructor = part) && properties);
         }
         else object = object[part] = Fuse.Class(object, { 'constructor': part });

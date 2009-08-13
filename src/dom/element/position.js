@@ -1,7 +1,7 @@
   /*---------------------------- ELEMENT: POSITION ---------------------------*/
 
-  (function() {
-    this.makeAbsolute = function makeAbsolute(element) {
+  (function(methods) {
+    methods.makeAbsolute = function makeAbsolute(element) {
       element = $(element);
       if (Element.getStyle(element, 'position') == 'absolute')
         return element;
@@ -15,7 +15,7 @@
       element._originalLeft       = s.left;
       element._originalTop        = s.top;
       element._originalWidth      = s.width;
-      element._originalHeight     = s.height;   
+      element._originalHeight     = s.height;
       element._originalMarginTop  = s.marginTop;
       element._originalMarginLeft = s.marginLeft;
 
@@ -34,7 +34,7 @@
       return element;
     },
 
-    this.undoAbsolute = function undoAbsolute(element) {
+    methods.undoAbsolute = function undoAbsolute(element) {
       element = $(element);
       if (Element.getStyle(element, 'position') == 'relative')
         return element;
@@ -56,7 +56,7 @@
       return element;
     };
 
-    this.makeClipping = function makeClipping(element) {
+    methods.makeClipping = function makeClipping(element) {
       element = $(element);
       if (element._overflow) return element;
       element._overflow = Element.getStyle(element, 'overflow') || 'auto';
@@ -65,7 +65,7 @@
       return element;
     };
 
-    this.undoClipping = function undoClipping(element) {
+    methods.undoClipping = function undoClipping(element) {
       element = $(element);
       if (!element._overflow) return element;
       element.style.overflow = element._overflow == 'auto' ? '' : element._overflow;
@@ -73,7 +73,7 @@
       return element;
     };
 
-    this.makePositioned = function makePositioned(element) {
+    methods.makePositioned = function makePositioned(element) {
       element = $(element);
       var pos = Element.getStyle(element, 'position');
       if (!pos || pos == 'static') {
@@ -86,23 +86,23 @@
       return element;
     };
 
-    this.undoPositioned = function undoPositioned(element) {
+    methods.undoPositioned = function undoPositioned(element) {
       element = $(element);
       if (element._madePositioned) {
-        element._madePositioned = undefined;
+        element._madePositioned = undef;
         element.style.position  =
          element.style.top      =
          element.style.left     =
          element.style.bottom   =
-         element.style.right    = '';   
+         element.style.right    = '';
       }
       return element;
     };
 
-   this.clonePosition = function clonePosition(element, source, options) {
+   methods.clonePosition = function clonePosition(element, source, options) {
       element = $(element);
       source  = $(source);
-      options = Fuse.Object._extend({
+      options = _extend({
         'offsetLeft': 0,
         'offsetTop':  0,
         'setLeft':    true,
@@ -116,14 +116,14 @@
        isElementVisible = Element.isVisible(element),
        isSourceVisible = Element.isVisible(source);
 
-       if (!isSourceVisible) {
-         sourceBackupStyle = source.style.cssText;
-         source.style.cssText += ';display:block;visibility:hidden;';
-       }
-       if (!isElementVisible) {
-         elementBackupStyle = { 'display': s.display, 'visibility': s.visibility };
-         s.cssText += ';display:block;visibility:hidden;';
-       }
+      if (!isSourceVisible) {
+        sourceBackupStyle = source.style.cssText;
+        source.style.cssText += ';display:block;visibility:hidden;';
+      }
+      if (!isElementVisible) {
+        elementBackupStyle = { 'display': s.display, 'visibility': s.visibility };
+        s.cssText += ';display:block;visibility:hidden;';
+      }
 
       // Get element size without border or padding then add
       // the difference between the source and element padding/border
@@ -163,7 +163,7 @@
       // set position
       if (options.setLeft) s.left = (p[0] - delta[0] + options.offsetLeft) + 'px';
       if (options.setTop)  s.top  = (p[1] - delta[1] + options.offsetTop)  + 'px';
-      
+
       if (!isSourceVisible)
         source.style.cssText = sourceBackupStyle;
       if (!isElementVisible) {
@@ -174,7 +174,7 @@
       return element;
     };
 
-    this.cumulativeOffset = (function() {
+    methods.cumulativeOffset = (function() {
       function getOffset(element, ancestor) {
         // TODO: overhaul with a thorough solution for finding the correct
         // offsetLeft and offsetTop values
@@ -194,7 +194,7 @@
             valueL += parseFloat(Element.getStyle(offsetParent, 'borderLeftWidth')) || 0;
           }
           if (position == 'fixed' || offsetParent && (offsetParent === ancestor ||
-             (BODY_OFFSETS_INHERIT_ITS_MARGINS && position == 'absolute' && 
+             (BODY_OFFSETS_INHERIT_ITS_MARGINS && position == 'absolute' &&
               getNodeName(offsetParent) === 'BODY'))) {
             break;
           }
@@ -205,7 +205,7 @@
       function cumulativeOffset(element, ancestor) {
         element = Element._ensureLayout(element);
         ancestor = $(ancestor);
-        if (!Fuse.Object.isElement(ancestor)) ancestor = null;
+        if (!isElement(ancestor)) ancestor = null;
 
         // offsetLeft/offsetTop properties return 0 on elements
         // with display:none, so show the element temporarily
@@ -245,7 +245,7 @@
       return cumulativeOffset;
     })();
 
-    this.cumulativeScrollOffset = function cumulativeScrollOffset(element, onlyAncestors) {
+    methods.cumulativeScrollOffset = function cumulativeScrollOffset(element, onlyAncestors) {
       element = $(element);
       var nodeName, original = element, valueT = 0, valueL = 0,
        doc = getDocument(element), info = Fuse._info,
@@ -267,7 +267,7 @@
         element = element.parentNode;
       } while (element && element.nodeType === 1);
 
-      if (onlyAncestors || ((nodeName = getNodeName(original)) && 
+      if (onlyAncestors || ((nodeName = getNodeName(original)) &&
           nodeName === 'TEXTAREA' || nodeName === 'INPUT')) {
         valueT -= original.scrollTop  || 0;
         valueL -= original.scrollLeft || 0;
@@ -276,7 +276,7 @@
       return Element._returnOffset(valueL, valueT);
     };
 
-    this.positionedOffset = function positionedOffset(element) {
+    methods.positionedOffset = function positionedOffset(element) {
       element = Element._ensureLayout(element);
       var valueT = 0, valueL = 0;
       do {
@@ -289,7 +289,7 @@
       return Element._returnOffset(valueL, valueT);
     },
 
-    this.viewportOffset = (function() {
+    methods.viewportOffset = (function() {
       var viewportOffset = function viewportOffset(element) {
         element = $(element);
         var scrollOffset = Element.cumulativeScrollOffset(element, /*onlyAncestors*/ true),
@@ -332,4 +332,4 @@
      undoAbsolute =           null,
      undoClipping =           null,
      undoPositioned =         null;
-  }).call(Element.Methods);
+  })(Element.Methods);

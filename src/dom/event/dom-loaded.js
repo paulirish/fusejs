@@ -1,6 +1,6 @@
   /*--------------------------- EVENT: DOM-LOADED ----------------------------*/
 
-  // Support for the "dom:loaded" event is based on work by Dan Webb, 
+  // Support for the "dom:loaded" event is based on work by Dan Webb,
   // Matthias Miller, Dean Edwards, John Resig and Diego Perini.
   (function() {
     function Poller(method) {
@@ -47,7 +47,7 @@
         sheet = getSheet(element);
         // bail when sheet is null/undefined on elements
         if (sheet == null) return false;
-        if (Fuse.Object.isSameOrigin(sheet.href)) {
+        if (isSameOrigin(sheet.href)) {
           results.push(sheet);
           if (!addImports(results, sheet))
             return false;
@@ -75,7 +75,7 @@
         ? function(collection, sheet) {
             var length = sheet.imports.length;
             while (length--) {
-              if (Fuse.Object.isSameOrigin(sheet.imports[length].href)) {
+              if (isSameOrigin(sheet.imports[length].href)) {
                 collection.push(sheet.imports[length]);
                 addImports(collection, sheet.imports[length])
               }
@@ -94,7 +94,7 @@
               // bail when sheet is null on rules
               ss = rules[length].styleSheet;
               if (ss === null) return false;
-              if (ss && Fuse.Object.isSameOrigin(ss.href)) {
+              if (ss && isSameOrigin(ss.href)) {
                 collection.push(ss);
                 if (!addImports(collection, ss))
                   return false;

@@ -16,23 +16,22 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function() {
-    function _buildCache(thisArg, callback) {
-      callback = callback || Fuse.emptyFunction;
+  (function(proto) {
+    function buildCache(thisArg, callback) {
       var c = thisArg._cache = Fuse.List(), i = 0,
        value = c.start = thisArg.start = Fuse.Object(thisArg.start);
 
       c.end = thisArg.end = Fuse.Object(thisArg.end);
       c.exclusive = thisArg.exclusive;
 
-      while (_inRange(thisArg, value)) {
+      while (isInRange(thisArg, value)) {
         c.push(value);
-        callback(value, i++, thisArg);
+        callback && callback(value, i++, thisArg);
         value = value.succ();
       }
     }
 
-    function _isExpired(thisArg) {
+    function isExpired(thisArg) {
       var c = thisArg._cache, result = false;
       if (!c || thisArg.start != c.start || thisArg.end != c.end)
         result = true;
@@ -47,7 +46,7 @@
       return result;
     }
 
-    function _inRange(thisArg, value) {
+    function isInRange(thisArg, value) {
       if (value < thisArg.start)
         return false;
       if (thisArg.exclusive)
@@ -55,55 +54,55 @@
       return value <= thisArg.end;
     }
 
-    this._each = function _each(callback) {
-      if (_isExpired(this)) _buildCache(this, callback);
+    proto._each = function _each(callback) {
+      if (isExpired(this)) buildCache(this, callback);
       else {
         var c = this._cache, i = 0, length = c.length;
         while (i < length) callback(c[i], i++ , this);
       }
     };
 
-    this.max = (function(__max) {
+    proto.max = (function(__max) {
       function max(callback, thisArg) {
         var result;
-        if (!callback && !_isExpired(this))
+        if (!callback && !isExpired(this))
           result = this._cache[this._cache.length - 1];
         else result = __max.call(this, callback, thisArg);
         return result;
       }
       return max;
-    })(this.max);
+    })(proto.max);
 
-    this.min = (function(__min) {
+    proto.min = (function(__min) {
       function min(callback, thisArg) {
         return !callback
           ? this.start
           : __min.call(this, callback, thisArg);
       }
       return min;
-    })(this.min);
+    })(proto.min);
 
-    this.size = function size() {
-      var c = this._cache, isNumber = Fuse.Object.isNumber;
-      if (_isExpired(this)) {
+    proto.size = function size() {
+      var c = this._cache;
+      if (isExpired(this)) {
         if (isNumber(this.start) && isNumber(this.end))
           return Fuse.Number(this.end - this.start + (this.exclusive ? 0 : 1));
-        _buildCache(this);
+        buildCache(this);
       }
       return Fuse.Number(this._cache.length);
     };
 
-    this.toArray = function toArray() {
-      _isExpired(this) && _buildCache(this);
+    proto.toArray = function toArray() {
+      isExpired(this) && buildCache(this);
       return Fuse.List.fromArray(this._cache);
     };
 
     // prevent JScript bug with named function expressions
     var _each = null, size = null, toArray = null;
-  }).call(Fuse.Range.Plugin);
+  })(Fuse.Range.Plugin);
 
   /*--------------------------------------------------------------------------*/
-  
+
   Fuse.addNS('Util');
 
   Fuse.Util.$R = Fuse.Range;

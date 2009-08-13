@@ -6,8 +6,7 @@
         if (!(this instanceof TimedUpdater))
           return new TimedUpdater(container, url, options);
 
-        options = Fuse.Object._extend(Fuse.Object
-          .clone(this.constructor.options), options);
+        options = _extend(clone(this.constructor.options), options);
 
         // this._super() equivalent
         Fuse.Ajax.Base.call(this, url, options);
@@ -19,13 +18,13 @@
         this.maxDecay  = options.maxDecay;
 
         this.onStop = options.onStop;
-        this.onTimerEvent = Fuse.Function.bind(this.start, this);
+        this.onTimerEvent = bind(this.start, this);
 
         // dynamically set readyState eventName to allow for easy customization
         var callbackName = 'on' + Request.Events[4],
          onDone = options[callbackName];
 
-        options[callbackName] = Fuse.Function.bind(function(request, json) {
+        options[callbackName] = bind(function(request, json) {
           if (!request.aborted) {
             this.updateDone(request);
             onDone && onDone(request, json);
@@ -40,8 +39,8 @@
     })()
   });
 
-  (function() {
-    this.updateDone = function updateDone(request) {
+  (function(proto) {
+    proto.updateDone = function updateDone(request) {
       var options = this.options, decay = options.decay,
        responseText = request.responseText;
 
@@ -51,15 +50,15 @@
 
         this.lastText = responseText;
       }
-      this.timer = Fuse.Function.delay(this.onTimerEvent,
+      this.timer = Func.delay(this.onTimerEvent,
         this.decay * this.frequency);
     };
 
-    this.start = function start() {
+    proto.start = function start() {
       this.updater = new Fuse.Ajax.Updater(this.container, this.url, this.options);
     };
 
-    this.stop = function stop() {
+    proto.stop = function stop() {
       this.updater.abort();
       global.clearTimeout(this.timer);
       this.onStop && this.onStop.apply(this, arguments);
@@ -68,7 +67,7 @@
 
     // prevent JScript bug with named function expressions
     var updateDone = null, start = null, stop = null;
-  }).call(Fuse.Ajax.TimedUpdater.Plugin);
+  })(Fuse.Ajax.TimedUpdater.Plugin);
 
   Fuse.Ajax.TimedUpdater.options = {
     'decay':     1,

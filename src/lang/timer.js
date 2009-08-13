@@ -9,10 +9,9 @@
         this.callback     = callback;
         this.interval     = interval;
         this.executing    = false;
-        this.onTimerEvent = Fuse.Function.bind(onTimerEvent, this);
+        this.onTimerEvent = bind(onTimerEvent, this);
 
-        this.options = Fuse.Object._extend(Fuse.Object
-          .clone(this.constructor.options), options);
+        this.options = _extend(clone(this.constructor.options), options);
       }
 
       function onTimerEvent() {
@@ -38,18 +37,18 @@
     })()
   });
 
-  (function() {
-    this.execute = function execute() {
+  (function(proto) {
+    proto.execute = function execute() {
       this.callback(this);
     };
 
-    this.start = function start() {
+    proto.start = function start() {
       this.timerID = global.setTimeout(this.onTimerEvent,
         this.interval * this.options.multiplier);
       return this;
     };
 
-    this.stop = function stop() {
+    proto.stop = function stop() {
       var id = this.timerID;
       if (id === null) return;
       global.clearTimeout(id);
@@ -59,7 +58,7 @@
 
     // prevent JScript bug with named function expressions
     var execute = null, start = null, stop = null;
-  }).call(Fuse.Timer.Plugin);
+  })(Fuse.Timer.Plugin);
 
   Fuse.Timer.options = {
     'multiplier': 1

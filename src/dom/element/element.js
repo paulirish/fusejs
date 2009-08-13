@@ -9,7 +9,7 @@
           elements.push($(arguments[i]));
         return elements;
       }
-      if (Fuse.Object.isString(element))
+      if (isString(element))
         element = Fuse._doc.getElementById(element || expando);
       return Element.extend(element);
     }
@@ -38,7 +38,7 @@
       var element = cache[tagName];
       if (!element)
         element = cache[tagName] = Element.extend(Fuse._doc.createElement(tagName));
-      element = element.cloneNode(false);  
+      element = element.cloneNode(false);
       return attributes
         ? Element.writeAttribute(element, attributes)
         : element;
@@ -61,7 +61,7 @@
     // Avoid Fuse.Object.extend() because IE8 cannot set any variable/property
     // reference to Element.toString.
     if (original) {
-      Fuse.Object._extend(global.Element, original);
+      _extend(global.Element, original);
       global.Element.prototype = original.prototype;
     }
 
@@ -74,21 +74,21 @@
   Element.extend = (function() {
     var Methods, ByTag, revision = 0;
 
-    function _createRevisionGetter(r) {
+    function createRevisionGetter(r) {
       return function() { return r };
     }
 
-    function _extendElement(element, nodeName) {
+    function extendElement(element, nodeName) {
       nodeName = nodeName || getNodeName(element);
       var pair, methods = ByTag[nodeName] || Methods, length = methods.length;
       while (length--) {
         pair = methods[length];
-        if (!Fuse.Object.hasKey(element, pair[0]))
+        if (!hasKey(element, pair[0]))
           element[pair[0]] = pair[1];
       }
 
       // avoid using Fuse.K.curry(revision) for speed
-      element._extendedByFuse = _createRevisionGetter(revision);
+      element._extendedByFuse = createRevisionGetter(revision);
       return element;
     }
 
@@ -100,25 +100,25 @@
         element.nodeType !== 1 || element == getWindow(element) ||
         !element.ownerDocument.body) return element;
 
-      return _extendElement(element);
+      return extendElement(element);
     }
 
     function refresh() {
       var tagName; Methods = []; ByTag = { };
 
-      Fuse.Object._each(Element.Methods, function(value, key, object) {
+      eachKey(Element.Methods, function(value, key, object) {
         if (key !== 'Simulated' && key !== 'ByTag')
-          Methods.push([key, Fuse.Function.methodize([key, object])]);
+          Methods.push([key, Func.methodize([key, object])]);
       });
 
-      Fuse.Object._each(Element.Methods.Simulated, function(value, key, object) {
-        Methods.push([key, Fuse.Function.methodize([key, object])]);
+      eachKey(Element.Methods.Simulated, function(value, key, object) {
+        Methods.push([key, Func.methodize([key, object])]);
       });
 
       for (tagName in Element.Methods.ByTag) {
         ByTag[tagName] = slice.call(Methods, 0);
-        Fuse.Object._each(Element.Methods.ByTag[tagName], function(value, key, object) {
-          ByTag[tagName].push([key, Fuse.Function.methodize([key, object])]);
+        eachKey(Element.Methods.ByTag[tagName], function(value, key, object) {
+          ByTag[tagName].push([key, Func.methodize([key, object])]);
         });
       }
       revision++;
@@ -128,10 +128,10 @@
     // don't need their elements extended UNLESS
     // they belong to a different document
     if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
-      extend = (function(_extend) {
+      extend = (function(__extend) {
         function extend(element) {
           return (element && element.ownerDocument &&
-            element.ownerDocument !== Fuse._doc) ? _extend(element) : element;
+            element.ownerDocument !== Fuse._doc) ? __extend(element) : element;
         }
         return extend;
       })(extend);
@@ -139,15 +139,15 @@
 
     // In IE8 APPLET, EMBED, and OBJECT elements don't inherit from their prototypes
     if (Bug('ELEMENT_OBJECT_AND_RELATIVES_FAILS_TO_INHERIT_FROM_PROTOTYPE')) {
-      extend = (function(_extend) {
+      extend = (function(__extend) {
         function extend(element) {
           var nodeName = element && getNodeName(element);
           if (BUGGY[nodeName]) {
             return (typeof element._extendedByFuse !== 'undefined' &&
               element._extendedByFuse() >= revision) ?
-                element : _extendElement(element, nodeName);
+                element : extendElement(element, nodeName);
           }
-          return _extend(element);
+          return __extend(element);
         }
         var BUGGY = { 'APPLET': 1, 'EMBED': 1, 'OBJECT': 1 };
         return extend;
@@ -164,7 +164,7 @@
     // add HTMLElement for Safari 2
     if (Feature('OBJECT__PROTO__') && !Feature('HTML_ELEMENT_CLASS')) {
       Feature.set({ 'HTML_ELEMENT_CLASS': true, 'ELEMENT_EXTENSIONS': true });
-      _emulateDOMClass('HTMLElement', 'DIV');
+      emulateDOMClass('HTMLElement', 'DIV');
     }
 
     var tagNameClassLookup = {
@@ -204,33 +204,33 @@
       Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO'),
 
     // supports IE8 as well as EOMB
-    elementPrototype = Feature('HTML_ELEMENT_CLASS') ?
+    elementProto = Feature('HTML_ELEMENT_CLASS') ?
       global.HTMLElement.prototype : Feature('ELEMENT_CLASS') ?
         global.Element.prototype : false;
 
-    function _copy(methods, destination, onlyIfAbsent) {
+    function copyMethods(methods, destination, onlyIfAbsent) {
       onlyIfAbsent = onlyIfAbsent || false;
-      Fuse.Object._each(methods, function(value, key) {
-        if (typeof value === 'function' && 
+      eachKey(methods, function(value, key) {
+        if (typeof value === 'function' &&
            (!onlyIfAbsent || !(key in destination)))
-          destination[key] = Fuse.Function.methodize([key, methods]);
+          destination[key] = Func.methodize([key, methods]);
       });
     }
 
-    function _emulateDOMClass(className, tagName) {
+    function extendByTag(tagName, methods) {
+      tagName = tagName.toUpperCase();
+      if (!Element.Methods.ByTag[tagName])
+        Element.Methods.ByTag[tagName] = { };
+      Obj.extend(Element.Methods.ByTag[tagName], methods);
+    }
+
+    function emulateDOMClass(className, tagName) {
       (global[className] = { }).prototype =
         Fuse._doc.createElement(tagName)['__proto__'];
       return global[className];
     }
 
-    function _extend(tagName, methods) {
-      tagName = tagName.toUpperCase();
-      if (!Element.Methods.ByTag[tagName])
-        Element.Methods.ByTag[tagName] = { };
-      Fuse.Object.extend(Element.Methods.ByTag[tagName], methods);
-    }
-
-    function _findDOMClass(tagName) {
+    function findDOMClass(tagName) {
       // catch most classes like HTMLUListElement and HTMLSelectElement
       var className = 'HTML' + (tagNameClassLookup[tagName] ||
         Fuse.String(tagName).capitalize()) + 'Element';
@@ -242,21 +242,21 @@
         return global[className];
       // emulate the class (not used by any browser)
       if (EMULATE_ELEMENT_CLASSES_WITH_PROTO)
-        return _emulateDOMClass(className, tagName);
+        return emulateDOMClass(className, tagName);
     }
 
-    return function(methods) {
+    function addMethods(methods) {
       var tagName, T = Element.Methods.ByTag;
 
       if (arguments.length < 2) {
-        Fuse.Object.extend(Form, Form.Methods);
-        Fuse.Object.extend(Form.Element, Form.Element.Methods);
-        Fuse.Object.extend(Element.Methods.ByTag, {
-          'BUTTON':   Fuse.Object.clone(Form.Element.Methods),
-          'FORM':     Fuse.Object.clone(Form.Methods),
-          'INPUT':    Fuse.Object.clone(Form.Element.Methods),
-          'SELECT':   Fuse.Object.clone(Form.Element.Methods),
-          'TEXTAREA': Fuse.Object.clone(Form.Element.Methods)
+        Obj.extend(Form, Form.Methods);
+        Obj.extend(Field, Field.Methods);
+        Obj.extend(T, {
+          'BUTTON':   clone(Field.Methods),
+          'FORM':     clone(Form.Methods),
+          'INPUT':    clone(Field.Methods),
+          'SELECT':   clone(Field.Methods),
+          'TEXTAREA': clone(Field.Methods)
         });
       } else {
         tagName = methods;
@@ -264,34 +264,36 @@
       }
 
       if (!tagName || tagName == '')
-        Fuse.Object.extend(Element.Methods, methods);
+        Obj.extend(Element.Methods, methods);
       else {
-        Fuse.List.isArray(tagName)
-          ? tagName._each(function(name) { _extend(name, methods) })
-          : _extend(tagName, methods);
+        isArray(tagName)
+          ? tagName._each(function(name) { extendByTag(name, methods) })
+          : extendByTag(tagName, methods);
       }
 
       if (Feature('ELEMENT_EXTENSIONS')) {
-        _copy(Element.Methods, elementPrototype);
-        _copy(Element.Methods.Simulated, elementPrototype, true);
+        copyMethods(Element.Methods, elementProto);
+        copyMethods(Element.Methods.Simulated, elementProto, true);
       }
 
       if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
-        var klass, infiniteRevision = function() { return Infinity };
-        for (tagName in Element.Methods.ByTag) {
-          klass = _findDOMClass(tagName);
-          if (typeof klass === 'undefined') continue;
-          _copy(T[tagName], klass.prototype);
+        var domClass, infiniteRevision = function() { return Infinity };
+        for (tagName in T) {
+          domClass = findDOMClass(tagName);
+          if (typeof domClass === 'undefined') continue;
+          copyMethods(T[tagName], domClass.prototype);
         }
-        elementPrototype._extendedByFuse = infiniteRevision;
+        elementProto._extendedByFuse = infiniteRevision;
       }
 
-      Fuse.Object.extend(Element, Element.Methods);
+      Obj.extend(Element, Element.Methods);
       delete Element.ByTag;
 
       Element.extend.refresh();
       Element.cache = { };
-    };
+    }
+    
+    return addMethods;
   })();
 
   /*--------------------------------------------------------------------------*/
@@ -307,36 +309,36 @@
     }
   };
 
-  (function() {
+  (function(T) {
     // TODO: Opera fails to render optgroups when set with innerHTML
-    Fuse.Object._extend(this.tags, {
-      'OPTGROUP': this.tags.SELECT,
-      'TFOOT':    this.tags.TBODY,
-      'TH':       this.tags.TD,
-      'THEAD':    this.tags.TBODY
+    _extend(T.tags, {
+      'OPTGROUP': T.tags.SELECT,
+      'TFOOT':    T.tags.TBODY,
+      'TH':       T.tags.TD,
+      'THEAD':    T.tags.TBODY
     });
 
-    this.before = function before(element, node) {
+    T.before = function before(element, node) {
       element.parentNode &&
         element.parentNode.insertBefore(node, element);
     };
 
-    this.top = function top(element, node) {
+    T.top = function top(element, node) {
       element.insertBefore(node, element.firstChild);
     };
 
-    this.bottom = function bottom(element, node) {
+    T.bottom = function bottom(element, node) {
       element.appendChild(node);
     };
 
-    this.after = function after(element, node) {
+    T.after = function after(element, node) {
       element.parentNode &&
         element.parentNode.insertBefore(node, element.nextSibling);
     };
 
     // prevent JScript bug with named function expressions
     var after = null, before = null,  bottom = null, top = null;
-  }).call(Element._insertionTranslations);
+  })(Element._insertionTranslations);
 
   /*--------------------------------------------------------------------------*/
 
@@ -345,8 +347,8 @@
     'Simulated': { }
   };
 
-  (function() {
-    this.cleanWhitespace = function cleanWhitespace(element) {
+  (function(methods) {
+    methods.cleanWhitespace = function cleanWhitespace(element) {
       // removes whitespace-only text node children
       element = $(element);
       var nextNode, node = element.firstChild;
@@ -359,15 +361,15 @@
       return element;
     };
 
-    this.empty = function empty(element) {
+    methods.empty = function empty(element) {
       return Fuse.String($(element).innerHTML).blank();
     };
 
-    this.getDimensions = function getDimensions(element) {
+    methods.getDimensions = function getDimensions(element) {
       return { 'width': Element.getWidth(element), 'height': Element.getHeight(element) };
     };
 
-    this.getOffsetParent = (function() {
+    methods.getOffsetParent = (function() {
       var END_ON_NODE = { 'BODY': 1, 'HTML': 1 },
        OFFSET_PARENTS = { 'TABLE': 1, 'TD': 1, 'TH': 1 };
 
@@ -375,7 +377,7 @@
         // http://www.w3.org/TR/cssom-view/#offset-attributes
         element = $(element);
         var original = element, nodeName = getNodeName(element);
-        if (nodeName === 'AREA') return Element.extend(element.parentNode); 
+        if (nodeName === 'AREA') return Element.extend(element.parentNode);
 
         // IE throws an error if the element is not in the document.
         // Many browsers report offsetParent as null if the element's
@@ -396,7 +398,7 @@
       return getOffsetParent;
     })();
 
-    this.identify = function identify(element) {
+    methods.identify = function identify(element) {
       // use readAttribute to avoid issues with form elements and
       // child controls with ids/names of "id"
       var id = Element.readAttribute(element, 'id');
@@ -409,21 +411,24 @@
       return Fuse.String(id);
     };
 
-    this.inspect = function inspect(element) {
-      element = $(element);
-      var attribute, property, value,
-       result = '<' + element.nodeName.toLowerCase(),
-       translation = { 'id': 'id', 'className': 'class' };
+    methods.inspect = (function() {
+      function inspect(element) {
+        element = $(element);
+        var attribute, property, value,
+         result = '<' + element.nodeName.toLowerCase(),
+         translation = { 'id': 'id', 'className': 'class' };
 
-      for (property in translation) {
-        attribute = translation[property];
-        value = element[property] || '';
-        if (value) result += ' ' + attribute + '=' + Fuse.String(value).inspect(true);
+        for (property in translation) {
+          attribute = translation[property];
+          value = element[property] || '';
+          if (value) result += ' ' + attribute + '=' + Fuse.String(value).inspect(true);
+        }
+        return Fuse.String(result + '>');
       }
-      return Fuse.String(result + '>');
-    };
+      return inspect;
+    })();
 
-    this.isFragment = (function() {
+    methods.isFragment = (function() {
       var isFragment = function isFragment(element) {
         element = $(element);
         var nodeType = element.nodeType;
@@ -451,7 +456,7 @@
       return isFragment;
     })();
 
-    this.hide = function hide(element) {
+    methods.hide = function hide(element) {
       element = $(element);
       var display = element.style.display;
       if (display && display !== 'none')
@@ -460,7 +465,7 @@
       return element;
     };
 
-    this.show = function show(element) {
+    methods.show = function show(element) {
       element = $(element);
       var display = element.style.display;
       if (display === 'none')
@@ -469,25 +474,25 @@
       return element;
     };
 
-    this.scrollTo = function scrollTo(element) {
+    methods.scrollTo = function scrollTo(element) {
       var pos = Element.cumulativeOffset(element);
       global.scrollTo(pos[0], pos[1]);
       return $(element);
     };
 
-    this.remove = function remove(element) {
+    methods.remove = function remove(element) {
       element = $(element);
       element.parentNode &&
       element.parentNode.removeChild(element);
       return element;
     };
 
-    this.toggle = function toggle(element) {
+    methods.toggle = function toggle(element) {
       return Element[Element.isVisible(element) ?
         'hide' : 'show'](element);
     };
 
-    this.isVisible = (function() {
+    methods.isVisible = (function() {
       function isVisible(element) {
         if (!Fuse._body) return false;
 
@@ -527,11 +532,11 @@
       return isVisible;
     })();
 
-    this.wrap = function wrap(element, wrapper, attributes) {
+    methods.wrap = function wrap(element, wrapper, attributes) {
       element = $(element);
-      if (Fuse.Object.isElement(wrapper))
+      if (isElement(wrapper))
         $(wrapper).writeAttribute(attributes);
-      else if (Fuse.Object.isString(wrapper))
+      else if (isString(wrapper))
         wrapper = new Element(wrapper, attributes);
       else wrapper = new Element('div', wrapper);
       if (element.parentNode)
@@ -547,7 +552,6 @@
      getOffsetParent =    null,
      hide =               null,
      identify =           null,
-     inspect =            null,
      isFragment =         null,
      isVisible =          null,
      remove =             null,
@@ -555,11 +559,11 @@
      show =               null,
      toggle =             null,
      wrap =               null;
-  }).call(Element.Methods);
+  })(Element.Methods);
 
   /*--------------------------------------------------------------------------*/
 
-  (function() {
+  (function(methods) {
     function _isInsertable(node) {
       return _isInsertable.nodeType[node.nodeType];
     }
@@ -569,7 +573,7 @@
       element.parentNode.replaceChild(node, element);
     }
 
-    this.insert = function insert(element, insertions) {
+    methods.insert = function insert(element, insertions) {
       element = $(element);
       var content, fragment, insertContent, position, nodeName;
 
@@ -577,9 +581,8 @@
         if (insertions instanceof Fuse.Hash)
           insertions = insertions._object;
 
-        if (Fuse.Object.isString(insertions) ||
-            Fuse.Object.isNumber(insertions) || _isInsertable(insertions) ||
-            insertions.toElement || insertions.toHTML)
+        if (isString(insertions) || isNumber(insertions) ||
+            _isInsertable(insertions) || insertions.toElement || insertions.toHTML)
           insertions = { 'bottom': insertions };
       }
 
@@ -594,7 +597,7 @@
             insertContent(element, content);
             continue;
           }
-          content = Fuse.Object.toHTML(content);
+          content = Obj.toHTML(content);
         }
         else continue;
 
@@ -605,12 +608,12 @@
           element.ownerDocument, nodeName, content.stripScripts());
 
         insertContent(element, fragment);
-        Fuse.Function.defer(Fuse.Function.bind(content.evalScripts, content));
+        defer(bind(content.evalScripts, content));
       }
       return element;
     };
 
-    this.replace = (function() {
+    methods.replace = (function() {
       var _createContextualFragment = function(element, content) {
         return Element._getContentFromAnonymousElement(element.ownerDocument,
           getNodeName(element.parentNode), content);
@@ -641,8 +644,8 @@
         if (content.toElement)
           content = content.toElement();
         else if (!_isInsertable(content)) {
-          content = Fuse.Object.toHTML(content);
-          Fuse.Function.defer(Fuse.Function.bind(content.evalScripts, content));
+          content = Obj.toHTML(content);
+          defer(bind(content.evalScripts, content));
           content = _createContextualFragment(element, content.stripScripts());
         }
         _replaceElement(element, content);
@@ -652,7 +655,7 @@
       return replace;
     })();
 
-    this.update = function update(element, content) {
+    methods.update = function update(element, content) {
       element = $(element);
       if (getNodeName(element) === 'SCRIPT') {
         element.text = Fuse.String.interpret(content);
@@ -665,9 +668,9 @@
             element.appendChild(content);
             return element;
           }
-          content = Fuse.Object.toHTML(content);
+          content = Obj.toHTML(content);
           element.innerHTML = content.stripScripts();
-          Fuse.Function.defer(Fuse.Function.bind(content.evalScripts, content));
+          defer(bind(content.evalScripts, content));
         } else element.innerHTML = '';
       }
       return element;
@@ -691,12 +694,12 @@
             if (content.toElement) content = content.toElement();
             if (_isInsertable(content)) element.appendChild(content);
             else {
-              content = Fuse.Object.toHTML(content);
+              content = Obj.toHTML(content);
               if (isBuggy)
                 element.appendChild(Element._getContentFromAnonymousElement(
                   element.ownerDocument, nodeName, content.stripScripts()));
               else element.innerHTML = content.stripScripts();
-              Fuse.Function.defer(Fuse.Function.bind(content.evalScripts, content));
+              defer(bind(content.evalScripts, content));
             }
           }
         }
@@ -711,12 +714,12 @@
       if (Bug('ELEMENT_SELECT_INNERHTML_BUGGY'))
         BUGGY.SELECT   = 1;
       if (Bug('ELEMENT_TABLE_INNERHTML_BUGGY'))
-        BUGGY.TABLE = BUGGY.TBODY = BUGGY.TR = BUGGY.TD = 
+        BUGGY.TABLE = BUGGY.TBODY = BUGGY.TR = BUGGY.TD =
         BUGGY.TFOOT = BUGGY.TH    = BUGGY.THEAD = 1;
 
-      if (!Fuse.Object.isEmpty(BUGGY))
-        this.update = update;
-    }).call(this);
+      if (!isEmpty(BUGGY))
+        methods.update = update;
+    })();
 
     // fix Safari <= 2.0.2 inserting script elements
     (function() {
@@ -751,17 +754,17 @@
       }
 
       if (Bug('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT_PROPERTY_ON_INSERT')) {
-        _replaceElement = Fuse.Function.wrap(_replaceElement, wrapper);
+        _replaceElement = Func.wrap(_replaceElement, wrapper);
 
         Fuse.Util.$w('before top bottom after').each(function(method) {
-          this[method] = Fuse.Function.wrap(this[method], wrapper);
+          this[method] = Func.wrap(this[method], wrapper);
         }, Element._insertionTranslations);
       }
     })();
 
     // prevent JScript bug with named function expressions
     var insert = null, update = null;
-  }).call(Element.Methods);
+  })(Element.Methods);
 
   /*--------------------------------------------------------------------------*/
 

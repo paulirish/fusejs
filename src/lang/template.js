@@ -9,7 +9,7 @@
         this.template = Fuse.String(template);
 
         pattern = pattern || Fuse.Template.Pattern;
-        if (!Fuse.Object.isRegExp(pattern))
+        if (!isRegExp(pattern))
           pattern = Fuse.RegExp(Fuse.RegExp.escape(pattern));
         if (!pattern.global)
           pattern = Fuse.RegExp.clone(pattern, { 'global': true });
@@ -35,7 +35,8 @@
           if (object == null) return before;
 
           // adds support for dot and bracket notation
-          var comp, ctx = object, 
+          var comp,
+           ctx     = object,
            value   = ctx,
            pattern = /^([^.[]+|\[((?:.*?[^\\])?)\])(\.|\[|$)/;
 
@@ -45,7 +46,7 @@
           while (match != null) {
             comp  = match[1].indexOf('[') === 0 ? match[2].replace(/\\]/g, ']') : match[1];
             value = ctx[comp];
-            if (!Fuse.Object.hasKey(ctx, comp) || value == null) {
+            if (!hasKey(ctx, comp) || value == null) {
               value = ''; break;
             }
             if ('' == match[3]) break;
@@ -53,7 +54,7 @@
             expr  = expr.substring('[' == match[3] ? match[1].length : match[0].length);
             match = pattern.exec(expr);
           }
-          return before + Fuse.String.interpret(value);
+          return before + (value == null ? '' : value);
         });
       }
       return evaluate;

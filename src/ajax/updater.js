@@ -11,7 +11,7 @@
           'failure': (container.failure || (container.success ? null : container))
         };
 
-        options = Fuse.Object.clone(options);
+        options = clone(options);
         var updater = this, callbackName = 'on' + Request.Events[4],
          onDone = options[callbackName];
 
@@ -37,7 +37,7 @@
           responseText = responseText.stripScripts();
         if (receiver = $(receiver)) {
           if (options.insertion) {
-            if (Fuse.Object.isString(options.insertion)) {
+            if (isString(options.insertion)) {
               var insertion = { }; insertion[options.insertion] = responseText;
               receiver.insert(insertion);
             }

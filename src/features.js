@@ -77,11 +77,6 @@
         return isHostObject(Fuse._doc.createRange(), 'createContextualFragment');
     },
 
-    'DOCUMENT_STYLE_SHEETS_COLLECTION': function() {
-      // true for all so far
-      return isHostObject(Fuse._doc, 'styleSheets');
-    },
-
     'ELEMENT_ADD_EVENT_LISTENER': function() {
       // true for all but IE
       return isHostObject(Fuse._doc, 'addEventListener');
@@ -104,21 +99,34 @@
         isHostObject(global.Element, 'prototype');
     },
 
+    'ELEMENT_COMPARE_DOCUMENT_POSITION': function() {
+      // true for Firefox and Opera 9.5+
+      return isHostObject(Fuse._docEl, 'compareDocumentPosition');
+    },
+
     'ELEMENT_COMPUTED_STYLE': function() {
       // true for all but IE
       return isHostObject(Fuse._doc, 'defaultView') &&
         isHostObject(Fuse._doc.defaultView, 'getComputedStyle');
     },
 
-    'ELEMENT_COMPARE_DOCUMENT_POSITION': function() {
-      // true for Firefox and Opera 9.5+
-      return isHostObject(Fuse._docEl, 'compareDocumentPosition');
-    },
-
     'ELEMENT_CURRENT_STYLE': function() {
       // true for IE
       return isHostObject(Fuse._docEl, 'currentStyle') &&
         !Feature('ELEMENT_COMPUTED_STYLE');
+    },
+
+    'ELEMENT_CONTAINS': function() {
+      // true for all but IE and Safari 2
+      if(isHostObject(Fuse._docEl, 'contains')) {
+        var result, div = Fuse._div;
+        div.innerHTML = '<div><\/div><div><div><\/div><\/div>';
+
+        // ensure element.contains() returns the correct results;
+        result = !div.firstChild.contains(div.childNodes[1].firstChild);
+        div.innerHTML = '';
+        return result;
+      }
     },
 
     'ELEMENT_DISPATCH_EVENT': function() {
@@ -180,7 +188,7 @@
       var docEl = Fuse._docEl, result = false;
       if (isHostObject(global, 'HTMLHtmlElement') &&
           isHostObject(global.HTMLHtmlElement, 'prototype') &&
-         (docEl.constructor === HTMLHtmlElement || 
+         (docEl.constructor === HTMLHtmlElement ||
           docEl instanceof HTMLHtmlElement || Feature('OBJECT__PROTO__') &&
           docEl['__proto__'] === HTMLHtmlElement.prototype)) {
         result = true;
@@ -235,49 +243,8 @@
         delete o['__count__'];
         return typeof o['__count__'] === 'number' && o['__count__'] === 1;
       }
-    },
-
-    'SELECTORS_API': function() {
-      // true for IE8, WebKit (Safari 3, Chrome)
-      var doc = Fuse._doc, docEl = Fuse._docEl;
-      return isHostObject(doc, 'querySelector') &&
-        isHostObject(doc,   'querySelectorAll') &&
-        isHostObject(docEl, 'querySelector')    &&
-        isHostObject(docEl, 'querySelectorAll');
-    },
-
-    'XPATH': function() {
-      // true for all but IE
-      return isHostObject(Fuse._doc, 'evaluate') &&
-        isHostObject(global, 'XPathResult') &&
-        typeof XPathResult.ORDERED_NODE_SNAPSHOT_TYPE === 'number';
     }
   });
-
-  (function() {
-    var div = Fuse._div, docEl = Fuse._docEl,
-     // true for IE, Safari 3, Opera, Firefox 3+
-     ELEMENT_CHILDREN_NODELIST = isHostObject(docEl, 'children'),
-     // true for all but IE and Safari 2
-     ELEMENT_CONTAINS = isHostObject(docEl, 'contains');
-
-    div.innerHTML = '<div><\/div><div><div><\/div><\/div>';
-
-    // ensure children collection only contains direct descendants
-    if (ELEMENT_CHILDREN_NODELIST)
-      ELEMENT_CHILDREN_NODELIST = div.children.length === div.childNodes.length;
-
-    // ensure element.contains() returns the correct results;
-    if (ELEMENT_CONTAINS)
-      ELEMENT_CONTAINS = !div.firstChild.contains(div.childNodes[1].firstChild);
-
-    div.innerHTML = '';
-
-    Feature.set({
-      'ELEMENT_CHILDREN_NODELIST': ELEMENT_CHILDREN_NODELIST,
-      'ELEMENT_CONTAINS':          ELEMENT_CONTAINS
-    });
-  })();
 
   /*------------------------------ BROWSER BUGS ------------------------------*/
 
@@ -409,17 +376,6 @@
       }
     },
 
-    'ELEMENT_PROPERTIES_ARE_ATTRIBUTES': function() {
-      // true for IE
-      var div = Fuse._div;
-      div[expando] = 'x';
-      var result = div.getAttribute(expando) === 'x';
-      div.removeAttribute(expando);
-      if (typeof div[expando] !== 'undefined')
-        delete div[expando];
-      return result;
-    },
-
     'ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT_PROPERTY_ON_INSERT': function() {
       var docEl = Fuse._docEl, element = Fuse._doc.createElement('script');
       element.text = 'Fuse.' + expando +' = true;';
@@ -439,16 +395,12 @@
       return result;
     },
 
-    'SELECTORS_API_CASE_INSENSITIVE_CLASSNAME': function() {
-      // Safari 3 before 3.1.2 treat class names
-      // case-insensitively in quirks mode.
-      var div = Fuse._div, result = false;
-      if (Feature('SELECTORS_API')) {
-        div.id = expando;
-        div.innerHTML = '<span class="X"><\/span>';
-        result = div.querySelector('#'+ expando +' .x') !== null;
-        div.id = div.innerHTML = '';
-      }
+    'GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES': function() {
+      // true for IE
+      var div = Fuse._div;
+      div.innerHTML = '<p>x<\/p><!--y-->';
+      var result = div.getElementsByTagName('*').length === 2;
+      div.innerHTML = '';
       return result;
     },
 
@@ -526,29 +478,5 @@
         // left out tbody to test if it's auto inserted
         '<table><tr><td><\/td><\/tr><\/table>', '<tr><td><p>x<\/p><\/td><\/tr>'
       )
-    };
-  })());
-
-  Bug.set((function() {
-    function createCommentTest(conditional) {
-      return function() {
-        var div = Fuse._div;
-        div.innerHTML = '<p>x<\/p><!--y-->';
-        var result = conditional(div);
-        div.innerHTML = '';
-        return result;
-      };
-    }
-
-    return {
-      'COMMENT_NODES_IN_CHILDREN_NODELIST': createCommentTest(function(element) {
-        // true for IE
-        return Feature('ELEMENT_CHILDREN_NODELIST') && element.children.length === 2;
-      }),
-
-      'GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES': createCommentTest(function(element) {
-        // true for IE
-        return element.getElementsByTagName('*').length === 2;
-      })
     };
   })());

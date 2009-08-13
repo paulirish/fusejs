@@ -1,38 +1,38 @@
   /*----------------------------- ELEMENT: STYLE -----------------------------*/
 
-  (function() {
-    this.classNames = function classNames(element) {
+  (function(methods) {
+    methods.classNames = function classNames(element) {
       var results = Fuse.String($(element).className).split(/\s+/);
       return results[0].length ? results : Fuse.List();
     };
 
-    this.hasClassName = function hasClassName(element, className) {
+    methods.hasClassName = function hasClassName(element, className) {
       element = $(element);
       var elementClassName = element.className;
-      return (elementClassName.length > 0 && (elementClassName === className || 
+      return (elementClassName.length > 0 && (elementClassName === className ||
         (' ' + elementClassName + ' ').indexOf(' ' + className + ' ') > -1));
     };
 
-    this.addClassName = function addClassName(element, className) {
+    methods.addClassName = function addClassName(element, className) {
       element = $(element);
       if (!Element.hasClassName(element, className))
         element.className += (element.className ? ' ' : '') + className;
       return element;
     };
 
-    this.removeClassName = function removeClassName(element, className) {
+    methods.removeClassName = function removeClassName(element, className) {
       element = $(element);
       element.className = Fuse.String(element.className.replace(
         new RegExp('(^|\\s+)' + className + '(\\s+|$)'), ' ')).trim();
       return element;
     };
 
-    this.toggleClassName = function toggleClassName(element, className) {
+    methods.toggleClassName = function toggleClassName(element, className) {
       return Element[Element.hasClassName(element, className) ?
         'removeClassName' : 'addClassName'](element, className);
     };
 
-    this.getOpacity = (function() {
+    methods.getOpacity = (function() {
       var getOpacity = function getOpacity(element) {
         return Fuse.Number(parseFloat($(element).style.opacity));
       };
@@ -56,10 +56,10 @@
       return getOpacity;
     })();
 
-    this.setOpacity = (function() {
+    methods.setOpacity = (function() {
       var setOpacity = function setOpacity(element, value) {
         element = $(element);
-        element.style.opacity = (value == 1 || value == '' && Fuse.Object.isString(value)) ? '' :
+        element.style.opacity = (value == 1 || value == '' && isString(value)) ? '' :
           (value < 0.00001) ? '0' : value;
         return element;
       };
@@ -83,8 +83,8 @@
       else if (Fuse.Browser.Agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
         setOpacity = function setOpacity(element, value) {
           element = $(element);
-          element.style.opacity = (value == 1) ? 0.999999 : 
-            (value == '' && Fuse.Object.isString(value)) ? '' :
+          element.style.opacity = (value == 1) ? 0.999999 :
+            (value == '' && isString(value)) ? '' :
               (value < 0.00001) ? 0 : value;
           return element;
         };
@@ -101,7 +101,7 @@
           // strip alpha
           filter = filter.replace(/alpha\([^)]*\)/gi, '');
 
-          if (value == 1 || value == '' && Fuse.Object.isString(value)) {
+          if (value == 1 || value == '' && isString(value)) {
             if (filter) style.filter = filter;
             else style.removeAttribute('filter');
             return element;
@@ -109,7 +109,7 @@
           else if (value < 0.00001) value = 0;
 
           style.filter = filter + 'alpha(opacity=' + (value * 100) + ')';
-          return element;   
+          return element;
         };
       }
       return setOpacity;
@@ -123,22 +123,22 @@
      toggleClassName = null,
      getOpacity =      null,
      setOpacity =      null;
-  }).call(Element.Methods);
+  })(Element.Methods);
 
   /*--------------------------------------------------------------------------*/
 
-  (function() {
+  (function(methods) {
     var DIMENSION_NAMES = { 'height': 1, 'width': 1 };
 
     var FLOAT_TRANSLATIONS = typeof Fuse._docEl.style.styleFloat !== 'undefined'
      ? { 'float': 'styleFloat', 'cssFloat': 'styleFloat' }
      : { 'float': 'cssFloat' };
 
-    this.setStyle = function setStyle(element, styles) {
+    methods.setStyle = function setStyle(element, styles) {
       element = $(element);
       var key, name, elementStyle = element.style;
 
-      if (Fuse.Object.isString(styles)) {
+      if (isString(styles)) {
         element.style.cssText += ';' + styles;
         return styles.indexOf('opacity') > -1
           ? Element.setOpacity(element, styles.match(/opacity:\s*(\d?\.?\d*)/)[1])
@@ -155,7 +155,7 @@
       return element;
     };
 
-    this.getStyle =
+    methods.getStyle =
       Feature('ELEMENT_COMPUTED_STYLE') || !Feature('ELEMENT_CURRENT_STYLE') ?
       (function() {
         function _getComputedStyle(element, name) {
@@ -191,7 +191,7 @@
           _isNull.handlers.push((function() {
             var POSITION_NAMES = { 'bottom': 1, 'left': 1, 'right': 1, 'top': 1 };
             return function(element, name) {
-              return POSITION_NAMES[name] && 
+              return POSITION_NAMES[name] &&
                 _getComputedStyle(element, 'position') === 'static';
             };
           })());
@@ -280,7 +280,7 @@
                 var size = element.appendChild(span).offsetHeight;
                 element.removeChild(span);
                 return Math.round(size) + 'px';
-              } 
+              }
               else if (RELATIVE_CSS_UNITS[unit])
                 element = element.parentNode;
             }
@@ -305,4 +305,4 @@
 
     // prevent JScript bug with named function expressions
     var setStyle = null;
-  }).call(Element.Methods);
+  })(Element.Methods);

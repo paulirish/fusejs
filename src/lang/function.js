@@ -1,54 +1,66 @@
   /*----------------------------- LANG: FUNCTIONS ----------------------------*/
 
+  Func = Fuse.Function;
+
+  // ECMA-5 15.3.4.5
+  bind =
+  Func.bind = (function() {
+    var bind = function bind(fn, thisArg) {
+      // allows lazy loading the target method
+      var f, context, name;
+      if (isArray(fn)) {
+        name = fn[0]; context = fn[1];
+      } else f = fn;
+
+      // simple bind
+      if (arguments.length < 3 ) {
+        if (typeof thisArg === 'undefined') return fn;
+        return function() {
+          var fn = f || context[name];
+          return arguments.length
+            ? fn.apply(thisArg, arguments)
+            : fn.call(thisArg);
+        };
+      }
+      // bind with curry
+      var args = slice.call(arguments, 2); reset = args.length;
+      return function() {
+        args.length = reset; // reset arg length
+        var fn = f || context[name];
+        return fn.apply(thisArg, arguments.length ?
+          concatList(args, arguments) : args);
+      };
+    };
+    // native support
+    if (typeof Func.prototype.bind === 'function') {
+      var proto = Func.prototype;
+      bind = function bind(fn, thisArg) {
+        return proto.bind.call(f || thisArg[name], thisArg);
+      };
+    }
+    return bind;
+  })();
+
+  defer =
+  Func.defer = function defer(fn) {
+    return Func.delay.apply(global,
+      concatList([fn, 0.01], slice.call(arguments, 1)));
+  };
+
+  /*--------------------------------------------------------------------------*/
+
   (function() {
-    this.argumentNames = function argumentNames(fn) {
+    Func.argumentNames = function argumentNames(fn) {
       var names = Fuse.String(fn).match(/^[\s\(]*function[^(]*\(([^)]*)\)/)[1]
        .replace(/\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g, '')
         .replace(/\s+/g, '').split(',');
       return names.length === 1 && !names[0].length ? Fuse.List() : names;
     };
 
-    // ECMA-5 15.3.4.5
-    this.bind = (function() {
-      var bind = function bind(fn, thisArg) {
-        // allows lazy loading the target method
-        var f, context, name;
-        if (Fuse.Object.isArray(fn)) {
-          name = fn[0]; context = fn[1];
-        } else f = fn;
-
-        // simple bind
-        if (arguments.length < 3 ) {
-          if (typeof thisArg === 'undefined') return fn;
-          return function() {
-            var fn = f || context[name];
-            return arguments.length
-              ? fn.apply(thisArg, arguments)
-              : fn.call(thisArg);
-          };
-        }
-        // bind with curry
-        var args = slice.call(arguments, 2); reset = args.length;
-        return function() {
-          args.length = reset; // reset arg length
-          var fn = f || context[name];
-          return fn.apply(thisArg, arguments.length ?
-            concatList(args, arguments) : args);
-        };
-      };
-      // native support
-      if (typeof this.prototype.bind === 'function') {
-        bind = function bind(fn, thisArg) {
-          return Fuse.Function.prototype.bind.call(f || thisArg[name], thisArg);
-        };
-      }
-      return bind;
-    }).call(this);
-
-    this.bindAsEventListener = function bindAsEventListener(fn, thisArg) {
+    Func.bindAsEventListener = function bindAsEventListener(fn, thisArg) {
       // allows lazy loading the target method
       var f, context, name;
-      if (Fuse.Object.isArray(fn)) {
+      if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else f = fn;
 
@@ -66,10 +78,10 @@
       };
     };
 
-    this.curry = function curry(fn) {
+    Func.curry = function curry(fn) {
       // allows lazy loading the target method
       var f, context, name;
-      if (Fuse.Object.isArray(fn)) {
+      if (isArray(fn)) {
         name = fn[0]; context = fn[1]; fn = context[name];
       } else f = fn;
 
@@ -84,12 +96,12 @@
       }
     };
 
-    this.delay = function delay(fn, timeout) {
+    Func.delay = function delay(fn, timeout) {
       timeout *= 1000;
       var f, context, name, args = slice.call(arguments, 2);
 
       // allows lazy loading the target method
-      if (Fuse.Object.isArray(fn)) {
+      if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else f = fn;
 
@@ -99,15 +111,10 @@
       }, timeout);
     };
 
-    this.defer = function defer(fn) {
-      return Fuse.Function.delay.apply(global,
-        concatList([fn, 0.01], slice.call(arguments, 1)));
-    };
-
-    this.methodize = function methodize(fn) {
+    Func.methodize = function methodize(fn) {
       // allows lazy loading the target method
       var f, context, name;
-      if (Fuse.Object.isArray(fn)) {
+      if (isArray(fn)) {
         name = fn[0]; context = fn[1]; fn = context[name];
       } else f = fn;
 
@@ -119,10 +126,10 @@
       });
     };
 
-    this.wrap = function wrap(fn, wrapper) {
+    Func.wrap = function wrap(fn, wrapper) {
       // allows lazy loading the target method
-      var f, context, name, bind = Fuse.Function.bind;
-      if (Fuse.Object.isArray(fn)) {
+      var f, context, name;
+      if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else f = fn;
 
@@ -138,28 +145,30 @@
     var argumentNames =    null,
      bindAsEventListener = null,
      curry =               null,
-     delay =               null,
-     defer =               null,
      methodize =           null,
      wrap =                null;
-  }).call(Fuse.Function);
+  })();
 
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    var name, i = 0, cache = Fuse.updateGenerics.cache,
+    var name, i = 0,
+     cache = Fuse.updateGenerics.cache,
+     proto = Func.prototype,
      names = ['argumentNames', 'bind', 'bindAdEventListener', 'curry', 'delay', 'defer', 'methodize', 'wrap'];
+
     cache.Function = { };
+
     while (name = names[i++]) {
-      cache.Function[name] = this[name];
-      if (this.prototype[name] !== 'function') {
-        this.prototype[name] = new Function('global', [
-          'var object = Fuse.Function, slice = Array.prototype.slice;',
+      cache.Function[name] = Func[name];
+      if (proto[name] !== 'function') {
+        proto[name] = new Function('global', [
+          'var Func = Fuse.Function, slice = Array.prototype.slice;',
           'function ' + name + '() {',
           'return arguments.length',
-          '? object.' + name + '.apply(object, [this].concat(slice.call(arguments, 0)))',
-          ': object.' + name + '.call(object, this);',
+          '? Func.' + name + '.apply(Func, [this].concat(slice.call(arguments, 0)))',
+          ': Func.' + name + '.call(Func, this);',
           '}', 'return ' + name].join('\n'))(global);
       }
     }
-  }).call(Fuse.Function);
+  })();

@@ -4,7 +4,7 @@
 
   if (typeof Node.ELEMENT_NODE !== 'number') {
     // DOM level 2 ECMAScript Language Binding
-    Fuse.Object._extend(Node, {
+    _extend(Node, {
       'ELEMENT_NODE':                1,
       'ATTRIBUTE_NODE':              2,
       'TEXT_NODE':                   3,

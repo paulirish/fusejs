@@ -28,7 +28,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    Field.Observer = 
+    Field.Observer =
     Field.TimedObserver = Fuse.Class(BaseTimedObserver, {
       'constructor': (function() {
         function FieldTimedObserver(element, callback, interval, options) {
@@ -40,12 +40,12 @@
       })(),
 
       'getValue': (function() {
-        function getValue() { return Form.Element.getValue(this.element) }
+        function getValue() { return Field.getValue(this.element) }
         return getValue;
       })()
     });
 
-    Form.Observer = 
+    Form.Observer =
     Form.TimedObserver = Fuse.Class(BaseTimedObserver, {
       'constructor': (function() {
         function FormTimedObserver(element, callback, interval, options) {

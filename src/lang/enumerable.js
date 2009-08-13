@@ -7,17 +7,17 @@
 
   Fuse.addNS('Enumerable');
 
-  (function() {
-    this.contains = function contains(object, strict) {
-      var result = 0;
+  (function(proto) {
+    proto.contains = function contains(object, strict) {
+      var result = 0, $break = Fuse.$break;
       if (strict)
-        this.each(function(value) { if (value === object && result++) throw Fuse.$break; });
+        this.each(function(value) { if (value === object && result++) throw $break; });
       else
-        this.each(function(value) { if (value == object && result++) throw Fuse.$break; });
+        this.each(function(value) { if (value == object && result++) throw $break; });
       return !!result;
     };
 
-    this.each = function each(callback, thisArg) {
+    proto.each = function each(callback, thisArg) {
       try {
         this._each(function(value, index, iterable) {
           callback.call(thisArg, value, index, iterable);
@@ -28,7 +28,7 @@
       return this;
     };
 
-    this.eachSlice = function eachSlice(size, callback, thisArg) {
+    proto.eachSlice = function eachSlice(size, callback, thisArg) {
       var index = -size, slices = Fuse.List(), list = this.toList();
       if (size < 1) return list;
       while ((index += size) < list.length)
@@ -36,8 +36,8 @@
       return slices.map(callback, thisArg);
     };
 
-    this.every = function every(callback, thisArg) {
-      callback = callback || Fuse.K;
+    proto.every = function every(callback, thisArg) {
+      callback = callback || K;
       var result = true;
       this.each(function(value, index, iterable) {
         if (!callback.call(thisArg, value, index, iterable)) {
@@ -47,7 +47,7 @@
       return result;
     };
 
-    this.filter = function filter(callback, thisArg) {
+    proto.filter = function filter(callback, thisArg) {
       var results = Fuse.List();
       callback = callback || function(value) { return value != null };
       this._each(function(value, index, iterable) {
@@ -57,7 +57,7 @@
       return results;
     };
 
-    this.first = function first(callback, thisArg) {
+    proto.first = function first(callback, thisArg) {
       if (callback == null) {
         var result;
         this.each(function(value) { result = value; throw Fuse.$break; });
@@ -66,13 +66,13 @@
       return this.toList().first(callback, thisArg);
     };
 
-    this.grep = function grep(pattern, callback, thisArg) {
-      if (!pattern || pattern == '' || Fuse.Object.isRegExp(pattern) &&
+    proto.grep = function grep(pattern, callback, thisArg) {
+      if (!pattern || pattern == '' || isRegExp(pattern) &&
          !pattern.source) return this.toList();
 
-      callback = callback || Fuse.K;
+      callback = callback || K;
       var results = Fuse.List();
-      if (Fuse.Object.isString(pattern))
+      if (isString(pattern))
         pattern = new RegExp(Fuse.RegExp.escape(pattern));
 
       this._each(function(value, index, iterable) {
@@ -82,37 +82,38 @@
       return results;
     };
 
-    this.inGroupsOf = function inGroupsOf(size, filler) {
-      filler = (typeof filler === 'undefined') ? null : filler;
+    proto.inGroupsOf = function inGroupsOf(size, filler) {
+      filler = typeof filler === 'undefined' ? null : filler;
       return this.eachSlice(size, function(slice) {
         while (slice.length < size) slice.push(filler);
         return slice;
       });
     };
 
-    this.inject = function inject(accumulator, callback, thisArg) {
+    proto.inject = function inject(accumulator, callback, thisArg) {
       this._each(function(value, index, iterable) {
         accumulator = callback.call(thisArg, accumulator, value, index, iterable);
       });
       return accumulator;
     };
 
-    this.inspect = function inspect() {
-      return '#<Enumerable:' + this.toList().inspect() + '>';
-    };
+    proto.inspect = (function() {
+      function inspect() { return '#<Enumerable:' + this.toList().inspect() + '>' }
+      return inspect;
+    })();
 
-    this.invoke = function invoke(method) {
-      var args = slice.call(arguments, 1);
+    proto.invoke = function invoke(method) {
+      var args = slice.call(arguments, 1), funcProto = Function.prototype;
       return this.map(function(value) {
-        return Function.prototype.apply.call(value[method], value, args);
+        return funcProto.apply.call(value[method], value, args);
       });
     };
 
-    this.last = function last(callback, thisArg) {
+    proto.last = function last(callback, thisArg) {
       return this.toList().last(callback, thisArg);
     };
 
-    this.map = function map(callback, thisArg) {
+    proto.map = function map(callback, thisArg) {
       if (!callback) return this.toList();
       var results = Fuse.List();
       if (thisArg) {
@@ -127,8 +128,8 @@
       return results;
     };
 
-    this.max = function max(callback, thisArg) {
-      callback = callback || Fuse.K;
+    proto.max = function max(callback, thisArg) {
+      callback = callback || K;
       var comparable, max, result;
       this._each(function(value, index, iterable) {
         comparable = callback.call(thisArg, value, index, iterable);
@@ -139,8 +140,8 @@
       return result;
     };
 
-    this.min = function min(callback, thisArg) {
-      callback = callback || Fuse.K;
+    proto.min = function min(callback, thisArg) {
+      callback = callback || K;
       var comparable, min, result;
       this._each(function(value, index, iterable) {
         comparable = callback.call(thisArg, value, index, iterable);
@@ -151,8 +152,8 @@
       return result;
     };
 
-    this.partition = function partition(callback, thisArg) {
-      callback = callback || Fuse.K;
+    proto.partition = function partition(callback, thisArg) {
+      callback = callback || K;
       var trues = Fuse.List(), falses = Fuse.List();
       this._each(function(value, index, iterable) {
         (callback.call(thisArg, value, index, iterable) ?
@@ -161,18 +162,18 @@
       return Fuse.List(trues, falses);
     };
 
-    this.pluck = function pluck(property) {
+    proto.pluck = function pluck(property) {
       return this.map(function(value) {
         return value[property];
       });
     };
 
-    this.size = function size() {
+    proto.size = function size() {
       return Fuse.Number(this.toList().length);
     };
 
-    this.some = function some(callback, thisArg) {
-      callback = callback || Fuse.K;
+    proto.some = function some(callback, thisArg) {
+      callback = callback || K;
       var result = false;
       this.each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable)) {
@@ -182,7 +183,7 @@
       return result;
     };
 
-    this.sortBy = function sortBy(callback, thisArg) {
+    proto.sortBy = function sortBy(callback, thisArg) {
       return this.map(function(value, index, iterable) {
         return {
           'value': value,
@@ -194,18 +195,20 @@
       }).pluck('value');
     };
 
-    this.toArray = function toArray() {
+    proto.toArray = function toArray() {
       var results = Fuse.List();
       this._each(function(value, index) { results[index] = value });
       return results;
     };
 
-    this.zip = function zip() {
-      var callback = Fuse.K, args = slice.call(arguments, 0);
-      if (typeof Fuse.List.Plugin.last.call(args) === 'function')
+    proto.zip = function zip() {
+      var callback = K, args = slice.call(arguments, 0);
+
+      // if last argument is a function it is the callback
+      if (typeof args[args.length-1] === 'function')
         callback = args.pop();
 
-      var collection = prependList(Fuse.List.Plugin.map.call(args, Fuse.Util.$A),
+      var collection = prependList(Fuse.List.prototype.map.call(args, Fuse.Util.$A),
         this.toArray(), Fuse.List());
 
       return this.map(function(value, index, iterable) {
@@ -214,7 +217,7 @@
     };
 
     // alias
-    this.toList = this.toArray;
+    proto.toList = proto.toArray;
 
     // prevent JScript bug with named function expressions
     var contains = null,
@@ -226,7 +229,6 @@
      grep =        null,
      inject =      null,
      inGroupsOf =  null,
-     inspect =     null,
      invoke =      null,
      last =        null,
      map =         null,
@@ -239,4 +241,4 @@
      sortBy =      null,
      toArray =     null,
      zip =         null;
-  }).call(Fuse.Enumerable.Plugin);
+  })(Fuse.Enumerable.Plugin);

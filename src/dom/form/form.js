@@ -17,13 +17,13 @@
   global.Form = { };
 
   (function() {
-    this.reset = function reset(form) {
+    Form.reset = function reset(form) {
       form = $(form);
       form.reset();
       return form;
     };
 
-    this.serializeElements = function serializeElements(elements, options) {
+    Form.serializeElements = function serializeElements(elements, options) {
       if (typeof options !== 'object')
         options = { 'hash': !!options };
       else if (typeof options.hash === 'undefined')
@@ -44,12 +44,12 @@
         isSubmitButton = type === 'submit' || isImageType;
 
         // reduce array value
-        if (Fuse.List.isArray(value) && value.length < 2)
+        if (isArray(value) && value.length < 2)
           value = value[0];
 
         if (value == null    || // controls with null/undefined values are unsuccessful
             element.disabled || // disabled elements are unsuccessful
-            type === 'file'  || // skip file inputs; 
+            type === 'file'  || // skip file inputs;
             type === 'reset' || // reset buttons are unsuccessful
             (isSubmitButton &&  // non-active submit buttons are unsuccessful
             (submit === false || submitSerialized ||
@@ -68,9 +68,9 @@
         if (!key) continue;
 
         // property exists and and belongs to result
-        if (Fuse.Object.hasKey(result, key)) {
+        if (hasKey(result, key)) {
           // a key is already present; construct an array of values
-          if (!Fuse.List.isArray(result[key])) result[key] = [result[key]];
+          if (!isArray(result[key])) result[key] = [result[key]];
           result[key].push(value);
         }
         else result[key] = value;
@@ -78,33 +78,33 @@
 
       return options.hash
         ? result
-        : Fuse.Object.toQueryString(result);
+        : Obj.toQueryString(result);
     };
 
     // prevent JScript bug with named function expressions
     var reset = null, serializeElements = null;
-  }).call(Form);
+  })();
 
   /*--------------------------------------------------------------------------*/
 
   Form.Methods = { };
 
-  (function() {
-    this.disable = function disable(form) {
+  (function(methods) {
+    methods.disable = function disable(form) {
       form = $(form);
       var node, nodes = Form.getElements(form), i = 0;
       while (node = nodes[i++]) Field.disable(node);
       return form;
     };
 
-    this.enable = function enable(form) {
+    methods.enable = function enable(form) {
       form = $(form);
       var node, nodes = Form.getElements(form), i = 0;
       while (node = nodes[i++]) Field.enable(node);
       return form;
     };
 
-    this.findFirstElement = function findFirstElement(form) {
+    methods.findFirstElement = function findFirstElement(form) {
       var firstByIndex, firstNode, node,
        nodes = $(form).getElements(), minTabIndex = Infinity, i = 0;
 
@@ -120,14 +120,14 @@
       return firstByIndex || firstNode;
     };
 
-    this.focusFirstElement = function focusFirstElement(form) {
-      form = $(form); 
-      var element = Form.findFirstElement(form); 
-      element && Field.focus(element); 
+    methods.focusFirstElement = function focusFirstElement(form) {
+      form = $(form);
+      var element = Form.findFirstElement(form);
+      element && Field.focus(element);
       return form;
     };
 
-    this.getElements = function getElements(form) {
+    methods.getElements = function getElements(form) {
       form = $(form);
       var node, results = Fuse.List(), i = 0,
        nodes = $(form).getElementsByTagName('*');
@@ -138,7 +138,7 @@
       return results;
     };
 
-    this.getInputs = function getInputs(form, typeName, name) {
+    methods.getInputs = function getInputs(form, typeName, name) {
       form = $(form);
       typeName = String(typeName || '');
       name = String(typeName || '');
@@ -161,8 +161,9 @@
       return results;
     };
 
-    this.request = function request(form, options) {
-      form = $(form), options = Fuse.Object.clone(options);
+    methods.request = function request(form, options) {
+      form = $(form);
+      options = clone(options);
 
       var params = options.parameters, submit = options.submit,
        action = Element.readAttribute(form, 'action') || Fuse.String('');
@@ -172,8 +173,8 @@
       options.parameters = Form.serialize(form, { 'submit':submit, 'hash':true });
 
       if (params) {
-        if (Fuse.Object.isString(params)) params = Fuse.String(params).toQueryParams();
-        Fuse.Object.extend(options.parameters, params);
+        if (isString(params)) params = Fuse.String(params).toQueryParams();
+        Obj.extend(options.parameters, params);
       }
 
       if (Element.hasAttribute(form, 'method') && !options.method)
@@ -182,7 +183,7 @@
       return new Fuse.Ajax.Request(action, options);
     };
 
-    this.serialize = function serialize(form, options) {
+    methods.serialize = function serialize(form, options) {
       return Form.serializeElements(Form.getElements(form), options);
     };
 
@@ -195,14 +196,14 @@
      getInputs =         null,
      request =           null,
      serialize =         null;
-  }).call(Form.Methods);
+  })(Form.Methods);
 
   /*--------------------------------------------------------------------------*/
 
   global.Field = Form.Element = { };
 
   (function() {
-    this.focus = function focus(element) {
+    Field.focus = function focus(element) {
       element = $(element);
       // avoid IE errors when element
       // or ancestors are not visible
@@ -210,58 +211,58 @@
       return element;
     };
 
-    this.select = function select(element) {
+    Field.select = function select(element) {
       (element = $(element)).select();
       return element;
     };
 
     // prevent JScript bug with named function expressions
     var focus = null, select = null;
-  }).call(Field);
+  })();
 
   /*--------------------------------------------------------------------------*/
 
   Field.Methods = { };
 
-  (function() {
-    this.disable = function disable(element) {
+  (function(methods) {
+    methods.disable = function disable(element) {
       element = $(element);
       element.disabled = true;
       return element;
     };
 
-    this.enable = function enable(element) {
+    methods.enable = function enable(element) {
       element = $(element);
       element.disabled = false;
       return element;
     };
 
-    this.present = function present(element) {
+    methods.present = function present(element) {
       return !!$(element).value;
     };
 
-    this.serialize = function serialize(element) {
+    methods.serialize = function serialize(element) {
       element = $(element);
       if (!element.disabled && element.name) {
         var value = Field.getValue(element);
-        if (Fuse.List.isArray(value) && value.length < 2)
+        if (isArray(value) && value.length < 2)
           value = value[0];
         if (value != null) {
           var pair = { };
           pair[element.name] = value;
-          return Fuse.Object.toQueryString(pair);
+          return Obj.toQueryString(pair);
         }
       }
       return '';
     };
 
-    this.getValue = function getValue(element) {
+    methods.getValue = function getValue(element) {
       element = $(element);
       var method = element.nodeName.toLowerCase();
       return Field.Serializers[method](element);
     };
 
-    this.setValue = function setValue(element, value) {
+    methods.setValue = function setValue(element, value) {
       element = $(element);
       var method = element.nodeName.toLowerCase();
       Field.Serializers[method](element, value || null);
@@ -275,12 +276,12 @@
      present =    null,
      serialize =  null,
      setValue =   null;
-  }).call(Field.Methods);
+  })(Field.Methods);
 
-  (function() {
+  (function(methods) {
     var matchInputButtons = /^(button|image|reset|submit)$/;
 
-    this.activate = function activate(element) {
+    methods.activate = function activate(element) {
       element = $(element);
       try { element.focus() } catch(e) { }
       if (element.select && getNodeName(element) !== 'BUTTON' &&
@@ -289,7 +290,7 @@
       return element;
     };
 
-    this.clear = function clear(element) {
+    methods.clear = function clear(element) {
       element = $(element);
       if (getNodeName(element) !== 'BUTTON' &&
           !matchInputButtons.test(element.type))
@@ -299,46 +300,46 @@
 
     // prevent JScript bug with named function expressions
     var activate = null, clear = null;
-  }).call(Field.Methods);
+  })(Field.Methods);
 
   /*--------------------------------------------------------------------------*/
 
   Field.Serializers = { };
 
-  (function() {
-    this.button = function button(element, value){
+  (function(serializers) {
+    serializers.button = function button(element, value){
       if (typeof value === 'undefined')
         return Element.readAttribute(element, 'value');
       else Element.writeAttribute(element, 'value', value);
     };
 
-    this.input = function input(element, value) {
+    serializers.input = function input(element, value) {
       var type = element.type.toLowerCase(),
        method = (type === 'checkbox' || type === 'radio')
         ? 'inputSelector' : 'textarea';
       return Field.Serializers[method](element, value);
     };
 
-    this.inputSelector = function inputSelector(element, value) {
+    serializers.inputSelector = function inputSelector(element, value) {
       if (typeof value === 'undefined')
         return element.checked ? element.value : null;
       else element.checked = !!value;
     };
 
-    this.optionValue = function optionValue(element) {
+    serializers.optionValue = function optionValue(element) {
       return element[Element.hasAttribute(element, 'value') ? 'value' : 'text'];
     };
 
-    this.select = function select(element, value) {
+    serializers.select = function select(element, value) {
       if (typeof value === 'undefined')
-        return this[element.type === 'select-one' ? 
+        return this[element.type === 'select-one' ?
           'selectOne' : 'selectMany'](element);
 
       if (value === null)
         return element.selectedIndex = -1;
 
       var node, i = 0;
-      if (Fuse.List.isArray(value)) {
+      if (isArray(value)) {
         value = expando + value.join(expando) + expando;
         while (node = element.options[i++])
           node.selected = value.indexOf(expando + this.optionValue(node) +expando) > -1;
@@ -349,12 +350,12 @@
       }
     };
 
-    this.selectOne = function selectOne(element) {
+    serializers.selectOne = function selectOne(element) {
       var index = element.selectedIndex;
       return index > -1 ? this.optionValue(element.options[index]) : null;
     };
 
-    this.selectMany = function selectMany(element) {
+    serializers.selectMany = function selectMany(element) {
       var node, results = Fuse.List(), i = 0;
       if (!element.options.length) return null;
 
@@ -363,7 +364,7 @@
       return results;
     };
 
-    this.textarea = function textarea(element, value) {
+    serializers.textarea = function textarea(element, value) {
       if (typeof value === 'undefined') return element.value;
       else element.value = value || '';
     };
@@ -377,4 +378,4 @@
      selectOne =     null,
      selectMany =    null,
      textarea =      null;
-  }).call(Field.Serializers);
+  })(Field.Serializers);

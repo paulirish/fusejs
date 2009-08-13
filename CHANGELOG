@@ -1,3 +1,5 @@
+* Reduce object property lookups by creating private variables and perform some code cleanup. [jddalton]
+
 * Fix bug in Fuse.Object.isSameOrigin() that allowed urls ending with the same domain name to pass. [jddalton]
 
 * Ensure Fuse.Object.toQueryString() only enumerates over an object's own direct properties. [Prototype LH #126] [jddalton, kitsg, Peter Gyongyosi]

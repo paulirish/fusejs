@@ -1,31 +1,31 @@
   /*---------------------------- ELEMENT: HELPERS ----------------------------*/
 
   (function() {
-    this._returnOffset = function _returnOffset(left, top) {
+    Element._returnOffset = function _returnOffset(left, top) {
       var result  = Fuse.List(Fuse.Number(left), Fuse.Number(top));
       result.left = result[0];
       result.top  = result[1];
       return result;
     };
 
-    this._getCssDimensions = function _getCssDimensions(element) {
+    Element._getCssDimensions = function _getCssDimensions(element) {
       return { 'width': Element._getCssWidth(element), 'height': Element._getCssHeight(element) };
     };
 
-    this._hasLayout = function _hasLayout(element) {
+    Element._hasLayout = function _hasLayout(element) {
       var currentStyle = element.currentStyle;
       return element.style.zoom && element.style.zoom !== 'normal' ||
         currentStyle && currentStyle.hasLayout;
     };
 
-    this._ensureLayout = function _ensureLayout(element) {
+    Element._ensureLayout = function _ensureLayout(element) {
       element = $(element);
       if (Element.getStyle(element, 'position') == 'static' &&
         !Element._hasLayout(element)) element.style.zoom = 1;
       return element;
     };
 
-    this._getContentFromAnonymousElement = (function() {
+    Element._getContentFromAnonymousElement = (function() {
       function getCache(ownerDoc) {
         if (ownerDoc === Fuse._doc)
           return getCache.cache[0];
@@ -56,8 +56,7 @@
             cache.range = cache.range || cache.node.ownerDocument.createRange();
             cache.range.selectNodeContents(container);
             var extracted = cache.range.extractContents();
-            extracted && cache.fragment.appendChild(extracted);
-            return cache.fragment;
+            return extracted || cache.fragment;
           };
         }
         return function(cache, container) {
@@ -84,16 +83,16 @@
         }
         return getContentAsFragment(cache, node);
       }
-      
+
       return _getContentFromAnonymousElement;
     })();
 
     // prevent JScript bug with named function expressions
     var _ensureLayout =  null,
      _getCssDimensions = null,
-     _hasLayout =        null, 
+     _hasLayout =        null,
      _returnOffset =     null;
-  }).call(Element);
+  })();
 
   // define Element._getCssHeight(), Element._getCssWidth(),
   // Element._getBorderHeight(), Element._getBorderWidth(),

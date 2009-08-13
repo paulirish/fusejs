@@ -2,9 +2,9 @@
   /* Based on work by Alex Arnell, Joey Hurst, John Resig, and Prototype core */
 
   Fuse.Class = (function() {
-    var _subclass = function() { };
+    function subclass() { };
 
-    function _createNamedClass(name) {
+    function createNamedClass(name) {
       return new Function('', [
         'function ' + name + '() {',
         'return this.initialize && this.initialize.apply(this, arguments);',
@@ -12,28 +12,30 @@
     }
 
     function Class() {
-      var klass, parent, props, i = 0, properties = slice.call(arguments, 0);
+      var klass, parent, props,
+       i = 0, properties = slice.call(arguments, 0);
+
       if (typeof properties[0] === 'function')
         parent = properties.shift();
 
       // search properties for a custom `constructor` method
       while (props = properties[i++]) {
-        if (Fuse.Object.hasKey(props, 'constructor')) {
+        if (hasKey(props, 'constructor')) {
           if (typeof props.constructor === 'function')
             klass = props.constructor;
-          else if (Fuse.Object.isString(props.constructor))
-            klass = _createNamedClass(props.constructor);
+          else if (isString(props.constructor))
+            klass = createNamedClass(props.constructor);
           delete props.constructor;
         }
       }
 
-      klass = klass || _createNamedClass('UnnamedClass');
-      Fuse.Object.extend(klass, Fuse.Class.Methods);
+      klass = klass || createNamedClass('UnnamedClass');
+      Obj.extend(klass, Fuse.Class.Methods);
 
       if (parent) {
         // note: Safari 2, inheritance won't work with subclass = new Function;
-        _subclass.prototype = parent.prototype;
-        klass.prototype = new _subclass;
+        subclass.prototype = parent.prototype;
+        klass.prototype = new subclass;
         parent.subclasses.push(klass);
       }
 
@@ -57,17 +59,20 @@
 
     function addMethods(source) {
       var prototype = this.prototype,
-       ancestor = this.superclass && this.superclass.prototype;
-      Fuse.Object._each(source, function(method, key) {
+       parentProto = this.superclass && this.superclass.prototype;
+
+      eachKey(source, function(method, key) {
+
         // avoid typeof === 'function' because Safari 3.1+ mistakes
         // regexp instances as typeof 'function'
-        if (ancestor && Fuse.Object.isFunction(ancestor[key]) && 
-            Fuse.Object.isFunction(method) && matchSuper.test(method)) {
+        if (parentProto && isFunction(parentProto[key]) && isFunction(method) &&
+            matchSuper.test(method)) {
+
           var __method = method;
           method = function() {
-            // backup this._super and assign the ancestors method to it
+            // backup this._super and assign the parentProto's method to it
             var result, backup = this._super;
-            this._super = ancestor[key];
+            this._super = parentProto[key];
 
             // execute and capture the result
             result = arguments.length
@@ -79,11 +84,12 @@
             return result;
           };
 
-          method.valueOf  = Fuse.Function.bind(__method.valueOf, __method);
-          method.toString = Fuse.Function.bind(__method.toString, __method);
+          method.valueOf  = bind(__method.valueOf, __method);
+          method.toString = bind(__method.toString, __method);
         }
         prototype[key] = method;
       });
+
       return this;
     }
 
@@ -92,14 +98,16 @@
     };
   })();
 
+  /*--------------------------------------------------------------------------*/
+
   // replace placeholder objects with inheritable classes
   global.Fuse = Fuse.Class({ 'constructor': Fuse });
-  Fuse.Plugin = Fuse.prototype = Fuse.Object.prototype;
+  Fuse.Plugin = Fuse.prototype = Obj.prototype;
 
-  Fuse.Browser = Fuse.Object._extend(Fuse.Class(Fuse,
+  Fuse.Browser = _extend(Fuse.Class(Fuse,
     { 'constructor': 'Browser' }), Fuse.Browser);
 
-  Fuse.Browser.Agent = Fuse.Object._extend(Fuse.Class(Fuse.Browser,
+  Fuse.Browser.Agent = _extend(Fuse.Class(Fuse.Browser,
     { 'constructor': 'Agent' }), Fuse.Browser.Agent);
 
   Fuse.Browser.Bug = Fuse.Class(Fuse.Browser, { 'constructor': Bug });

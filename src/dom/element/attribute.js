@@ -7,11 +7,11 @@
     'names': { 'htmlFor':'for', 'className':'class' }
   };
 
-  (function() {
+  (function(methods) {
     var ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS =
       Bug('ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS');
 
-    this.readAttribute = function readAttribute(element, name) {
+    methods.readAttribute = function readAttribute(element, name) {
       element = $(element);
       var result, T = Element.Attribute;
       name = T.names[name] || name;
@@ -22,12 +22,12 @@
       return Fuse.String(result || '');
     };
 
-    this.writeAttribute = function writeAttribute(element, name, value) {
+    methods.writeAttribute = function writeAttribute(element, name, value) {
       element = $(element);
       var node, contentName, attr, attributes = { }, T = Element.Attribute;
 
       if (name instanceof Fuse.Hash) attributes = name._object;
-      else if (!Fuse.Object.isString(name)) attributes = name;
+      else if (!isString(name)) attributes = name;
       else attributes[name] = (typeof value === 'undefined') ? true : value;
 
       for (attr in attributes) {
@@ -50,10 +50,10 @@
       }
       return element;
     };
-  }).call(Element.Methods);
+  })(Element.Methods);
 
   // No use of $ in this function in order to keep things fast.
-  // Used by the Selector class. 
+  // Used by the Selector class.
   Element.Methods.Simulated.hasAttribute = (function() {
     function hasAttribute(element, attribute) {
       var node = element.getAttributeNode(attribute);
@@ -166,7 +166,7 @@
       else T.contentNames.className = 'class';
 
       // set `encType`
-      if ((node = form.getAttributeNode('encType')) && 
+      if ((node = form.getAttributeNode('encType')) &&
           node.value !== 'multipart/form-data') {
         T.write.encType = setNode('encType');
       }

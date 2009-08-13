@@ -1,7 +1,7 @@
   /*---------------------------- SELECTOR: SLICK -----------------------------*/
 
-  (function() {
-    this.match = function match(element, selector) {
+  (function(Selector) {
+    Selector.match = function match(element, selector) {
       var item, i = 0,
        results = slick(getDocument(element), String(selector || ''));
       while (item = results[i++])
@@ -9,7 +9,7 @@
       return false;
     };
 
-    this.select = (function() {
+    Selector.select = (function() {
       var select = function select(selector, context) {
         return slick(context || Fuse._doc, String(selector || ''), Fuse.List())
           .map(Element.extend);
@@ -25,4 +25,4 @@
 
     // prevent JScript bug with named function expressions
     var match = null;
-  }).call(Fuse.Dom.Selector);
+  })(Fuse.Dom.Selector);

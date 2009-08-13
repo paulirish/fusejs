@@ -2,12 +2,12 @@
 
   Fuse._doc.viewport = { };
 
-  (function() {
-    this.getDimensions = function getDimensions() {
+  (function(proto) {
+    proto.getDimensions = function getDimensions() {
       return { 'width': this.getWidth(), 'height': this.getHeight() };
     };
 
-    this.getScrollOffsets = function getScrollOffsets() {
+    proto.getScrollOffsets = function getScrollOffsets() {
       // lazy define
       return (this.getScrollOffsets =
         typeof global.pageXOffset === 'number' ?
@@ -22,7 +22,7 @@
 
     // prevent JScript bug with named function expressions
     var getDimensions = null, getScrollOffsets = null;
-  }).call(Fuse._doc.viewport);
+  })(Fuse._doc.viewport);
 
   // lazy define document.viewport.getWidth() and document.viewport.getHeight()
   (function(v) {
@@ -35,6 +35,6 @@
       v['get' + D] = function() { return Fuse.Number(node['client' + D]) };
       return v['get' + D]();
     }
-    v.getHeight = Fuse.Function.curry(define, 'Height');
-    v.getWidth  = Fuse.Function.curry(define, 'Width');
+    v.getHeight = Func.curry(define, 'Height');
+    v.getWidth  = Func.curry(define, 'Width');
   })(Fuse._doc.viewport);
