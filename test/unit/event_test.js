@@ -89,7 +89,7 @@ new Test.Unit.Runner({
         'Failed to extend element with a toString method.');
 
       // remove toString addition
-      if (Fuse.Browser.Feature('ELEMENT_SPECIFIC_EXTENSIONS'))
+      if (Fuse.Env.Feature('ELEMENT_SPECIFIC_EXTENSIONS'))
         delete Event.prototype.toString;
       delete Event.Methods.toString;
       Event.addMethods();

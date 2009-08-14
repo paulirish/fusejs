@@ -64,7 +64,7 @@
         return element;
       };
 
-      if (Fuse.Browser.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d+)/) || [])[1] < 500) {
+      if (Fuse.Env.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d+)/) || [])[1] < 500) {
         var _setOpacity = setOpacity;
         setOpacity = function setOpacity(element, value) {
           element = _setOpacity(element, value);
@@ -80,7 +80,7 @@
           return element;
         };
       }
-      else if (Fuse.Browser.Agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
+      else if (Fuse.Env.Agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
         setOpacity = function setOpacity(element, value) {
           element = $(element);
           element.style.opacity = (value == 1) ? 0.999999 :

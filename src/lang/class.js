@@ -104,15 +104,15 @@
   global.Fuse = Fuse.Class({ 'constructor': Fuse });
   Fuse.Plugin = Fuse.prototype = Obj.prototype;
 
-  Fuse.Browser = _extend(Fuse.Class(Fuse,
-    { 'constructor': 'Browser' }), Fuse.Browser);
+  Fuse.Env = _extend(Fuse.Class(Fuse,
+    { 'constructor': 'Env' }), Fuse.Env);
 
-  Fuse.Browser.Agent = _extend(Fuse.Class(Fuse.Browser,
-    { 'constructor': 'Agent' }), Fuse.Browser.Agent);
+  Fuse.Env.Agent = _extend(Fuse.Class(Fuse.Env,
+    { 'constructor': 'Agent' }), Fuse.Env.Agent);
 
-  Fuse.Browser.Bug = Fuse.Class(Fuse.Browser, { 'constructor': Bug });
+  Fuse.Env.Bug = Fuse.Class(Fuse.Env, { 'constructor': Bug });
 
-  Fuse.Browser.Feature = Fuse.Class(Fuse.Browser, { 'constructor': Feature });
+  Fuse.Env.Feature = Fuse.Class(Fuse.Env, { 'constructor': Feature });
 
   Fuse.Class = Fuse.Class(Fuse, { 'constructor': Fuse.Class });
 

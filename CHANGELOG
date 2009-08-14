@@ -1,3 +1,5 @@
+* Rename Fuse.Browser to Fuse.Env to include other environments like Jaxer and Adobe AIR. [FuseJS LH #44] [jddalton, kangax]
+
 * Reduce object property lookups by creating private variables and perform some code cleanup. [jddalton]
 
 * Fix bug in Fuse.Object.isSameOrigin() that allowed urls ending with the same domain name to pass. [jddalton]

@@ -180,7 +180,7 @@ new Test.Unit.Runner({
       'm2': function() { return this._super() + ' child' }
     });
 
-    if (Fuse.Browser.Feature('FUNCTION_TO_STRING_RETURNS_SOURCE'))
+    if (Fuse.Env.Feature('FUNCTION_TO_STRING_RETURNS_SOURCE'))
       this.assert(new Child().m1.toString().indexOf(' child') > -1);
 
     this.assertEqual('toString', new Foo().toString());

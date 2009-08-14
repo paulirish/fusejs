@@ -31,8 +31,8 @@
       return Tester;
     }
 
-    Bug = Fuse.Browser.Bug = createTester('Bug');
-    Feature = Fuse.Browser.Feature = createTester('Feature');
+    Bug = Fuse.Env.Bug = createTester('Bug');
+    Feature = Fuse.Env.Feature = createTester('Feature');
   })();
 
   /*---------------------------- BROWSER FEATURES ----------------------------*/
@@ -195,7 +195,7 @@
       } else result = Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO');
 
       // TODO: Remove this browser sniff
-      return Fuse.Browser.Agent.MobileSafari ? false : result;
+      return Fuse.Env.Agent.MobileSafari ? false : result;
     },
 
     'ELEMENT_TEXT_CONTENT': function() {

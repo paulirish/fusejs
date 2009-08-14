@@ -73,7 +73,7 @@ new Test.Unit.Runner({
         'Failed to extend element with a toString method.');
 
       // remove toString addition
-      if (Fuse.Browser.Feature('ELEMENT_SPECIFIC_EXTENSIONS'))
+      if (Fuse.Env.Feature('ELEMENT_SPECIFIC_EXTENSIONS'))
         delete HTMLDivElement.prototype.toString;
       delete Element.Methods.ByTag.DIV.toString;
       Element.addMethods();
@@ -1339,7 +1339,7 @@ new Test.Unit.Runner({
     this.assert(
       $('style_test_3').setOpacity(0.9999999).getStyle('opacity') > 0.999);
 
-    if (Fuse.Browser.Agent.IE) {
+    if (Fuse.Env.Agent.IE) {
       this.assert(Element._hasLayout($('style_test_4').setOpacity(0.5)));
 
       this.assert(2, $('style_test_5').setOpacity(0.5).getStyle('zoom'));
@@ -1498,7 +1498,7 @@ new Test.Unit.Runner({
 
     // WebKit has a bug effecting the style marginRight
     // https://bugs.webkit.org/show_bug.cgi?id=13343
-    if (!Fuse.Browser.Agent.WebKit) {
+    if (!Fuse.Env.Agent.WebKit) {
       tests.unit_px_test_1.push($w('margin-right 39'));
     }
     else {
@@ -1794,12 +1794,12 @@ new Test.Unit.Runner({
     // The delayed execution of the tests
     // helps prevent a crash in some OSX
     // versions of Opera 9.2x
-    if (Fuse.Browser.Agent.Opera)
+    if (Fuse.Env.Agent.Opera)
       recursiveTestTags();
     else while (testTags()) { };
 
     /* window.ElementOld = function(tagName, attributes) {
-      if (Fuse.Browser.Agent.IE && attributes && attributes.name) {
+      if (Fuse.Env.Agent.IE && attributes && attributes.name) {
         tagName = '<' + tagName + ' name="' + attributes.name + '">';
         delete attributes.name;
       }
@@ -1827,7 +1827,7 @@ new Test.Unit.Runner({
     this.assertEqual('my_input_field', $(document.body.lastChild).name);
 
     // TODO: Fix IE7 and lower bug in getElementById()
-    if (Fuse.Browser.Agent.IE && $('my_input_field')) {
+    if (Fuse.Env.Agent.IE && $('my_input_field')) {
       this.assertMatch(/name=["']?my_input_field["']?/,
         $('my_input_field').outerHTML);
     }
@@ -1842,7 +1842,7 @@ new Test.Unit.Runner({
       input.name,
       'Attribute did not respect case.');
 
-    if (originalElement && Fuse.Browser.Feature('ELEMENT_EXTENSIONS')) {
+    if (originalElement && Fuse.Env.Feature('ELEMENT_EXTENSIONS')) {
       Element.prototype.fooBar = Fuse.emptyFunction;
       this.assertRespondsTo('fooBar', new Element('div'));
     }
@@ -2044,7 +2044,7 @@ new Test.Unit.Runner({
     source.setStyle({ 'width': '70px','height': '40px' });
     var srcDims = source.getDimensions();
 
-    if (!Fuse.Browser.Bug('ELEMENT_STYLE_OVERFLOW_VISIBLE_EXPANDS_TO_FIT_CONTENT')) {
+    if (!Fuse.Env.Bug('ELEMENT_STYLE_OVERFLOW_VISIBLE_EXPANDS_TO_FIT_CONTENT')) {
       targets.each(function(id, index) {
         var target = window.$(id);
         target.clonePosition(source);

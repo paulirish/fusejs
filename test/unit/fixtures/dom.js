@@ -1,5 +1,5 @@
 var documentViewportProperties,
- isIE6AndLower = Fuse.Browser.Agent.IE && !window.XMLHttpRequest,
+ isIE6AndLower = Fuse.Env.Agent.IE && !window.XMLHttpRequest,
  testVar  = 'to be updated',
  testVar2 = '';
 
@@ -87,7 +87,7 @@ function preservingBrowserDimensions(callback) {
       return transport.responseXML;
     };
 
-    if (Fuse.Browser.Feature('ACTIVE_X_OBJECT')) {
+    if (Fuse.Env.Feature('ACTIVE_X_OBJECT')) {
       parseFromString = function parseFromString(string, contentType) {
         var xmldata = new ActiveXObject('MSXML.DomDocument');
         xmldata.async = false;
@@ -104,7 +104,7 @@ function preservingBrowserDimensions(callback) {
 
 /*--------------------------------------------------------------------------*/
 
-Fuse.Browser.Bug.set({
+Fuse.Env.Bug.set({
   'ELEMENT_STYLE_OVERFLOW_VISIBLE_EXPANDS_TO_FIT_CONTENT': function() {
     // IE 6 and lower
     var div = Fuse._div, clone = div.cloneNode(false), ds = div.style, cs = clone.style;

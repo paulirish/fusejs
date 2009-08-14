@@ -152,7 +152,7 @@
   };
 
 <%= include(
-   'browser.js',
+   'env.js',
    'features.js',
    'fusebox.js',
 
