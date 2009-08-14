@@ -141,20 +141,17 @@
 
     this.Array = this.Array.concat((
       'pop push forEach reduce reduceRight reverse shift sort splice unshift ' +
-      'toLocaleString toString valueOf').split(' '));
+      'toLocaleString').split(' '));
 
     this.Date = this.Date.concat((
       'setDate setDay setFullYear setHours setMilliseconds setMinutes setMonth '  +
       'setSeconds setTime setTimezoneOffset setUTCDate setUTCDay setUTCFullYear ' +
       'setUTCHours setUTCMilliseconds setUTCMinutes setUTCMonth setUTCSeconds '   +
       'setYear toDateString toGMTString toISOString toLocaleDateString ' +
-      'toLocaleString toLocaleTimeString toString toTimeString toUTCString ' +
-      'valueOf').split(' '));
-
-    this.Function = this.Function.concat('toString', 'valueOf');
-    this.Number   = this.Number.concat('toLocaleString', 'toString', 'valueOf');
-    this.RegExp   = this.RegExp.concat('test', 'toString', 'valueOf');
-    this.String   = this.String.concat('toString', 'valueOf');
+      'toLocaleString toLocaleTimeString toString toTimeString toUTCString').split(' '));
+      
+    this.Number   = this.Number.concat('toLocaleString');
+    this.RegExp   = this.RegExp.concat('test');
 
   }).call(Fuse.Fusebox.MethodNames = { }, Fuse.Fusebox.AccessorNames);
 
@@ -395,7 +392,7 @@
         };
 
         var s = (function() {
-          var result = ['\\s'];
+          var character, result = ['\\s'];
           for (character in specialCharMap.s)
             if (character.replace(/\s/, '').length)
               result.push('\\u' +('0000' + character.charCodeAt(0).toString(16)).slice(-4));
@@ -540,7 +537,7 @@
 
   Fuse.Fusebox._wrapAccessorMethods = (function() {
     function _wrapAccessorMethods() {
-      var code, i, name, names, type, natives = Fuse.Fusebox.AccessorNames,
+      var code, i, n, name, names, type, natives = Fuse.Fusebox.AccessorNames,
        skip = Fuse.Fusebox._wrapAccessorMethods.skip;
 
       // Opera and Chrome still need a convienence wrapper for filter

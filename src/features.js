@@ -185,27 +185,17 @@
     },
 
     'ELEMENT_SPECIFIC_EXTENSIONS': function() {
-      var docEl = Fuse._docEl, result = false;
-      if (isHostObject(global, 'HTMLHtmlElement') &&
-          isHostObject(global.HTMLHtmlElement, 'prototype') &&
-         (docEl.constructor === HTMLHtmlElement ||
-          docEl instanceof HTMLHtmlElement || Feature('OBJECT__PROTO__') &&
-          docEl['__proto__'] === HTMLHtmlElement.prototype)) {
-        result = true;
-      } else result = Feature('EMULATE_ELEMENT_CLASSES_WITH_PROTO');
-
-      // TODO: Remove this browser sniff
-      return Fuse.Env.Agent.MobileSafari ? false : result;
+      var docEl = Fuse._docEl;
+      return (isHostObject(global, 'HTMLHtmlElement') &&
+        isHostObject(global.HTMLHtmlElement, 'prototype') && (
+        docEl.constructor === HTMLHtmlElement ||
+        docEl instanceof HTMLHtmlElement || Feature('OBJECT__PROTO__') &&
+        docEl['__proto__'] === HTMLHtmlElement.prototype));
     },
 
     'ELEMENT_TEXT_CONTENT': function() {
       // true for all but IE and Safari 2
       return typeof Fuse._div.textContent === 'string';
-    },
-
-    'EMULATE_ELEMENT_CLASSES_WITH_PROTO': function() {
-      return Feature('OBJECT__PROTO__') &&
-        Fuse._div['__proto__'] !== Fuse._docEl['__proto__'];
     },
 
     'FUNCTION_TO_STRING_RETURNS_SOURCE': function() {

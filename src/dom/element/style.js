@@ -64,17 +64,17 @@
         return element;
       };
 
+      // TODO: Is this really needed or the best approach ?
       if (Fuse.Env.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d+)/) || [])[1] < 500) {
-        var _setOpacity = setOpacity;
+        var __setOpacity = setOpacity;
         setOpacity = function setOpacity(element, value) {
-          element = _setOpacity(element, value);
-          // TODO: Is this really needed or the best approach ?
+          element = __setOpacity(element, value);
           if (value == 1) {
             if (getNodeName(element) === 'IMG' && element.width) {
               element.width++; element.width--;
             } else try {
-              var n = element.ownerDocument.createTextNode(' ');
-              element.removeChild(element.appendChild(n));
+              element.removeChild(element.appendChild(element
+                .ownerDocument.createTextNode(' ')));
             } catch (e) { }
           }
           return element;

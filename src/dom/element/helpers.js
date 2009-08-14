@@ -25,7 +25,7 @@
       return element;
     };
 
-    Element._getContentFromAnonymousElement = (function() {
+    Element._getFragmentFromString = (function() {
       function getCache(ownerDoc) {
         if (ownerDoc === Fuse._doc)
           return getCache.cache[0];
@@ -67,7 +67,7 @@
         };
       })();
 
-      function _getContentFromAnonymousElement(ownerDoc, nodeName, html) {
+      function _getFragmentFromString(ownerDoc, nodeName, html) {
         var cache = getCache(ownerDoc), node = cache.node,
          t = Element._insertionTranslations.tags[nodeName];
         if (t) {
@@ -84,7 +84,7 @@
         return getContentAsFragment(cache, node);
       }
 
-      return _getContentFromAnonymousElement;
+      return _getFragmentFromString;
     })();
 
     // prevent JScript bug with named function expressions

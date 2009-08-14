@@ -56,7 +56,7 @@
    slice = global.Array.prototype.slice,
 
    // used to access the an object's internal [[Class]] property
-   toString = Object.prototype.toString,
+   toString = global.Object.prototype.toString,
 
    // used for some required browser sniffing
    userAgent = global.navigator.userAgent;

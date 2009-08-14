@@ -127,6 +127,7 @@
     try {
       return Fuse.String(value);
     } catch (e) {
+      // probably caused by having the `toString` of an object call inspect()
       if (e.constructor === global.RangeError)
         return Fuse.String('...');
       throw e;
