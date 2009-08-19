@@ -1,6 +1,6 @@
   /*------------------------------- LANG: HASH -------------------------------*/
 
-  Fuse.addNS('Hash', Fuse.Enumerable, (function() {
+  Fuse.addNS('Hash', (function() {
     function indexOfKey(hash, key) {
       key = String(key);
       var index = 0, keys = hash._keys, length = keys.length;
@@ -27,7 +27,7 @@
     }
 
     function setWithObject(hash, object) {
-      if (object instanceof Fuse.Hash) {
+      if (isHash(object)) {
         var pair, i = 0, pairs = object._pairs;
         while (pair = pairs[i++]) setValue(hash, pair[0], pair[1]);
       }
@@ -197,36 +197,10 @@
       return this._data[expando + key];
     };
 
-    proto.grep = function grep(pattern, callback, thisArg) {
-      if (!pattern || pattern == '' || isRegExp(pattern) &&
-         !pattern.source) return this.clone();
-
-      callback = callback || K;
-      var key, pair, value, i = 0, pairs = this._pairs, result = new $H();
-      if (isString(pattern))
-        pattern = new RegExp(Fuse.RegExp.escape(pattern));
-
-      while (pair = pairs[i++]) {
-        if (pattern.test(value = pair[1]))
-          result.set(key = pair[0], callback.call(thisArg, value, key, this));
-      }
-      return result;
-    };
-
     proto.hasKey = (function() {
       function hasKey(key) { return (expando + key) in this._data }
       return hasKey;
     })();
-
-    proto.inspect = (function(__inspect) {
-      function inspect() {
-        var pair, i = 0, pairs = this._pairs, results = [];
-        while (pair = pairs[i])
-          results[i++] = pair[0].inspect() + ': ' + __inspect(pair[1]);
-        return '#<Hash:{' + results.join(', ') + '}>';
-      }
-      return inspect;
-    })(inspect);
 
     proto.keyOf = function keyOf(value) {
       var pair, i = 0, pairs = this._pairs;
@@ -288,35 +262,52 @@
       return Fuse.List.fromArray(this._values);
     };
 
-    proto.zip = function zip() {
-      var callback = K, args = slice.call(arguments, 0);
-
-      // if last argument is a function it is the callback
-      if (typeof args[args.length - 1] === 'function')
-        callback = args.pop();
-
-      var result = new $H(),
-       hashes = prependList(Fuse.List.prototype.map.call(args, $H), this),
-       length = hashes.length;
-
-      var j, key, pair, i = 0, pairs = this._pairs;
-      while (pair = pairs[i++]) {
-        j = 0; values = Fuse.List(); key = pair[0];
-        while (j < length) values[j] = hashes[j++]._data[expando + key];
-        result.set(key, callback(values, key, this));
+    proto.zip = (function() {
+      function mapToHash(array) {
+        var results = [], length = array.length;
+        while (length--) results[length] = new $H(array[length]);
+        return results;
       }
-      return result;
-    };
+
+      function zip() {
+        var callback = K, args = slice.call(arguments, 0);
+
+        // if last argument is a function it is the callback
+        if (typeof args[args.length - 1] === 'function')
+          callback = args.pop();
+
+        var result = new $H(),
+         hashes = prependList(mapToHash(args), this),
+         length = hashes.length;
+
+        var j, key, pair, i = 0, pairs = this._pairs;
+        while (pair = pairs[i++]) {
+          j = 0; values = Fuse.List(); key = pair[0];
+          while (j < length) values[j] = hashes[j++]._data[expando + key];
+          result.set(key, callback(values, key, this));
+        }
+        return result;
+      }
+
+      return zip;
+    })();
 
     // alias
     proto.toList = proto.toArray;
+
+    // assign any missing Enumerable methods
+    if (Fuse.Enumerable) {
+      eachKey(Fuse.Enumerable.Plugin, function(value, key, object) {
+        if (hasKey(object, key) && typeof proto[key] !== 'function')
+          proto[key] = value;
+      });
+    }
 
     // prevent JScript bug with named function expressions
     var clear =      null,
      contains =      null,
      filter =        null,
      get =           null,
-     grep =          null,
      keys =          null,
      keyOf =         null,
      map =           null,
@@ -325,8 +316,7 @@
      toArray =       null,
      toObject =      null,
      toQueryString = null,
-     values =        null,
-     zip =           null;
+     values =        null;
   })(Fuse.Hash.Plugin, Fuse.Hash);
 
   /*--------------------------------------------------------------------------*/

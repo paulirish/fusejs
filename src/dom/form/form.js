@@ -174,7 +174,7 @@
 
       if (params) {
         if (isString(params)) params = Fuse.String(params).toQueryParams();
-        Obj.extend(options.parameters, params);
+        _extend(options.parameters, params);
       }
 
       if (Element.hasAttribute(form, 'method') && !options.method)

@@ -84,8 +84,8 @@
             return result;
           };
 
-          method.valueOf  = bind(__method.valueOf, __method);
-          method.toString = bind(__method.toString, __method);
+          method.valueOf  = function() { return __method.valueOf() };
+          method.toString = function() { return __method.toString() };
         }
         prototype[key] = method;
       });

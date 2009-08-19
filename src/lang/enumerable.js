@@ -1,15 +1,10 @@
   /*---------------------------- LANG: ENUMERABLE ----------------------------*/
 
-  Fuse.$break = (function() {
-    function $break() { }
-    return $break;
-  })();
-
   Fuse.addNS('Enumerable');
 
   (function(proto) {
     proto.contains = function contains(object, strict) {
-      var result = 0, $break = Fuse.$break;
+      var result = 0;
       if (strict)
         this.each(function(value) { if (value === object && result++) throw $break; });
       else
@@ -23,7 +18,7 @@
           callback.call(thisArg, value, index, iterable);
         });
       } catch (e) {
-        if (e !== Fuse.$break) throw e;
+        if (e !== $break) throw e;
       }
       return this;
     };
@@ -41,7 +36,7 @@
       var result = true;
       this.each(function(value, index, iterable) {
         if (!callback.call(thisArg, value, index, iterable)) {
-          result = false; throw Fuse.$break;
+          result = false; throw $break;
         }
       });
       return result;
@@ -60,26 +55,10 @@
     proto.first = function first(callback, thisArg) {
       if (callback == null) {
         var result;
-        this.each(function(value) { result = value; throw Fuse.$break; });
+        this.each(function(value) { result = value; throw $break; });
         return result;
       }
       return this.toList().first(callback, thisArg);
-    };
-
-    proto.grep = function grep(pattern, callback, thisArg) {
-      if (!pattern || pattern == '' || isRegExp(pattern) &&
-         !pattern.source) return this.toList();
-
-      callback = callback || K;
-      var results = Fuse.List();
-      if (isString(pattern))
-        pattern = new RegExp(Fuse.RegExp.escape(pattern));
-
-      this._each(function(value, index, iterable) {
-        if (pattern.test(value))
-          results.push(callback.call(thisArg, value, index, iterable));
-      });
-      return results;
     };
 
     proto.inGroupsOf = function inGroupsOf(size, filler) {
@@ -96,11 +75,6 @@
       });
       return accumulator;
     };
-
-    proto.inspect = (function() {
-      function inspect() { return '#<Enumerable:' + this.toList().inspect() + '>' }
-      return inspect;
-    })();
 
     proto.invoke = function invoke(method) {
       var args = slice.call(arguments, 1), funcProto = Function.prototype;
@@ -177,7 +151,7 @@
       var result = false;
       this.each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable)) {
-          result = true; throw Fuse.$break;
+          result = true; throw $break;
         }
       });
       return result;
@@ -226,7 +200,6 @@
      every =       null,
      filter =      null,
      first =       null,
-     grep =        null,
      inject =      null,
      inGroupsOf =  null,
      invoke =      null,

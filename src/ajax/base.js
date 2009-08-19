@@ -38,7 +38,7 @@
         // convert string/hash parameters to an object
         if (isString(params))
           params = Fuse.String(params).toQueryParams();
-        else if (params instanceof Fuse.Hash)
+        else if (isHash(params))
           params = params.toObject();
         else params = clone(params);
 
@@ -59,7 +59,7 @@
             for (var i = 0, length = customHeaders.length; i < length; i += 2)
               headers[customHeaders[i]] = customHeaders[i + 1];
           } else {
-            if (customHeaders instanceof Fuse.Hash) customHeaders = customHeaders._object;
+            if (isHash(customHeaders)) customHeaders = customHeaders._object;
             for (key in customHeaders) headers[key] = customHeaders[key];
           }
         }
@@ -99,7 +99,7 @@
     'contentType':  'application/x-www-form-urlencoded',
     'encoding':     'UTF-8',
     'evalJS':       true,
-    'evalJSON':     true,
+    'evalJSON':     !!Fuse.String.evalJSON,
     'forceMethod':  false,
     'method':       'post',
     'parameters':   '',

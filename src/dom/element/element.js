@@ -365,35 +365,6 @@
       return { 'width': Element.getWidth(element), 'height': Element.getHeight(element) };
     };
 
-    methods.getOffsetParent = (function() {
-      var END_ON_NODE = { 'BODY': 1, 'HTML': 1 },
-       OFFSET_PARENTS = { 'TABLE': 1, 'TD': 1, 'TH': 1 };
-
-      function getOffsetParent(element) {
-        // http://www.w3.org/TR/cssom-view/#offset-attributes
-        element = $(element);
-        var original = element, nodeName = getNodeName(element);
-        if (nodeName === 'AREA') return Element.extend(element.parentNode);
-
-        // IE throws an error if the element is not in the document.
-        // Many browsers report offsetParent as null if the element's
-        // style is display:none.
-        if (Element.isFragment(element) || element.nodeType === 9 || END_ON_NODE[nodeName] ||
-           !element.offsetParent && Element.getStyle(element, 'display') != 'none')
-          return null;
-
-        while (element = element.parentNode) {
-          nodeName = getNodeName(element);
-          if (END_ON_NODE[nodeName]) break;
-          if (OFFSET_PARENTS[nodeName] ||
-              Element.getStyle(element, 'position') != 'static')
-            return Element.extend(element);
-        }
-        return Element.extend(getDocument(original).body);
-      };
-      return getOffsetParent;
-    })();
-
     methods.identify = function identify(element) {
       // use readAttribute to avoid issues with form elements and
       // child controls with ids/names of "id"
@@ -406,23 +377,6 @@
       Element.writeAttribute(element, 'id', id);
       return Fuse.String(id);
     };
-
-    methods.inspect = (function() {
-      function inspect(element) {
-        element = $(element);
-        var attribute, property, value,
-         result = '<' + element.nodeName.toLowerCase(),
-         translation = { 'id': 'id', 'className': 'class' };
-
-        for (property in translation) {
-          attribute = translation[property];
-          value = element[property] || '';
-          if (value) result += ' ' + attribute + '=' + Fuse.String(value).inspect(true);
-        }
-        return Fuse.String(result + '>');
-      }
-      return inspect;
-    })();
 
     methods.isFragment = (function() {
       var isFragment = function isFragment(element) {
@@ -545,7 +499,6 @@
     var cleanWhitespace = null,
      empty =              null,
      getDimensions =      null,
-     getOffsetParent =    null,
      hide =               null,
      identify =           null,
      isFragment =         null,
@@ -636,7 +589,7 @@
       var content, fragment, insertContent, position, nodeName;
 
       if (insertions) {
-        if (insertions instanceof Fuse.Hash)
+        if (isHash(insertions))
           insertions = insertions._object;
 
         if (isString(insertions) || isNumber(insertions) ||

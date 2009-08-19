@@ -38,15 +38,29 @@
     })();
 
     proto.register = function register(responder) {
-      var m, handler, handlers, name;
-      if (responder instanceof Fuse.Hash)
-        responder = responder._object;
+      var found, handler, handlers, length, method, name;
+      if (isHash(responder)) responder = responder._object;
 
       for (name in responder) {
+        found    = false;
         handlers = this.responders[name];
-        m = responder[name];
-        if (!handlers || !handlers.first(function(c) { return c.__method === m })) {
-          (handler = bind(m, responder)).__method = m;
+        length   = handlers.length;
+        method   = responder[name];
+
+        // check if responder method is in the handlers list
+        if (handles)
+          while (handler = handlers[length--])
+            if (handler.__method === method) { found = true; break; }
+
+        if (!found) {
+          // create handler if not found
+          handler = (function(n) {
+            return function(request, json) { responder[n](request, json) }})(name)
+
+          // tie original method to handler
+          handler.__method = method;
+
+          // create handlers list if non-existent and add handler
           if (!handlers) this.responders[name] = handlers = Fuse.List();
           handlers.push(handler);
         }
@@ -54,18 +68,23 @@
     };
 
     proto.unregister = function unregister(responder) {
-      var name;
-      if (responder instanceof Fuse.Hash)
-        responder = responder._object;
+      var handler, name, handlers, length, results;
+      if (isHash(responder)) responder = responder._object;
 
       for (name in responder) {
-        var handlers = this.responders[name];
-        if (handlers)
-          this.responders[name] =
-            handlers.filter(function(c) { return c.__method !== responder[name] });
+        if (handlers = this.responders[name]) {
+          results = Fuse.List(); 
+          length  = handlers.length;
+          method  = responder[name];
+
+          // rebuild handlers list excluding the handle that is tied to the responder method
+          while (handler = handlers[length--])
+            if (handler.__method !== method) results.push(handler);
+          this.responders[name] = results;
+        }
       }
     };
 
     // prevent JScript bug with named function expressions
-    var dispatch = null, register = null, unregister =  null;
+    var register = null, unregister =  null;
   })(Fuse.Ajax.Responders);

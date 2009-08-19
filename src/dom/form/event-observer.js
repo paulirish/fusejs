@@ -5,7 +5,9 @@
       'constructor': (function() {
         function BaseEventObserver(element, callback) {
           this.element = $(element);
-          this.onElementEvent = bind(this.onElementEvent, this);
+
+          var eventObserver = this, onElementEvent = this.onElementEvent;
+          this.onElementEvent = function() { onElementEvent.call(eventObserver) };
 
           if (getNodeName(this.element) === 'FORM')
             return this.registerFormCallbacks();

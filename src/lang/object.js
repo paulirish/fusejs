@@ -99,43 +99,6 @@
 
   /*--------------------------------------------------------------------------*/
 
-  inspect =
-  Obj.inspect = function inspect(value) {
-    if (value != null) {
-      var object = Fuse.Object(value);
-      if (typeof object.inspect === 'function')
-        return object.inspect();
-
-      // Attempt to avoid inspecting DOM nodes.
-      // IE treats nodes like objects:
-      // IE7 and below are missing the node's constructor property
-      // IE8 node constructors are typeof "object"
-      try {
-        var string = toString.call(object), constructor = object.constructor;
-        if (string === '[object Object]' && constructor && typeof constructor !== 'object') {
-          var results = [];
-          eachKey(object, function(value, key) {
-            hasKey(object, key) &&
-              results.push(Fuse.String(key).inspect() + ': ' + inspect(object[key]));
-          });
-          return Fuse.String('{' + results.join(', ') + '}');
-        }
-      } catch (e) { }
-    }
-
-    // try coercing to string
-    try {
-      return Fuse.String(value);
-    } catch (e) {
-      // probably caused by having the `toString` of an object call inspect()
-      if (e.constructor === global.RangeError)
-        return Fuse.String('...');
-      throw e;
-    }
-  };
-
-  /*--------------------------------------------------------------------------*/
-
   _extend =
   Obj._extend = function _extend(destination, source) {
     for (var key in source)
@@ -183,7 +146,8 @@
 
   isHash =
   Obj.isHash = function isHash(value) {
-    return value instanceof Fuse.Hash;
+    var Hash = Fuse.Hash;
+    return !!value && value.constructor === Hash && value !== Hash.prototype;
   };
 
   isNumber =
@@ -249,7 +213,7 @@
           callback.call(thisArg, value, key, object);
         });
       } catch (e) {
-        if (e !== Fuse.$break) throw e;
+        if (e !== $break) throw e;
       }
       return object;
     };

@@ -10,7 +10,7 @@
 
         pattern = pattern || Fuse.Template.Pattern;
         if (!isRegExp(pattern))
-          pattern = Fuse.RegExp(Fuse.RegExp.escape(pattern));
+          pattern = Fuse.RegExp(escapeRegExpChars(pattern));
         if (!pattern.global)
           pattern = Fuse.RegExp.clone(pattern, { 'global': true });
         this.pattern = pattern;
@@ -21,7 +21,7 @@
     'evaluate': (function() {
       function evaluate(object) {
         if (object) {
-          if (object instanceof Fuse.Hash)
+          if (isHash(object))
             object = object._object;
           else if (typeof object.toTemplateReplacements === 'function')
             object = object.toTemplateReplacements();
@@ -62,3 +62,54 @@
   });
 
   Fuse.Template.Pattern = /(\\)?(#\{([^}]*)\})/;
+
+  /*--------------------------------------------------------------------------*/
+
+  (function(proto) {
+    function prepareReplacement(replacement) {
+      if (typeof replacement === 'function')
+        return function() { return replacement(slice.call(arguments, 0, -2)) };
+      var template = new Fuse.Template(replacement);
+      return function() { return template.evaluate(slice.call(arguments, 0, -2)) };
+    }
+
+    proto.gsub = function gsub(pattern, replacement) {
+      if (this == null) throw new TypeError;
+
+      if (!isRegExp(pattern))
+        pattern = Fuse.RegExp(escapeRegExpChars(pattern), 'g');
+      if (!pattern.global)
+        pattern = Fuse.RegExp.clone(pattern, { 'global': true });
+      return this.replace(pattern, prepareReplacement(replacement));
+    };
+
+    proto.interpolate = function interpolate(object, pattern) {
+      if (this == null) throw new TypeError;
+      return new Fuse.Template(this, pattern).evaluate(object);
+    };
+
+    proto.sub = function sub(pattern, replacement, count) {
+      if (this == null) throw new TypeError;
+
+      count = (typeof count === 'undefined') ? 1 : count;
+      if (count === 1) {
+        if (!isRegExp(pattern))
+          pattern = Fuse.RegExp(escapeRegExpChars(pattern));
+        if (pattern.global)
+          pattern = Fuse.RegExp.clone(pattern, { 'global': false });
+        return this.replace(pattern, prepareReplacement(replacement));
+      }
+
+      if (typeof replacement !== 'function') {
+        var template = new Fuse.Template(replacement);
+        replacement = function(match) { return template.evaluate(match) };
+      }
+      return this.gsub(pattern, function(match) {
+        if (--count < 0) return match[0];
+        return replacement(match);
+      });
+    };
+
+    // prevent JScript bug with named function expressions
+    var gsub = null, interpolate = null, sub = null;
+  })(Fuse.String.Plugin);

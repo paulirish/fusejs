@@ -14,6 +14,10 @@
     })()
   });
 
+  Fuse.addNS('Util');
+
+  Fuse.Util.$R = Fuse.Range;
+
   /*--------------------------------------------------------------------------*/
 
   (function(proto) {
@@ -103,6 +107,18 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Fuse.addNS('Util');
+  (function() {
+    Fuse.Number.prototype.succ = function succ() {
+      return Fuse.Number(toInteger(this) + 1);
+    };
 
-  Fuse.Util.$R = Fuse.Range;
+    Fuse.String.prototype.succ = function succ() {
+      if (this == null) throw new TypeError;
+      var index = this.length -1;
+      return Fuse.String(this.slice(0, index) +
+        String.fromCharCode(this.charCodeAt(index) + 1));
+    };
+
+    // prevent JScript bug with named function expressions
+    var succ = null;
+  })();

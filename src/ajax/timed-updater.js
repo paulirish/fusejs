@@ -17,20 +17,19 @@
         this.frequency = options.frequency;
         this.maxDecay  = options.maxDecay;
 
-        this.onStop = options.onStop;
-        this.onTimerEvent = bind(this.start, this);
-
         // dynamically set readyState eventName to allow for easy customization
-        var callbackName = 'on' + Request.Events[4],
+        var timedUpdater = this, callbackName = 'on' + Request.Events[4],
          onDone = options[callbackName];
 
-        options[callbackName] = bind(function(request, json) {
+        options[callbackName] = function(request, json) {
           if (!request.aborted) {
-            this.updateDone(request);
+            timedUpdater.updateDone(request);
             onDone && onDone(request, json);
           }
-        }, this);
+        };
 
+        this.onStop = options.onStop;
+        this.onTimerEvent = function() { timedUpdater.start() };
         this.start();
       }
 
@@ -50,8 +49,9 @@
 
         this.lastText = responseText;
       }
-      this.timer = Func.delay(this.onTimerEvent,
-        this.decay * this.frequency);
+
+      this.timer = global.setTimeout(this.onTimerEvent,
+        this.decay * this.frequency * this.timerMultiplier);
     };
 
     proto.start = function start() {

@@ -26,21 +26,9 @@
     var from = null, fromNodeList = null;
   })(Fuse.Array);
 
-  /*--------------------------------------------------------------------------*/
-
   Fuse.addNS('Util');
 
   Fuse.Util.$A = Fuse.Array.from;
-
-  Fuse.Util.$w = (function() {
-    function $w(string) {
-      if (!isString(string)) return Fuse.Array();
-      string = strProto.trim.call(string);
-      return string != '' ? string.split(/\s+/) : Fuse.Array();
-    }
-    var strProto = Fuse.String.prototype;
-    return $w;
-  })();
 
   /*--------------------------------------------------------------------------*/
 
@@ -96,7 +84,7 @@
       try {
         proto.forEach.call(this, callback, thisArg);
       } catch (e) {
-        if (e !== Fuse.$break) throw e;
+        if (e !== $break) throw e;
       }
       return this;
     };
@@ -148,18 +136,6 @@
       else proto.splice.call(object, index, 0, value);
       return object;
     };
-
-    proto.inspect = (function(__inspect) {
-      function inspect() {
-        if (this == null) throw new TypeError;
-        var i = 0, results = result = [], object = Object(this),
-         length = object.length >>> 0;
-
-        while (length--) results[length] = __inspect(object[length]);
-        return '[' + results.join(', ') + ']';
-      }
-      return inspect;
-    })(inspect);
 
     proto.intersect = function intersect(array) {
       if (this == null) throw new TypeError;
@@ -298,24 +274,6 @@
       return results;
     };
 
-    proto.grep = function grep(pattern, callback, thisArg) {
-      if (this == null) throw new TypeError;
-      if (!pattern || pattern == '' || isRegExp(pattern) &&
-         !pattern.source) return proto.toArray.call(this);
-
-      callback = callback || K;
-      var item, i = 0, results = Fuse.Array(), object = Object(this),
-       length = object.length >>> 0;
-
-      if (isString(pattern))
-        pattern = new RegExp(Fuse.RegExp.escape(pattern));
-
-      for ( ; i < length; i++)
-        if (i in object && pattern.test(object[i]))
-          results.push(callback.call(thisArg, object[i], i, object));
-      return results;
-    };
-
     proto.max = function max(callback, thisArg) {
       if (this == null) throw new TypeError;
 
@@ -435,7 +393,6 @@
      each =      null,
      first =     null,
      flatten =   null,
-     grep =      null,
      insert =    null,
      intersect = null,
      invoke =    null,
@@ -580,8 +537,9 @@
 
     // assign any missing Enumerable methods
     if (Fuse.Enumerable) {
-      Obj.each(Fuse.Enumerable.Plugin, function(value, key) {
-        if (typeof proto[key] !== 'function') proto[key] = value;
+      eachKey(Fuse.Enumerable.Plugin, function(value, key, object) {
+        if (hasKey(object, key) && typeof proto[key] !== 'function')
+          proto[key] = value;
       });
     }
 

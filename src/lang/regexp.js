@@ -1,10 +1,7 @@
   /*------------------------------ LANG: REGEXP ------------------------------*/
 
   Fuse.RegExp.escape = (function() {
-    function escape(string) {
-      return Fuse.String(String(string).replace(matchSpecialChars, '\\$1'));
-    }
-    var matchSpecialChars = /([.*+?^=!:${}()|[\]\/\\])/g;
+    function escape(string) { return Fuse.String(escapeRegExpChars(string)) }
     return escape;
   })();
 

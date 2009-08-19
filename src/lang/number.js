@@ -25,30 +25,6 @@
       return round;
     })();
 
-  })(Fuse.Number.Plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  (function(proto) {
-    var toInteger = (function() {
-      var abs = Math.abs, floor = Math.floor,
-       maxBitwiseNumber = Math.pow(2, 31);
-
-      return function(object) {
-        var number = 1 * object; // fast coerce to number
-        if (number == 0 || !isFinite(number)) return number || 0;
-
-        // avoid issues with large numbers against bitwise operators
-        return number < maxBitwiseNumber
-          ? number | 0
-          : (number < 0 ? -1 : 1) * floor(abs(number));
-      };
-    })();
-
-    proto.succ = function succ() {
-      return Fuse.Number(toInteger(this) + 1);
-    };
-
     proto.times = function times(callback, thisArg) {
       var i = 0, length = toInteger(this);
       if (arguments.length === 1) {
@@ -76,5 +52,5 @@
     })();
 
     // prevent JScript bug with named function expressions
-    var succ = null, times = null, toColorPart = null;
+    var times = null, toColorPart = null;
   })(Fuse.Number.Plugin);

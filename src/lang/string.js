@@ -1,22 +1,21 @@
   /*------------------------------ LANG: STRING ------------------------------*/
 
-  _extend(Fuse.String, (function() {
-    function interpret(value) {
-      return Fuse.String(value == null ? '' : value);
-    }
+  Fuse.addNS('Util');
 
-    return {
-      'specialChar': {
-        '\b': '\\b',
-        '\f': '\\f',
-        '\n': '\\n',
-        '\r': '\\r',
-        '\t': '\\t',
-        '\\': '\\\\'
-      },
-      'interpret': interpret
-    };
-  })());
+  Fuse.Util.$w = (function() {
+    function $w(string) {
+      if (!isString(string)) return Fuse.Array();
+      string = strProto.trim.call(string);
+      return string != '' ? string.split(/\s+/) : Fuse.Array();
+    }
+    var strProto = Fuse.String.prototype;
+    return $w;
+  })();
+
+  Fuse.String.interpret = (function() {
+    function interpret(value) { return Fuse.String(value == null ? '' : value) }
+    return interpret;
+  })();
 
   /*--------------------------------------------------------------------------*/
 
@@ -53,7 +52,7 @@
       if (this == null) throw new TypeError;
 
       if (!isRegExp(pattern))
-        pattern = new RegExp(escape(pattern));
+        pattern = new RegExp(escapeRegExpChars(pattern));
 
       // set pattern.lastIndex to 0 before we perform string operations
       var match, index = 0, nonGlobal = !pattern.global,
@@ -89,9 +88,7 @@
       return Fuse.String(result);
     }
 
-    var __replace = proto.replace, escape = Fuse.RegExp.escape,
-     exec = RegExp.prototype.exec;
-
+    var __replace = proto.replace, exec = RegExp.prototype.exec;
     proto.replace = replace;
   })(Fuse.String.Plugin);
 
@@ -154,65 +151,6 @@
   /*--------------------------------------------------------------------------*/
 
   (function(proto) {
-    var escape = Fuse.RegExp.escape;
-
-    function prepareReplacement(replacement) {
-      if (typeof replacement === 'function')
-        return function() { return replacement(slice.call(arguments, 0, -2)) };
-      var template = new Fuse.Template(replacement);
-      return function() { return template.evaluate(slice.call(arguments, 0, -2)) };
-    }
-
-    proto.gsub = function gsub(pattern, replacement) {
-      if (this == null) throw new TypeError;
-
-      if (!isRegExp(pattern))
-        pattern = Fuse.RegExp(escape(pattern), 'g');
-      if (!pattern.global)
-        pattern = Fuse.RegExp.clone(pattern, { 'global': true });
-      return this.replace(pattern, prepareReplacement(replacement));
-    };
-
-    proto.sub = function sub(pattern, replacement, count) {
-      if (this == null) throw new TypeError;
-
-      count = (typeof count === 'undefined') ? 1 : count;
-      if (count === 1) {
-        if (!isRegExp(pattern))
-          pattern = Fuse.RegExp(escape(pattern));
-        if (pattern.global)
-          pattern = Fuse.RegExp.clone(pattern, { 'global': false });
-        return this.replace(pattern, prepareReplacement(replacement));
-      }
-
-      if (typeof replacement !== 'function') {
-        var template = new Fuse.Template(replacement);
-        replacement = function(match) { return template.evaluate(match) };
-      }
-      return this.gsub(pattern, function(match) {
-        if (--count < 0) return match[0];
-        return replacement(match);
-      });
-    };
-
-    // prevent JScript bug with named function expressions
-    var gsub = null, sub = null;
-  })(Fuse.String.Plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  (function(proto) {
-    proto.interpolate = function interpolate(object, pattern) {
-      if (this == null) throw new TypeError;
-      return new Fuse.Template(this, pattern).evaluate(object);
-    };
-
-    proto.succ = function succ() {
-      if (this == null) throw new TypeError;
-      return Fuse.String(this.slice(0, this.length - 1) +
-        String.fromCharCode(this.charCodeAt(this.length - 1) + 1));
-    };
-
     proto.times = function times(count) {
       if (this == null) throw new TypeError;
       return Fuse.String(count < 1 ? '' : new Array(count + 1).join(this));
@@ -260,11 +198,7 @@
     proto.parseQuery = proto.toQueryParams;
 
     // prevent JScript bug with named function expressions
-    var interpolate = null,
-     succ =           null,
-     times =          null,
-     toArray =        null,
-     toQueryParams =  null;
+    var times = null, toArray = null, toQueryParams = null;
   })(Fuse.String.Plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -290,24 +224,6 @@
       var string = String(this), d = string.length - pattern.length;
       return d >= 0 && string.lastIndexOf(pattern) == d;
     };
-
-    proto.inspect = (function() {
-      function inspect(useDoubleQuotes) {
-        if (this == null) throw new TypeError;
-        var escapedString, specialChar = Fuse.String.specialChar;
-
-        escapedString = Fuse.String(this).replace(/[\x00-\x1f\\]/g, function(match) {
-          var character = specialChar[match];
-          return character ?
-            character :
-            '\\u00' + Fuse.Number(match.charCodeAt(0)).toPaddedString(2, 16);
-        });
-        return Fuse.String(useDoubleQuotes
-          ? '"' + escapedString.replace(/"/g, '\\"')  + '"'
-          : "'" + escapedString.replace(/'/g, '\\\'') + "'");
-      }
-      return inspect;
-    })();
 
     proto.scan = function scan(pattern, callback) {
       if (this == null) throw new TypeError;

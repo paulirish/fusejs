@@ -144,7 +144,7 @@
           ? Element.setOpacity(element, styles.match(/opacity:\s*(\d?\.?\d*)/)[1])
           : element;
       }
-      if (styles instanceof Fuse.Hash)
+      if (isHash(styles))
         styles = styles._object;
 
       for (key in styles) {

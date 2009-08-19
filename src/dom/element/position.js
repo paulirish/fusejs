@@ -174,6 +174,35 @@
       return element;
     };
 
+    methods.getOffsetParent = (function() {
+      var END_ON_NODE = { 'BODY': 1, 'HTML': 1 },
+       OFFSET_PARENTS = { 'TABLE': 1, 'TD': 1, 'TH': 1 };
+
+      function getOffsetParent(element) {
+        // http://www.w3.org/TR/cssom-view/#offset-attributes
+        element = $(element);
+        var original = element, nodeName = getNodeName(element);
+        if (nodeName === 'AREA') return Element.extend(element.parentNode);
+
+        // IE throws an error if the element is not in the document.
+        // Many browsers report offsetParent as null if the element's
+        // style is display:none.
+        if (Element.isFragment(element) || element.nodeType === 9 || END_ON_NODE[nodeName] ||
+           !element.offsetParent && Element.getStyle(element, 'display') != 'none')
+          return null;
+
+        while (element = element.parentNode) {
+          nodeName = getNodeName(element);
+          if (END_ON_NODE[nodeName]) break;
+          if (OFFSET_PARENTS[nodeName] ||
+              Element.getStyle(element, 'position') != 'static')
+            return Element.extend(element);
+        }
+        return Element.extend(getDocument(original).body);
+      };
+      return getOffsetParent;
+    })();
+
     methods.cumulativeOffset = (function() {
       function getOffset(element, ancestor) {
         // TODO: overhaul with a thorough solution for finding the correct

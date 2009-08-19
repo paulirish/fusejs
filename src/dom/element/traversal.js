@@ -1,18 +1,6 @@
   /*--------------------------- ELEMENT: TRAVERSAL ---------------------------*/
 
-  Fuse.addNS('Util');
-
-  Fuse.addNS('Dom.Selector');
-
   (function(methods, Selector) {
-    Fuse.Util.$$ = Fuse.query = (function() {
-      function query(selectors, context) {
-        return Selector.select(selectors, $(context));
-      }
-      return query;
-    })();
-
-    /*------------------------------------------------------------------------*/
 
     (function() {
       methods.childElements = function childElements(element, selectors) {

@@ -6,10 +6,12 @@
         if (!(this instanceof Timer))
           return new Timer(callback, interval, options);
 
-        this.callback     = callback;
-        this.interval     = interval;
-        this.executing    = false;
-        this.onTimerEvent = bind(onTimerEvent, this);
+        this.callback  = callback;
+        this.interval  = interval;
+        this.executing = false;
+
+        var timer = this;
+        this.onTimerEvent = function() { onTimerEvent.call(timer) };
 
         this.options = _extend(clone(this.constructor.options), options);
       }

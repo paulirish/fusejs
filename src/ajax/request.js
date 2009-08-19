@@ -6,9 +6,14 @@
         if (!(this instanceof Request))
           return new Request(url, options);
 
+        var request = this, onStateChange = this.onStateChange,
+         onTimeout = this.onTimeout;
+
         this.transport = Fuse.Ajax.getTransport();
-        this.onStateChange = bind(this.onStateChange, this);
-        this.onTimeout = bind(this.onTimeout, this);
+        this.onTimeout = function() { onTimeout.call(request) };
+        this.onStateChange =
+          function(event, forceState) { onStateChange.call(request, event, forceState) };
+
         this.request(url, options);
       }
       return Request;
@@ -21,7 +26,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    var matchHTTP = /^https?:/;
+    var matchHTTP = /^https?:/,
+      Responders = Fuse.Ajax.Responders;
 
     this._useStatus   = true;
     this._timerID     = null;
@@ -54,13 +60,13 @@
       } catch (e) {
         this.dispatchException(e);
       }
-      Fuse.Ajax.Responders.dispatch(eventName, this, this.headerJSON);
+      Responders && Responders.dispatch(eventName, this, this.headerJSON);
     };
 
     this.dispatchException = function dispatchException(exception) {
       var callback = this.options.onException;
       callback && callback(this, exception);
-      Fuse.Ajax.Responders.dispatch('onException', this, exception);
+      Responders && Responders.dispatch('onException', this, exception);
 
       // throw error if not caught by a request onException handler
       if (!callback) throw exception;
@@ -165,11 +171,12 @@
     };
 
     this.setReadyState = function setReadyState(readyState) {
-      var eventName, json, status, statusText, successOrFailure, i = 0,
+      var eventName, json, responseText, status, statusText, successOrFailure, i = 0,
        aborted    = this.aborted,
        eventNames = [],
        skipped    = { },
        options    = this.options,
+       evalJSON   = options.evalJSON,
        timedout   = this.timedout,
        transport  = this.transport,
        url        = this.url;
@@ -187,7 +194,7 @@
         this.status       = Fuse.Number(0);
         this.statusText   = Fuse.String('');
       }
-      else if (readyState > 1 ) {
+      else if (readyState > 1) {
         // Request status/statusText have really bad cross-browser consistency.
         // Monsur Hossain has done an exceptional job cataloging the cross-browser
         // differences.
@@ -213,9 +220,12 @@
         // set responseText
         if (readyState > 2) {
           // IE will throw an error when accessing responseText in state 3
-          try { this.responseText = Fuse.String.interpret(transport.responseText) } catch (e) { }
+          try {
+            if (responseText = transport.responseText)
+              this.responseText = Fuse.String(responseText);
+          } catch (e) { }
         }
-        else if (readyState == 2 &&
+        else if (readyState == 2 && evalJSON &&
             (json = this.getHeader('X-JSON')) && json != '') {
           // set headerJSON
           try {
@@ -230,9 +240,9 @@
         var responseXML,
          contentType = this.getHeader('Content-type') || '',
          evalJS = options.evalJS,
-         evalJSON = options.evalJSON,
-         responseText = this.responseText,
          timerID = this._timerID;
+
+        responseText = this.responseText;
 
         // typecast status to string
         status = String(status);

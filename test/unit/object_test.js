@@ -167,18 +167,18 @@ new Test.Unit.Runner({
   },
 
   'testObjectIsHash': function() {
-    this.assert(Fuse.Object.isHash($H()));
-    this.assert(Fuse.Object.isHash(Fuse.Hash()));
+    this.assertIdentical(true, Fuse.Object.isHash($H()));
+    this.assertIdentical(true, Fuse.Object.isHash(Fuse.Hash()));
 
-    this.assert(!Fuse.Object.isHash({}));
-    this.assert(!Fuse.Object.isHash(null));
-    this.assert(!Fuse.Object.isHash());
-    this.assert(!Fuse.Object.isHash(''));
-    this.assert(!Fuse.Object.isHash(2));
-    this.assert(!Fuse.Object.isHash(false));
-    this.assert(!Fuse.Object.isHash(true));
-    this.assert(!Fuse.Object.isHash([]));
-    this.assert(!Fuse.Object.isHash(Fuse.Hash.prototype));
+    this.assertIdentical(false, Fuse.Object.isHash({}));
+    this.assertIdentical(false, Fuse.Object.isHash(null));
+    this.assertIdentical(false, Fuse.Object.isHash());
+    this.assertIdentical(false, Fuse.Object.isHash(''));
+    this.assertIdentical(false, Fuse.Object.isHash(2));
+    this.assertIdentical(false, Fuse.Object.isHash(false));
+    this.assertIdentical(false, Fuse.Object.isHash(true));
+    this.assertIdentical(false, Fuse.Object.isHash([]));
+    this.assertIdentical(false, Fuse.Object.isHash(Fuse.Hash.prototype));
 
     // falsy variables should not mess up return value type
     this.assertIdentical(false, Fuse.Object.isHash(0));

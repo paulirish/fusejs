@@ -199,8 +199,26 @@
 
   Event.Methods = { };
 
-  (function() {
-    this.element = function element(event) {
+  (function(methods) {
+    // lazy define on first call
+    var isButton = function(event, mouseButton) {
+      var property = (typeof event.which === 'number')
+       ? 'which' : (typeof event.button === 'number')
+         ? 'button' : false;
+
+      var buttonMap = (property === 'button')
+        ? { 'left': 1, 'middle': 4, 'right': 2 }
+        : { 'left': 1, 'middle': 2, 'right': 3 };
+
+      return (_isButton = (property === false)
+        ? function() { return false }
+        : function(event, mouseButton) {
+            return event[property] === buttonMap[mouseButton];
+          }
+      )(event, mouseButton);
+    };
+
+    methods.element = function element(event) {
       event = Event.extend(event);
       var node = event.target, type = event.type,
        currentTarget = event.currentTarget;
@@ -221,18 +239,30 @@
         node.parentNode : node);
     };
 
-    this.findElement = function findElement(event, selector) {
+    methods.findElement = function findElement(event, selector) {
       var element = Event.element(event);
       if (!selector || selector == null) return element;
       return Fuse.Dom.Selector.match(element, selector) ? element :
         Element.up(element, selector);
     };
 
-    this.pointer = function pointer(event) {
+    methods.isLeftClick = function isLeftClick(event) {
+      return isButton(event, 'left');
+    };
+
+    methods.isMiddleClick = function isMiddleClick(event) {
+      return isButton(event, 'middle');
+    };
+
+    methods.isRightClick = function isRightClick(event) {
+      return isButton(event, 'right');
+    };
+
+    methods.pointer = function pointer(event) {
       return { 'x': Event.pointerX(event), 'y': Event.pointerY(event) };
     };
 
-    this.stop = function stop(event) {
+    methods.stop = function stop(event) {
       // Set a "stopped" property so that a custom event can be inspected
       // after the fact to determine whether or not it was stopped.
       event = Event.extend(event);
@@ -242,70 +272,43 @@
     };
 
     // prevent JScript bug with named function expressions
-    var element = null, findElement = null, pointer = null, stop = null;
-  }).call(Event.Methods);
-
-  (function() {
-    var isButton = function(event, mouseButton) {
-      var property = (typeof event.which === 'number')
-       ? 'which' : (typeof event.button === 'number')
-         ? 'button' : false;
-
-      var buttonMap = (property === 'button')
-        ? { 'left': 1, 'middle': 4, 'right': 2 }
-        : { 'left': 1, 'middle': 2, 'right': 3 };
-
-      return (_isButton = (property === false)
-        ? function() { return false }
-        : function(event, mouseButton) {
-            return event[property] === buttonMap[mouseButton];
-          }
-      )(event, mouseButton);
-    };
-
-    this.isLeftClick = function isLeftClick(event) {
-      return isButton(event, 'left');
-    };
-
-    this.isMiddleClick = function isMiddleClick(event) {
-      return isButton(event, 'middle');
-    };
-
-    this.isRightClick = function isRightClick(event) {
-      return isButton(event, 'right');
-    };
-
-    // prevent JScript bug with named function expressions
-    var isLeftClick = null, isMiddleClick = null, isRightClick = null;
-  }).call(Event.Methods);
+    var element =    null,
+     findElement =   null,
+     isLeftClick =   null,
+     isMiddleClick = null,
+     isRightClick =  null,
+     pointer =       null,
+     stop =          null;
+  })(Event.Methods);
 
   // lazy define Event.pointerX() and Event.pointerY()
-  (function(m) {
+  (function(methods) {
     function define(methodName, event) {
       if (!Fuse._body) return 0;
       if (typeof event.pageX === 'number') {
-        Event.pointerX = m.pointerX = function(event) { return event.pageX };
-        Event.pointerY = m.pointerY = function(event) { return event.pageY };
+        Event.pointerX = methods.pointerX = function(event) { return event.pageX };
+        Event.pointerY = methods.pointerY = function(event) { return event.pageY };
       }
       else {
-        Event.pointerX = m.pointerX = function(event) {
+        Event.pointerX = methods.pointerX = function(event) {
           var info = Fuse._info, doc = getDocument(event.srcElement || global),
            result = event.clientX + doc[info.scrollEl.property].scrollLeft -
              doc[info.root.property].clientLeft;
           return result > -1 ? result : 0;
         };
 
-        Event.pointerY = m.pointerY = function(event) {
+        Event.pointerY = methods.pointerY = function(event) {
           var info = Fuse._info, doc = getDocument(event.srcElement || global),
            result = event.clientY + doc[info.scrollEl.property].scrollTop -
              doc[info.root.property].clientTop;
            return result > -1 ? result : 0;
         };
       }
-      return m[methodName](event);
+      return methods[methodName](event);
     }
-    m.pointerX = Func.curry(define, 'pointerX');
-    m.pointerY = Func.curry(define, 'pointerY');
+
+    methods.pointerX = Func.curry(define, 'pointerX');
+    methods.pointerY = Func.curry(define, 'pointerY');
   })(Event.Methods);
 
   /*--------------------------------------------------------------------------*/
@@ -314,7 +317,6 @@
     var Methods;
 
     function addLevel2Methods(event) {
-      event.inspect         = inspect;
       event.preventDefault  = preventDefault;
       event.stopPropagation = stopPropagation;
 
@@ -380,10 +382,6 @@
         : event;
     }
 
-    function inspect() {
-      return '[object Event]';
-    }
-
     function preventDefault() {
       this.returnValue = false;
     }
@@ -428,17 +426,17 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function() {
-    var _addCache        = this.Temp.addCache,
-     _addObserver        = this.Temp.addObserver,
-     _createEvent        = this.Temp.createEvent,
-     _fireEvent          = this.Temp.fireEvent,
-     _getCacheID         = this.Temp.getCacheID,
-     _getNewCacheID      = this.Temp.getNewCacheID,
-     _removeCacheAtIndex = this.Temp.removeCacheAtIndex,
-     _removeObserver     = this.Temp.removeObserver;
+  (function(temp) {
+    var _addCache        = temp.addCache,
+     _addObserver        = temp.addObserver,
+     _createEvent        = temp.createEvent,
+     _fireEvent          = temp.fireEvent,
+     _getCacheID         = temp.getCacheID,
+     _getNewCacheID      = temp.getNewCacheID,
+     _removeCacheAtIndex = temp.removeCacheAtIndex,
+     _removeObserver     = temp.removeObserver;
 
-    this.fire = function fire(element, eventName, memo) {
+    Event.fire = function fire(element, eventName, memo) {
       element = $(element);
 
       var event = _createEvent(element, Event.CUSTOM_EVENT_NAME);
@@ -449,7 +447,7 @@
       return Event.extend(event);
     };
 
-    this.getEventID = function getEventID() {
+    Event.getEventID = function getEventID() {
       // handle calls from Event object
       if (this != global) {
         var element = arguments[0];
@@ -470,7 +468,7 @@
       })();
     };
 
-    this.observe = function observe(element, eventName, handler) {
+    Event.observe = function observe(element, eventName, handler) {
       element = $(element);
       var dispatcher = _addCache(element, eventName, handler);
       if (!dispatcher) return element;
@@ -478,7 +476,7 @@
       return element;
     };
 
-    this.stopObserving = function stopObserving(element, eventName, handler) {
+    Event.stopObserving = function stopObserving(element, eventName, handler) {
       element = $(element);
       eventName = isString(eventName) ? eventName : null;
       var id = _getCacheID(element), c = Event.cache[id];
@@ -516,7 +514,7 @@
 
     // prevent JScript bug with named function expressions
     var fire = null, getEventID = null, observe = null, stopObserving = null;
-  }).call(Event);
+  })(Event.Temp);
 
   /*--------------------------------------------------------------------------*/
 
