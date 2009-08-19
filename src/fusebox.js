@@ -634,7 +634,7 @@
     }
 
     function updateGenerics() {
-      var c, j, n, names, object, i = 0,
+      var c, j, n, name, names, object, i = 0,
        cache = Fuse.Fusebox.prototype.updateGenerics.cache,
        forIn = eachKey || _forIn,
        natives = arguments.length ? arguments : _natives;

@@ -1,3 +1,5 @@
+* Fix leaked variable `name` that caused TaskSpeed to error in WebKit based browsers. [Diego Perini]
+
 * Refactor codebase to reduce file dependencies and allow more custom build variations. [jddalton]
 
 * Cleanup codebase and optimize Element class. [jddalton, kangax]
