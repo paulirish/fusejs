@@ -1,23 +1,28 @@
   /*------------------------------- LANG: GREP -------------------------------*/
 
   (function() {
-    Fuse.Array.prototype.grep = function grep(pattern, callback, thisArg) {
-      if (this == null) throw new TypeError;
-      if (!pattern || pattern == '' || isRegExp(pattern) &&
-         !pattern.source) return Fuse.Array.toArray(this);
+    Fuse.Array.prototype.grep = (function() {
+      function grep(pattern, callback, thisArg) {
+        if (this == null) throw new TypeError;
+        if (toArray && (!pattern || pattern == '' || isRegExp(pattern) &&
+           !pattern.source)) return toArray.call(this);
 
-      callback = callback || K;
-      var item, i = 0, results = Fuse.Array(), object = Object(this),
-       length = object.length >>> 0;
+        callback = callback || K;
+        var item, i = 0, results = Fuse.Array(), object = Object(this),
+         length = object.length >>> 0;
 
-      if (isString(pattern))
-        pattern = new RegExp(escapeRegExpChars(pattern));
+        if (isString(pattern))
+          pattern = new RegExp(escapeRegExpChars(pattern));
 
-      for ( ; i < length; i++)
-        if (i in object && pattern.test(object[i]))
-          results.push(callback.call(thisArg, object[i], i, object));
-      return results;
-    };
+        for ( ; i < length; i++)
+          if (i in object && pattern.test(object[i]))
+            results.push(callback.call(thisArg, object[i], i, object));
+        return results;
+      }
+
+      var toArray = Fuse.Array.prototype.toArray;
+      return grep;
+    })();
 
     if (Fuse.Enumerable)
       Fuse.Enumerable.prototype.grep = function grep(pattern, callback, thisArg) {
