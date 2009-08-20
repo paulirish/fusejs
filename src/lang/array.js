@@ -80,6 +80,86 @@
       return results;
     };
 
+    proto.flatten = function flatten() {
+      if (this == null) throw new TypeError;
+      var i = 0, results = Fuse.Array(),
+       object = Object(this), length = object.length >>> 0;
+
+      for ( ; i < length; i++) {
+        if (isArray(object[i]))
+          concatList(results, proto.flatten.call(object[i]));
+        else results.push(object[i]);
+      }
+      return results;
+    };
+
+    proto.insert = function insert(index, value) {
+      if (this == null) throw new TypeError;
+      var object = Object(this),
+       length = object.length >>> 0;
+
+      if (length < index) object.length = index;
+      if (index < 0) index = length;
+      if (arguments.length > 2)
+        proto.splice.apply(object, concatList([index, 0], slice.call(arguments, 1)));
+      else proto.splice.call(object, index, 0, value);
+      return object;
+    };
+
+    proto.unique = function unique() {
+      var item, i = 0, results = Fuse.Array(), object = Object(this),
+       length = object.length >>> 0;
+
+      for ( ; i < length; i++)
+        if (i in object && !results.contains(item = object[i]))
+          results.push(item);
+      return results;
+    };
+
+    proto.without = function without() {
+      if (this == null) throw new TypeError;
+      var i = 0, args = slice.call(arguments, 0), indexOf = proto.indexOf,
+       results = Fuse.Array(), object = Object(this),
+       length = object.length >>> 0;
+
+      for ( ; i < length; i++)
+        if (i in object && indexOf.call(args, object[i]) == -1)
+          results.push(object[i]);
+      return results;
+    };
+
+    /* Create optimized Enumerable equivalents */
+
+    proto.contains = (function() {
+      var contains = function contains(value) {
+        if (this == null) throw new TypeError;
+        var item, object = Object(this), length = object.length >>> 0;
+
+        while (length--) {
+          if (length in object) {
+            // basic strict match
+            if ((item = object[length]) === value) return true;
+            // match String and Number object instances
+            try { if (item.valueOf() === value.valueOf()) return true } catch (e) { }
+          }
+        }
+        return false;
+      };
+
+      if (typeof proto.indexOf === 'function') {
+        var __contains = contains;
+        contains = function contains(value) {
+          // attempt a fast strict search first
+          if (this == null) throw new TypeError;
+          var object = Object(this);
+
+          if (proto.indexOf.call(object, value) > -1) return true;
+          return __contains.call(object, value);
+        };
+      }
+      return contains;
+    })();
+
     proto.each = function each(callback, thisArg) {
       try {
         proto.forEach.call(this, callback, thisArg);
@@ -111,125 +191,6 @@
       }
     };
 
-    proto.flatten = function flatten() {
-      if (this == null) throw new TypeError;
-      var i = 0, results = Fuse.Array(),
-       object = Object(this), length = object.length >>> 0;
-
-      for ( ; i < length; i++) {
-        if (isArray(object[i]))
-          concatList(results, proto.flatten.call(object[i]));
-        else results.push(object[i]);
-      }
-      return results;
-    };
-
-    proto.insert = function insert(index, value) {
-      if (this == null) throw new TypeError;
-      var object = Object(this),
-       length = object.length >>> 0;
-
-      if (length < index) object.length = index;
-      if (index < 0) index = length;
-      if (arguments.length > 2)
-        proto.splice.apply(object, concatList([index, 0], slice.call(arguments, 1)));
-      else proto.splice.call(object, index, 0, value);
-      return object;
-    };
-
-    proto.intersect = function intersect(array) {
-      if (this == null) throw new TypeError;
-      var item, i = 0, indexOf = proto.indexOf, results = Fuse.Array(),
-       object = Object(this), length = object.length >>> 0;
-
-      for ( ; i < length; i++) {
-        item = array[i];
-        if (i in object && indexOf.call(object, item) != -1 &&
-            results.indexOf(item) == -1)
-          results.push(item);
-      }
-      return results;
-    };
-
-    proto.last = function last(callback, thisArg) {
-      if (this == null) throw new TypeError;
-      var object = Object(this), length = object.length >>> 0;
-
-      if (callback == null)
-        return object[length && length - 1];
-      if (typeof callback === 'function') {
-        while (length--)
-          if (callback.call(thisArg, object[length], length, object))
-            return object[length];
-      }
-      else {
-        var results = Fuse.Array(), count = 1 * callback;
-        if (isNaN(count)) return results;
-
-        count = count < 1 ? 1 : count > length ? length : count;
-        return proto.slice.call(object, length - count);
-      }
-    };
-
-    proto.size = function size() {
-      if (this == null) throw new TypeError;
-      return Fuse.Number(Object(this).length >>> 0);
-    };
-
-    proto.unique = function unique() {
-      var i = 0, results = Fuse.Array(), object = Object(this),
-       length = object.length >>> 0;
-
-      for ( ; i < length; i++)
-        if (i in object && results.indexOf(object[i]) == -1)
-          results.push(object[i]);
-      return results;
-    };
-
-    proto.without = function without() {
-      if (this == null) throw new TypeError;
-      var i = 0, args = slice.call(arguments, 0), indexOf = proto.indexOf,
-       results = Fuse.Array(), object = Object(this),
-       length = object.length >>> 0;
-
-      for ( ; i < length; i++)
-        if (i in object && indexOf.call(args, object[i]) == -1)
-          results.push(object[i]);
-      return results;
-    };
-
-    /* Create optimized Enumerable equivalents */
-
-    proto.contains = (function() {
-      var contains = function contains(value, strict) {
-        if (this == null) throw new TypeError;
-        var object = Object(this), length = object.length >>> 0;
-
-        if (strict) {
-          while (length--)
-            if (length in object && object[length] === value) return true;
-        } else {
-          while (length--)
-            if (length in object && object[length] == value) return true;
-        }
-        return false;
-      };
-
-      if (typeof proto.indexOf === 'function') {
-        var _contains = contains;
-        contains = function contains(value, strict) {
-          // attempt a fast strict search first
-          if (this == null) throw new TypeError;
-          var object = Object(this),
-           result = proto.indexOf.call(object, value) != -1;
-
-          if (strict || result) return result;
-          return _contains.call(object, value);
-        };
-      }
-      return contains;
-    })();
-
     proto.inject = (function() {
       var inject = function inject(accumulator, callback, thisArg) {
         if (this == null) throw new TypeError;
@@ -258,6 +219,24 @@
       return inject;
     })();
 
+    proto.intersect = (function() {
+      function intersect(array) {
+        if (this == null) throw new TypeError;
+        var item, i = 0, results = Fuse.Array(),
+         object = Object(this), length = object.length >>> 0;
+
+        for ( ; i < length; i++) {
+          if (i in object &&
+              contains.call(array, item = object[i]) && !results.contains(item))
+            results.push(item);
+        }
+        return results;
+      }
+
+      var contains = proto.contains;
+      return intersect;
+    })();
+
     proto.invoke = function invoke(method) {
       if (this == null) throw new TypeError;
       var args, i = 0, results = Fuse.Array(), object = Object(this),
@@ -272,6 +251,26 @@
           results[length] = funcProto.apply.call(object[length][method], object[length], args);
       }
       return results;
+    };
+
+    proto.last = function last(callback, thisArg) {
+      if (this == null) throw new TypeError;
+      var object = Object(this), length = object.length >>> 0;
+
+      if (callback == null)
+        return object[length && length - 1];
+      if (typeof callback === 'function') {
+        while (length--)
+          if (callback.call(thisArg, object[length], length, object))
+            return object[length];
+      }
+      else {
+        var results = Fuse.Array(), count = 1 * callback;
+        if (isNaN(count)) return results;
+
+        count = count < 1 ? 1 : count > length ? length : count;
+        return proto.slice.call(object, length - count);
+      }
     };
 
     proto.max = function max(callback, thisArg) {
@@ -347,6 +346,11 @@
       return results;
     };
 
+    proto.size = function size() {
+      if (this == null) throw new TypeError;
+      return Fuse.Number(Object(this).length >>> 0);
+    };
+
     proto.sortBy = function sortBy(callback, thisArg) {
       if (this == null) throw new TypeError;
 
@@ -394,7 +398,6 @@
      first =     null,
      flatten =   null,
      insert =    null,
-     intersect = null,
      invoke =    null,
      last =      null,
      max =       null,

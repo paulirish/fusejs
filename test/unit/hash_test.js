@@ -72,6 +72,12 @@ new Test.Unit.Runner({
 
     this.assert(!$H(Fixtures.many).contains('Z'));
     this.assert(!$H().contains('foo'));
+
+    this.assert($H(Fixtures.value_zero).contains(Fuse.Number(0)),
+      'Should match Number object instances');
+
+    this.assert($H(Fixtures.many).contains(Fuse.String('A')),
+      'Should match String object instances');
   },
 
   'testFilter': function() {

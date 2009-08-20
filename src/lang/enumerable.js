@@ -3,12 +3,16 @@
   Fuse.addNS('Enumerable');
 
   (function(proto) {
-    proto.contains = function contains(object, strict) {
+    proto.contains = function contains(value) {
       var result = 0;
-      if (strict)
-        this.each(function(value) { if (value === object && result++) throw $break; });
-      else
-        this.each(function(value) { if (value == object && result++) throw $break; });
+      this.each(function(item) {
+        // basic strict match
+        if (item === value && result++) throw $break; 
+        // match String and Number object instances
+        try { if (item.valueOf() === value.valueOf() && result++) throw $break; }
+        catch (e) { }
+      });
+
       return !!result;
     };
 

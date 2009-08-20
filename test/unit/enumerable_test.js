@@ -59,12 +59,16 @@ new Test.Unit.Runner({
     this.assert(Fixtures.Nicknames.contains('sam-'));
     this.assert(Fixtures.Nicknames.contains('noradio'));
     this.assert(Fixtures.Basic.contains(2));
-    this.assert(Fixtures.Basic.contains(2, true));
-    this.assert(Fixtures.Basic.contains('2'));
 
     this.assert(!Fixtures.Nicknames.contains('gmosx'));
-    this.assert(!Fixtures.Basic.contains('2', true));
+    this.assert(!Fixtures.Basic.contains('2'));
     this.assert(!Fixtures.Basic.contains('4'));
+
+    this.assert(Fixtures.Basic.contains(Fuse.Number(2)),
+      'Should match Number object instances');
+
+    this.assert(Fixtures.Nicknames.contains(Fuse.String('sam-')),
+      'Should match String object instances');
   },
 
   'testEvery': function() {

@@ -1,3 +1,5 @@
+* Remove `strict` flag from the `contains` methods and allow native/sandboxed object instances to match primitive values. [jddalton]
+
 * Remove lingering Fuse.Array#clone dependency from the Fuse.Array#grep addition. [jddalton]
 
 * Fix leaked variable `name` that caused TaskSpeed to error in WebKit based browsers. [Diego Perini]

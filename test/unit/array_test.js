@@ -6,7 +6,7 @@ new Test.Unit.Runner({
 
     this.assertEnumEqual(['a', 'b', 'c'], $A(['a', 'b', 'c']), 'simple array');
     this.assertEnumEqual(['a', 'b', 'c'], $A('abc'), 'string value');
- 
+
     this.assertEnumEqual(['x'],
       $A({ 'toArray': function() { return ['x'] } }),
       'toArray');
@@ -132,24 +132,25 @@ new Test.Unit.Runner({
   },
 
   'testContains': function() {
-    var names = Fuse.List('joe', 'john', 'zach');
-    var basic = Fuse.List(1, 2, 3);
+    var basic = Fuse.List(1, 2, 3),
+     names = Fuse.List('joe', 'john', 'kit');
+
     this.assert(names.contains('joe'));
-    this.assert(names.contains('joe', true));
-    this.assert(!names.contains('gizmo'));
+    this.assert(!names.contains('dagny'));
 
     this.assert(basic.contains(2));
-    this.assert(basic.contains('2'));
-    this.assert(!basic.contains('2', true));
+    this.assert(!basic.contains('2'));
     this.assert(!basic.contains('4'));
+
+    this.assert(basic.contains(Fuse.Number(2)),
+      'Should match Number object instances');
+
+    this.assert(names.contains(Fuse.String('kit')),
+      'Should match String object instances');
 
     this.assert(
       Fuse.List.Plugin.contains.call(Fixtures.Object, 2),
       'called with an object as the `this` value');
-
-    this.assert(
-      !Fuse.List.Plugin.contains.call(Fixtures.Object, '2', true),
-      'called with an object as the `this` value and strict matching');
   },
 
  'testEach': function() {
@@ -375,23 +376,36 @@ new Test.Unit.Runner({
   },
 
   'testIntersect': function() {
-    this.assertEnumEqual([1, 3], Fuse.List(1, 1, 3, 5).intersect([1, 2, 3]));
-    this.assertEnumEqual([1],    Fuse.List(1, 1).intersect([1, 1]));
-    this.assertEnumEqual([0],    Fuse.List(0, 2).intersect([1, 0]));
-    this.assertEnumEqual([],     Fuse.List(1, 1, 3, 5).intersect([4]));
-    this.assertEnumEqual([],     Fuse.List.create(1).intersect(['1']));
+    this.assertEnumEqual([1, 3], Fuse.List(1, '2', 3).intersect([1, 2, 3]),
+      'Should have performed a strict match');
 
-    this.assertEnumEqual(
-      ['B', 'C', 'D'],
-      $R('A', 'Z').toArray().intersect($R('B', 'D').toArray())
-    );
+    this.assertEnumEqual([1], Fuse.List(1, 1).intersect([1, 1]),
+      'Should only return one match even if the value is at more than one index');
+
+    this.assertEnumEqual([0], Fuse.List(0, 2).intersect([1, 0]),
+      'Should have matched the falsy number 0');
+
+    this.assertEnumEqual([], Fuse.List(1, 1, 3, 5).intersect([4]),
+      'Should not have matched the number 4');
+
+    this.assertEnumEqual([1, 2, 3],
+      $R(1, 10).toArray().intersect([1, 2, 3]),
+      'Should match Number object instances');
+
+    this.assertEnumEqual(['B', 'C', 'D'],
+      $R('A', 'Z').toArray().intersect($R('B', 'D').toArray()),
+      'Should match String object instances');
+
+    this.assertEnumEqual([1, 2, 3],
+      Fuse.List(1,2,3, Fuse.Number(2)).intersect([1, 2, 3]),
+      'Should return only one entry with a valueOf 2');
 
     var object = Fuse.Object.clone(Fixtures.Object);
     object['1'] = undef;
 
     this.assertEnumEqual([0, 2],
       Fuse.List.Plugin.intersect.call(Fixtures.Object, object),
-      'called with an object as the `this` value');
+      'Failed when called with an object as the `this` value');
   },
 
   'testInvoke': function() {
@@ -507,7 +521,7 @@ new Test.Unit.Runner({
     this.assertEqual(2,
       Fuse.List(-9, -8, -7, -6, -4, -3, -2,  0, -1,  2).max(),
       'failed with negative and positive numbers');
-    
+
     this.assertEqual('kangax',
       Fixtures.Nicknames.max(),
       'failed comparing string values'); // ?s > ?U

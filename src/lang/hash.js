@@ -168,27 +168,28 @@
     };
 
     proto.clone = (function() {
-      function clone() { return $H(this) };
+      function clone() { return new $H(this) };
       return clone;
     })();
 
-    proto.contains = function contains(value, strict) {
-      var pair, i = 0, pairs = this._pairs;
-      if (strict) {
-        while (pair = pairs[i++]) if (value === pair[1]) return true;
-      } else {
-        while (pair = pairs[i++]) if (value == pair[1]) return true;
+    proto.contains = function contains(value) {
+      var item, pair, i = 0, pairs = this._pairs;
+      while (pair = pairs[i++]) {
+        // basic strict match
+        if ((item = pair[1]) === value) return true;
+        // match String and Number object instances
+        try { if (item.valueOf() === value.valueOf()) return true } catch (e) { }
       }
       return false;
     };
 
     proto.filter = function filter(callback, thisArg) {
-      var pair, i = 0, pairs = this._pairs, result = new $H();
+      var key, pair, value, i = 0, pairs = this._pairs, result = new $H();
       callback = callback || function(value) { return value != null };
 
       while (pair = pairs[i++]) {
-        if (callback.call(thisArg, pair[1], pair[0], this))
-          result.set(pair[0], pair[1]);
+        if (callback.call(thisArg, value = pair[1], key = pair[0], this))
+          result.set(key, value);
       }
       return result;
     };
