@@ -5,8 +5,8 @@
     return escape;
   })();
 
-  (function(proto) {
-    proto.clone = function clone(options) {
+  (function(plugin) {
+    plugin.clone = function clone(options) {
       options = _extend({
         'global':     this.global,
         'ignoreCase': this.ignoreCase,
@@ -20,8 +20,8 @@
     };
 
     // alias
-    proto.match = proto.test;
+    plugin.match = plugin.test;
 
     // prevent JScript bug with named function expressions
     var clone = null;
-  })(Fuse.RegExp.Plugin);
+  })(Fuse.RegExp.plugin);

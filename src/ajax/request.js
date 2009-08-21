@@ -328,4 +328,4 @@
      onTimeout =         null,
      request =           null,
      setReadyState =     null;
-  }).call(Fuse.Ajax.Request.Plugin);
+  }).call(Fuse.Ajax.Request.plugin);

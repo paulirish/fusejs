@@ -27,15 +27,15 @@
       })()
     });
 
-    (function(proto) {
-      proto.onElementEvent = function onElementEvent() {
+    (function(plugin) {
+      plugin.onElementEvent = function onElementEvent() {
         var value = this.getValue();
         if (this.lastValue === value) return;
         this.callback(this.element, value);
         this.lastValue = value;
       };
 
-      proto.registerCallback = function registerCallback(element) {
+      plugin.registerCallback = function registerCallback(element) {
         if (!element.type) return;
         var eventName = 'change', type = element.type;
         if (type === 'checkbox' || type === 'radio')
@@ -43,14 +43,14 @@
         Event.observe(element, eventName, this.onElementEvent);
       };
 
-      proto.registerFormCallbacks = function registerFormCallbacks() {
+      plugin.registerFormCallbacks = function registerFormCallbacks() {
         var element, elements = Form.getElements(this.element), i= 0;
         while (element = elements[i++]) this.registerCallback(element);
       };
 
       // prevent JScript bug with named function expressions
       var onElementEvent = null, registerCallback = null, registerFormCallbacks = null;
-    })(BaseEventObserver.Plugin);
+    })(BaseEventObserver.plugin);
 
   /*--------------------------------------------------------------------------*/
 

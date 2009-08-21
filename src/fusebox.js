@@ -26,12 +26,12 @@
         Fuse.Fusebox._createStatics.call(this, sandbox);
         Fuse.Fusebox._wrapAccessorMethods.call(this, sandbox);
 
-        // assign prototype properties, Plugin alias, and static updateGenerics method
+        // assign prototype properties, plugin alias, and static updateGenerics method
         var n, i = 0;
         while (n = natives[i++]) {
           this[n].constructor = this;
           this[n].prototype.constructor = this[n];
-          this[n].Plugin = this[n].prototype;
+          this[n].plugin = this[n].prototype;
 
           if (n !== 'Object') this[n].updateGenerics = new Function('', [
             'function updateGenerics() {',
@@ -654,7 +654,7 @@
         // convert additional methods: _forIn is safe the first time because
         // we have avoided problem properties
         forIn(object.prototype, function(value, key) {
-          if (!c[key] && !/^(constructor|prototype|Plugin)$/.test(key))
+          if (!c[key] && !/^(constructor|prototype|plugin)$/.test(key))
             object[key] = c[key] = _createGeneric(key);
         });
       }

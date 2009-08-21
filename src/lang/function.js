@@ -33,9 +33,9 @@
     };
     // native support
     if (typeof Func.prototype.bind === 'function') {
-      var proto = Func.prototype;
+      var plugin = Func.plugin;
       bind = function bind(fn, thisArg) {
-        return proto.bind.call(f || thisArg[name], thisArg);
+        return plugin.bind.call(f || thisArg[name], thisArg);
       };
     }
     return bind;
@@ -153,16 +153,16 @@
 
   (function() {
     var name, i = 0,
-     cache = Fuse.updateGenerics.cache,
-     proto = Func.prototype,
-     names = ['argumentNames', 'bind', 'bindAdEventListener', 'curry', 'delay', 'defer', 'methodize', 'wrap'];
+     cache  = Fuse.updateGenerics.cache,
+     plugin = Func.plugin,
+     names  = ['argumentNames', 'bind', 'bindAdEventListener', 'curry', 'delay', 'defer', 'methodize', 'wrap'];
 
     cache.Function = { };
 
     while (name = names[i++]) {
       cache.Function[name] = Func[name];
-      if (proto[name] !== 'function') {
-        proto[name] = new Function('global', [
+      if (plugin[name] !== 'function') {
+        plugin[name] = new Function('global', [
           'var Func = Fuse.Function, slice = Array.prototype.slice;',
           'function ' + name + '() {',
           'return arguments.length',

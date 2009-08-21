@@ -1,7 +1,7 @@
   /*------------------------------- LANG: GREP -------------------------------*/
 
   (function() {
-    Fuse.Array.prototype.grep = (function() {
+    Fuse.Array.plugin.grep = (function() {
       function grep(pattern, callback, thisArg) {
         if (this == null) throw new TypeError;
         if (toArray && (!pattern || pattern == '' || isRegExp(pattern) &&
@@ -20,12 +20,12 @@
         return results;
       }
 
-      var toArray = Fuse.Array.prototype.toArray;
+      var toArray = Fuse.Array.plugin.toArray;
       return grep;
     })();
 
     if (Fuse.Enumerable)
-      Fuse.Enumerable.prototype.grep = function grep(pattern, callback, thisArg) {
+      Fuse.Enumerable.plugin.grep = function grep(pattern, callback, thisArg) {
         if (!pattern || pattern == '' || isRegExp(pattern) &&
            !pattern.source) return this.toList();
 
@@ -42,7 +42,7 @@
       };
 
     if (Fuse.Hash)
-      Fuse.Hash.prototype.grep = function grep(pattern, callback, thisArg) {
+      Fuse.Hash.plugin.grep = function grep(pattern, callback, thisArg) {
         if (!pattern || pattern == '' || isRegExp(pattern) &&
            !pattern.source) return this.clone();
 

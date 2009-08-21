@@ -44,8 +44,8 @@
 
       klass.superclass = parent;
       klass.subclasses = Fuse.List();
-      klass.Plugin = klass.prototype;
-      klass.Plugin.constructor = klass;
+      klass.plugin = klass.prototype;
+      klass.plugin.constructor = klass;
       return klass;
     }
 
@@ -102,7 +102,7 @@
 
   // replace placeholder objects with inheritable classes
   global.Fuse = Fuse.Class({ 'constructor': Fuse });
-  Fuse.Plugin = Fuse.prototype = Obj.prototype;
+  Fuse.prototype = Fuse.plugin = Obj.plugin;
 
   Fuse.Env = _extend(Fuse.Class(Fuse,
     { 'constructor': 'Env' }), Fuse.Env);

@@ -20,7 +20,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto) {
+  (function(plugin) {
     function buildCache(thisArg, callback) {
       var c = thisArg._cache = Fuse.List(), i = 0,
        value = c.start = thisArg.start = Fuse.Object(thisArg.start);
@@ -58,7 +58,7 @@
       return value <= thisArg.end;
     }
 
-    proto._each = function _each(callback) {
+    plugin._each = function _each(callback) {
       if (isExpired(this)) buildCache(this, callback);
       else {
         var c = this._cache, i = 0, length = c.length;
@@ -66,7 +66,7 @@
       }
     };
 
-    proto.max = (function(__max) {
+    plugin.max = (function(__max) {
       function max(callback, thisArg) {
         var result;
         if (!callback && !isExpired(this))
@@ -75,18 +75,18 @@
         return result;
       }
       return max;
-    })(proto.max);
+    })(plugin.max);
 
-    proto.min = (function(__min) {
+    plugin.min = (function(__min) {
       function min(callback, thisArg) {
         return !callback
           ? this.start
           : __min.call(this, callback, thisArg);
       }
       return min;
-    })(proto.min);
+    })(plugin.min);
 
-    proto.size = function size() {
+    plugin.size = function size() {
       var c = this._cache;
       if (isExpired(this)) {
         if (isNumber(this.start) && isNumber(this.end))
@@ -96,23 +96,23 @@
       return Fuse.Number(this._cache.length);
     };
 
-    proto.toArray = function toArray() {
+    plugin.toArray = function toArray() {
       isExpired(this) && buildCache(this);
       return Fuse.List.fromArray(this._cache);
     };
 
     // prevent JScript bug with named function expressions
     var _each = null, size = null, toArray = null;
-  })(Fuse.Range.Plugin);
+  })(Fuse.Range.plugin);
 
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    Fuse.Number.prototype.succ = function succ() {
+    Fuse.Number.plugin.succ = function succ() {
       return Fuse.Number(toInteger(this) + 1);
     };
 
-    Fuse.String.prototype.succ = function succ() {
+    Fuse.String.plugin.succ = function succ() {
       if (this == null) throw new TypeError;
       var index = this.length -1;
       return Fuse.String(this.slice(0, index) +

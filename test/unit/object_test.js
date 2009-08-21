@@ -485,7 +485,7 @@ new Test.Unit.Runner({
     for (property in obj) iterations++;
     this.assertEqual(3, iterations);
 
-    // for-in is not effected by Fuse.List.Plugin additions
+    // for-in is not effected by Fuse.List.plugin additions
     iterations = 0;
     for (property in arr) iterations++;
     this.assertEqual(3, iterations);

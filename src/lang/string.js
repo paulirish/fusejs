@@ -5,10 +5,10 @@
   Fuse.Util.$w = (function() {
     function $w(string) {
       if (!isString(string)) return Fuse.Array();
-      string = strProto.trim.call(string);
+      string = plugin.trim.call(string);
       return string != '' ? string.split(/\s+/) : Fuse.Array();
     }
-    var strProto = Fuse.String.prototype;
+    var plugin = Fuse.String.plugin;
     return $w;
   })();
 
@@ -22,7 +22,7 @@
   // ECMA-5 15.5.4.11
 
   // for IE
-  if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX')) (function(proto) {
+  if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX')) (function(plugin) {
     function replace(pattern, replacement) {
       if (typeof replacement === 'function') {
         // ensure string `null` and `undefined` are returned
@@ -37,14 +37,14 @@
       return result;
     }
 
-    var __replace = proto.replace;
-    proto.replace = replace;
-  })(Fuse.String.Plugin);
+    var __replace = plugin.replace;
+    plugin.replace = replace;
+  })(Fuse.String.plugin);
 
   // primarily for Safari 2.0.2 and lower, based on work by Dean Edwards
   // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
   if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING') ||
-      Bug('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN')) (function(proto) {
+      Bug('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN')) (function(plugin) {
     function replace(pattern, replacement) {
       if (typeof replacement !== 'function')
         return __replace.call(this, pattern, replacement);
@@ -88,15 +88,15 @@
       return Fuse.String(result);
     }
 
-    var __replace = proto.replace, exec = RegExp.prototype.exec;
-    proto.replace = replace;
-  })(Fuse.String.Plugin);
+    var __replace = plugin.replace, exec = RegExp.prototype.exec;
+    plugin.replace = replace;
+  })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
 
   // ECMA-5 15.5.4.8
 
-  if (!Fuse.String.Plugin.lastIndexOf) (function() {
+  if (!Fuse.String.plugin.lastIndexOf) (function() {
     function lastIndexOf(searchString) {
       if (this == null) throw new TypeError;
       searchString = String(searchString);
@@ -118,50 +118,50 @@
       return Fuse.Number(-1);
     }
 
-    Fuse.String.Plugin.lastIndexOf = lastIndexOf;
+    Fuse.String.plugin.lastIndexOf = lastIndexOf;
   })();
 
   // for Chome 1 and 2
-  if (Bug('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION')) (function(proto) {
+  if (Bug('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION')) (function(plugin) {
     function lastIndexOf(searchString) {
       var pos = 1 * arguments[1];
       return __lastIndexOf.call(this, searchString, pos < 0 ? 0 : pos);
     }
 
-    var __lastIndexOf = proto.lastIndexOf;
-    proto.lastIndexOf = lastIndexOf;
-  })(Fuse.String.Plugin);
+    var __lastIndexOf = plugin.lastIndexOf;
+    plugin.lastIndexOf = lastIndexOf;
+  })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
 
   // ECMA-5 15.5.4.10
 
   // for IE
-  if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX')) (function(proto) {
+  if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX')) (function(plugin) {
     function match(pattern) {
       var result = __match.call(this, pattern);
       if (isRegExp(pattern)) pattern.lastIndex = 0;
       return result;
     }
 
-    var __match = proto.match;
-    proto.match = match;
-  })(Fuse.String.Plugin);
+    var __match = plugin.match;
+    plugin.match = match;
+  })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto) {
-    proto.times = function times(count) {
+  (function(plugin) {
+    plugin.times = function times(count) {
       if (this == null) throw new TypeError;
       return Fuse.String(count < 1 ? '' : new Array(count + 1).join(this));
     };
 
-    proto.toArray = function toArray() {
+    plugin.toArray = function toArray() {
       if (this == null) throw new TypeError;
       return Fuse.String(this).split('');
     };
 
-    proto.toQueryParams = function toQueryParams(separator) {
+    plugin.toQueryParams = function toQueryParams(separator) {
       if (this == null) throw new TypeError;
       var match = String(this).split('?'), object = Fuse.Object();
       if (match.length > 1 && !match[1]) return object;
@@ -194,44 +194,44 @@
     };
 
     // aliases
-    proto.toList = proto.toArray;
-    proto.parseQuery = proto.toQueryParams;
+    plugin.toList = plugin.toArray;
+    plugin.parseQuery = plugin.toQueryParams;
 
     // prevent JScript bug with named function expressions
     var times = null, toArray = null, toQueryParams = null;
-  })(Fuse.String.Plugin);
+  })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto) {
-    proto.blank = function blank() {
+  (function(plugin) {
+    plugin.blank = function blank() {
       if (this == null) throw new TypeError;
       return /^\s*$/.test(this);
     };
 
-    proto.contains = function contains(pattern) {
+    plugin.contains = function contains(pattern) {
       if (this == null) throw new TypeError;
       return String(this).indexOf(pattern) > -1;
     };
 
-    proto.empty = function empty() {
+    plugin.empty = function empty() {
       if (this == null) throw new TypeError;
       return !String(this).length;
     };
 
-    proto.endsWith = function endsWith(pattern) {
+    plugin.endsWith = function endsWith(pattern) {
       if (this == null) throw new TypeError;
       var string = String(this), d = string.length - pattern.length;
       return d >= 0 && string.lastIndexOf(pattern) == d;
     };
 
-    proto.scan = function scan(pattern, callback) {
+    plugin.scan = function scan(pattern, callback) {
       if (this == null) throw new TypeError;
       Fuse.String(this).gsub(pattern, callback); // gsub for backcompat
       return Fuse.String(this);
     };
 
-    proto.startsWith = function startsWith(pattern) {
+    plugin.startsWith = function startsWith(pattern) {
       if (this == null) throw new TypeError;
       return String(this).indexOf(pattern) == 0;
     };
@@ -243,12 +243,12 @@
       endsWith =   null,
       scan =       null,
       startsWith = null;
-  })(Fuse.String.Plugin);
+  })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto) {
-    proto.camelize = (function() {
+  (function(plugin) {
+    plugin.camelize = (function() {
       function toUpperCase(match, character) {
         return character ? character.toUpperCase() : '';
       }
@@ -260,14 +260,14 @@
           (cache[expandoKey] = replace.call(string, matchHyphenated, toUpperCase));
       }
 
-      var replace = Fuse.String.Plugin.replace,
+      var replace = Fuse.String.plugin.replace,
        cache = { },
        matchHyphenated = /\-+(.)?/g;
 
       return camelize;
     })();
 
-    proto.capitalize = (function() {
+    plugin.capitalize = (function() {
       function capitalize() {
         if (this == null) throw new TypeError;
         var string = String(this), expandoKey = expando + string;
@@ -280,12 +280,12 @@
       return capitalize;
     })();
 
-    proto.hyphenate = function hyphenate() {
+    plugin.hyphenate = function hyphenate() {
       if (this == null) throw new TypeError;
       return Fuse.String(String(this).replace(/_/g, '-'));
     };
 
-    proto.truncate = function truncate(length, truncation) {
+    plugin.truncate = function truncate(length, truncation) {
       if (this == null) throw new TypeError;
       var endIndex, string = String(this);
 
@@ -300,7 +300,7 @@
       return Fuse.String(string);
     };
 
-    proto.underscore = function underscore() {
+    plugin.underscore = function underscore() {
       if (this == null) throw new TypeError;
       return Fuse.String(String(this).replace(/::/g, '/')
         .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
@@ -310,23 +310,23 @@
 
     // prevent JScript bug with named function expressions
     var hyphenate = null, truncate = null, underscore = null;
-  })(Fuse.String.Plugin);
+  })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto) {
+  (function(plugin) {
     var matchScripts   = RegExp(Fuse.ScriptFragment, 'gi'),
      matchHTMLComments = Fuse.RegExp('<!--\\s*' + Fuse.ScriptFragment + '\\s*-->', 'gi'),
      matchOpenTag      = /<script/i;
 
-    proto.evalScripts = function evalScripts() {
+    plugin.evalScripts = function evalScripts() {
       if (this == null) throw new TypeError;
       return Fuse.String(this).extractScripts().map(function(script) {
         return global.eval(String(script));
       });
     };
 
-    proto.extractScripts = function extractScripts() {
+    plugin.extractScripts = function extractScripts() {
       if (this == null) throw new TypeError;
       var string = Fuse.String(this), results = Fuse.List();
 
@@ -337,23 +337,23 @@
       return results;
     };
 
-    proto.stripScripts = function stripScripts() {
+    plugin.stripScripts = function stripScripts() {
       if (this == null) throw new TypeError;
       return Fuse.String(this).replace(matchScripts, '');
     };
 
     // prevent JScript bug with named function expressions
     var evalScripts = null, extractScripts = null, stripScripts = null;
-  })(Fuse.String.Plugin);
+  })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto) {
+  (function(plugin) {
     var sMap = Fuse.RegExp.specialCharMap.s;
 
     // ECMA-5 15.5.4.20
-    if (!proto.trim)
-      proto.trim = function trim() {
+    if (!plugin.trim)
+      plugin.trim = function trim() {
         if (this == null) throw new TypeError;
         var string = String(this), start = -1, end = string.length;
 
@@ -366,8 +366,8 @@
       };
 
     // non-standard
-    if (!proto.trimLeft)
-      proto.trimLeft = function trimLeft() {
+    if (!plugin.trimLeft)
+      plugin.trimLeft = function trimLeft() {
         if (this == null) throw new TypeError;
         var string = String(this), start = -1;
 
@@ -376,8 +376,8 @@
         return Fuse.String(string.slice(start));
       };
 
-    if (!proto.trimRight)
-      proto.trimRight = function trimRight() {
+    if (!plugin.trimRight)
+      plugin.trimRight = function trimRight() {
         if (this == null) throw new TypeError;
         var string = String(this), end = string.length;
 
@@ -388,11 +388,11 @@
 
     // prevent JScript bug with named function expressions
     var trim = null, trimLeft = null, trimRight = null;
-  })(Fuse.String.Plugin);
+  })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  Fuse.String.Plugin.escapeHTML = (function() {
+  Fuse.String.plugin.escapeHTML = (function() {
     var escapeHTML = function escapeHTML() {
       if (this == null) throw new TypeError;
       textNode.data = String(this);
@@ -422,7 +422,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto) {
+  (function(plugin) {
     function swapTagsToTokens(tag) {
       var length = tags.length;
       tags.push(tag);
@@ -494,7 +494,7 @@
     Fuse._div.innerHTML = '';
 
     // assign methods to string prototype
-    proto.unescapeHTML = unescapeHTML;
-    proto.stripTags = stripTags;
+    plugin.unescapeHTML = unescapeHTML;
+    plugin.stripTags = stripTags;
 
-  })(Fuse.String.Plugin);
+  })(Fuse.String.plugin);

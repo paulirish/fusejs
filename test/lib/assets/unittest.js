@@ -288,7 +288,7 @@ Test.Unit.Assertions = (function() {
 
   function _assertPairEqual(pair) {
     if (pair.every(Fuse.List.isArray))
-      return Fuse.List.Plugin.zip.call(pair[0], pair[1]).every(_assertPairEqual);
+      return Fuse.List.plugin.zip.call(pair[0], pair[1]).every(_assertPairEqual);
     return _isEqual(pair[0], pair[1]);
   }
 

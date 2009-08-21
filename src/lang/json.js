@@ -1,11 +1,11 @@
   /*------------------------------- LANG: JSON -------------------------------*/
 
   (function() {
-    Fuse.Hash.Plugin.toJSON = function toJSON() {
+    Fuse.Hash.plugin.toJSON = function toJSON() {
       return Obj.toJSON(this._object);
     };
 
-    Fuse.List.Plugin.toJSON = function toJSON() {
+    Fuse.List.plugin.toJSON = function toJSON() {
       for (var value, i = 0, results = Fuse.List(), length = this.length; i < length; i++) {
         value = Obj.toJSON(this[i]);
         if (typeof value !== 'undefined') results.push(value);
@@ -36,8 +36,8 @@
     };
 
     // ECMA-5 15.9.5.44
-    if (!Fuse.Date.Plugin.toJSON)
-      Fuse.Date.Plugin.toJSON = function toJSON() {
+    if (!Fuse.Date.plugin.toJSON)
+      Fuse.Date.plugin.toJSON = function toJSON() {
         return Fuse.String('"' + this.getUTCFullYear() + '-' +
           Fuse.Number(this.getUTCMonth() + 1).toPaddedString(2) + '-' +
           this.getUTCDate().toPaddedString(2)    + 'T' +
@@ -47,14 +47,14 @@
       };
 
     // ECMA-5 15.7.4.8
-    if (!Fuse.Number.Plugin.toJSON)
-      Fuse.Number.Plugin.toJSON = function toJSON() {
+    if (!Fuse.Number.plugin.toJSON)
+      Fuse.Number.plugin.toJSON = function toJSON() {
         return Fuse.String(isFinite(this) ? this : 'null');
       };
 
     // ECMA-5 15.5.4.21
-    if (!Fuse.String.Plugin.toJSON)
-      Fuse.String.Plugin.toJSON = function toJSON() {
+    if (!Fuse.String.plugin.toJSON)
+      Fuse.String.plugin.toJSON = function toJSON() {
         return Fuse.String(this).inspect(true);
       };
 
@@ -64,9 +64,9 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // complementary JSON methods for String.Plugin
-  (function(proto) {
-    proto.evalJSON = function evalJSON(sanitize) {
+  // complementary JSON methods for String.plugin
+  (function(plugin) {
+    plugin.evalJSON = function evalJSON(sanitize) {
       if (this == null) throw new TypeError;
       var string = Fuse.String(this), json = string.unfilterJSON();
 
@@ -77,7 +77,7 @@
       throw new SyntaxError('Badly formed JSON string: ' + string.inspect());
     };
 
-    proto.isJSON = function isJSON() {
+    plugin.isJSON = function isJSON() {
       if (this == null) throw new TypeError;
       var string = String(this);
       if (/^\s*$/.test(string)) return false;
@@ -86,11 +86,11 @@
       return (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/).test(string);
     };
 
-    proto.unfilterJSON = function unfilterJSON(filter) {
+    plugin.unfilterJSON = function unfilterJSON(filter) {
       if (this == null) throw new TypeError;
       return Fuse.String(String(this).replace(filter || Fuse.JSONFilter, '$1'));
     };
 
     // prevent JScript bug with named function expressions
     var evalJSON = null, isJSON = null, unfilterJSON = null;
-  })(Fuse.String.Plugin);
+  })(Fuse.String.plugin);

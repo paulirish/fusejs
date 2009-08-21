@@ -2,12 +2,12 @@
 
   Fuse._doc.viewport = { };
 
-  (function(proto) {
-    proto.getDimensions = function getDimensions() {
+  (function(viewport) {
+    viewport.getDimensions = function getDimensions() {
       return { 'width': this.getWidth(), 'height': this.getHeight() };
     };
 
-    proto.getScrollOffsets = function getScrollOffsets() {
+    viewport.getScrollOffsets = function getScrollOffsets() {
       // lazy define
       return (this.getScrollOffsets =
         typeof global.pageXOffset === 'number' ?

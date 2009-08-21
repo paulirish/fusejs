@@ -38,8 +38,8 @@
     })()
   });
 
-  (function(proto) {
-    proto.updateDone = function updateDone(request) {
+  (function(plugin) {
+    plugin.updateDone = function updateDone(request) {
       var options = this.options, decay = options.decay,
        responseText = request.responseText;
 
@@ -54,11 +54,11 @@
         this.decay * this.frequency * this.timerMultiplier);
     };
 
-    proto.start = function start() {
+    plugin.start = function start() {
       this.updater = new Fuse.Ajax.Updater(this.container, this.url, this.options);
     };
 
-    proto.stop = function stop() {
+    plugin.stop = function stop() {
       this.updater.abort();
       global.clearTimeout(this.timer);
       this.onStop && this.onStop.apply(this, arguments);
@@ -67,7 +67,7 @@
 
     // prevent JScript bug with named function expressions
     var updateDone = null, start = null, stop = null;
-  })(Fuse.Ajax.TimedUpdater.Plugin);
+  })(Fuse.Ajax.TimedUpdater.plugin);
 
   Fuse.Ajax.TimedUpdater.options = {
     'decay':     1,

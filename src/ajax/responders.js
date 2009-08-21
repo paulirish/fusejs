@@ -3,13 +3,13 @@
   Fuse.addNS('Ajax.Responders');
 
   // TODO: Utilize custom events for responders
-  (function(proto) {
-    proto.responders = {
+  (function(Responders) {
+    Responders.responders = {
       'onCreate': Fuse.List(function() { Fuse.Ajax.activeRequestCount++ }),
       'onDone':   Fuse.List(function() { Fuse.Ajax.activeRequestCount-- })
     };
 
-    proto.dispatch = (function() {
+    Responders.dispatch = (function() {
       // This pattern, based on work by Dean Edwards and John Resig, allows a
       // responder to error out without stopping the other responders from firing.
       // http://groups.google.com/group/jquery-dev/browse_thread/thread/2a14c2da6bcbb5f
@@ -37,7 +37,7 @@
       return dispatch;
     })();
 
-    proto.register = function register(responder) {
+    Responders.register = function register(responder) {
       var found, handler, handlers, length, method, name;
       if (isHash(responder)) responder = responder._object;
 
@@ -67,7 +67,7 @@
       }
     };
 
-    proto.unregister = function unregister(responder) {
+    Responders.unregister = function unregister(responder) {
       var handler, name, handlers, length, results;
       if (isHash(responder)) responder = responder._object;
 

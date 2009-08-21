@@ -32,13 +32,13 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto) {
-    proto._each = function _each(callback) {
+  (function(plugin) {
+    plugin._each = function _each(callback) {
       this.forEach(callback);
       return this;
     };
 
-    proto.clear = function clear() {
+    plugin.clear = function clear() {
       if (this == null) throw new TypeError;
       var object = Object(this);
 
@@ -50,7 +50,7 @@
       return object;
     };
 
-    proto.clone = (function() {
+    plugin.clone = (function() {
       function clone() {
         var object = Object(this);
         if (this == null) throw new TypeError;
@@ -65,7 +65,7 @@
       return clone;
     })();
 
-    proto.compact = function compact(falsy) {
+    plugin.compact = function compact(falsy) {
       if (this == null) throw new TypeError;
       var i = 0, results = Fuse.Array(), object = Object(this),
        length = object.length >>> 0;
@@ -80,20 +80,20 @@
       return results;
     };
 
-    proto.flatten = function flatten() {
+    plugin.flatten = function flatten() {
       if (this == null) throw new TypeError;
       var i = 0, results = Fuse.Array(),
        object = Object(this), length = object.length >>> 0;
 
       for ( ; i < length; i++) {
         if (isArray(object[i]))
-          concatList(results, proto.flatten.call(object[i]));
+          concatList(results, plugin.flatten.call(object[i]));
         else results.push(object[i]);
       }
       return results;
     };
 
-    proto.insert = function insert(index, value) {
+    plugin.insert = function insert(index, value) {
       if (this == null) throw new TypeError;
       var object = Object(this),
        length = object.length >>> 0;
@@ -101,12 +101,12 @@
       if (length < index) object.length = index;
       if (index < 0) index = length;
       if (arguments.length > 2)
-        proto.splice.apply(object, concatList([index, 0], slice.call(arguments, 1)));
-      else proto.splice.call(object, index, 0, value);
+        plugin.splice.apply(object, concatList([index, 0], slice.call(arguments, 1)));
+      else plugin.splice.call(object, index, 0, value);
       return object;
     };
 
-    proto.unique = function unique() {
+    plugin.unique = function unique() {
       var item, i = 0, results = Fuse.Array(), object = Object(this),
        length = object.length >>> 0;
 
@@ -116,9 +116,9 @@
       return results;
     };
 
-    proto.without = function without() {
+    plugin.without = function without() {
       if (this == null) throw new TypeError;
-      var i = 0, args = slice.call(arguments, 0), indexOf = proto.indexOf,
+      var i = 0, args = slice.call(arguments, 0), indexOf = plugin.indexOf,
        results = Fuse.Array(), object = Object(this),
        length = object.length >>> 0;
 
@@ -130,7 +130,7 @@
 
     /* Create optimized Enumerable equivalents */
 
-    proto.contains = (function() {
+    plugin.contains = (function() {
       var contains = function contains(value) {
         if (this == null) throw new TypeError;
         var item, object = Object(this), length = object.length >>> 0;
@@ -146,30 +146,30 @@
         return false;
       };
 
-      if (typeof proto.indexOf === 'function') {
+      if (typeof plugin.indexOf === 'function') {
         var __contains = contains;
         contains = function contains(value) {
           // attempt a fast strict search first
           if (this == null) throw new TypeError;
           var object = Object(this);
 
-          if (proto.indexOf.call(object, value) > -1) return true;
+          if (plugin.indexOf.call(object, value) > -1) return true;
           return __contains.call(object, value);
         };
       }
       return contains;
     })();
 
-    proto.each = function each(callback, thisArg) {
+    plugin.each = function each(callback, thisArg) {
       try {
-        proto.forEach.call(this, callback, thisArg);
+        plugin.forEach.call(this, callback, thisArg);
       } catch (e) {
         if (e !== $break) throw e;
       }
       return this;
     };
 
-    proto.first = function first(callback, thisArg) {
+    plugin.first = function first(callback, thisArg) {
       if (this == null) throw new TypeError;
       var i = 0, object = Object(this),
        length = object.length >>> 0;
@@ -187,11 +187,11 @@
         var count = 1 * callback; // fast coerce to number
         if (isNaN(count)) return Fuse.Array();
         count = count < 1 ? 1 : count > length ? length : count;
-        return proto.slice.call(object, 0, count);
+        return plugin.slice.call(object, 0, count);
       }
     };
 
-    proto.inject = (function() {
+    plugin.inject = (function() {
       var inject = function inject(accumulator, callback, thisArg) {
         if (this == null) throw new TypeError;
         var i = 0, object = Object(this), length = object.length >>> 0;
@@ -208,18 +208,18 @@
       };
 
       // use Array#reduce if available
-      if (typeof proto.reduce === 'function') {
+      if (typeof plugin.reduce === 'function') {
         var _inject = inject;
         inject = function inject(accumulator, callback, thisArg) {
           return thisArg
             ? _inject.call(this, accumulator, callback, thisArg)
-            : proto.reduce.call(this, callback, accumulator);
+            : plugin.reduce.call(this, callback, accumulator);
         };
       }
       return inject;
     })();
 
-    proto.intersect = (function() {
+    plugin.intersect = (function() {
       function intersect(array) {
         if (this == null) throw new TypeError;
         var item, i = 0, results = Fuse.Array(),
@@ -233,11 +233,11 @@
         return results;
       }
 
-      var contains = proto.contains;
+      var contains = plugin.contains;
       return intersect;
     })();
 
-    proto.invoke = function invoke(method) {
+    plugin.invoke = function invoke(method) {
       if (this == null) throw new TypeError;
       var args, i = 0, results = Fuse.Array(), object = Object(this),
        length = object.length >>> 0, funcProto = Function.prototype;
@@ -253,7 +253,7 @@
       return results;
     };
 
-    proto.last = function last(callback, thisArg) {
+    plugin.last = function last(callback, thisArg) {
       if (this == null) throw new TypeError;
       var object = Object(this), length = object.length >>> 0;
 
@@ -269,11 +269,11 @@
         if (isNaN(count)) return results;
 
         count = count < 1 ? 1 : count > length ? length : count;
-        return proto.slice.call(object, length - count);
+        return plugin.slice.call(object, length - count);
       }
     };
 
-    proto.max = function max(callback, thisArg) {
+    plugin.max = function max(callback, thisArg) {
       if (this == null) throw new TypeError;
 
       var result;
@@ -299,7 +299,7 @@
       return result;
     };
 
-    proto.min = function min(callback, thisArg) {
+    plugin.min = function min(callback, thisArg) {
       if (this == null) throw new TypeError;
 
       var result;
@@ -323,7 +323,7 @@
       return result;
     };
 
-    proto.partition = function partition(callback, thisArg) {
+    plugin.partition = function partition(callback, thisArg) {
       if (this == null) throw new TypeError;
 
       callback = callback || K;
@@ -336,7 +336,7 @@
       return Fuse.Array(trues, falses);
     };
 
-    proto.pluck = function pluck(property) {
+    plugin.pluck = function pluck(property) {
       if (this == null) throw new TypeError;
       var i = 0, results = Fuse.Array(), object = Object(this),
        length = object.length >>> 0;
@@ -346,12 +346,12 @@
       return results;
     };
 
-    proto.size = function size() {
+    plugin.size = function size() {
       if (this == null) throw new TypeError;
       return Fuse.Number(Object(this).length >>> 0);
     };
 
-    proto.sortBy = function sortBy(callback, thisArg) {
+    plugin.sortBy = function sortBy(callback, thisArg) {
       if (this == null) throw new TypeError;
 
       callback = callback || K;
@@ -369,7 +369,7 @@
       }).pluck('value');
     };
 
-    proto.zip = function zip() {
+    plugin.zip = function zip() {
       if (this == null) throw new TypeError;
 
       var i = 0, results = Fuse.Array(), callback = K,
@@ -380,15 +380,15 @@
       if (typeof args[args.length - 1] === 'function')
         callback = args.pop();
 
-      var collection = prependList(proto.map.call(args, Fuse.Util.$A), object, Fuse.Array());
+      var collection = prependList(plugin.map.call(args, Fuse.Util.$A), object, Fuse.Array());
       for ( ; i < length; i++)
         results.push(callback(collection.pluck(i), i, object));
       return results;
     };
 
     // aliases
-    proto.toArray =
-    proto.toList  = proto.clone;
+    plugin.toArray =
+    plugin.toList  = plugin.clone;
 
     // prevent JScript bug with named function expressions
     var _each =  null,
@@ -409,19 +409,19 @@
      unique =    null,
      without =   null,
      zip =       null;
-  })(Fuse.Array.Plugin);
+  })(Fuse.Array.plugin);
 
   /*--------------------------------------------------------------------------*/
 
   /* Use native browser JS 1.6 implementations if available */
 
-  (function(proto) {
+  (function(plugin) {
 
     // Opera's implementation of Array.prototype.concat treats a functions arguments
     // object as an array so we overwrite concat to fix it.
     // ECMA-5 15.4.4.4
-    if (!proto.concat || Bug('ARRAY_CONCAT_ARGUMENTS_BUGGY'))
-      proto.concat = function concat() {
+    if (!plugin.concat || Bug('ARRAY_CONCAT_ARGUMENTS_BUGGY'))
+      plugin.concat = function concat() {
         if (this == null) throw new TypeError;
 
         var i = 0, args = arguments, length = args.length, object = Object(this),
@@ -437,7 +437,7 @@
       };
 
     // ECMA-5 15.4.4.16
-    if (!proto.every) proto.every = function every(callback, thisArg) {
+    if (!plugin.every) plugin.every = function every(callback, thisArg) {
       callback = callback || K;
       if (this == null || !isFunction(callback)) throw new TypeError;
 
@@ -449,7 +449,7 @@
     };
 
     // ECMA-5 15.4.4.20
-    if (!proto.filter) proto.filter = function filter(callback, thisArg) {
+    if (!plugin.filter) plugin.filter = function filter(callback, thisArg) {
       callback = callback || function(value) { return value != null };
       if (this == null || !isFunction(callback)) throw new TypeError;
 
@@ -463,7 +463,7 @@
     };
 
     // ECMA-5 15.4.4.18
-    if (!proto.forEach) proto.forEach = function forEach(callback, thisArg) {
+    if (!plugin.forEach) plugin.forEach = function forEach(callback, thisArg) {
       if (this == null || !isFunction(callback)) throw new TypeError;
 
       var i = 0, object = Object(this), length = object.length >>> 0;
@@ -477,7 +477,7 @@
     };
 
     // ECMA-5 15.4.4.14
-    if (!proto.indexOf) proto.indexOf = function indexOf(item, fromIndex) {
+    if (!plugin.indexOf) plugin.indexOf = function indexOf(item, fromIndex) {
       if (this == null) throw new TypeError;
 
       fromIndex = fromIndex >> 0;
@@ -492,7 +492,7 @@
     };
 
     // ECMA-5 15.4.4.15
-    if (!proto.lastIndexOf) proto.lastIndexOf = function lastIndexOf(item, fromIndex) {
+    if (!plugin.lastIndexOf) plugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
       if (this == null) throw new TypeError;
 
       var object = Object(this), length = object.length >>> 0;
@@ -509,8 +509,8 @@
     };
 
     // ECMA-5 15.4.4.19
-    if (!proto.map) proto.map = function map(callback, thisArg) {
-      if (!callback) return proto.clone.call(this);
+    if (!plugin.map) plugin.map = function map(callback, thisArg) {
+      if (!callback) return plugin.clone.call(this);
       if (this == null || !isFunction(callback)) throw new TypeError;
 
       var i = 0, results = Fuse.Array(), object = Object(this),
@@ -527,7 +527,7 @@
     };
 
     // ECMA-5 15.4.4.17
-    if (!proto.some) proto.some = function some(callback, thisArg) {
+    if (!plugin.some) plugin.some = function some(callback, thisArg) {
       callback = callback || K;
       if (this == null || !isFunction(callback)) throw new TypeError;
 
@@ -540,9 +540,9 @@
 
     // assign any missing Enumerable methods
     if (Fuse.Enumerable) {
-      eachKey(Fuse.Enumerable.Plugin, function(value, key, object) {
-        if (hasKey(object, key) && typeof proto[key] !== 'function')
-          proto[key] = value;
+      eachKey(Fuse.Enumerable.plugin, function(value, key, object) {
+        if (hasKey(object, key) && typeof plugin[key] !== 'function')
+          plugin[key] = value;
       });
     }
 
@@ -555,4 +555,4 @@
      lastIndexOf = null,
      map =         null,
      some =        null;
-  })(Fuse.Array.Plugin);
+  })(Fuse.Array.plugin);

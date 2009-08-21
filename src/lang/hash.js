@@ -93,7 +93,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto) {
+  (function(plugin) {
     function _returnPair(pair) {
       var key, value;
       pair = Fuse.List(key = pair[0], value = pair[1]);
@@ -102,13 +102,13 @@
       return pair;
     }
 
-    proto._each = function _each(callback) {
+    plugin._each = function _each(callback) {
       var pair, i = 0, pairs = this._pairs;
       while (pair = pairs[i]) callback(_returnPair(pair), i++, this);
       return this;
     };
 
-    proto.first = function first(callback, thisArg) {
+    plugin.first = function first(callback, thisArg) {
       var pair, i = 0, pairs = this._pairs;
       if (callback == null) {
         if (pairs.length) return _returnPair(pairs[0]);
@@ -128,7 +128,7 @@
       }
     };
 
-    proto.last = function last(callback, thisArg) {
+    plugin.last = function last(callback, thisArg) {
       var pair, i = 0, pairs = this._pairs, length = pairs.length;
       if (callback == null) {
         if (length) return _returnPair(this._pairs.last());
@@ -153,12 +153,12 @@
 
     // prevent JScript bug with named function expressions
     var _each = null, first = null, last = null;
-  })(Fuse.Hash.Plugin);
+  })(Fuse.Hash.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto, $H) {
-    proto.clear = function clear() {
+  (function(plugin, $H) {
+    plugin.clear = function clear() {
       this._data   = { };
       this._object = { };
       this._keys   = Fuse.List();
@@ -167,12 +167,12 @@
       return this;
     };
 
-    proto.clone = (function() {
+    plugin.clone = (function() {
       function clone() { return new $H(this) };
       return clone;
     })();
 
-    proto.contains = function contains(value) {
+    plugin.contains = function contains(value) {
       var item, pair, i = 0, pairs = this._pairs;
       while (pair = pairs[i++]) {
         // basic strict match
@@ -183,7 +183,7 @@
       return false;
     };
 
-    proto.filter = function filter(callback, thisArg) {
+    plugin.filter = function filter(callback, thisArg) {
       var key, pair, value, i = 0, pairs = this._pairs, result = new $H();
       callback = callback || function(value) { return value != null };
 
@@ -194,16 +194,16 @@
       return result;
     };
 
-    proto.get = function get(key) {
+    plugin.get = function get(key) {
       return this._data[expando + key];
     };
 
-    proto.hasKey = (function() {
+    plugin.hasKey = (function() {
       function hasKey(key) { return (expando + key) in this._data }
       return hasKey;
     })();
 
-    proto.keyOf = function keyOf(value) {
+    plugin.keyOf = function keyOf(value) {
       var pair, i = 0, pairs = this._pairs;
       while (pair = pairs[i++]) {
         if (value === pair[1])
@@ -212,11 +212,11 @@
       return Fuse.Number(-1);
     };
 
-    proto.keys = function keys() {
+    plugin.keys = function keys() {
       return Fuse.List.fromArray(this._keys);
     };
 
-    proto.map = function map(callback, thisArg) {
+    plugin.map = function map(callback, thisArg) {
       if (!callback) return this;
       var key, pair, i = 0, pairs = this._pairs, result = new $H();
 
@@ -230,7 +230,7 @@
       return result;
     };
 
-    proto.partition = function partition(callback, thisArg) {
+    plugin.partition = function partition(callback, thisArg) {
       callback = callback || K;
       var key, value, pair, i = 0, pairs = this._pairs,
        trues = new $H(), falses = new $H();
@@ -241,29 +241,29 @@
       return Fuse.List(trues, falses);
     };
 
-    proto.size = function size() {
+    plugin.size = function size() {
       return Fuse.Number(this._keys.length);
     };
 
-    proto.toArray = function toArray() {
+    plugin.toArray = function toArray() {
       return Fuse.List.fromArray(this._pairs);
     };
 
-    proto.toObject = function toObject() {
+    plugin.toObject = function toObject() {
       var pair, i = 0, pairs = this._pairs, result = Fuse.Object();
       while (pair = pairs[i++]) result[pair[0]] = pair[1];
       return result;
     };
 
-    proto.toQueryString = function toQueryString() {
+    plugin.toQueryString = function toQueryString() {
       return Obj.toQueryString(this._object);
     };
 
-    proto.values = function values() {
+    plugin.values = function values() {
       return Fuse.List.fromArray(this._values);
     };
 
-    proto.zip = (function() {
+    plugin.zip = (function() {
       function mapToHash(array) {
         var results = [], length = array.length;
         while (length--) results[length] = new $H(array[length]);
@@ -294,13 +294,13 @@
     })();
 
     // alias
-    proto.toList = proto.toArray;
+    plugin.toList = plugin.toArray;
 
     // assign any missing Enumerable methods
     if (Fuse.Enumerable) {
-      eachKey(Fuse.Enumerable.Plugin, function(value, key, object) {
-        if (hasKey(object, key) && typeof proto[key] !== 'function')
-          proto[key] = value;
+      eachKey(Fuse.Enumerable.plugin, function(value, key, object) {
+        if (hasKey(object, key) && typeof plugin[key] !== 'function')
+          plugin[key] = value;
       });
     }
 
@@ -318,7 +318,7 @@
      toObject =      null,
      toQueryString = null,
      values =        null;
-  })(Fuse.Hash.Plugin, Fuse.Hash);
+  })(Fuse.Hash.plugin, Fuse.Hash);
 
   /*--------------------------------------------------------------------------*/
 

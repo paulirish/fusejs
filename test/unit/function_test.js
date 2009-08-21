@@ -169,9 +169,9 @@ new Test.Unit.Runner({
       return proceed().toUpperCase();
     })());
 
-    var temp = Fuse.String.Plugin.capitalize;
-    Fuse.String.Plugin.capitalize = wrap(
-      Fuse.String.Plugin.capitalize,
+    var temp = Fuse.String.plugin.capitalize;
+    Fuse.String.plugin.capitalize = wrap(
+      Fuse.String.plugin.capitalize,
       function(proceed, eachWord) {
         if (eachWord && this.contains(' '))
           return this.split(' ').map(function(str){ return str.capitalize() }).join(' ');
@@ -182,7 +182,7 @@ new Test.Unit.Runner({
     this.assertEqual('Hello World', Fuse.String('hello world').capitalize(true));
     this.assertEqual('Hello',       Fuse.String('hello').capitalize());
 
-    Fuse.String.Plugin.capitalize = temp;
+    Fuse.String.plugin.capitalize = temp;
 
     // test lazy defined syntax support
     var lazy = { 'test': function() { window.lazyDelayed = 'old' } };

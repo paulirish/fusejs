@@ -39,18 +39,18 @@
     })()
   });
 
-  (function(proto) {
-    proto.execute = function execute() {
+  (function(plugin) {
+    plugin.execute = function execute() {
       this.callback(this);
     };
 
-    proto.start = function start() {
+    plugin.start = function start() {
       this.timerID = global.setTimeout(this.onTimerEvent,
         this.interval * this.options.multiplier);
       return this;
     };
 
-    proto.stop = function stop() {
+    plugin.stop = function stop() {
       var id = this.timerID;
       if (id === null) return;
       global.clearTimeout(id);
@@ -60,7 +60,7 @@
 
     // prevent JScript bug with named function expressions
     var execute = null, start = null, stop = null;
-  })(Fuse.Timer.Plugin);
+  })(Fuse.Timer.plugin);
 
   Fuse.Timer.options = {
     'multiplier': 1

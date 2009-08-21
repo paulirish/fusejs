@@ -65,7 +65,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function(proto) {
+  (function(plugin) {
     function prepareReplacement(replacement) {
       if (typeof replacement === 'function')
         return function() { return replacement(slice.call(arguments, 0, -2)) };
@@ -73,7 +73,7 @@
       return function() { return template.evaluate(slice.call(arguments, 0, -2)) };
     }
 
-    proto.gsub = function gsub(pattern, replacement) {
+    plugin.gsub = function gsub(pattern, replacement) {
       if (this == null) throw new TypeError;
 
       if (!isRegExp(pattern))
@@ -83,12 +83,12 @@
       return this.replace(pattern, prepareReplacement(replacement));
     };
 
-    proto.interpolate = function interpolate(object, pattern) {
+    plugin.interpolate = function interpolate(object, pattern) {
       if (this == null) throw new TypeError;
       return new Fuse.Template(this, pattern).evaluate(object);
     };
 
-    proto.sub = function sub(pattern, replacement, count) {
+    plugin.sub = function sub(pattern, replacement, count) {
       if (this == null) throw new TypeError;
 
       count = (typeof count === 'undefined') ? 1 : count;
@@ -112,4 +112,4 @@
 
     // prevent JScript bug with named function expressions
     var gsub = null, interpolate = null, sub = null;
-  })(Fuse.String.Plugin);
+  })(Fuse.String.plugin);

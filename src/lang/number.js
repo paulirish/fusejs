@@ -1,31 +1,31 @@
   /*------------------------------ LANG: NUMBER ------------------------------*/
 
-  (function(proto) {
-    proto.abs = (function() {
+  (function(plugin) {
+    plugin.abs = (function() {
       function abs() { return Fuse.Number(__abs(this)) }
       var __abs = Math.abs;
       return abs;
     })();
 
-    proto.ceil = (function() {
+    plugin.ceil = (function() {
       function ceil() { return Fuse.Number(__ceil(this)) }
       var __ceil = Math.ceil;
       return ceil;
     })();
 
-    proto.floor = (function() {
+    plugin.floor = (function() {
       function floor() { return Fuse.Number(__floor(this)) }
       var __floor = Math.floor;
       return floor;
     })();
 
-    proto.round = (function() {
+    plugin.round = (function() {
       function round() { return Fuse.Number(__round(this)) }
       var __round = Math.round;
       return round;
     })();
 
-    proto.times = function times(callback, thisArg) {
+    plugin.times = function times(callback, thisArg) {
       var i = 0, length = toInteger(this);
       if (arguments.length === 1) {
         while (i < length) callback(i, i++);
@@ -35,11 +35,11 @@
       return this;
     };
 
-    proto.toColorPart = function toColorPart() {
-      return proto.toPaddedString.call(this, 2, 16);
+    plugin.toColorPart = function toColorPart() {
+      return plugin.toPaddedString.call(this, 2, 16);
     };
 
-    proto.toPaddedString = (function() {
+    plugin.toPaddedString = (function() {
       function toPaddedString(length, radix) {
         var string = toInteger(this).toString(radix || 10);
         if (length <= string.length) return Fuse.String(string);
@@ -53,4 +53,4 @@
 
     // prevent JScript bug with named function expressions
     var times = null, toColorPart = null;
-  })(Fuse.Number.Plugin);
+  })(Fuse.Number.plugin);

@@ -16,7 +16,7 @@
        ec = getOrCreateCache(id, element, eventName);
 
       // bail if handler is already exists
-      if (Fuse.List.Plugin.indexOf.call(ec.handlers, handler) != -1)
+      if (Fuse.List.plugin.indexOf.call(ec.handlers, handler) != -1)
         return false;
 
       ec.handlers.unshift(handler);
@@ -313,7 +313,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function() {
+  (function(proto) {
     var Methods;
 
     function addLevel2Methods(event) {
@@ -365,9 +365,9 @@
       var name; Methods = [];
       methods && Obj.extend(Event.Methods, methods);
 
-      eachKey(Event.Methods, Event.prototype
+      eachKey(Event.Methods, proto
         ? function(value, key, object) {
-            Event.prototype[key] = Func.methodize([key, object]);
+            proto[key] = Func.methodize([key, object]);
           }
         : function(value, key, object) {
             if (key.indexOf('pointer') != 0)
@@ -392,23 +392,23 @@
 
     Event.addMethods = addMethods;
 
-    if (Event.prototype || Feature('OBJECT__PROTO__')) {
+    if (proto || Feature('OBJECT__PROTO__')) {
       // Safari 2 support
-      if (!Event.prototype)
-        Event.prototype = Event.Temp.createEvent(Fuse._doc)['__proto__'];
+      if (!proto)
+        proto = Event.prototype = Event.Temp.createEvent(Fuse._doc)['__proto__'];
 
       // IE8 supports Event.prototype but still needs
       // DOM Level 2 event methods and properties.
-      if (hasKey(Event.prototype, 'cancelBubble') &&
-          hasKey(Event.prototype, 'returnValue') &&
-         !hasKey(Event.prototype, 'stopPropagation') &&
-         !hasKey(Event.prototype, 'preventDefault') &&
-         !hasKey(Event.prototype, 'target') &&
-         !hasKey(Event.prototype, 'currentTarget')) {
+      if (hasKey(proto, 'cancelBubble') &&
+          hasKey(proto, 'returnValue') &&
+         !hasKey(proto, 'stopPropagation') &&
+         !hasKey(proto, 'preventDefault') &&
+         !hasKey(proto, 'target') &&
+         !hasKey(proto, 'currentTarget')) {
 
         // initially add methods
         Event.addMethods();
-        addLevel2Methods(Event.prototype);
+        addLevel2Methods(proto);
 
         Event.extend = function(event, element) {
           return (event && !event._extendedByFuse)
@@ -422,7 +422,7 @@
 
     // add methods if haven't yet
     if (!Methods) Event.addMethods();
-  })();
+  })(Event.prototype);
 
   /*--------------------------------------------------------------------------*/
 
@@ -501,7 +501,7 @@
       }
 
       var dispatcher = ec.dispatcher, foundAt = isNumber(handler) ?
-        handler : Fuse.List.Plugin.indexOf.call(ec.handlers, handler);
+        handler : Fuse.List.plugin.indexOf.call(ec.handlers, handler);
 
       if (foundAt == -1) return element;
       _removeCacheAtIndex(id, eventName, foundAt);

@@ -39,7 +39,7 @@
 
   (function(__inspect) {
 
-    Fuse.Array.prototype.inspect = function inspect() {
+    Fuse.Array.plugin.inspect = function inspect() {
       if (this == null) throw new TypeError;
       var i = 0, results = result = [], object = Object(this),
        length = object.length >>> 0;
@@ -48,7 +48,7 @@
       return '[' + results.join(', ') + ']';
     };
 
-    Fuse.String.prototype.inspect = (function() {
+    Fuse.String.plugin.inspect = (function() {
       var specialChar = {
         '\b': '\\b',
         '\f': '\\f',
@@ -87,11 +87,11 @@
     })();
 
     if (Fuse.Enumerable)
-      Fuse.Enumerable.prototype.inspect =
+      Fuse.Enumerable.plugin.inspect =
         function inspect() { return '#<Enumerable:' + this.toList().inspect() + '>' };
 
     if (Fuse.Hash)
-      Fuse.Hash.prototype.inspect = function inspect() {
+      Fuse.Hash.plugin.inspect = function inspect() {
         var pair, i = 0, pairs = this._pairs, results = [];
         while (pair = pairs[i])
           results[i++] = pair[0].inspect() + ': ' + __inspect(pair[1]);

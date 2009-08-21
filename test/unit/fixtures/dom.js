@@ -16,7 +16,7 @@ function createParagraph(text, context) {
   return p;
 }
 
-createParagraph.curry = Fuse.Function.Plugin.curry;
+createParagraph.curry = Fuse.Function.plugin.curry;
 
 function getIframeDocument() {
   var element = $('iframe');
