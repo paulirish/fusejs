@@ -4,32 +4,29 @@
 Most popular JavaScript frameworks share similar features and functionalities 
 such as DOM manipulation, event registration, and CSS selector engines. FuseJS 
 attempts to incorporate the strengths of these frameworks into one stable, 
-efficient, and optimized core JavaScript framework. In many cases developers can
-simply replace their supported client-side framework with FuseJS and receive 
-instant performance and stability gains while continuing to use the framework 
-API they are familiar with.
+efficient, and optimized core JavaScript framework. 
 
-One unique feature of FuseJS is its ability to emulate other frameworks 
-(Prototype supported at launch and jQuery support, in beta form, soon after) 
-by creating a shell of the target framework and mapping all API calls to Fuse's 
-core. As more frameworks are emulated FuseJS will gain bug fixes and features 
-which are shared between all emulated frameworks. For example Prototype 
-officially supports Safari 2 while jQuery does not. Under FuseJS, jQuery would 
-support Safari 2.  Another example, jQuery supports pages in quirks mode while 
-Prototype does not. Under FuseJS, Prototype would support pages in quirks mode. 
-Because of FuseJS's optimized core each emulated framework should, as a whole, 
-perform better than their official counterpart.
+FuseJS can emulate other frameworks* by creating a shell of the target framework
+and mapping all API calls to FuseJS's core. As more frameworks are emulated FuseJS
+will gain bug fixes and features which are shared between all emulated frameworks.
+Because of FuseJS's optimized core each emulated framework should, as a whole, perform
+better than their official counterpart. In most cases a developer can simply replace a
+supported client-side framework with FuseJS + emulation layer and receive instant
+performance and stability gains while continuing to use the framework API they are
+familiar with.
 
-Another unique feature is FuseJS's use of cross-browser/platform sandboxed 
-natives. This allows FuseJS to use extended Array, String, Number, Date, and 
-RegExp objects without polluting the native objects of the host environment.
+FuseJS is also the first JavaScript framework to use cross-browser/platform sandboxed 
+natives. This allows FuseJS to extend Array, String, Number, Date, and 
+RegExp object prototypes without polluting the native objects of the host environment.
 
 FuseJS emphasizes browser capability testing, method forking, and lazy method 
 definitions for maintainability and performance. FuseJS also adheres to 
-ECMA 2.62 and 3.1-draft specifications. Developers can create customized builds 
-of FuseJS and choose their favorite CSS selector engine (NWMatcher and Sizzle 
-supported at launch). FuseJS has in-line documentation, supports minification, 
-and will be released under the MIT license.
+ECMA 2.62 and 5 draft specifications. Developers can create customized builds 
+of FuseJS and choose one of seven supported CSS selector engines. FuseJS has in-line
+documentation, supports minification, and is released under the MIT license.
+
+* Prototype is currently the only emulated framework.
+  jQuery support will be added A.S.A.P.
 
 === Targeted platforms
 
@@ -71,6 +68,9 @@ From the root FuseJS directory,
 
 Check out the FuseJS source with 
   $ git clone git://github.com/jdalton/fusejs.git
+  $ cd fusejs
+  $ git submodule init
+  $ git submodule update
 
 Find out how to contribute:
   http://fusejs.com/contribute
