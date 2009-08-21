@@ -1,3 +1,5 @@
+* Ensure the catch-all of Fuse.Object.hasKey() won't error if the object doesn't have a constructor property. [Garrett Smith, jddalton]
+
 * Rename all occurrences of `.Plugin` to `.plugin`. [jddalton, kangax]
 
 * Rename Fuse.Exception to Fuse.Console and add support Opera and Jaxer consoles. [FuseJS LH #52] [jddalton, Mark Caudill, kangax]

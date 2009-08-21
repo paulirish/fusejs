@@ -51,7 +51,8 @@
 
   hasKey =
   Obj.hasKey = (function() {
-    var hasOwnProperty = Object.prototype.hasOwnProperty;
+    var objectProto = Object.prototype,
+     hasOwnProperty = objectProto.hasOwnProperty;
 
     if (typeof hasOwnProperty !== 'function') {
       if (Feature('OBJECT__PROTO__')) {
@@ -72,7 +73,11 @@
         hasKey = function hasKey(object, property) {
           if (object == null) throw new TypeError;
           object = Object(object);
-          return object[property] !== object.constructor.prototype[property];
+          var constructor = object.constructor;
+          return property in object &&
+            (constructor && constructor.prototype
+              ? object[property] !== constructor.prototype[property]
+              : object[property] !== objectProto[property]);
         };
       }
     }
@@ -82,14 +87,14 @@
       return hasOwnProperty.call(object, property);
     };
 
-    // Opera (bug occurs with the window object and not the global)
+    // Garrett Smith found an Opera bug that occurs with the window object and not the global
     if (typeof window !== 'undefined' && window.Object && !hasKey(window, 'Object')) {
       var _hasKey = hasKey;
       hasKey = function hasKey(object, property) {
         if (object == null) throw new TypeError;
         if(object == global) {
           return property in object &&
-            object[property] !== Object.prototype[property];
+            object[property] !== objectProto[property];
         }
         return _hasKey(object, property);
       };
