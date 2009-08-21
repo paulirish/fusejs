@@ -176,7 +176,7 @@
 
    'lang/object.js',
    'lang/class.js',
-   'lang/exception.js',
+   'lang/console.js',
 
    'lang/function.js',
    'lang/enumerable.js',

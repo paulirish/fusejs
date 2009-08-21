@@ -1,3 +1,5 @@
+* Rename Fuse.Exception to Fuse.Console and add support Opera and Jaxer consoles. [FuseJS LH #52] [jddalton, Mark Caudill, kangax]
+
 * Remove `strict` flag from the `contains` methods and allow native/sandboxed object instances to match primitive values. [jddalton]
 
 * Remove lingering Fuse.Array#clone dependency from the Fuse.Array#grep addition. [jddalton]
