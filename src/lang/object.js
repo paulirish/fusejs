@@ -89,14 +89,14 @@
 
     // Garrett Smith found an Opera bug that occurs with the window object and not the global
     if (typeof window !== 'undefined' && window.Object && !hasKey(window, 'Object')) {
-      var _hasKey = hasKey;
+      var __hasKey = hasKey;
       hasKey = function hasKey(object, property) {
         if (object == null) throw new TypeError;
         if(object == global) {
           return property in object &&
             object[property] !== objectProto[property];
         }
-        return _hasKey(object, property);
+        return __hasKey(object, property);
       };
     }
     return hasKey;

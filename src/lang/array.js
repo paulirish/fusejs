@@ -437,106 +437,113 @@
       };
 
     // ECMA-5 15.4.4.16
-    if (!plugin.every) plugin.every = function every(callback, thisArg) {
-      callback = callback || K;
-      if (this == null || !isFunction(callback)) throw new TypeError;
+    if (!plugin.every)
+      plugin.every = function every(callback, thisArg) {
+        callback = callback || K;
+        if (this == null || !isFunction(callback)) throw new TypeError;
 
-      var i = 0, object = Object(this), length = object.length >>> 0;
-      for ( ; i < length; i++)
-        if (i in object && !callback.call(thisArg, object[i], i, object))
-          return false;
-      return true;
-    };
+        var i = 0, object = Object(this), length = object.length >>> 0;
+        for ( ; i < length; i++)
+          if (i in object && !callback.call(thisArg, object[i], i, object))
+            return false;
+        return true;
+      };
 
     // ECMA-5 15.4.4.20
-    if (!plugin.filter) plugin.filter = function filter(callback, thisArg) {
-      callback = callback || function(value) { return value != null };
-      if (this == null || !isFunction(callback)) throw new TypeError;
+    if (!plugin.filter)
+      plugin.filter = function filter(callback, thisArg) {
+        callback = callback || function(value) { return value != null };
+        if (this == null || !isFunction(callback)) throw new TypeError;
 
-      var i = 0, results = Fuse.Array(), object = Object(this),
-       length = object.length >>> 0;
+        var i = 0, results = Fuse.Array(), object = Object(this),
+         length = object.length >>> 0;
 
-      for ( ; i < length; i++)
-        if (i in object && callback.call(thisArg, object[i], i, object))
-          results.push(object[i]);
-      return results;
-    };
+        for ( ; i < length; i++)
+          if (i in object && callback.call(thisArg, object[i], i, object))
+            results.push(object[i]);
+        return results;
+      };
 
     // ECMA-5 15.4.4.18
-    if (!plugin.forEach) plugin.forEach = function forEach(callback, thisArg) {
-      if (this == null || !isFunction(callback)) throw new TypeError;
+    if (!plugin.forEach)
+      plugin.forEach = function forEach(callback, thisArg) {
+        if (this == null || !isFunction(callback)) throw new TypeError;
 
-      var i = 0, object = Object(this), length = object.length >>> 0;
-      if (thisArg) {
-        for ( ; i < length; i++)
-          i in object && callback.call(thisArg, object[i], i, object);
-      } else {
-        for ( ; i < length; i++)
-          i in object && callback(object[i], i, object);
-      }
-    };
+        var i = 0, object = Object(this), length = object.length >>> 0;
+        if (thisArg) {
+          for ( ; i < length; i++)
+            i in object && callback.call(thisArg, object[i], i, object);
+        } else {
+          for ( ; i < length; i++)
+            i in object && callback(object[i], i, object);
+        }
+      };
 
     // ECMA-5 15.4.4.14
-    if (!plugin.indexOf) plugin.indexOf = function indexOf(item, fromIndex) {
-      if (this == null) throw new TypeError;
+    if (!plugin.indexOf)
+      plugin.indexOf = function indexOf(item, fromIndex) {
+        if (this == null) throw new TypeError;
 
-      fromIndex = fromIndex >> 0;
-      var object = Object(this), length = object.length >>> 0;
-      if (fromIndex < 0) fromIndex = length + fromIndex;
+        fromIndex = fromIndex >> 0;
+        var object = Object(this), length = object.length >>> 0;
+        if (fromIndex < 0) fromIndex = length + fromIndex;
 
-      // ECMA-5 draft oversight, should use [[HasProperty]] instead of [[Get]]
-      for ( ; fromIndex < length; fromIndex++)
-        if (fromIndex in object && object[fromIndex] === item)
-          return Fuse.Number(fromIndex);
-      return Fuse.Number(-1);
-    };
+        // ECMA-5 draft oversight, should use [[HasProperty]] instead of [[Get]]
+        for ( ; fromIndex < length; fromIndex++)
+          if (fromIndex in object && object[fromIndex] === item)
+            return Fuse.Number(fromIndex);
+        return Fuse.Number(-1);
+      };
 
     // ECMA-5 15.4.4.15
-    if (!plugin.lastIndexOf) plugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
-      if (this == null) throw new TypeError;
+    if (!plugin.lastIndexOf)
+      plugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
+        if (this == null) throw new TypeError;
 
-      var object = Object(this), length = object.length >>> 0;
-      fromIndex = arguments.length === 2 ? fromIndex >> 0 : length;
+        var object = Object(this), length = object.length >>> 0;
+        fromIndex = arguments.length === 2 ? fromIndex >> 0 : length;
 
-      if (!length) return Fuse.Number(-1);
-      if (fromIndex > length) fromIndex = length - 1;
-      if (fromIndex < 0) fromIndex = length + fromIndex;
+        if (!length) return Fuse.Number(-1);
+        if (fromIndex > length) fromIndex = length - 1;
+        if (fromIndex < 0) fromIndex = length + fromIndex;
 
-      // ECMA-5 draft oversight, should use [[HasProperty]] instead of [[Get]]
-      for ( ; fromIndex > -1; fromIndex--)
-        if (fromIndex in object && object[fromIndex] === item) break;
-      return Fuse.Number(fromIndex);
-    };
+        // ECMA-5 draft oversight, should use [[HasProperty]] instead of [[Get]]
+        for ( ; fromIndex > -1; fromIndex--)
+          if (fromIndex in object && object[fromIndex] === item) break;
+        return Fuse.Number(fromIndex);
+      };
 
     // ECMA-5 15.4.4.19
-    if (!plugin.map) plugin.map = function map(callback, thisArg) {
-      if (!callback) return plugin.clone.call(this);
-      if (this == null || !isFunction(callback)) throw new TypeError;
+    if (!plugin.map)
+      plugin.map = function map(callback, thisArg) {
+        if (!callback) return plugin.clone.call(this);
+        if (this == null || !isFunction(callback)) throw new TypeError;
 
-      var i = 0, results = Fuse.Array(), object = Object(this),
-       length = object.length >>> 0;
+        var i = 0, results = Fuse.Array(), object = Object(this),
+         length = object.length >>> 0;
 
-      if (thisArg) {
-        for ( ; i < length; i++)
-          if (i in object) results[i] = callback.call(thisArg, object[i], i, object);
-      } else {
-        for ( ; i < length; i++)
-          if (i in object) results[i] = callback(object[i], i, object);
-      }
-      return results;
-    };
+        if (thisArg) {
+          for ( ; i < length; i++)
+            if (i in object) results[i] = callback.call(thisArg, object[i], i, object);
+        } else {
+          for ( ; i < length; i++)
+            if (i in object) results[i] = callback(object[i], i, object);
+        }
+        return results;
+      };
 
     // ECMA-5 15.4.4.17
-    if (!plugin.some) plugin.some = function some(callback, thisArg) {
-      callback = callback || K;
-      if (this == null || !isFunction(callback)) throw new TypeError;
+    if (!plugin.some)
+      plugin.some = function some(callback, thisArg) {
+        callback = callback || K;
+        if (this == null || !isFunction(callback)) throw new TypeError;
 
-      var i = 0, object = Object(this), length = object.length >>> 0;
-      for ( ; i < length; i++)
-        if (i in object && callback.call(thisArg, object[i], i, object))
-          return true;
-      return false;
-    };
+        var i = 0, object = Object(this), length = object.length >>> 0;
+        for ( ; i < length; i++)
+          if (i in object && callback.call(thisArg, object[i], i, object))
+            return true;
+        return false;
+      };
 
     // assign any missing Enumerable methods
     if (Fuse.Enumerable) {

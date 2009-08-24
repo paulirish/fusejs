@@ -1,3 +1,5 @@
+* Minor code cleanup and add missing semicolon to Fuse.Ajax.Responder.register(). [Diego Perini, jddalton]
+
 * Ensure the catch-all of Fuse.Object.hasKey() won't error if the object doesn't have a constructor property. [Garrett Smith, jddalton]
 
 * Rename all occurrences of `.Plugin` to `.plugin`. [jddalton, kangax]
@@ -494,7 +496,7 @@
 
 * Add Opera support to the ELEMENT_SPECIFIC_EXTENSIONS feature detection. [jddalton]
 
-* Add missing semi-colon to String#toQueryParams and make Selector methods more Caja friendly. [jddalton]
+* Add missing semicolon to String#toQueryParams and make Selector methods more Caja friendly. [jddalton]
 
 * Large cleanup of code in preparation for the namespace rewrite. [jddalton]
   - Add private method getNodeName() [David Mark, kangax]
@@ -1000,7 +1002,7 @@
 
 * Fix Element#clonePosition issues with element margins, borders, and padding. [Ruby Trac #11613] [azazel, jddalton, Nick Stakenburg]
 
-* Minor clean-up to Element#cumulativeOffset and Element#positionedOffset. [jddalton]
+* Minor cleanup to Element#cumulativeOffset and Element#positionedOffset. [jddalton]
 
 * Fix Element#cumulativeScrollOffset for Opera 9.25/9.5. [Ruby Trac #10486] [jddalton, Nick Stakenburg]
 
@@ -1123,7 +1125,7 @@
 
 * Make Element#writeAttribute handle frameborder attribute in IE. [Ruby Trac #11068] [Nick Stakenburg, Tobie Langel]
 
-* Minor clean-up of selector.js. [Ruby Trac #10844] [Richard Quadling]
+* Minor cleanup of selector.js. [Ruby Trac #10844] [Richard Quadling]
 
 * Make String#unescapeHTML strip tags in IE. [Ruby Trac #10173] [kangax]
 
@@ -1149,7 +1151,7 @@
 
 * unit test: Remove usage of the 'with' statement from unit tests. [Tobie Langel]
 
-* unit test: Clean-up. [Tobie Langel]
+* unit test: Cleanup. [Tobie Langel]
 
 * unit test: Stop form observers in unit tests. [Ruby Trac #10938] [kangax]
 

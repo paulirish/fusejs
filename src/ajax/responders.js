@@ -55,7 +55,7 @@
         if (!found) {
           // create handler if not found
           handler = (function(n) {
-            return function(request, json) { responder[n](request, json) }})(name)
+            return function(request, json) { responder[n](request, json) }})(name);
 
           // tie original method to handler
           handler.__method = method;
