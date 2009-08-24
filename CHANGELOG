@@ -1,3 +1,5 @@
+* Cleanup and simplify the Fuse.Console class. [jddalton]
+
 * Minor code cleanup and add missing semicolon to Fuse.Ajax.Responder.register(). [Diego Perini, jddalton]
 
 * Ensure the catch-all of Fuse.Object.hasKey() won't error if the object doesn't have a constructor property. [Garrett Smith, jddalton]

@@ -3,7 +3,24 @@
 Fuse.addNS('Console');
 
 (function(Console) {
-  var error, info, object,
+  var object,
+
+  error = function() { return false },
+
+  info = error,
+
+  consoleWrite = function(type, message) {
+    Fuse._div.innerHTML = '<div id="fusejs-console"><pre>x</pre></div>';
+    var consoleElement = Fuse._body.appendChild(Fuse._div.firstChild),
+     textNode = consoleElement.firstChild.firstChild;
+    textNode.data = '';
+
+    return (consoleWrite = function(type, message) {
+      // append text and scroll to bottom of console
+      textNode.data += type + ': ' + message + '\n\n';
+      consoleElement.scrollTop = consoleElement.scrollHeight;
+    })(type, message);
+  },
 
   hasGlobalConsole = (
     isHostObject(global, 'console') &&
@@ -34,40 +51,20 @@ Fuse.addNS('Console');
       object.error(message, exception);
     };
   }
-  else {
-    info  = function info (message) {
-      Fuse.Console._init();
-      Fuse.Console._con.innerHTML += 'Info: ' + message + '\n';
-    };
+  else if (Fuse._doc) {
+    info  = function info (message) { consoleWrite('Info', message) };
     error = function error(message, error) {
-      Fuse.Console._init();
-      var errorText = '';
-      if (error) errorText =
-        (message ? '\n' : '') + [
-          '[Error:',
-          'name: '    + error.name,
-          'message: ' + (error.description || error.message),
-          ']'
-        ].join('\n');
+      var result = message ? [message] : [];
+      if (error) result.push(
+        '[Error:',
+        'name: '    + error.name,
+        'message: ' + (error.description || error.message),
+        ']');
 
-      Fuse.Console._con.innerHTML += 'Error: ' + message + errorText + '\n';
+      consoleWrite('Error', result.join('\n'));
     };
   }
 
   Console.error = error;
   Console.info  = info;
-  Console._init = function _init() {
-    var div = document.createElement('div'),
-     ds     = div.style;
-
-    ds.whiteSpace = 'pre',
-     ds.marginTop =
-     ds.height    = '100px',
-     ds.overflow  = 'auto',
-     div.id       = '_fjsConsoleContainer';
-
-    Fuse._doc.body.appendChild(div);
-    Fuse.Console._con = Fuse._doc.getElementById(div.id);
-    Fuse.Console._init = emptyFunction;
-  };
 })(Fuse.Console);

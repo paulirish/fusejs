@@ -10,7 +10,7 @@ new Test.Unit.Runner({
 
   'testConsoleError': function() {
     var message = 'testing error output';
-    Fuse.Console.error(message, new Error);
+    Fuse.Console.error(message, new SyntaxError);
 
     this.assert(
       confirm('Do you see the error message "' + message + '" in your environment\'s console ?'),
