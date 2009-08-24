@@ -17,7 +17,7 @@ Fuse.addNS('Console');
 
     return (consoleWrite = function(type, message) {
       // append text and scroll to bottom of console
-      textNode.data += type + ': ' + message + '\n\n';
+      textNode.data += type + ': ' + message + '\r\n\r\n';
       consoleElement.scrollTop = consoleElement.scrollHeight;
     })(type, message);
   },
@@ -61,7 +61,7 @@ Fuse.addNS('Console');
         'message: ' + (error.description || error.message),
         ']');
 
-      consoleWrite('Error', result.join('\n'));
+      consoleWrite('Error', result.join('\r\n'));
     };
   }
 

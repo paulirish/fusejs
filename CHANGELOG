@@ -1,3 +1,5 @@
+* Ensure line breaks in the Fuse.Console output display correctly for IE6. [jddalton]
+
 * Cleanup and simplify the Fuse.Console class. [jddalton]
 
 * Minor code cleanup and add missing semicolon to Fuse.Ajax.Responder.register(). [Diego Perini, jddalton]
