@@ -7,8 +7,8 @@
           return new Updater(container, url, options);
 
         this.container = {
-          'success': (container.success || container),
-          'failure': (container.failure || (container.success ? null : container))
+          'success': $(container.success || container),
+          'failure': $(container.failure || (container.success ? null : container))
         };
 
         options = clone(options);
@@ -30,15 +30,17 @@
 
     'updateContent': (function() {
       function updateContent(responseText) {
-        var receiver = this.container[this.isSuccess() ? 'success' : 'failure'],
-         options = this.options;
+        var insertion,
+         options = this.options,
+         receiver = this.container[this.isSuccess() ? 'success' : 'failure'];
 
-        if (!options.evalScripts)
-          responseText = responseText.stripScripts();
-        if (receiver = $(receiver)) {
+        if (receiver) {
+          if (!options.evalScripts)
+            responseText = responseText.stripScripts();
+
           if (options.insertion) {
             if (isString(options.insertion)) {
-              var insertion = { }; insertion[options.insertion] = responseText;
+              insertion = { }; insertion[options.insertion] = responseText;
               receiver.insert(insertion);
             }
             else options.insertion(receiver, responseText);

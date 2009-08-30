@@ -108,6 +108,7 @@ new Test.Unit.Runner({
 
     var request = Fuse.Ajax.Request('../fixtures/hello.js?delay=1', {
       'method':    'get',
+      'timerMultiplier': 1,
       'timeout':   10, // ms
       'onTimeout': function() { fired.timeout = true },
       'onDone':    function(request) { timedoutFlag = request.timedout }
@@ -135,14 +136,12 @@ new Test.Unit.Runner({
       this.assert(timedoutFlag,
         'failed to set request.timedout flag');
 
-
       // test timerMultiplier
       request.abort();
       fired.timeout = false;
 
       request.request('../fixtures/hello.js?delay=3', {
         'method':    'get',
-        'timerMultiplier': 1000,
         'timeout':   0.5, // seconds
         'onTimeout': function() { fired.timeout = true }
       });
@@ -162,13 +161,14 @@ new Test.Unit.Runner({
   },
 
   'testRequestWithNoUrl': function() {
-    var test = this,  suceeded = false;
+    var suceeded = false;
     Fuse.Ajax.Request(null, {
-      'method':    'get',
-      'onSuccess': function() { suceeded = true }
+      'method': 'get',
+      'asynchronous': false,
+      'onSuccess': function() { suceeded = true; }
     });
 
-    this.wait(1000, function() { this.assert(suceeded) });
+    this.assert(suceeded);
   },
 
   'testUpdater': function() {
@@ -181,10 +181,7 @@ new Test.Unit.Runner({
       this.assertEqual('', getInnerHTML('content'));
 
       Fuse.Ajax.Updater({ 'success': 'content', 'failure': 'content2' },
-        '../fixtures/content.html', { 'method': 'get', 'parameters': { 'pet': 'monkey' } });
-
-      Fuse.Ajax.Updater('', '../fixtures/content.html',
-        { 'method': 'get', 'parameters': 'pet=monkey' });
+        '../fixtures/content.html', { 'method': 'get' });
 
       this.wait(1000, function() {
         this.assertEqual(sentence, getInnerHTML('content'));
@@ -571,14 +568,15 @@ new Test.Unit.Runner({
 
   'testIsSameOrigin': function() {
     if (this.isRunningFromRake) {
-      var isSameOrigin = Fuse.Object.isSameOrigin;
-      Fuse.Object.isSameOrigin = function() { return false };
+      var loc = window.location, 
+       url = loc.protocol + '//127.0.0.1' + loc.port + '/response';
 
       $('content').update('same origin policy');
 
-      Fuse.Ajax.Request('/response',
+      Fuse.Ajax.Request(url,
         extendDefault({
           'parameters': Fixtures.js,
+          'onException': function() { /* swallow error */ },
           'onDone': Fuse.Function.bind(function() {
             this.assertEqual('same origin policy', getInnerHTML('content'));
           }, this)
@@ -599,9 +597,6 @@ new Test.Unit.Runner({
             this.assert(Fuse.String.contains(error.message, 'Badly formed JSON string'));
           }, this)
       }));
-
-      // restore original method
-      Fuse.Object.isSameOrigin = isSameOrigin;
     }
     else this.info(message);
   },

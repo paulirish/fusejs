@@ -1,3 +1,5 @@
+* Fix bugs/typos/unit tests in the Fuse.Ajax classes. [Diego Perini, jddalton]
+
 * Ensure line breaks in the Fuse.Console output display correctly for IE6. [jddalton]
 
 * Cleanup and simplify the Fuse.Console class. [jddalton]

@@ -190,13 +190,6 @@
    'lang/template.js',
    'lang/timer.js',
 
-   'ajax/ajax.js',
-   'ajax/responders.js',
-   'ajax/base.js',
-   'ajax/request.js',
-   'ajax/updater.js',
-   'ajax/timed-updater.js',
-
    'dom/element/element.js',
    'dom/element/attribute.js',
    'dom/element/style.js',
@@ -219,7 +212,14 @@
 
    'lang/grep.js',
    'lang/inspect.js',
-   'lang/json.js') %>
+   'lang/json.js',
+   
+   'ajax/ajax.js',
+   'ajax/responders.js',
+   'ajax/base.js',
+   'ajax/request.js',
+   'ajax/updater.js',
+   'ajax/timed-updater.js') %>
   /*--------------------------------------------------------------------------*/
 
   // update native generics and element methods

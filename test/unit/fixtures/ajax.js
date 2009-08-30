@@ -52,3 +52,6 @@ var Fixtures = {
     'X-JSON': '{"test": "hello #\u00E9\u00E0 "}' // hello #éà
   }
 };
+
+// make all timers/delays use seconds
+Fuse.Timer.options.multiplier = 1000;

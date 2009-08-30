@@ -99,7 +99,7 @@
     'contentType':  'application/x-www-form-urlencoded',
     'encoding':     'UTF-8',
     'evalJS':       true,
-    'evalJSON':     !!Fuse.String.evalJSON,
+    'evalJSON':     !!Fuse.String.plugin.evalJSON,
     'forceMethod':  false,
     'method':       'post',
     'parameters':   '',

@@ -44,7 +44,7 @@
        responseText = request.responseText;
 
       if (decay) {
-        this.decay = Math.min(responseText == this.lastText ?
+        this.decay = Math.min(responseText == String(this.lastText) ?
           (this.decay * decay) : 1, this.maxDecay);
 
         this.lastText = responseText;
@@ -59,10 +59,10 @@
     };
 
     plugin.stop = function stop() {
-      this.updater.abort();
       global.clearTimeout(this.timer);
-      this.onStop && this.onStop.apply(this, arguments);
       this.lastText = null;
+      this.updater.abort();
+      this.onStop && this.onStop.apply(this, arguments);
     };
 
     // prevent JScript bug with named function expressions
