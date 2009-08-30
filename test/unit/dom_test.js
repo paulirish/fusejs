@@ -974,7 +974,7 @@ new Test.Unit.Runner({
     dummy.innerHTML = Fuse.String.times('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down().siblings()[0]);
   },
-  
+
   'testElementSiblingsWithSelector': function() {
     var results = $('intended').siblings('p');
 
@@ -1276,7 +1276,7 @@ new Test.Unit.Runner({
     this.assertEqual('-1px', $('style_test_3').style.left);
     this.assertEqual('2px',  $('style_test_3').style.marginTop);
     this.assertEqual('none', $('style_test_3').getStyle('float'));
-    
+
     $('style_test_3').setStyle({ 'float': 'left' });
     this.assertEqual('left', $('style_test_3').getStyle('float'));
 
@@ -1716,7 +1716,7 @@ new Test.Unit.Runner({
     this.assertEqual('some-className',
       p.writeAttribute({ 'className': 'some-className' }).readAttribute('class'));
 
-    this.assertEqual('some-id', 
+    this.assertEqual('some-id',
       label.writeAttribute({ 'for': 'some-id' }).readAttribute('for'));
 
     this.assertEqual('some-other-id',
@@ -1827,13 +1827,13 @@ new Test.Unit.Runner({
 
     var input = document.body.appendChild(new Element('input',
       { 'id': 'my_input_field_id', 'name': 'my_input_field' }));
- 
+
     this.assertEqual(input, document.body.lastChild);
     this.assertEqual('my_input_field', $(document.body.lastChild).name);
 
     // TODO: Fix IE7 and lower bug in getElementById()
     if (Fuse.Env.Agent.IE && $('my_input_field')) {
-      this.assertMatch(/name=["']?my_input_field["']?/,
+      this.assertMatch(/name=["']?my_input_field["']?/, // '
         $('my_input_field').outerHTML);
     }
 
@@ -1885,7 +1885,7 @@ new Test.Unit.Runner({
     this.assertEqual(100,
       $('dimensions-visible').getDimensions().height,
         '`dimensions-visible` height');
- 
+
     this.assertEqual(200,
       $('dimensions-visible').getDimensions().width,
       '`dimensions-visible` width');
@@ -1893,7 +1893,7 @@ new Test.Unit.Runner({
     this.assertEqual(100,
       $('dimensions-display-none').getDimensions().height,
       '`dimensions-display-none` height');
- 
+
     this.assertEqual(200,
       $('dimensions-display-none').getDimensions().width,
       '`dimensions-display-none` width');
@@ -1948,6 +1948,64 @@ new Test.Unit.Runner({
     this.assertEqual(100, $('dimensions-table').getDimensions().height, 'TABLE height');
     this.assertEqual(200, $('dimensions-table').getDimensions().width,  'TABLE height');
     $('dimensions-table').show();
+  },
+
+  'testElementGetDimensionsPresets': function() {
+    function getNumericStyle(element, styleName) {
+      return parseFloat(Element.getStyle(element, styleName)) || 0;
+    }
+
+    var margin = { }, border = { }, padding = { },
+     el = $('style_test_dimensions_container'),
+     clientWidth = el.clientWidth;
+
+    border.left   = getNumericStyle(el, 'borderLeftWidth');
+    border.right  = getNumericStyle(el, 'borderRightWidth');
+
+    margin.left   = getNumericStyle(el, 'marginLeft');
+    margin.right  = getNumericStyle(el, 'marginRight');
+
+    padding.left  = getNumericStyle(el, 'paddingLeft');
+    padding.right = getNumericStyle(el, 'paddingRight');
+
+    border.width  = border.left  + border.right;
+    margin.width  = margin.left  + margin.right;
+    padding.width = padding.left + padding.right;
+
+    // content + padding + border (visual preset) [default]
+    var dimensions = el.getDimensions();
+    this.assertEqual(clientWidth + border.width, dimensions.width);
+    this.assertEqual(56, dimensions.height);
+
+    // content + padding + border + margin
+    dimensions = el.getDimensions('box');
+    this.assertEqual(clientWidth + border.width + margin.width,
+      dimensions.width, 'Failed width `box` preset');
+    this.assertEqual(76, dimensions.height, 'Failed height `box` preset');
+
+    // content + padding
+    dimensions = el.getDimensions('client');
+    this.assertEqual(clientWidth,
+      dimensions.width, 'Failed width `client` preset');
+    this.assertEqual(50, dimensions.height, 'Failed height `client` preset');
+
+    // content
+    dimensions = el.getDimensions('content');
+    this.assertEqual(clientWidth - padding.width,
+      dimensions.width, 'Failed width `content` preset');
+    this.assertEqual(30, dimensions.height, 'Failed height `content` preset');
+
+    // content + padding + border + margin (box preset)
+    dimensions = el.getDimensions({ 'border': 1, 'margin': 1, 'padding': 1 });
+    this.assertEqual(clientWidth + border.width + margin.width,
+      dimensions.width, 'Failed user options `box` width');
+    this.assertEqual(76, dimensions.height, 'Failed user options `box` height');
+
+    // border + content
+    dimensions = el.getDimensions({ 'border': 1 });
+    this.assertEqual(clientWidth + border.width - padding.width,
+      dimensions.width, 'Failed user options border+content width');
+    this.assertEqual(36, dimensions.height, 'Failed user options border+content height');
   },
 
   'testElementClonePosition': function() {
@@ -2348,11 +2406,11 @@ new Test.Unit.Runner({
     this.assertEqual('TABLE',
       $('tr_offset_parent_test').getOffsetParent().tagName.toUpperCase(),
       'offsetParent should be TABLE');
- 
+
     this.assertEqual('TH',
       $('th_offset_parent_test').getOffsetParent().tagName.toUpperCase(),
       'offsetParent should be TH');
- 
+
     this.assertEqual('TD',
       $('td_offset_parent_test').getOffsetParent().tagName.toUpperCase(),
       'offsetParent should be TD');
@@ -2428,15 +2486,15 @@ new Test.Unit.Runner({
       var relative    = element.getDimensions();
       relative.width  = Number(relative.width);
       relative.height = Number(relative.height);
-      
+
       this.assert(original.width == absolute.width && absolute.width == relative.width,
-        element.tagName + ' ' + element.className + '; original.width: ' + 
-        original.width +'; absolute.width: ' + absolute.width + '; relative.width: ' + 
+        element.tagName + ' ' + element.className + '; original.width: ' +
+        original.width +'; absolute.width: ' + absolute.width + '; relative.width: ' +
         relative.width);
 
       this.assert(original.height == absolute.height && absolute.height == relative.height,
-        element.tagName + ' ' + element.className + '; original.height: ' + 
-        original.height +'; absolute.height: ' + absolute.height + 
+        element.tagName + ' ' + element.className + '; original.height: ' +
+        original.height +'; absolute.height: ' + absolute.height +
         '; relative.height: ' +  relative.height);
 
     }, this);

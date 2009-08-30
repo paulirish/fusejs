@@ -33,7 +33,7 @@
 
       // bonus! make the dom methods able to execute via call/apply
       eachKey(proto, function(value, key) {
-        if (hasKey(proto, key) && typeof value === 'function' && 
+        if (hasKey(proto, key) && typeof value === 'function' &&
             value['__proto__'] !== Function.prototype)
           proto[key]['__proto__'] = Function.prototype;
       });
@@ -361,10 +361,6 @@
       return Fuse.String($(element).innerHTML).blank();
     };
 
-    methods.getDimensions = function getDimensions(element) {
-      return { 'width': Element.getWidth(element), 'height': Element.getHeight(element) };
-    };
-
     methods.identify = function identify(element) {
       // use readAttribute to avoid issues with form elements and
       // child controls with ids/names of "id"
@@ -442,46 +438,6 @@
         'hide' : 'show'](element);
     };
 
-    methods.isVisible = (function() {
-      function isVisible(element) {
-        if (!Fuse._body) return false;
-
-        var isVisible = function isVisible(element) {
-          // handles IE and the fallback solution
-          element = $(element);
-          var style = element.currentStyle;
-          return style !== null && (style || element.style).display !== 'none' &&
-            !!(element.offsetHeight || element.offsetWidth);
-        };
-
-        if (Feature('ELEMENT_COMPUTED_STYLE')) {
-          isVisible = function isVisible(element) {
-            element = $(element);
-            var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
-            return !!(style && (element.offsetHeight || element.offsetWidth));
-          };
-        }
-        if (Bug('TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN')) {
-          var _isVisible = isVisible;
-          isVisible = function isVisible(element) {
-            element = $(element);
-            if (_isVisible(element)) {
-              var nodeName = getNodeName(element);
-              if ((nodeName === 'THEAD' || nodeName === 'TBODY' || nodeName === 'TR') &&
-                 (element = element.parentNode))
-                return Element.isVisible(element);
-              return true;
-            }
-            return false;
-          };
-        }
-        // update API hooks
-        Element.isVisible = Element.Methods.isVisible = isVisible;
-        return isVisible(element);
-      }
-      return isVisible;
-    })();
-
     methods.wrap = function wrap(element, wrapper, attributes) {
       element = $(element);
       if (isElement(wrapper))
@@ -498,11 +454,9 @@
     // prevent JScript bug with named function expressions
     var cleanWhitespace = null,
      empty =              null,
-     getDimensions =      null,
      hide =               null,
      identify =           null,
      isFragment =         null,
-     isVisible =          null,
      remove =             null,
      scrollTo =           null,
      show =               null,
@@ -708,30 +662,6 @@
     // prevent JScript bug with named function expressions
     var insert = null, replace = null, update = null;
   })(Element.Methods);
-
-  /*--------------------------------------------------------------------------*/
-
-  // define Element#getWidth() and Element#getHeight()
-  Fuse.Util.$w('Width Height')._each(function(D) {
-    Element.Methods['get' + D] = (function() {
-      var property = 'offset' + D;
-      return function(element) {
-        element = $(element);
-
-        // offsetHidth/offsetWidth properties return 0 on elements
-        // with display:none, so show the element temporarily
-        var result;
-        if (!Element.isVisible(element)) {
-          var s = element.style, backup = s.cssText;
-          s.cssText += ';display:block;visibility:hidden;';
-          result = element[property];
-          s.cssText = backup;
-        }
-        else result = element[property];
-        return Fuse.Number(result);
-      };
-    })();
-  });
 
   /*--------------------------------------------------------------------------*/
 

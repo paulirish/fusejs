@@ -128,9 +128,9 @@
   /*--------------------------------------------------------------------------*/
 
   (function(methods) {
-    var DIMENSION_NAMES = { 'height': 1, 'width': 1 };
+    var DIMENSION_NAMES = { 'height': 1, 'width': 1 },
 
-    var FLOAT_TRANSLATIONS = typeof Fuse._docEl.style.styleFloat !== 'undefined'
+    FLOAT_TRANSLATIONS = typeof Fuse._docEl.style.styleFloat !== 'undefined'
      ? { 'float': 'styleFloat', 'cssFloat': 'styleFloat' }
      : { 'float': 'cssFloat' };
 
@@ -306,3 +306,132 @@
     // prevent JScript bug with named function expressions
     var setStyle = null;
   })(Element.Methods);
+
+  /*--------------------------------------------------------------------------*/
+
+  (function(methods) {
+    methods.getDimensions = function getDimensions(element, options) {
+      return {
+        'width': Element.getWidth(element, options),
+        'height': Element.getHeight(element, options)
+      }
+    };
+
+    methods.isVisible = function isVisible(element) {
+      if (!Fuse._body) return false;
+
+      var isVisible = function isVisible(element) {
+        // handles IE and the fallback solution
+        element = $(element);
+        var style = element.currentStyle;
+        return style !== null && (style || element.style).display !== 'none' &&
+          !!(element.offsetHeight || element.offsetWidth);
+      };
+
+      if (Feature('ELEMENT_COMPUTED_STYLE')) {
+        isVisible = function isVisible(element) {
+          element = $(element);
+          var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
+          return !!(style && (element.offsetHeight || element.offsetWidth));
+        };
+      }
+
+      if (Bug('TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN')) {
+        var __isVisible = isVisible;
+        isVisible = function isVisible(element) {
+          element = $(element);
+          if (__isVisible(element)) {
+            var nodeName = getNodeName(element);
+            if ((nodeName === 'THEAD' || nodeName === 'TBODY' || nodeName === 'TR') &&
+               (element = element.parentNode))
+              return Element.isVisible(element);
+            return true;
+          }
+          return false;
+        };
+      }
+
+      // redefine method and execute
+      return (Element.isVisible = methods.isVisible = isVisible)(element);
+    };
+
+    // prevent JScript bug with named function expressions
+    var getDimensions = null, isVisible = null;
+  })(Element.Methods);
+
+  /*--------------------------------------------------------------------------*/
+
+  // define Element#getWidth and Element#getHeight
+  (function(methods) {
+    var i      = 0,
+     getStyle  = methods.getStyle,
+     isVisible = methods.isVisible,
+     toFloat   = parseFloat,
+
+    PRESETS = {
+      'box':     { 'border':  1, 'margin':  1, 'padding': 1 },
+      'visual':  { 'border':  1, 'padding': 1 },
+      'client':  { 'padding': 1 },
+      'content': {  }
+    };
+
+    while (i < 2) (function() {
+      var borderA, borderB, marginA, marginB, paddingA, paddingB,
+       dim        = i ? 'Width' : 'Height',
+       methodName = 'get' + dim,
+       property   = 'offset' + dim;
+
+      // set style property names
+      if (i++) {
+        borderA  = 'borderLeftWidth'; borderB  = 'borderRightWidth';
+        marginA  = 'marginLeft';      marginB  = 'marginRight';
+        paddingA = 'paddingLeft';     paddingB = 'paddingRight';
+      }  else {
+        borderA  = 'borderTopWidth';  borderB  = 'borderBottomWidth';
+        marginA  = 'marginTop';       marginB  = 'marginBottom';
+        paddingA = 'paddingTop';      paddingB = 'paddingBottom';
+      }
+
+      function getHeightWidth(element, options) {
+        var backup, result, s;
+
+        // default to `visual` preset
+        if (options) {
+          if (isString(options)) options = PRESETS[options];
+        } else options = PRESETS.visual;
+
+        // First get our offset(Width/Height) (visual)
+        // offsetHeight/offsetWidth properties return 0 on elements
+        // with display:none, so show the element temporarily
+        if (!isVisible(element)) {
+          s = element.style; backup = s.cssText;
+          s.cssText += ';display:block;visibility:hidden;';
+          result = element[property];
+          s.cssText = backup;
+        }
+        else result = element[property];
+
+        // add margins because they're excluded from the offset values
+        if (options.margin)
+          result += (toFloat(getStyle(element, marginA)) || 0) +
+            (toFloat(getStyle(element, marginB)) || 0);
+
+        // subtract border and padding because they're included in the offset values
+        if (!options.border)
+          result -= (toFloat(getStyle(element, borderA)) || 0) +
+            (toFloat(getStyle(element, borderB)) || 0);
+
+        if (!options.padding)
+          result -= (toFloat(Element.getStyle(element, paddingA)) || 0) +
+            (toFloat(getStyle(element, paddingB)) || 0);
+
+        return Fuse.Number(result);
+      }
+
+      methods[methodName] = getHeightWidth;
+    })();
+
+    i = undef;
+  })(Element.Methods);
+
+  /*--------------------------------------------------------------------------*/
