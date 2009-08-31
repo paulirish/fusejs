@@ -446,9 +446,6 @@ new Test.Unit.Runner({
     this.assert(!$('test-hidden').isVisible(),
       $('test-hidden').inspect());
 
-    this.assert(!$('test-hidden-by-size').isVisible(),
-      $('test-hidden-by-size').inspect());
-
     this.assert(!$('test-nested-hidden-visible').isVisible(),
       $('test-nested-hidden-visible').inspect());
 
@@ -458,11 +455,14 @@ new Test.Unit.Runner({
     this.assert(!(new Element('div')).isVisible(),
       'element fragment');
 
-    this.assert(!$('dimensions-tr').hide().isVisible(),
-      'hidden TR element');
-    $('dimensions-tr').show();
+    $('dimensions-tr').hide();
 
+    this.assert(!$('dimensions-tr').isVisible(),
+      'hidden TR element');
+
+    $('dimensions-tr').show();
     $('dimensions-table').hide();
+
     this.assert(!$('dimensions-tbody').isVisible(),
       'non-hidden TBODY element inside hidden TABLE');
 
@@ -473,6 +473,11 @@ new Test.Unit.Runner({
       'non-hidden TD element inside hidden TABLE');
 
     $('dimensions-table').show();
+
+    // IE6 will make the min-height 16px instead of 0px
+    this.assertEqual(!!$('test-hidden-by-size').offsetHeight,
+      $('test-hidden-by-size').isVisible(),
+      $('test-hidden-by-size').inspect());
   },
 
   'testElementToggle': function(){

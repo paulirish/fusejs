@@ -1,3 +1,5 @@
+* Stop Element#isVisible unit test from failing because IE6 doesn't respect 0px dimensions. [jddalton]
+
 * Fix bugs/typos/unit tests in the Fuse.Ajax classes. [Diego Perini, jddalton]
 
 * Ensure line breaks in the Fuse.Console output display correctly for IE6. [jddalton]
