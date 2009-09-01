@@ -23,7 +23,7 @@ new Test.Unit.Runner({
     var count = 0;
     klass.prototype.toString = 0;
     Fuse.Object.each(new klass(), function() { count++ });
- 
+
     this.assertEqual(1, count,
       'Failed to iterate correctly over the object properties');
   },
@@ -362,9 +362,11 @@ new Test.Unit.Runner({
 
     // simulate document.domain changes
     var isSameOrigin = Fuse.Object.isSameOrigin,
-     docDomain = 'www.example.com',
-     protocol = 'http:';
+     docDomain       = 'www.example.com',
+     port            = 80,
+     protocol        = 'http:';
 
+    // redefine method (not pretty but it gets the job done)
     Fuse.Object.isSameOrigin = function(url) {
       var domainIndex, urlDomain,
        result       = true,
@@ -376,7 +378,7 @@ new Test.Unit.Runner({
         domainIndex = urlDomain.indexOf(docDomain);
         result = parts[1] === protocol &&
           domainIndex > -1 && (!domainIndex || urlDomain.charAt(domainIndex -1) == '.') &&
-            (parts[3] || defaultPort) === (window.location.port || defaultPort);
+            (parts[3] || defaultPort) === (port || defaultPort);
       }
       return result;
     };

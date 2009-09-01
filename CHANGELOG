@@ -1,3 +1,5 @@
+* Fix Fuse.Object.isSameOrigin() unit test when running from rake. [Diego Perini, jddalton]
+
 * Implemented Element.getDimensions() options argument. [FuseJS LH #6] [Joe Gornick, jddalton]
 
 * Stop Element#isVisible unit test from failing because IE6 doesn't respect 0px dimensions. [jddalton]
