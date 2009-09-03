@@ -2,25 +2,25 @@
 
   (function(plugin) {
     plugin.abs = (function() {
-      function abs() { return Fuse.Number(__abs(this)) }
+      function abs() { return Fuse.Number(__abs(this)); }
       var __abs = Math.abs;
       return abs;
     })();
 
     plugin.ceil = (function() {
-      function ceil() { return Fuse.Number(__ceil(this)) }
+      function ceil() { return Fuse.Number(__ceil(this)); }
       var __ceil = Math.ceil;
       return ceil;
     })();
 
     plugin.floor = (function() {
-      function floor() { return Fuse.Number(__floor(this)) }
+      function floor() { return Fuse.Number(__floor(this)); }
       var __floor = Math.floor;
       return floor;
     })();
 
     plugin.round = (function() {
-      function round() { return Fuse.Number(__round(this)) }
+      function round() { return Fuse.Number(__round(this)); }
       var __round = Math.round;
       return round;
     })();

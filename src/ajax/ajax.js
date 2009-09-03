@@ -5,7 +5,7 @@
   Fuse.Ajax.activeRequestCount = 0;
 
   Fuse.Ajax.getTransport = (function() {
-    var getTransport = function getTransport() { return false };
+    var getTransport = function getTransport() { return false; };
 
     // check ActiveXObject first because IE7+ implementation of
     // XMLHttpRequest doesn't work with local files.

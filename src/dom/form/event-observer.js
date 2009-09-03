@@ -7,7 +7,7 @@
           this.element = $(element);
 
           var eventObserver = this, onElementEvent = this.onElementEvent;
-          this.onElementEvent = function() { onElementEvent.call(eventObserver) };
+          this.onElementEvent = function() { onElementEvent.call(eventObserver); };
 
           if (getNodeName(this.element) === 'FORM')
             return this.registerFormCallbacks();
@@ -88,7 +88,7 @@
       })(),
 
       'getValue': (function() {
-        function getValue() { return Form.serialize(this.element) }
+        function getValue() { return Form.serialize(this.element); }
         return getValue;
       })()
     });

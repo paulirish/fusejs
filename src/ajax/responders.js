@@ -5,8 +5,8 @@
   // TODO: Utilize custom events for responders
   (function(Responders) {
     Responders.responders = {
-      'onCreate': Fuse.List(function() { Fuse.Ajax.activeRequestCount++ }),
-      'onDone':   Fuse.List(function() { Fuse.Ajax.activeRequestCount-- })
+      'onCreate': Fuse.List(function() { Fuse.Ajax.activeRequestCount++; }),
+      'onDone':   Fuse.List(function() { Fuse.Ajax.activeRequestCount--; })
     };
 
     Responders.dispatch = (function() {
@@ -58,7 +58,7 @@
         if (!found) {
           // create handler if not found
           handler = (function(n) {
-            return function(request, json) { responder[n](request, json) }})(name);
+            return function(request, json) { responder[n](request, json); };})(name);
 
           // tie original method to handler
           handler.__method = method;

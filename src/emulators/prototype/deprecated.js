@@ -143,7 +143,7 @@
         for (var i = 0, child, cn; child = nodes[i]; i++) {
           if (child.className && (cn = ' ' + child.className + ' ') && (cn.contains(className) ||
             (classNames && classNames.every(function(name) {
-              return !name.toString().blank() && cn.contains(' ' + name + ' ') })))) {
+              return !name.toString().blank() && cn.contains(' ' + name + ' '); })))) {
             elements.push(Element.extend(child));
           }
         }
@@ -185,7 +185,7 @@
 
     this._each = function _each(callback) {
       this.element.className.split(/\s+/)
-        .filter(function(name) { return name.length > 0 })
+        .filter(function(name) { return name.length > 0; })
           ._each(callback);
     };
 

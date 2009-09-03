@@ -55,7 +55,7 @@
   Fuse.Class.Methods = (function() {
     var matchSuper = Feature('FUNCTION_TO_STRING_RETURNS_SOURCE')
       ? /\bthis\._super\b/
-      : { 'test': function() { return true } };
+      : { 'test': function() { return true; } };
 
     function addMethods(source) {
       var prototype = this.prototype,
@@ -84,8 +84,8 @@
             return result;
           };
 
-          method.valueOf  = function() { return __method.valueOf() };
-          method.toString = function() { return __method.toString() };
+          method.valueOf  = function() { return __method.valueOf(); };
+          method.toString = function() { return __method.toString(); };
         }
         prototype[key] = method;
       });

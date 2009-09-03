@@ -17,7 +17,7 @@
     };
 
     function cssDoneLoading() {
-      return (isCssLoaded = function() { return true })();
+      return (isCssLoaded = function() { return true; })();
     }
 
     function fireDomLoadedEvent() {
@@ -77,7 +77,7 @@
             while (length--) {
               if (isSameOrigin(sheet.imports[length].href)) {
                 collection.push(sheet.imports[length]);
-                addImports(collection, sheet.imports[length])
+                addImports(collection, sheet.imports[length]);
               }
             }
             return collection;
@@ -119,30 +119,30 @@
 
     getSheet = function(element) {
       return (getSheet = isHostObject(element, 'styleSheet')
-        ? function(element) { return element.styleSheet }
-        : function(element) { return element.sheet }
+        ? function(element) { return element.styleSheet; }
+        : function(element) { return element.sheet; }
       )(element);
     },
 
     getRules = function(sheet) {
       return (getRules = isHostObject(sheet, 'rules')
-        ? function(sheet) { return sheet.rules }
-        : function(sheet) { return sheet.cssRules }
+        ? function(sheet) { return sheet.rules; }
+        : function(sheet) { return sheet.cssRules; }
       )(sheet);
     },
 
     addRule = function(sheet, selector, cssText) {
       return (addRule = isHostObject(sheet, 'addRule')
-        ? function(sheet, selector, cssText) { return sheet.addRule(selector, cssText) }
+        ? function(sheet, selector, cssText) { return sheet.addRule(selector, cssText); }
         : function(sheet, selector, cssText) { return sheet.insertRule(selector +
-            '{' + cssText + '}', getRules(sheet).length) }
+            '{' + cssText + '}', getRules(sheet).length); }
       )(sheet, selector, cssText);
     },
 
     removeRule = function(sheet, index) {
       return (removeRule = isHostObject(sheet, 'removeRule')
-        ? function(sheet, index) { return sheet.removeRule(index) }
-        : function(sheet, index) { return sheet.deleteRule(index) }
+        ? function(sheet, index) { return sheet.removeRule(index); }
+        : function(sheet, index) { return sheet.deleteRule(index); }
       )(sheet, index);
     },
 
@@ -217,7 +217,7 @@
       // Avoid a potential browser hang when checking global.top (thanks Rich Dougherty)
       // Checking global.frameElement could throw if not accessible.
       var isFramed = true;
-      try { isFramed = global.frameElement != null } catch(e) { }
+      try { isFramed = global.frameElement != null; } catch(e) { }
 
       // Derived with permission from Diego Perini's IEContentLoaded
       // http://javascript.nwbox.com/IEContentLoaded/
@@ -228,7 +228,7 @@
             if (Fuse._doc.readyState === 'complete')
               fireDomLoadedEvent();
             else {
-              try { Fuse._div.doScroll() } catch(e) { return }
+              try { Fuse._div.doScroll(); } catch(e) { return; }
               fireDomLoadedEvent();
             }
           }

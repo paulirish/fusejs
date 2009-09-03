@@ -5,7 +5,7 @@ Fuse.addNS('Console');
 (function(Console) {
   var object,
 
-  error = function() { return false },
+  error = function() { return false; },
 
   info = error,
 
@@ -39,20 +39,20 @@ Fuse.addNS('Console');
 
   if (hasOperaConsole) {
     object = global.opera;
-    info   = function info(message) { object.postError('Info: ' + message) };
+    info   = function info(message) { object.postError('Info: ' + message); };
     error  = function error(message, exception) {
       object.postError(['Error: ' + message + '\n', exception]);
     };
   }
   else if (hasGlobalConsole || hasJaxerConsole) {
     object = hasGlobalConsole ? global.console : global.Jaxer.Log;
-    info   = function info(message) { object.info(message) };
+    info   = function info(message) { object.info(message); };
     error  = function error(message, exception) {
       object.error(message, exception);
     };
   }
   else if (Fuse._doc) {
-    info  = function info (message) { consoleWrite('Info', message) };
+    info  = function info (message) { consoleWrite('Info', message); };
     error = function error(message, error) {
       var result = message ? [message] : [];
       if (error) result.push(

@@ -10,9 +10,9 @@
          onTimeout = this.onTimeout;
 
         this.transport = Fuse.Ajax.getTransport();
-        this.onTimeout = function() { onTimeout.call(request) };
+        this.onTimeout = function() { onTimeout.call(request); };
         this.onStateChange =
-          function(event, forceState) { onStateChange.call(request, event, forceState) };
+          function(event, forceState) { onStateChange.call(request, event, forceState); };
 
         this.request(url, options);
       }
@@ -74,13 +74,13 @@
 
     this.getAllHeaders = function getAllHeaders() {
       var result;
-      try { result = this.transport.getAllResponseHeaders() } catch (e) { }
+      try { result = this.transport.getAllResponseHeaders(); } catch (e) { }
       return Fuse.String(result || '');
     };
 
     this.getHeader = function getHeader(name) {
       var result;
-      try { result = this.transport.getResponseHeader(name) } catch (e) { }
+      try { result = this.transport.getResponseHeader(name); } catch (e) { }
       return result ? Fuse.String(result) : null;
     };
 

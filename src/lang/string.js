@@ -13,7 +13,7 @@
   })();
 
   Fuse.String.interpret = (function() {
-    function interpret(value) { return Fuse.String(value == null ? '' : value) }
+    function interpret(value) { return Fuse.String(value == null ? '' : value); }
     return interpret;
   })();
 
@@ -472,16 +472,16 @@
 
     var div = Fuse._div, tags = [],
      matchToken = new RegExp(expando + '\\d+' + expando, 'g'),
-     __unescape = function() { return div.textContent };
+     __unescape = function() { return div.textContent; };
 
     if (!Feature('ELEMENT_TEXT_CONTENT')) {
       div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;<\/pre>';
 
       if (Feature('ELEMENT_INNER_TEXT') && div.firstChild.innerText === '<p>x<\/p>')
-        __unescape = function() { return div.firstChild.innerText.replace(/\r/g, '') };
+        __unescape = function() { return div.firstChild.innerText.replace(/\r/g, ''); };
 
       else if (div.firstChild.innerHTML === '<p>x<\/p>')
-        __unescape = function() { return div.firstChild.innerHTML };
+        __unescape = function() { return div.firstChild.innerHTML; };
 
       else __unescape = function() {
         var node, nodes = div.firstChild.childNodes, parts = [], i = 0;

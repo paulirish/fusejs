@@ -88,7 +88,7 @@
 
     if (Fuse.Enumerable)
       Fuse.Enumerable.plugin.inspect =
-        function inspect() { return '#<Enumerable:' + this.toList().inspect() + '>' };
+        function inspect() { return '#<Enumerable:' + this.toList().inspect() + '>'; };
 
     if (Fuse.Hash)
       Fuse.Hash.plugin.inspect = function inspect() {
@@ -114,7 +114,7 @@
       };
 
     if (global.Event && global.Event.Methods)
-      Event.Methods.inspect = function inspect() { return '[object Event]' };
+      Event.Methods.inspect = function inspect() { return '[object Event]'; };
 
     // prevent JScript bug with named function expressions
     var inspect = null;

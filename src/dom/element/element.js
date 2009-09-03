@@ -110,7 +110,7 @@
 
     Element.extend = (function() {
       function createRevisionGetter(r) {
-        return function() { return r };
+        return function() { return r; };
       }
 
       function extendElement(element, nodeName) {
@@ -261,7 +261,7 @@
           extend(elementMethods, methods);
         else {
           isArray(tagName)
-            ? tagName._each(function(name) { extendByTag(name, methods) })
+            ? tagName._each(function(name) { extendByTag(name, methods); })
             : extendByTag(tagName, methods);
         }
 
@@ -271,7 +271,7 @@
         }
 
         if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
-          var domClass, infiniteRevision = function() { return Infinity };
+          var domClass, infiniteRevision = function() { return Infinity; };
           for (tagName in T) {
             domClass = findDOMClass(tagName);
             if (typeof domClass === 'undefined') continue;
@@ -368,7 +368,7 @@
       if (id.length) return id;
 
       var ownerDoc = element.ownerDocument;
-      do { id = 'anonymous_element_' + Element.idCounter++ }
+      do { id = 'anonymous_element_' + Element.idCounter++; }
       while (ownerDoc.getElementById(id));
       Element.writeAttribute(element, 'id', id);
       return Fuse.String(id);
@@ -573,7 +573,7 @@
           element.ownerDocument, nodeName, content.stripScripts());
 
         insertContent(element, fragment);
-        defer(function() { content.evalScripts() });
+        defer(function() { content.evalScripts(); });
       }
       return element;
     };
@@ -586,7 +586,7 @@
         content = content.toElement();
       else if (!insertableNodeTypes[content.nodeType]) {
         var html = Obj.toHTML(content);
-        defer(function() { html.evalScripts() });
+        defer(function() { html.evalScripts(); });
         content = createContextualFragment(element, html.stripScripts());
       }
       replaceElement(element, content);
@@ -608,7 +608,7 @@
           }
           content = Obj.toHTML(content);
           element.innerHTML = content.stripScripts();
-          defer(function() { content.evalScripts() });
+          defer(function() { content.evalScripts(); });
         } else element.innerHTML = '';
       }
       return element;
@@ -637,7 +637,7 @@
                 element.appendChild(Element._getFragmentFromString(
                   element.ownerDocument, nodeName, content.stripScripts()));
               else element.innerHTML = content.stripScripts();
-              defer(function() { content.evalScripts() });
+              defer(function() { content.evalScripts(); });
             }
           }
         }

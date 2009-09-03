@@ -162,7 +162,7 @@
           eventType && (event.eventType = 'on' + eventType);
           return event;
         } :
-      function() { return false },
+      function() { return false; },
 
     fireEvent =
       Feature('ELEMENT_DISPATCH_EVENT') ?
@@ -177,7 +177,7 @@
         function(element, event) {
           element.fireEvent(event.eventType, event);
         } :
-      function() { return false };
+      function() { return false; };
 
     return {
       'addCache':           addCache,
@@ -211,7 +211,7 @@
         : { 'left': 1, 'middle': 2, 'right': 3 };
 
       return (_isButton = (property === false)
-        ? function() { return false }
+        ? function() { return false; }
         : function(event, mouseButton) {
             return event[property] === buttonMap[mouseButton];
           }
@@ -286,8 +286,8 @@
     function define(methodName, event) {
       if (!Fuse._body) return 0;
       if (typeof event.pageX === 'number') {
-        Event.pointerX = methods.pointerX = function(event) { return event.pageX };
-        Event.pointerY = methods.pointerY = function(event) { return event.pageY };
+        Event.pointerX = methods.pointerX = function(event) { return event.pageX; };
+        Event.pointerY = methods.pointerY = function(event) { return event.pageY; };
       }
       else {
         Event.pointerX = methods.pointerX = function(event) {
@@ -347,9 +347,9 @@
 
     function createPointerMethod(xOrY) {
       switch (xOrY) {
-        case 'x': return function() { return this.pageX };
-        case 'y': return function() { return this.pageY };
-        default : return function() { return { 'x': this.pageX, 'y': this.pageY } };
+        case 'x': return function() { return this.pageX; };
+        case 'y': return function() { return this.pageY; };
+        default : return function() { return { 'x': this.pageX, 'y': this.pageY }; };
       }
     }
 

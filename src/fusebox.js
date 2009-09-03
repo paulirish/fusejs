@@ -85,7 +85,7 @@
           // another iframe and then accessing the methods.
           if (Array.prototype.map) {
             _cleanup(Fuse.Fusebox._createIframeObject().frameElement);
-            try { new Array().map(K) } catch (e) {
+            try { new Array().map(K); } catch (e) {
               _postProcess = function(fusebox) {
                 fusebox.Array.prototype.map =
                 fusebox.String.prototype.lastIndexOf = null;
@@ -252,13 +252,13 @@
       /* Array statics */
 
       this.Array.create = (function(Array) {
-        function create() { return Array.fromArray(arguments) }
+        function create() { return Array.fromArray(arguments); }
         return create;
       })(this.Array);
 
       // ECMA-5 15.4.3.2
       this.Array.isArray = sandbox.Array.isArray || (function(toString) {
-        function isArray(value) { return toString.call(value) === '[object Array]' }
+        function isArray(value) { return toString.call(value) === '[object Array]'; }
         return isArray;
       })(sandbox.Object.prototype.toString);
 
@@ -290,8 +290,8 @@
 
       (function(fn, Number) {
         // ECMA-5 15.9.4.4
-        var now = function now() { return Number(1 * new Date()) };
-        if (fn.now) now = function now() { return Number(fn.now()) };
+        var now = function now() { return Number(1 * new Date()); };
+        if (fn.now) now = function now() { return Number(fn.now()); };
         this.now = now;
 
         // ECMA-5 15.9.4.2
@@ -319,7 +319,7 @@
       /* String statics */
 
       this.String.fromCharCode = (function(fn, String) {
-        function fromCharCode() { return String(fn.fromCharCode.apply(fn, arguments)) }
+        function fromCharCode() { return String(fn.fromCharCode.apply(fn, arguments)); }
         return fromCharCode;
       })(sandbox.String, this.String);
 
@@ -355,7 +355,7 @@
             'var sandbox = this; return function() { return result.apply(this == sandbox ? global : this, arguments) }'
           )(global, result);
 
-          result[expando].toString = function toString() { return originalBody };
+          result[expando].toString = function toString() { return originalBody; };
 
           var toString = null;
           return result[expando];
@@ -365,13 +365,13 @@
       })(sandbox.Function);
 
       this.Number = (function(fn) {
-        function Number(value) { return new fn(value) }
+        function Number(value) { return new fn(value); }
         Number.prototype = fn.prototype;
         return Number;
       })(sandbox.Number);
 
       this.RegExp = (function(fn) {
-        var RegExp = function RegExp(pattern, flags) { return new fn(pattern, flags) };
+        var RegExp = function RegExp(pattern, flags) { return new fn(pattern, flags); };
 
         // versions of WebKit and IE have non-spec-conforming /\s/
         // so we emulate it (see: ECMA-5 15.10.2.12)
@@ -422,7 +422,7 @@
       })(sandbox.RegExp);
 
       this.String = (function(fn) {
-        function String(value) { return new fn(arguments.length ? value : '') }
+        function String(value) { return new fn(arguments.length ? value : ''); }
         String.prototype = fn.prototype;
         return String;
       })(sandbox.String);

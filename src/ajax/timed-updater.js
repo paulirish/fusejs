@@ -29,7 +29,7 @@
         };
 
         this.onStop = options.onStop;
-        this.onTimerEvent = function() { timedUpdater.start() };
+        this.onTimerEvent = function() { timedUpdater.start(); };
         this.start();
       }
 

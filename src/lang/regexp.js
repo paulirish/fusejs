@@ -1,7 +1,7 @@
   /*------------------------------ LANG: REGEXP ------------------------------*/
 
   Fuse.RegExp.escape = (function() {
-    function escape(string) { return Fuse.String(escapeRegExpChars(string)) }
+    function escape(string) { return Fuse.String(escapeRegExpChars(string)); }
     return escape;
   })();
 

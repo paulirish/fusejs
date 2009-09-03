@@ -11,7 +11,7 @@
         this.executing = false;
 
         var timer = this;
-        this.onTimerEvent = function() { onTimerEvent.call(timer) };
+        this.onTimerEvent = function() { onTimerEvent.call(timer); };
 
         this.options = _extend(clone(this.constructor.options), options);
       }

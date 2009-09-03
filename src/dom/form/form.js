@@ -207,7 +207,7 @@
       element = $(element);
       // avoid IE errors when element
       // or ancestors are not visible
-      try { element.focus() } catch(e) { }
+      try { element.focus(); } catch(e) { }
       return element;
     };
 
@@ -283,7 +283,7 @@
 
     methods.activate = function activate(element) {
       element = $(element);
-      try { element.focus() } catch(e) { }
+      try { element.focus(); } catch(e) { }
       if (element.select && getNodeName(element) !== 'BUTTON' &&
           !matchInputButtons.test(element.type))
         element.select();

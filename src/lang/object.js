@@ -7,7 +7,7 @@
     // use switch statement to avoid creating a temp variable
     var _each;
     switch (function() {
-      var key, count = 0, klass = function() { this.toString = 1 };
+      var key, count = 0, klass = function() { this.toString = 1; };
       klass.prototype.toString = 1;
       for (key in new klass()) count++;
       return count;
@@ -225,7 +225,7 @@
 
     Obj.extend = function extend(destination, source) {
       if (source)
-        eachKey(source, function(value, key) { destination[key] = value });
+        eachKey(source, function(value, key) { destination[key] = value; });
       return destination;
     };
 

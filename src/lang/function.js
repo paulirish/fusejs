@@ -93,7 +93,7 @@
         return arguments.length
           ? fn.apply(this, concatList(args, arguments))
           : fn.apply(this, args);
-      }
+      };
     };
 
     Func.delay = function delay(fn, timeout) {
@@ -138,7 +138,7 @@
         return arguments.length
           ? wrapper.apply(this, prependList(arguments, bind(fn, this)))
           : wrapper.call(this, bind(fn, this));
-      }
+      };
     };
 
     // prevent JScript bug with named function expressions

@@ -1,3 +1,5 @@
+* Add extraneous semicolons to make JSLint happy. [Diego Perini]
+
 * Fix Fuse.Object.isSameOrigin() unit test when running from rake. [Diego Perini, jddalton]
 
 * Implemented Element.getDimensions() options argument. [FuseJS LH #6] [Joe Gornick, jddalton]

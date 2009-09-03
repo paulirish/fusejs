@@ -6,7 +6,7 @@
     function these() {
       var i = 0, length = arguments.length;
       while (i < length)
-        try { return arguments[i++]() } catch (e) { }
+        try { return arguments[i++](); } catch (e) { }
     }
     return these;
   })();

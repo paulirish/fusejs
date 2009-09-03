@@ -48,7 +48,7 @@
 
     plugin.filter = function filter(callback, thisArg) {
       var results = Fuse.List();
-      callback = callback || function(value) { return value != null };
+      callback = callback || function(value) { return value != null; };
       this._each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable))
           results.push(value);
@@ -175,7 +175,7 @@
 
     plugin.toArray = function toArray() {
       var results = Fuse.List();
-      this._each(function(value, index) { results[index] = value });
+      this._each(function(value, index) { results[index] = value; });
       return results;
     };
 

@@ -190,7 +190,7 @@
         // Opera 9.25 will automatically translate the URI from relative to absolute.
         // In IE this fix has the reverse effect.
         Fuse.Util.$w('data href longDesc src')
-          ._each(function(attr) { T.read[attr] = getExact });
+          ._each(function(attr) { T.read[attr] = getExact; });
       }
     })();
   })(Element.Attribute);

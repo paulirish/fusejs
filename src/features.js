@@ -64,7 +64,7 @@
 
     'DOCUMENT_CREATE_EVENT_OBJECT': function() {
       // true for IE
-      return isHostObject(Fuse._doc, 'createEventObject')
+      return isHostObject(Fuse._doc, 'createEventObject');
     },
 
     'DOCUMENT_RANGE': function(){
@@ -200,7 +200,7 @@
 
     'FUNCTION_TO_STRING_RETURNS_SOURCE': function() {
       // true for all but some mobile browsers
-      function toStringTest(param1, param2) { var x = 1 }
+      function toStringTest(param1, param2) { var x = 1; }
       var source = toStringTest.toString();
       return source.indexOf('param1') > -1 && source.indexOf('x = 1') > -1;
     },
@@ -242,7 +242,7 @@
     'ARRAY_CONCAT_ARGUMENTS_BUGGY': function() {
       // true for Opera
       return (function() { return Array.prototype.concat &&
-        [].concat(arguments).length === 2 })(1, 2);
+        [].concat(arguments).length === 2; })(1, 2);
     },
 
     'ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS': function() {
@@ -411,13 +411,13 @@
 
     'STRING_REPLACE_COHERSE_FUNCTION_TO_STRING': function() {
       // true for Safari 2
-      var func = function() { return '' };
+      var func = function() { return ''; };
       return 'a'.replace(/a/, func) === String(func);
     },
 
     'STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN': function() {
       // true for Chrome 1
-      var string = 'xy', replacement = function() { return 'o' };
+      var string = 'xy', replacement = function() { return 'o'; };
       return !(string.replace(/()/g, 'o') === 'oxoyo' &&
         string.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
         string.replace(/(y|)/g, replacement) === 'oxoo');

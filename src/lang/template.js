@@ -68,9 +68,9 @@
   (function(plugin) {
     function prepareReplacement(replacement) {
       if (typeof replacement === 'function')
-        return function() { return replacement(slice.call(arguments, 0, -2)) };
+        return function() { return replacement(slice.call(arguments, 0, -2)); };
       var template = new Fuse.Template(replacement);
-      return function() { return template.evaluate(slice.call(arguments, 0, -2)) };
+      return function() { return template.evaluate(slice.call(arguments, 0, -2)); };
     }
 
     plugin.gsub = function gsub(pattern, replacement) {
@@ -102,7 +102,7 @@
 
       if (typeof replacement !== 'function') {
         var template = new Fuse.Template(replacement);
-        replacement = function(match) { return template.evaluate(match) };
+        replacement = function(match) { return template.evaluate(match); };
       }
       return this.gsub(pattern, function(match) {
         if (--count < 0) return match[0];

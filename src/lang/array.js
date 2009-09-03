@@ -140,7 +140,7 @@
             // basic strict match
             if ((item = object[length]) === value) return true;
             // match String and Number object instances
-            try { if (item.valueOf() === value.valueOf()) return true } catch (e) { }
+            try { if (item.valueOf() === value.valueOf()) return true; } catch (e) { }
           }
         }
         return false;
@@ -452,7 +452,7 @@
     // ECMA-5 15.4.4.20
     if (!plugin.filter)
       plugin.filter = function filter(callback, thisArg) {
-        callback = callback || function(value) { return value != null };
+        callback = callback || function(value) { return value != null; };
         if (this == null || !isFunction(callback)) throw new TypeError;
 
         var i = 0, results = Fuse.Array(), object = Object(this),

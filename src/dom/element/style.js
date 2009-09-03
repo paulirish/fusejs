@@ -314,7 +314,7 @@
       return {
         'width': Element.getWidth(element, options),
         'height': Element.getHeight(element, options)
-      }
+      };
     };
 
     methods.isVisible = function isVisible(element) {
