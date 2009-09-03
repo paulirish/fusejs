@@ -1,174 +1,212 @@
   /*---------------------------- ELEMENT: POSITION ---------------------------*/
 
   (function(methods) {
+    
+    var getHeight = methods.getHeight, getWidth = methods.getWidth,
+     getStyle = methods.getStyle, isVisible = methods.isVisible;
+
+    removeExpando = (function() {
+      Fuse._div._x = 1;
+      Fuse._div.removeAttribute('_x');
+      return typeof Fuse._div._x === 'undefined'
+        ? function(element, expandoName) { element.removeAttribute(expandoName); }
+        : function(element, expandoName) { delete element[expandoName]; };
+    })();
+
     methods.makeAbsolute = function makeAbsolute(element) {
       element = $(element);
-      if (Element.getStyle(element, 'position') == 'absolute')
-        return element;
+      if (getStyle(element, 'position') != 'absolute') {
+        var after, s = element.style,
+         backup  = element._madeAbsolute = { }, 
+         width   = getWidth(element, 'content'),
+         height  = getHeight(element, 'content'),
+         offsets = Element.positionedOffset(element),
+         before  = Element.getDimensions(element);
 
-      var s = element.style,
-       cssWidth  = Element._getCssWidth(element),
-       cssHeight = Element._getCssHeight(element),
-       offsets   = Element.positionedOffset(element),
-       before    = Element.getDimensions(element);
+        backup.left       = s.left;
+        backup.top        = s.top;
+        backup.width      = s.width;
+        backup.height     = s.height;
+        backup.marginTop  = s.marginTop;
+        backup.marginLeft = s.marginLeft;
 
-      element._originalLeft       = s.left;
-      element._originalTop        = s.top;
-      element._originalWidth      = s.width;
-      element._originalHeight     = s.height;
-      element._originalMarginTop  = s.marginTop;
-      element._originalMarginLeft = s.marginLeft;
+        s.position  = 'absolute';
+        s.marginTop = s.marginLeft = '0';
+        s.top       = offsets.top   + 'px';
+        s.left      = offsets.left  + 'px';
+        s.width     = width         + 'px';
+        s.height    = height        + 'px';
 
-      s.position   = 'absolute';
-      s.marginTop  = '0';
-      s.marginLeft = '0';
-      s.top        = offsets.top  + 'px';
-      s.left       = offsets.left + 'px';
-      s.width      = cssWidth     + 'px';
-      s.height     = cssHeight    + 'px';
-
-      var after = Element.getDimensions(element);
-      s.width   = Math.max(0, cssWidth  + (before.width  - after.width))  + 'px';
-      s.height  = Math.max(0, cssHeight + (before.height - after.height)) + 'px';
-
+        after    = Element.getDimensions(element);
+        s.width  = Math.max(0, width  + (before.width  - after.width))  + 'px';
+        s.height = Math.max(0, height + (before.height - after.height)) + 'px';
+      }
       return element;
     },
 
     methods.undoAbsolute = function undoAbsolute(element) {
       element = $(element);
-      if (Element.getStyle(element, 'position') == 'relative')
-        return element;
-      if (typeof element._originalTop === 'undefined')
-        throw new Error('Element#makeAbsolute must be called first.');
+      if (getStyle(element, 'position') == 'absolute') {
+        if (!element._madeAbsolute)
+          throw new Error('Element#makeAbsolute must be called first.');
 
-      var s = element.style;
-      s.position   = 'relative';
-      s.marginLeft = element._originalMarginLeft;
-      s.marginTop  = element._originalMarginTop;
-      s.top        = element._originalTop;
-      s.left       = element._originalLeft;
-      s.width      = element._originalHeight;
-      s.height     = element._originalWidth;
+        var backup = element._madeAbsolute, s = element.style;
+        s.position   = 'relative';
+        s.marginLeft = backup.marginLeft;
+        s.marginTop  = backup.marginTop;
+        s.top        = backup.top;
+        s.left       = backup.left;
+        s.width      = backup.height;
+        s.height     = backup.width;
 
-      element.removeAttribute('_originalTop');
-      if (typeof element._originalTop !== 'undefined')
-        delete element._originalTop;
+        removeExpando(element, '_madeAbsolute');
+      }
       return element;
     };
 
     methods.makeClipping = function makeClipping(element) {
       element = $(element);
-      if (element._overflow) return element;
-      element._overflow = Element.getStyle(element, 'overflow') || 'auto';
-      if (element._overflow != 'hidden')
+      if (getStyle(element, 'overflow') != 'hidden') {
+        element._madeClipped = getStyle(element, 'overflow') || 'auto';
         element.style.overflow = 'hidden';
+      }
       return element;
     };
 
     methods.undoClipping = function undoClipping(element) {
       element = $(element);
-      if (!element._overflow) return element;
-      element.style.overflow = element._overflow == 'auto' ? '' : element._overflow;
-      element._overflow = null;
+      if (getStyle(element, 'overflow') == 'hidden') {
+        if (!element._madeClipped)
+          throw new Error('Element#makeClipping must be called first.');
+
+        var overflow = element._madeClipped;
+        element.style.overflow = overflow == 'auto' ? '' : overflow;
+        removeExpando(element, '_madeClipped');
+      }
       return element;
     };
 
     methods.makePositioned = function makePositioned(element) {
       element = $(element);
-      var pos = Element.getStyle(element, 'position');
+      var elemStyle = element.style, pos = getStyle(element, 'position');
       if (!pos || pos == 'static') {
-        element._madePositioned = true;
-        element.style.position  = 'relative';
         // Opera returns the offset relative to the positioning context, when an
         // element is position relative but top and left have not been defined
-        element.style.top = element.style.left = '0';
+        elemStyle.top = elemStyle.left = '0';
+        elemStyle.position = 'relative';
+        element._madePositioned = true;
       }
       return element;
     };
 
     methods.undoPositioned = function undoPositioned(element) {
       element = $(element);
-      if (element._madePositioned) {
-        element._madePositioned = undef;
-        element.style.position  =
-         element.style.top      =
-         element.style.left     =
-         element.style.bottom   =
-         element.style.right    = '';
+      if (getStyle(element, 'position') == 'relative') {
+        if (!element._madePositioned)
+          throw new Error('Element#makePositioned must be called first.');
+
+        var elemStyle = element.style;
+        elemStyle.position = elemStyle.top   = elemStyle.left =
+        elemStyle.bottom   = elemStyle.right = '';
+        removeExpando(element, '_madePositioned');
       }
       return element;
     };
 
-   methods.clonePosition = function clonePosition(element, source, options) {
+    methods.clonePosition = function clonePosition(element, source, options) {
       element = $(element);
       source  = $(source);
       options = _extend({
         'offsetLeft': 0,
         'offsetTop':  0,
-        'setLeft':    true,
-        'setTop':     true,
-        'setWidth':   true,
-        'setHeight':  true
+        'setLeft':    1,
+        'setTop':     1,
+        'setWidth':   1,
+        'setHeight':  1
       }, options);
 
-      var elementBackupStyle, sourceBackupStyle,
-       s = element.style,
-       isElementVisible = Element.isVisible(element),
-       isSourceVisible = Element.isVisible(source);
+      var coord, borderHeight, borderWidth, paddingHeight, paddingWidth,
+       elemDisplay, elemOffset, elemPos, elemVis, srcDisplay, srcVis,
+       appendCSS     = ';display:block;visibility:hidden;',
+       elemIsVisible = isVisible(element),
+       elemStyle     = element.style,
+       srcIsVisible  = isVisible(source),
+       srcStyle      = source.style;
 
-      if (!isSourceVisible) {
-        sourceBackupStyle = source.style.cssText;
-        source.style.cssText += ';display:block;visibility:hidden;';
+      // attempt to unhide elements to get their styles
+      if (!srcIsVisible) {
+        srcDisplay = srcStyle.display;
+        srcVis     = srcStyle.visibility;
+        srcStyle.cssText += appendCSS;
       }
-      if (!isElementVisible) {
-        elementBackupStyle = { 'display': s.display, 'visibility': s.visibility };
-        s.cssText += ';display:block;visibility:hidden;';
+
+      if (!elemIsVisible) {
+        elemDisplay = elemStyle.display;
+        elemVis     = elemStyle.visibility;
+        elemStyle.cssText += appendCSS;
       }
 
       // Get element size without border or padding then add
       // the difference between the source and element padding/border
       // to the height and width in an attempt to keep the same dimensions.
-      if (options.setHeight)
-        s.height = Math.max(0, Element._getCssHeight(source) +
-          (Element._getPaddingHeight(source) - Element._getPaddingHeight(element)) +
-          (Element._getBorderHeight(source)  - Element._getBorderHeight(element))) + 'px';
+      if (options.setHeight) {
+        paddingHeight = getStyle(source, 'paddingHeight');
+        borderHeight  = getStyle(source, 'borderHeight');
+        elemStyle.height = Math.max(0,
+          (source.offsetHeight - paddingHeight - borderHeight) +       // content height
+          (paddingHeight - getStyle(element, 'paddingHeight')) +       // padding diff
+          (borderHeight  - getStyle(element, 'borderHeight'))) + 'px'; // border diff
+      }
+      if (options.setWidth) {
+        paddingWidth = getStyle(source, 'paddingWidth');
+        borderWidth  = getStyle(source, 'borderWidth');
+        elemStyle.width = Math.max(0,
+          (source.offsetWidth - paddingWidth - borderWidth)  +       // content width
+          (paddingWidth - getStyle(element, 'paddingWidth')) +       // padding diff
+          (borderWidth  - getStyle(element, 'borderWidth'))) + 'px'; // border diff
+      }
 
-      if (options.setWidth)
-        s.width = Math.max(0, Element._getCssWidth(source) +
-          (Element._getPaddingWidth(source) - Element._getPaddingWidth(element)) +
-          (Element._getBorderWidth(source)  - Element._getBorderWidth(element))) + 'px';
+      if (options.setLeft || options.setTop) {
 
-      // bail if skipping setLeft and setTop
-      if (!options.setLeft && !options.setTop)
-        return element;
+        elemPos = getStyle(element, 'position');
 
-      // clear element coords before getting
-      // the cumulativeOffset because Opera
-      // will fumble the calculations if
-      // you try to subtract the coords after
-      if (options.setLeft) s.left = s.marginLeft = '0';
-      if (options.setTop)  s.top  = s.marginTop  = '0';
+        // clear element coords before getting
+        // the cumulativeOffset because Opera
+        // will fumble the calculations if
+        // you try to subtract the coords after
+        if (options.setLeft) elemStyle.left = elemStyle.marginLeft = '0';
+        if (options.setTop)  elemStyle.top  = elemStyle.marginTop  = '0';
 
-      var p, position = Element.getStyle(element, 'position');
+        // if an absolute element is a descendant of the source then
+        // calculate its offset to the source and inverse it
+        if (elemPos == 'absolute' && Element.descendantOf(element, source)) {
+          coord = Element.cumulativeOffset(element, source);
+          coord.left *= -1;
+          coord.top  *= -1;
+        }
+        else {
+          coord = Element.cumulativeOffset(source);
+          if (elemPos == 'relative') {
+            // subtract the relative element's offset from the source's offsets
+            elemOffset  = Element.cumulativeOffset(element);
+            coord.left -= elemOffset.left;
+            coord.top  -= elemOffset.top;
+          }
+        }
 
-      var delta = position == 'relative'
-        ? Element.cumulativeOffset(element)
-        : [0, 0];
+        // set position
+        if (options.setLeft) elemStyle.left = (coord.left + options.offsetLeft) + 'px';
+        if (options.setTop)  elemStyle.top  = (coord.top  + options.offsetTop)  + 'px';
 
-      if (position == 'absolute' && Element.descendantOf(element, source)) {
-        p = Element.cumulativeOffset(element, source);
-        p[0] *= -1; p[1] *= -1;
-      } else p = Element.cumulativeOffset(source);
-
-      // set position
-      if (options.setLeft) s.left = (p[0] - delta[0] + options.offsetLeft) + 'px';
-      if (options.setTop)  s.top  = (p[1] - delta[1] + options.offsetTop)  + 'px';
-
-      if (!isSourceVisible)
-        source.style.cssText = sourceBackupStyle;
-      if (!isElementVisible) {
-        s.display = elementBackupStyle.display;
-        s.visibility = elementBackupStyle.visibility;
+        // restore styles
+        if (!srcIsVisible) {
+          srcStyle.display    = srcDisplay;
+          srcStyle.visibility = srcVis;
+        }
+        if (!elemIsVisible) {
+          elemStyle.display    = elemDisplay;
+          elemStyle.visibility = elemVis;
+        }
       }
 
       return element;

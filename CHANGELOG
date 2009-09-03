@@ -1,3 +1,5 @@
+* Absorb pseudo private style helper methods into Element#getStyle and cleanup style.js and position.js. [jddalton]
+
 * Add extraneous semicolons to make JSLint happy. [Diego Perini]
 
 * Fix Fuse.Object.isSameOrigin() unit test when running from rake. [Diego Perini, jddalton]

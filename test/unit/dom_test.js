@@ -1096,8 +1096,15 @@ new Test.Unit.Runner({
       element.makeClipping();
       this.assertEqual('hidden', element.getStyle('overflow'));
 
-      element.undoClipping();
-      this.assertEqual(overflowValue, element.getStyle('overflow'));
+      // throw if overflow=hidden to begin with because we can't makeClipping
+      // on an element that is already clipped
+      if (overflowValue === 'hidden') {
+        this.assertRaise('Error', function() { element.undoClipping() },
+          'Should have thrown an error because makeClipping was not performed');
+      } else {
+        element.undoClipping();
+        this.assertEqual(overflowValue, element.getStyle('overflow'));
+      }
     }, this);
   },
 
@@ -2433,12 +2440,11 @@ new Test.Unit.Runner({
     this.assertEqual(null, offsetParent);
   },
 
-  'testAbsolute': function() {
-    $('notInlineAbsoluted', 'inlineAbsoluted').each(function(elt) {
-      if ('_originalLeft' in elt) delete elt._originalLeft;
-      elt.makeAbsolute();
+  'testMakeAbsolute': function() {
+    $('notInlineAbsoluted', 'inlineAbsoluted').each(function(element) {
 
-      this.assertUndefined(elt._originalLeft,
+      element.makeAbsolute();
+      this.assertUndefined(element._madeAbsolute,
         'makeAbsolute() did not detect absolute positioning');
     }, this);
 
