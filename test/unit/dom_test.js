@@ -1427,7 +1427,7 @@ new Test.Unit.Runner({
     $('op3').setStyle({ 'opacity': 0 });
     this.assertEqual(0, $('op3').getStyle('opacity'));
 
-    if (navigator.appVersion.match(/MSIE/)) {
+    if (Fuse.Env.IE) {
       this.assertEqual('alpha(opacity=30)', $('op1').getStyle('filter'));
       this.assertEqual('progid:DXImageTransform.Microsoft.Blur(strength=10)alpha(opacity=30)',
         $('op2').getStyle('filter'));
@@ -1446,21 +1446,23 @@ new Test.Unit.Runner({
     this.assertEqual('12px', $('style_test_1').getStyle('fontSize'));
 
     // getStyle on width/height should return values according to
-    // the CSS box-model, which doesn't include
-    // margin, padding, or borders
-    // TODO: This test fails on IE because there seems to be no way
-    // to calculate this properly (clientWidth/Height returns 0)
-    if (!navigator.appVersion.match(/MSIE/)) {
-      this.assertEqual('14px', $('style_test_dimensions').getStyle('width'));
-      this.assertEqual('17px', $('style_test_dimensions').getStyle('height'));
-    }
+    // the CSS box-model, which doesn't include margin, padding, or borders
+    var element = $('style_test_dimensions');
+    this.assertEqual(element.getWidth('content') + 'px',
+      element.getStyle('width'),
+      'Failed to resolve the correct width');
+
+    this.assertEqual(element.getHeight('content') + 'px',
+      element.getStyle('height'),
+      'Failed to resolve the correct height');
 
     // check "auto" value for browsers that support document.defaultView.getComputedStyle()
-    var div = $('style_test_3'), backup = div.style.height;
-    div.style.height = 'auto';
+    element = $('style_test_3');
+    var backup = element.style.height;
+    element.style.height = 'auto';
 
-    this.assertNotNull(div.getStyle('height'));
-    div.style.height = backup;
+    this.assertNotNull(element.getStyle('height'));
+    element.style.height = backup;
 
     // ensure units convert to px correctly
     var tests = {
