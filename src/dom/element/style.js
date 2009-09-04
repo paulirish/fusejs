@@ -232,12 +232,20 @@
       return element;
     };
 
-    methods.removeClassName = function removeClassName(element, className) {
-      element = $(element);
-      element.className = Fuse.String(element.className.replace(
-        new RegExp('(^|\\s+)' + className + '(\\s+|$)'), ' ')).trim();
-      return element;
-    };
+    methods.removeClassName = (function() {
+      function removeClassName(element, className) {
+        element = $(element);
+        var expandoKey = expando + className,
+         pattern = cache[expandoKey] ||
+           (cache[expandoKey] = new RegExp('(^|\\s+)' + className + '(\\s+|$)'));
+
+        element.className = trim.call(element.className.replace(pattern, ' '));
+        return element;
+      }
+
+      var cache = { }, trim = Fuse.String.plugin.trim;
+      return removeClassName;
+    })();
 
     methods.toggleClassName = function toggleClassName(element, className) {
       return Element[Element.hasClassName(element, className) ?
@@ -374,7 +382,6 @@
     // prevent JScript bug with named function expressions
     var addClassName = null,
      hasClassName =    null,
-     removeClassName = null,
      classNames =      null,
      toggleClassName = null,
      getDimensions =   null,

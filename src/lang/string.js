@@ -262,9 +262,9 @@
           (cache[expandoKey] = replace.call(string, matchHyphenated, toUpperCase));
       }
 
-      var replace = Fuse.String.plugin.replace,
-       cache = { },
-       matchHyphenated = /\-+(.)?/g;
+      var cache = { },
+       matchHyphenated = /\-+(.)?/g,
+       replace = Fuse.String.plugin.replace;
 
       return camelize;
     })();

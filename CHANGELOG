@@ -1,3 +1,5 @@
+* Store RegExp patterns created while executing Element#removeClassName in a cache. [jddalton, Garrett Smith, kangax, YUI Team]
+
 * Move `borderWidth`, `marginWidth`, `paddingWidth`, and height equivalents from Element#getStyle to Element#getDimensions. [jddalton]
 
 * Optimize Element traversal methods `ancestors`, `next`, `nextSiblings`, `previous`, `previousSiblings`, `siblings`, and `up`. [jddalton, joneff, kangax]
