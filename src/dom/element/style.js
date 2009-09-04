@@ -22,18 +22,7 @@
       'ex': 1
     },
 
-    SHORTHAND_SUM = {
-      'borderHeight':  ['borderTopWidth',  'borderBottomWidth'],
-      'borderWidth':   ['borderLeftWidth', 'borderRightWidth'], 
-      'marginHeight':  ['marginTop',       'marginBottom'],
-      'marginWidth':   ['marginLeft',      'marginRight'],
-      'paddingHeight': ['paddingTop',      'paddingBottom'],
-      'paddingWidth':  ['paddingLeft',     'paddingRight']
-    },
-
-    nullHandlers = [],
-
-    toFloat = parseFloat;
+    nullHandlers = [];
 
     function getComputedStyle(element, name) {
       name = FLOAT_TRANSLATIONS[name] || name;
@@ -107,23 +96,14 @@
       methods.getStyle = function getStyle(element, name) {
         element = $(element);
         name = Fuse.String(name).camelize();
-  
-        // handle shorthand
-        var length, shorthand, result = 0;
-        if (shorthand = SHORTHAND_SUM[name]) {
-          length = shorthand.length;
-          while (length--) result += toFloat(getStyle(element, shorthand[length])) || 0;
-          result = Fuse.Number(result);
-        }
-        else result = getValue(element, name);
-        return result;
+        return getValue(element, name);
       };
 
     // Opera 9.2x
     else if (Bug('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX'))
       methods.getStyle = function getStyle(element, name) {
         element = $(element);
-        var dim, length, shorthand, result = 0;
+        var dim, result;
 
         // returns the border-box dimensions rather than the content-box
         // dimensions, so we subtract padding and borders from the value
@@ -132,16 +112,9 @@
           result = getComputedStyle(element, name);
           if ((parseFloat(result) || 0) === element['offset' + dim])
             result = Fuse.String(Element['get' + dim](element, 'content') + 'px');
-        }
-        else {
-          // handle shorthand
+        } else {
           name = Fuse.String(name).camelize();
-          if (shorthand = SHORTHAND_SUM[name]) {
-            length = shorthand.length;
-            while (length--) result += toFloat(getStyle(element, shorthand[length])) || 0;
-            result = Fuse.Number(result);
-          }
-          else if (isNull(element, name)) result = null;
+          if (isNull(element, name)) result = null;
           else result = getComputedStyle(element, name);
         }
 
@@ -153,17 +126,7 @@
       methods.getStyle = function getStyle(element, name) {
         element = $(element);
         name = Fuse.String(name).camelize();
-  
-        // handle shorthand
-        var length, shorthand, result = 0;
-        if (shorthand = SHORTHAND_SUM[name]) {
-          length = shorthand.length;
-          while (length--) result += toFloat(getStyle(element, shorthand[length])) || 0;
-          result = Fuse.Number(result);
-        }
-        else if (isNull(element, name)) result = null;
-        else result = getComputedStyle(element, name);
-        return result;
+        return isNull(element, name) ? null : getComputedStyle(element, name);
       };
 
     // IE
@@ -178,7 +141,7 @@
 
       function getStyle(element, name) {
         var currStyle, elemStyle, runtimeStyle, runtimePos, stylePos,
-         length, pos, size, shorthand, unit, result = 0;
+         pos, result, size, unit;
 
         // handle opacity
         if (name == 'opacity') {
@@ -190,11 +153,6 @@
         // handle shorthand
         element = $(element);
         name = Fuse.String(name).camelize();
-        if (shorthand = SHORTHAND_SUM[name]) {
-          length = shorthand.length;
-            while (length--) result += toFloat(getStyle(element, shorthand[length])) || 0;
-          return Fuse.Number(result);
-        }
 
         // get cascaded style
         name      = FLOAT_TRANSLATIONS[name] || name;
@@ -428,22 +386,49 @@
   // define Element#getWidth and Element#getHeight
   (function(methods) {
 
-    var getStyle = methods.getStyle, isVisible = methods.isVisible, i = 0,
-
-    PRESETS = {
+    var PRESETS = {
       'box':     { 'border':  1, 'margin':  1, 'padding': 1 },
       'visual':  { 'border':  1, 'padding': 1 },
       'client':  { 'padding': 1 },
       'content': {  }
-    };
+    },
+
+    HEIGHT_WIDTH_STYLE_SUMS = {
+      'Height': {
+        'border':  ['borderTopWidth', 'borderBottomWidth'],
+        'margin':  ['marginTop',      'marginBottom'],
+        'padding': ['paddingTop',     'paddingBottom']
+      },
+      'Width': {
+        'border':  ['borderLeftWidth', 'borderRightWidth'], 
+        'margin':  ['marginLeft',      'marginRight'],
+        'padding': ['paddingLeft',     'paddingRight']
+      }
+    },
+
+    getStyle = methods.getStyle,
+
+    isVisible = methods.isVisible, 
+
+    i = 0;
 
     while (i < 2) (function() {
-      function getHeightWidth(element, options) {
+      function getSum(element, name) {
+        var styles = STYLE_SUMS[name];
+        return (parseFloat(getStyle(element, styles[0])) || 0) +
+          (parseFloat(getStyle(element, styles[1])) || 0);  
+      }
+
+      function getDimension(element, options) {
+        element = $(element);
+        var backup, elemStyle, isGettingSum, result;
+
         // default to `visual` preset
-        var backup, elemStyle, result;
-        if (options) {
-          if (isString(options)) options = PRESETS[options];
-        } else options = PRESETS.visual;
+        if (!options) options = PRESETS.visual;
+        else if (options && isString(options)) {
+          if (STYLE_SUMS[options]) isGettingSum = true;
+          else options = PRESETS[options];
+        } 
 
         // First get our offset(Width/Height) (visual)
         // offsetHeight/offsetWidth properties return 0 on elements
@@ -451,29 +436,39 @@
         if (!isVisible(element)) {
           elemStyle = element.style;
           backup = elemStyle.cssText;
-
           elemStyle.cssText += ';display:block;visibility:hidden;';
+
+          // exit early when returning style sums
+          if (isGettingSum) {
+            result = getSum(element, options);
+            elemStyle.cssText = backup;
+            return Fuse.Number(result);
+          }
           result = element[property];
           elemStyle.cssText = backup;
         }
+        else if (isGettingSum) return Fuse.Number(getSum(element, options));
         else result = element[property];
 
         // add margins because they're excluded from the offset values
         if (options.margin)
-          result += getStyle(element, 'margin' + dim);
+          result += getSum(element, 'margin');
 
         // subtract border and padding because they're included in the offset values
         if (!options.border)
-          result -= getStyle(element, 'border' + dim);
+          result -= getSum(element, 'border');
 
         if (!options.padding)
-          result -= getStyle(element, 'padding' + dim);
+          result -= getSum(element, 'padding');
 
         return Fuse.Number(result);
       }
 
-      var dim = i++ ? 'Width' : 'Height', property = 'offset' + dim;
-      methods['get' + dim] = getHeightWidth;
+      var dim = i++ ? 'Width' : 'Height',
+       property = 'offset' + dim,
+       STYLE_SUMS = HEIGHT_WIDTH_STYLE_SUMS[dim];
+
+      methods['get' + dim] = getDimension;
     })();
 
     i = undef;

@@ -1,9 +1,29 @@
   /*---------------------------- ELEMENT: POSITION ---------------------------*/
 
   (function(methods) {
-    
-    var getHeight = methods.getHeight, getWidth = methods.getWidth,
-     getStyle = methods.getStyle, isVisible = methods.isVisible;
+
+    var OFFSET_PARENT_EXIT_BEFORE_NODES = {
+      'BODY': 1,
+      'HTML': 1
+    },
+
+    OFFSET_PARENT_EXIT_ON_NODES = {
+      'TABLE': 1,
+      'TD':    1,
+      'TH':    1
+    },
+
+    BODY_OFFSETS_INHERIT_ITS_MARGINS = null,
+
+    ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH = null,
+
+    getHeight = methods.getHeight,
+
+    getWidth  = methods.getWidth,
+
+    getStyle  = methods.getStyle,
+
+    isVisible = methods.isVisible,
 
     removeExpando = (function() {
       Fuse._div._x = 1;
@@ -12,6 +32,7 @@
         ? function(element, expandoName) { element.removeAttribute(expandoName); }
         : function(element, expandoName) { delete element[expandoName]; };
     })();
+
 
     methods.makeAbsolute = function makeAbsolute(element) {
       element = $(element);
@@ -126,23 +147,23 @@
       }, options);
 
       var coord, borderHeight, borderWidth, paddingHeight, paddingWidth,
-       elemDisplay, elemOffset, elemPos, elemVis, srcDisplay, srcVis,
-       appendCSS     = ';display:block;visibility:hidden;',
-       elemIsVisible = isVisible(element),
-       elemStyle     = element.style,
-       srcIsVisible  = isVisible(source),
-       srcStyle      = source.style;
+       elemDisplay, elemOffset, elemPos, elemVis, srcBackup,
+       appendCSS    = ';display:block;visibility:hidden;',
+       elemIsHidden = !isVisible(element),
+       elemStyle    = element.style,
+       srcIsHidden  = !isVisible(source),
+       srcStyle     = source.style;
 
       // attempt to unhide elements to get their styles
-      if (!srcIsVisible) {
-        srcDisplay = srcStyle.display;
-        srcVis     = srcStyle.visibility;
+      if (srcIsHidden) {
+        srcBackup = srcStyle.cssText;
         srcStyle.cssText += appendCSS;
       }
-
-      if (!elemIsVisible) {
+      if (elemIsHidden) {
+        // backup individual style properties because we are changing several
+        // others and don't want to pave them when the backup is restored
         elemDisplay = elemStyle.display;
-        elemVis     = elemStyle.visibility;
+        elemVis = elemStyle.visibility;
         elemStyle.cssText += appendCSS;
       }
 
@@ -150,20 +171,20 @@
       // the difference between the source and element padding/border
       // to the height and width in an attempt to keep the same dimensions.
       if (options.setHeight) {
-        paddingHeight = getStyle(source, 'paddingHeight');
-        borderHeight  = getStyle(source, 'borderHeight');
+        paddingHeight = getHeight(source, 'padding');
+        borderHeight  = getHeight(source, 'border');
         elemStyle.height = Math.max(0,
-          (source.offsetHeight - paddingHeight - borderHeight) +       // content height
-          (paddingHeight - getStyle(element, 'paddingHeight')) +       // padding diff
-          (borderHeight  - getStyle(element, 'borderHeight'))) + 'px'; // border diff
+          (source.offsetHeight - paddingHeight - borderHeight) +  // content height
+          (paddingHeight - getHeight(element, 'padding')) +       // padding diff
+          (borderHeight  - getHeight(element, 'border'))) + 'px'; // border diff
       }
       if (options.setWidth) {
-        paddingWidth = getStyle(source, 'paddingWidth');
-        borderWidth  = getStyle(source, 'borderWidth');
+        paddingWidth = getWidth(source, 'padding');
+        borderWidth  = getWidth(source, 'border');
         elemStyle.width = Math.max(0,
-          (source.offsetWidth - paddingWidth - borderWidth)  +       // content width
-          (paddingWidth - getStyle(element, 'paddingWidth')) +       // padding diff
-          (borderWidth  - getStyle(element, 'borderWidth'))) + 'px'; // border diff
+          (source.offsetWidth - paddingWidth - borderWidth)  +  // content width
+          (paddingWidth - getWidth(element, 'padding')) +       // padding diff
+          (borderWidth  - getWidth(element, 'border'))) + 'px'; // border diff
       }
 
       if (options.setLeft || options.setTop) {
@@ -199,66 +220,63 @@
         if (options.setTop)  elemStyle.top  = (coord.top  + options.offsetTop)  + 'px';
 
         // restore styles
-        if (!srcIsVisible) {
-          srcStyle.display    = srcDisplay;
-          srcStyle.visibility = srcVis;
-        }
-        if (!elemIsVisible) {
-          elemStyle.display    = elemDisplay;
+        if (elemIsHidden) {
+          elemStyle.display = elemDisplay;
           elemStyle.visibility = elemVis;
         }
+        if (srcIsHidden)
+          srcStyle.cssText = srcBackup;
       }
 
       return element;
     };
 
-    methods.getOffsetParent = (function() {
-      var END_ON_NODE = { 'BODY': 1, 'HTML': 1 },
-       OFFSET_PARENTS = { 'TABLE': 1, 'TD': 1, 'TH': 1 };
+    // Follows spec http://www.w3.org/TR/cssom-view/#offset-attributes
+    methods.getOffsetParent = function getOffsetParent(element) {
+      element = $(element);
+      var original = element, nodeName = getNodeName(element);
+      if (nodeName === 'AREA') return Element.extend(element.parentNode);
 
-      function getOffsetParent(element) {
-        // http://www.w3.org/TR/cssom-view/#offset-attributes
-        element = $(element);
-        var original = element, nodeName = getNodeName(element);
-        if (nodeName === 'AREA') return Element.extend(element.parentNode);
+      // IE throws an error if the element is not in the document.
+      // Many browsers report offsetParent as null if the element's
+      // style is display:none.
+      if (Element.isFragment(element) || element.nodeType === 9 ||
+          OFFSET_PARENT_EXIT_BEFORE_NODES[nodeName] || !element.offsetParent &&
+          getStyle(element, 'display') != 'none') return null;
 
-        // IE throws an error if the element is not in the document.
-        // Many browsers report offsetParent as null if the element's
-        // style is display:none.
-        if (Element.isFragment(element) || element.nodeType === 9 || END_ON_NODE[nodeName] ||
-           !element.offsetParent && Element.getStyle(element, 'display') != 'none')
-          return null;
+      while (element = element.parentNode) {
+        nodeName = getNodeName(element);
+        if (OFFSET_PARENT_EXIT_BEFORE_NODES[nodeName]) break;
+        if (OFFSET_PARENT_EXIT_ON_NODES[nodeName] ||
+            getStyle(element, 'position') != 'static')
+          return Element.extend(element);
+      }
+      return Element.extend(getDocument(original).body);
+    };
 
-        while (element = element.parentNode) {
-          nodeName = getNodeName(element);
-          if (END_ON_NODE[nodeName]) break;
-          if (OFFSET_PARENTS[nodeName] ||
-              Element.getStyle(element, 'position') != 'static')
-            return Element.extend(element);
-        }
-        return Element.extend(getDocument(original).body);
-      };
-      return getOffsetParent;
-    })();
-
+    // TODO: overhaul with a thorough solution for finding the correct
+    // offsetLeft and offsetTop values
     methods.cumulativeOffset = (function() {
       function getOffset(element, ancestor) {
-        // TODO: overhaul with a thorough solution for finding the correct
-        // offsetLeft and offsetTop values
-        var offsetParent, position, valueT = 0, valueL = 0,
-         BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS'),
-         ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH =
-           Bug('ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH');
+        var offsetParent, position, valueT = 0, valueL = 0;
+
+        if (BODY_OFFSETS_INHERIT_ITS_MARGINS === null)
+          BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS');
+
+        if (ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH === null)
+          ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH =
+            Bug('ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH');
+
         do {
           valueT += element.offsetTop  || 0;
           valueL += element.offsetLeft || 0;
 
           offsetParent = Element.getOffsetParent(element);
-          position     = Element.getStyle(element, 'position');
+          position     = getStyle(element, 'position');
 
           if (offsetParent && ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH) {
-            valueT += parseFloat(Element.getStyle(offsetParent, 'borderTopWidth'))  || 0;
-            valueL += parseFloat(Element.getStyle(offsetParent, 'borderLeftWidth')) || 0;
+            valueT += parseFloat(getStyle(offsetParent, 'borderTopWidth'))  || 0;
+            valueL += parseFloat(getStyle(offsetParent, 'borderLeftWidth')) || 0;
           }
           if (position == 'fixed' || offsetParent && (offsetParent === ancestor ||
              (BODY_OFFSETS_INHERIT_ITS_MARGINS && position == 'absolute' &&
@@ -326,10 +344,8 @@
           valueT += element.scrollTop  || 0;
           valueL += element.scrollLeft || 0;
 
-          if (element === scrollEl ||
-              Element.getStyle(element, 'position') == 'fixed') {
+          if (element === scrollEl || getStyle(element, 'position') == 'fixed')
             break;
-          }
         }
         element = element.parentNode;
       } while (element && element.nodeType === 1);
@@ -351,7 +367,7 @@
         valueL += element.offsetLeft || 0;
         element = Element.getOffsetParent(element);
       } while (element && getNodeName(element) !== 'BODY' &&
-          Element.getStyle(element, 'position') == 'static');
+          getStyle(element, 'position') == 'static');
 
       return Element._returnOffset(valueL, valueT);
     },
@@ -393,6 +409,7 @@
     var makeAbsolute =        null,
      clonePosition =          null,
      cumulativeScrollOffset = null,
+     getOffsetParent =        null,
      makeClipping =           null,
      makePositioned =         null,
      positionedOffset =       null,

@@ -1,3 +1,5 @@
+* Move `borderWidth`, `marginWidth`, `paddingWidth`, and height equivalents from Element#getStyle to Element#getDimensions. [jddalton]
+
 * Optimize Element traversal methods `ancestors`, `next`, `nextSiblings`, `previous`, `previousSiblings`, `siblings`, and `up`. [jddalton, joneff, kangax]
 
 * Add support for the MSXML2.XMLHTTP ActiveXObject because Microsoft.XMLHTTP is deprecated. [MooTools LH #739] [jddalton, lukasbuenger, Scott Kyle]
