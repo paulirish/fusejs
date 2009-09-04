@@ -25,21 +25,19 @@
       };
 
       methods.siblings = function siblings(element, selectors) {
-        var results = Fuse.List(), original = element = $(element);
-        element = element.parentNode && element.parentNode.firstChild;
-
-        if (selectors && selectors.length) {
-          var match = Selector.match;
-          while (element) {
-            if (element !== original && element.nodeType === 1 && match(element, selectors))
-              results.push(Element.extend(element));
-            element = element.nextSibling;
-          }
-        } else {
-          while (element) {
-            if (element !== original && element.nodeType === 1)
-              results.push(Element.extend(element));
-            element = element.nextSibling;
+        var match, i = 0, original = element = $(element), results = Fuse.List();
+        if (element = element.parentNode && element.parentNode.firstChild) {
+          if (selectors && selectors.length) {
+            match = Selector.match;
+            do {
+              if (element.nodeType === 1 && element !== original && match(element, selectors))
+                results[i++] = Element.extend(element);
+            } while (element = element.nextSibling);
+          } else {
+            do {
+              if (element.nodeType === 1 && element !== original)
+                results[i++] = Element.extend(element);
+            } while (element = element.nextSibling);
           }
         }
         return results;
@@ -54,9 +52,11 @@
     (function() {
       methods.descendants = (function() {
         var descendants = function descendants(element, selectors) {
-          var node, i = 0, results = Fuse.List(), nodes = $(element).getElementsByTagName('*');
+          var match, node, i = 0, results = Fuse.List(),
+           nodes = $(element).getElementsByTagName('*');
+
           if (selectors && selectors.length) {
-            var match = Selector.match;
+            match = Selector.match;
             while (node = nodes[i++])
               if (match(element, selectors))
                 results.push(Element.extend(element));
@@ -67,9 +67,11 @@
 
         if (Bug('GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES')) {
           descendants = function descendants(element, selectors) {
-            var node, i = 0, results = Fuse.List(), nodes = $(element).getElementsByTagName('*');
+            var match, node, i = 0, results = Fuse.List(),
+             nodes = $(element).getElementsByTagName('*');
+
             if (selectors && selectors.length) {
-              var match = Selector.match;
+              match = Selector.match;
               while (node = nodes[i++])
                 if (node.nodeType === 1 && match(element, selectors))
                   results.push(Element.extend(node));
@@ -169,21 +171,25 @@
     (function() {
       function getNth(element, property, selectors, index) {
         element = $(element);
-        var count = 0;
+        var match, count = 0;
 
         if (isNumber(selectors)) {
           index = selectors; selectors = null;
         } else index = index || 0;
 
-        if (selectors && selectors.length) {
-          var match = Selector.match;
-          while (element = element[property])
-            if (element.nodeType === 1 && match(element, selectors) && count++ === index)
-              return Element.extend(element);
-        } else {
-          while (element = element[property])
-            if (element.nodeType === 1 && count++ === index)
-              return Element.extend(element);
+        if (element = element[property]) {
+          if (selectors && selectors.length) {
+            match = Selector.match;
+            do {
+              if (element.nodeType === 1 && match(element, selectors) && count++ === index)
+                return Element.extend(element);
+            } while (element = element[property]);
+          } else {
+            do {
+              if (element.nodeType === 1 && count++ === index)
+                return Element.extend(element);
+            } while (element = element[property]);
+          }
         }
       }
 
@@ -210,16 +216,20 @@
     (function() {
       function collect(element, property, selectors) {
         element = $(element);
-        var results = Fuse.List();
-        if (selectors && selectors.length) {
-          var match = Selector.match;
-          while (element = element[property])
-            if (element.nodeType === 1 && match(element, selectors))
-              results.push(Element.extend(element));
-        } else {
-          while (element = element[property])
-            if (element.nodeType === 1)
-              results.push(Element.extend(element));
+        var match, i = 0, results = Fuse.List();
+        if (element = element[property]) {
+          if (selectors && selectors.length) {
+            match = Selector.match;
+            do {
+              if (element.nodeType === 1 && match(element, selectors))
+                results[i++] = Element.extend(element);
+            } while (element = element[property]);
+          } else {
+            do {
+              if (element.nodeType === 1)
+                results[i++] = Element.extend(element);
+            } while (element = element[property]);
+          }
         }
         return results;
       }
