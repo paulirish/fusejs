@@ -1,3 +1,5 @@
+* Add support for the MSXML2.XMLHTTP ActiveXObject because Microsoft.XMLHTTP is deprecated. [MooTools LH #739] [jddalton, lukasbuenger, Scott Kyle]
+
 * Change Fuse.Version, Fuse.ScriptFragment and Fuse.JSONFilter to camelCase to be consistent with the rest of the codebase. [jddalton]
 
 * Absorb pseudo private style helper methods into Element#getStyle and cleanup style.js and position.js. [jddalton]
