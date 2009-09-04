@@ -2,6 +2,8 @@
 
   Fuse.addNS('Ajax.Responders');
 
+  Fuse.Ajax.activeRequestCount = 0;
+
   // TODO: Utilize custom events for responders
   (function(Responders) {
     Responders.responders = {

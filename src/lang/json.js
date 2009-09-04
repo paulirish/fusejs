@@ -1,18 +1,8 @@
   /*------------------------------- LANG: JSON -------------------------------*/
 
+  Fuse.jsonFilter = /^\/\*-secure-([\s\S]*)\*\/\s*$/;
+
   (function() {
-    Fuse.Hash.plugin.toJSON = function toJSON() {
-      return Obj.toJSON(this._object);
-    };
-
-    Fuse.List.plugin.toJSON = function toJSON() {
-      for (var value, i = 0, results = Fuse.List(), length = this.length; i < length; i++) {
-        value = Obj.toJSON(this[i]);
-        if (typeof value !== 'undefined') results.push(value);
-      }
-      return '[' + results.join(', ') + ']';
-    };
-
     Obj.toJSON = function toJSON(value) {
       switch (typeof value) {
         case 'undefined':
@@ -34,6 +24,19 @@
       });
       return Fuse.String('{' + results.join(', ') + '}');
     };
+
+    Fuse.List.plugin.toJSON = function toJSON() {
+      for (var value, i = 0, results = Fuse.List(), length = this.length; i < length; i++) {
+        value = Obj.toJSON(this[i]);
+        if (typeof value !== 'undefined') results.push(value);
+      }
+      return '[' + results.join(', ') + ']';
+    };
+
+    if (Fuse.Hash)
+      Fuse.Hash.plugin.toJSON = function toJSON() {
+        return Obj.toJSON(this._object);
+      };
 
     // ECMA-5 15.9.5.44
     if (!Fuse.Date.plugin.toJSON)
@@ -65,6 +68,7 @@
   /*--------------------------------------------------------------------------*/
 
   // complementary JSON methods for String.plugin
+
   (function(plugin) {
     plugin.evalJSON = function evalJSON(sanitize) {
       if (this == null) throw new TypeError;
@@ -88,7 +92,7 @@
 
     plugin.unfilterJSON = function unfilterJSON(filter) {
       if (this == null) throw new TypeError;
-      return Fuse.String(String(this).replace(filter || Fuse.JSONFilter, '$1'));
+      return Fuse.String(String(this).replace(filter || Fuse.jsonFilter, '$1'));
     };
 
     // prevent JScript bug with named function expressions

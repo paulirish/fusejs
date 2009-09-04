@@ -105,7 +105,7 @@
     'parameters':   '',
     'headers':      {
       'Accept': 'text/javascript, text/html, application/xml, text/xml, */*',
-      'X-Fuse-Version': Fuse.Version,
+      'X-Fuse-Version': Fuse.version,
       'X-Requested-With': 'XMLHttpRequest'
     }
   };

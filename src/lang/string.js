@@ -1,5 +1,7 @@
   /*------------------------------ LANG: STRING ------------------------------*/
 
+  Fuse.scriptFragment = '<script[^>]*>([^\\x00]*?)<\/script>';
+
   Fuse.addNS('Util');
 
   Fuse.Util.$w = (function() {
@@ -315,8 +317,8 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var matchScripts   = RegExp(Fuse.ScriptFragment, 'gi'),
-     matchHTMLComments = Fuse.RegExp('<!--\\s*' + Fuse.ScriptFragment + '\\s*-->', 'gi'),
+    var matchScripts   = RegExp(Fuse.scriptFragment, 'gi'),
+     matchHTMLComments = Fuse.RegExp('<!--\\s*' + Fuse.scriptFragment + '\\s*-->', 'gi'),
      matchOpenTag      = /<script/i;
 
     plugin.evalScripts = function evalScripts() {

@@ -33,9 +33,7 @@
     return false;
   })();
 
-  Fuse.JSONFilter =     /^\/\*-secure-([\s\S]*)\*\/\s*$/;
-  Fuse.ScriptFragment = '<script[^>]*>([^\\x00]*?)<\/script>';
-  Fuse.Version =        '<%= FUSEJS_VERSION %>';
+  Fuse.version = '<%= FUSEJS_VERSION %>';
 
   /*----------------------- PRIVATE VARIABLES/METHODS ------------------------*/
 

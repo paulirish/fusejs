@@ -1,3 +1,5 @@
+* Change Fuse.Version, Fuse.ScriptFragment and Fuse.JSONFilter to camelCase to be consistent with the rest of the codebase. [jddalton]
+
 * Absorb pseudo private style helper methods into Element#getStyle and cleanup style.js and position.js. [jddalton]
 
 * Add extraneous semicolons to make JSLint happy. [Diego Perini]
