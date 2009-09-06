@@ -1,3 +1,10 @@
+* Changed the Class API for calling a super method in favor of T.J. Crowder's approach. [jddalton, kangax, T.J. Crowder]
+  Note: A subclassed method may call it's super by:
+    Subclass.callSuper(this, 'subMethod', arg1, arg2, ...); // OR
+    Subclass.callSuper(this, arguments, arg1, arg2, ...);   // OR
+    subMethod.$super.call(this, arg2, arg2, ...);           // OR
+    arguments.callee.$super.call(this, arg2, arg2, ...);
+
 * unit test: Correct Element#getStyle width/height test in IE6. [jddalton]
 
 * Store RegExp patterns created while executing Element#removeClassName in a cache. [jddalton, Garrett Smith, kangax, YUI Team]

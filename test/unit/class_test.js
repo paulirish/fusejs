@@ -81,32 +81,24 @@ new Test.Unit.Runner({
     // augment the constructor and test
     var Dodo = Fuse.Class(Fixtures.Animal, {
       'initialize': function(name) {
-        this._super(name);
+        Dodo.callSuper(this, 'initialize', name);
         this.extinct = true;
       },
 
       'say': function(message) {
-        return this._super(message) + ' honk honk';
-      },
-
-      'speed': 4
-    });
-
-    var gonzo = new Dodo('Gonzo');
-    this.assertEqual('Gonzo', gonzo.name);
-    this.assert(gonzo.extinct, 'Dodo birds should be extinct');
-    this.assertEqual('Gonzo: hello honk honk', gonzo.say('hello'));
-
-    // test against super that is not a method
-    var Twit = Fuse.Class(Dodo, {
-      'initialize': function() { },
-      'speed': function() {
-        if (this._super && !Fuse.Object.isFunction(this._super))
-          throw new TypeError;
+        return Dodo.callSuper(this, arguments, message) + ' honk honk';
       }
     });
 
-    this.assertNothingRaised(function() { new Twit().speed() });
+    var gonzo = new Dodo('Gonzo');
+    this.assertEqual('Gonzo', gonzo.name,
+      'Should have called super `initialize` method and set `name` property');
+
+    this.assert(gonzo.extinct, 'Dodo birds should be extinct',
+      'Should have set the `extinct` property of the Dodo instance');
+
+    this.assertEqual('Gonzo: hello honk honk', gonzo.say('hello'),
+      'Should have called super `say` method resolved from arguments.callee');
   },
 
   'testClassAddMethods': function() {
@@ -119,8 +111,9 @@ new Test.Unit.Runner({
 
     Fixtures.Mouse.addMethods({
       'sleep': function() {
-        return this._super() + ' ... no, can\'t sleep! Gotta steal cheese!';
+        return Fixtures.Mouse.callSuper(this, 'sleep') + ' ... no, can\'t sleep! Gotta steal cheese!';
       },
+
       'escape': function(cat) {
         return this.say('(from a mousehole) Take that, ' + cat.name + '!');
       }
@@ -169,15 +162,16 @@ new Test.Unit.Runner({
     var Foo = Fuse.Class({
       'toString': function() { return 'toString' },
       'valueOf':  function() { return 'valueOf'  }
-    });
+    }),
 
-    var Parent = Fuse.Class({
+    Parent = Fuse.Class({
       'm1': function(){ return 'm1' },
       'm2': function(){ return 'm2' }
-    });
-    var Child = Fuse.Class(Parent, {
-      'm1': function() { return this._super() + ' child' },
-      'm2': function() { return this._super() + ' child' }
+    }),
+    
+    Child = Fuse.Class(Parent, {
+      'm1': function() { return Child.callSuper(this, 'm1') + ' child' },
+      'm2': function() { return Child.callSuper(this, 'm2') + ' child' }
     });
 
     if (Fuse.Env.Feature('FUNCTION_TO_STRING_RETURNS_SOURCE'))
@@ -185,5 +179,28 @@ new Test.Unit.Runner({
 
     this.assertEqual('toString', new Foo().toString());
     this.assertEqual('valueOf',  new Foo().valueOf());
+  },
+
+  'testGrandChildClass': function() {
+    var Parent = Fuse.Class({
+      'say': function() {
+        return 'Parent#say';
+      }
+    }),
+
+    Child = Fuse.Class(Parent, {
+      'say': function() {
+        return 'Child#say > ' + Child.callSuper(this, 'say');
+      }
+    }),
+
+    GrandChild = Fuse.Class(Child, {
+      'say': function() {
+        return 'GrandChild#say > ' + GrandChild.callSuper(this, 'say');
+      }
+    });
+
+    var grandChild = new GrandChild;
+    this.assertEqual('GrandChild#say > Child#say > Parent#say', grandChild.say());
   }
 });

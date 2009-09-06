@@ -1,5 +1,5 @@
   /*------------------------------ LANG: CLASS -------------------------------*/
-  /* Based on work by Alex Arnell, Joey Hurst, John Resig, and Prototype core */
+  /* Based on work by Alex Arnell, John Resig, T.J. Crowder and Prototype core */
 
   Fuse.Class = (function() {
     function subclass() { };
@@ -11,9 +11,20 @@
         '}', 'return ' + name].join('\n'))();
     }
 
+    function createCallSuper(plugin) {
+      function callSuper(thisArg, name) {
+        var args = arguments, fn = name.callee || plugin[name],
+         $super = fn.$super || fn.superclass;
+        return args.length
+          ? $super.apply(thisArg, slice.call(args, 2))
+          : $super.call(thisArg);
+      }
+      return callSuper;
+    }
+
     function Class() {
-      var klass, parent, props,
-       i = 0, properties = slice.call(arguments, 0);
+      var klass, parent, plugin, props, i = 0,
+       properties = slice.call(arguments, 0);
 
       if (typeof properties[0] === 'function')
         parent = properties.shift();
@@ -30,7 +41,6 @@
       }
 
       klass = klass || createNamedClass('UnnamedClass');
-      Obj.extend(klass, Fuse.Class.Methods);
 
       if (parent) {
         // note: Safari 2, inheritance won't work with subclass = new Function;
@@ -39,64 +49,68 @@
         parent.subclasses.push(klass);
       }
 
-      klass.superclass = parent; i = 0;
+      // add static methods/properties to the klass
+      plugin = klass.plugin = klass.prototype;
+      Obj.extend(klass, Fuse.Class.Methods);
+
+      klass.callSuper  = createCallSuper(plugin);
+      klass.subclasses = Fuse.List();
+      klass.superclass = parent;
+
+      // add methods to klass.plugin
+      i = 0;
       while (props = properties[i++]) klass.addMethods(props);
 
-      klass.superclass = parent;
-      klass.subclasses = Fuse.List();
-      klass.plugin = klass.prototype;
-      klass.plugin.constructor = klass;
+      plugin.constructor = klass;
       return klass;
     }
 
     return Class;
   })();
 
-  Fuse.Class.Methods = (function() {
-    var matchSuper = Feature('FUNCTION_TO_STRING_RETURNS_SOURCE')
-      ? /\bthis\._super\b/
-      : { 'test': function() { return true; } };
+  /*--------------------------------------------------------------------------*/
 
-    function addMethods(source) {
-      var prototype = this.prototype,
-       parentProto = this.superclass && this.superclass.prototype;
+  (function(methods) {
+    methods.addMethods = function addMethods(source) {
+      var i, otherMethod,
+       prototype  = this.prototype,
+       superProto = this.superclass && this.superclass.prototype,
+       subclasses = this.subclasses,
+       length = subclasses.length;
 
-      eachKey(source, function(method, key) {
+      // a simple assignment
+      if (!superProto && !length)
+        eachKey(source, function(method, key) { prototype[key] = method; });
 
-        // avoid typeof === 'function' because Safari 3.1+ mistakes
-        // regexp instances as typeof 'function'
-        if (parentProto && isFunction(parentProto[key]) && isFunction(method) &&
-            matchSuper.test(method)) {
+      // or add $super support and/or update subclasses
+      else eachKey(source, function(method, key) {
+        var protoMethod = prototype[key],
+         superMethod = superProto && superProto[key];
 
-          var __method = method;
-          method = function() {
-            // backup this._super and assign the parentProto's method to it
-            var result, backup = this._super;
-            this._super = parentProto[key];
+        // avoid typeof === `function` because Safari 3.1+ mistakes
+        // regexp instances as typeof `function`
+        if (isFunction(method)) {
+          if (isFunction(superMethod))
+            method.$super = superMethod;
 
-            // execute and capture the result
-            result = arguments.length
-              ? __method.apply(this, arguments)
-              : __method.call(this);
-
-            // restore backup and return result
-            this._super = backup;
-            return result;
-          };
-
-          method.valueOf  = function() { return __method.valueOf(); };
-          method.toString = function() { return __method.toString(); };
+          if (isFunction(protoMethod)) {
+            i = length;
+            while (i--) {
+              otherMethod = subclasses[i].prototype[key];
+              if (otherMethod && otherMethod.$super)
+                otherMethod.$super = method;
+            }
+          }
         }
         prototype[key] = method;
       });
 
       return this;
-    }
-
-    return {
-      'addMethods': addMethods
     };
-  })();
+
+    // prevent JScript bug with named function expressions
+    var addMethods = null;
+  })(Fuse.Class.Methods = { });
 
   /*--------------------------------------------------------------------------*/
 

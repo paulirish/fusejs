@@ -1,21 +1,31 @@
 
 var Fixtures = {
-  'Person': function(name){ this.name = name },
+  'Person': function(name){
+    this.name = name;
+  },
 
   'Animal': Fuse.Class({
     'initialize': (function() {
       function Animal(name) { this.name = name }
       return Animal;
     })(),
-    'name': '',
-    'eat': function() { return this.say('Yum!') },
-    'say': function(message) { return this.name + ': ' + message }
+
+    'eat': function() {
+      return this.say('Yum!');
+    },
+
+    'say': function(message) {
+      return this.name + ': ' + message;
+    }
   }),
 
-  //mixins
+  // mixins
   'Sellable': {
-    'getValue': function(pricePerKilo) { return this.weight * pricePerKilo },
-    'inspect':  function() {
+    'getValue': function(pricePerKilo) {
+      return this.weight * pricePerKilo;
+    },
+
+    'inspect': function() {
       return Fuse.String('#<Sellable: #{weight}kg>').interpolate(this);
     }
   },
@@ -24,7 +34,8 @@ var Fixtures = {
     'reproduce': function(partner) {
       if (partner.constructor != this.constructor || partner.sex == this.sex)
         return null;
-      var weight = this.weight / 10, sex = Math.random(1).round() ? 'male' : 'female';
+      var weight = this.weight / 10,
+       sex = Math.random(1).round() ? 'male' : 'female';
       return new this.constructor('baby', weight, sex);
     }
   }
@@ -36,21 +47,19 @@ Fuse.Object.extend(Fixtures, {
   // subclass that augments a method
   'Cat': Fuse.Class(Fixtures.Animal, {
     'eat': function(food) {
-      if (food instanceof Fixtures.Mouse) return this._super();
+      if (food instanceof Fixtures.Mouse)
+        return Fixtures.Cat.callSuper(this, 'eat');
       else return this.say('Yuk! I only eat mice.');
     }
   }),
 
   // subclass with mixin
   'Dog': Fuse.Class(Fixtures.Animal, Fixtures.Reproduceable, {
-    'constructor': (function() {
-      function Dog(name, weight, sex) {
-        this.weight = weight;
-        this.sex    = sex;
-        this._super(name);
-      }
-      return Dog;
-    })()
+    'constructor': function(name, weight, sex) {
+      Fixtures.Dog.callSuper(this, 'constructor', name);
+      this.weight = weight;
+      this.sex    = sex;
+    }
   }),
 
   // empty subclass
@@ -59,9 +68,9 @@ Fuse.Object.extend(Fixtures, {
   // subclass with mixins
   'Ox': Fuse.Class(Fixtures.Animal, Fixtures.Sellable, Fixtures.Reproduceable, {
     'initialize': function(name, weight, sex) {
+      Fixtures.Ox.callSuper(this, 'initialize', name);
       this.weight = weight;
       this.sex    = sex;
-      this._super(name);
     },
 
     'eat': function(food) {
@@ -69,7 +78,9 @@ Fuse.Object.extend(Fixtures, {
         this.weight += food.weight;
     },
 
-    'inspect': function() { return Fuse.String('#<Ox: #{name}>').interpolate(this) }
+    'inspect': function() {
+      return Fuse.String('#<Ox: #{name}>').interpolate(this);
+    }
   }),
 
   // base class with mixin
@@ -79,6 +90,8 @@ Fuse.Object.extend(Fixtures, {
       this.weight = weight;
     },
 
-    'inspect': function() { return Fuse.String('#<Plant: #{name}>').interpolate(this) }
+    'inspect': function() {
+      return Fuse.String('#<Plant: #{name}>').interpolate(this);
+    }
   })
 });
