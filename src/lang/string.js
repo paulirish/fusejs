@@ -470,11 +470,15 @@
 
       return new RegExp('<'+ name + '(?:' + space + attribute + ')*' + space + '?/?>|' +
         '</' + name + space + '?>', 'g');
-    })();
+    })(),
 
-    var div = Fuse._div, tags = [],
-     matchToken = new RegExp(expando + '\\d+' + expando, 'g'),
-     __unescape = function() { return div.textContent; };
+    matchToken = new RegExp(expando + '\\d+' + expando, 'g'),
+
+    div = Fuse._div,
+
+    tags = [],
+
+    __unescape = function() { return div.textContent; };
 
     if (!Feature('ELEMENT_TEXT_CONTENT')) {
       div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;<\/pre>';

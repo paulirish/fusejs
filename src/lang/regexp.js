@@ -1,11 +1,10 @@
   /*------------------------------ LANG: REGEXP ------------------------------*/
 
-  Fuse.RegExp.escape = (function() {
-    function escape(string) { return Fuse.String(escapeRegExpChars(string)); }
-    return escape;
-  })();
-
   (function(plugin) {
+    Fuse.RegExp.escape = function escape(string) {
+      return Fuse.String(escapeRegExpChars(string));
+    };
+
     plugin.clone = function clone(options) {
       options = _extend({
         'global':     this.global,
@@ -23,5 +22,5 @@
     plugin.match = plugin.test;
 
     // prevent JScript bug with named function expressions
-    var clone = null;
+    var clone = null, escape = null;
   })(Fuse.RegExp.plugin);
