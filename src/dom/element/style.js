@@ -212,10 +212,19 @@
 
   /*--------------------------------------------------------------------------*/
 
+  // Note: For performance we only support classNames containing \x20 spaces.
+  // Newline, tab and other whitespaces are not supported.
   (function(methods) {
+    methods.addClassName = function addClassName(element, className) {
+      element = $(element);
+      if (!Element.hasClassName(element, className))
+        element.className += (element.className ? ' ' : '') + className;
+      return element;
+    };
+
     methods.classNames = function classNames(element) {
-      var results = Fuse.String($(element).className).split(/\s+/);
-      return results[0].length ? results : Fuse.List();
+      var cn = $(element).className;
+      return cn ? Fuse.String(cn).split(' ') : Fuse.List();
     };
 
     methods.hasClassName = function hasClassName(element, className) {
@@ -225,33 +234,40 @@
         (' ' + elementClassName + ' ').indexOf(' ' + className + ' ') > -1));
     };
 
-    methods.addClassName = function addClassName(element, className) {
+    methods.removeClassName = function removeClassName(element, className) {
       element = $(element);
-      if (!Element.hasClassName(element, className))
-        element.className += (element.className ? ' ' : '') + className;
+      var classNames, cn, length,
+       i = 0, result = [];
+
+      if (cn = element.className) {
+        classNames = cn.split(' ');
+        length = classNames.length;
+
+        while (i < length) {
+          cn = classNames[i++];
+          if (cn != className) result.push(cn);
+        }
+        element.className = result.join(' ');
+      }
       return element;
     };
-
-    methods.removeClassName = (function() {
-      function removeClassName(element, className) {
-        element = $(element);
-        var expandoKey = expando + className,
-         pattern = cache[expandoKey] ||
-           (cache[expandoKey] = new RegExp('(^|\\s+)' + className + '(\\s+|$)'));
-
-        element.className = trim.call(element.className.replace(pattern, ' '));
-        return element;
-      }
-
-      var cache = { }, trim = Fuse.String.plugin.trim;
-      return removeClassName;
-    })();
 
     methods.toggleClassName = function toggleClassName(element, className) {
       return Element[Element.hasClassName(element, className) ?
         'removeClassName' : 'addClassName'](element, className);
     };
 
+    // prevent JScript bug with named function expressions
+    var addClassName = null,
+     classNames =      null,
+     hasClassName =    null,
+     removeClassName = null,
+     toggleClassName = null;
+  })(Element.Methods);
+
+  /*--------------------------------------------------------------------------*/
+
+  (function(methods) {
     methods.getDimensions = function getDimensions(element, options) {
       return {
         'width': Element.getWidth(element, options),
@@ -380,12 +396,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var addClassName = null,
-     hasClassName =    null,
-     classNames =      null,
-     toggleClassName = null,
-     getDimensions =   null,
-     isVisible =       null;
+    var getDimensions = null, isVisible = null;
   })(Element.Methods);
 
   /*--------------------------------------------------------------------------*/
