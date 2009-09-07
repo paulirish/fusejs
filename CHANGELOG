@@ -1,3 +1,5 @@
+* Ensure Element#getStyle checks isNull() before other calculations. [jddalton]
+
 * Optimize Element className methods by removing support for edge case whitespace such as newlines and tabs. [jddalton, kangax]
 
 * Changed the Class API for calling a super method in favor of T.J. Crowder's approach. [jddalton, kangax, T.J. Crowder]

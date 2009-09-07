@@ -1375,6 +1375,7 @@ new Test.Unit.Runner({
     this.assertNull(Element.getStyle('style_test_1', 'width'),
       'elements that are hidden should return null on getStyle("width")');
 
+    // show element so browsers like Opera/Safari can compute the styles
     $('style_test_1').show();
 
     // from id rule
@@ -1390,7 +1391,7 @@ new Test.Unit.Runner({
     this.assertEqual($('style_test_2').offsetWidth+'px',
       Element.getStyle('style_test_2','width'));
 
-    this.assertEqual('static',Element.getStyle('style_test_1','position'));
+    this.assertEqual('static', Element.getStyle('style_test_1','position'));
 
     // from style
     this.assertEqual('11px',

@@ -22,24 +22,22 @@
       'ex': 1
     },
 
+    camelize = Fuse.String.plugin.camelize,
+
     nullHandlers = [];
 
     function getComputedStyle(element, name) {
       name = FLOAT_TRANSLATIONS[name] || name;
       var css = element.ownerDocument.defaultView.getComputedStyle(element, null);
-      if (css) return getResult(name, css[name]);
-      return getValue(element, name);
+      return getValue(element, name, css && css[name]);
     }
 
-    function getResult(name, value) {
-      if (name == 'opacity')
-        return Fuse.String(value === '1' ? '1.0' : parseFloat(value) || '0');
-      return value === 'auto' || value === '' ? null : Fuse.String(value);
-    }
-
-    function getValue(element, name) {
+    function getValue(element, name, value) {
       name = FLOAT_TRANSLATIONS[name] || name;
-      return getResult(name, element.style[name]);
+      value = value || element.style[name];
+      if (name == 'opacity')
+        return value === '1' ? '1.0' : parseFloat(value) || '0';
+      return value === 'auto' || value === '' ? null : value;
     }
 
     function isNull(element, name) {
@@ -59,7 +57,7 @@
 
     if (Bug('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN'))
       nullHandlers.push(function(element, name) {
-        return DIMENSION_NAMES[name] && element.style.display === 'none';
+        return DIMENSION_NAMES[name] && getComputedStyle(element, 'display') === 'none';
       });
 
 
@@ -94,39 +92,40 @@
     // fallback for browsers without computedStyle or currentStyle
     if (!Feature('ELEMENT_COMPUTED_STYLE') && !Feature('ELEMENT_CURRENT_STYLE'))
       methods.getStyle = function getStyle(element, name) {
-        element = $(element);
-        name = Fuse.String(name).camelize();
-        return getValue(element, name);
+        var result = getValue($(element), camelize.call(name));
+        return result === null ? result : Fuse.String(result);
       };
 
     // Opera 9.2x
     else if (Bug('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX'))
       methods.getStyle = function getStyle(element, name) {
         element = $(element);
+        name = camelize.call(name);
         var dim, result;
 
-        // returns the border-box dimensions rather than the content-box
-        // dimensions, so we subtract padding and borders from the value
+        if (isNull(element, name))
+          return null;
+
         if (DIMENSION_NAMES[name]) {
           dim = name == 'width' ? 'Width' : 'Height';
           result = getComputedStyle(element, name);
           if ((parseFloat(result) || 0) === element['offset' + dim])
-            result = Fuse.String(Element['get' + dim](element, 'content') + 'px');
-        } else {
-          name = Fuse.String(name).camelize();
-          if (isNull(element, name)) result = null;
-          else result = getComputedStyle(element, name);
+            return Fuse.String(Element['get' + dim](element, 'content') + 'px');
         }
 
-        return result;
+        result = getComputedStyle(element, name);
+        return result === null ? result : Fuse.String(result);
       };
 
     // Firefox, Safari, Opera 9.5+
     else if (Feature('ELEMENT_COMPUTED_STYLE'))
       methods.getStyle = function getStyle(element, name) {
         element = $(element);
-        name = Fuse.String(name).camelize();
-        return isNull(element, name) ? null : getComputedStyle(element, name);
+        name = camelize.call(name);
+        if (isNull(element, name)) return null;
+
+        var result = getComputedStyle(element, name);
+        return result === null ? result : Fuse.String(result);
       };
 
     // IE
@@ -152,7 +151,7 @@
 
         // handle shorthand
         element = $(element);
-        name = Fuse.String(name).camelize();
+        name = camelize.call(name);
 
         // get cascaded style
         name      = FLOAT_TRANSLATIONS[name] || name;
