@@ -1028,7 +1028,7 @@ new Test.Unit.Runner({
     // Test INPUT elements because Element#down calls Element#select
     var input = $$('input')[0];
     this.assertNothingRaised(function(){ input.down('span') });
-    this.assertUndefined(input.down('span'));
+    this.assertNull(input.down('span'));
   },
 
   'testElementPrevious': function() {

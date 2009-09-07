@@ -1,3 +1,5 @@
+* Add support for the W3C ElementTraversal interface in traversal.js. [jddalton, Diego Perini]
+
 * Ensure Element#getStyle checks isNull() before other calculations. [jddalton]
 
 * Optimize Element className methods by removing support for edge case whitespace such as newlines and tabs. [jddalton, kangax]
