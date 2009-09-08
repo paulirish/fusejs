@@ -680,32 +680,6 @@ new Test.Unit.Runner({
       'Should not iterate over inherited properties.');
   },
 
-  'testInspect': function() {
-    this.assertEqual('\'\'',
-      Fuse.String('').inspect());
-
-    this.assertEqual('\'test\'',
-      Fuse.String('test').inspect());
-
-    this.assertEqual('\'test \\\'test\\\' "test"\'',
-      Fuse.String('test \'test\' "test"').inspect());
-
-    this.assertEqual('\"test \'test\' \\"test\\"\"',
-      Fuse.String('test \'test\' "test"').inspect(true));
-
-    this.assertEqual('\'\\b\\t\\n\\f\\r"\\\\\'',
-      Fuse.String('\b\t\n\f\r"\\').inspect());
-
-    this.assertEqual('\"\\b\\t\\n\\f\\r\\"\\\\\"',
-      Fuse.String('\b\t\n\f\r"\\').inspect(true));
-
-    this.assertEqual('\'\\b\\t\\n\\f\\r\'',
-      Fuse.String('\x08\x09\x0a\x0c\x0d').inspect());
-
-    this.assertEqual('\'\\u001a\'',
-      Fuse.String('\x1a').inspect());
-  },
-
   'testInclude': function() {
     this.assert(Fuse.String('hello world').contains('h'));
     this.assert(Fuse.String('hello world').contains('hello'));

@@ -182,19 +182,6 @@ new Test.Unit.Runner({
       '`e` is not a key.');
   },
 
-  'testInspect': function() {
-    this.assertEqual('#<Hash:{}>', $H({}).inspect());
-
-    this.assertEqual("#<Hash:{'a': 'A#'}>",
-      $H(Fixtures.one).inspect());
-
-    this.assertEqual("#<Hash:{'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D#'}>",
-      $H(Fixtures.many).inspect());
-
-    this.assertEqual("#<Hash:{'a': 'A', 'b': 'B', 'toString': 'bar', 'valueOf': ''}>",
-      $H(Fixtures.mixed_dont_enum).inspect());
-  },
-
   'testKeyOf': function() {
     this.assert('a', $H(Fixtures.one).keyOf('A#'));
     this.assert('a', $H(Fixtures.many).keyOf('A'));

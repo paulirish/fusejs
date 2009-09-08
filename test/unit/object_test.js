@@ -118,20 +118,6 @@ new Test.Unit.Runner({
       'Custom clone method on object.');
   },
 
-  'testObjectInspect': function() {
-    this.assertEqual('undefined', Fuse.Object.inspect());
-    this.assertEqual('undefined', Fuse.Object.inspect(undef));
-    this.assertEqual('null',      Fuse.Object.inspect(null));
-    this.assertEqual('[]',        Fuse.Object.inspect([]));
-
-    this.assertEqual("'foo\\\\b\\\'ar'",  Fuse.Object.inspect('foo\\b\'ar'));
-    this.assertNothingRaised(function() { Fuse.Object.inspect(window.Node) });
-
-    // test Object object
-    this.assertEqual("{'a': 'A', 'b': 'B', 'c': 'C'}",
-      Fuse.Object.inspect({ 'a': 'A', 'b': 'B', 'c': 'C' }), 'Object object');
-  },
-
   'testObjectToHTML': function() {
     this.assertEqual('',    Fuse.Object.toHTML());
     this.assertEqual('',    Fuse.Object.toHTML(''));

@@ -364,17 +364,6 @@ new Test.Unit.Runner({
       'called with an object as the `this` value');
   },
 
-  'testInspect': function() {
-    this.assertEqual('[]', Fuse.List().inspect());
-    this.assertEqual('[1]', Fuse.List.create(1).inspect());
-    this.assertEqual('[\'a\']', Fuse.List('a').inspect());
-    this.assertEqual('[\'a\', 1]', Fuse.List('a', 1).inspect());
-
-    this.assertEqual('[0, undefined, 2]',
-      Fuse.List.plugin.inspect.call(Fixtures.Object),
-      'called with an object as the `this` value');
-  },
-
   'testIntersect': function() {
     this.assertEnumEqual([1, 3], Fuse.List(1, '2', 3).intersect([1, 2, 3]),
       'Should have performed a strict match');

@@ -1064,20 +1064,6 @@ new Test.Unit.Runner({
     this.assertRespondsTo('show', dummy.down().next());
   },
 
-  'testElementInspect': function() {
-    this.assertEqual('<ul id="navigation_test">',
-      $('navigation_test').inspect(),
-      'element with id only');
-
-    this.assertEqual('<li class="first">',
-      $('navigation_test').down().inspect(),
-      'element with className only');
-
-    this.assertEqual('<em>',
-      $('navigation_test').down(1).inspect(),
-      'element with no className or id');
-  },
-
   'testElementMakeClipping': function() {
     var chained = new Element('div');
 
