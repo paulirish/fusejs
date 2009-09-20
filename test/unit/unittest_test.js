@@ -124,18 +124,19 @@ new Test.Unit.Runner({
     this.assertNotVisible('testcss1_span');
     //this.assertNotVisible('testcss2', 'Due to a Safari bug, this test fails in Safari.');
 
-    Element.hide('testcss1');
+    $('testcss1').hide();
     this.assertNotVisible('testcss1');
     this.assertNotVisible('testcss1_span');
 
-    Element.show('testcss1');
+    $('testcss1').show();
+    console.log($('testcss1').isVisible())
     this.assertVisible('testcss1');
     this.assertNotVisible('testcss1_span');
 
-    Element.show('testcss1_span');
+    $('testcss1_span').show();
     this.assertVisible('testcss1_span');
 
-    Element.hide('testcss1');
+    $('testcss1').hide();
     this.assertNotVisible('testcss1_span'); // hidden by parent
   },
 
@@ -153,6 +154,6 @@ new Test.Unit.Runner({
   },
 
   'testMultipleTestRunner': function() {
-    this.assertEqual('passed', $('testlog_2').down('td', 1).innerHTML);
+    this.assertEqual('passed', $('testlog_2').down('td', 1).raw.innerHTML);
   }
 }, { 'testLog': 'testlog_2' });

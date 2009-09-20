@@ -6,7 +6,7 @@ new Test.Unit.Runner({
     $$('form').each(function(f){ f.reset() });
 
     // hidden value does not reset (for some reason)
-    $('bigform')['tf_hidden'].value = '';
+    $('bigform').raw['tf_hidden'].value = '';
   },
 
   'testDollarF': function(){
@@ -265,7 +265,7 @@ new Test.Unit.Runner({
 
   'testFormSerialize': function() {
     // form is initially empty
-    var form = $('bigform');
+    var form = $('bigform').raw;
     var expected = {
       'tf_selectOne': '',
       'tf_textarea':  '',
@@ -387,10 +387,10 @@ new Test.Unit.Runner({
     // ensure button elements are extended with Form.Element.Methods
     this.assertNothingRaised(function() { $('button_submit').getValue() });
 
-    Element.addMethods('INPUT',
+    Fuse.Dom.InputElement.extend(
       { 'anInputMethod': function(input)  { return 'input'  } });
 
-    Element.addMethods('SELECT',
+    Fuse.Dom.SelectElement('SELECT',
       { 'aSelectMethod': function(select) { return 'select' } });
 
     form = $('bigform');

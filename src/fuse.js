@@ -37,9 +37,10 @@
 
   /*----------------------- PRIVATE VARIABLES/METHODS ------------------------*/
 
-  var $, Bug, Feature, Func, Obj, _extend, bind, clone, defer,
-   eachKey, hasKey, inspect, isArray, isElement, isEmpty, isHash, isFunction,
-   isNumber, isPrimitive, isRegExp, isSameOrigin, isString, isUndefined, undef,
+  var Bug, Data, Element, Feature, Field, Form, Func, Obj, Node, NodeList,
+   _extend, bind, capitalize, clone, decorate, defer, eachKey, hasKey, inspect,
+   isArray, isElement, isEmpty, isHash, isFunction, isNumber, isPrimitive, isRegExp,
+   isSameOrigin, isString, isUndefined, undef,
 
    $break =
    Fuse.$break = function $break() { },
@@ -64,7 +65,7 @@
    })(),
 
    // a unqiue 15 char id used throughout Fuse
-   expando = '_fuse' + String(1 * new Date).slice(0, 10),
+   expando = '_fuse' + String(+new Date).slice(0, 10),
 
    // Check for `ownerDocument` first because an element of a document fragment
    // will have a `document` property that is NOT the pages document object.
@@ -112,7 +113,7 @@
       maxBitwiseNumber = Math.pow(2, 31);
 
      return function(object) {
-       var number = 1 * object; // fast coerce to number
+       var number = +object; // fast coerce to number
        if (number == 0 || !isFinite(number)) return number || 0;
 
        // avoid issues with large numbers against bitwise operators
@@ -188,30 +189,30 @@
    'lang/template.js',
    'lang/timer.js',
 
+   
+   'dom/data.js',
+   'dom/node.js',
+
    'dom/element/element.js',
    'dom/element/attribute.js',
    'dom/element/style.js',
    'dom/element/position.js',
-   'dom/element/helpers.js',
 
-   'dom/selector/selector.js',
-   'dom/selector/nwmatcher.js',
-   'dom/element/traversal.js',
-
+   'dom/form/field.js',
    'dom/form/form.js',
-   'dom/form/timed-observer.js',
-   'dom/form/event-observer.js',
-
-   'dom/node.js',
-   'dom/viewport.js',
-
-   'dom/event/event.js',
-   'dom/event/dom-loaded.js',
 
    'lang/grep.js',
    'lang/inspect.js',
    'lang/json.js',
-   
+
+   'dom/node-list.js',
+   'dom/selector/selector.js',
+   'dom/selector/nwmatcher.js',
+   'dom/element/traversal.js',
+
+   'dom/event/event.js',
+   'dom/event/dom-loaded.js',
+
    'ajax/ajax.js',
    'ajax/responders.js',
    'ajax/base.js',
@@ -222,9 +223,6 @@
 
   // update native generics and element methods
   Fuse.updateGenerics();
-
-  if (global.Element && global.Element.Methods)
-    Element.addMethods();
 
   if (global.Event && global.Event.Methods)
     Event.addMethods();

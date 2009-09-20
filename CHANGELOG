@@ -1,3 +1,9 @@
+* Switch to element decorator patterns instead of extending the native dom elements. [FuseJS LH #29] [jddalton]
+  Note: Backwards compatibility warning.
+    - Reorganized event.js
+    - Remove unused functionality from unittest.js
+    - Convert some unit tests to use the new element decorators
+
 * Add support for inspecting Fuse's Array, Element, Event, Enumerable, Hash, and String plugin properties. [Prototype LH #787] [jddalton, jedediah]
 
 * Add support for the W3C ElementTraversal interface in traversal.js. [jddalton, Diego Perini]

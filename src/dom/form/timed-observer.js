@@ -7,7 +7,7 @@
           // this._super() equivalent
           Fuse.Timer.call(this, callback, interval, options);
 
-          this.element = $(element);
+          this.element = Fuse.get(element);
           this.lastValue = this.getValue();
           this.start();
         }

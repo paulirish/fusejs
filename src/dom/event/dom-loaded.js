@@ -4,12 +4,12 @@
   // Matthias Miller, Dean Edwards, John Resig and Diego Perini.
   (function() {
     function Poller(method) {
-      var poller = this, defer = Fuse.Function.defer;
+      var poller = this, setTimeout = global.setTimeout;
       var callback = function() {
         if (!method() && poller.id != null)
-          poller.id = defer(callback);
+          poller.id = setTimeout(callback, 10);
       };
-      this.id = defer(callback);
+      this.id = setTimeout(callback, 10);
     }
 
     Poller.prototype.clear = function() {

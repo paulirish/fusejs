@@ -59,8 +59,8 @@ new Test.Unit.Runner({
       'Iframe failed. You MUST run the tests from Rake and not the local file system.');
   },
 
-  'testElementAddMethods': function() {
-    Element.addMethods({ 'cheeseCake': function() { return 'Cheese cake' } });
+  'testElementExtend': function() {
+    Fuse.Dom.Element.extend({ 'cheeseCake': function() { return 'Cheese cake' } });
     this.assertRespondsTo('cheeseCake', new Element('div'));
 
     // Additions to HTMLElement.prototype will be ignored if
@@ -68,15 +68,12 @@ new Test.Unit.Runner({
     // same name. Extending elements by tagName will get around the issue.
     if (!Fuse.Object.hasKey(new Element('div'), 'toString')) {
 
-      Element.addMethods('DIV', { 'toString': Element.Methods.inspect });
+      Fuse.Dom.Element.extend('DIV', { 'toString': Fuse.Dom.Element.plugin.inspect });
       this.assertEqual('<div id="testdiv">', $('testdiv').toString(),
         'Failed to extend element with a toString method.');
 
       // remove toString addition
-      if (Fuse.Env.Feature('ELEMENT_SPECIFIC_EXTENSIONS'))
-        delete HTMLDivElement.prototype.toString;
-      delete Element.Methods.ByTag.DIV.toString;
-      Element.addMethods();
+      delete Fuse.Dom.DivElement.plugin.toString;
     }
   },
 
@@ -1095,10 +1092,6 @@ new Test.Unit.Runner({
   },
 
   'testElementExtend': function() {
-    // add dummy simulated method
-    Element.Methods.Simulated.simulatedMethod = Fuse.K;
-    Element.addMethods();
-
     var element = $('element_extend_test');
     this.assertRespondsTo('show', element);
 
@@ -1122,10 +1115,6 @@ new Test.Unit.Runner({
       // test if elements are extended
       this.assertRespondsTo('show', element,
         nodeName + ' failed to be extended.');
-
-      // test if elements are extended with simulated methods
-      this.assertRespondsTo('simulatedMethod', element,
-        nodeName + ' failed to to be extended with simulated methods.');
     }, this);
 
     // ensure text nodes don't get extended
@@ -1139,12 +1128,6 @@ new Test.Unit.Runner({
     var xmlDoc = (new DOMParser()).parseFromString('<note><to>Sam</to></note>', 'text/xml');
     Element.extend(xmlDoc.firstChild);
     this.assertUndefined(xmlDoc.firstChild._extendedByFuse);
-
-    // remove dummy simulated method
-    delete Element.Methods.Simulated.simulatedMethod;
-    var proto = (window.HTMLElement || window.Element).prototype;
-    if (proto) delete proto.simulatedMethod;
-    Element.addMethods();
   },
 
   'testElementExtendReextendsDiscardedNodes': function() {
@@ -1155,10 +1138,10 @@ new Test.Unit.Runner({
   },
 
   'testExtendingAfterAddMethods': function() {
-    var span = new Element('span');
-    Element.addMethods({ 'testMethod': Fuse.K });
+    var span = Fuse.Dom.Element('span');
+    Fuse.Dom.Element.extend({ 'testMethod': Fuse.K });
 
-    this.assertRespondsTo('testMethod', Element.extend(span));
+    this.assertRespondsTo('testMethod', Fuse.Dom.Element(span));
   },
 
   'testElementCleanWhitespace': function() {

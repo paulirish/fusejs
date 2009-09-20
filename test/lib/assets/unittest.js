@@ -21,624 +21,572 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-// experimental, Firefox-only
-Event.simulateMouse = function(element, eventName) {
-  var options = Fuse.Object.extend({
-    'pointerX': 0,
-    'pointerY': 0,
-    'buttons':  0
-  }, arguments[2] || { });
+(function(global) {
+  var slice = Array.prototype.slice,
 
-  var oEvent = document.createEvent('MouseEvents');
-  oEvent.initMouseEvent(eventName, true, true, document.defaultView,
-    options.buttons, options.pointerX, options.pointerY, options.pointerX, options.pointerY,
-    false, false, false, false, 0, $(element));
+   emptyFunction = function() { },
 
-  if (this.mark) Element.remove(this.mark);
+   toString = Object.prototype.toString,
 
-  var style = Fuse.String(
-    'position: absolute; width: 5px; height: 5px;' +
-    'top: #{pointerY}px; left: #{pointerX}px;border-top: 1px solid red;' +
-    'border-left: 1px solid red;').interpolate(options);
+   isArray = function(object) {
+     return toString.call(object) === '[object Array]';
+   },
 
-  this.mark = new Element('div', { 'style': style });
-  this.mark.appendChild(document.createTextNode(' '));
-  document.body.appendChild(this.mark);
+   isFunction = function(object) {
+     return toString.call(object) === '[object Function]';
+   },
 
-  if (this.step)
-    alert('[' + new Date().getTime().toString() + '] ' + eventName + '/' + Test.Unit.inspect(options));
+   zip = Fuse.Array.plugin.zip;
 
-  $(element).dispatchEvent(oEvent);
-};
 
-// Note: Due to a fix in Firefox 1.0.5/6 that probably fixed "too much", this doesn't work in 1.0.6 or DP2.
-// You need to downgrade to 1.0.4 for now to get this working
-// See https://bugzilla.mozilla.org/show_bug.cgi?id=289940 for the fix that fixed too much
-Event.simulateKey = function(element, eventName) {
-  var options = Fuse.Object.extend({
-    'ctrlKey':  false,
-    'altKey':   false,
-    'shiftKey': false,
-    'metaKey':  false,
-    'keyCode':  0,
-    'charCode': 0
-  }, arguments[2] || { });
-
-  var oEvent = document.createEvent('KeyEvents');
-  oEvent.initKeyEvent(eventName, true, true, window,
-    options.ctrlKey, options.altKey, options.shiftKey, options.metaKey,
-    options.keyCode, options.charCode );
-  $(element).dispatchEvent(oEvent);
-};
-
-Event.simulateKeys = function(element, command) {
-  for(var i = 0, length = command.length; i < length; i++) {
-    Event.simulateKey(element, 'keypress', { 'charCode':command.charCodeAt(i) });
-  }
-};
-
-var Test = {
-  Unit: {
-    inspect: Fuse.Object.inspect // security exception workaround
-  }
-};
-
-Test.Unit.Logger = Fuse.Class({
-  'initialize': function(id) {
-    if (typeof id === 'string')
-      id = document.getElementById(id);
-    this.element = id;
-    if (this.element) this._createLogTable();
-    this.tbody = this.element.getElementsByTagName('tbody')[0];
-  },
-
-  'start': function(testName) {
-    if (!this.element) return;
-    var tr = document.createElement('tr');
-    var first = document.createElement('td');
-
-    first.appendChild(document.createTextNode(testName));
-    tr.appendChild(first);
-    tr.appendChild(document.createElement('td'));
-    tr.appendChild(document.createElement('td'));
-    this.tbody.appendChild(tr);
-  },
-
-  'setStatus': function(status) {
-    this.getLastLogLine().className = status;
-    this.getLastLogLine().getElementsByTagName('td')[1].innerHTML = status;
-  },
-
-  'finish': function(status, summary) {
-    if (!this.element) return;
-    this.setStatus(status);
-    this.message(summary);
-  },
-
-  'message': function(message) {
-    if (!this.element) return;
-    this.getMessageCell().innerHTML = this._toHTML(message);
-  },
-
-  'summary': function(summary) {
-    if (!this.element) return;
-    this.element.getElementsByTagName('div')[0].innerHTML = this._toHTML(summary);
-  },
-
-  'getLastLogLine': function() {
-    var trs = this.element.getElementsByTagName('tr');
-    return trs[trs.length - 1];
-  },
-
-  'getMessageCell': function() {
-    return this.getLastLogLine().getElementsByTagName('td')[2];
-  },
-
-  '_createLogTable': function() {
-    var html = '<div class="logsummary">running...</div>' +
-    '<table class="logtable">' +
-    '<thead><tr><th>Status</th><th>Test</th><th>Message</th></tr></thead>' +
-    '<tbody class="loglines"></tbody>' +
-    '</table>';
-    this.element.innerHTML = html;
-
-  },
-
-  'appendActionButtons': function(actions) {
-   /* actions = Fuse.Util.$H(actions);
-    if (!actions.some()) return;
-    var div = new Element('div', { 'className': 'action_buttons'});
-    actions.inject(div, function(container, action) {
-      var button = new Element('input').setValue(action.key).observe('click', action.value);
-      button.type = 'button';
-      return container.insert(button);
-    });
-    this.getMessageCell().insert(div); */
-  },
-
-  '_toHTML': function(txt) {
-    return Fuse.String(txt).escapeHTML().replace(/\n/g,'<br />');
-  }
-});
-
-Test.Unit.runners = [];
-Test.Unit.run = true;
-Test.Unit.AutoRunner = {
-  'run': function() {
-    if (!Test.Unit.run) return;
-    Test.Unit.run = false;
-    for (var i=0; i < Test.Unit.runners.length; i++) {
-      Test.Unit.runners[i].run();
+  global.Test = {
+    'Unit': {
+      'inspect': Fuse.Object.inspect // security exception workaround
     }
-  }
-};
-Event.observe(window, 'load', Test.Unit.AutoRunner.run);
+  };
 
-Test.Unit.Runner = Fuse.Class({
-  'initialize': function(testcases) {
-    var options = this.options = Fuse.Object.extend({
-      testLog: 'testlog'
-    }, arguments[1] || { });
+  Test.Unit.Logger = Fuse.Class({
+    'initialize': function(id) {
+      if (typeof id === 'string')
+        id = document.getElementById(id);
+      this.element = id;
+      if (this.element) this._createLogTable();
+      this.tbody = this.element.getElementsByTagName('tbody')[0];
+    },
 
-    options.resultsURL = this.queryParams.resultsURL;
+    'start': function(testName) {
+      if (!this.element) return;
+      var tr = document.createElement('tr');
+      var first = document.createElement('td');
 
-    this.tests = this.getTests(testcases);
-    this.currentTest = 0;
-    Test.Unit.runners.push(this);
-  },
+      first.appendChild(document.createTextNode(testName));
+      tr.appendChild(first);
+      tr.appendChild(document.createElement('td'));
+      tr.appendChild(document.createElement('td'));
+      this.tbody.appendChild(tr);
+    },
 
-  'run': function() {
-    this.logger = new Test.Unit.Logger(this.options.testLog);
-    Fuse.Function.delay(Fuse.Function.bind(this.runTests, this), 0.1);
-  },
+    'setStatus': function(status) {
+      this.getLastLogLine().className = status;
+      this.getLastLogLine().getElementsByTagName('td')[1].innerHTML = status;
+    },
 
-  'queryParams': Fuse.String(window.location.search).parseQuery(),
+    'finish': function(status, summary) {
+      if (!this.element) return;
+      this.setStatus(status);
+      this.message(summary);
+    },
 
-  'getTests': function(testcases) {
-    var tests, options = this.options;
-    if (this.queryParams.tests) tests = this.queryParams.tests.split(',');
-    else if (options.tests) tests = options.tests;
-    else if (options.test) tests = [option.test];
-    else tests = Fuse.Object.keys(testcases).grep(/^test/);
+    'message': function(message) {
+      if (!this.element) return;
+      this.getMessageCell().innerHTML = this._toHTML(message);
+    },
 
-    return tests.map(function(test) {
-      if (testcases[test])
-        return new Test.Unit.Testcase(test, testcases[test], testcases.setup, testcases.teardown);
-    }).compact();
-  },
+    'summary': function(summary) {
+      if (!this.element) return;
+      this.element.getElementsByTagName('div')[0].innerHTML = this._toHTML(summary);
+    },
 
-  'getResult': function() {
-    var results = {
-      'tests': this.tests.length,
-      'assertions': 0,
-      'failures': 0,
-      'errors': 0
-    };
+    'getLastLogLine': function() {
+      var trs = this.element.getElementsByTagName('tr');
+      return trs[trs.length - 1];
+    },
 
-    return this.tests.inject(results, function(results, test) {
-      results.assertions += test.assertions;
-      results.failures   += test.failures;
-      results.errors     += test.errors;
-      return results;
-    });
-  },
+    'getMessageCell': function() {
+      return this.getLastLogLine().getElementsByTagName('td')[2];
+    },
 
-  'postResults': function() {
-    if (window.postUnittestResults) {
-      window.postUnittestResults(this.getResult());
+    '_createLogTable': function() {
+      var html = '<div class="logsummary">running...</div>' +
+      '<table class="logtable">' +
+      '<thead><tr><th>Status</th><th>Test</th><th>Message</th></tr></thead>' +
+      '<tbody class="loglines"></tbody>' +
+      '</table>';
+      this.element.innerHTML = html;
+
+    },
+
+    '_toHTML': function(txt) {
+      return Fuse.String(txt).escapeHTML().replace(/\n/g,'<br />');
     }
-    else if (this.options.resultsURL) {
-      new Fuse.Ajax.Request(this.options.resultsURL,
-        { 'method': 'get', 'parameters': this.getResult(), 'asynchronous': false });
+  });
+
+  Test.Unit.runners = [];
+  Test.Unit.run = true;
+  Test.Unit.AutoRunner = {
+    'run': function() {
+      if (!Test.Unit.run) return;
+      Test.Unit.run = false;
+      for (var i=0; i < Test.Unit.runners.length; i++) {
+        Test.Unit.runners[i].run();
+      }
     }
-  },
+  };
+  Event.observe(window, 'load', Test.Unit.AutoRunner.run);
 
-  'runTests': function() {
-    var test = this.tests[this.currentTest], actions;
-    if (!test) return this.finish();
-    if (!test.isWaiting) this.logger.start(test.name);
+  Test.Unit.Runner = Fuse.Class({
+    'initialize': function(testcases) {
+      var options = this.options = Fuse.Object.extend({
+        testLog: 'testlog'
+      }, arguments[1] || { });
 
-    test.run();
+      options.resultsURL = this.queryParams.resultsURL;
 
-    if (test.isWaiting) {
-      this.logger.message('Waiting for ' + test.timeToWait + 'ms');
-      setTimeout(Fuse.Function.bind(this.runTests, this), test.timeToWait || 1000);
-      return;
+      this.tests = this.getTests(testcases);
+      this.currentTest = 0;
+      Test.Unit.runners.push(this);
+    },
+
+    'run': function() {
+      this.logger = new Test.Unit.Logger(this.options.testLog);
+      Fuse.Function.delay(Fuse.Function.bind(this.runTests, this), 0.1);
+    },
+
+    'queryParams': Fuse.String(window.location.search).parseQuery(),
+
+    'getTests': function(testcases) {
+      var tests, options = this.options;
+      if (this.queryParams.tests) tests = this.queryParams.tests.split(',');
+      else if (options.tests) tests = options.tests;
+      else if (options.test) tests = [option.test];
+      else tests = Fuse.Object.keys(testcases).grep(/^test/);
+
+      return tests.map(function(test) {
+        if (testcases[test])
+          return new Test.Unit.Testcase(test, testcases[test], testcases.setup, testcases.teardown);
+      }).compact();
+    },
+
+    'getResult': function() {
+      var results = {
+        'tests': this.tests.length,
+        'assertions': 0,
+        'failures': 0,
+        'errors': 0
+      };
+
+      return this.tests.inject(results, function(results, test) {
+        results.assertions += test.assertions;
+        results.failures   += test.failures;
+        results.errors     += test.errors;
+        return results;
+      });
+    },
+
+    'postResults': function() {
+      if (window.postUnittestResults) {
+        window.postUnittestResults(this.getResult());
+      }
+      else if (this.options.resultsURL) {
+        new Fuse.Ajax.Request(this.options.resultsURL,
+          { 'method': 'get', 'parameters': this.getResult(), 'asynchronous': false });
+      }
+    },
+
+    'runTests': function() {
+      var test = this.tests[this.currentTest], actions;
+      if (!test) return this.finish();
+      if (!test.isWaiting) this.logger.start(test.name);
+
+      test.run();
+
+      if (test.isWaiting) {
+        this.logger.message('Waiting for ' + test.timeToWait + 'ms');
+        setTimeout(Fuse.Function.bind(this.runTests, this), test.timeToWait || 1000);
+        return;
+      }
+
+      this.logger.finish(test.status(), test.summary());
+
+      this.currentTest++;
+
+      // tail recursive, hopefully the browser will skip the stackframe
+      this.runTests();
+    },
+
+    'finish': function() {
+      this.postResults();
+      this.logger.summary(this.summary());
+    },
+
+    'summary': function() {
+      return Fuse.String('#{tests} tests, #{assertions} assertions, #{failures} failures, #{errors} errors')
+        .interpolate(this.getResult());
+    }
+  });
+
+  Test.Unit.MessageTemplate = Fuse.Class({
+    'initialize': function(string) {
+      var parts = Fuse.Array();
+      Fuse.String(string || '').replace(/(?=[^\\])\?|(?:\\\?|[^\?])+/g, function(part) {
+        parts.push(part);
+      });
+      this.parts = parts;
+    },
+
+    'evaluate': function(params) {
+      return this.parts.map(function(part) {
+        return part === '?' ? Test.Unit.inspect(params.shift()) : part.replace(/\\\?/, '?');
+      }).join('');
+    }
+  });
+
+  Test.Unit.Assertions = (function() {
+    var MessageTemplate = Test.Unit.MessageTemplate;
+
+    function _assertPairEqual(pair) {
+      if (pair.every(isArray))
+        return zip.call(pair[0], pair[1]).every(_assertPairEqual);
+      return _isEqual(pair[0], pair[1]);
     }
 
-    this.logger.finish(test.status(), test.summary());
-
-    if (actions = test.actions) this.logger.appendActionButtons(actions);
-
-    this.currentTest++;
-
-    // tail recursive, hopefully the browser will skip the stackframe
-    this.runTests();
-  },
-
-  'finish': function() {
-    this.postResults();
-    this.logger.summary(this.summary());
-  },
-
-  'summary': function() {
-    return Fuse.String('#{tests} tests, #{assertions} assertions, #{failures} failures, #{errors} errors')
-      .interpolate(this.getResult());
-  }
-});
-
-Test.Unit.MessageTemplate = Fuse.Class({
-  'initialize': function(string) {
-    var parts = Fuse.List();
-    Fuse.String(string || '').replace(/(?=[^\\])\?|(?:\\\?|[^\?])+/g, function(part) {
-      parts.push(part);
-    });
-    this.parts = parts;
-  },
-
-  'evaluate': function(params) {
-    return this.parts.map(function(part) {
-      return part === '?' ? Test.Unit.inspect(params.shift()) : part.replace(/\\\?/, '?');
-    }).join('');
-  }
-});
-
-Test.Unit.Assertions = (function() {
-  var MessageTemplate = Test.Unit.MessageTemplate;
-
-  function _assertPairEqual(pair) {
-    if (pair.every(Fuse.List.isArray))
-      return Fuse.List.plugin.zip.call(pair[0], pair[1]).every(_assertPairEqual);
-    return _isEqual(pair[0], pair[1]);
-  }
-
-  function _isEqual(expected, actual) {
-    var isFunction = Fuse.Object.isFunction;
-    if (expected && actual && isFunction(expected.valueOf) && isFunction(actual.valueOf))
-      return expected.valueOf() == actual.valueOf();
-    return expected == actual;
-  }
-
-  function buildMessage(message, template) {
-    var args = Array.prototype.slice.call(arguments, 2);
-    return (message ? message + '\n' : '') + new MessageTemplate(template).evaluate(args);
-  }
-
-  function flunk(message) {
-    this.assertBlock(message || 'Flunked', function() { return false });
-  }
-
-  function assertBlock(message, block) {
-    try {
-      block.call(this) ? this.pass() : this.fail(message);
-    } catch(e) { this.error(e) }
-  }
-
-  function assert(expression, message) {
-    message = buildMessage(message || 'assert', 'got <?>', expression);
-    this.assertBlock(message, function() { return expression });
-  }
-
-  function assertEqual(expected, actual, message) {
-    message = buildMessage(message || 'assertEqual', 'expected: <?>, actual: <?>', expected, actual);
-    this.assertBlock(message, function() { return _isEqual(expected, actual) });
-  }
-
-  function assertNotEqual(expected, actual, message) {
-    message = buildMessage(message || 'assertNotEqual', 'expected: <?>, actual: <?>', expected, actual);
-    this.assertBlock(message, function() { return !_isEqual(expected, actual) });
-  }
-
-  function assertEnumEqual(expected, actual, message) {
-    expected = Fuse.Util.$A(expected);
-    actual   = Fuse.Util.$A(actual);
-    message  = buildMessage(message || 'assertEnumEqual', 'expected: <?>, actual: <?>', expected, actual);
-
-    this.assertBlock(message, function() {
-      return expected.length === actual.length &&
-        expected.zip(actual).every(_assertPairEqual);
-    });
-  }
-
-  function assertEnumNotEqual(expected, actual, message) {
-    expected = Fuse.Util.$A(expected);
-    actual   = Fuse.Util.$A(actual);
-    message  = buildMessage(message || 'assertEnumNotEqual', '<?> was the same as <?>', expected, actual);
-
-    this.assertBlock(message, function() {
-      return !(expected.length === actual.length &&
-        expected.zip(actual).every(_assertPairEqual));
-    });
-  }
-
-  function assertHashEqual(expected, actual, message) {
-    // from now we recursively zip & compare nested arrays
-    function block() {
-      return expected_array.length === actual_array.length &&
-        expected_array.zip(actual_array).every(_assertPairEqual);
+    function _isEqual(expected, actual) {
+      if (expected && actual && isFunction(expected.valueOf) && isFunction(actual.valueOf))
+        return expected.valueOf() == actual.valueOf();
+      return expected == actual;
     }
 
-    expected = Fuse.Util.$H(expected);
-    actual   = Fuse.Util.$H(actual);
-
-    var expected_array = expected.toArray().sort(), actual_array = actual.toArray().sort();
-    message = buildMessage(message || 'assertHashEqual', 'expected: <?>, actual: <?>', expected, actual);
-    this.assertBlock(message, block);
-  }
-
-  function assertHashNotEqual(expected, actual, message) {
-    // from now we recursively zip & compare nested arrays
-    function block() {
-      return !(expected_array.length === actual_array.length &&
-        expected_array.zip(actual_array).every(_assertPairEqual));
+    function buildMessage(message, template) {
+      var args = slice.call(arguments, 2);
+      return (message ? message + '\n' : '') + new MessageTemplate(template).evaluate(args);
     }
 
-    expected = Fuse.Util.$H(expected);
-    actual = Fuse.Util.$H(actual);
+    function flunk(message) {
+      this.assertBlock(message || 'Flunked', function() { return false });
+    }
 
-    var expected_array = expected.toArray().sort(), actual_array = actual.toArray().sort();
-    message = buildMessage(message || 'assertHashNotEqual', '<?> was the same as <?>', expected, actual);
-    this.assertBlock(message, block);
-  }
+    function assertBlock(message, block) {
+      try {
+        block.call(this) ? this.pass() : this.fail(message);
+      } catch(e) { this.error(e) }
+    }
 
-  function assertIdentical(expected, actual, message) {
-    message = buildMessage(message || 'assertIdentical', 'expected: <?>, actual: <?>', expected, actual);
-    this.assertBlock(message, function() { return expected === actual });
-  }
+    function assert(expression, message) {
+      message = buildMessage(message || 'assert', 'got <?>', expression);
+      this.assertBlock(message, function() { return expression });
+    }
 
-  function assertNotIdentical(expected, actual, message) {
-    message = buildMessage(message || 'assertNotIdentical', 'expected: <?>, actual: <?>', expected, actual);
-    this.assertBlock(message, function() { return expected !== actual });
-  }
+    function assertEqual(expected, actual, message) {
+      message = buildMessage(message || 'assertEqual', 'expected: <?>, actual: <?>', expected, actual);
+      this.assertBlock(message, function() { return _isEqual(expected, actual) });
+    }
 
-  function assertNull(obj, message) {
-    message = buildMessage(message || 'assertNull', 'got <?>', obj);
-    this.assertBlock(message, function() { return obj === null });
-  }
+    function assertNotEqual(expected, actual, message) {
+      message = buildMessage(message || 'assertNotEqual', 'expected: <?>, actual: <?>', expected, actual);
+      this.assertBlock(message, function() { return !_isEqual(expected, actual) });
+    }
 
-  function assertNotNull(obj, message) {
-    message = buildMessage(message || 'assertNotNull', 'got <?>', obj);
-    this.assertBlock(message, function() { return obj !== null });
-  }
+    function assertEnumEqual(expected, actual, message) {
+      expected = slice.call(expected, 0);
+      actual   = slice.call(actual, 0);
+      message  = buildMessage(message || 'assertEnumEqual', 'expected: <?>, actual: <?>', expected, actual);
 
-  function assertUndefined(obj, message) {
-    message = buildMessage(message || 'assertUndefined', 'got <?>', obj);
-    this.assertBlock(message, function() { return typeof obj === 'undefined' });
-  }
+      this.assertBlock(message, function() {
+        return expected.length === actual.length &&
+          zip.call(expected, actual).every(_assertPairEqual);
+      });
+    }
 
-  function assertNotUndefined(obj, message) {
-    message = buildMessage(message || 'assertNotUndefined', 'got <?>', obj);
-    this.assertBlock(message, function() { return typeof obj !== 'undefined' });
-  }
+    function assertEnumNotEqual(expected, actual, message) {
+      expected = Fuse.Util.$A(expected);
+      actual   = Fuse.Util.$A(actual);
+      message  = buildMessage(message || 'assertEnumNotEqual', '<?> was the same as <?>', expected, actual);
 
-  function assertNullOrUndefined(obj, message) {
-    message = buildMessage(message || 'assertNullOrUndefined', 'got <?>', obj);
-    this.assertBlock(message, function() { return obj == null });
-  }
+      this.assertBlock(message, function() {
+        return !(expected.length === actual.length &&
+          zip.call(expected, actual).every(_assertPairEqual));
+      });
+    }
 
-  function assertNotNullOrUndefined(obj, message) {
-    message = buildMessage(message || 'assertNotNullOrUndefined', 'got <?>', obj);
-    this.assertBlock(message, function() { return obj != null });
-  }
+    function assertHashEqual(expected, actual, message) {
+      // from now we recursively zip & compare nested arrays
+      function block() {
+        return expected_array.length === actual_array.length &&
+          expected_array.zip(actual_array).every(_assertPairEqual);
+      }
 
-  function assertMatch(expected, actual, message) {
-    message = buildMessage(message || 'assertMatch', 'regex <?> did not match <?>', expected, actual);
-    this.assertBlock(message, function() { return new RegExp(expected).exec(actual) });
-  }
+      expected = Fuse.Hash(expected);
+      actual   = Fuse.Hash(actual);
 
-  function assertNoMatch(expected, actual, message) {
-    message = buildMessage(message || 'assertNoMatch', 'regex <?> matched <?>', expected, actual);
-    this.assertBlock(message, function() { return !(new RegExp(expected).exec(actual)) });
-  }
+      var expected_array = expected.toArray().sort(), actual_array = actual.toArray().sort();
+      message = buildMessage(message || 'assertHashEqual', 'expected: <?>, actual: <?>', expected, actual);
+      this.assertBlock(message, block);
+    }
 
-  function assertHidden(element, message) {
-    message = buildMessage(message || 'assertHidden', '? isn\'t hidden.', element);
-    this.assertBlock(message, function() { return element.style.display === 'none' });
-  }
+    function assertHashNotEqual(expected, actual, message) {
+      // from now we recursively zip & compare nested arrays
+      function block() {
+        return !(expected_array.length === actual_array.length &&
+          expected_array.zip(actual_array).every(_assertPairEqual));
+      }
 
-  function assertInstanceOf(expected, actual, message) {
-    message = buildMessage(message || 'assertInstanceOf', '<?> was not an instance of the expected type', actual);
-    this.assertBlock(message, function() { return actual instanceof expected });
-  }
+      expected = Fuse.Hash(expected);
+      actual   = Fuse.Hash(actual);
 
-  function assertNotInstanceOf(expected, actual, message) {
-    message = buildMessage(message || 'assertNotInstanceOf', '<?> was an instance of the expected type', actual);
-    this.assertBlock(message, function() { return !(actual instanceof expected) });
-  }
+      var expected_array = expected.toArray().sort(), actual_array = actual.toArray().sort();
+      message = buildMessage(message || 'assertHashNotEqual', '<?> was the same as <?>', expected, actual);
+      this.assertBlock(message, block);
+    }
 
-  function assertRespondsTo(method, obj, message) {
-    message = buildMessage(message || 'assertRespondsTo', 'object doesn\'t respond to <?>', method);
-    this.assertBlock(message, function() { return (method in obj && typeof obj[method] === 'function') });
-  }
+    function assertIdentical(expected, actual, message) {
+      message = buildMessage(message || 'assertIdentical', 'expected: <?>, actual: <?>', expected, actual);
+      this.assertBlock(message, function() { return expected === actual });
+    }
 
-  function assertRaise(exceptionName, method, message) {
-    message = buildMessage(message || 'assertRaise', '<?> exception expected but none was raised', exceptionName);
-    var block = function() {
+    function assertNotIdentical(expected, actual, message) {
+      message = buildMessage(message || 'assertNotIdentical', 'expected: <?>, actual: <?>', expected, actual);
+      this.assertBlock(message, function() { return expected !== actual });
+    }
+
+    function assertNull(obj, message) {
+      message = buildMessage(message || 'assertNull', 'got <?>', obj);
+      this.assertBlock(message, function() { return obj === null });
+    }
+
+    function assertNotNull(obj, message) {
+      message = buildMessage(message || 'assertNotNull', 'got <?>', obj);
+      this.assertBlock(message, function() { return obj !== null });
+    }
+
+    function assertUndefined(obj, message) {
+      message = buildMessage(message || 'assertUndefined', 'got <?>', obj);
+      this.assertBlock(message, function() { return typeof obj === 'undefined' });
+    }
+
+    function assertNotUndefined(obj, message) {
+      message = buildMessage(message || 'assertNotUndefined', 'got <?>', obj);
+      this.assertBlock(message, function() { return typeof obj !== 'undefined' });
+    }
+
+    function assertNullOrUndefined(obj, message) {
+      message = buildMessage(message || 'assertNullOrUndefined', 'got <?>', obj);
+      this.assertBlock(message, function() { return obj == null });
+    }
+
+    function assertNotNullOrUndefined(obj, message) {
+      message = buildMessage(message || 'assertNotNullOrUndefined', 'got <?>', obj);
+      this.assertBlock(message, function() { return obj != null });
+    }
+
+    function assertMatch(expected, actual, message) {
+      message = buildMessage(message || 'assertMatch', 'regex <?> did not match <?>', expected, actual);
+      this.assertBlock(message, function() { return new RegExp(expected).exec(actual) });
+    }
+
+    function assertNoMatch(expected, actual, message) {
+      message = buildMessage(message || 'assertNoMatch', 'regex <?> matched <?>', expected, actual);
+      this.assertBlock(message, function() { return !(new RegExp(expected).exec(actual)) });
+    }
+
+    function assertHidden(element, message) {
+      message = buildMessage(message || 'assertHidden', '? isn\'t hidden.', element);
+      this.assertBlock(message, function() { return element.style.display === 'none' });
+    }
+
+    function assertInstanceOf(expected, actual, message) {
+      message = buildMessage(message || 'assertInstanceOf', '<?> was not an instance of the expected type', actual);
+      this.assertBlock(message, function() { return actual instanceof expected });
+    }
+
+    function assertNotInstanceOf(expected, actual, message) {
+      message = buildMessage(message || 'assertNotInstanceOf', '<?> was an instance of the expected type', actual);
+      this.assertBlock(message, function() { return !(actual instanceof expected) });
+    }
+
+    function assertRespondsTo(method, obj, message) {
+      message = buildMessage(message || 'assertRespondsTo', 'object doesn\'t respond to <?>', method);
+      this.assertBlock(message, function() { return (method in obj && typeof obj[method] === 'function') });
+    }
+
+    function assertRaise(exceptionName, method, message) {
+      message = buildMessage(message || 'assertRaise', '<?> exception expected but none was raised', exceptionName);
+      var block = function() {
+        try {
+          method();
+          return false;
+        } catch(e) {
+          if (e.name == exceptionName) return true;
+          else throw e;
+        }
+      };
+      this.assertBlock(message, block);
+    }
+
+    function assertNothingRaised(method, message) {
       try {
         method();
-        return false;
+        this.assert(true, 'Expected nothing to be thrown');
       } catch(e) {
-        if (e.name == exceptionName) return true;
-        else throw e;
+        message = buildMessage(message || 'assertNothingRaised', '<?> was thrown when nothing was expected.', e);
+        this.flunk(message);
       }
-    };
-    this.assertBlock(message, block);
-  }
-
-  function assertNothingRaised(method, message) {
-    try {
-      method();
-      this.assert(true, 'Expected nothing to be thrown');
-    } catch(e) {
-      message = buildMessage(message || 'assertNothingRaised', '<?> was thrown when nothing was expected.', e);
-      this.flunk(message);
     }
-  }
 
-  function isVisible(element) {
-    element = $(element);
-    if (!element.parentNode) return true;
-    this.assertNotNull(element);
-    if (element.style && !Element.isVisible(element))
-      return false;
-    return isVisible.call(this, element.parentNode);
-  }
-
-  function assertVisible(element, message) {
-    message = buildMessage(message, '? was not visible.', element);
-    this.assertBlock(message, function() { return isVisible.call(this, element) });
-  }
-
-  function assertNotVisible(element, message) {
-    message = buildMessage(message, '? was not hidden and didn\'t have a hidden parent either.', element);
-    this.assertBlock(message, function() { return !isVisible.call(this, element) });
-  }
-
-  function assertElementsMatch() {
-    var message, pass = true, expressions = Fuse.Util.$A(arguments), elements = Fuse.Util.$A(expressions.shift());
-    if (elements.length != expressions.length) {
-      message = buildMessage('assertElementsMatch', 'size mismatch: ? elements, ? expressions (?).', elements.length, expressions.length, expressions);
-      this.flunk(message);
-      pass = false;
+    function isVisible(element) {
+      return Fuse.get(element).isVisible();
     }
-    elements.zip(expressions).every(Fuse.Function.bind(function(pair, index) {
-      var element = $(pair.first()), expression = pair.last();
-      if (element.match(expression)) return true;
-      message = buildMessage('assertElementsMatch', 'In index <?>: expected <?> but got ?', index, expression, element);
-      this.flunk(message);
-      pass = false;
-    }, this))
 
-    if (pass) this.assert(true, 'Expected all elements to match.');
-  }
+    function assertVisible(element, message) {
+      message = buildMessage(message, '? was not visible.', element);
+      this.assertBlock(message, function() { return isVisible.call(this, element) });
+    }
 
-  function assertElementMatches(element, expression, message) {
-    this.assertElementsMatch([element], expression);
-  }
+    function assertNotVisible(element, message) {
+      message = buildMessage(message, '? was not hidden and didn\'t have a hidden parent either.', element);
+      this.assertBlock(message, function() { return !isVisible.call(this, element) });
+    }
 
-  return {
-    'buildMessage':             buildMessage,
-    'flunk':                    flunk,
-    'assertBlock':              assertBlock,
-    'assert':                   assert,
-    'assertEqual':              assertEqual,
-    'assertNotEqual':           assertNotEqual,
-    'assertEnumEqual':          assertEnumEqual,
-    'assertEnumNotEqual':       assertEnumNotEqual,
-    'assertHashEqual':          assertHashEqual,
-    'assertHashNotEqual':       assertHashNotEqual,
-    'assertIdentical':          assertIdentical,
-    'assertNotIdentical':       assertNotIdentical,
-    'assertNull':               assertNull,
-    'assertNotNull':            assertNotNull,
-    'assertUndefined':          assertUndefined,
-    'assertNotUndefined':       assertNotUndefined,
-    'assertNullOrUndefined':    assertNullOrUndefined,
-    'assertNotNullOrUndefined': assertNotNullOrUndefined,
-    'assertMatch':              assertMatch,
-    'assertNoMatch':            assertNoMatch,
-    'assertHidden':             assertHidden,
-    'assertInstanceOf':         assertInstanceOf,
-    'assertNotInstanceOf':      assertNotInstanceOf,
-    'assertRespondsTo':         assertRespondsTo,
-    'assertRaise':              assertRaise,
-    'assertNothingRaised':      assertNothingRaised,
-    'assertVisible':            assertVisible,
-    'assertNotVisible':         assertNotVisible,
-    'assertElementsMatch':      assertElementsMatch,
-    'assertElementMatches':     assertElementMatches
-  }
-})();
+    function assertElementsMatch() {
+      var message, pass = true, expressions = slice.call(arguments, 0),
+       elements = slice.call(expressions.shift(), 0);
 
-Test.Unit.Testcase = Fuse.Class(Test.Unit.Assertions, {
-  'initialize': function(name, test, setup, teardown) {
-    this.name     = name;
-    this.test     = test     || Fuse.emptyFunction;
-    this.setup    = setup    || Fuse.emptyFunction;
-    this.teardown = teardown || Fuse.emptyFunction;
-    this.messages = [];
-    this.actions  = { };
-  },
+      if (elements.length != expressions.length) {
+        message = buildMessage('assertElementsMatch', 'size mismatch: ? elements, ? expressions (?).', elements.length, expressions.length, expressions);
+        this.flunk(message);
+        pass = false;
+      }
 
-  'isWaiting':  false,
-  'timeToWait': 1000,
-  'assertions': 0,
-  'failures':   0,
-  'errors':     0,
-  'isRunningFromRake': window.location.port == 4711,
+      zip.call(elements, expressions).every(Fuse.Function.bind(function(pair, index) {
+        var element = $(pair.first()), expression = pair.last();
+        if (element.match(expression)) return true;
+        message = buildMessage('assertElementsMatch', 'In index <?>: expected <?> but got ?', index, expression, element);
+        this.flunk(message);
+        pass = false;
+      }, this))
 
-  'wait': function(time, nextPart) {
-    this.isWaiting = true;
-    this.test = nextPart;
-    this.timeToWait = time;
-  },
+      if (pass) this.assert(true, 'Expected all elements to match.');
+    }
 
-  'run': function(rethrow) {
-    try {
-      // IE6 bug with try/finally, the finally does not get executed if the
-      // exception is uncaught. So instead we perform the teardown check before
-      // throwing the error.
+    function assertElementMatches(element, expression, message) {
+      this.assertElementsMatch([element], expression);
+    }
+
+    return {
+      'buildMessage':             buildMessage,
+      'flunk':                    flunk,
+      'assertBlock':              assertBlock,
+      'assert':                   assert,
+      'assertEqual':              assertEqual,
+      'assertNotEqual':           assertNotEqual,
+      'assertEnumEqual':          assertEnumEqual,
+      'assertEnumNotEqual':       assertEnumNotEqual,
+      'assertHashEqual':          assertHashEqual,
+      'assertHashNotEqual':       assertHashNotEqual,
+      'assertIdentical':          assertIdentical,
+      'assertNotIdentical':       assertNotIdentical,
+      'assertNull':               assertNull,
+      'assertNotNull':            assertNotNull,
+      'assertUndefined':          assertUndefined,
+      'assertNotUndefined':       assertNotUndefined,
+      'assertNullOrUndefined':    assertNullOrUndefined,
+      'assertNotNullOrUndefined': assertNotNullOrUndefined,
+      'assertMatch':              assertMatch,
+      'assertNoMatch':            assertNoMatch,
+      'assertHidden':             assertHidden,
+      'assertInstanceOf':         assertInstanceOf,
+      'assertNotInstanceOf':      assertNotInstanceOf,
+      'assertRespondsTo':         assertRespondsTo,
+      'assertRaise':              assertRaise,
+      'assertNothingRaised':      assertNothingRaised,
+      'assertVisible':            assertVisible,
+      'assertNotVisible':         assertNotVisible,
+      'assertElementsMatch':      assertElementsMatch,
+      'assertElementMatches':     assertElementMatches
+    }
+  })();
+
+  Test.Unit.Testcase = Fuse.Class(Test.Unit.Assertions, {
+    'initialize': function(name, test, setup, teardown) {
+      this.name     = name;
+      this.test     = test     || emptyFunction;
+      this.setup    = setup    || emptyFunction;
+      this.teardown = teardown || emptyFunction;
+      this.messages = [];
+      this.actions  = { };
+    },
+
+    'isWaiting':  false,
+    'timeToWait': 1000,
+    'assertions': 0,
+    'failures':   0,
+    'errors':     0,
+    'isRunningFromRake': window.location.port == 4711,
+
+    'wait': function(time, nextPart) {
+      this.isWaiting = true;
+      this.test = nextPart;
+      this.timeToWait = time;
+    },
+
+    'run': function(rethrow) {
       try {
-        if (!this.isWaiting) this.setup();
-        this.isWaiting = false;
-        this.test();
-        if (!this.isWaiting)
-          this.teardown();
+        // IE6 bug with try/finally, the finally does not get executed if the
+        // exception is uncaught. So instead we perform the teardown check before
+        // throwing the error.
+        try {
+          if (!this.isWaiting) this.setup();
+          this.isWaiting = false;
+          this.test();
+          if (!this.isWaiting)
+            this.teardown();
+        }
+        catch (e) {
+          if (!this.isWaiting)
+            this.teardown();
+          throw e;
+        }
       }
-      catch (e) {
-        if (!this.isWaiting)
-          this.teardown();
-        throw e;
+      catch(e) {
+        if (rethrow) throw e;
+        this.error(e, this);
       }
+    },
+
+    'summary': function() {
+      var msg = Fuse.String('#{assertions} assertions, #{failures} failures, #{errors} errors\n');
+      return msg.interpolate(this) + this.messages.join('\n');
+    },
+
+    'pass': function() {
+      this.assertions++;
+    },
+
+    'fail': function(message) {
+      this.failures++;
+      var line = '';
+      try {
+        throw new Error('stack');
+      } catch(e) {
+        line = (/\.html:(\d+)/.exec(e.stack || '') || ['',''])[1];
+      }
+      this.messages.push('Failure: ' + message + (line ? ' Line #' + line : ''));
+    },
+
+    'info': function(message) {
+      this.messages.push('Info: ' + message);
+    },
+
+    'error': function(error, test) {
+      this.errors++;
+      this.actions['retry with throw'] = function() { test.run(true) };
+      this.messages.push(error.name + ': ' + error.message + ', error=(' + Test.Unit.inspect(error) + ')');
+    },
+
+    'status': function() {
+      if (this.failures > 0) return 'failed';
+      if (this.errors > 0) return 'error';
+      return 'passed';
+    },
+
+    'benchmark': function(operation, iterations) {
+      var startAt = new Date(), i = 0, length = iterations || 1;
+      while (i < length) operation(i++);
+
+      var timeTaken = ((new Date()) - startAt);
+      this.info((arguments[2] || 'Operation') + ' finished ' +
+         iterations + ' iterations in ' + (timeTaken/1000) + 's' );
+      return timeTaken;
     }
-    catch(e) {
-      if (rethrow) throw e;
-      this.error(e, this);
-    }
-  },
+  });
 
-  'summary': function() {
-    var msg = Fuse.String('#{assertions} assertions, #{failures} failures, #{errors} errors\n');
-    return msg.interpolate(this) + this.messages.join('\n');
-  },
-
-  'pass': function() {
-    this.assertions++;
-  },
-
-  'fail': function(message) {
-    this.failures++;
-    var line = '';
-    try {
-      throw new Error('stack');
-    } catch(e) {
-      line = (/\.html:(\d+)/.exec(e.stack || '') || ['',''])[1];
-    }
-    this.messages.push('Failure: ' + message + (line ? ' Line #' + line : ''));
-  },
-
-  'info': function(message) {
-    this.messages.push('Info: ' + message);
-  },
-
-  'error': function(error, test) {
-    this.errors++;
-    this.actions['retry with throw'] = function() { test.run(true) };
-    this.messages.push(error.name + ': ' + error.message + ', error=(' + Test.Unit.inspect(error) + ')');
-  },
-
-  'status': function() {
-    if (this.failures > 0) return 'failed';
-    if (this.errors > 0) return 'error';
-    return 'passed';
-  },
-
-  'benchmark': function(operation, iterations) {
-    var startAt = new Date();
-    Fuse.Number(iterations || 1).times(operation);
-    var timeTaken = ((new Date())-startAt);
-    this.info((arguments[2] || 'Operation') + ' finished ' +
-       iterations + ' iterations in ' + (timeTaken/1000) + 's' );
-    return timeTaken;
-  }
-});
+})(this);

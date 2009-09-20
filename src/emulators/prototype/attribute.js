@@ -7,27 +7,13 @@
     'names': { 'htmlFor':'for', 'className':'class' }
   };
 
-  (function(plugin) {
+  (function(methods) {
     var ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS =
       Bug('ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS');
 
-    plugin.hasAttribute = (function() {
-      var hasAttribute = function hasAttribute(attribute) {
-        return (this.raw || this).hasAttribute(attribute);
-      };
-
-      if (!isHostObject(Fuse._docEl, 'hasAttribute'))
-        hasAttribute = function hasAttribute(attribute) {
-          var node =(this.raw || this)
-            .getAttributeNode(Element.Attribute.names[attribute] || attribute);
-          return !!node && node.specified;
-        };
-
-      return hasAttribute;
-    })();
-
-    plugin.readAttribute = function readAttribute(name) {
-      var result, element = this.raw || this, T = Element.Attribute;
+    methods.readAttribute = function readAttribute(element, name) {
+      element = $(element);
+      var result, T = Element.Attribute;
       name = T.names[name] || name;
 
       if (T.read[name])
@@ -36,9 +22,9 @@
       return Fuse.String(result || '');
     };
 
-    plugin.writeAttribute = function writeAttribute(name, value) {
-      var node, contentName, attr,
-       element = this.raw || this, attributes = { }, T = Element.Attribute;
+    methods.writeAttribute = function writeAttribute(element, name, value) {
+      element = $(element);
+      var node, contentName, attr, attributes = { }, T = Element.Attribute;
 
       if (isHash(name)) attributes = name._object;
       else if (!isString(name)) attributes = name;
@@ -57,19 +43,34 @@
           element.setAttribute(contentName, contentName);
         else {
           if (ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS &&
-              this.hasAttribute(name))
+              Element.hasAttribute(element, name))
             element.removeAttribute(contentName);
           element.setAttribute(contentName, String(value));
         }
       }
-      return this;
+      return element;
     };
+  })(Element.Methods);
 
-    // prevent JScript bug with named function expressions
-    var readAttribute = null, writeAttribute = null;
-  })(Element.plugin);
+  // No use of $ in this function in order to keep things fast.
+  // Used by the Selector class.
+  Element.Methods.Simulated.hasAttribute = (function() {
+    function hasAttribute(element, attribute) {
+      var node = element.getAttributeNode(attribute);
+      return !!node && node.specified;
+    }
+    return hasAttribute;
+  })();
 
+  Element.hasAttribute = (function() {
+    function hasAttribute(element, attribute) {
+      return element.hasAttribute(attribute);
+    }
 
+    if (isHostObject(Fuse._docEl, 'hasAttribute'))
+      return hasAttribute;
+    return Element.Methods.Simulated.hasAttribute;
+  })();
 
   /*--------------------------------------------------------------------------*/
 

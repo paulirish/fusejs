@@ -4,7 +4,7 @@
     var BaseEventObserver = Fuse.Class({
       'constructor': (function() {
         function BaseEventObserver(element, callback) {
-          this.element = $(element);
+          this.element = Fuse.get(element);
 
           var eventObserver = this, onElementEvent = this.onElementEvent;
           this.onElementEvent = function() { onElementEvent.call(eventObserver); };
@@ -52,7 +52,7 @@
       var onElementEvent = null, registerCallback = null, registerFormCallbacks = null;
     })(BaseEventObserver.plugin);
 
-  /*--------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------*/
 
     Field.EventObserver = Fuse.Class(BaseEventObserver, {
       'constructor': (function() {

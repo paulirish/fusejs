@@ -42,7 +42,7 @@ new Test.Unit.Runner({
 
   'testToArrayOnNodeList': function() {
     // direct HTML
-    this.assertEqual(3, $A($('test_node').childNodes).length);
+    this.assertEqual(3, $A($('test_node').raw.childNodes).length);
 
     // DOM
     var element = document.createElement('div');

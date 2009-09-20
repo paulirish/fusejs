@@ -12,7 +12,7 @@
   <script src="../../../dist/fuse.js" type="text/javascript"></script>
   <script src="../../lib/assets/unittest.js" type="text/javascript"></script>
   <script type="text/javascript">
-    var Feature = Fuse.Env.Feature,
+    var undef,
      $  = Fuse.Util.$,
      $$ = Fuse.Util.$$,
      $A = Fuse.Util.$A,
@@ -20,11 +20,6 @@
      $H = Fuse.Util.$H,
      $R = Fuse.Util.$R,
      $w = Fuse.Util.$w;
-
-    function getDocument(element) {
-      return element.ownerDocument || element.document ||
-        (element.nodeType === 9 ? element : Fuse._doc);
-    }
 
     document.observe('dom:loaded', function() {
       function refresh() {
@@ -39,59 +34,43 @@
         return (window.location.href.match(pattern) || [0, defaultValue])[1];
       }
 
-      function insertScript(text) {
-        var script = document.createElement('script');
-        script.type = 'text/javascript';
-
-        text = 'Fuse.' + expando + ' = true;' + text;
-        delete Fuse[expando];
-
-        // attempt the standard way first and then the IE way
-        try { script.appendChild(document.createTextNode(text)) }
-        catch (e) { script.text = text }
-        head.insertBefore(script, head.firstChild);
-
-        // Safari 2 support
-        if (!Fuse[expando])
-          window.eval(text);
-      }
-
-      function loadScriptFile(url) {
-        Fuse.Ajax.Request(url, {
-          'method': 'get',
-          'evalJS': false,
-          'asynchronous': false,
-          'onDone': function(response) {
-            insertScript(response.responseText);
-          }
-        });
-      }
+      var loadScriptFile = (function() {
+        var head = Fuse.get(document.getElementsByTagName('HEAD')[0]);
+        return function(url) {
+          Fuse.Ajax.Request(url, {
+            'method': 'get',
+            'evalJS': false,
+            'asynchronous': false,
+            'onDone': function(response) {
+              head.insert('<script>' + response.responseText + '<\/script>');
+            }
+          });
+        };
+      })();
 
       var engineItem, i = 0,
-       head        = document.getElementsByTagName('HEAD')[0],
-       debug       = getQueryParam('debug', '0') == 1,
+       expando     = '_fuse' + String(+new Date).slice(0, 10),
+       debugParam  = getQueryParam('debug', '0') == 1,
+       engineParam = getQueryParam('engine', 'NWMatcher'),
        debugEl     = $('debug-switch'),
-       expando     = '_fuse' + String(1 * new Date).slice(0, 10),
-       engine      = getQueryParam('engine', 'NWMatcher'),
        engineEl    = $('selector-engine'),
-       engineItems = engineEl.options;
+       engineItems = engineEl.raw.options;
 
       // set active debug state in it's dropdown list
-      debugEl.setValue(debug ? '1' : '0');
+      debugEl.setValue(debugParam ? '1' : '0');
 
       // set active css engine in it's dropdown list
       while (engineItem = engineItems[i++]) {
-        if (engineItem.text === engine) {
-          engineItems[engineEl.selectedIndex = i - 1];
+        if (engineItem.text === engineParam) {
+          engineItems[engineEl.raw.selectedIndex = i - 1];
           break;
         }
       }
 
       // set debug flag
-      Fuse.debug = debug;
+      Fuse.debug = debugParam;
 
       // load selector engine and Fuse engine adapter
-      var engine
       loadScriptFile('../../../vendor/' + engineItem.value);
       loadScriptFile('../../../src/dom/selector/' + engineItem.text.toLowerCase() + '.js');
 

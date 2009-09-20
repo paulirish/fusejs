@@ -7,8 +7,8 @@
           return new Updater(container, url, options);
 
         this.container = {
-          'success': $(container.success || container),
-          'failure': $(container.failure || (container.success ? null : container))
+          'success': Fuse.get(container.success || container),
+          'failure': Fuse.get(container.failure || (container.success ? null : container))
         };
 
         options = clone(options);

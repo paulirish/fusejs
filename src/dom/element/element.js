@@ -1,9 +1,59 @@
   /*-------------------------------- ELEMENT ---------------------------------*/
 
-  // Cache Element capabilities before overwriting the Element object
-  Feature('ELEMENT_CLASS');
-  Feature('ELEMENT_EXTENSIONS');
-  Feature('ELEMENT_SPECIFIC_EXTENSIONS');
+  Element =
+  Fuse.addNS('Dom.Element', Node, {
+    'constructor': (function() {
+      function Element(tagName, attributes, context) {
+        if (isString(tagName))
+          return Element.create(tagName, attributes, context);
+
+        // bail on XML nodes, document, window objects
+        var element = tagName;
+        return (!element || element.nodeType !== 1 ||
+            element == getWindow(element) || !element.ownerDocument.body)
+          ? element
+          : decorate(element);
+      }
+
+      return Element;
+    })()
+  });
+
+  (function() {
+    function $(element) {
+      var elements, args = arguments, length = args.length;
+      if (length > 1) {
+        elements = NodeList();
+        while (length--) elements[length] = $(args[length]);
+        return elements;
+      }
+      if (isString(element))
+        element = doc.getElementById(element || expando);
+      return Element(element);
+    }
+
+    function get(object, context) {
+      if (isString(object))
+        object = (context || doc).getElementById(object || expando);
+      return Element(object);
+    }
+
+    function getById(id, context) {
+      var element = (context || doc).getElementById(id || expando);
+      return element && decorate(element);
+    }
+
+    var doc = Fuse._doc;
+
+    Element.from =
+    Fuse.get     = get;
+    Fuse.getById = getById;
+
+    Fuse.addNS('Util');
+    Fuse.Util.$ = $;
+  })();
+
+  /*--------------------------------------------------------------------------*/
 
   // For speed we don't normalize tagName case.
   // There is the potential for cache.div, cache.DIV, cache['<div name="x">']
@@ -14,551 +64,436 @@
   //
   // IE fails to set the BUTTON element's `type` attribute without using the sTag
   // http://dev.rubyonrails.org/ticket/10548
-  (function() {
-    var cache, original = global.Element;
 
-    function createElement(tagName, attributes) {
-      var element = cache[tagName];
+  Element.create = (function() {
+    var doc = Fuse._doc,
+
+    __create =
+
+    create = function create(tagName, attributes, context) {
+      var data, element, fragment, id, html, length, nodes, result;
+
+      // html strings are not cached at the moment
+      if (tagName.charAt(0) == '<') {
+        html     = tagName;
+        context  = attributes;
+        fragment = Fuse.Dom.getFragmentFromString(html, context);
+        length   = fragment.childNodes.length;
+
+        if (length < 2)
+          result = decorate(fragment.removeChild(fragment.firstChild));
+        else {
+          result = NodeList();
+          while (length--)
+            result[length] = decorate(fragment.removeChild(fragment.lastChild));
+        }
+        return result;
+      }
+
+      context = context || doc;
+      id = context === doc ? '0' : getFuseId(getWindow(context).frameElement);
+      data = Data[id] || (Data[id] = { });
+      nodes = data.nodes || (data.nodes = { });
+      element = nodes[tagName];
+
       if (!element)
-        element = cache[tagName] = Element.extend(Fuse._doc.createElement(tagName));
-      element = element.cloneNode(false);
+        element = nodes[tagName] = context.createElement(tagName);
+
+      element = decorate(element.cloneNode(false));
       return attributes
-        ? Element.writeAttribute(element, attributes)
+        ? element.writeAttribute(attributes)
         : element;
-    }
+    };
 
-    function emulateDOMClass(className) {
-      var proto = (global[className] = global[className] || { })
-        .prototype = Fuse._div['__proto__'];
-
-      // bonus! make the dom methods able to execute via call/apply
-      eachKey(proto, function(value, key) {
-        if (hasKey(proto, key) && typeof value === 'function' &&
-            value['__proto__'] !== Function.prototype)
-          proto[key]['__proto__'] = Function.prototype;
-      });
-    }
-
-    if (Feature('CREATE_ELEMENT_WITH_HTML')) {
-      global.Element = function(tagName, attributes) {
+    if (Feature('CREATE_ELEMENT_WITH_HTML'))
+      create = function create(tagName, attributes, context) {
         var name, type;
-        if (attributes && ((name = attributes.name) || (type = attributes.type))) {
+        if (attributes && tagName.charAt(0) != '<' &&
+           ((name = attributes.name) || (type = attributes.type))) {
           tagName = '<' + tagName +
             (name ? ' name="' + name + '"' : '') +
             (type ? ' type="' + type + '"' : '') + '>';
           delete attributes.name; delete attributes.type;
         }
-        return createElement(tagName, attributes);
+        return __create(tagName, attributes, context);
       };
-    }
-    else global.Element = createElement;
 
-    // Avoid Fuse.Object.extend() because IE8 cannot set any variable/property
-    // reference to Element.toString.
-    if (original) {
-      _extend(global.Element, original);
-      global.Element.prototype = original.prototype;
-    }
-
-    // Safari 2
-    if (Feature('OBJECT__PROTO__')) {
-      // add Element prototype
-      if (!Feature('ELEMENT_CLASS')) {
-        Feature.set({ 'ELEMENT_CLASS': true, 'ELEMENT_EXTENSIONS': true });
-        emulateDOMClass('Element');
-      }
-
-      // add HTMLElement for Safari 2
-      if (!Feature('HTML_ELEMENT_CLASS')) {
-        Feature.set({ 'HTML_ELEMENT_CLASS': true, 'ELEMENT_EXTENSIONS': true });
-        emulateDOMClass('HTMLElement');
-      }
-    }
-
-    cache = global.Element.cache = { };
-    global.Element.idCounter = 1;
+    return create;
   })();
 
   /*--------------------------------------------------------------------------*/
 
+  decorate =
   (function() {
-    // element method caches
-    var Methods, ByTag, revision = 0;
+    var TAG_NAME_CLASSES = {
+      'A':        'Anchor',
+      'CAPTION':  'TableCaption',
+      'COL':      'TableCol',
+      'COLGROUP': 'TableCol',
+      'DEL':      'Mod',
+      'DIR':      'Directory',
+      'DL':       'DList',
+      'H1':       'Heading',
+      'H2':       'Heading',
+      'H3':       'Heading',
+      'H4':       'Heading',
+      'H5':       'Heading',
+      'H6':       'Heading',
+      'IFRAME':   'IFrame',
+      'IMG':      'Image',
+      'INS':      'Mod',
+      'FIELDSET': 'FieldSet',
+      'FRAMESET': 'FrameSet',
+      'OL':       'OList',
+      'OPTGROUP': 'OptGroup',
+      'P':        'Paragraph',
+      'Q':        'Quote',
+      'TBODY':    'TableSection',
+      'TD':       'TableCell',
+      'TEXTAREA': 'TextArea',
+      'TH':       'TableCell',
+      'TFOOT':    'TableSection',
+      'THEAD':    'TableSection',
+      'TR':       'TableRow',
+      'UL':       'UList'
+    },
 
-    function refreshMethodCache() {
-      Methods = []; ByTag = { };
+    Class = Fuse.Class,
 
-      eachKey(Element.Methods, function(value, key, object) {
-        if (key !== 'Simulated' && key !== 'ByTag')
-          Methods.push([key, Func.methodize([key, object])]);
-      });
+    Dom = Fuse.Dom,
 
-      eachKey(Element.Methods.Simulated, function(value, key, object) {
-        Methods.push([key, Func.methodize([key, object])]);
-      });
+    doc = Fuse._doc,
 
-      for (var tagName in Element.Methods.ByTag) {
-        ByTag[tagName] = slice.call(Methods, 0);
-        eachKey(Element.Methods.ByTag[tagName], function(value, key, object) {
-          ByTag[tagName].push([key, Func.methodize([key, object])]);
-        });
-      }
-      revision++;
+    getFuseId = Node.getFuseId;
+
+
+    function Decorator() { }
+
+    function decorate(element, thisArg) {
+      // return if already a decorator
+      if (element.raw) return element;
+
+      var decorated, nodeName, tagClass, tagClassName,
+       id = getFuseId(element),
+       cache = (Data[id] = Data[id] || { });
+
+      // return cached if available
+      if (cache.decorator)
+        return cache.decorator;
+
+      nodeName = getNodeName(element);
+
+      tagClassName = (TAG_NAME_CLASSES[nodeName] ||
+        capitalize.call(nodeName)) + 'Element';
+
+      tagClass = Dom[tagClassName] || (Dom[tagClassName] =
+        Class(Element, {
+          'constructor': function(element) {
+            return element && (element.raw ?
+              element : decorate(element, tagClass));
+          }
+        }));
+
+      // return custom element class if available
+      thisArg = thisArg || Element;
+      if (thisArg === Element)
+        return new tagClass(element);
+
+      Decorator.prototype = thisArg.plugin;
+
+      cache.decorator =
+      decorated = new Decorator;
+
+      cache.node =
+      decorated.raw = element;
+      decorated.style = element.style;
+
+      return decorated;
     }
 
-    /*------------------------------------------------------------------------*/
+    function extendByTag(tagName, statics, plugins, mixins) {
+      var tagClass, tagClassName, i = 0;
 
-    Element.extend = (function() {
-      function createRevisionGetter(r) {
-        return function() { return r; };
+      if (isArray(tagName)) {
+        while (tagName[i])
+          extendByTag(tagName[i++], statics, plugins, mixins);
       }
+      else {
+        tagName = tagName.toUpperCase();
+        tagClassName = (TAG_NAME_CLASSES[tagName] ||
+          capitalize.call(tagName)) + 'Element';
 
-      function extendElement(element, nodeName) {
-        nodeName = nodeName || getNodeName(element);
-        var pair, methods = ByTag[nodeName] || Methods, length = methods.length;
-        while (length--) {
-          pair = methods[length];
-          if (!hasKey(element, pair[0]))
-            element[pair[0]] = pair[1];
-        }
-
-        // avoid using Fuse.K.curry(revision) for speed
-        element._extendedByFuse = createRevisionGetter(revision);
-        return element;
-      }
-
-      function extend(element) {
-        // Bail on elements that don't need extending,
-        // XML nodes (IE errors on them), document, window objects
-        if (!element || (typeof element._extendedByFuse !== 'undefined' &&
-          element._extendedByFuse() >= revision) ||
-          element.nodeType !== 1 || element == getWindow(element) ||
-          !element.ownerDocument.body) return element;
-
-        return extendElement(element);
-      }
-
-      // Browsers with specific element extensions
-      // don't need their elements extended UNLESS
-      // they belong to a different document
-      if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
-        extend = (function(__extend) {
-          function extend(element) {
-            return (element && element.ownerDocument &&
-              element.ownerDocument !== Fuse._doc) ? __extend(element) : element;
-          }
-          return extend;
-        })(extend);
-      }
-
-      // In IE8 APPLET, EMBED, and OBJECT elements don't inherit from their prototypes
-      if (Bug('ELEMENT_OBJECT_AND_RELATIVES_FAILS_TO_INHERIT_FROM_PROTOTYPE')) {
-        extend = (function(__extend) {
-          function extend(element) {
-            var nodeName = element && getNodeName(element);
-            if (BUGGY[nodeName]) {
-              return (typeof element._extendedByFuse !== 'undefined' &&
-                element._extendedByFuse() >= revision) ?
-                  element : extendElement(element, nodeName);
+        tagClass = Dom[tagClassName] || (Dom[tagClassName] =
+          Class(Element, {
+            'constructor': function(element) {
+              return element && (element.raw ?
+                element : decorate(element, tagClass));
             }
-            return __extend(element);
-          }
-          var BUGGY = { 'APPLET': 1, 'EMBED': 1, 'OBJECT': 1 };
-          return extend;
-        })(extend);
-      }
+          }));
 
-      return extend;
+        tagClass.extend(statics, plugins, mixins);
+      }
+    }
+
+    Decorator.plugin = Decorator.prototype;
+    Element.decorate = decorate;
+    Dom.extendByTag  = extendByTag;
+
+    return decorate;
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
+  Fuse.Dom.getFragmentFromString = (function() {
+    var FROM_STRING_PARENT_WRAPPERS = (function() {
+      var T = {
+        'COLGROUP': ['<table><colgroup>',      '<\/colgroup><tbody><\/tbody><\/table>', 2],
+        'SELECT':   ['<select>',               '<\/select>',                            1],
+        'TABLE':    ['<table>',                '<\/table>',                             1],
+        'TBODY':    ['<table><tbody>',         '<\/tbody><\/table>',                    2],
+        'TR':       ['<table><tbody><tr>',     '<\/tr><\/tbody><\/table>',              3],
+        'TD':       ['<table><tbody><tr><td>', '<\/td><\/tr><\/tbody><\/table>',        4]
+      };
+
+      // TODO: Opera fails to render optgroups when set with innerHTML
+      T['TFOOT'] = T['THEAD'] = T['TBODY'];
+      T['OPTGROUP'] = T['SELECT'];
+      T['TH'] = T['TD'];
+
+      return T;
+    })(),
+
+    FROM_STRING_CHILDRENS_PARENT_KEYS = (function() {
+      var T = {
+        'TD':     'TR',
+        'TR':     'TBODY',
+        'TBODY':  'TABLE',
+        'OPTION': 'SELECT',
+        'COL':    'COLGROUP'
+      };
+
+      T['TFOOT'] = T['THEAD'] = T['TBODY'];
+      T['TH'] = T['TD'];
+
+      return T;
+    })(),
+
+    doc = Fuse._doc,
+
+    getFuseId = Node.getFuseId,
+
+    matchStartsWithTableRow = /^<[tT][rR]/,
+
+    matchTagName= /^<([^> ]+)/,
+
+    getFragmentCache = (function() {
+      if (Feature('DOCUMENT_RANGE'))
+        return function(ownerDoc) {
+          var id = ownerDoc === doc ? '0' : getFuseId(getWindow(ownerDoc).frameElement),
+           data = Data[id] || (Data[id] = { });
+          return (data.fragmentCache = data.fragmentCache || {
+            'node':     ownerDoc.createElement('div'),
+            'fragment': ownerDoc.createDocumentFragment(),
+            'range':    ownerDoc.createRange()
+          });
+        };
+
+      return function(ownerDoc) {
+        var id = ownerDoc === doc ? '0' : getFuseId(getWindow(ownerDoc).frameElement),
+         data = Data[id] || (Data[id] = { });
+        return (data.fragmentCache = data.fragmentCache || {
+          'node':     ownerDoc.createElement('div'),
+          'fragment': ownerDoc.createDocumentFragment()
+        });
+      };
+    })(),
+
+    getFragmentFromChildNodes = (function() {
+      if (Feature('ELEMENT_REMOVE_NODE'))
+        return function(parentNode, cache) {
+          // removeNode: removes the parent but keeps the children
+          var fragment = cache.fragment;
+          fragment.appendChild(parentNode).removeNode();
+          return fragment;
+        };
+
+      if (Feature('DOCUMENT_RANGE'))
+        return function(parentNode, cache) {
+          var range = cache.range;
+          range.selectNodeContents(parentNode);
+          return range.extractContents() || cache.fragment;
+        };
+
+      return function(parentNode, cache) {
+        var fragment = cache.fragment,
+         nodes = parentNode.childNodes,
+         length = node.length;
+
+        while (length--)
+          fragment.insertBefore(nodes[length], fragment.firstChild);
+        return fragment;
+      };
     })();
 
-    /*------------------------------------------------------------------------*/
+    function getFromDocumentFragment(html, context, cache) {
+       context = context || Fuse._body || Fuse._docEl;
+       cache = cache || getFragmentCache(context.ownerDocument || context);
+       var node = cache.node,
+        nodeName = context.nodeType === 9
+          ? FROM_STRING_CHILDRENS_PARENT_KEYS[tagName.match(matchTagName)[1].toUpperCase()]
+          : getNodeName(context),
 
-    Element.addMethods = (function() {
-      var tagNameClassLookup = {
-        'A':        'Anchor',
-        'CAPTION':  'TableCaption',
-        'COL':      'TableCol',
-        'COLGROUP': 'TableCol',
-        'DEL':      'Mod',
-        'DIR':      'Directory',
-        'DL':       'DList',
-        'H1':       'Heading',
-        'H2':       'Heading',
-        'H3':       'Heading',
-        'H4':       'Heading',
-        'H5':       'Heading',
-        'H6':       'Heading',
-        'IFRAME':   'IFrame',
-        'IMG':      'Image',
-        'INS':      'Mod',
-        'FIELDSET': 'FieldSet',
-        'FRAMESET': 'FrameSet',
-        'OL':       'OList',
-        'OPTGROUP': 'OptGroup',
-        'P':        'Paragraph',
-        'Q':        'Quote',
-        'TBODY':    'TableSection',
-        'TD':       'TableCell',
-        'TEXTAREA': 'TextArea',
-        'TH':       'TableCell',
-        'TFOOT':    'TableSection',
-        'THEAD':    'TableSection',
-        'TR':       'TableRow',
-        'UL':       'UList'
+        wrapping = FROM_STRING_PARENT_WRAPPERS[nodeName];
+
+      if (wrapping) {
+        var times = wrapping[2];
+        node.innerHTML= wrapping[0] + html + wrapping[1];
+        while (times--) node = node.firstChild;
+      } else node.innerHTML = html;
+
+      // skip auto-inserted tbody
+      if (ELEMENT_TABLE_INNERHTML_INSERTS_TBODY &&
+          nodeName === 'TABLE' && matchStartsWithTableRow.test(html))
+        node = node.firstChild;
+
+      return getFragmentFromChildNodes(node, cache);
+    }
+
+    function getFromContextualFragment(html, context) {
+      try {
+        // 1) Konqueror throws when trying to create a fragment from
+        //    incompatible markup such as table rows. Similar to IE's issue
+        //    with setting table's innerHTML.
+        //
+        // 2) WebKit and KHTML throw when creating contextual fragments from
+        //    orphaned elements.
+
+        context = context || Fuse._body || Fuse._docEl;
+        var cache = getFragmentCache(context.ownerDocument || context),
+         range = cache.range;
+        range.selectNode(context.firstChild);
+        return range.createContextualFragment(html);
+      } catch (e) {
+        return getFromDocumentFragment(html, context, cache);
+      }
+    }
+
+    return Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT')
+      ? getFromContextualFragment
+      : getFromDocumentFragment;
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
+  (function(plugin) {
+    var ELEMENT_TABLE_INNERHTML_INSERTS_TBODY =
+      Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY'),
+
+    ELEMENT_INSERT_METHODS = {
+      'before': function(element, node) {
+        element.parentNode &&
+          element.parentNode.insertBefore(node, element);
       },
 
-      // supports IE8 as well as EOMB
-      elementProto = Feature('HTML_ELEMENT_CLASS') && global.HTMLElement.prototype ||
-        Feature('ELEMENT_CLASS') && global.Element.prototype;
+      'top': function(element, node) {
+        element.insertBefore(node, element.firstChild);
+      },
 
-      function copyMethods(methods, destination, onlyIfAbsent) {
-        onlyIfAbsent = onlyIfAbsent || false;
-        eachKey(methods, function(value, key) {
-          if (typeof value === 'function' &&
-             (!onlyIfAbsent || !(key in destination)))
-            destination[key] = Func.methodize([key, methods]);
-        });
+      'bottom': function bottom(element, node) {
+        element.appendChild(node);
+      },
+
+      'after': function after(element, node) {
+        element.parentNode &&
+          element.parentNode.insertBefore(node, element.nextSibling);
       }
+    },
 
-      function extendByTag(tagName, methods) {
-        tagName = tagName.toUpperCase();
-        if (!Element.Methods.ByTag[tagName])
-          Element.Methods.ByTag[tagName] = { };
-        Obj.extend(Element.Methods.ByTag[tagName], methods);
-      }
+    INSERTABLE_NODE_TYPES = {
+      '1':  1,
+      '3':  1,
+      '8':  1,
+      '10': 1,
+      '11': 1
+    },
 
-      function findDOMClass(tagName) {
-        // catch most classes like HTMLUListElement and HTMLSelectElement
-        var className = 'HTML' + (tagNameClassLookup[tagName] ||
-          Fuse.String(tagName).capitalize()) + 'Element';
-        if (global[className]) return global[className];
+    setTimeout = global.setTimeout,
 
-        // catch element classes like HTMLLIElement
-        className = 'HTML' + tagName + 'Element';
-        if (global[className]) return global[className];
-      }
-
-      function addMethods(tagName, methods) {
-        var extend = Obj.extend, elementMethods = Element.Methods,
-         formMethods = Form.Methods, fieldMethods = Field.Methods,
-         T = elementMethods.ByTag;
-
-        // if arguments.length < 2
-        if (tagName && !methods || !tagName && !methods) {
-          methods = tagName; tagName = null;
-          extend(Form,  formMethods);
-          extend(Field, fieldMethods);
-          extend(T, {
-            'BUTTON':   clone(fieldMethods),
-            'FORM':     clone(formMethods),
-            'INPUT':    clone(fieldMethods),
-            'SELECT':   clone(fieldMethods),
-            'TEXTAREA': clone(fieldMethods)
-          });
-        }
-
-        if (!tagName || tagName == '')
-          extend(elementMethods, methods);
-        else {
-          isArray(tagName)
-            ? tagName._each(function(name) { extendByTag(name, methods); })
-            : extendByTag(tagName, methods);
-        }
-
-        if (Feature('ELEMENT_EXTENSIONS')) {
-          copyMethods(elementMethods, elementProto);
-          copyMethods(elementMethods.Simulated, elementProto, true);
-        }
-
-        if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
-          var domClass, infiniteRevision = function() { return Infinity; };
-          for (tagName in T) {
-            domClass = findDOMClass(tagName);
-            if (typeof domClass === 'undefined') continue;
-            copyMethods(T[tagName], domClass.prototype);
+    replaceElement = (function(){
+      function getByTagName(node, tagName) {
+        var results = [], child = node.firstChild;
+        while (child) {
+          if (getNodeName(child) === tagName)
+            results.push(child);
+          else if (child.getElementsByTagName) {
+            // concatList implementation for nodeLists
+            var i = 0, pad = results.length, nodes = child.getElementsByTagName(tagName);
+            while (results[pad + i] = nodes[i++]) { }
+            results.length--;
           }
-          elementProto._extendedByFuse = infiniteRevision;
+          child = child.nextSibling;
+        }
+        return results;
+      }
+
+      function wrapper(method, element, node) {
+        var i = 0, scripts = [];
+        if (INSERTABLE_NODE_TYPES[node.nodeType]) {
+          if (getNodeName(node) === 'SCRIPT')
+            scripts = [node];
+          else if (node.getElementsByTagName)
+            scripts = node.getElementsByTagName('SCRIPT');
+          // Safari 2 fragments don't have GEBTN
+          else scripts = getByTagName(node, 'SCRIPT');
         }
 
-        extend(Element, elementMethods);
-        delete Element.ByTag;
-
-        // refresh element method cache and clear element cache
-        refreshMethodCache();
-        Element.cache = { };
+        method(element, node);
+        while (scripts[i]) global.eval(String(scripts[i++].text));
       }
 
-      return addMethods;
-    })();
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  Element._insertionTranslations = {
-    'tags': {
-      'COLGROUP': ['<table><colgroup>',      '<\/colgroup><tbody><\/tbody><\/table>', 2],
-      'SELECT':   ['<select>',               '<\/select>',                            1],
-      'TABLE':    ['<table>',                '<\/table>',                             1],
-      'TBODY':    ['<table><tbody>',         '<\/tbody><\/table>',                    2],
-      'TR':       ['<table><tbody><tr>',     '<\/tr><\/tbody><\/table>',              3],
-      'TD':       ['<table><tbody><tr><td>', '<\/td><\/tr><\/tbody><\/table>',        4]
-    }
-  };
-
-  (function(T) {
-    // TODO: Opera fails to render optgroups when set with innerHTML
-    _extend(T.tags, {
-      'OPTGROUP': T.tags.SELECT,
-      'TFOOT':    T.tags.TBODY,
-      'TH':       T.tags.TD,
-      'THEAD':    T.tags.TBODY
-    });
-
-    T.before = function before(element, node) {
-      element.parentNode &&
-        element.parentNode.insertBefore(node, element);
-    };
-
-    T.top = function top(element, node) {
-      element.insertBefore(node, element.firstChild);
-    };
-
-    T.bottom = function bottom(element, node) {
-      element.appendChild(node);
-    };
-
-    T.after = function after(element, node) {
-      element.parentNode &&
-        element.parentNode.insertBefore(node, element.nextSibling);
-    };
-
-    // prevent JScript bug with named function expressions
-    var after = null, before = null,  bottom = null, top = null;
-  })(Element._insertionTranslations);
-
-  /*--------------------------------------------------------------------------*/
-
-  Element.Methods = {
-    'ByTag':     { },
-    'Simulated': { }
-  };
-
-  (function(methods) {
-    methods.cleanWhitespace = function cleanWhitespace(element) {
-      // removes whitespace-only text node children
-      element = $(element);
-      var nextNode, node = element.firstChild;
-      while (node) {
-        nextNode = node.nextSibling;
-        if (node.nodeType === 3 && !/\S/.test(node.nodeValue))
-          element.removeChild(node);
-        node = nextNode;
+      function replaceElement(element, node) {
+        element.parentNode.replaceChild(node, element);
       }
-      return element;
-    };
 
-    methods.empty = function empty(element) {
-      return Fuse.String($(element).innerHTML).blank();
-    };
+      // fix Safari <= 2.0.2 inserting script elements
+      if (Bug('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT_PROPERTY_ON_INSERT')) {
+        var T = ELEMENT_INSERT_METHODS,
+         before = T.before, top = T.top, bottom = T.bottom, after = T.after;
 
-    methods.identify = function identify(element) {
-      // use readAttribute to avoid issues with form elements and
-      // child controls with ids/names of "id"
-      var id = Element.readAttribute(element, 'id');
-      if (id.length) return id;
+        T.before = function(element, node) { wrapper(before, element, node); };
+        T.top    = function(element, node) { wrapper(top,    element, node); };
+        T.bottom = function(element, node) { wrapper(bottom, element, node); };
+        T.after  = function(element, node) { wrapper(after,  element, node); };
 
-      var ownerDoc = element.ownerDocument;
-      do { id = 'anonymous_element_' + Element.idCounter++; }
-      while (ownerDoc.getElementById(id));
-      Element.writeAttribute(element, 'id', id);
-      return Fuse.String(id);
-    };
-
-    methods.isFragment = (function() {
-      var isFragment = function isFragment(element) {
-        element = $(element);
-        var nodeType = element.nodeType;
-        return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
-          Element.descendantOf(element, element.ownerDocument)));
-      };
-
-      if (Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
-        isFragment = function isFragment(element) {
-          element = $(element);
-          var nodeType = element.nodeType;
-          return nodeType === 11 || (nodeType === 1 &&
-            element.ownerDocument.all[element.sourceIndex] !== element);
+        return function(element, node) {
+          wrapper(replaceElement, element, node);
         };
       }
-      if (Feature('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
-        isFragment = function isFragment(element) {
-          /* DOCUMENT_POSITION_DISCONNECTED = 0x01 */
-          element = $(element);
-          var nodeType = element.nodeType;
-          return nodeType === 11 || (nodeType === 1 &&
-            (element.ownerDocument.compareDocumentPosition(element) & 1) === 1);
-        };
-      }
-      return isFragment;
+
+      return replaceElement;
     })();
 
-    methods.hide = function hide(element) {
-      element = $(element);
-      var display = element.style.display;
-      if (display && display !== 'none')
-        element._originalDisplay = display;
-      element.style.display = 'none';
-      return element;
-    };
-
-    methods.show = function show(element) {
-      element = $(element);
-      var display = element.style.display;
-      if (display === 'none')
-        element.style.display = element._originalDisplay || '';
-      element._originalDisplay = null;
-      return element;
-    };
-
-    methods.scrollTo = function scrollTo(element) {
-      var pos = Element.cumulativeOffset(element);
-      global.scrollTo(pos[0], pos[1]);
-      return $(element);
-    };
-
-    methods.remove = function remove(element) {
-      element = $(element);
-      element.parentNode &&
-      element.parentNode.removeChild(element);
-      return element;
-    };
-
-    methods.toggle = function toggle(element) {
-      return Element[Element.isVisible(element) ?
-        'hide' : 'show'](element);
-    };
-
-    methods.wrap = function wrap(element, wrapper, attributes) {
-      element = $(element);
-      if (isElement(wrapper))
-        $(wrapper).writeAttribute(attributes);
-      else if (isString(wrapper))
-        wrapper = new Element(wrapper, attributes);
-      else wrapper = new Element('div', wrapper);
-      if (element.parentNode)
-        element.parentNode.replaceChild(wrapper, element);
-      wrapper.appendChild(element);
-      return wrapper;
-    };
-
-    // prevent JScript bug with named function expressions
-    var cleanWhitespace = null,
-     empty =              null,
-     hide =               null,
-     identify =           null,
-     isFragment =         null,
-     remove =             null,
-     scrollTo =           null,
-     show =               null,
-     toggle =             null,
-     wrap =               null;
-  })(Element.Methods);
-
-  /*--------------------------------------------------------------------------*/
-
-  (function(methods) {
-    var insertableNodeTypes = { '1': 1, '3': 1, '8': 1, '10': 1, '11': 1 };
-
-    function replaceElement(element, node) {
-      element.parentNode.replaceChild(node, element);
-    }
-
-    function createContextualFragment(element, content) {
-      return Element._getFragmentFromString(element.ownerDocument,
-        getNodeName(element.parentNode), content);
-    }
-
-    if (Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT'))
-      createContextualFragment = (function(__createContextualFragment) {
-        return function(element, content) {
-          try {
-            // Konqueror throws when trying to create a fragment from
-            // incompatible markup such as table rows. Similar to IE's issue
-            // with setting table's innerHTML.
-
-            // WebKit and KHTML throw when creating contextual fragments from orphaned elements
-            var range = element.ownerDocument.createRange();
-            range.selectNode(element);
-            return range.createContextualFragment(content);
-          } catch (e) {
-            return __createContextualFragment(element, content);
-          }
-        };
-      })(createContextualFragment);
-
-    // fix Safari <= 2.0.2 inserting script elements
-    if (Bug('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT_PROPERTY_ON_INSERT'))
-      replaceElement = (function() {
-        function getByTagName(node, tagName) {
-          var results = [], child = node.firstChild;
-          while (child) {
-            if (getNodeName(child) === tagName)
-              results.push(child);
-            else if (child.getElementsByTagName) {
-              // concatList implementation for nodeLists
-              var i = 0, pad = results.length, nodes = child.getElementsByTagName(tagName);
-              while (results[pad + i] = nodes[i++]) { }
-              results.length--;
-            }
-            child = child.nextSibling;
-          }
-          return results;
-        }
-
-        function wrapper(proceed, element, node) {
-          var i = 0, scripts = [];
-          if (insertableNodeTypes[node.nodeType]) {
-            if (getNodeName(node) === 'SCRIPT')
-              scripts = [node];
-            else if (node.getElementsByTagName)
-              scripts = node.getElementsByTagName('SCRIPT');
-            // Safari 2 fragments don't have GEBTN
-            else scripts = getByTagName(node, 'SCRIPT');
-          }
-          proceed(element, node);
-          while (scripts[i]) global.eval(String(scripts[i++].text));
-        }
-
-        // wrap insertion translations and replaceElement
-        Fuse.Util.$w('before top bottom after').each(function(method) {
-          this[method] = Func.wrap(this[method], wrapper);
-        }, Element._insertionTranslations);
-
-        return Func.wrap(replaceElement, wrapper);
-      })();
-
-
-    methods.insert = function insert(element, insertions) {
-      element = $(element);
-      var content, fragment, insertContent, position, nodeName;
+    plugin.insert = function insert(insertions) {
+      var content, fragment, insertContent, position, nodeName,
+       element = this.raw || this;
 
       if (insertions) {
         if (isHash(insertions))
           insertions = insertions._object;
 
         if (isString(insertions) || isNumber(insertions) ||
-            insertableNodeTypes[insertions.nodeType] || insertions.toElement || insertions.toHTML)
-          insertions = { 'bottom': insertions };
+            INSERTABLE_NODE_TYPES[(insertions.raw || insertions).nodeType] || insertions.toElement || insertions.toHTML)
+          insertions = { 'bottom': (insertions.raw || insertions) };
       }
 
       for (position in insertions) {
         content  = insertions[position];
         position = position.toLowerCase();
-        insertContent = Element._insertionTranslations[position];
+        insertContent = ELEMENT_INSERT_METHODS[position];
 
         if (content && content != '') {
           if (content.toElement) content = content.toElement();
-          if (insertableNodeTypes[content.nodeType]) {
+          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
             insertContent(element, content);
             continue;
           }
@@ -566,61 +501,62 @@
         }
         else continue;
 
-        nodeName = getNodeName(position === 'before' || position === 'after'
-          ? element.parentNode : element);
-
-        fragment = Element._getFragmentFromString(
-          element.ownerDocument, nodeName, content.stripScripts());
+        fragment = Fuse.Dom.getFragmentFromString(content.stripScripts(),
+          position === 'before' || position === 'after' ? element.parentNode : element);
 
         insertContent(element, fragment);
-        defer(function() { content.evalScripts(); });
+        setTimeout(function() { content.evalScripts(); }, 10);
       }
-      return element;
+      return this;
     };
 
-    methods.replace = function replace(element, content) {
-      element = $(element);
+    plugin.replace = function replace(content) {
+      var element = this.raw || this;
       if (!content || content == '')
         return element.parentNode.removeChild(element);
       if (content.toElement)
         content = content.toElement();
-      else if (!insertableNodeTypes[content.nodeType]) {
+      else if (!INSERTABLE_NODE_TYPES[content.nodeType]) {
         var html = Obj.toHTML(content);
-        defer(function() { html.evalScripts(); });
-        content = createContextualFragment(element, html.stripScripts());
+        setTimeout(function() { html.evalScripts(); }, 10);
+        content = Fuse.Dom.getFragmentFromString(html.stripScripts(), element.parentNode);
       }
+
       replaceElement(element, content);
-      return element;
+      return this;
     };
 
-    methods.update = function update(element, content) {
-      element = $(element);
+    plugin.update = function update(content) {
+      var element = this.raw || this;
       if (getNodeName(element) === 'SCRIPT') {
-        element.text = Fuse.String.interpret(content);
+        element.text = content || '';
       } else {
         if (content && content != '') {
           if (content.toElement)
             content = content.toElement();
-          if (insertableNodeTypes[content.nodeType]) {
+          if (INSERTABLE_NODE_TYPES[content.nodeType]) {
             element.innerHTML = '';
             element.appendChild(content);
-            return element;
+            return this;
           }
           content = Obj.toHTML(content);
           element.innerHTML = content.stripScripts();
-          defer(function() { content.evalScripts(); });
+          setTimeout(function() { content.evalScripts(); }, 10);
         } else element.innerHTML = '';
       }
-      return element;
+      return this;
     };
 
     // fix browsers with buggy innerHTML implementations
     (function() {
-      function update(element, content) {
-        element = $(element);
-        var nodeName = getNodeName(element), isBuggy = BUGGY[nodeName];
+      function update(content) {
+        var stripped,
+         element  = this.raw || this,
+         nodeName = getNodeName(element),
+         isBuggy  = BUGGY[nodeName];
+
         if (nodeName === 'SCRIPT') {
-          element.text = Fuse.String.interpret(content);
+          element.text = content || '';
         } else {
           // remove children
           if (isBuggy) {
@@ -630,18 +566,20 @@
 
           if (content && content != '') {
             if (content.toElement) content = content.toElement();
-            if (insertableNodeTypes[content.nodeType]) element.appendChild(content);
+            if (INSERTABLE_NODE_TYPES[content.nodeType]) element.appendChild(content);
             else {
               content = Obj.toHTML(content);
+              stripped = content.stripScripts();
+
               if (isBuggy)
-                element.appendChild(Element._getFragmentFromString(
-                  element.ownerDocument, nodeName, content.stripScripts()));
-              else element.innerHTML = content.stripScripts();
-              defer(function() { content.evalScripts(); });
+                element.appendChild(Fuse.Dom.getFragmentFromString(stripped, element));
+              else element.innerHTML = stripped;
+
+              setTimeout(function() { content.evalScripts(); }, 10);
             }
           }
         }
-        return element;
+        return this;
       };
 
       var BUGGY = { };
@@ -656,29 +594,148 @@
         BUGGY.TFOOT = BUGGY.TH    = BUGGY.THEAD = 1;
 
       if (!isEmpty(BUGGY))
-        methods.update = update;
+        plugin.update = update;
     })();
 
     // prevent JScript bug with named function expressions
     var insert = null, replace = null, update = null;
-  })(Element.Methods);
+  })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/
 
-  Fuse.addNS('Util');
+  (function(plugin) {
+    plugin.cleanWhitespace = function cleanWhitespace() {
+      // removes whitespace-only text node children
+      var nextNode, element = this.raw || this,
+       node = element.firstChild;
 
-  $ = Fuse.Util.$ = (function() {
-    function $(element) {
-      var args = arguments, length = args.length;
-      if (length > 1) {
-        var elements = Fuse.List();
-        while (length--) elements[length] = $(args[length]);
-        return elements;
+      while (node) {
+        nextNode = node.nextSibling;
+        if (node.nodeType === 3 && !/\S/.test(node.nodeValue))
+          element.removeChild(node);
+        node = nextNode;
       }
-      if (isString(element)) element = doc.getElementById(element || expando);
-      return extend(element);
-    }
+      return this;
+    };
 
-    var doc = Fuse._doc, extend = Element.extend;
-    return $;
-  })();
+    plugin.empty = function empty() {
+      return Fuse.String((this.raw || this).innerHTML).blank();
+    };
+
+    plugin.getFuseId = function getFuseId() {
+      return (this.raw || this).getFuseId();
+    };
+
+    plugin.identify = (function() {
+      function identify() {
+        // use readAttribute to avoid issues with form elements and
+        // child controls with ids/names of "id"
+        var element = this.raw || this, id = this.readAttribute('id');
+        if (id.length) return id;
+
+        var ownerDoc = element.ownerDocument;
+        do { id = 'anonymous_element_' + counter++; }
+        while (ownerDoc.getElementById(id));
+        this.writeAttribute('id', id);
+        return Fuse.String(id);
+      }
+
+      // private counter
+      var counter = 0;
+      return identify;
+    })();
+
+    plugin.isFragment = (function() {
+      var isFragment = function isFragment() {
+        var element = this.raw || this, nodeType = element.nodeType;
+        return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
+          this.descendantOf(element.ownerDocument)));
+      };
+
+      if (Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
+        isFragment = function isFragment() {
+          var element = this.raw || this, nodeType = element.nodeType;
+          return nodeType === 11 || (nodeType === 1 &&
+            element.ownerDocument.all[element.sourceIndex] !== element);
+        };
+      }
+      if (Feature('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
+        isFragment = function isFragment() {
+          /* DOCUMENT_POSITION_DISCONNECTED = 0x01 */
+          var element = this.raw || this, nodeType = element.nodeType;
+          return nodeType === 11 || (nodeType === 1 &&
+            (element.ownerDocument.compareDocumentPosition(element) & 1) === 1);
+        };
+      }
+      return isFragment;
+    })();
+
+    plugin.hide = function hide() {
+      var element = this.raw || this,
+       elemStyle = element.style,
+       display = elemStyle.display;
+
+      if (display && display !== 'none')
+        Data[element.getFuseId()].madeHidden = display;
+      elemStyle.display = 'none';
+      return this;
+    };
+
+    plugin.show = function show() {
+      var element = this.raw || this,
+       data = Data[element.getFuseId()],
+       elemStyle = element.style,
+       display = elemStyle.display;
+
+      if (display === 'none')
+        elemStyle.display = data.madeHidden || '';
+
+      delete data.madeHidden;
+      return this;
+    };
+
+    plugin.scrollTo = function scrollTo() {
+      var pos = this.cumulativeOffset();
+      global.scrollTo(pos[0], pos[1]);
+      return this;
+    };
+
+    plugin.remove = function remove() {
+      var element = this.raw || this;
+      element.parentNode &&
+        element.parentNode.removeChild(element);
+      return this;
+    };
+
+    plugin.toggle = function toggle() {
+      return this[this.isVisible() ? 'hide' : 'show']();
+    };
+
+    plugin.wrap = function wrap(wrapper, attributes) {
+      var element = this.raw || this;
+
+      if (isString(wrapper))
+        wrapper = Element.create(wrapper, attributes);
+      if (isElement(wrapper = wrapper.raw || Fuse.get(wrapper)))
+        wrapper.writeAttribute(attributes);
+      else wrapper = Element.create('div', wrapper);
+
+      wrapper = wrapper.raw;
+      if (element.parentNode)
+        element.parentNode.replaceChild(wrapper, element);
+      wrapper.appendChild(element);
+      return wrapper;
+    };
+
+    // prevent JScript bug with named function expressions
+    var cleanWhitespace = null,
+     empty =              null,
+     hide =               null,
+     getFuseId =          null,
+     isFragment =         null,
+     remove =             null,
+     scrollTo =           null,
+     show =               null,
+     toggle =             null,
+     wrap =               null;
+  })(Element.plugin);

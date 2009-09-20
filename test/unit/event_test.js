@@ -111,7 +111,9 @@ new Test.Unit.Runner({
   },
 
   'testEventObserversAreBoundToTheObservedElement': function() {
-    var span = $('span'), target, observer = function() { target = this };
+    var target, 
+     span = $('span'),
+     observer = function() { target = this };
 
     span.observe('test:somethingHappened', observer);
     span.fire('test:somethingHappened');
@@ -191,26 +193,31 @@ new Test.Unit.Runner({
   },
 
   'testStopObservingRemovesHandlerFromCache': function() {
-    var span = $('span'), observer = function() { }, eventID;
+    var data, events, fuseId,
+     span = $('span'), observer = function() { };
 
     span.observe('test:somethingHappened', observer);
-    eventID = span.getEventID();
 
-    this.assert(Event.cache[eventID]);
-    this.assert(Fuse.List.isArray(Event.cache[eventID]
-      .events['test:somethingHappened'].handlers));
+    fuseId = span.getFuseId();
+    data   = Fuse.Dom.Data[fuseId];
+    events = data.events;
 
-    this.assertEqual(1, Event.cache[eventID]
-      .events['test:somethingHappened'].handlers.length);
+    this.assert(data);
+    this.assert(Fuse.List.isArray(events['test:somethingHappened'].handlers));
+
+    this.assertEqual(1, events['test:somethingHappened'].handlers.length);
 
     span.stopObserving('test:somethingHappened', observer);
-    this.assert(!Event.cache[eventID]);
+    this.assert(!events['test:somethingHappened']);
   },
 
   'testObserveAndStopObservingAreChainable': function() {
     var span = $('span'), observer = function() { };
 
+    try {
     this.assertEqual(span, span.observe('test:somethingHappened', observer));
+    }
+    catch (e) { console.log(e) }
     this.assertEqual(span, span.stopObserving('test:somethingHappened', observer));
 
     span.observe('test:somethingHappened', observer);
@@ -363,7 +370,7 @@ new Test.Unit.Runner({
   },
 
   'testEventFindElement': function() {
-    var span = $('span'), event;
+    var event, span = $('span');
     event = span.fire('test:somethingHappened');
 
     this.assertElementMatches(event.findElement(),
@@ -381,27 +388,27 @@ new Test.Unit.Runner({
     this.assertEqual(null, event.findElement('div.does_not_exist'));
   },
 
-  'testEventIDDuplication': function() {
+  'testFuseIdDuplication': function() {
     var element = $('container').down();
     element.observe('test:somethingHappened', Fuse.emptyFunction);
 
-    var elementID = element.getEventID(),
-     clone = $(element.cloneNode(true));
-     cloneID = clone.getEventID()
+    var fuseId = element.getFuseId(),
+     clone = $(element.raw.cloneNode(true));
+     cloneId = clone.getFuseId();
 
-    this.assertNotEqual(elementID, cloneID);
+    this.assertNotEqual(fuseId, cloneId);
 
     $('container').innerHTML += $('container').innerHTML;
 
-    this.assertNotEqual(elementID, $('container').down());
-    this.assertNotEqual(elementID, $('container').down(1));
+    this.assertNotEqual(fuseId, $('container').down());
+    this.assertNotEqual(fuseId, $('container').down(1));
   },
 
-  'testDocumentAndWindowEventID': function() {
+  'testDocumentAndWindowFuseId': function() {
     Fuse.List(document, window).each(function(object) {
       Event.observe(object, 'test:somethingHappened', Fuse.emptyFunction);
 
-      this.assertUndefined(object._prototypeEventID);
+      this.assertUndefined(object.getFuseId);
 
       Event.stopObserving(object, 'test:somethingHappened');
     }, this);

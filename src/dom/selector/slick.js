@@ -1,6 +1,6 @@
   /*---------------------------- SELECTOR: SLICK -----------------------------*/
 
-  (function(Selector) {
+  (function(Selector, NodeList) {
     Selector.match = function match(element, selector) {
       var item, i = 0,
        results = slick(getDocument(element), String(selector || ''));
@@ -9,20 +9,9 @@
       return false;
     };
 
-    Selector.select = (function() {
-      var select = function select(selector, context) {
-        return slick(context || Fuse._doc, String(selector || ''), Fuse.List())
-          .map(Element.extend);
-      };
+    Selector.select = function select(selector, context) {
+      return slick(context || Fuse._doc, String(selector || ''), NodeList());
+    };
 
-      if (Feature('ELEMENT_EXTENSIONS'))
-        select = function select(selector, context) {
-          return slick(context || Fuse._doc, String(selector || ''), Fuse.List());
-        };
-
-      return select;
-    })();
-
-    // prevent JScript bug with named function expressions
-    var match = null;
-  })(Fuse.Dom.Selector);
+    var getDocument = getDocument, match = null, select = null;
+  })(Fuse.Dom.Selector, Fuse.Dom.NodeList);

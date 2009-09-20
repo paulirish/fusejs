@@ -20,14 +20,14 @@ document.observe('dom:loaded', function(event) {
     'contentLoadedBug': false
   });
 
-  body.insert(new Element('img', { 'id': 'img_load_test' }));
+  body.insert('<img id="img_load_test">');
 
   $('img_load_test').observe('load', function(e) {
     if (e.element() !== this)
       eventResults.eventElement.imageOnLoadBug = true;
   }).writeAttribute('src', '../fixtures/logo.gif');
 
-  body.insert(new Element('img', { 'id': 'img_error_test' }));
+  body.insert('<img id="img_error_test">');
 
   $('img_error_test').observe('error', function(e) {
     if (e.element() !== this)

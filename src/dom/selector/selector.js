@@ -4,12 +4,10 @@
 
   Fuse.addNS('Dom.Selector');
 
-  (function(Selector) {
-    Fuse.Util.$$ = 
-    Fuse.query = function query(selectors, context) {
-      return Selector.select(selectors, $(context));
-    };
-
-    // prevent JScript bug with named function expressions
-    var query = null;
+  Fuse.query = 
+  Fuse.Util.$$ = (function(Selector) {
+    function query(selectors, context) {
+      return Selector.select(selectors, Fuse.get(context));
+    }
+    return query;
   })(Fuse.Dom.Selector);
