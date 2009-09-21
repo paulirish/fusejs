@@ -1,3 +1,5 @@
+* Ensure Fuse.RegExp's \s fix is done in a non-capturing group. [jddalton]
+
 * Fix typo in STRING_REPLACE_COERCE_FUNCTION_TO_STRING bug test key. [jddalton, kangax]
 
 * Stop Opera 9.25 Fuse.Array#slice from clipping results when the end index falls on an undefined index. [jddalton]

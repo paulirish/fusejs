@@ -396,7 +396,7 @@
           for (character in specialCharMap.s)
             if (character.replace(/\s/, '').length)
               result.push('\\u' +('0000' + character.charCodeAt(0).toString(16)).slice(-4));
-          return result.length > 1 ? '(' + result.join('|') + ')' : result[0];
+          return result.length > 1 ? '(?:' + result.join('|') + ')' : result[0];
         })();
 
         if (s !== '\\s') {
