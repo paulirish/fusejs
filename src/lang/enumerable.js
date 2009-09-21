@@ -1,9 +1,9 @@
   /*---------------------------- LANG: ENUMERABLE ----------------------------*/
 
-  Fuse.addNS('Enumerable');
+  Fuse.Enumerable = { };
 
-  (function(plugin) {
-    plugin.contains = function contains(value) {
+  (function(mixin) {
+    mixin.contains = function contains(value) {
       var result = 0;
       this.each(function(item) {
         // basic strict match
@@ -16,7 +16,7 @@
       return !!result;
     };
 
-    plugin.each = function each(callback, thisArg) {
+    mixin.each = function each(callback, thisArg) {
       try {
         this._each(function(value, index, iterable) {
           callback.call(thisArg, value, index, iterable);
@@ -27,7 +27,7 @@
       return this;
     };
 
-    plugin.eachSlice = function eachSlice(size, callback, thisArg) {
+    mixin.eachSlice = function eachSlice(size, callback, thisArg) {
       var index = -size, slices = Fuse.List(), list = this.toList();
       if (size < 1) return list;
       while ((index += size) < list.length)
@@ -35,7 +35,7 @@
       return slices.map(callback, thisArg);
     };
 
-    plugin.every = function every(callback, thisArg) {
+    mixin.every = function every(callback, thisArg) {
       callback = callback || K;
       var result = true;
       this.each(function(value, index, iterable) {
@@ -46,7 +46,7 @@
       return result;
     };
 
-    plugin.filter = function filter(callback, thisArg) {
+    mixin.filter = function filter(callback, thisArg) {
       var results = Fuse.List();
       callback = callback || function(value) { return value != null; };
       this._each(function(value, index, iterable) {
@@ -56,7 +56,7 @@
       return results;
     };
 
-    plugin.first = function first(callback, thisArg) {
+    mixin.first = function first(callback, thisArg) {
       if (callback == null) {
         var result;
         this.each(function(value) { result = value; throw $break; });
@@ -65,7 +65,7 @@
       return this.toList().first(callback, thisArg);
     };
 
-    plugin.inGroupsOf = function inGroupsOf(size, filler) {
+    mixin.inGroupsOf = function inGroupsOf(size, filler) {
       filler = typeof filler === 'undefined' ? null : filler;
       return this.eachSlice(size, function(slice) {
         while (slice.length < size) slice.push(filler);
@@ -73,25 +73,25 @@
       });
     };
 
-    plugin.inject = function inject(accumulator, callback, thisArg) {
+    mixin.inject = function inject(accumulator, callback, thisArg) {
       this._each(function(value, index, iterable) {
         accumulator = callback.call(thisArg, accumulator, value, index, iterable);
       });
       return accumulator;
     };
 
-    plugin.invoke = function invoke(method) {
+    mixin.invoke = function invoke(method) {
       var args = slice.call(arguments, 1), funcProto = Function.prototype;
       return this.map(function(value) {
         return funcProto.apply.call(value[method], value, args);
       });
     };
 
-    plugin.last = function last(callback, thisArg) {
+    mixin.last = function last(callback, thisArg) {
       return this.toList().last(callback, thisArg);
     };
 
-    plugin.map = function map(callback, thisArg) {
+    mixin.map = function map(callback, thisArg) {
       if (!callback) return this.toList();
       var results = Fuse.List();
       if (thisArg) {
@@ -106,7 +106,7 @@
       return results;
     };
 
-    plugin.max = function max(callback, thisArg) {
+    mixin.max = function max(callback, thisArg) {
       callback = callback || K;
       var comparable, max, result;
       this._each(function(value, index, iterable) {
@@ -118,7 +118,7 @@
       return result;
     };
 
-    plugin.min = function min(callback, thisArg) {
+    mixin.min = function min(callback, thisArg) {
       callback = callback || K;
       var comparable, min, result;
       this._each(function(value, index, iterable) {
@@ -130,7 +130,7 @@
       return result;
     };
 
-    plugin.partition = function partition(callback, thisArg) {
+    mixin.partition = function partition(callback, thisArg) {
       callback = callback || K;
       var trues = Fuse.List(), falses = Fuse.List();
       this._each(function(value, index, iterable) {
@@ -140,17 +140,17 @@
       return Fuse.List(trues, falses);
     };
 
-    plugin.pluck = function pluck(property) {
+    mixin.pluck = function pluck(property) {
       return this.map(function(value) {
         return value[property];
       });
     };
 
-    plugin.size = function size() {
+    mixin.size = function size() {
       return Fuse.Number(this.toList().length);
     };
 
-    plugin.some = function some(callback, thisArg) {
+    mixin.some = function some(callback, thisArg) {
       callback = callback || K;
       var result = false;
       this.each(function(value, index, iterable) {
@@ -161,7 +161,7 @@
       return result;
     };
 
-    plugin.sortBy = function sortBy(callback, thisArg) {
+    mixin.sortBy = function sortBy(callback, thisArg) {
       return this.map(function(value, index, iterable) {
         return {
           'value': value,
@@ -173,13 +173,13 @@
       }).pluck('value');
     };
 
-    plugin.toArray = function toArray() {
+    mixin.toArray = function toArray() {
       var results = Fuse.List();
       this._each(function(value, index) { results[index] = value; });
       return results;
     };
 
-    plugin.zip = function zip() {
+    mixin.zip = function zip() {
       var callback = K, args = slice.call(arguments, 0);
 
       // if last argument is a function it is the callback
@@ -195,7 +195,7 @@
     };
 
     // alias
-    plugin.toList = plugin.toArray;
+    mixin.toList = mixin.toArray;
 
     // prevent JScript bug with named function expressions
     var contains = null,
@@ -218,4 +218,4 @@
      sortBy =      null,
      toArray =     null,
      zip =         null;
-  })(Fuse.Enumerable.plugin);
+  })(Fuse.Enumerable);

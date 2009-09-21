@@ -1,6 +1,6 @@
   /*------------------------------- LANG: RANGE ------------------------------*/
 
-  Fuse.addNS('Range', Fuse.Enumerable, {
+  Fuse.addNS('Range', {
     'constructor': (function() {
       function Range(start, end, exclusive) {
         if (!(this instanceof Range))
@@ -100,6 +100,14 @@
       isExpired(this) && buildCache(this);
       return Fuse.List.fromArray(this._cache);
     };
+
+    // assign any missing Enumerable methods
+    if (Fuse.Enumerable) {
+      eachKey(Fuse.Enumerable, function(value, key, object) {
+        if (hasKey(object, key) && typeof plugin[key] !== 'function')
+          plugin[key] = value;
+      });
+    }
 
     // prevent JScript bug with named function expressions
     var _each = null, size = null, toArray = null;

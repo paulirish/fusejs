@@ -127,16 +127,16 @@
 
     // Fuse.Enumerable#inspect
     if (Fuse.Enumerable)
-    (function(plugin) {
+    (function() {
       function inspect() {
-        // called normally or called Obj.inspect(Fuse.Enumerable.plugin)
+        // called normally or called Obj.inspect(Fuse.Enumerable)
         return isFunction(this._each)
           ? Fuse.String('#<Enumerable:' + this.toList().inspect() + '>')
-          : inspectPlugin(plugin);
+          : inspectPlugin(Fuse.Enumerable);
       }
 
-      plugin.inspect = inspect;
-    })(Fuse.Enumerable.plugin);
+      Fuse.Enumerable.inspect = inspect;
+    })();
 
 
     // Fuse.Hash#inspect
