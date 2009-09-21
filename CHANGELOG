@@ -1,3 +1,5 @@
+* Update vendor repos and modify the NWMatcher adapter to use variable references for the NW.Dom.select() and NW.Dom.match() methods. [Diego Perini, jddalton]
+
 * Optimize Fuse.Enumerable.eachSlice() by avoiding a call to map() if no callback is provided. [Prototype LH #796] [Joran Greef]
 
 * Rename Fuse.Class.Methods.addMethods to `extend`. [jddalton]
