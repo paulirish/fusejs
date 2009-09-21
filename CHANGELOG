@@ -1,3 +1,9 @@
+* Rename Fuse.Class.Methods.addMethods to `extend`. [jddalton]
+  Note: extend() may be invoked in one of the following ways:
+   - MyClass.extend(plugins)
+   - MyClass.extend(statics, plugins)
+   - MyClass.extend(statics, plugins, mixins)
+
 * Convert Element#inspect to Fuse.Dom.Element#inspect. [jddalton]
 
 * Revert Fuse.Enumerable to a mixin and remove it as a dependency for Fuse.Range. [jddalton]

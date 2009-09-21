@@ -101,23 +101,34 @@ new Test.Unit.Runner({
       'Should have called super `say` method resolved from arguments.callee');
   },
 
-  'testClassAddMethods': function() {
+  'testClassExtend': function() {
     var tom = new Fixtures.Cat('Tom'),
      jerry  = new Fixtures.Mouse('Jerry');
 
-    Fixtures.Animal.addMethods({
-      'sleep': function() { return this.say('ZZZ') }
+    Fixtures.Animal.extend({
+      'sleep': function() { return this.say('ZZZ'); }
     });
 
-    Fixtures.Mouse.addMethods({
-      'sleep': function() {
-        return Fixtures.Mouse.callSuper(this, 'sleep') + ' ... no, can\'t sleep! Gotta steal cheese!';
+    Fixtures.Mouse.extend(
+      {
+        'staticTest': function() {
+          return 'static';
+        }
       },
+      {
+        'sleep': function() {
+          return Fixtures.Mouse.callSuper(this, 'sleep') +
+            ' ... no, can\'t sleep! Gotta steal cheese!';
+        },
 
-      'escape': function(cat) {
-        return this.say('(from a mousehole) Take that, ' + cat.name + '!');
+        'escape': function(cat) {
+          return this.say('(from a mousehole) Take that, ' + cat.name + '!');
+        }
       }
-    });
+    );
+
+    this.assertEqual('function', typeof Fixtures.Mouse.staticTest,
+      'Class.extend(static, plugin) should have added a static method to Fixtures.Mouse');
 
     this.assertEqual('Tom: ZZZ', tom.sleep(),
       'added instance method not available to subclass');
@@ -132,7 +143,7 @@ new Test.Unit.Runner({
     this.assertUndefined(tom.escape);
     this.assertUndefined(new Fixtures.Animal().escape);
 
-    Fixtures.Animal.addMethods({
+    Fixtures.Animal.extend({
       'sleep': function() { return this.say('zZzZ') }
     });
 
@@ -168,7 +179,7 @@ new Test.Unit.Runner({
       'm1': function(){ return 'm1' },
       'm2': function(){ return 'm2' }
     }),
-    
+
     Child = Fuse.Class(Parent, {
       'm1': function() { return Child.callSuper(this, 'm1') + ' child' },
       'm2': function() { return Child.callSuper(this, 'm2') + ' child' }

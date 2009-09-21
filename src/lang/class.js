@@ -24,9 +24,12 @@
 
     function Class() {
       var klass, parent, plugin, props, i = 0,
-       properties = slice.call(arguments, 0);
+       properties = slice.call(arguments, 0),
+       first = properties[0];
 
-      if (typeof properties[0] === 'function')
+      if (isString(first))
+        parent = createNamedClass(properties.shift());
+      else if (typeof first === 'function')
         parent = properties.shift();
 
       // search properties for a custom `constructor` method
@@ -59,7 +62,7 @@
 
       // add methods to klass.plugin
       i = 0;
-      while (props = properties[i++]) klass.addMethods(props);
+      while (props = properties[i++]) klass.extend(props);
 
       plugin.constructor = klass;
       return klass;
@@ -71,45 +74,55 @@
   /*--------------------------------------------------------------------------*/
 
   (function(methods) {
-    methods.addMethods = function addMethods(source) {
+    methods.extend = function extend() {
       var i, otherMethod,
-       prototype  = this.prototype,
-       superProto = this.superclass && this.superclass.prototype,
-       subclasses = this.subclasses,
-       length = subclasses.length;
+       args      = arguments,
+       argLength = args.length,
 
-      // a simple assignment
-      if (!superProto && !length)
-        eachKey(source, function(method, key) { prototype[key] = method; });
+       klass      = this,
+       prototype  = klass.prototype,
+       superProto = klass.superclass && klass.superclass.prototype,
+       subclasses = klass.subclasses,
+       subLength  = subclasses.length,
 
-      // or add $super support and/or update subclasses
-      else eachKey(source, function(method, key) {
-        var protoMethod = prototype[key],
-         superMethod = superProto && superProto[key];
+       statics = argLength > 1 ? args[0] : null,
+       plugins = argLength < 3 ? args[argLength - 1] : args[1],
+       mixins  = argLength > 2 ? args[2] : null;
 
-        // avoid typeof === `function` because Safari 3.1+ mistakes
-        // regexp instances as typeof `function`
-        if (isFunction(method)) {
-          if (isFunction(superMethod))
-            method.$super = superMethod;
+      if (statics)
+        eachKey(statics, function(method, key) { klass[key] = method; });
 
-          if (isFunction(protoMethod)) {
-            i = length;
-            while (i--) {
-              otherMethod = subclasses[i].prototype[key];
-              if (otherMethod && otherMethod.$super)
-                otherMethod.$super = method;
+      if (mixins)
+        eachKey(mixins, function(method, key) { prototype[key] = method; });
+
+      if (plugins)
+        eachKey(plugins, function(method, key) {
+          var protoMethod = prototype[key],
+           superMethod = superProto && superProto[key];
+  
+          // avoid typeof === `function` because Safari 3.1+ mistakes
+          // regexp instances as typeof `function`
+          if (isFunction(method)) {
+            if (isFunction(superMethod))
+              method.$super = superMethod;
+  
+            if (isFunction(protoMethod)) {
+              i = subLength;
+              while (i--) {
+                otherMethod = subclasses[i].prototype[key];
+                if (otherMethod && otherMethod.$super)
+                  otherMethod.$super = method;
+              }
             }
           }
-        }
-        prototype[key] = method;
-      });
+          prototype[key] = method;
+        });
 
-      return this;
+      return klass;
     };
 
     // prevent JScript bug with named function expressions
-    var addMethods = null;
+    var extend = null;
   })(Fuse.Class.Methods = { });
 
   /*--------------------------------------------------------------------------*/
