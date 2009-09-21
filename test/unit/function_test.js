@@ -1,41 +1,5 @@
 new Test.Unit.Runner({
 
-  'testFunctionArgumentNames': function() {
-    function named1() { };
-    function named2(one) { };
-    function named3(one, two, three) { };
-    function named4(/*foo*/ foo, /* bar */ bar, /*****/ baz) { }
-    function named5(
-      /*foo*/ foo,
-      /**/bar,
-      /* baz */ /* baz */ baz,
-      // Skip a line just to screw with the regex...
-      /* thud */ thud) { }
-
-    var argumentNames = Fuse.Function.argumentNames;
-
-    this.assertEnumEqual([],
-      argumentNames(function() { }));
-
-    this.assertEnumEqual(['one'],
-      argumentNames(function(one) { }));
-
-    this.assertEnumEqual(['one', 'two', 'three'],
-      argumentNames(function(one, two, three) { }));
-
-    this.assertEnumEqual(['one', 'two', 'three'],
-      argumentNames(function(  one  , two
-      , three   ) {}));
-
-    this.assertEqual('$fuse', argumentNames(function($fuse) { }).first());
-
-    this.assertEnumEqual([], argumentNames(named1));
-    this.assertEnumEqual(['one'], argumentNames(named2));
-    this.assertEnumEqual(['one', 'two', 'three'], argumentNames(named3));
-    this.assertEnumEqual($w('foo bar baz'), argumentNames(named4));
-    this.assertEnumEqual($w('foo bar baz thud'), argumentNames(named5));
-  },
-
   'testFunctionBind': function() {
     function methodWithoutArguments() { return this.hi };
     function methodWithArguments() { return this.hi + ',' + $A(arguments).join(',') };

@@ -198,13 +198,6 @@
       return typeof Fuse._div.textContent === 'string';
     },
 
-    'FUNCTION_TO_STRING_RETURNS_SOURCE': function() {
-      // true for all but some mobile browsers
-      function toStringTest(param1, param2) { var x = 1; }
-      var source = toStringTest.toString();
-      return source.indexOf('param1') > -1 && source.indexOf('x = 1') > -1;
-    },
-
     'HTML_ELEMENT_CLASS': function() {
       // true for all but IE
       // (Safari 2 support is emulated in element.js)

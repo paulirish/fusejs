@@ -1,3 +1,6 @@
+* Remove support for Fuse.Function#argumentNames. [jddalton]
+  Note: Backwards compatibility warning.
+
 * Switch to element decorator patterns instead of extending the native dom elements. [FuseJS LH #29] [jddalton]
   Note: Backwards compatibility warning.
     - Reorganized event.js
