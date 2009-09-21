@@ -409,7 +409,7 @@
       return data[0] || data[1];
     },
 
-    'STRING_REPLACE_COHERSE_FUNCTION_TO_STRING': function() {
+    'STRING_REPLACE_COERCE_FUNCTION_TO_STRING': function() {
       // true for Safari 2
       var func = function() { return ''; };
       return 'a'.replace(/a/, func) === String(func);

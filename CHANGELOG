@@ -1,3 +1,5 @@
+* Fix typo in STRING_REPLACE_COERCE_FUNCTION_TO_STRING bug test key. [jddalton, kangax]
+
 * Stop Opera 9.25 Fuse.Array#slice from clipping results when the end index falls on an undefined index. [jddalton]
 
 * Remove support for Fuse.Function#argumentNames. [jddalton]

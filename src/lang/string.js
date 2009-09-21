@@ -45,7 +45,7 @@
 
   // primarily for Safari 2.0.2 and lower, based on work by Dean Edwards
   // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
-  if (Bug('STRING_REPLACE_COHERSE_FUNCTION_TO_STRING') ||
+  if (Bug('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
       Bug('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN')) (function(plugin) {
     function replace(pattern, replacement) {
       if (typeof replacement !== 'function')
@@ -269,6 +269,8 @@
       return camelize;
     })();
 
+    // set private reference
+    capitalize =
     plugin.capitalize = (function() {
       function capitalize() {
         if (this == null) throw new TypeError;
@@ -425,6 +427,12 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
+
+    function stripTags() {
+      if (this == null) throw new TypeError;
+      return Fuse.String(String(this).replace(matchTags, ''));
+    }
+
     function swapTagsToTokens(tag) {
       var length = tags.length;
       tags.push(tag);
@@ -451,16 +459,12 @@
         : result;
     }
 
-    function stripTags() {
-      if (this == null) throw new TypeError;
-      return Fuse.String(String(this).replace(matchTags, ''));
-    }
 
     // Information on parsing tags can be found at
     // http://www.w3.org/TR/REC-xml-names/#ns-using
     var matchTags = (function() {
       var name   = '\\w+',
-       space     = '[\\x20\\x09\\x0D\\x0A]',
+       space     = '[\\x20\\t\\r\\n]', // \x20 \x09 \x0D \x0A
        eq        = space + '?=' + space + '?',
        charRef   = '&#[0-9]+;',
        entityRef = '&' + name + ';',
@@ -479,6 +483,7 @@
     tags = [],
 
     __unescape = function() { return div.textContent; };
+
 
     if (!Feature('ELEMENT_TEXT_CONTENT')) {
       div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;<\/pre>';
