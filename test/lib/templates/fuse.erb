@@ -25,7 +25,7 @@
       function refresh() {
         var loc = window.location;
         loc.href = loc.protocol + '//' + loc.hostname + loc.pathname +
-          '?engine=' + engineEl.options[engineEl.selectedIndex].text +
+          '?engine=' + engineEl.raw.options[engineEl.raw.selectedIndex].text +
           '&debug='  + $F(debugEl);
       }
 
