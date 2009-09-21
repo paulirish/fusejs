@@ -290,7 +290,7 @@
 
       (function(fn, Number) {
         // ECMA-5 15.9.4.4
-        var now = function now() { return Number(1 * new Date()); };
+        var now = function now() { return Number(+new Date()); };
         if (fn.now) now = function now() { return Number(fn.now()); };
         this.now = now;
 

@@ -104,7 +104,7 @@
       searchString = String(searchString);
 
       var string = String(this),
-       pos = 1 * arguments[1], // fast coerce to number
+       pos = +arguments[1], // fast coerce to number
        len = string.length,
        searchLen = searchString.length;
 
@@ -126,7 +126,7 @@
   // for Chome 1 and 2
   if (Bug('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION')) (function(plugin) {
     function lastIndexOf(searchString) {
-      var pos = 1 * arguments[1];
+      var pos = +arguments[1];
       return __lastIndexOf.call(this, searchString, pos < 0 ? 0 : pos);
     }
 
@@ -293,7 +293,7 @@
       if (this == null) throw new TypeError;
       var endIndex, string = String(this);
 
-      length = 1 * length;
+      length = +length;
       if (isNaN(length)) length = 30;
 
       if (length < string.length) {

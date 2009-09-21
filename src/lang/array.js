@@ -184,7 +184,7 @@
             return object[i];
       }
       else {
-        var count = 1 * callback; // fast coerce to number
+        var count = +callback; // fast coerce to number
         if (isNaN(count)) return Fuse.Array();
         count = count < 1 ? 1 : count > length ? length : count;
         return plugin.slice.call(object, 0, count);
@@ -265,7 +265,7 @@
             return object[length];
       }
       else {
-        var results = Fuse.Array(), count = 1 * callback;
+        var results = Fuse.Array(), count = +callback;
         if (isNaN(count)) return results;
 
         count = count < 1 ? 1 : count > length ? length : count;
