@@ -1,3 +1,5 @@
+* Expose Fuse.getDocument() and Fuse.getWindow(). [jddalton]
+
 * Make Fuse.Dom.Node() pass to Fuse.Dom.Element.decorate() if the nodeType is equal to 1. [jddalton]
 
 * Ensure Fuse.Dom.NodeList methods return Fuse.Dom.NodeList instead of Fuse.Array instances where necessary. [jddalton]

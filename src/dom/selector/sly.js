@@ -6,7 +6,8 @@
     };
 
     Selector.select = function select(selector, context) {
-      return Sly(String(selector || ''), context || Fuse._doc, NodeList());
+      return Sly(String(selector || ''),
+        context && context.raw || context || Fuse._doc, NodeList());
     };
 
     // prevent JScript bug with named function expressions

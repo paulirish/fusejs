@@ -6,7 +6,8 @@
     };
 
     Selector.select = function select(selector, context) {
-      return Sizzle(String(selector || ''), context || Fuse._doc, NodeList());
+      return Sizzle(String(selector || ''), 
+        context && context.raw || context || Fuse._doc, NodeList());
     };
 
     // prevent JScript bug with named function expressions

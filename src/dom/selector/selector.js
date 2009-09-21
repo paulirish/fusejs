@@ -4,8 +4,8 @@
 
   Fuse.addNS('Dom.Selector');
 
-  Fuse.query = 
-  Fuse.Util.$$ = (function(Selector) {
+  Fuse.Util.$$ = 
+  Fuse.query   = (function(Selector) {
     function query(selectors, context) {
       return Selector.select(selectors, Fuse.get(context));
     }
