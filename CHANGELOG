@@ -1,3 +1,5 @@
+* Convert Element#inspect to Fuse.Dom.Element#inspect. [jddalton]
+
 * Revert Fuse.Enumerable to a mixin and remove it as a dependency for Fuse.Range. [jddalton]
 
 * After further study change `1 * n` back to to `+n` for quick numeric conversions. [Kean Tan]

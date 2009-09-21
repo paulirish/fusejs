@@ -159,36 +159,29 @@
 
 
     // Element#inspect
-    if (global.Element && global.Element.Methods)
-    (function(proto, methods) {
-      function inspect(element) {
-        // called methodized Obj.inspect(Element.prototype || HTMLElement.prototype)
-        if (element === proto)
-          return inspectPlugin(proto);
+    if (Element)
+    (function(plugin) {
+      function inspect() {
+        // called Obj.inspect(Element.plugin) or Obj.inspect(Element)
+        if (this === plugin || this === Element)
+          return inspectPlugin(this);
 
         // called normally Element.inspect(element)
-        if (element = $(element)) {
-          var attribute, property, value,
-           result = '<' + element.nodeName.toLowerCase(),
-           translation = { 'id': 'id', 'className': 'class' };
+        var attribute, property, value,
+         element     = this.raw || this,
+         result      = '<' + element.nodeName.toLowerCase(),
+         translation = { 'id': 'id', 'className': 'class' };
 
-          for (property in translation) {
-            attribute = translation[property];
-            value = element[property] || '';
-            if (value) result += ' ' + attribute + '=' + Fuse.String(value).inspect(true);
-          }
-          return Fuse.String(result + '>');
+        for (property in translation) {
+          attribute = translation[property];
+          value = element[property] || '';
+          if (value) result += ' ' + attribute + '=' + Fuse.String(value).inspect(true);
         }
-
-        // called Obj.inspect(Element) or Obj.inspect(Element.Methods);
-        if (this === methods || this === Element)
-          return inspectPlugin(this);
+        return Fuse.String(result + '>');
       }
 
-      methods.inspect = inspect;
-    })(Feature('HTML_ELEMENT_CLASS') && global.HTMLElement.prototype ||
-       Feature('ELEMENT_CLASS') && global.Element.prototype,
-       Element.Methods);
+      plugin.inspect = inspect;
+    })(Element.plugin);
 
 
     // Event#inspect
