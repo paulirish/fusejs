@@ -1,3 +1,5 @@
+* Optimize Fuse.Enumerable.eachSlice() by avoiding a call to map() if no callback is provided. [Prototype LH #796] [Joran Greef]
+
 * Rename Fuse.Class.Methods.addMethods to `extend`. [jddalton]
   Note: extend() may be invoked in one of the following ways:
    - MyClass.extend(plugins)

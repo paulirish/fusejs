@@ -32,7 +32,9 @@
       if (size < 1) return list;
       while ((index += size) < list.length)
         slices[slices.length] = list.slice(index, index + size);
-      return slices.map(callback, thisArg);
+      return callback
+        ? slices.map(callback, thisArg)
+        : slices;
     };
 
     mixin.every = function every(callback, thisArg) {
