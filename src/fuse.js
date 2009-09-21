@@ -38,9 +38,9 @@
   /*----------------------- PRIVATE VARIABLES/METHODS ------------------------*/
 
   var Bug, Data, Element, Feature, Field, Form, Func, Obj, Node, NodeList,
-   _extend, bind, capitalize, clone, decorate, defer, eachKey, hasKey, inspect,
-   isArray, isElement, isEmpty, isHash, isFunction, isNumber, isPrimitive, isRegExp,
-   isSameOrigin, isString, isUndefined, undef,
+   _extend, addListMethods, bind, capitalize, clone, decorate, defer, eachKey,
+   hasKey, inspect, isArray, isElement, isEmpty, isHash, isFunction, isNumber,
+   isPrimitive, isRegExp, isSameOrigin, isString, isUndefined, undef,
 
    $break =
    Fuse.$break = function $break() { },
