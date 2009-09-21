@@ -4,29 +4,25 @@
   Fuse.addNS('Dom.Node', {
     'constructor': (function() {
       function Node(node) {
+        // return if already decoratored or falsy
+        if (!node || node.raw) return node;
+
+        // pass to element decorator
+        var data, id, nodeType = node.nodeType;
+        if (nodeType === 1)
+          return decorate(node);
+
         if (this === Fuse.Dom)
           return new Node(node);
 
-        if (node) {
-          // return if already a decorator
-          if (node.raw) return node;
+        // return cached if available
+        id = Node.getFuseId(node);
+        data = (Data[id] = Data[id] || { });
+        if (data.decorator) return data.decorator;
 
-          // return custom element class if available
-          var klass, nodeName = node.nodeName;
-          if (nodeName && this.constructor === Node &&
-              (klass = Fuse.Dom[capitalize.call(nodeName) + 'Element']))
-            return new klass(node);
-
-          // return cached if available
-          var id = Node.getFuseId(node),
-           cache = (Data[id] = Data[id] || { });
-          if (cache.decorator) return cache.decorator;
- 
-          cache.decorator = this;
-          cache.node =
-          this.raw = node;
-        }
-        else return node;
+        data.decorator = this;
+        data.node =
+        this.raw = node;
       }
 
       return Node;

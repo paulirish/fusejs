@@ -68,8 +68,6 @@
   Element.create = (function() {
     var doc = Fuse._doc,
 
-    __create =
-
     create = function create(tagName, attributes, context) {
       var data, element, fragment, id, html, length, nodes, result;
 
@@ -105,7 +103,9 @@
         : element;
     };
 
-    if (Feature('CREATE_ELEMENT_WITH_HTML'))
+    if (Feature('CREATE_ELEMENT_WITH_HTML')) {
+      var __create = create;
+
       create = function create(tagName, attributes, context) {
         var name, type;
         if (attributes && tagName.charAt(0) != '<' &&
@@ -117,7 +117,7 @@
         }
         return __create(tagName, attributes, context);
       };
-
+    }
     return create;
   })();
 
@@ -175,11 +175,11 @@
 
       var decorated, nodeName, tagClass, tagClassName,
        id = getFuseId(element),
-       cache = (Data[id] = Data[id] || { });
+       data = (Data[id] = Data[id] || { });
 
       // return cached if available
-      if (cache.decorator)
-        return cache.decorator;
+      if (data.decorator)
+        return data.decorator;
 
       nodeName = getNodeName(element);
 
@@ -201,10 +201,10 @@
 
       Decorator.prototype = thisArg.plugin;
 
-      cache.decorator =
+      data.decorator =
       decorated = new Decorator;
 
-      cache.node =
+      data.node =
       decorated.raw = element;
       decorated.style = element.style;
 
