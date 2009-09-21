@@ -175,7 +175,7 @@
     },
 
     'ELEMENT_REMOVE_NODE': function() {
-      // true for IE
+      // true for IE and Opera
       return isHostObject(Fuse._docEl, 'removeNode');
     },
 
@@ -234,8 +234,15 @@
   Bug.set({
     'ARRAY_CONCAT_ARGUMENTS_BUGGY': function() {
       // true for Opera
-      return (function() { return Array.prototype.concat &&
-        [].concat(arguments).length === 2; })(1, 2);
+      var array = [];
+      return (function() { return array.concat &&
+        array.concat(arguments).length === 2; })(1, 2);
+    },
+
+    'ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES': function() {
+      // true for Opera 9,25
+      var array = [1]; array[2] = 1;
+      return array.slice && array.slice(0, 2).length === 1;
     },
 
     'ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS': function() {

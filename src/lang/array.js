@@ -532,6 +532,28 @@
         return results;
       };
 
+    
+    if (Bug('ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES'))
+      plugin.slice = (function(__slice) {
+        function slice(start, end) {
+          if (this == null) throw new TypeError;
+          end = toInteger(end);
+
+          var result, object = Object(this),
+           length = object.length >>> 0, endIndex = end - 1;
+
+          if (end > length || endIndex in object)
+            return __slice.call(object, start, end);
+
+          object[endIndex] = undef;
+          result = __slice.call(object, start, end);
+          delete object[endIndex];
+          return result;
+        }
+
+        return slice;
+      })(plugin.slice);
+
     // ECMA-5 15.4.4.17
     if (!plugin.some)
       plugin.some = function some(callback, thisArg) {
