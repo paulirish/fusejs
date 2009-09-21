@@ -4,11 +4,13 @@
   // Matthias Miller, Dean Edwards, John Resig and Diego Perini.
   (function() {
     function Poller(method) {
-      var poller = this, setTimeout = global.setTimeout;
-      var callback = function() {
+      function callback() {
         if (!method() && poller.id != null)
           poller.id = setTimeout(callback, 10);
-      };
+      }
+
+      var poller = this,
+       setTimeout = global.setTimeout;
       this.id = setTimeout(callback, 10);
     }
 
