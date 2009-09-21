@@ -272,7 +272,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    var Methods, domLoadDispatcher, winLoadDispatcher
+    var Methods, domLoadDispatcher, winLoadDispatcher,
 
     arrayIndexOf = Array.prototype.indexOf || Fuse.Array.plugin.indexOf,
 
