@@ -622,10 +622,6 @@
       return Fuse.String((this.raw || this).innerHTML).blank();
     };
 
-    plugin.getFuseId = function getFuseId() {
-      return (this.raw || this).getFuseId();
-    };
-
     plugin.identify = (function() {
       function identify() {
         // use readAttribute to avoid issues with form elements and

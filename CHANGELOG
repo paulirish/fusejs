@@ -1,3 +1,5 @@
+* Add Fuse.Dom.Node#getFuseId so it can be inherited by all other element/node classes. [jddalton]
+
 * Optimize Fuse.String#startsWith and Fuse.String#endsWith. [Prototype LH #808] [jddalton, Yaffle]
 
 * Cleanup and optimize Fuse.Fusebox() as well as add Firefox 1.5 - 2.0.0.2 compatibility. [jddalton]

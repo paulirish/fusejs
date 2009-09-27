@@ -46,8 +46,6 @@
   }, null);
 
   Node.getFuseId = (function() {
-    var fuseId = 3;
-
     function createGetter() {
       function getFuseId() {
         // if cache doesn't match, request a new id
@@ -80,5 +78,11 @@
       return (node.getFuseId = createGetter())();
     }
 
+    var fuseId = 3;
+    return getFuseId;
+  })();
+
+  Node.plugin.getFuseId = (function() {
+    function getFuseId() { return (this.raw || this).getFuseId(); }
     return getFuseId;
   })();
