@@ -283,7 +283,7 @@
       methods && Obj.extend(Event.Methods, methods);
 
       eachKey(Event.Methods, function(value, key, object) {
-        if (key.indexOf('pointer') != 0)
+        if (key.lastIndexOf('pointer', 0))
           Methods.push([key, Func.methodize([key, object])]);
       });
     },

@@ -1,3 +1,5 @@
+* Optimize Fuse.String#startsWith and Fuse.String#endsWith. [Prototype LH #808] [jddalton, Yaffle]
+
 * Cleanup and optimize Fuse.Fusebox() as well as add Firefox 1.5 - 2.0.0.2 compatibility. [jddalton]
 
 * Expose Fuse.getDocument() and Fuse.getWindow(). [jddalton]

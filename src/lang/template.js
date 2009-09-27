@@ -44,7 +44,7 @@
           if (match == null) return before;
 
           while (match != null) {
-            comp  = match[1].indexOf('[') === 0 ? match[2].replace(/\\]/g, ']') : match[1];
+            comp  = !match[1].lastIndexOf('[', 0) ? match[2].replace(/\\]/g, ']') : match[1];
             value = ctx[comp];
             if (!hasKey(ctx, comp) || value == null) {
               value = ''; break;

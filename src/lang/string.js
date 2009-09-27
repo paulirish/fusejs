@@ -222,9 +222,11 @@
     };
 
     plugin.endsWith = function endsWith(pattern) {
+      // when searching for a pattern at the end of a long string
+      // indexOf(pattern, fromIndex) is faster than lastIndexOf(pattern) 
       if (this == null) throw new TypeError;
       var string = String(this), d = string.length - pattern.length;
-      return d >= 0 && string.lastIndexOf(pattern) == d;
+      return d >= 0 && string.indexOf(pattern, d) === d;
     };
 
     plugin.scan = function scan(pattern, callback) {
@@ -234,8 +236,10 @@
     };
 
     plugin.startsWith = function startsWith(pattern) {
+      // when searching for a pattern at the start of a long string
+      // lastIndexOf(pattern, fromIndex) is faster than indexOf(pattern) 
       if (this == null) throw new TypeError;
-      return String(this).indexOf(pattern) == 0;
+      return !String(this).lastIndexOf(pattern, 0);
     };
 
     // prevent JScript bug with named function expressions
