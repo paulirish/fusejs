@@ -1,627 +1,834 @@
   /*----------------------------- FUSE: FUSEBOX ------------------------------*/
 
   Fuse.Fusebox = (function() {
-    function Fusebox() {
-      if (this === Fuse) return new Fuse.Fusebox();
 
-      function _cleanup(object) {
-        if (Fuse.Fusebox.mode === 'IFRAME') {
-          var cache = Fuse.Fusebox._createSandbox.cache,
-           iframeEl = object || cache[cache.length -1];
-          iframeEl.parentNode.removeChild(iframeEl);
-        }
-      }
+    var SKIP_METHODS_RETURNING_ARRAYS,
 
-      var _postProcess = function() { };
+    cache = [],
 
-      function Fusebox(sandbox) {
-        if (this === Fuse) return new Fuse.Fusebox();
-        sandbox = sandbox || Fuse.Fusebox._createSandbox();
+    mode = (function()  {
+      // avoids the htmlfile activeX warning when served from the file protocol
+      if (Feature('ACTIVE_X_OBJECT') && global.location.protocol !== 'file:')
+        return 'ACTIVE_X_OBJECT';
 
-        // use call to avoid polluting the scope of the called
-        // methods with another varaiable
-        Fuse.Fusebox._createNatives.call(this, sandbox);
-        _postProcess(this);
+      // check "OBJECT__PROTO__" first because Firefox will permanently screw up
+      // other iframes on the page if an iframe is inserted before the dom has loaded
+      if (Feature('OBJECT__PROTO__'))
+        return 'OBJECT__PROTO__';
 
-        Fuse.Fusebox._createStatics.call(this, sandbox);
-        Fuse.Fusebox._wrapAccessorMethods.call(this, sandbox);
+      if (isHostObject(global, 'frames') && Fuse._doc &&
+          isHostObject(Fuse._doc, 'createElement'))
+        return 'IFRAME';
+    })(),
 
-        // assign prototype properties, plugin alias, and static updateGenerics method
-        var n, i = 0;
-        while (n = natives[i++]) {
-          this[n].constructor = this;
-          this[n].prototype.constructor = this[n];
-          this[n].plugin = this[n].prototype;
+    createSandbox = (function() {
+      if (mode === 'OBJECT__PROTO__')
+        return function () { return global; };
 
-          if (n !== 'Object') this[n].updateGenerics = new Function('', [
-            'function updateGenerics() {',
-            'this.constructor.updateGenerics("' + n + '");',
-            '}', 'return updateGenerics;'].join('\n'))();
-        }
-
-        _cleanup();
-        this.updateGenerics();
-      }
-
-      var sandbox,
-       natives = ['Array', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String'];
-
-      // Safari 2.0.2 and lower will not populate the window.frames collection
-      // until the dom has loaded. This will cause early attempts to create an
-      // iframe sandbox to fail.
-      try {
-        sandbox = Fuse.Fusebox._createSandbox();
-      } catch(e) {
-        if (Fuse.Fusebox.mode !== 'IFRAME') throw e;
-      }
-
-      if (Fuse.Fusebox.mode === 'IFRAME')
-        (function(Array) {
-          // remove iframe from the document and nullify sandbox variable in
-          // case it was corrupted by Opera
-          sandbox && _cleanup(Fuse.Fusebox._createSandbox.cache.pop());
-          sandbox = null;
-
-          // Safari 3+ will fail to extend iframe sandboxed natives before the
-          // dom has loaded. Catches Safari 2.0.2 and lower as well because sandbox
-          // will be undefined
-          try {
-            Array.prototype.x = 1;
-            if (!Array().x) throw new Error;
-            delete Array.prototype.x;
-          }
-          catch(e) {
-            // switch to "__proto__" powered sandboxes if available
-            if (Feature('OBJECT__PROTO__')) {
-              Fuse.Fusebox.mode = 'OBJECT__PROTO__';
-              sandbox = Fuse.Fusebox._createSandbox();
-              Array = sandbox.Array;
-            } else throw e;
-          }
-
-          // Opera 9.5 - 10a throws a security error when calling Array#map or String#lastIndexOf
-          // Opera 9.5 - 9.64 will error by simply calling the methods.
-          // Opera 10 will error when first accessing the contentDocument of
-          // another iframe and then accessing the methods.
-          if (Array.prototype.map) {
-            _cleanup(Fuse.Fusebox._createIframeObject().frameElement);
-            try { new Array().map(K); } catch (e) {
-              _postProcess = function(fusebox) {
-                fusebox.Array.prototype.map =
-                fusebox.String.prototype.lastIndexOf = null;
-              };
-            }
-          }
-        })(sandbox && sandbox.Array);
-
-      // Chrome, IE, and Opera's Array accessors return sugared arrays so we skip wrapping them
-      sandbox = sandbox || Fuse.Fusebox._createSandbox();
-      if (!(new sandbox.Array().slice(0) instanceof global.Array))
-        Fuse.Fusebox._wrapAccessorMethods.skip.Array = { 'concat': 1, 'filter': 1, 'slice': 1 };
-
-      // copy original properties to lazy loaded Fusebox and then replace
-      (function(i) { for (i in this) Fusebox[i] = this[i]; }).call(Fuse.Fusebox);
-      Fusebox.prototype = Fuse.Fusebox.prototype;
-      Fuse.Fusebox = Fusebox;
-
-      return new Fusebox(sandbox);
-    }
-    return Fusebox;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  // create lists of spec'ed methods belonging to natives
-  (function() {
-    this.Array =
-      'concat every filter join indexOf lastIndexOf map slice some'.split(' ');
-
-    this.Date =
-      ('getDate getDay getFullYear getHours getMilliseconds getMinutes getMonth ' +
-       'getSeconds getTime getTimezoneOffset getUTCDate getUTCDay ' +
-       'getUTCFullYear getUTCHours getUTCMilliseconds getUTCMinutes ' +
-       'getUTCMonth getUTCSeconds getYear toJSON').split(' ');
-
-    this.Number =
-      'toExponential toFixed toJSON toPrecision'.split(' ');
-
-    this.String =
-      ('charAt charCodeAt concat indexOf lastIndexOf localeCompare match ' +
-       'replace search slice split substr substring toJSON toLowerCase ' +
-       'toUpperCase toLocaleLowerCase toLocaleUpperCase trim').split(' ');
-
-    this.Function = ['bind'];
-    this.RegExp   = ['exec'];
-
-  }).call(Fuse.Fusebox.AccessorNames = { });
-
-  (function(AccessorNames) {
-    for (var n in AccessorNames)
-      this[n] = slice.call(AccessorNames[n], 0);
-
-    this.Array = this.Array.concat((
-      'pop push forEach reduce reduceRight reverse shift sort splice unshift ' +
-      'toLocaleString').split(' '));
-
-    this.Date = this.Date.concat((
-      'setDate setDay setFullYear setHours setMilliseconds setMinutes setMonth '  +
-      'setSeconds setTime setTimezoneOffset setUTCDate setUTCDay setUTCFullYear ' +
-      'setUTCHours setUTCMilliseconds setUTCMinutes setUTCMonth setUTCSeconds '   +
-      'setYear toDateString toGMTString toISOString toLocaleDateString ' +
-      'toLocaleString toLocaleTimeString toString toTimeString toUTCString').split(' '));
-      
-    this.Number   = this.Number.concat('toLocaleString');
-    this.RegExp   = this.RegExp.concat('test');
-
-  }).call(Fuse.Fusebox.MethodNames = { }, Fuse.Fusebox.AccessorNames);
-
-  /*--------------------------------------------------------------------------*/
-
-  Fuse.Fusebox._createIframeObject = (function() {
-    function _createIframeObject(content) {
-      var iframeDoc, i = 0,
-       frame = false,
-       frames = global.frames,
-       iframeEl = Fuse._doc.createElement('iframe'),
-       parentNode = Fuse._body || Fuse._docEl,
-       id = 'iframe_' + expando + counter++;
-
-      iframeEl.id = id;
-      iframeEl.style.cssText = 'position:absolute;left:-1000px;width:0;height:0;overflow:hidden';
-      parentNode.insertBefore(iframeEl, parentNode.firstChild);
-
-      if (frames[0]) {
-        while (frame = frames[i++]) {
-          if (frame.frameElement.id === id) {
-            iframeDoc = frame.document; break;
-          }
-        }
-        if (content) {
-          iframeDoc.open();
-          iframeDoc.write(content);
-          iframeDoc.close();
-        }
-      }
-      return frame;
-    }
-
-    var counter = 0;
-    return _createIframeObject;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  Fuse.Fusebox._createSandbox = (function() {
-    function _createSandbox(mode) {
-      var cache = Fuse.Fusebox._createSandbox.cache;
-      switch(mode || Fuse.Fusebox.mode) {
-        case 'ACTIVE_X_OBJECT':
+      // IE requires the iframe/htmlfile remain in the cache or it will be
+      // marked for garbage collection
+      if (mode === 'ACTIVE_X_OBJECT')
+        return function() {
           var htmlfile = new ActiveXObject('htmlfile');
           htmlfile.open();
           htmlfile.write('<script>document.domain="' + Fuse._doc.domain + '";document.global = this;<\/script>');
           htmlfile.close();
           cache.push(htmlfile);
           return htmlfile.global;
+        };
 
-        case 'IFRAME':
-          var frame = Fuse.Fusebox._createIframeObject('<script>parent.Fuse.' +
-            expando + ' = this;<\/script>');
-          if (frame) {
-            var result = Fuse[expando];
-            delete Fuse[expando];
-            cache.push(frame.frameElement);
-            return result;
+      if (mode === 'IFRAME') {
+        var counter = 0;
+        return function() {
+          var idoc, iframe, frame, result, i = 0,
+           frames = global.frames,
+           iframe = Fuse._doc.createElement('iframe'),
+           parentNode = Fuse._body || Fuse._docEl,
+           id = 'iframe_' + expando + counter++;
+
+          iframe.id = id;
+          iframe.style.cssText = 'position:absolute;left:-1000px;width:0;height:0;overflow:hidden';
+          parentNode.insertBefore(iframe, parentNode.firstChild);
+
+          while (frame = frames[i++]) {
+            if (frame.frameElement.id === id) {
+              idoc = frame.document; break;
+            }
           }
-          break;
 
-         case 'OBJECT__PROTO__': return global;
+          idoc.open();
+          idoc.write('<script>parent.Fuse.' + expando + ' = this;<\/script>');
+          idoc.close();
+
+          result = Fuse[expando];
+          delete Fuse[expando];
+
+          cache.push(iframe);
+          return result;
+        };
       }
-      throw new Error('Fuse failed to create a sandbox.');
-    }
 
-    // IE requires the iframe/htmlfile remain in the cache or it will be
-    // marked for garbage collection
-    _createSandbox.cache = [];
-    return _createSandbox;
-  })();
+      return function() {
+        throw new Error('Fuse failed to create a sandbox.');
+      };
+    })(),
 
-  /*--------------------------------------------------------------------------*/
+    postProcess = function() {
+      // remove iframe
+      iframe = cache[cache.length -1];
+      iframe.parentNode.removeChild(iframe);
+    },
 
-  // determine default mode for creating a sandbox
-  Fuse.Fusebox.mode = (function()  {
-    var isFileProtocol = global.location &&
-      (global.location.href || '').indexOf('file:') === 0;
+    Fusebox = (function() {
+      var Fusebox = function Fusebox() {
+        if (this.prototype) return new Fusebox();
+        createFusebox(this);
+      };
 
-    // avoids the htmlfile activeX warning when served from the file protocol
-    if (Feature('ACTIVE_X_OBJECT') && !isFileProtocol)
-      return 'ACTIVE_X_OBJECT';
+      if (mode === 'IFRAME')
+        Fusebox = function Fusebox() {
+          if (this.prototype) return new Fusebox();
+          createFusebox(this);
+          postProcess(this);
+        };
+      return Fusebox;
+    })();
 
-    if (Feature('OBJECT__PROTO__')) return 'OBJECT__PROTO__';
+    /*------------------------------------------------------------------------*/
 
-    // check "OBJECT__PROTO__" first because Firefox will permanently screw up
-    // other iframes on the page if an iframe is inserted before the dom has loaded
-    if (Fuse._doc && isHostObject(global, 'frames') &&
-        isHostObject(Fuse._doc, 'createElement')) return 'IFRAME';
-  })();
+    function createFusebox(thisArg) {
+      var Array, Date, Function, Number, Object, RegExp, String, fromArray,
+       glSlice         = global.Array.prototype.slice,
+       glFunction      = global.Function,
+       matchStrict     = /^\s*(['"])use strict\1/,
+       sandbox         = createSandbox(),
+       toString        = global.Object.prototype.toString,
+       __Array         = sandbox.Array,
+       __Date          = sandbox.Date,
+       __Function      = sandbox.Function,
+       __Number        = sandbox.Number,
+       __Object        = sandbox.Object,
+       __RegExp        = sandbox.RegExp,
+       __String        = sandbox.String;
 
-  /*--------------------------------------------------------------------------*/
+      if (mode === 'OBJECT__PROTO__') {
+        Array = function Array(length) {
+          var result = arguments.length === 1
+            ? new __Array(length)
+            : fromArray(arguments);
+          result['__proto__'] = Array.prototype;
+          return result;
+        };
 
-  Fuse.Fusebox._createStatics = (function() {
-    function _createStatics(sandbox) {
+        Date = function Date(year, month, date, hours, minutes, seconds, ms) {
+          var result;
+          if (this.constructor === Date) {
+           result = arguments.length === 1
+             ? new __Date(year)
+             : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
+           result['__proto__'] = Date.prototype;
+          }
+          else result = String(new __Date);
+          return result;
+        };
 
-      /* Array statics */
+        Function = function Function(argN, body) {
+          var args = arguments,
+          result = args.length < 3
+           ? __Function(argN, body)
+           : __Function.apply(__Function, args);
+          result['__proto__'] = Function.prototype;
+          return result;
+        };
 
-      this.Array.create = (function(Array) {
-        function create() { return Array.fromArray(arguments); }
-        return create;
-      })(this.Array);
+        Number = function Number(value) {
+          var result = new __Number(value);
+          result['__proto__'] = Number.prototype;
+          return result;
+        };
 
-      // ECMA-5 15.4.3.2
-      this.Array.isArray = sandbox.Array.isArray || (function(toString) {
-        function isArray(value) { return toString.call(value) === '[object Array]'; }
-        return isArray;
-      })(sandbox.Object.prototype.toString);
+        Object = function Object(value) {
+          if (value != null) {
+           switch (toString.call(value)) {
+             case '[object Boolean]': return new Boolean(value);
+             case '[object Number]':  return Number(value);
+             case '[object String]':  return String(value);
+             case '[object Array]':
+               if (value.constructor !== Array)
+                 return Array.fromArray(value);
+           }
+           return value;
+          }
+          var result = new __Object;
+          result['__proto__'] = Object.prototype;
+          return result;
+        };
 
-      this.Array.fromArray = (function(fn) {
+        RegExp = function RegExp(pattern, flags) {
+          var result = new __RegExp(pattern, flags);
+          result['__proto__'] = RegExp.prototype;
+          return result;
+        };
+
+        String = function String(value) {
+          var result = new __String(arguments.length ? value : '');
+          result['__proto__'] = String.prototype;
+          return result;
+        };
+
+        Array.prototype['__proto__']    = __Array.prototype;
+        Date.prototype['__proto__']     = __Date.prototype;
+        Function.prototype['__proto__'] = __Function.prototype;
+        Number.prototype['__proto__']   = __Number.prototype;
+        Object.prototype['__proto__']   = __Object.prototype;
+        RegExp.prototype['__proto__']   = __RegExp.prototype;
+        String.prototype['__proto__']   = __String.prototype;
+      }
+      else {
+        Array = function Array(length) {
+          return arguments.length === 1
+           ? new __Array(length)
+           : fromArray(arguments);
+        };
+
+        Date = function Date(year, month, date, hours, minutes, seconds, ms) {
+          if (this.constructor === Date) {
+           return arguments.length === 1
+             ? new __Date(year)
+             : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
+          }
+          return String(new __Date);
+        };
+
+        Function = function Function(argN, body) {
+          var result, args = glSlice.call(arguments, 0),
+          originalBody = body = args.pop();
+          argN = args.join(',');
+
+          // ensure we aren't in strict mode
+          if (body && body.search(matchStrict) < 0)
+            body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
+
+          result = new glFunction(argN, body);
+          result[expando] = new __Function('global, result',
+            'var sandbox = this; return function() { return result.apply(this == sandbox ? global : this, arguments) }')(global, result);
+
+          function toString() { return originalBody; }
+          result[expando].toString = toString;
+          return result[expando];
+        };
+
+        Number = function Number(value) {
+          return new __Number(value);
+        };
+
+        Object = function Object(value) {
+          if (value != null) {
+           switch (toString.call(value)) {
+             case '[object Boolean]': return new Boolean(value);
+             case '[object Number]':  return Number(value);
+             case '[object String]':  return String(value);
+             case '[object Array]':
+               if (value.constructor !== Array)
+                 return Array.fromArray(value);
+           }
+           return value;
+          }
+          return new __Object;
+        };
+
+        RegExp = function RegExp(pattern, flags) {
+          return new __RegExp(pattern, flags);
+        };
+
+        String = function String(value) {
+          return new __String(arguments.length ? value : '');
+        };
+
+        Array.prototype    = __Array.prototype;
+        Date.prototype     = __Date.prototype;
+        Function.prototype = __Function.prototype;
+        Number.prototype   = __Number.prototype;
+        Object.prototype   = __Object.prototype;
+        RegExp.prototype   = __RegExp.prototype;
+        String.prototype   = __String.prototype;
+      }
+
+      /*----------------------------------------------------------------------*/
+
+      var arrPlugin         = Array.plugin  = Array.prototype,
+       datePlugin           = Date.plugin   = Date.prototype,
+       numPlugin            = Number.plugin = Number.prototype,
+       rePlugin             = RegExp.plugin = RegExp.prototype,
+       strPlugin            = String.plugin = String.prototype,
+       __concat             = arrPlugin.concat,
+       __every              = arrPlugin.every,
+       __filter             = arrPlugin.filter,
+       __join               = arrPlugin.join,
+       __indexOf            = arrPlugin.indexOf,
+       __lastIndexOf        = arrPlugin.lastIndexOf,
+       __map                = arrPlugin.map,
+       __push               = arrPlugin.push,
+       __slice              = arrPlugin.slice,
+       __some               = arrPlugin.some,
+       __unshift            = arrPlugin.unshift,
+       __getDate            = datePlugin.getDate,
+       __getDay             = datePlugin.getDay,
+       __getFullYear        = datePlugin.getFullYear,
+       __getHours           = datePlugin.getHours,
+       __getMilliseconds    = datePlugin.getMilliseconds,
+       __getMinutes         = datePlugin.getMinutes,
+       __getMonth           = datePlugin.getMonth,
+       __getSeconds         = datePlugin.getSeconds,
+       __getTime            = datePlugin.getTime,
+       __getTimezoneOffset  = datePlugin.getTimezoneOffset,
+       __getUTCDate         = datePlugin.getUTCDate,
+       __getUTCDay          = datePlugin.getUTCDay,
+       __getUTCFullYear     = datePlugin.getUTCFullYear,
+       __getUTCHours        = datePlugin.getUTCHours,
+       __getUTCMilliseconds = datePlugin.getUTCMilliseconds,
+       __getUTCMinutes      = datePlugin.getUTCMinutes,
+       __getUTCMonth        = datePlugin.getUTCMonth,
+       __getUTCSeconds      = datePlugin.getUTCSeconds,
+       __getYear            = datePlugin.getYear,
+       __toISOString        = datePlugin.toISOString,
+       __toJSON             = datePlugin.toJSON,
+       __toExponential      = numPlugin.toExponential,
+       __toFixed            = numPlugin.toFixed,
+       __toPrecision        = numPlugin.toPrecision,
+       __exec               = rePlugin.exec,
+       __charAt             = strPlugin.charAt,
+       __charCodeAt         = strPlugin.charCodeAt,
+       __strConcat          = strPlugin.concat,
+       __strIndexOf         = strPlugin.indexOf,
+       __strLastIndexOf     = strPlugin.lastIndexOf,
+       __localeCompare      = strPlugin.localeCompare,
+       __match              = strPlugin.match,
+       __replace            = strPlugin.replace,
+       __search             = strPlugin.search,
+       __strSlice           = strPlugin.slice,
+       __split              = strPlugin.split,
+       __substr             = strPlugin.substr,
+       __substring          = strPlugin.substring,
+       __toLowerCase        = strPlugin.toLowerCase,
+       __toLocaleLowerCase  = strPlugin.toLocaleLowerCase,
+       __toLocaleUpperCase  = strPlugin.toLocaleUpperCase,
+       __toUpperCase        = strPlugin.toUpperCase,
+       __trim               = strPlugin.trim;
+
+      Number.MAX_VALUE         = 1.7976931348623157e+308;
+
+      Number.MIN_VALUE         = 5e-324;
+
+      Number.NaN               = +'x';
+
+      Number.NEGATIVE_INFINITY = __Number.NEGATIVE_INFINITY;
+
+      Number.POSITIVE_INFINITY = __Number.POSITIVE_INFINITY;
+
+      RegExp.SPECIAL_CHARS = {
+        's': {
+          /* whitespace */
+          '\x09': '\\x09', '\x0B': '\\x0B', '\x0C': '\\x0C', '\x20': '\\x20', '\xA0': '\\xA0',
+
+          /* line terminators */
+          '\x0A': '\\x0A', '\x0D': '\\x0D', '\u2028': '\\u2028', '\u2029': '\\u2029',
+
+          /* unicode category "Zs" space separators */
+          '\u1680': '\\u1680', '\u180e': '\\u180e', '\u2000': '\\u2000',
+          '\u2001': '\\u2001', '\u2002': '\\u2002', '\u2003': '\\u2003',
+          '\u2004': '\\u2004', '\u2005': '\\u2005', '\u2006': '\\u2006',
+          '\u2007': '\\u2007', '\u2008': '\\u2008', '\u2009': '\\u2009',
+          '\u200a': '\\u200a', '\u202f': '\\u202f', '\u205f': '\\u205f',
+          '\u3000': '\\u3000'
+        }
+      };
+
+      Array.updateGenerics = function updateGenerics() {
+        thisArg.updateGenerics('Array');
+      };
+
+      Date.updateGenerics = function updateGenerics() {
+        thisArg.updateGenerics('Date');
+      };
+
+      Function.updateGenerics = function updateGenerics() {
+        thisArg.updateGenerics('Function');
+      };
+
+      Number.updateGenerics = function updateGenerics() {
+        thisArg.updateGenerics('Number');
+      };
+
+      Object.updateGenerics = function updateGenerics() {
+        thisArg.updateGenerics('Object');
+      };
+
+      RegExp.updateGenerics = function updateGenerics() {
+        thisArg.updateGenerics('RegExp');
+      };
+
+      String.updateGenerics = function updateGenerics() {
+        thisArg.updateGenerics('String');
+      };
+
+      fromArray =
+      Array.fromArray = (function() {
         var fromArray = function fromArray(array) {
-          var result = new fn;
+          var result = new __Array;
           result.push.apply(result, array);
           return result;
         };
 
-        if (Fuse.Fusebox.mode === 'OBJECT__PROTO__') {
-          var Array = this, slice = fn.prototype.slice;
+        if (mode === 'OBJECT__PROTO__') {
           fromArray = function fromArray(array) {
-            var result = slice.call(array, 0);
+            var result = glSlice.call(array, 0);
             result['__proto__'] = Array.prototype;
             return result;
           };
         }
-        else if ((Fuse.Fusebox._wrapAccessorMethods.skip.Array || { }).slice) {
-          var slice = fn.prototype.slice;
+        else if (SKIP_METHODS_RETURNING_ARRAYS) {
+          var sbSlice = __Array.prototype.slice;
           fromArray = function fromArray(array) {
-            return slice.call(array, 0);
+            return sbSlice.call(array, 0);
           };
         }
         return fromArray;
-      }).call(this.Array, sandbox.Array);
+      })();
 
-      /* Number statics */
+      Array.create = function create() {
+        return fromArray(arguments);
+      };
 
-      (function(fn, Number) {
-        // ECMA-5 15.9.4.4
+      // ECMA-5 15.4.3.2
+      if (!(Array.isArray = __Array.isArray))
+        Array.isArray = function isArray(value) {
+          return toString.call(value) === '[object Array]';
+        };
+
+      // ECMA-5 15.9.4.4
+      Date.now = (function() {
         var now = function now() { return Number(+new Date()); };
-        if (fn.now) now = function now() { return Number(fn.now()); };
-        this.now = now;
+        if (__Date.now)
+          now = function now() { return Number(__Date.now()); };
+        return now;
+      })();
 
-        // ECMA-5 15.9.4.2
-        this.parse = function parse(dateString) {
-          return Number(fn.parse(dateString));
-        };
+      // ECMA-5 15.9.4.2
+      Date.parse = function parse(dateString) {
+        return Number(__Date.parse(dateString));
+      };
 
-        // ECMA-5 15.9.4.3
-        this.UTC = function UTC() {
-          return Number(fn.UTC.apply(fn, arguments));
-        };
+      // ECMA-5 15.9.4.3
+      Date.UTC = function UTC(year, month, date, hours, minutes, seconds, ms) {
+        return Number(__Date.UTC(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0));
+      };
 
-        // prevent JScript bug with named function expressions
-        var parse = null, UTC = null;
-      }).call(this.Date, sandbox.Date, this.Number);
+      // ECMA-5 15.5.3.2
+      String.fromCharCode = function fromCharCode(charCode) {
+        var args = arguments;
+        return String(args.length > 1
+          ? __String.fromCharCode.apply(__String, arguments)
+          : __String.fromCharCode(charCode));
+      };
 
-      (function(fn) {
-        this.MAX_VALUE         = fn.MAX_VALUE;
-        this.MIN_VALUE         = fn.MIN_VALUE;
-        this.NaN               = fn.NaN;
-        this.NEGATIVE_INFINITY = fn.NEGATIVE_INFINITY;
-        this.POSITIVE_INFINITY = fn.POSITIVE_INFINITY;
-      }).call(this.Number, sandbox.Number);
+      // versions of WebKit and IE have non-spec-conforming /\s/
+      // so we emulate it (see: ECMA-5 15.10.2.12)
+      // http://www.unicode.org/Public/UNIDATA/PropList.txt
+      RegExp = (function(RE) {
+        var character,
+         RegExp = RE,
+         matchWhitespace = /\s/,
+         matchEscapedWhiteSpace = /\\s/g,
+         sCharClass = ['\\s'],
+         sMap = RE.SPECIAL_CHARS.s;
 
-      /* String statics */
+        for (character in sMap)
+          if (character.replace(matchWhitespace, '').length)
+            sCharClass.push(sMap[character]);
 
-      this.String.fromCharCode = (function(fn, String) {
-        function fromCharCode() { return String(fn.fromCharCode.apply(fn, arguments)); }
-        return fromCharCode;
-      })(sandbox.String, this.String);
+        sCharClass = sCharClass.length > 1
+          ? '(?:' + sCharClass.join('|') + ')'
+          : sCharClass[0];
 
-      sandbox = null;
-    }
-    return _createStatics;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  Fuse.Fusebox._createNatives = (function() {
-    function _createNatives(sandbox) {
-      this.Array = (function(fn, self) {
-        function Array(length) {
-          return arguments.length === 1 ? new fn(length) : self.Array.fromArray(arguments);
-        }
-        Array.prototype = fn.prototype;
-        return Array;
-      })(sandbox.Array, this);
-
-      this.Function = (function(fn) {
-        function Function(argN, body) {
-          var result, args = slice.call(arguments, 0), originalBody = args.pop();
-          body = originalBody;
-          argN = args.join(',');
-
-          // ensure we aren't in strict mode
-          if (body && body.search(/^\s*(['"])use strict(( |,)?[^\1]+?)?\1/i) < 0)
-            body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
-
-          result = global.Function(argN, body);
-          result[expando] = fn('global, result',
-            'var sandbox = this; return function() { return result.apply(this == sandbox ? global : this, arguments) }'
-          )(global, result);
-
-          result[expando].toString = function toString() { return originalBody; };
-
-          var toString = null;
-          return result[expando];
-        }
-        Function.prototype = fn.prototype;
-        return Function;
-      })(sandbox.Function);
-
-      this.Number = (function(fn) {
-        function Number(value) { return new fn(value); }
-        Number.prototype = fn.prototype;
-        return Number;
-      })(sandbox.Number);
-
-      this.RegExp = (function(fn) {
-        var RegExp = function RegExp(pattern, flags) { return new fn(pattern, flags); };
-
-        // versions of WebKit and IE have non-spec-conforming /\s/
-        // so we emulate it (see: ECMA-5 15.10.2.12)
-        // http://www.unicode.org/Public/UNIDATA/PropList.txt
-        var specialCharMap = {
-          's': {
-            /* whitespace */
-            '\x09': 1, '\x0B': 1, '\x0C': 1, '\x20': 1, '\xA0': 1,
-
-            /* line terminators */
-            '\x0A': 1, '\x0D': 1, '\u2028': 1, '\u2029': 1,
-
-            /* unicode category "Zs" space separators */
-            '\u1680': 1, '\u180e': 1, '\u2000': 1, '\u2001': 1, '\u2002': 1, '\u2003': 1,
-            '\u2004': 1, '\u2005': 1, '\u2006': 1, '\u2007': 1, '\u2008': 1, '\u2009': 1,
-            '\u200a': 1, '\u202f': 1, '\u205f': 1, '\u3000': 1
-          }
-        };
-
-        var s = (function() {
-          var character, result = ['\\s'];
-          for (character in specialCharMap.s)
-            if (character.replace(/\s/, '').length)
-              result.push('\\u' +('0000' + character.charCodeAt(0).toString(16)).slice(-4));
-          return result.length > 1 ? '(?:' + result.join('|') + ')' : result[0];
-        })();
-
-        if (s !== '\\s') {
-          var toString = sandbox.Object.prototype.toString;
+        if (sCharClass !== '\\s') {
           RegExp = function RegExp(pattern, flags) {
             if (toString.call(pattern) === '[object RegExp]') {
               if (pattern.global || pattern.ignoreCase || pattern.multiline)
                 throw new TypeError;
               if (pattern.source.indexOf('\\s') > -1)
-                pattern = pattern.source.replace(/\\s/g, s);
+                pattern = pattern.source.replace(matchEscapedWhiteSpace, sCharClass);
             }
-            else pattern = String(pattern).replace(/\\s/g, s);
+            else pattern = String(pattern).replace(matchEscapedWhiteSpace, sCharClass);
 
-            return new fn(pattern, flags);
+            return new RE(pattern, flags);
           };
-        } else s = null;
 
-        RegExp.prototype = fn.prototype;
-        RegExp.specialCharMap = specialCharMap;
+          RegExp.SPECIAL_CHARS = RE.SPECIAL_CHARS;
+          rePlugin = RegExp.plugin = RegExp.prototype = RE.prototype;
+        }
 
-        specialCharMap = null;
         return RegExp;
-      })(sandbox.RegExp);
+      })(RegExp);
 
-      this.String = (function(fn) {
-        function String(value) { return new fn(arguments.length ? value : ''); }
-        String.prototype = fn.prototype;
-        return String;
-      })(sandbox.String);
+      /*----------------------------------------------------------------------*/
 
-      this.Date = (function(fn, self) {
-        function Date(year, month, date, hours, minutes, seconds, ms) {
-          if (this instanceof self.Date) {
-            return arguments.length === 1
-              ? new fn(year)
-              : new fn(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
-          }
-          return self.String(new fn);
+      if (!SKIP_METHODS_RETURNING_ARRAYS)
+        arrPlugin.concat = function concat() {
+          var args = arguments;
+          return fromArray(args.length
+            ? __concat.apply(this, args)
+            : __concat.call(this));
+        };
+
+      if (arrPlugin.every)
+        arrPlugin.every = function every(callback, thisArg) {
+          return __every.call(this, callback || K, thisArg);
+        };
+
+      if (arrPlugin.filter)
+        arrPlugin.filter = function filter(callback, thisArg) {
+          var result = __filter.call(this, callback ||
+            function(value) { return value != null; }, thisArg);
+          return result.length
+            ? fromArray(result)
+            : Array();
+        };
+
+      arrPlugin.join = function join(separator) {
+        return String(__join.call(this, separator));
+      };
+
+      if (arrPlugin.indexOf)
+        arrPlugin.indexOf = function indexOf(item, fromIndex) {
+          return Number(__indexOf.call(this, item,
+            fromIndex == null ? 0 : fromIndex));
+        };
+
+      if (arrPlugin.lastIndexOf)
+        arrPlugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
+          return Number(__lastIndexOf.call(this, item,
+            fromIndex == null ? this.length : fromIndex));
+        };
+
+      if (arrPlugin.map && !SKIP_METHODS_RETURNING_ARRAYS)
+        arrPlugin.map = function map(callback, thisArg) {
+          var result = __map.call(this, callback || K, thisArg);
+          return result.length
+            ? fromArray(result)
+            : Array();
+        };
+
+      arrPlugin.push = function push(item) {
+        var args = arguments;
+        return Number(args.length > 1
+          ? __push.apply(this, args)
+          : __push.call(this, item));
+      };
+
+      if (!SKIP_METHODS_RETURNING_ARRAYS)
+        arrPlugin.slice = function slice(start, end) {
+          var result = __slice.call(this, start, end == null ? this.length : end);
+          return result.length
+            ? fromArray(result)
+            : Array();
+        };
+
+      if (arrPlugin.some)
+        arrPlugin.some = function some(callback, thisArg) {
+          return __some.call(this, callback || K, thisArg);
+        };
+
+      arrPlugin.unshift = function unshift(item) {
+        var args = arguments;
+        return Number(args.length > 1
+          ? __unshift.apply(this, args)
+          : __unshift.call(this, item));
+      };
+
+      datePlugin.getDate = function getDate() {
+        return Number(__getDate.call(this));
+      };
+
+      datePlugin.getDay = function getDay() {
+        return Number(__getDay.call(this));
+      };
+
+      datePlugin.getFullYear = function getFullYear() {
+        return Number(__getFullYear.call(this));
+      };
+
+      datePlugin.getHours = function getHours() {
+        return Number(__getHours.call(this));
+      };
+
+      datePlugin.getMilliseconds = function getMilliseconds() {
+        return Number(__getMilliseconds.call(this));
+      };
+
+      datePlugin.getMinutes = function getMinutes() {
+        return Number(__getMinutes.call(this));
+      };
+
+      datePlugin.getMonth  = function getMonth () {
+        return Number(__getMonth.call(this));
+      };
+
+      datePlugin.getSeconds = function getSeconds() {
+        return Number(__getSeconds.call(this));
+      };
+
+      datePlugin.getTime = function getTime() {
+        return Number(__getTime.call(this));
+      };
+
+      datePlugin.getTimezoneOffset = function getTimezoneOffset() {
+        return Number(__getTimezoneOffset.call(this));
+      };
+
+      datePlugin.getUTCDate = function getUTCDate() {
+        return Number(__getUTCDate.call(this));
+      };
+
+      datePlugin.getUTCDay = function getUTCDay() {
+        return Number(__getUTCDay.call(this));
+      };
+
+      datePlugin.getUTCFullYear = function getUTCFullYear() {
+        return Number(__getUTCFullYear.call(this));
+      };
+
+      datePlugin.getUTCHours = function getUTCHours() {
+        return Number(__getUTCHours.call(this));
+      };
+
+      datePlugin.getUTCMilliseconds = function getUTCMilliseconds() {
+        return Number(__getUTCMilliseconds.call(this));
+      };
+
+      datePlugin.getUTCMinutes = function getUTCMinutes() {
+        return Number(__getUTCMinutes.call(this));
+      };
+
+      datePlugin.getUTCMonth = function getUTCMonth() {
+        return Number(__getUTCMonth.call(this));
+      };
+
+      datePlugin.getUTCSeconds = function getUTCSeconds() {
+        return Number(__getUTCSeconds.call(this));
+      };
+
+      datePlugin.getYear = function getYear() {
+        return Number(__getYear.call(this));
+      };
+
+      if (datePlugin.toISOString)
+        datePlugin.toISOString = function toISOString() {
+          return String(__toISOString.call(this));
+        };
+
+      if (datePlugin.toJSON)
+        datePlugin.toJSON= function toJSON() {
+          return String(__toJSON.call(this));
+        };
+
+      numPlugin.toExponential = function toExponential() {
+        return Number(__toExponential.call(this));
+      };
+
+      numPlugin.toFixed = function toFixed() {
+        return Number(__toFixed.call(this));
+      };
+
+      numPlugin.toPrecision = function toPrecision() {
+        return Number(__toPrecision.call(this));
+      };
+
+      rePlugin.exec = function exec(string) {
+        var length, results, output = __exec.call(this, string);
+        if (output) {
+          length = output.length; results = Fuse.Array(); 
+          while (length--) results[length] = String(output[length]);
         }
-        Date.prototype = fn.prototype;
-        return Date;
-      })(sandbox.Date, this);
+        return output && results;
+      };
 
-      this.Object = (function(fn, self) {
-        function Object(value) {
-          if (value != null) {
-            switch (toString.call(value)) {
-              case '[object Boolean]': return new Boolean(value);
-              case '[object Number]':  return self.Number(value);
-              case '[object String]':  return self.String(value);
-              case '[object Array]':
-                if (value.constructor !== self.Array)
-                  return self.Array.fromArray(value);
-            }
-            return value;
-          }
-          return new fn;
+      strPlugin.charAt = function charAt(pos) {
+        return String(__charAt.call(this, pos));
+      };
+
+      strPlugin.charCodeAt = function charCodeAt(pos) {
+        return Number(__charCodeAt.call(this, pos));
+      };
+
+      strPlugin.concat = function concat(item) {
+        var args = arguments;
+        return String(args.length > 1
+          ? __strConcat.apply(this, args)
+          : __strConcat.call(this, item));
+      };
+
+      strPlugin.indexOf = function indexOf(item, fromIndex) {
+        return Number(__strIndexOf.call(this, item,
+          fromIndex == null ? 0 : fromIndex));
+      };
+
+      strPlugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
+        return Number(__strLastIndexOf.call(this, item,
+          fromIndex == null ? this.length : fromIndex));
+      };
+
+      strPlugin.localeCompare = function localeCompare(that) {
+        return Number(__localeCompate.call(this, that));
+      };
+
+      strPlugin.match = function match(pattern) {
+        var length, results, output = __match.call(this, pattern);
+        if (output) {
+          length = output.length; results = Fuse.Array(); 
+          while (length--) results[length] = String(output[length]);
         }
-        Object.prototype = fn.prototype;
-        var toString = fn.prototype.toString;
-        return Object;
-      })(sandbox.Object, this);
+        return output && results;
+      };
 
-      sandbox = null;
+      strPlugin.replace = function replace(pattern, replacement) {
+        return String(__replace.call(this, pattern, replacement));
+      };
+
+      strPlugin.search = function search(pattern) {
+        return Number(__search.call(pattern));
+      };
+
+      strPlugin.slice = function slice(start, end) {
+        return String(__strSlice.call(this, start,
+          end == null ? this.length : end));
+      };
+
+      strPlugin.split = function split(separator, limit) {
+        var output = __split.call(this, separator, limit),
+         length = output.length, results = Fuse.Array();
+        while (length--) results[length] = String(output[length]);
+        return results;
+      };
+
+      strPlugin.substr = function substr(start, length) {
+        return String(__substr.call(start, length == null ? this.length : length));
+      };
+
+      strPlugin.substring = function substring(start, end) {
+        return String(__substring.call(this, start,
+          end == null ? this.length : end));
+      };
+
+      strPlugin.toLowerCase = function toLowerCase() {
+        return String(__toLowerCase.call(this));
+      };
+
+      strPlugin.toLocaleLowerCase = function toLocaleLowerCase() {
+        return String(__toLocaleLowerCase.call(this));
+      };
+
+      strPlugin.toLocaleUpperCase = function toLocaleUpperCase() {
+        return String(__toLocaleUpperCase.call(this));
+      };
+
+      strPlugin.toUpperCase = function toUpperCase() {
+        return String(__toUpperCase.call(this));
+      };
+
+      if (strPlugin.trim)
+        strPlugin.trim = function trim() {
+          return String(__trim.call(this));
+        };
+
+      arrPlugin.constructor  = Array;
+      datePlugin.constructor = Date;
+      numPlugin.constructor  = Number;
+      rePlugin.constructor   = RegExp;
+      strPlugin.constructor  = String;
+
+      (Function.plugin = Function.prototype).constructor = Function;
+      (Object.plugin   = Object.prototype).constructor = Object;
+
+      /*----------------------------------------------------------------------*/
+
+      // prevent JScript bug with named function expressions
+      var charAt = null, charCodeAt = null, create = null, concat = null,
+       every = null, exec = null, filter = null, getDate = null, getDay = null,
+       getFullYear = null, getHours = null, getMilliseconds = null,
+       getMinutes = null, getMonth = null, getSeconds = null, getTime = null,
+       getTimezoneOffset = null, getUTCDate = null, getUTCDay = null,
+       getUTCFullYear = null, getUTCHours = null, getUTCMilliseconds = null,
+       getUTCMinutes = null, getUTCMonth = null, getUTCSeconds = null,
+       getYear = null, join = null, indexOf = null, lastIndexOf = null,
+       localeCompare = null, match = null, map = null, push = null,
+       replace = null, search = null, slice = null, some = null, split = null,
+       substr = null, substring = null, toExponential = null, toFixed = null,
+       toISOString = null, toJSON = null, toLowerCase = null,
+       toLocaleLowerCase = null, toLocaleUpperCase = null, toPrecision = null,
+       toUpperCase = null, trim = null, updateGenerics = null, unshift = null;
+       
+      thisArg.Array    = Array;
+      thisArg.Date     = Date;
+      thisArg.Function = Function;
+      thisArg.Number   = Number;
+      thisArg.Object   = Object;
+      thisArg.RegExp   = RegExp;
+      thisArg.String   = String;
     }
 
-    // clean scope
-    var $ = null, Bug = null, Feature = null, concatList = null, document = null,
-     getDocument = null, getNodeName = null, getWindow = null, isHostObject = null,
-     prependList = null, userAgent = null, window = null;
+    /*------------------------------------------------------------------------*/
 
-    return _createNatives;
-  })();
+    (function() {
+      var usesIframe = mode === 'IFRAME',
+       sandbox = createSandbox(),
+       Array = sandbox.Array;
 
-  /*--------------------------------------------------------------------------*/
+      if (usesIframe) postProcess();
 
-  // wrap original _createNatives to make __proto__ support optional
-  Fuse.Fusebox._createNatives = (function(fn) {
-    function _createNatives(sandbox) {
-      if (Fuse.Fusebox.mode !== 'OBJECT__PROTO__')
-        return fn.call(this, sandbox);
+      // Chrome, IE, and Opera's Array accessors return sandboxed arrays
+      SKIP_METHODS_RETURNING_ARRAYS =
+        !(Array().slice(0) instanceof global.Array);
 
-      // call original _createNatives method
-      fn.call(this, sandbox);
+      if (usesIframe && Array.prototype.map) {
+        // Opera 9.5 - 10a throws a security error when calling Array#map or String#lastIndexOf
+        // Opera 9.5 - 9.64 will error by simply calling the methods.
+        // Opera 10 will error when first accessing the contentDocument of
+        // another iframe and then accessing the methods.
+        createSandbox();
+        postProcess();
 
-      // wrap native constructors to add __proto__ support
-      var n, i = 0, natives = ['Array', 'Function', 'Number', 'String'];
-      while (n = natives[i++])
-        this[n] = new Function('global,fn', [
-          'function ' + n + '() {',
-          'var result = arguments.length ?',
-          'fn.apply(this, arguments) : fn.call(this);',
-          'result["__proto__"] = ' + n + '.prototype;',
-          'return result; }',
-          n + '.prototype["__proto__"] = fn.prototype;',
-          'return ' + n].join('\n'))(global, this[n]);
-
-      i = n = natives = null;
-
-      this.Date = (function(fn, self) {
-        function Date(year, month, date, hours, minutes, seconds, ms) {
-          var result = fn.apply(this, arguments);
-          if (this instanceof self.Date)
-            result['__proto__'] = Date.prototype;
-          return result;
-        }
-        Date.prototype = fn.prototype;
-        return Date;
-      })(this.Date, this);
-
-      this.Object = (function(fn) {
-        function Object(value) {
-          var result = fn(value);
-          if (value == null)
-            result['__proto__'] = Object.prototype;
-          return result;
-        }
-        Object.prototype['__proto__'] = fn.prototype;
-        return Object;
-      })(this.Object);
-
-      this.RegExp = (function(fn) {
-        function RegExp(pattern, flags) {
-          var result = fn(pattern, flags);
-          result['__proto__'] = RegExp.prototype;
-          return result;
-        }
-        RegExp.prototype['__proto__'] = fn.prototype;
-        RegExp.specialCharMap = fn.specialCharMap;
-        return RegExp;
-      })(this.RegExp);
-    }
-
-    return _createNatives;
-  })(Fuse.Fusebox._createNatives);
-
-  /*--------------------------------------------------------------------------*/
-
-  Fuse.Fusebox._wrapAccessorMethods = (function() {
-    function _wrapAccessorMethods() {
-      var code, i, n, name, names, type, natives = Fuse.Fusebox.AccessorNames,
-       skip = Fuse.Fusebox._wrapAccessorMethods.skip;
-
-      // Opera and Chrome still need a convienence wrapper for filter
-      // so that it supports an undefined callback
-      if (this.Array.prototype.filter && skip.Array && skip.Array.filter) (function() {
-        this.filter = new Function('fn', [
-          'function filter(callback, thisArg) {',
-          'return fn.call(this, callback || function(value) { return value != null }, thisArg);',
-          '} return filter'].join('\n'))(this.filter);
-      }).call(this.Array.prototype);
-
-      // iterate over native constructors
-      for (n in natives) {
-        i = 0; names = natives[n];
-
-        // iterate over each method on the native object
-        while (name = names[i++]) {
-          if ((skip[n] && skip[n][name]) || !this[n].prototype[name]) continue;
-
-          // determine the data type of the returned value
-          type = n;
-          if (/ndexOf|Date|Day|Hour|Minutes|Month|econds|Time|Year|^(charCodeAt|search|push|unshift)$/.test(name))
-            type = 'Number';
-          else if (/String|^(join|charAt)$/.test(name))
-            type = 'String';
-          else if (/^(exec|match|split)$/.test(name))
-            type = 'Array';
-
-          // compile wrapper code
-          code = [
-            'var ' + type + ' = this.' + type + ';',
-            'var fn = this.' + n + '.prototype.' + name + ';',
-            'function ' + name + '() {',
-            'var args = arguments;'];
-
-          // ensure a sugared array is returned when needed
-          if (type === 'Array') {
-            if (/^(RegExp|String)$/.test(n)) {
-              code.unshift('var String = this.String;');
-
-              if (/^(exec|match)$/.test(name)) code.push(
-                'var results = args.length ? fn.apply(this, args) : fn.call(this);',
-                'if (!results) return null;',
-                'results = Array.fromArray(results);'
-              );
-              else code.push(
-                'var results = Array.fromArray(args.length ?',
-                'fn.apply(this, args) : fn.call(this));'
-              );
-
-              code.push(
-                'var length = results.length, i = 0;',
-                'while (length--) results[length] = String(results[length]);',
-                'return results;'
-              );
-            }
-            else {
-              // ensure a default callback argument is provided
-              code.push('return ' + (/^(every|some)$/.test(name) ? ' (' : 'Array.fromArray('));
-              if (name === 'filter')
-                code.push('fn.call(this, args[0] || function(value) { return value != null }, args[1]));');
-              else if (/^(every|map|some)$/.test(name))
-                code.push('fn.call(this, args[0] || Fuse.K, args[1]));');
-            }
-          }
-          else code.push('return new ' + type + '(');
-
-          if (code.length === 5)
-            code.push('args.length ? fn.apply(this, args) : fn.call(this));');
-          code.push('} return ' + name);
-
-          this[n].prototype[name] = new Function('', code.join('\n')).call(this);
+        try { Array().map(K); }
+        catch (e) {
+         postProcess = (function(__postProcess) {
+            return function(thisArg) {
+              __postProcess();
+              thisArg.Array.prototype.map =
+              thisArg.String.prototype.lastIndexOf = null;
+            };
+          })(postProcess);
         }
       }
-    }
 
-    _wrapAccessorMethods.skip = { };
-    return _wrapAccessorMethods;
+      // cleanup
+      sandbox = null;
+      cache = [];
+    })();
+
+    return Fusebox;
   })();
 
   /*--------------------------------------------------------------------------*/
 
-  Fuse.Fusebox.prototype.updateGenerics = (function() {
-    function _createGeneric(methodName) {
+  (Fuse.Fusebox.plugin =
+  Fuse.Fusebox.prototype).updateGenerics = (function() {
+    var SKIPPED_PROPERTIES = {
+      'constructor': 1,
+      'prototype':   1,
+      'plugin':      1
+    };
+
+    function createGeneric(methodName) {
       return new Function('', [
         'function ' + methodName + '(thisArg) {',
         'return this.prototype.' + methodName + '.apply(thisArg,',
@@ -629,39 +836,23 @@
         '}', 'return ' + methodName].join('\n'))();
     }
 
-    function _forIn(object, callback) {
-      for (var key in object) callback(object[key], key, object);
-    }
-
     function updateGenerics() {
-      var c, j, n, name, names, object, i = 0,
-       cache = Fuse.Fusebox.prototype.updateGenerics.cache,
-       forIn = eachKey || _forIn,
-       natives = arguments.length ? arguments : _natives;
+      var constructor, n, i = 0,
+       natives = arguments.length ? arguments :
+        ['Array', 'Date', 'Number', 'Object', 'RegExp', 'String'];
 
       // iterate over native constructors
       while (n = natives[i++]) {
-        j = 0; c = cache[n] || (cache[n] = { });
-        object = this[n];
-        names  = Fuse.Fusebox.MethodNames[n] || [];
-
-        // convert common methods on the native object prototype to
-        // generics on the native constructor
-        while (name = names[j++])
-          if (!c[name] && object.prototype[name])
-            object[name] = c[name] = _createGeneric(name);
-
-        // convert additional methods: _forIn is safe the first time because
-        // we have avoided problem properties
-        forIn(object.prototype, function(value, key) {
-          if (!c[key] && !/^(constructor|prototype|plugin)$/.test(key))
-            object[key] = c[key] = _createGeneric(key);
-        });
+        // convert methods on the object's prototype to
+        // generics on the constructor
+        constructor = this[n];
+        Obj._each(constructor.prototype, function(value, key, object) {
+          if (!SKIPPED_PROPERTIES[key])
+            constructor[key] = createGeneric(key);
+        })
       }
     }
 
-    var _natives = ['Array', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String'];
-    updateGenerics.cache = { };
     return updateGenerics;
   })();
 
@@ -669,11 +860,13 @@
 
   // assign Fusebox natives to Fuse object
   (function() {
+    // assign natives to Fuse
     var n, i = 0;
+    while (n = arguments[i++]) Fuse[n] = this[n];
+
     // add generics updater
     Fuse.updateGenerics = this.updateGenerics;
-    // assign natives to Fuse
-    while (n = arguments[i++]) (Fuse[n] = this[n]).constructor = Fuse;
+
     // alias
     Fuse.List = Fuse.Array;
   }).call(Fuse.Fusebox(), 'Array', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String');

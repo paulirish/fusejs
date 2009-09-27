@@ -1,43 +1,50 @@
   /*----------------------------- LANG: FUNCTIONS ----------------------------*/
 
-  Func = Fuse.Function;
+  Func =
+  Fuse.Function;
 
   // ECMA-5 15.3.4.5
   bind =
   Func.bind = (function() {
     var bind = function bind(fn, thisArg) {
       // allows lazy loading the target method
-      var f, context, name;
+      var f, context, curried, name, reset, args = arguments;
       if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else f = fn;
 
+      if (typeof thisArg === 'undefined')
+        return f || context[name];
+
       // simple bind
-      if (arguments.length < 3 ) {
-        if (typeof thisArg === 'undefined') return fn;
+      if (args.length < 3 )
         return function() {
-          var fn = f || context[name];
-          return arguments.length
-            ? fn.apply(thisArg, arguments)
+          var args = arguments, fn = f || context[name];
+          return args.length
+            ? fn.apply(thisArg, args)
             : fn.call(thisArg);
         };
-      }
+
       // bind with curry
-      var args = slice.call(arguments, 2); reset = args.length;
+      curried = slice.call(args, 2);
+      reset   = curried.length;
+
       return function() {
-        args.length = reset; // reset arg length
-        var fn = f || context[name];
-        return fn.apply(thisArg, arguments.length ?
-          concatList(args, arguments) : args);
+        curried.length = reset; // reset arg length
+        var args = arguments, fn = f || context[name];
+        return fn.apply(thisArg, args.length ?
+          concatList(curried, args) : curried);
       };
     };
+
     // native support
     if (typeof Func.prototype.bind === 'function') {
       var plugin = Func.plugin;
       bind = function bind(fn, thisArg) {
-        return plugin.bind.call(f || thisArg[name], thisArg);
+        return plugin.bind.call(f || context[name], thisArg);
       };
     }
+
     return bind;
   })();
 
@@ -49,22 +56,24 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (function() {
+  (function(plugin) {
+
     Func.bindAsEventListener = function bindAsEventListener(fn, thisArg) {
       // allows lazy loading the target method
-      var f, context, name;
+      var f, context, name, args = arguments;
       if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else f = fn;
 
       // simple bind
-      if (arguments.length < 3 ) {
+      if (args.length < 3 ) {
         return function(event) {
           return (f || context[name]).call(thisArg, event || getWindow(this).event);
         };
       }
+
       // bind with curry
-      var args = slice.call(arguments, 2);
+      args = slice.call(args, 2);
       return function(event) {
         return (f || context[name]).apply(thisArg,
           prependList(args, event || getWindow(this).event));
@@ -73,27 +82,30 @@
 
     Func.curry = function curry(fn) {
       // allows lazy loading the target method
-      var f, context, name;
+      var f, context, curried, name, reset, args = arguments;
       if (isArray(fn)) {
         name = fn[0]; context = fn[1]; fn = context[name];
       } else f = fn;
 
-      if (arguments.length === 1) return fn;
-      var args = slice.call(arguments, 1), reset = args.length;
+      if (args.length === 1)
+        return f || context[name];
+
+      curried = slice.call(args, 1);
+      reset   = curried.length;
+
       return function() {
-        args.length = reset; // reset arg length
-        var fn = f || context[name];
-        return arguments.length
-          ? fn.apply(this, concatList(args, arguments))
-          : fn.apply(this, args);
+        curried.length = reset; // reset arg length
+        var args = arguments, fn = f || context[name];
+        return fn.apply(this, args.length ?
+          concatList(curried, args) : curried);
       };
     };
 
     Func.delay = function delay(fn, timeout) {
       timeout *= 1000;
-      var f, context, name, args = slice.call(arguments, 2);
 
       // allows lazy loading the target method
+      var f, context, name, args = slice.call(arguments, 2);
       if (isArray(fn)) {
         name = fn[0]; context = fn[1];
       } else f = fn;
@@ -112,9 +124,9 @@
       } else f = fn;
 
       return fn._methodized || (fn._methodized = function() {
-        var fn = f || context[name];
-        return arguments.length
-          ? fn.apply(global, prependList(arguments, this))
+        var args = arguments, fn = f || context[name];
+        return args.length
+          ? fn.apply(global, prependList(args, this))
           : fn.call(global, this);
       });
     };
@@ -127,37 +139,62 @@
       } else f = fn;
 
       return function() {
-        var fn = f || context[name];
-        return arguments.length
-          ? wrapper.apply(this, prependList(arguments, bind(fn, this)))
+        var args = arguments, fn = f || context[name];
+        return args.length
+          ? wrapper.apply(this, prependList(args, bind(fn, this)))
           : wrapper.call(this, bind(fn, this));
       };
     };
 
+    /*------------------------------------------------------------------------*/
+
+     if (!plugin.bind)
+       plugin.bind = (function() {
+         function bind(thisArg) {
+           var args = arguments;
+           return args.length > 1
+             ? Func.bind.apply(Func, prependList(args, this))
+             : Func.bind(this, thisArg);
+         }
+         return bind;
+       })();
+
+     plugin.bindAsEventListener = function bindAdEventListener(thisArg) {
+       var args = arguments;
+       return args.length > 1
+         ? Func.bindAdEventListener.apply(Func, prependList(args, this))
+         : Func.bindAdEventListener(this, thisArg);
+     };
+
+     plugin.curry = function curry() {
+       var args = arguments;
+       return args.length
+         ? Func.curry.apply(Func, prependList(args, this))
+         : this;
+     };
+
+     plugin.delay = function delay(timeout) {
+       var args = arguments;
+       return args.length > 1
+         ? Func.delay.apply(Func, prependList(args, this))
+         : Func.delay(this, timeout);
+     };
+
+     plugin.defer = function defer() {
+       var args = arguments;
+       return args.length
+         ? Func.defer.apply(Func, prependList(args, this))
+         : Func.defer(this);
+     };
+
+     plugin.methodize = function methodize() {
+       return Func.methodize(this);
+     };
+
+     plugin.wrap = function wrap(wrapper) {
+       Func.wrap(this, wrapper);
+     };
+
     // prevent JScript bug with named function expressions
     var bindAsEventListener = null, curry = null, methodize = null, wrap = null;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  (function() {
-    var name, i = 0,
-     cache  = Fuse.updateGenerics.cache,
-     plugin = Func.plugin,
-     names  = ['bind', 'bindAdEventListener', 'curry', 'delay', 'defer', 'methodize', 'wrap'];
-
-    cache.Function = { };
-
-    while (name = names[i++]) {
-      cache.Function[name] = Func[name];
-      if (plugin[name] !== 'function') {
-        plugin[name] = new Function('global', [
-          'var Func = Fuse.Function, slice = Array.prototype.slice;',
-          'function ' + name + '() {',
-          'return arguments.length',
-          '? Func.' + name + '.apply(Func, [this].concat(slice.call(arguments, 0)))',
-          ': Func.' + name + '.call(Func, this);',
-          '}', 'return ' + name].join('\n'))(global);
-      }
-    }
-  })();
+  })(Func.plugin);

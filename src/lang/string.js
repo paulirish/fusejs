@@ -353,7 +353,7 @@
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
-    var sMap = Fuse.RegExp.specialCharMap.s;
+    var sMap = Fuse.RegExp.SPECIAL_CHARS.s;
 
     // ECMA-5 15.5.4.20
     if (!plugin.trim)

@@ -1,3 +1,5 @@
+* Cleanup and optimize Fuse.Fusebox() as well as add Firefox 1.5 - 2.0.0.2 compatibility. [jddalton]
+
 * Expose Fuse.getDocument() and Fuse.getWindow(). [jddalton]
 
 * Make Fuse.Dom.Node() pass to Fuse.Dom.Element.decorate() if the nodeType is equal to 1. [jddalton]
