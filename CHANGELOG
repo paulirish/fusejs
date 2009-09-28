@@ -1,3 +1,5 @@
+* Make Fuse(element) point to Fuse.get(element) when DOM modules are included. [jddalton]
+
 * Make Fuse.Range#max and Fuse.Range#min only require Fuse.Enumerable equivalents when passing a callback. [jddalton]
 
 * Add private `Enumerable` variable to shorten the Fuse.Enumerable lookup. [jddalton]

@@ -1,5 +1,15 @@
   /*-------------------------------- ELEMENT ---------------------------------*/
 
+  // make Fuse() pass to Fuse.get()
+  Fuse =
+  global.Fuse = (function(__Fuse) {
+    function Fuse(object) {
+      return Fuse.get(object);
+    }
+    return Obj.extend(__Fuse.Class({ 'constructor': Fuse }), __Fuse,
+      function(value, key, object) { if (hasKey(object, key)) object[key] = value; });
+  })(Fuse);
+
   Element =
   Fuse.addNS('Dom.Element', Node, {
     'constructor': (function() {
