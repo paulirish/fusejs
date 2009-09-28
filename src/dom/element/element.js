@@ -3,8 +3,8 @@
   // make Fuse() pass to Fuse.get()
   Fuse =
   global.Fuse = (function(__Fuse) {
-    function Fuse(object) {
-      return Fuse.get(object);
+    function Fuse(object, context) {
+      return Fuse.get(object, context);
     }
     return Obj.extend(__Fuse.Class({ 'constructor': Fuse }), __Fuse,
       function(value, key, object) { if (hasKey(object, key)) object[key] = value; });
@@ -43,8 +43,11 @@
     }
 
     function get(object, context) {
-      if (isString(object))
+      if (isString(object)) {
+        if (object.charAt(0) == '<' && object.charAt(object.length - 1) == '>')
+          return Element.create(object, context);
         object = (context || doc).getElementById(object || expando);
+      }
       return Element(object);
     }
 
@@ -78,24 +81,35 @@
   Element.create = (function() {
     var doc = Fuse._doc,
 
+    matchComplexTag = /^<([A-Za-z]+)>$/,
+
     create = function create(tagName, attributes, context) {
-      var data, element, fragment, id, html, length, nodes, result;
+      var complexTag, data, element, fragment, id, html, length, nodes, result;
 
-      // html strings are not cached at the moment
+      // caching html strings is not supported at the moment
       if (tagName.charAt(0) == '<') {
-        html     = tagName;
-        context  = attributes;
-        fragment = Fuse.Dom.getFragmentFromString(html, context);
-        length   = fragment.childNodes.length;
+        context = attributes;
 
-        if (length < 2)
-          result = decorate(fragment.removeChild(fragment.firstChild));
-        else {
-          result = NodeList();
-          while (length--)
-            result[length] = decorate(fragment.removeChild(fragment.lastChild));
+        // support <div> format tags
+        if (complexTag = tagName.match(matchComplexTag)) {
+          tagName = complexTag[1];
         }
-        return result;
+        else {
+          html     = tagName;
+          fragment = Fuse.Dom.getFragmentFromString(html, context);
+          length   = fragment.childNodes.length;
+
+          // single element return decorated element
+          if (length < 2)
+            result = decorate(fragment.removeChild(fragment.firstChild));
+          // multiple elements return a NodeList
+          else {
+            result = NodeList();
+            while (length--)
+              result[length] = decorate(fragment.removeChild(fragment.lastChild));
+          }
+          return result;
+        }
       }
 
       context = context || doc;
