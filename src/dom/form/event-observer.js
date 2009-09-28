@@ -49,7 +49,7 @@
       };
 
       // prevent JScript bug with named function expressions
-      var onElementEvent = null, registerCallback = null, registerFormCallbacks = null;
+      var onElementEvent = nil, registerCallback = nil, registerFormCallbacks = nil;
     })(BaseEventObserver.plugin);
 
     /*------------------------------------------------------------------------*/

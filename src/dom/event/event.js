@@ -91,13 +91,13 @@
     };
 
     // prevent JScript bug with named function expressions
-    var element =    null,
-     findElement =   null,
-     isLeftClick =   null,
-     isMiddleClick = null,
-     isRightClick =  null,
-     pointer =       null,
-     stop =          null;
+    var element =    nil,
+     findElement =   nil,
+     isLeftClick =   nil,
+     isMiddleClick = nil,
+     isRightClick =  nil,
+     pointer =       nil,
+     stop =          nil;
   })(Event.Methods);
 
   // lazy define Event.pointerX() and Event.pointerY()
@@ -265,7 +265,7 @@
       else if (Data['2'] && Data['2'].events['dom:loaded'])
         return setTimeout(function() { winLoadWrapper(event); }, 10);
 
-      event.eventName = null;
+      event.eventName = nil;
       winLoadDispatcher(event);
       Event.stopObserving(global, 'load');
     }

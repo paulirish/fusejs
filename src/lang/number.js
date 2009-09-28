@@ -52,5 +52,5 @@
     })();
 
     // prevent JScript bug with named function expressions
-    var times = null, toColorPart = null;
+    var times = nil, toColorPart = nil;
   })(Fuse.Number.plugin);

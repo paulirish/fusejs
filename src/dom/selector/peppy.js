@@ -14,5 +14,5 @@
         context && context.raw || context || Fuse._doc));
     };
 
-     var toList = NodeList.fromNodeList, match = null, select = null;
+     var toList = NodeList.fromNodeList, match = nil, select = nil;
   })(Fuse.Dom.Selector, Fuse.Dom.NodeList);

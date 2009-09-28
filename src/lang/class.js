@@ -122,7 +122,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var extend = null;
+    var extend = nil;
   })(Fuse.Class.Methods = { });
 
   /*--------------------------------------------------------------------------*/

@@ -110,7 +110,7 @@
     }
 
     // prevent JScript bug with named function expressions
-    var _each = null, size = null, toArray = null;
+    var _each = nil, size = nil, toArray = nil;
   })(Fuse.Range.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -128,5 +128,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var succ = null;
+    var succ = nil;
   })();

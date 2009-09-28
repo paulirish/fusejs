@@ -124,7 +124,7 @@
     inputPlugin.setValue = function setValue(value) {
       var element = this.raw || this;
       if (CHECKED_INPUT_TYPES[element.type.toUpperCase()])
-        element.checked = !!value
+        element.checked = !!value;
       else element.value = value || '';
     };
 
@@ -171,14 +171,14 @@
     optionPlugin.getValue = getOptionValue;
 
     // prevent JScript bug with named function expressions
-    var activate = null,
-     clear =       null,
-     disable =     null,
-     enable =      null,
-     focus =       null,
-     getValue =    null,
-     present =     null,
-     select =      null,
-     setValue =    null,
-     serialize =   null;
+    var activate = nil,
+     clear =       nil,
+     disable =     nil,
+     enable =      nil,
+     focus =       nil,
+     getValue =    nil,
+     present =     nil,
+     select =      nil,
+     setValue =    nil,
+     serialize =   nil;
   })(Fuse.Dom);

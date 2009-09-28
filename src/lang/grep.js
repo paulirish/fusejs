@@ -59,5 +59,5 @@
       };
 
     // prevent JScript bug with named function expressions
-    var grep = null;
+    var grep = nil;
   })();

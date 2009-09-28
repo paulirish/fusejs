@@ -1,3 +1,5 @@
+* Add private `nil` variable to shorten some null assignments. [jddalton, Kyle Simpson]
+
 * Optimize Fuse.Dom.Element methods `insert`, `update`, and `replace` by only evaling scripts or creating nodes when needed. [jddalton]
 
 * Overhaul how Fuse.Dom.Element methods read and write SCRIPT element text. [jddalton]

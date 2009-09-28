@@ -196,5 +196,5 @@
      };
 
     // prevent JScript bug with named function expressions
-    var bindAsEventListener = null, curry = null, methodize = null, wrap = null;
+    var bindAsEventListener = nil, curry = nil, methodize = nil, wrap = nil;
   })(Func.plugin);

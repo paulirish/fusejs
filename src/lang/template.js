@@ -111,5 +111,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var gsub = null, interpolate = null, sub = null;
+    var gsub = nil, interpolate = nil, sub = nil;
   })(Fuse.String.plugin);

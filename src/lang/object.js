@@ -282,9 +282,9 @@
     })();
 
     // prevent JScript bug with named function expressions
-    var each = null,
-     extend =  null,
-     keys =    null,
-     values =  null,
-     toHTML =  null;
+    var each = nil,
+     extend =  nil,
+     keys =    nil,
+     values =  nil,
+     toHTML =  nil;
   })();

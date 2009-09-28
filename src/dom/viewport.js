@@ -21,7 +21,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var getDimensions = null, getScrollOffsets = null;
+    var getDimensions = nil, getScrollOffsets = nil;
   })(Fuse._doc.viewport);
 
   // lazy define document.viewport.getWidth() and document.viewport.getHeight()

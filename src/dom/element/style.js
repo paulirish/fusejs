@@ -204,7 +204,7 @@
     })();
 
     // prevent JScript bug with named function expressions
-    var getStyle = null, setStyle = null;
+    var getStyle = nil, setStyle = nil;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -254,11 +254,11 @@
     };
 
     // prevent JScript bug with named function expressions
-    var addClassName = null,
-     classNames =      null,
-     hasClassName =    null,
-     removeClassName = null,
-     toggleClassName = null;
+    var addClassName = nil,
+     classNames =      nil,
+     hasClassName =    nil,
+     removeClassName = nil,
+     toggleClassName = nil;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -395,7 +395,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var getDimensions = null, isVisible = null;
+    var getDimensions = nil, isVisible = nil;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/

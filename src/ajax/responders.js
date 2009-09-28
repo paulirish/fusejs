@@ -93,5 +93,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var register = null, unregister = null;
+    var register = nil, unregister = nil;
   })(Fuse.Ajax.Responders);

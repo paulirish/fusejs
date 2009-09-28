@@ -647,7 +647,7 @@
       rePlugin.exec = function exec(string) {
         var length, results, output = __exec.call(this, string);
         if (output) {
-          length = output.length; results = Fuse.Array(); 
+          length = output.length; results = Fuse.Array();
           while (length--) results[length] = String(output[length]);
         }
         return output && results;
@@ -685,7 +685,7 @@
       strPlugin.match = function match(pattern) {
         var length, results, output = __match.call(this, pattern);
         if (output) {
-          length = output.length; results = Fuse.Array(); 
+          length = output.length; results = Fuse.Array();
           while (length--) results[length] = String(output[length]);
         }
         return output && results;
@@ -753,21 +753,21 @@
       /*----------------------------------------------------------------------*/
 
       // prevent JScript bug with named function expressions
-      var charAt = null, charCodeAt = null, create = null, concat = null,
-       every = null, exec = null, filter = null, getDate = null, getDay = null,
-       getFullYear = null, getHours = null, getMilliseconds = null,
-       getMinutes = null, getMonth = null, getSeconds = null, getTime = null,
-       getTimezoneOffset = null, getUTCDate = null, getUTCDay = null,
-       getUTCFullYear = null, getUTCHours = null, getUTCMilliseconds = null,
-       getUTCMinutes = null, getUTCMonth = null, getUTCSeconds = null,
-       getYear = null, join = null, indexOf = null, lastIndexOf = null,
-       localeCompare = null, match = null, map = null, push = null,
-       replace = null, search = null, slice = null, some = null, split = null,
-       substr = null, substring = null, toExponential = null, toFixed = null,
-       toISOString = null, toJSON = null, toLowerCase = null,
-       toLocaleLowerCase = null, toLocaleUpperCase = null, toPrecision = null,
-       toUpperCase = null, trim = null, updateGenerics = null, unshift = null;
-       
+      var charAt = nil, charCodeAt = nil, create = nil, concat = nil,
+       every = nil, exec = nil, filter = nil, getDate = nil, getDay = nil,
+       getFullYear = nil, getHours = nil, getMilliseconds = nil,
+       getMinutes = nil, getMonth = nil, getSeconds = nil, getTime = nil,
+       getTimezoneOffset = nil, getUTCDate = nil, getUTCDay = nil,
+       getUTCFullYear = nil, getUTCHours = nil, getUTCMilliseconds = nil,
+       getUTCMinutes = nil, getUTCMonth = nil, getUTCSeconds = nil,
+       getYear = nil, join = nil, indexOf = nil, lastIndexOf = nil,
+       localeCompare = nil, match = nil, map = nil, push = nil, replace = nil,
+       search = nil, slice = nil, some = nil, split = nil, substr = nil,
+       substring = nil, toExponential = nil, toFixed = nil, toISOString = nil,
+       toJSON = nil, toLowerCase = nil, toLocaleLowerCase = nil,
+       toLocaleUpperCase = nil, toPrecision = nil, toUpperCase = nil,
+       trim = nil, updateGenerics = nil, unshift = nil;
+
       thisArg.Array    = Array;
       thisArg.Date     = Date;
       thisArg.Function = Function;
@@ -804,14 +804,14 @@
             return function(thisArg) {
               __postProcess();
               thisArg.Array.prototype.map =
-              thisArg.String.prototype.lastIndexOf = null;
+              thisArg.String.prototype.lastIndexOf = nil;
             };
           })(postProcess);
         }
       }
 
       // cleanup
-      sandbox = null;
+      sandbox = nil;
       cache = [];
     })();
 

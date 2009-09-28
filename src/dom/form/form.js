@@ -214,14 +214,14 @@
     };
 
     // prevent JScript bug with named function expressions
-    var disable =        null,
-     enable =            null,
-     findFirstElement =  null,
-     focusFirstElement = null,
-     getElements =       null,
-     getInputs =         null,
-     request =           null,
-     reset =             null,
-     serializeElements = null,
-     serialize =         null;
+    var disable =        nil,
+     enable =            nil,
+     findFirstElement =  nil,
+     focusFirstElement = nil,
+     getElements =       nil,
+     getInputs =         nil,
+     request =           nil,
+     reset =             nil,
+     serializeElements = nil,
+     serialize =         nil;
   })(Form.plugin);

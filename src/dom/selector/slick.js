@@ -15,5 +15,5 @@
     };
 
     // prevent JScript bug with named function expressions
-    var match = null, select = null;
+    var match = nil, select = nil;
   })(Fuse.Dom.Selector, Fuse.Dom.NodeList);

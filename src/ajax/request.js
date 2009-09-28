@@ -30,7 +30,7 @@
       Responders = Fuse.Ajax.Responders;
 
     this._useStatus   = true;
-    this._timerID     = null;
+    this._timerID     = nil;
     this.aborted      = false;
     this.readyState   = Fuse.Number(0);
     this.responseText = Fuse.String('');
@@ -38,7 +38,7 @@
     this.statusText   = Fuse.String('');
     this.timedout     = false;
 
-    this.headerJSON = this.responseJSON = this.responseXML = null;
+    this.headerJSON = this.responseJSON = this.responseXML = nil;
 
     this.abort = function abort() {
       var transport = this.transport;
@@ -318,14 +318,14 @@
     };
 
     // prevent JScript bug with named function expressions
-    var abort =          null,
-     dispatch =          null,
-     dispatchException = null,
-     getHeader =         null,
-     getAllHeaders =     null,
-     isSuccess =         null,
-     onStateChange =     null,
-     onTimeout =         null,
-     request =           null,
-     setReadyState =     null;
+    var abort =          nil,
+     dispatch =          nil,
+     dispatchException = nil,
+     getHeader =         nil,
+     getAllHeaders =     nil,
+     isSuccess =         nil,
+     onStateChange =     nil,
+     onTimeout =         nil,
+     request =           nil,
+     setReadyState =     nil;
   }).call(Fuse.Ajax.Request.plugin);

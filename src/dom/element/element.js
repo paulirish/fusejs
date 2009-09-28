@@ -658,7 +658,7 @@
     })();
 
     // prevent JScript bug with named function expressions
-    var insert = null, replace = null, update = null;
+    var insert = nil, replace = nil, update = nil;
   })(Element.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -784,14 +784,14 @@
     };
 
     // prevent JScript bug with named function expressions
-    var cleanWhitespace = null,
-     empty =              null,
-     hide =               null,
-     getFuseId =          null,
-     isFragment =         null,
-     remove =             null,
-     scrollTo =           null,
-     show =               null,
-     toggle =             null,
-     wrap =               null;
+    var cleanWhitespace = nil,
+     empty =              nil,
+     hide =               nil,
+     getFuseId =          nil,
+     isFragment =         nil,
+     remove =             nil,
+     scrollTo =           nil,
+     show =               nil,
+     toggle =             nil,
+     wrap =               nil;
   })(Element.plugin);

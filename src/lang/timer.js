@@ -59,7 +59,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var execute = null, start = null, stop = null;
+    var execute = nil, start = nil, stop = nil;
   })(Fuse.Timer.plugin);
 
   Fuse.Timer.options = {

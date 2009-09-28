@@ -200,7 +200,7 @@
     plugin.parseQuery = plugin.toQueryParams;
 
     // prevent JScript bug with named function expressions
-    var times = null, toArray = null, toQueryParams = null;
+    var times = nil, toArray = nil, toQueryParams = nil;
   })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -243,12 +243,12 @@
     };
 
     // prevent JScript bug with named function expressions
-    var blank =    null,
-      contains =   null,
-      empty =      null,
-      endsWith =   null,
-      scan =       null,
-      startsWith = null;
+    var blank =    nil,
+      contains =   nil,
+      empty =      nil,
+      endsWith =   nil,
+      scan =       nil,
+      startsWith = nil;
   })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -317,7 +317,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var hyphenate = null, truncate = null, underscore = null;
+    var hyphenate = nil, truncate = nil, underscore = nil;
   })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -351,7 +351,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var evalScripts = null, extractScripts = null, stripScripts = null;
+    var evalScripts = nil, extractScripts = nil, stripScripts = nil;
   })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -395,7 +395,7 @@
       };
 
     // prevent JScript bug with named function expressions
-    var trim = null, trimLeft = null, trimRight = null;
+    var trim = nil, trimLeft = nil, trimRight = nil;
   })(Fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/

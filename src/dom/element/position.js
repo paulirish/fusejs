@@ -13,9 +13,9 @@
       'TH':    1
     },
 
-    BODY_OFFSETS_INHERIT_ITS_MARGINS = null,
+    BODY_OFFSETS_INHERIT_ITS_MARGINS = nil,
 
-    ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH = null;
+    ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH = nil;
 
     function ensureLayout(decorator) {
       var element = (decorator.raw || decorator),
@@ -439,14 +439,14 @@
     })();
 
     // prevent JScript bug with named function expressions
-    var makeAbsolute =        null,
-     clonePosition =          null,
-     cumulativeScrollOffset = null,
-     getOffsetParent =        null,
-     makeClipping =           null,
-     makePositioned =         null,
-     positionedOffset =       null,
-     undoAbsolute =           null,
-     undoClipping =           null,
-     undoPositioned =         null;
+    var makeAbsolute =        nil,
+     clonePosition =          nil,
+     cumulativeScrollOffset = nil,
+     getOffsetParent =        nil,
+     makeClipping =           nil,
+     makePositioned =         nil,
+     positionedOffset =       nil,
+     undoAbsolute =           nil,
+     undoClipping =           nil,
+     undoPositioned =         nil;
   })(Element.plugin);

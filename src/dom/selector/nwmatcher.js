@@ -20,5 +20,5 @@
       return (Selector.select = select)(selector, context);
     };
 
-    var nwMatch, nwSelect, match = null, select = null;
+    var nwMatch, nwSelect, match = nil, select = nil;
   })(Fuse.Dom.Selector, Fuse.Dom.NodeList);

@@ -152,7 +152,7 @@
     };
 
     // prevent JScript bug with named function expressions
-    var _each = null, first = null, last = null;
+    var _each = nil, first = nil, last = nil;
   })(Fuse.Hash.plugin);
 
   /*--------------------------------------------------------------------------*/
@@ -305,19 +305,19 @@
     }
 
     // prevent JScript bug with named function expressions
-    var clear =      null,
-     contains =      null,
-     filter =        null,
-     get =           null,
-     keys =          null,
-     keyOf =         null,
-     map =           null,
-     partition =     null,
-     size =          null,
-     toArray =       null,
-     toObject =      null,
-     toQueryString = null,
-     values =        null;
+    var clear =      nil,
+     contains =      nil,
+     filter =        nil,
+     get =           nil,
+     keys =          nil,
+     keyOf =         nil,
+     map =           nil,
+     partition =     nil,
+     size =          nil,
+     toArray =       nil,
+     toObject =      nil,
+     toQueryString = nil,
+     values =        nil;
   })(Fuse.Hash.plugin, Fuse.Hash);
 
   /*--------------------------------------------------------------------------*/

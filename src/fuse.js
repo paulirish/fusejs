@@ -7,7 +7,7 @@
    decorate, defer, eachKey, emptyFunction, escapeRegExpChars, expando,
    getDocument, getNodeName, getWindow, hasKey, inspect, isArray, isElement,
    isEmpty, isHash, isHostObject, isFunction, isNumber, isPrimitive, isRegExp,
-   isSameOrigin, isString, isUndefined, K, prependList, slice, toInteger,
+   isSameOrigin, isString, isUndefined, K, nil, prependList, slice, toInteger,
    toString, undef, userAgent;
 
   Fuse =
@@ -139,6 +139,9 @@
 
   // a unqiue 15 char id used throughout Fuse
   expando = '_fuse' + String(+new Date).slice(0, 10);
+
+  // helps minify nullifying the JScript function declarations
+  nil = null;
 
   // a quick way to copy an array slice.call(array, 0)
   slice = global.Array.prototype.slice;

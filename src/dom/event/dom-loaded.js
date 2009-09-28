@@ -201,7 +201,7 @@
                   }
 
                   if (done) {
-                    cache = null;
+                    cache = nil;
                     return cssDoneLoading();
                   }
                   return done;

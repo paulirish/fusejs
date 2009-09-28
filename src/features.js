@@ -301,7 +301,7 @@
         des.position = 'static';
         des.top = des.left = '';
 
-        var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null);
+        var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, nil);
         result = (style && style.top === '0px' && style.left === '0px');
         des.cssText = backup;
         return result;
@@ -313,7 +313,7 @@
         // true for Opera 9.2x
         var docEl = Fuse._docEl, des = docEl.style, backup = des.paddingBottom;
         des.paddingBottom = '1px';
-        var style = Fuse._doc.defaultView.getComputedStyle(docEl, null),
+        var style = Fuse._doc.defaultView.getComputedStyle(docEl, nil),
          result = style && (parseInt(style.height) || 0) ===  docEl.offsetHeight;
         des.paddingBottom = backup;
         return result;
@@ -327,7 +327,7 @@
         des.display = 'none';
 
         // In Safari 2 getComputedStyle() will return null for elements with style display:none
-        var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, null),
+        var style = Fuse._doc.defaultView.getComputedStyle(Fuse._docEl, nil),
          result = style && style.height === '0px';
 
         des.display = backup;

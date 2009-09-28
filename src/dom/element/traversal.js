@@ -64,7 +64,7 @@
       };
 
       // prevent JScript bug with named function expressions
-      var childElements = null, match = null, query = null, siblings = null;
+      var childElements = nil, match = nil, query = nil, siblings = nil;
     })();
 
     /*------------------------------------------------------------------------*/
@@ -244,7 +244,7 @@
       };
 
       // prevent JScript bug with named function expressions
-      var next = null, previous = null, up = null;
+      var next = nil, previous = nil, up = nil;
     })();
 
     /*------------------------------------------------------------------------*/
@@ -284,7 +284,7 @@
       };
 
       // prevent JScript bug with named function expressions
-      var ancestors = null, nextSiblings = null, previousSiblings = null;
+      var ancestors = nil, nextSiblings = nil, previousSiblings = nil;
     })();
 
   })(Element.plugin, Fuse.Dom.Selector);

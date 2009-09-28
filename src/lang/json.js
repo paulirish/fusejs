@@ -62,7 +62,7 @@
       };
 
     // prevent JScript bug with named function expressions
-    var toJSON = null;
+    var toJSON = nil;
   })();
 
   /*--------------------------------------------------------------------------*/
