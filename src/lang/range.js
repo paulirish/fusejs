@@ -28,10 +28,15 @@
       c.end = thisArg.end = Fuse.Object(thisArg.end);
       c.exclusive = thisArg.exclusive;
 
-      while (isInRange(thisArg, value)) {
-        c.push(value);
-        callback && callback(value, i++, thisArg);
-        value = value.succ();
+      if (callback) {
+        while (isInRange(thisArg, value)) {
+          c.push(value);
+          callback(value, i++, thisArg);
+          value = value.succ();
+        }
+      } else {
+        while (isInRange(thisArg, value))
+          c.push(value) && (value = value.succ());
       }
     }
 
@@ -69,13 +74,15 @@
     plugin.max = (function(__max) {
       function max(callback, thisArg) {
         var result;
-        if (!callback && !isExpired(this))
+        if (!callback) {
+          if (isExpired(this)) buildCache(this, callback);
           result = this._cache[this._cache.length - 1];
+        }
         else result = __max.call(this, callback, thisArg);
         return result;
       }
       return max;
-    })(plugin.max);
+    })(Enumerable && Enumerable.max);
 
     plugin.min = (function(__min) {
       function min(callback, thisArg) {
@@ -84,7 +91,7 @@
           : __min.call(this, callback, thisArg);
       }
       return min;
-    })(plugin.min);
+    })(Enumerable && Enumerable.min);
 
     plugin.size = function size() {
       var c = this._cache;
@@ -102,8 +109,8 @@
     };
 
     // assign any missing Enumerable methods
-    if (Fuse.Enumerable) {
-      eachKey(Fuse.Enumerable, function(value, key, object) {
+    if (Enumerable) {
+      eachKey(Enumerable, function(value, key, object) {
         if (hasKey(object, key) && typeof plugin[key] !== 'function')
           plugin[key] = value;
       });

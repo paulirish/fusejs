@@ -1,3 +1,7 @@
+* Make Fuse.Range#max and Fuse.Range#min only require Fuse.Enumerable equivalents when passing a callback. [jddalton]
+
+* Add private `Enumerable` variable to shorten the Fuse.Enumerable lookup. [jddalton]
+
 * Add private `nil` variable to shorten some null assignments. [jddalton, Kyle Simpson]
 
 * Optimize Fuse.Dom.Element methods `insert`, `update`, and `replace` by only evaling scripts or creating nodes when needed. [jddalton]

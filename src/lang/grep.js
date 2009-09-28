@@ -24,8 +24,8 @@
       return grep;
     })();
 
-    if (Fuse.Enumerable)
-      Fuse.Enumerable.grep = function grep(pattern, callback, thisArg) {
+    if (Enumerable)
+      Enumerable.grep = function grep(pattern, callback, thisArg) {
         if (!pattern || pattern == '' || isRegExp(pattern) &&
            !pattern.source) return this.toList();
 

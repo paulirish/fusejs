@@ -55,7 +55,7 @@ new Test.Unit.Runner({
   },
 
   'testDefaultsToNotExclusive': function() {
-    this.assertEnumEqual($R(-3,3), $R(-3,3,false));
+    this.assertEnumEqual($R(-3, 3), $R(-3, 3, false));
   },
 
   'testMax': function() {

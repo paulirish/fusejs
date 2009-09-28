@@ -126,7 +126,7 @@
 
 
     // Fuse.Enumerable#inspect
-    if (Fuse.Enumerable)
+    if (Enumerable)
     (function() {
       function inspect() {
         // called normally or called Obj.inspect(Fuse.Enumerable)
@@ -135,7 +135,7 @@
           : inspectPlugin(Fuse.Enumerable);
       }
 
-      Fuse.Enumerable.inspect = inspect;
+      Enumerable.inspect = inspect;
     })();
 
 

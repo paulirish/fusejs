@@ -566,8 +566,8 @@
         };
 
       // assign any missing Enumerable methods
-      if (Fuse.Enumerable) {
-        eachKey(Fuse.Enumerable, function(value, key, object) {
+      if (Enumerable) {
+        eachKey(Enumerable, function(value, key, object) {
           if (hasKey(object, key) && typeof plugin[key] !== 'function')
             plugin[key] = value;
         });

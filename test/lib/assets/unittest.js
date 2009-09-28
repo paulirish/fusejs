@@ -277,9 +277,13 @@
     }
 
     function assertEnumEqual(expected, actual, message) {
-      expected = slice.call(expected, 0);
-      actual   = slice.call(actual, 0);
-      message  = buildMessage(message || 'assertEnumEqual', 'expected: <?>, actual: <?>', expected, actual);
+      expected = (expected || { }).toArray ?
+        expected.toArray() : slice.call(expected, 0);
+
+      actual = (actual || { }).toArray ?
+        actual.toArray() : slice.call(actual, 0);
+
+      message = buildMessage(message || 'assertEnumEqual', 'expected: <?>, actual: <?>', expected, actual);
 
       this.assertBlock(message, function() {
         return expected.length === actual.length &&
