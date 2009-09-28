@@ -129,7 +129,6 @@ new Test.Unit.Runner({
     this.assertNotVisible('testcss1_span');
 
     $('testcss1').show();
-    console.log($('testcss1').isVisible())
     this.assertVisible('testcss1');
     this.assertNotVisible('testcss1_span');
 
