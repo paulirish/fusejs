@@ -154,8 +154,21 @@
 
   (function(plugin) {
     plugin.times = function times(count) {
+      // uses the `Exponentiation by squaring` algorithm. Thanx Yaffle !
       if (this == null) throw new TypeError;
-      return Fuse.String(count < 1 ? '' : new Array(count + 1).join(this));
+      count = toInteger(count);
+      var accumulator = String(this), result = '';
+
+      while (count > 0) {
+        if (count % 2) {
+          count--;
+          result += accumulator;
+        } else {
+          count /= 2;
+          accumulator += accumulator;
+        }
+      }
+      return Fuse.String(result);
     };
 
     plugin.toArray = function toArray() {

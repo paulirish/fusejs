@@ -1,3 +1,5 @@
+* Optimize Fuse.String#times by using the `Exponentiation by squaring` algorithm. [Yaffle]
+
 * Add support for Fuse.get('<div>') and Fuse.Dom.Element('<div>') to return a new decorated element. [jddalton]
 
 * Make Fuse(element) point to Fuse.get(element) when DOM modules are included. [jddalton]
