@@ -19,20 +19,20 @@
 
     // lazy define on first call
     isButton = function(event, mouseButton) {
-      var property = (typeof event.which === 'number')
-       ? 'which' : (typeof event.button === 'number')
-         ? 'button' : false,
+      var property, buttonMap = { 'left': 1, 'middle': 2, 'right': 3 } ;
 
-      buttonMap = (property === 'button')
-        ? { 'left': 1, 'middle': 4, 'right': 2 }
-        : { 'left': 1, 'middle': 2, 'right': 3 };
+      if (typeof event.which === 'number')
+        property = 'which';
+      else if (typeof event.button === 'number') {
+        property = 'button';
+        buttonMap = { 'left': 1, 'middle': 4, 'right': 2 };
+      }
 
-      return (isButton = property === false
-        ? function() { return false; }
-        : function(event, mouseButton) {
-            return event[property] === buttonMap[mouseButton];
-          }
-      )(event, mouseButton);
+      isButton = property
+        ? function(event, mouseButton) { return event[property] === buttonMap[mouseButton]; }
+        : function() { return false; };
+
+      return isButton(event, mouseButton);
     };
 
     methods.element = function element(event) {
