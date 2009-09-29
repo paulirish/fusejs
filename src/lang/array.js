@@ -482,7 +482,7 @@
         plugin.indexOf = function indexOf(item, fromIndex) {
           if (this == null) throw new TypeError;
 
-          fromIndex = fromIndex >> 0;
+          fromIndex = toInteger(fromIndex);
           var object = Object(this), length = object.length >>> 0;
           if (fromIndex < 0) fromIndex = length + fromIndex;
 
@@ -499,7 +499,7 @@
           if (this == null) throw new TypeError;
 
           var object = Object(this), length = object.length >>> 0;
-          fromIndex = arguments.length === 2 ? fromIndex >> 0 : length;
+          fromIndex = fromIndex == null ? length : toInteger(fromIndex);
 
           if (!length) return Fuse.Number(-1);
           if (fromIndex > length) fromIndex = length - 1;

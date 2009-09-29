@@ -99,24 +99,29 @@
   // ECMA-5 15.5.4.8
 
   if (!Fuse.String.plugin.lastIndexOf) (function() {
-    function lastIndexOf(searchString) {
+    function lastIndexOf(searchString, position) {
       if (this == null) throw new TypeError;
       searchString = String(searchString);
+      position = +position;
 
       var string = String(this),
-       pos = +arguments[1], // fast coerce to number
        len = string.length,
        searchLen = searchString.length;
 
-      if (searchLen > len) return Fuse.Number(-1);
-      if (pos < 0) pos = 0;
-      else if (isNaN(pos) || pos > len - searchLen) pos = len - searchLen;
-      if (!searchLen) return Fuse.Number(pos);
+      if (searchLen > len)
+        return Fuse.Number(-1);
 
-      pos++;
-      while (pos--)
-        if (string.slice(pos, pos + searchLen) === searchString)
-          return Fuse.Number(pos);
+      if (position < 0) position = 0;
+      else if (isNaN(position) || position > len - searchLen)
+        position = len - searchLen;
+
+      if (!searchLen)
+        return Fuse.Number(position);
+
+      position++;
+      while (position--)
+        if (string.slice(position, position + searchLen) === searchString)
+          return Fuse.Number(position);
       return Fuse.Number(-1);
     }
 
@@ -125,9 +130,9 @@
 
   // for Chome 1 and 2
   if (Bug('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION')) (function(plugin) {
-    function lastIndexOf(searchString) {
-      var pos = +arguments[1];
-      return __lastIndexOf.call(this, searchString, pos < 0 ? 0 : pos);
+    function lastIndexOf(searchString, position) {
+      position = +position;
+      return __lastIndexOf.call(this, searchString, position < 0 ? 0 : position);
     }
 
     var __lastIndexOf = plugin.lastIndexOf;
