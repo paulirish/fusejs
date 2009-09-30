@@ -1,3 +1,5 @@
+* Allow Fuse.String#extractScripts() to accept a callback argument which reduces one iteration in Fuse.String#evalScripts. [jddalton]
+
 * Cleanup string.js and lazy define Fuse.String#escapeHTML and Fuse.String#unescapeHTML. [jddalton]
 
 * Move all DOM functionality to the src/dom directory. [jddalton]

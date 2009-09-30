@@ -197,17 +197,17 @@
 
   (function(plugin) {
 
-    var matchBlank     = Fuse.RegExp('^\\s*$'),
-     matchCapped       = /([A-Z]+)([A-Z][a-z])/g,
-     matchCamelCases   = /([a-z\d])([A-Z])/g,
-     matchDoubleColons = /::/g,
-     matchHTMLComments = Fuse.RegExp('<!--\\s*' + Fuse.scriptFragment + '\\s*-->', 'gi'),
-     matchHyphens      = /-/g,
-     matchHyphenated   = /-+(.)?/g,
-     matchOpenTag      = /<script/i,
-     matchScripts      = new RegExp(Fuse.scriptFragment, 'gi'),
-     matchUnderscores  = /_/g,
-     replace           = plugin.replace;
+    var matchBlank      = Fuse.RegExp('^\\s*$'),
+     matchCapped        = /([A-Z]+)([A-Z][a-z])/g,
+     matchCamelCases    = /([a-z\d])([A-Z])/g,
+     matchDoubleColons  = /::/g,
+     matchHTMLComments  = Fuse.RegExp('<!--\\s*' + Fuse.scriptFragment + '\\s*-->', 'gi'),
+     matchHyphens       = /-/g,
+     matchHyphenated    = /-+(.)?/g,
+     matchOpenScriptTag = /<script/i,
+     matchScripts       = new RegExp(Fuse.scriptFragment, 'gi'),
+     matchUnderscores   = /_/g,
+     replace            = plugin.replace;
 
     plugin.blank = function blank() {
       if (this == null) throw new TypeError;
@@ -265,23 +265,32 @@
 
     plugin.evalScripts = function evalScripts() {
       if (this == null) throw new TypeError;
-      return Fuse.String(this).extractScripts().map(function(script) {
-        return global.eval(String(script));
+      results = Fuse.Array();
+      Fuse.String(this).extractScripts(function(script) {
+        results.push(global.eval(String(script)));
       });
+
+      return results;
     };
 
-    plugin.extractScripts = function extractScripts() {
+    plugin.extractScripts = function extractScripts(callback) {
       if (this == null) throw new TypeError;
-      var match, striptTags,
+      var match, script, striptTags,
        string = String(this), results = Fuse.List();
 
-      if (!matchOpenTag.test(string)) return results;
-      matchHTMLComments.lastIndex = 0;
+      if (!matchOpenScriptTag.test(string)) return results;
+
+      matchHTMLComments.lastIndex =
+      matchScripts.lastIndex      = 0;
       scriptTags = string.replace(matchHTMLComments, '');
 
-      matchScripts.lastIndex = 0;
-      while (match = matchScripts.exec(scriptTags))
-        match[1] && results.push(match[1]);
+      if (callback) {
+        while (match = matchScripts.exec(scriptTags))
+          if (script = match[1]) { callback(script); results.push(script); }
+      } else {
+        while (match = matchScripts.exec(scriptTags))
+          if (script = match[1]) results.push(script);
+      }
       return results;
     };
 

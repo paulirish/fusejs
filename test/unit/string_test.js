@@ -341,7 +341,7 @@ new Test.Unit.Runner({
 
     this.assertEqual('fooBar',  Fuse.String('foo-bar').camelize(),
       'String with one hyphen');
- 
+
     this.assertEqual('borderBottomWidth', Fuse.String('border-bottom-width').camelize(),
       'String simulating style property');
 
@@ -475,7 +475,7 @@ new Test.Unit.Runner({
 
     this.assertEqual('hello world',
       Fuse.String('hello wor<input type="text" value="foo>bar">ld').stripTags());
- 
+
     this.assertEqual('1\n2',
       Fuse.String('1\n2').stripTags());
 
@@ -532,7 +532,8 @@ new Test.Unit.Runner({
   },
 
   'testEvalScripts': function() {
-    this.assertEqual(0, evalScriptsCounter);
+    this.assertEqual(0, evalScriptsCounter,
+      'Sanity check. No scripts should be evaled yet.');
 
     Fuse.String('foo <script>evalScriptsCounter++<\/script>bar').evalScripts();
     this.assertEqual(1, evalScriptsCounter);
@@ -540,8 +541,11 @@ new Test.Unit.Runner({
     var stringWithScripts = '';
     Fuse.Number(3).times(function(){ stringWithScripts += 'foo <script>evalScriptsCounter++<\/script>bar' });
     Fuse.String(stringWithScripts).evalScripts();
-
     this.assertEqual(4, evalScriptsCounter);
+
+    this.assertEnumEqual([4, 'hello world!'],
+      Fuse.String('<script>2 + 2</script><script>"hello world!"</script>').evalScripts(),
+      'Should return the evaled scripts.');
   },
 
   'testEscapeHTML': function() {
@@ -705,7 +709,7 @@ new Test.Unit.Runner({
     this.assertEqual(0, source.lastIndexOf('test', -1),
       'failed with negative position');
 
-    // this.assertEqual(1,  new Fuse.String().lastIndexOf.length); 
+    // this.assertEqual(1,  new Fuse.String().lastIndexOf.length);
 
     for (var i = source.length + 10; i >= 0; i--) {
       var expected = i < source.length ? i : source.length;
