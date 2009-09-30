@@ -21,361 +21,137 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // ECMA-5 15.5.4.11
-
-  // for IE
-  if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX')) (function(plugin) {
-    function replace(pattern, replacement) {
-      if (typeof replacement === 'function') {
-        // ensure string `null` and `undefined` are returned
-        var __replacement = replacement;
-        replacement = function() {
-          var result = __replacement.apply(global, arguments);
-          return result || String(result);
-        };
-      }
-      var result = __replace.call(this, pattern, replacement);
-      if (isRegExp(pattern)) pattern.lastIndex = 0;
-      return result;
-    }
-
-    var __replace = plugin.replace;
-    plugin.replace = replace;
-  })(Fuse.String.plugin);
-
-  // primarily for Safari 2.0.2 and lower, based on work by Dean Edwards
-  // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
-  if (Bug('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
-      Bug('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN')) (function(plugin) {
-    function replace(pattern, replacement) {
-      if (typeof replacement !== 'function')
-        return __replace.call(this, pattern, replacement);
-
-      if (this == null) throw new TypeError;
-
-      if (!isRegExp(pattern))
-        pattern = new RegExp(escapeRegExpChars(pattern));
-
-      // set pattern.lastIndex to 0 before we perform string operations
-      var match, index = 0, nonGlobal = !pattern.global,
-       lastIndex = pattern.lastIndex = 0,
-       result = '', source = String(this),
-       srcLength = source.length;
-
-      while (match = exec.call(pattern, source)) {
-        index = match.index;
-        result += source.slice(lastIndex, index);
-
-        // set lastIndex before replacement call to avoid potential
-        // pattern.lastIndex tampering
-        lastIndex = pattern.lastIndex;
-        result += replacement.apply(global, concatList(match, [index, source]));
-
-        if (nonGlobal) {
-          pattern.lastIndex = lastIndex = index + match[0].length;
-          break;
-        }
-        // handle empty pattern matches like /()/g
-        if (lastIndex === index) {
-          if (lastIndex === srcLength) break;
-          result += source.charAt(lastIndex++);
-        }
-        pattern.lastIndex = lastIndex;
-      }
-
-      // append the remaining source to the result
-      if (lastIndex < srcLength)
-        result += source.slice(lastIndex, srcLength);
-
-      return Fuse.String(result);
-    }
-
-    var __replace = plugin.replace, exec = RegExp.prototype.exec;
-    plugin.replace = replace;
-  })(Fuse.String.plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  // ECMA-5 15.5.4.8
-
-  if (!Fuse.String.plugin.lastIndexOf) (function() {
-    function lastIndexOf(searchString, position) {
-      if (this == null) throw new TypeError;
-      searchString = String(searchString);
-      position = +position;
-
-      var string = String(this),
-       len = string.length,
-       searchLen = searchString.length;
-
-      if (searchLen > len)
-        return Fuse.Number(-1);
-
-      if (position < 0) position = 0;
-      else if (isNaN(position) || position > len - searchLen)
-        position = len - searchLen;
-
-      if (!searchLen)
-        return Fuse.Number(position);
-
-      position++;
-      while (position--)
-        if (string.slice(position, position + searchLen) === searchString)
-          return Fuse.Number(position);
-      return Fuse.Number(-1);
-    }
-
-    Fuse.String.plugin.lastIndexOf = lastIndexOf;
-  })();
-
-  // for Chome 1 and 2
-  if (Bug('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION')) (function(plugin) {
-    function lastIndexOf(searchString, position) {
-      position = +position;
-      return __lastIndexOf.call(this, searchString, position < 0 ? 0 : position);
-    }
-
-    var __lastIndexOf = plugin.lastIndexOf;
-    plugin.lastIndexOf = lastIndexOf;
-  })(Fuse.String.plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  // ECMA-5 15.5.4.10
-
-  // for IE
-  if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX')) (function(plugin) {
-    function match(pattern) {
-      var result = __match.call(this, pattern);
-      if (isRegExp(pattern)) pattern.lastIndex = 0;
-      return result;
-    }
-
-    var __match = plugin.match;
-    plugin.match = match;
-  })(Fuse.String.plugin);
-
-  /*--------------------------------------------------------------------------*/
-
   (function(plugin) {
-    plugin.times = function times(count) {
-      // uses the `Exponentiation by squaring` algorithm. Thanx Yaffle !
-      if (this == null) throw new TypeError;
-      count = toInteger(count);
-      var accumulator = String(this), result = '';
 
-      while (count > 0) {
-        if (count % 2) {
-          count--;
-          result += accumulator;
-        } else {
-          count /= 2;
-          accumulator += accumulator;
-        }
-      }
-      return Fuse.String(result);
-    };
-
-    plugin.toArray = function toArray() {
-      if (this == null) throw new TypeError;
-      return Fuse.String(this).split('');
-    };
-
-    plugin.toQueryParams = function toQueryParams(separator) {
-      if (this == null) throw new TypeError;
-      var match = String(this).split('?'), object = Fuse.Object();
-      if (match.length > 1 && !match[1]) return object;
-
-      (match = (match = match[1] || match[0]).split('#')) &&
-        (match = match[0].split(' ')[0]);
-      if (!match) return object;
-
-      var pair, key, value, index, i = 0,
-       pairs = match.split(separator || '&'), length = pairs.length;
-
-      for ( ; i < length; i++) {
-        value = undef;
-        index = (pair = pairs[i]).indexOf('=');
-        if (!pair || index == 0) continue;
-
-        if (index != -1) {
-          key = decodeURIComponent(pair.slice(0, index));
-          value = pair.slice(index + 1);
-          if (value) value = decodeURIComponent(value);
-        } else key = pair;
-
-        if (hasKey(object, key)) {
-          if (!isArray(object[key])) object[key] = [object[key]];
-          object[key].push(value);
-        }
-        else object[key] = value;
-      }
-      return object;
-    };
-
-    // aliases
-    plugin.toList = plugin.toArray;
-    plugin.parseQuery = plugin.toQueryParams;
-
-    // prevent JScript bug with named function expressions
-    var times = nil, toArray = nil, toQueryParams = nil;
-  })(Fuse.String.plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  (function(plugin) {
-    plugin.blank = function blank() {
-      if (this == null) throw new TypeError;
-      return /^\s*$/.test(this);
-    };
-
-    plugin.contains = function contains(pattern) {
-      if (this == null) throw new TypeError;
-      return String(this).indexOf(pattern) > -1;
-    };
-
-    plugin.empty = function empty() {
-      if (this == null) throw new TypeError;
-      return !String(this).length;
-    };
-
-    plugin.endsWith = function endsWith(pattern) {
-      // when searching for a pattern at the end of a long string
-      // indexOf(pattern, fromIndex) is faster than lastIndexOf(pattern) 
-      if (this == null) throw new TypeError;
-      var string = String(this), d = string.length - pattern.length;
-      return d >= 0 && string.indexOf(pattern, d) === d;
-    };
-
-    plugin.scan = function scan(pattern, callback) {
-      if (this == null) throw new TypeError;
-      Fuse.String(this).gsub(pattern, callback); // gsub for backcompat
-      return Fuse.String(this);
-    };
-
-    plugin.startsWith = function startsWith(pattern) {
-      // when searching for a pattern at the start of a long string
-      // lastIndexOf(pattern, fromIndex) is faster than indexOf(pattern) 
-      if (this == null) throw new TypeError;
-      return !String(this).lastIndexOf(pattern, 0);
-    };
-
-    // prevent JScript bug with named function expressions
-    var blank =    nil,
-      contains =   nil,
-      empty =      nil,
-      endsWith =   nil,
-      scan =       nil,
-      startsWith = nil;
-  })(Fuse.String.plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  (function(plugin) {
-    plugin.camelize = (function() {
-      function toUpperCase(match, character) {
-        return character ? character.toUpperCase() : '';
-      }
-
-      function camelize() {
-        if (this == null) throw new TypeError;
-        var string = String(this), expandoKey = expando + string;
-        return cache[expandoKey] ||
-          (cache[expandoKey] = replace.call(string, matchHyphenated, toUpperCase));
-      }
-
-      var cache = { },
-       matchHyphenated = /\-+(.)?/g,
-       replace = Fuse.String.plugin.replace;
-
-      return camelize;
-    })();
-
-    // set private reference
-    capitalize =
-    plugin.capitalize = (function() {
-      function capitalize() {
-        if (this == null) throw new TypeError;
-        var string = String(this), expandoKey = expando + string;
-        return cache[expandoKey] ||
-          (cache[expandoKey] = Fuse.String(string.charAt(0).toUpperCase() +
-            string.slice(1).toLowerCase()));
-      }
-
-      var cache = { };
-      return capitalize;
-    })();
-
-    plugin.hyphenate = function hyphenate() {
-      if (this == null) throw new TypeError;
-      return Fuse.String(String(this).replace(/_/g, '-'));
-    };
-
-    plugin.truncate = function truncate(length, truncation) {
-      if (this == null) throw new TypeError;
-      var endIndex, string = String(this);
-
-      length = +length;
-      if (isNaN(length)) length = 30;
-
-      if (length < string.length) {
-        truncation = truncation == null ? '...' : String(truncation);
-        endIndex = length - truncation.length;
-        string = endIndex > 0 ? string.slice(0, endIndex) + truncation : truncation;
-      }
-      return Fuse.String(string);
-    };
-
-    plugin.underscore = function underscore() {
-      if (this == null) throw new TypeError;
-      return Fuse.String(String(this).replace(/::/g, '/')
-        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-        .replace(/([a-z\d])([A-Z])/g, '$1_$2')
-        .replace(/-/g,'_').toLowerCase());
-    };
-
-    // prevent JScript bug with named function expressions
-    var hyphenate = nil, truncate = nil, underscore = nil;
-  })(Fuse.String.plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  (function(plugin) {
-    var matchScripts   = RegExp(Fuse.scriptFragment, 'gi'),
-     matchHTMLComments = Fuse.RegExp('<!--\\s*' + Fuse.scriptFragment + '\\s*-->', 'gi'),
-     matchOpenTag      = /<script/i;
-
-    plugin.evalScripts = function evalScripts() {
-      if (this == null) throw new TypeError;
-      return Fuse.String(this).extractScripts().map(function(script) {
-        return global.eval(String(script));
-      });
-    };
-
-    plugin.extractScripts = function extractScripts() {
-      if (this == null) throw new TypeError;
-      var string = Fuse.String(this), results = Fuse.List();
-
-      if (!matchOpenTag.test(string)) return results;
-      var match, scriptTags = string.replace(matchHTMLComments, '');
-      while (match = matchScripts.exec(scriptTags))
-        match[1] && results.push(match[1]);
-      return results;
-    };
-
-    plugin.stripScripts = function stripScripts() {
-      if (this == null) throw new TypeError;
-      return Fuse.String(this).replace(matchScripts, '');
-    };
-
-    // prevent JScript bug with named function expressions
-    var evalScripts = nil, extractScripts = nil, stripScripts = nil;
-  })(Fuse.String.plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  (function(plugin) {
     var sMap = Fuse.RegExp.SPECIAL_CHARS.s;
+
+    // ECMA-5 15.5.4.11
+    // For IE
+    if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX'))
+      plugin.replace = (function(__replace) {
+        function replace(pattern, replacement) {
+          var __replacement, result;
+          if (typeof replacement === 'function') {
+            // ensure string `null` and `undefined` are returned
+            __replacement = replacement;
+            replacement = function() {
+              var result = __replacement.apply(global, arguments);
+              return result || String(result);
+            };
+          }
+          result = __replace.call(this, pattern, replacement);
+          if (isRegExp(pattern)) pattern.lastIndex = 0;
+          return result;
+        }
+
+        return replace;
+      })(plugin.replace);
+
+    // For Safari 2.0.2- and Chrome 1+
+    // Based on work by Dean Edwards:
+    // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
+    if (Bug('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
+        Bug('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN'))
+      plugin.replace = (function(__replace) {
+        function replace(pattern, replacement) {
+          if (typeof replacement !== 'function')
+            return __replace.call(this, pattern, replacement);
+
+          if (this == null) throw new TypeError;
+          if (!isRegExp(pattern))
+            pattern = new RegExp(escapeRegExpChars(pattern));
+
+          // set pattern.lastIndex to 0 before we perform string operations
+          var match, index = 0, nonGlobal = !pattern.global,
+           lastIndex = pattern.lastIndex = 0,
+           result = '', source = String(this),
+           srcLength = source.length;
+
+          while (match = exec.call(pattern, source)) {
+            index = match.index;
+            result += source.slice(lastIndex, index);
+
+            // set lastIndex before replacement call to avoid potential
+            // pattern.lastIndex tampering
+            lastIndex = pattern.lastIndex;
+            result += replacement.apply(global, concatList(match, [index, source]));
+
+            if (nonGlobal) {
+              pattern.lastIndex = lastIndex = index + match[0].length;
+              break;
+            }
+            // handle empty pattern matches like /()/g
+            if (lastIndex === index) {
+              if (lastIndex === srcLength) break;
+              result += source.charAt(lastIndex++);
+            }
+            pattern.lastIndex = lastIndex;
+          }
+
+          // append the remaining source to the result
+          if (lastIndex < srcLength)
+            result += source.slice(lastIndex, srcLength);
+          return Fuse.String(result);
+        }
+
+        var exec = RegExp.prototype.exec;
+        return replace;
+      })(plugin.replace);
+
+
+    // ECMA-5 15.5.4.8
+    if (!plugin.lastIndexOf)
+      plugin.lastIndexOf = function lastIndexOf(searchString, position) {
+        if (this == null) throw new TypeError;
+        searchString = String(searchString);
+        position = +position;
+
+        var string = String(this),
+         len = string.length,
+         searchLen = searchString.length;
+
+        if (searchLen > len)
+          return Fuse.Number(-1);
+
+        if (position < 0) position = 0;
+        else if (isNaN(position) || position > len - searchLen)
+          position = len - searchLen;
+
+        if (!searchLen)
+          return Fuse.Number(position);
+
+        position++;
+        while (position--)
+          if (string.slice(position, position + searchLen) === searchString)
+            return Fuse.Number(position);
+        return Fuse.Number(-1);
+      };
+
+    // For Chome 1+
+    if (Bug('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION'))
+      plugin.lastIndexOf = (function(__lastIndexOf) {
+        function lastIndexOf(searchString, position) {
+          position = +position;
+          return __lastIndexOf.call(this, searchString, position < 0 ? 0 : position);
+        }
+
+        return lastIndexOf;
+      })(plugin.lastIndexOf);
+
+
+    // ECMA-5 15.5.4.10
+    // For IE
+    if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX'))
+      plugin.match = (function(__match) {
+        function match(pattern) {
+          var result = __match.call(this, pattern);
+          if (isRegExp(pattern)) pattern.lastIndex = 0;
+          return result;
+        }
+
+        return match;
+      })(plugin.match);
+
 
     // ECMA-5 15.5.4.20
     if (!plugin.trim)
@@ -402,6 +178,7 @@
         return Fuse.String(string.slice(start));
       };
 
+    // non-standard
     if (!plugin.trimRight)
       plugin.trimRight = function trimRight() {
         if (this == null) throw new TypeError;
@@ -413,76 +190,243 @@
       };
 
     // prevent JScript bug with named function expressions
-    var trim = nil, trimLeft = nil, trimRight = nil;
+    var lastIndexOf = nil, match = nil, trim = nil, trimLeft = nil, trimRight = nil;
   })(Fuse.String.plugin);
-
-  /*--------------------------------------------------------------------------*/
-
-  Fuse.String.plugin.escapeHTML = (function() {
-    var escapeHTML = function escapeHTML() {
-      if (this == null) throw new TypeError;
-      textNode.data = String(this);
-      return Fuse.String(container.innerHTML);
-    };
-
-    var container = Fuse._doc.createElement('pre'),
-     textNode = container.appendChild(Fuse._doc.createTextNode(''));
-
-    // Safari 2.x has issues with escaping html inside a "pre"
-    // element so we use the deprecated "xmp" element instead.
-    if ((textNode.data = '&') && container.innerHTML !== '&amp;') {
-      container = Fuse._doc.createElement('xmp');
-      textNode = container.appendChild(Fuse._doc.createTextNode(''));
-    }
-
-    // Safari 3.x has issues with escaping the ">" character
-    if ((textNode.data = '>') && container.innerHTML !== '&gt;') {
-      escapeHTML = function escapeHTML() {
-        if (this == null) throw new TypeError;
-        textNode.data = String(this);
-        return Fuse.String(container.innerHTML.replace(/>/g, '&gt;'));
-      };
-    }
-    return escapeHTML;
-  })();
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
 
-    function stripTags() {
+    var matchBlank     = Fuse.RegExp('^\\s*$'),
+     matchCapped       = /([A-Z]+)([A-Z][a-z])/g,
+     matchCamelCases   = /([a-z\d])([A-Z])/g,
+     matchDoubleColons = /::/g,
+     matchHTMLComments = Fuse.RegExp('<!--\\s*' + Fuse.scriptFragment + '\\s*-->', 'gi'),
+     matchHyphens      = /-/g,
+     matchHyphenated   = /-+(.)?/g,
+     matchOpenTag      = /<script/i,
+     matchScripts      = new RegExp(Fuse.scriptFragment, 'gi'),
+     matchUnderscores  = /_/g,
+     replace           = plugin.replace;
+
+    plugin.blank = function blank() {
       if (this == null) throw new TypeError;
-      return Fuse.String(String(this).replace(matchTags, ''));
-    }
+      return matchBlank.test(this);
+    };
 
-    function swapTagsToTokens(tag) {
-      var length = tags.length;
-      tags.push(tag);
-      return expando + length + expando;
-    }
+    plugin.camelize = (function() {
+      function toUpperCase(match, character) {
+        return character ? character.toUpperCase() : '';
+      }
 
-    function swapTokensToTags(token) {
-      return tags[token.slice(15).slice(0, -15)];
-    }
+      function camelize() {
+        if (this == null) throw new TypeError;
+        var string = String(this), expandoKey = expando + string;
+        return cache[expandoKey] ||
+          (cache[expandoKey] = replace.call(string, matchHyphenated, toUpperCase));
+      }
 
-    function unescapeHTML() {
+      var cache = { };
+      return camelize;
+    })();
+
+    // set private reference
+    capitalize =
+    plugin.capitalize = (function() {
+      function capitalize() {
+        if (this == null) throw new TypeError;
+        var string = String(this), expandoKey = expando + string;
+        return cache[expandoKey] ||
+          (cache[expandoKey] = Fuse.String(string.charAt(0).toUpperCase() +
+            string.slice(1).toLowerCase()));
+      }
+
+      var cache = { };
+      return capitalize;
+    })();
+
+    plugin.contains = function contains(pattern) {
       if (this == null) throw new TypeError;
-      var result, string = String(this);
+      return String(this).indexOf(pattern) > -1;
+    };
 
-      // tokenize tags before setting innerHTML then swap them after
-      tags.length = 0;
-      if (string.indexOf('<') > -1)
-        string = string.replace(matchTags, swapTagsToTokens);
-      div.innerHTML = '<pre>' + string + '<\/pre>';
+    plugin.empty = function empty() {
+      if (this == null) throw new TypeError;
+      return !String(this).length;
+    };
 
-      result = Fuse.String(__unescape());
-      return tags.length
-        ? result.replace(matchToken, swapTokensToTags)
-        : result;
-    }
+    plugin.endsWith = function endsWith(pattern) {
+      // when searching for a pattern at the end of a long string
+      // indexOf(pattern, fromIndex) is faster than lastIndexOf(pattern)
+      if (this == null) throw new TypeError;
+      var string = String(this), d = string.length - pattern.length;
+      return d >= 0 && string.indexOf(pattern, d) === d;
+    };
 
+    plugin.evalScripts = function evalScripts() {
+      if (this == null) throw new TypeError;
+      return Fuse.String(this).extractScripts().map(function(script) {
+        return global.eval(String(script));
+      });
+    };
 
-    // Information on parsing tags can be found at
+    plugin.extractScripts = function extractScripts() {
+      if (this == null) throw new TypeError;
+      var match, striptTags,
+       string = String(this), results = Fuse.List();
+
+      if (!matchOpenTag.test(string)) return results;
+      matchHTMLComments.lastIndex = 0;
+      scriptTags = string.replace(matchHTMLComments, '');
+
+      matchScripts.lastIndex = 0;
+      while (match = matchScripts.exec(scriptTags))
+        match[1] && results.push(match[1]);
+      return results;
+    };
+
+    plugin.hyphenate = function hyphenate() {
+      if (this == null) throw new TypeError;
+      matchUnderscores.lastIndex = 0;
+      return Fuse.String(String(this).replace(matchUnderscores, '-'));
+    };
+
+    plugin.scan = function scan(pattern, callback) {
+      if (this == null) throw new TypeError;
+      Fuse.String(this).gsub(pattern, callback); // gsub for backcompat
+      return Fuse.String(this);
+    };
+
+    plugin.startsWith = function startsWith(pattern) {
+      // when searching for a pattern at the start of a long string
+      // lastIndexOf(pattern, fromIndex) is faster than indexOf(pattern)
+      if (this == null) throw new TypeError;
+      return !String(this).lastIndexOf(pattern, 0);
+    };
+
+    plugin.stripScripts = function stripScripts() {
+      if (this == null) throw new TypeError;
+      matchScripts.lastIndex = 0;
+      return Fuse.String(String(this).replace(matchScripts, ''));
+    };
+
+    plugin.times = function times(count) {
+      // uses the `Exponentiation by squaring` algorithm. Thanx Yaffle !
+      if (this == null) throw new TypeError;
+      count = toInteger(count);
+      var accumulator = String(this), result = '';
+
+      while (count > 0) {
+        if (count % 2) {
+          count--;
+          result += accumulator;
+        } else {
+          count /= 2;
+          accumulator += accumulator;
+        }
+      }
+      return Fuse.String(result);
+    };
+
+    plugin.toArray = function toArray() {
+      if (this == null) throw new TypeError;
+      return Fuse.String(this).split('');
+    };
+
+    plugin.toQueryParams = function toQueryParams(separator) {
+      if (this == null) throw new TypeError;
+      var match = String(this).split('?'), object = Fuse.Object();
+
+      // if ? (question mark) is present and there is no query after it
+      if (match.length > 1 && !match[1]) return object;
+
+      // grab the query before the # (hash) and\or spaces
+      (match = (match = match[1] || match[0]).split('#')) &&
+        (match = match[0].split(' ')[0]);
+
+      // bail if empty string
+      if (!match) return object;
+
+      var pair, key, value, index, i = 0,
+       pairs = match.split(separator || '&'), length = pairs.length;
+
+      // iterate over key-value pairs
+      for ( ; i < length; i++) {
+        value = undef;
+        index = (pair = pairs[i]).indexOf('=');
+        if (!pair || index == 0) continue;
+
+        if (index != -1) {
+          key = decodeURIComponent(pair.slice(0, index));
+          value = pair.slice(index + 1);
+          if (value) value = decodeURIComponent(value);
+        } else key = pair;
+
+        if (hasKey(object, key)) {
+          if (!isArray(object[key])) object[key] = [object[key]];
+          object[key].push(value);
+        }
+        else object[key] = value;
+      }
+      return object;
+    };
+
+    plugin.truncate = function truncate(length, truncation) {
+      if (this == null) throw new TypeError;
+      var endIndex, string = String(this);
+
+      length = +length;
+      if (isNaN(length)) length = 30;
+
+      if (length < string.length) {
+        truncation = truncation == null ? '...' : String(truncation);
+        endIndex = length - truncation.length;
+        string = endIndex > 0 ? string.slice(0, endIndex) + truncation : truncation;
+      }
+      return Fuse.String(string);
+    };
+
+    plugin.underscore = function underscore() {
+      if (this == null) throw new TypeError;
+      matchDoubleColons.lastIndex =
+      matchCapped.lastIndex       =
+      matchCamelCases.lastIndex   =
+      matchHyphens.lastIndex      = 0;
+
+      return Fuse.String(String(this)
+        .replace(matchDoubleColons, '/')
+        .replace(matchCapped,       '$1_$2')
+        .replace(matchCamelCases,   '$1_$2')
+        .replace(matchHyphens,      '_').toLowerCase());
+    };
+
+    // aliases
+    plugin.toList = plugin.toArray;
+    plugin.parseQuery = plugin.toQueryParams;
+
+    // prevent JScript bug with named function expressions
+    var blank =        nil,
+      contains =       nil,
+      empty =          nil,
+      endsWith =       nil,
+      evalScripts =    nil,
+      extractScripts = nil,
+      hyphenate =      nil,
+      scan =           nil,
+      startsWith =     nil,
+      stripScripts =   nil,
+      times =          nil,
+      toArray =        nil,
+      toQueryParams =  nil,
+      truncate =       nil,
+      underscore =     nil;
+  })(Fuse.String.plugin);
+
+  /*--------------------------------------------------------------------------*/
+
+  (function(plugin) {
+
+    // Tag parsing instructions:
     // http://www.w3.org/TR/REC-xml-names/#ns-using
     var matchTags = (function() {
       var name   = '\\w+',
@@ -496,38 +440,108 @@
 
       return new RegExp('<'+ name + '(?:' + space + attribute + ')*' + space + '?/?>|' +
         '</' + name + space + '?>', 'g');
-    })(),
+    })();
 
-    matchToken = new RegExp(expando + '\\d+' + expando, 'g'),
+    function define() {
+      var tags      = [],
+       div          = Fuse._div,
+       container    = Fuse._doc.createElement('pre'),
+       textNode     = container.appendChild(Fuse._doc.createTextNode('')),
+       replace      = plugin.replace,
+       matchTagEnds = />/g,
+       matchToken   = new RegExp(expando + '\\d+' + expando, 'g');
 
-    div = Fuse._div,
+       escapeHTML = function escapeHTML() {
+         if (this == null) throw new TypeError;
+         textNode.data = String(this);
+         return Fuse.String(container.innerHTML);
+       },
 
-    tags = [],
+       getText = function() {
+         return div.textContent;
+       };
 
-    __unescape = function() { return div.textContent; };
+      function swapTagsToTokens(tag) {
+        var length = tags.length;
+        tags.push(tag);
+        return expando + length + expando;
+      }
+
+      function swapTokensToTags(token) {
+        return tags[token.slice(15).slice(0, -15)];
+      }
+
+      function unescapeHTML() {
+        if (this == null) throw new TypeError;
+        var result, tokenized, string = String(this);
+
+        // tokenize tags before setting innerHTML then swap them after
+        if (tokenized = string.indexOf('<') > -1) {
+          tags.length = 0;
+          string = replace.call(string, matchTags, swapTagsToTokens);
+        }
+
+        div.innerHTML = '<pre>' + string + '<\/pre>';
+        result = getText();
+
+        return Fuse.String(tokenized
+          ? replace.call(result, matchToken, swapTokensToTags)
+          : result);
+      }
 
 
-    if (!Feature('ELEMENT_TEXT_CONTENT')) {
-      div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;<\/pre>';
+      // Safari 2.x has issues with escaping html inside a `pre`
+      // element so we use the deprecated `xmp` element instead.
+      textNode.data = '&';
+      if (container.innerHTML !== '&amp;')
+        textNode = (container = Fuse._doc.createElement('xmp'))
+          .appendChild(Fuse._doc.createTextNode(''));
 
-      if (Feature('ELEMENT_INNER_TEXT') && div.firstChild.innerText === '<p>x<\/p>')
-        __unescape = function() { return div.firstChild.innerText.replace(/\r/g, ''); };
+      // Safari 3.x has issues with escaping the ">" character
+      textNode.data = '>';
+      if (container.innerHTML !== '&gt;')
+        escapeHTML = function escapeHTML() {
+          if (this == null) throw new TypeError;
+          textNode.data = String(this);
+          return Fuse.String(container.innerHTML.replace(matchTagEnds, '&gt;'));
+        };
 
-      else if (div.firstChild.innerHTML === '<p>x<\/p>')
-        __unescape = function() { return div.firstChild.innerHTML; };
+      if (!Feature('ELEMENT_TEXT_CONTENT')) {
+        div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;<\/pre>';
 
-      else __unescape = function() {
-        var node, nodes = div.firstChild.childNodes, parts = [], i = 0;
-        while (node = nodes[i++]) parts.push(node.nodeValue);
-        return parts.join('');
-      };
+        if (Feature('ELEMENT_INNER_TEXT') && div.firstChild.innerText === '<p>x<\/p>')
+          getText = function() { return div.firstChild.innerText.replace(/\r/g, ''); };
+
+        else if (div.firstChild.innerHTML === '<p>x<\/p>')
+          getText = function() { return div.firstChild.innerHTML; };
+
+        else getText = function() {
+          var node, nodes = div.firstChild.childNodes, parts = [], i = 0;
+          while (node = nodes[i++]) parts.push(node.nodeValue);
+          return parts.join('');
+        };
+      }
+
+      // lazy define methods
+      plugin.escapeHTML   = escapeHTML;
+      plugin.unescapeHTML = unescapeHTML;
+
+      return plugin[arguments[0]];
     }
 
-    // cleanup
-    Fuse._div.innerHTML = '';
+    plugin.escapeHTML = function escapeHTML() {
+      return define('escapeHTML').call(this);
+    };
 
-    // assign methods to string prototype
-    plugin.unescapeHTML = unescapeHTML;
-    plugin.stripTags = stripTags;
+    plugin.unescapeHTML = function unescapeHTML() {
+      return define('unescapeHTML').call(this);
+    };
 
+    plugin.stripTags = function stripTags() {
+      if (this == null) throw new TypeError;
+      return Fuse.String(String(this).replace(matchTags, ''));
+    };
+
+    // prevent JScript bug with named function expressions
+    var escapeHTML = nil, stripTags = nil, unescapeHTML = nil;
   })(Fuse.String.plugin);
