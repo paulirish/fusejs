@@ -95,7 +95,7 @@
   toString = global.Object.prototype.toString;
 
   // used for some required browser sniffing
-  userAgent = global.navigator && global.navigator.userAgent || '';
+  userAgent = global.navigator && navigator.userAgent || '';
 
   /*--------------------------------------------------------------------------*/
 
