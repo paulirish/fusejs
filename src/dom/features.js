@@ -69,7 +69,7 @@
     },
 
     'ELEMENT_CONTAINS': function() {
-      // true for all but IE and Safari 2
+      // true for all but Safari 2
       if(isHostObject(Fuse._docEl, 'contains')) {
         var result, div = Fuse._div;
         div.innerHTML = '<div><\/div><div><div><\/div><\/div>';

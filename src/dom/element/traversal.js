@@ -130,7 +130,7 @@
           var element, ancestorElem = ancestor.raw;
           if (ancestorElem.nodeType !== 1) return __descendantOf.call(this, ancestor);
           element = this.raw || this;
-          return ancestorElem.contains(element) && ancestorElem !== element;
+          return ancestorElem !== element && ancestorElem.contains(element);
         };
       }
       return descendantOf;
