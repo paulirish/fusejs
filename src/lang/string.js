@@ -319,23 +319,24 @@
       return Fuse.String(String(this).replace(matchScripts, ''));
     };
 
-    plugin.times = function times(count) {
-      // uses the `Exponentiation by squaring` algorithm. Thanx Yaffle !
-      if (this == null) throw new TypeError;
-      count = toInteger(count);
-      var accumulator = String(this), result = '';
-
-      while (count > 0) {
-        if (count % 2) {
-          count--;
-          result += accumulator;
-        } else {
-          count /= 2;
-          accumulator += accumulator;
-        }
+    plugin.times = (function() {
+      function __times(string, count) {
+        // Based on work by Yaffle and Dr. J.R.Stockton.
+        // Uses the `Exponentiation by squaring` algorithm. 
+        // http://www.merlyn.demon.co.uk/js-misc0.htm#MLS
+        if (count < 1) return '';
+        if (count % 2) return __times(string, count - 1) + string;
+        var half = __times(string, count / 2);
+        return half + half;
       }
-      return Fuse.String(result);
-    };
+
+      function times(count) {
+        if (this == null) throw new TypeError;
+        return Fuse.String(__times(String(this), toInteger(count)));
+      }
+
+      return times;
+    })();
 
     plugin.toArray = function toArray() {
       if (this == null) throw new TypeError;
@@ -424,7 +425,6 @@
       scan =           nil,
       startsWith =     nil,
       stripScripts =   nil,
-      times =          nil,
       toArray =        nil,
       toQueryParams =  nil,
       truncate =       nil,

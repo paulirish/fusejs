@@ -1,3 +1,5 @@
+* Futher optimize Fuse.String#times by using recursion. [Dr. J.R.Stockton, jddalton, kangax, Yaffle]
+
 * Allow Fuse.String#extractScripts() to accept a callback argument which reduces one iteration in Fuse.String#evalScripts. [jddalton]
 
 * Cleanup string.js and lazy define Fuse.String#escapeHTML and Fuse.String#unescapeHTML. [jddalton]
