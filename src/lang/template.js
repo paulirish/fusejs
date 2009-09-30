@@ -73,6 +73,8 @@
       return function() { return template.evaluate(slice.call(arguments, 0, -2)); };
     }
 
+    var replace = plugin.replace;
+
     plugin.gsub = function gsub(pattern, replacement) {
       if (this == null) throw new TypeError;
 
@@ -80,7 +82,7 @@
         pattern = Fuse.RegExp(escapeRegExpChars(pattern), 'g');
       if (!pattern.global)
         pattern = Fuse.RegExp.clone(pattern, { 'global': true });
-      return this.replace(pattern, prepareReplacement(replacement));
+      return replace.call(this, pattern, prepareReplacement(replacement));
     };
 
     plugin.interpolate = function interpolate(object, pattern) {
@@ -88,28 +90,36 @@
       return new Fuse.Template(this, pattern).evaluate(object);
     };
 
+    plugin.scan = function scan(pattern, callback) {
+      if (this == null) throw new TypeError;
+      var result = Fuse.String(this);
+      result.gsub(pattern, callback);
+      return result;
+    };
+
     plugin.sub = function sub(pattern, replacement, count) {
       if (this == null) throw new TypeError;
+      count = typeof count === 'undefined' ? 1 : count;
 
-      count = (typeof count === 'undefined') ? 1 : count;
       if (count === 1) {
         if (!isRegExp(pattern))
           pattern = Fuse.RegExp(escapeRegExpChars(pattern));
         if (pattern.global)
           pattern = Fuse.RegExp.clone(pattern, { 'global': false });
-        return this.replace(pattern, prepareReplacement(replacement));
+        return replace.call(this, pattern, prepareReplacement(replacement));
       }
 
       if (typeof replacement !== 'function') {
         var template = new Fuse.Template(replacement);
         replacement = function(match) { return template.evaluate(match); };
       }
-      return this.gsub(pattern, function(match) {
+
+      return Fuse.String(this).gsub(pattern, function(match) {
         if (--count < 0) return match[0];
         return replacement(match);
       });
     };
 
     // prevent JScript bug with named function expressions
-    var gsub = nil, interpolate = nil, sub = nil;
+    var gsub = nil, interpolate = nil, scan = nil, sub = nil;
   })(Fuse.String.plugin);

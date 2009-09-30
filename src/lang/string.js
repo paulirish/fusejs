@@ -300,12 +300,6 @@
       return Fuse.String(String(this).replace(matchUnderscores, '-'));
     };
 
-    plugin.scan = function scan(pattern, callback) {
-      if (this == null) throw new TypeError;
-      Fuse.String(this).gsub(pattern, callback); // gsub for backcompat
-      return Fuse.String(this);
-    };
-
     plugin.startsWith = function startsWith(pattern) {
       // when searching for a pattern at the start of a long string
       // lastIndexOf(pattern, fromIndex) is faster than indexOf(pattern)
@@ -422,7 +416,6 @@
       evalScripts =    nil,
       extractScripts = nil,
       hyphenate =      nil,
-      scan =           nil,
       startsWith =     nil,
       stripScripts =   nil,
       toArray =        nil,
