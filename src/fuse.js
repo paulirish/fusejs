@@ -13,35 +13,15 @@
   Fuse =
   global.Fuse = function Fuse() { };
 
-  Fuse._body =
-  Fuse._root =
+  Fuse._body  =
+  Fuse._div   =
+  Fuse._doc   =
+  Fuse._docEl =
+  Fuse._info  =
+  Fuse._root  =
   Fuse._scrollEl = null;
 
-  Fuse._doc =   document;
-  Fuse._div =   Fuse._doc.createElement('div');
-  Fuse._docEl = Fuse._doc.documentElement;
-
-  Fuse._info = {
-    'body':  { 'nodeName': 'BODY', 'property': 'body' },
-    'docEl': { 'nodeName': 'HTML', 'property': 'documentElement' }
-  };
-
-  Fuse._info.root = Fuse._info.docEl;
-  Fuse._info.scrollEl = Fuse._info.body;
-
-  // set the debug flag based on script debug query parameter
-  Fuse.debug = (function() {
-    var script, i = 0,
-     matchDebug = /(^|&)debug=(1|true)(&|$)/,
-     matchFilename = /(^|\/)fuse\.js\?/,
-     scripts = Fuse._doc.getElementsByTagName('script');
-
-    while (script = scripts[i++])
-      if (matchFilename.test(script.src) &&
-          matchDebug.test(script.src.split('?')[1])) return true;
-    return false;
-  })();
-
+  Fuse.debug   = false;
   Fuse.version = '<%= FUSEJS_VERSION %>';
 
   /*--------------------------------------------------------------------------*/
@@ -65,37 +45,6 @@
   K =
   Fuse.K = function K(x) { return x };
 
-  getDocument =
-  Fuse.getDocument = function getDocument(element) {
-    return element.ownerDocument || element.document ||
-      (element.nodeType === 9 ? element : Fuse._doc);
-  };
-
-  getWindow =
-  Fuse.getWindow = (function() {
-    var getWindow = function getWindow(element) {
-      var frame, i = 0, doc = getDocument(element), frames = global.frames;
-      if (Fuse._doc !== doc)
-        while (frame = frames[i++])
-          if (frame.document === doc) return frame;
-      return global;
-    };
-
-    // Based on work by Diego Perini
-    // Safari 2.0.x returns `Abstract View` instead of `global`
-    if (isHostObject(document, 'defaultView') && Fuse._doc.defaultView === global) {
-      getWindow = function getWindow(element) {
-        return getDocument(element).defaultView || element;
-      };
-    }
-    else if (isHostObject(Fuse._doc, 'parentWindow')) {
-      getWindow = function getWindow(element) {
-        return getDocument(element).parentWindow || element;
-      };
-    }
-    return getWindow;
-  })();
-
   concatList = function(list, otherList) {
     var pad = list.length, length = otherList.length;
     while (length--) list[pad + length] = otherList[length];
@@ -116,10 +65,6 @@
       return String(string).replace(matchSpecialChars, '\\$1');
     };
   })();
-
-  getNodeName = Fuse._docEl.nodeName === 'HTML'
-    ? function(element) { return element.nodeName; }
-    : function(element) { return element.nodeName.toUpperCase(); };
 
   // ECMA-5 9.4 ToInteger implementation
   toInteger = (function() {
@@ -150,7 +95,7 @@
   toString = global.Object.prototype.toString;
 
   // used for some required browser sniffing
-  userAgent = global.navigator.userAgent;
+  userAgent = global.navigator && global.navigator.userAgent || '';
 
   /*--------------------------------------------------------------------------*/
 
@@ -189,8 +134,8 @@
 
 <%= include(
    'env.js',
-   'features.js',
-   'fusebox.js',
+   'lang/features.js',
+   'lang/fusebox.js',
 
    'lang/object.js',
    'lang/class.js',
@@ -208,7 +153,8 @@
    'lang/template.js',
    'lang/timer.js',
 
-
+   'dom/dom.js',
+   'dom/features.js',
    'dom/data.js',
    'dom/node.js',
 

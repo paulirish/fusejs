@@ -16,8 +16,9 @@
       if (Feature('OBJECT__PROTO__'))
         return 'OBJECT__PROTO__';
 
-      if (isHostObject(global, 'frames') && Fuse._doc &&
-          isHostObject(Fuse._doc, 'createElement'))
+      var doc = global.document;
+      if (isHostObject(global, 'frames') && doc &&
+          isHostObject(doc, 'createElement'))
         return 'IFRAME';
     })(),
 
@@ -27,11 +28,12 @@
 
       // IE requires the iframe/htmlfile remain in the cache or it will be
       // marked for garbage collection
+      var doc = global.document;
       if (mode === 'ACTIVE_X_OBJECT')
         return function() {
           var htmlfile = new ActiveXObject('htmlfile');
           htmlfile.open();
-          htmlfile.write('<script>document.domain="' + Fuse._doc.domain + '";document.global = this;<\/script>');
+          htmlfile.write('<script>document.domain="' + doc.domain + '";document.global = this;<\/script>');
           htmlfile.close();
           cache.push(htmlfile);
           return htmlfile.global;
@@ -41,10 +43,10 @@
         var counter = 0;
         return function() {
           var idoc, iframe, frame, result, i = 0,
-           frames = global.frames,
-           iframe = Fuse._doc.createElement('iframe'),
-           parentNode = Fuse._body || Fuse._docEl,
-           id = 'iframe_' + expando + counter++;
+           frames     = global.frames,
+           iframe     = doc.createElement('iframe'),
+           parentNode = doc.body || doc.documentElement,
+           id         = 'iframe_' + expando + counter++;
 
           iframe.id = id;
           iframe.style.cssText = 'position:absolute;left:-1000px;width:0;height:0;overflow:hidden';

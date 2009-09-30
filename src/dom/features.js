@@ -1,48 +1,6 @@
-  /*--------------------------- FEATURE/BUG TESTER ---------------------------*/
-
-  (function() {
-    function createTester(name) {
-      var Tester = new Function('', [
-        'function ' + name + '() {',
-        'var title, o = ' + name + '._object, i = 0;',
-      	'while (title = arguments[i++]) {',
-        'if (typeof o[title] === "function") o[title] = o[title]();',
-        'if (o[title] !== true) return false;',
-        '}', 'return true;',
-        '}', 'return ' + name].join('\n'))();
-
-      Tester.set = function(name, value) {
-        var o = this._object;
-        if (typeof name === 'object'){
-          for (var i in name) o[i] = name[i];
-        } else o[name] = value;
-      };
-
-      Tester.unset = function(name) {
-        var o = this._object;
-        name = name.valueOf();
-        if (typeof name === 'string') delete o[name];
-        else {
-          for (var i in name) delete o[i];
-        }
-      };
-
-      Tester._object = { };
-      return Tester;
-    }
-
-    Bug = Fuse.Env.Bug = createTester('Bug');
-    Feature = Fuse.Env.Feature = createTester('Feature');
-  })();
-
-  /*---------------------------- BROWSER FEATURES ----------------------------*/
+  /*------------------------------ DOM FEATURES ------------------------------*/
 
   Feature.set({
-    'ACTIVE_X_OBJECT': function() {
-      // true for IE
-      return isHostObject(global, 'ActiveXObject');
-    },
-
     'CREATE_ELEMENT_WITH_HTML': function() {
       try { // true for IE
         var div = Fuse._doc.createElement('<div id="x">');
@@ -93,12 +51,6 @@
       return isHostObject(Fuse._docEl, 'getBoundingClientRect');
     },
 
-    'ELEMENT_CLASS': function() {
-      // true for all but Safari 2 and IE7-
-      return isHostObject(global, 'Element') &&
-        isHostObject(global.Element, 'prototype');
-    },
-
     'ELEMENT_COMPARE_DOCUMENT_POSITION': function() {
       // true for Firefox and Opera 9.5+
       return isHostObject(Fuse._docEl, 'compareDocumentPosition');
@@ -129,6 +81,7 @@
       }
     },
 
+    // features
     'ELEMENT_DISPATCH_EVENT': function() {
       // true for all but IE
       return isHostObject(Fuse._docEl, 'dispatchEvent');
@@ -137,11 +90,6 @@
     'ELEMENT_DO_SCROLL': function() {
       // true for IE
       return isHostObject(Fuse._docEl, 'doScroll');
-    },
-
-    'ELEMENT_EXTENSIONS': function() {
-      // true for all but Safari 2 and IE7-
-      return Feature('HTML_ELEMENT_CLASS') || Feature('ELEMENT_CLASS');
     },
 
     'ELEMENT_FIRE_EVENT': function() {
@@ -169,9 +117,10 @@
 
     'ELEMENT_MS_CSS_FILTERS': function() {
       // true for IE
-      return isHostObject(Fuse._docEl, 'filters') &&
-        typeof Fuse._docEl.style.filter === 'string' &&
-        typeof Fuse._docEl.style.opacity !== 'string';
+      var docEl = Fuse._docEl, elemStyle = docEl.style;
+      return isHostObject(docEl, 'filters') &&
+        typeof elemStyle.filter === 'string' &&
+        typeof elemStyle.opacity !== 'string';
     },
 
     'ELEMENT_REMOVE_NODE': function() {
@@ -184,67 +133,15 @@
       return typeof Fuse._docEl.sourceIndex === 'number';
     },
 
-    'ELEMENT_SPECIFIC_EXTENSIONS': function() {
-      var docEl = Fuse._docEl;
-      return (isHostObject(global, 'HTMLHtmlElement') &&
-        isHostObject(global.HTMLHtmlElement, 'prototype') && (
-        docEl.constructor === HTMLHtmlElement ||
-        docEl instanceof HTMLHtmlElement || Feature('OBJECT__PROTO__') &&
-        docEl['__proto__'] === HTMLHtmlElement.prototype));
-    },
-
     'ELEMENT_TEXT_CONTENT': function() {
       // true for all but IE and Safari 2
       return typeof Fuse._div.textContent === 'string';
-    },
-
-    'HTML_ELEMENT_CLASS': function() {
-      // true for all but IE
-      // (Safari 2 support is emulated in element.js)
-      return isHostObject(global,'HTMLElement') &&
-        isHostObject(global.HTMLElement, 'prototype');
-    },
-
-    'OBJECT__PROTO__': function() {
-      // true for Gecko and Webkit
-      if (isHostObject(Fuse._docEl, '__proto__') &&
-          [ ]['__proto__'] === Array.prototype  &&
-          { }['__proto__'] === Object.prototype) {
-        // test if it's writable and restorable
-        var result, list = [], backup = list['__proto__'];
-        list['__proto__'] = { };
-        result = typeof list.push === 'undefined';
-        list['__proto__'] = backup;
-        return result && typeof list.push === 'function';
-      }
-    },
-
-    'OBJECT__COUNT__': function() {
-      // true for Gecko
-      if (Feature('OBJECT__PROTO__')) {
-        var o = { 'x':0 };
-        delete o['__count__'];
-        return typeof o['__count__'] === 'number' && o['__count__'] === 1;
-      }
     }
   });
 
-  /*------------------------------ BROWSER BUGS ------------------------------*/
+  /*-------------------------------- DOM BUGS --------------------------------*/
 
   Bug.set({
-    'ARRAY_CONCAT_ARGUMENTS_BUGGY': function() {
-      // true for Opera
-      var array = [];
-      return (function() { return array.concat &&
-        array.concat(arguments).length === 2; })(1, 2);
-    },
-
-    'ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES': function() {
-      // true for Opera 9.25
-      var array = [1]; array[2] = 1;
-      return array.slice && array.slice(0, 2).length === 1;
-    },
-
     'ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS': function() {
       // true for IE
       var node, clone, div = Fuse._div;
@@ -382,35 +279,6 @@
       var result = div.getElementsByTagName('*').length === 2;
       div.innerHTML = '';
       return result;
-    },
-
-    'STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION': function() {
-       // true for Chrome 1 and 2
-       return 'x'.lastIndexOf('x', -1) !== 0;
-    },
-
-    'STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX': function() {
-      // true for IE
-      var string = 'oxo', data = [], pattern = /x/;
-      string.replace(pattern, '');
-      data[0] = !!pattern.lastIndex;
-      string.match(pattern);
-      data[1] = !!pattern.lastIndex;
-      return data[0] || data[1];
-    },
-
-    'STRING_REPLACE_COERCE_FUNCTION_TO_STRING': function() {
-      // true for Safari 2
-      var func = function() { return ''; };
-      return 'a'.replace(/a/, func) === String(func);
-    },
-
-    'STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN': function() {
-      // true for Chrome 1
-      var string = 'xy', replacement = function() { return 'o'; };
-      return !(string.replace(/()/g, 'o') === 'oxoyo' &&
-        string.replace(new RegExp('', 'g'), replacement) === 'oxoyo' &&
-        string.replace(/(y|)/g, replacement) === 'oxoo');
     },
 
     'TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN': function() {

@@ -1,3 +1,5 @@
+* Move all DOM functionality to the src/dom directory. [jddalton]
+
 * Optimize Fuse.String#lastIndexOf by removing the use of the arguments object and make Fuse.Array#indexOf and Fuse.Array#lastIndexOf use toInteger(). [jddalton]
 
 * Optimize Fuse.String#times by using the `Exponentiation by squaring` algorithm. [Yaffle]
