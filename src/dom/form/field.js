@@ -97,7 +97,7 @@
 
     // copy InputElement methods to the other field classes
     eachKey(inputPlugin, function(value, key, object) {
-      if (key !== 'constructor')
+      if (key !== 'constructor' && hasKey(object, key))
         buttonPlugin[key]   =
         selectPlugin[key]   =
         textAreaPlugin[key] = value;

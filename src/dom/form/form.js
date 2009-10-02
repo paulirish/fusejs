@@ -9,7 +9,7 @@
   Fuse.Util.$F = (function() {
     function $F(element) {
       element = Fuse.get(element);
-      return element.getValue
+      return element && element.getValue
         ? element.getValue()
         : null;
     }
@@ -34,19 +34,17 @@
       if (node = nodes[0]) {
         do {
           FIELD_NODE_NAMES[node.nodeName.toUpperCase()] && callback(node);
-        } while (node = element[i++]);
+        } while (node = nodes[i++]);
       }
     }
 
     plugin.disable = function disable() {
-      var disable = Field.plugin.disable;
-      eachElement(this, function(node) { disable.call(node); });
+      eachElement(this, function(node) { node.disabled = true; });
       return this;
     };
 
     plugin.enable = function enable() {
-      var enable = Field.plugin.enable;
-      eachElement(this, function(node) { enable.call(node); });
+      eachElement(this, function(node) { node.disabled = false; });
       return this;
     };
 
