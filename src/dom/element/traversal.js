@@ -51,12 +51,12 @@
             match = Selector.match;
             do {
               if (element.nodeType === 1 && element !== original && match(element, selectors))
-                results[i++] = decorate(element);
+                results[i++] = fromElement(element);
             } while (element = element[nextNode]);
           } else {
             do {
               if (element.nodeType === 1 && element !== original)
-                results[i++] = decorate(element);
+                results[i++] = fromElement(element);
             } while (element = element[nextNode]);
           }
         }
@@ -78,9 +78,9 @@
           match = Selector.match;
           while (node = nodes[i++])
             if (match(node, selectors))
-              results.push(decorate(node));
+              results.push(fromElement(node));
         }
-        else while (node = nodes[i]) results[i++] = decorate(node);
+        else while (node = nodes[i]) results[i++] = fromElement(node);
         return results;
       };
 
@@ -93,11 +93,11 @@
             match = Selector.match;
             while (node = nodes[i++])
               if (node.nodeType === 1 && match(element, selectors))
-                results.push(decorate(node));
+                results.push(fromElement(node));
           } else {
             while (node = nodes[i++])
               if (node.nodeType === 1)
-                results.push(decorate(node));
+                results.push(fromElement(node));
           }
           return results;
         };
@@ -140,7 +140,7 @@
       function getNth(nodes, index) {
         var count = 0, i = 0;
         while (node = nodes[i++])
-          if (count++ === index) return decorate(node);
+          if (count++ === index) return fromElement(node);
         return null;
       }
 
@@ -148,7 +148,7 @@
         var count = 0, i = 0, match = Selector.match;
         while (node = nodes[i++])
           if (match(node, selectors) && count++ === index)
-            return decorate(node);
+            return fromElement(node);
         return null;
       }
 
@@ -157,7 +157,7 @@
           var count = 0, i = 0;
           while (node = nodes[i++])
             if (node.nodeType === 1 && count++ === index)
-              return decorate(node);
+              return fromElement(node);
           return null;
         };
 
@@ -165,7 +165,7 @@
           var count = 0, i = 0, match = Selector.match;
           while (node = nodes[i++])
             if (node.nodeType === 1 && match(node, selectors) && count++ === index)
-              return decorate(node);
+              return fromElement(node);
           return null;
         };
       }
@@ -190,12 +190,12 @@
       var firstDescendant = function firstDescendant() {
         var element = (this.raw || this).firstChild;
         while (element && element.nodeType !== 1) element = element[nextNode];
-        return decorate(element);
+        return fromElement(element);
       };
 
       if (firstNode === firstElement)
         firstDescendant = function firstDescendant() {
-          return decorate((this.raw || this).firstElementChild);
+          return fromElement((this.raw || this).firstElementChild);
         };
 
       return firstDescendant;
@@ -217,12 +217,12 @@
             match = Selector.match;
             do {
               if (element.nodeType === 1 && match(element, selectors) && count++ === index)
-                return decorate(element);
+                return fromElement(element);
             } while (element = element[property]);
           } else {
             do {
               if (element.nodeType === 1 && count++ === index)
-                return decorate(element);
+                return fromElement(element);
             } while (element = element[property]);
           }
         }
@@ -239,7 +239,7 @@
 
       plugin.up = function up(selectors, index) {
         return selectors == null
-          ? decorate((this.raw || this).parentNode)
+          ? fromElement((this.raw || this).parentNode)
           : getNth(this, 'parentNode', selectors, index);
       };
 
@@ -259,12 +259,12 @@
             match = Selector.match;
             do {
               if (element.nodeType === 1 && match(element, selectors))
-                results[i++] = decorate(element);
+                results[i++] = fromElement(element);
             } while (element = element[property]);
           } else {
             do {
               if (element.nodeType === 1)
-                results[i++] = decorate(element);
+                results[i++] = fromElement(element);
             } while (element = element[property]);
           }
         }

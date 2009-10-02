@@ -4,8 +4,8 @@
   // private vars
   var Fuse, Bug, Data, Document, Element, Enumerable, Feature, Form, Func, Obj,
    Node, NodeList, $break, _extend, addListMethods, bind, capitalize, clone,
-   concatList, decorate, defer, eachKey, emptyFunction, escapeRegExpChars,
-   expando, getDocument, getNodeName, getWindow, hasKey, inspect, isArray,
+   concatList, defer, eachKey, emptyFunction, escapeRegExpChars, expando,
+   fromElement, getDocument, getNodeName, getWindow, hasKey, inspect, isArray,
    isElement, isEmpty, isHash, isHostObject, isFunction, isNumber, isPrimitive,
    isRegExp, isSameOrigin, isString, isUndefined, K, nil, prependList,
    returnOffset, slice, toInteger, toString, undef, userAgent;

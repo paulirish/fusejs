@@ -7,7 +7,7 @@
 
       // pass to element decorator
       switch (node.nodeType) {
-        case 1: return decorate(node);
+        case 1: return fromElement(node);
         case 9: return Document(node);
       }
 

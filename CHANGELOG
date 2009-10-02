@@ -1,3 +1,5 @@
+* Rename Fuse.Dom.Element.decorate to Fuse.Dom.Element.fromElement to be consistent with the rest of the API. [jddalton]
+
 * Add Fuse.Dom.Document class and support for Fuse.get(document). [jddalton]
 
 * Move Fuse.String#scan to template.js so it is with other `gsub` centric methods. [jddalton]

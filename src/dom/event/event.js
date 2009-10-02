@@ -53,7 +53,7 @@
       // Fix a Safari bug where a text node gets passed as the target of an
       // anchor click rather than the anchor itself.
       return node && node.nodeType === 3
-        ? decorate(node.parentNode)
+        ? fromElement(node.parentNode)
         : Element(node);
     };
 
@@ -182,8 +182,8 @@
 
     function relatedTarget(event) {
       switch (event.type) {
-        case 'mouseover': return decorate(event.fromElement);
-        case 'mouseout':  return decorate(event.toElement);
+        case 'mouseover': return fromElement(event.fromElement);
+        case 'mouseout':  return fromElement(event.toElement);
         default:          return null;
       }
     }
@@ -214,8 +214,7 @@
     }
 
     function getOrCreateCache(id, eventName) {
-      var data = Data[id],
-       events = data.events || (data.events ={ });
+      var data = Data[id], events = data.events || (data.events = { });
       return (events[eventName] = events[eventName] ||
         { 'handlers': [], 'dispatcher': false });
     }
