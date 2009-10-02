@@ -14,15 +14,9 @@
   Fuse.addNS('Dom.Element', Node, {
     'constructor': (function() {
       function Element(tagName, attributes, context) {
-        if (isString(tagName))
-          return Element.create(tagName, attributes, context);
-
-        // bail on XML nodes, document, window objects
-        var element = tagName;
-        return (!element || element.nodeType !== 1 ||
-            element == getWindow(element) || !element.ownerDocument.body)
-          ? element
-          : decorate(element);
+        return isString(tagName)
+          ? Element.create(tagName, attributes, context)
+          : decorate(tagName);
       }
 
       return Element;
@@ -37,9 +31,7 @@
         while (length--) elements[length] = $(args[length]);
         return elements;
       }
-      if (isString(element))
-        element = doc.getElementById(element || expando);
-      return Element(element);
+      return get(element);
     }
 
     function get(object, context) {
@@ -47,8 +39,17 @@
         if (object.charAt(0) == '<' && object.charAt(object.length - 1) == '>')
           return Element.create(object, context);
         object = (context || doc).getElementById(object || expando);
+        return object && decorate(object);
       }
-      return Element(object);
+
+      if (!object) return object;
+
+      var nodeType = object.nodeType;
+      if (nodeType === 9) return Document(object);
+
+      // bail on XML nodes, text nodes, and window objects
+      return (nodeType !== 1 || object == getWindow(object) ||
+        !object.ownerDocument.body) ? object : decorate(object);
     }
 
     function getById(id, context) {
@@ -190,9 +191,6 @@
 
     getFuseId = Node.getFuseId;
 
-
-    function Decorator() { }
-
     function decorate(element, thisArg) {
       // return if already a decorator
       if (element.raw) return element;
@@ -202,8 +200,7 @@
        data = (Data[id] = Data[id] || { });
 
       // return cached if available
-      if (data.decorator)
-        return data.decorator;
+      if (data.decorator) return data.decorator;
 
       nodeName = getNodeName(element);
 
@@ -259,10 +256,10 @@
       }
     }
 
-    Decorator.plugin = Decorator.prototype;
+    function Decorator() { }
+
     Element.decorate = decorate;
     Dom.extendByTag  = extendByTag;
-
     return decorate;
   })();
 

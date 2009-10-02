@@ -60,3 +60,10 @@
     }
     return getWindow;
   })();
+
+  returnOffset = function(left, top) {
+    var result  = Fuse.Array(Fuse.Number(left), Fuse.Number(top));
+    result.left = result[0];
+    result.top  = result[1];
+    return result;
+  };

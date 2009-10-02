@@ -2,13 +2,13 @@
 (function(global) {
 
   // private vars
-  var Fuse, Bug, Data, Element, Enumerable, Feature, Form, Func, Obj, Node,
-   NodeList, $break, _extend, addListMethods, bind, capitalize, clone,
+  var Fuse, Bug, Data, Document, Element, Enumerable, Feature, Form, Func, Obj,
+   Node, NodeList, $break, _extend, addListMethods, bind, capitalize, clone,
    concatList, decorate, defer, eachKey, emptyFunction, escapeRegExpChars,
    expando, getDocument, getNodeName, getWindow, hasKey, inspect, isArray,
    isElement, isEmpty, isHash, isHostObject, isFunction, isNumber, isPrimitive,
-   isRegExp, isSameOrigin, isString, isUndefined, K, nil, prependList, slice,
-   toInteger, toString, undef, userAgent;
+   isRegExp, isSameOrigin, isString, isUndefined, K, nil, prependList,
+   returnOffset, slice, toInteger, toString, undef, userAgent;
 
   Fuse =
   global.Fuse = function Fuse() { };
@@ -157,6 +157,7 @@
    'dom/features.js',
    'dom/data.js',
    'dom/node.js',
+   'dom/document.js',
 
    'dom/element/element.js',
    'dom/element/attribute.js',

@@ -1,6 +1,8 @@
+* Add Fuse.Dom.Document class and support for Fuse.get(document). [jddalton]
+
 * Move Fuse.String#scan to template.js so it is with other `gsub` centric methods. [jddalton]
 
-* Futher optimize Fuse.String#times by using recursion. [Dr. J.R.Stockton, jddalton, kangax, Yaffle]
+* Futher optimize Fuse.String#times by using recursion. [Dr. J.R. Stockton, jddalton, kangax, Yaffle]
 
 * Allow Fuse.String#extractScripts() to accept a callback argument which reduces one iteration in Fuse.String#evalScripts. [jddalton]
 

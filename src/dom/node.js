@@ -1,33 +1,38 @@
   /*------------------------------- DOM: NODE --------------------------------*/
 
-  Node =
-  Fuse.addNS('Dom.Node', {
-    'constructor': (function() {
-      function Node(node) {
-        // return if already decoratored or falsy
-        if (!node || node.raw) return node;
+  Node = (function() {
+    var Node = function Node(node) {
+      // return if already decoratored or falsy
+      if (!node || node.raw) return node;
 
-        // pass to element decorator
-        var data, id, nodeType = node.nodeType;
-        if (nodeType === 1)
-          return decorate(node);
-
-        if (this === Fuse.Dom)
-          return new Node(node);
-
-        // return cached if available
-        id = Node.getFuseId(node);
-        data = (Data[id] = Data[id] || { });
-        if (data.decorator) return data.decorator;
-
-        data.decorator = this;
-        data.node =
-        this.raw = node;
+      // pass to element decorator
+      switch (node.nodeType) {
+        case 1: return decorate(node);
+        case 9: return Document(node);
       }
 
-      return Node;
-    })()
-  });
+      var decorated,
+       id = Node.getFuseId(node),
+       data = (Data[id] = Data[id] || { });
+
+      // return cached if available
+      if (data.decorator) return data.decorator;
+
+      decorated =
+      data.decorator = new Decorator;
+
+      data.node =
+      decorated.raw = node;
+
+      return decorated;
+    };
+
+    function Decorator() { }
+    Node = Fuse.addNS('Dom.Node', { 'constructor': Node });
+    Decorator.prototype = Node.plugin;
+
+    return Node;
+  })();
 
   // Node constants
   Node.extend({

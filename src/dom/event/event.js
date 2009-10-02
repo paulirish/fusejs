@@ -234,7 +234,8 @@
     // executing its observers before allowing the
     // window onload event to proceed.
     function domLoadWrapper(event) {
-      if (!Fuse._doc.loaded) {
+      var docObj = Fuse.get(Fuse._doc);
+      if (!docObj.loaded) {
         event = event || global.event;
         event.eventName = 'dom:loaded';
 
@@ -252,15 +253,15 @@
           Fuse._info.scrollEl = Fuse._info.docEl;
         }
 
-        Fuse._doc.loaded = true;
+        docObj.loaded = true;
         domLoadDispatcher(event);
-        Event.stopObserving(Fuse._doc, 'dom:loaded');
+        docObj.stopObserving('dom:loaded');
       }
     }
 
     function winLoadWrapper(event) {
       event = event || global.event;
-      if (!Fuse._doc.loaded)
+      if (!Fuse.get(Fuse._doc).loaded)
         domLoadWrapper(event);
       else if (Data['2'] && Data['2'].events['dom:loaded'])
         return setTimeout(function() { winLoadWrapper(event); }, 10);
@@ -575,7 +576,7 @@
     'stopObserving': Func.methodize(['stopObserving', Event])
   });
 
-  _extend(Fuse._doc, {
+  _extend(Document.plugin, {
     'loaded':        false,
     'fire':          Func.methodize(['fire', Event]),
     'observe':       Func.methodize(['observe', Event]),

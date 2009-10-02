@@ -29,13 +29,6 @@
       return element;
     }
 
-    function returnOffset(left, top) {
-      var result  = Fuse.List(Fuse.Number(left), Fuse.Number(top));
-      result.left = result[0];
-      result.top  = result[1];
-      return result;
-    }
-
     /*------------------------------------------------------------------------*/
 
     plugin.makeAbsolute = function makeAbsolute() {

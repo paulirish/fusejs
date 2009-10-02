@@ -26,18 +26,18 @@
       readyStatePoller.clear();
       cssPoller && cssPoller.clear();
 
-      if (Fuse._doc.loaded) return;
-      return Event.fire(Fuse._doc, 'dom:loaded');
+      if (docObj.loaded) return;
+      return docObj.fire('dom:loaded');
     }
 
     function checkCssAndFire() {
-      if (Fuse._doc.loaded) return fireDomLoadedEvent();
+      if (docObj.loaded) return fireDomLoadedEvent();
       return !!(isCssLoaded() && fireDomLoadedEvent());
     }
 
     function getSheetElements() {
-      var i = 0, link, links = Fuse._doc.getElementsByTagName('LINK'),
-       results = Fuse.List.fromNodeList(Fuse._doc.getElementsByTagName('STYLE'));
+      var i = 0, link, links = docNode.getElementsByTagName('LINK'),
+       results = Fuse.List.fromNodeList(docNode.getElementsByTagName('STYLE'));
       while (link = links[i++])
         if (link.rel.toLowerCase() === 'stylesheet')
           results.push(link);
@@ -60,14 +60,18 @@
 
     var cssPoller, readyStatePoller,
 
+    docNode = Fuse._doc,
+
+    docObj = Fuse.get(docNode),
+
     checkDomLoadedState = function(event) {
       // Not sure if readyState is ever `loaded` in Safari 2.x but
       // we check to be on the safe side
-      if (Fuse._doc.loaded) readyStatePoller.clear();
+      if (docObj.loaded) readyStatePoller.clear();
       else if (event && event.type === 'DOMContentLoaded' ||
-          /^(loaded|complete)$/.test(Fuse._doc.readyState)) {
+          /^(loaded|complete)$/.test(docNode.readyState)) {
         readyStatePoller.clear();
-        Fuse._doc.stopObserving('readystatechange', checkDomLoadedState);
+        docObj.stopObserving('readystatechange', checkDomLoadedState);
         if (!checkCssAndFire()) cssPoller = new Poller(checkCssAndFire);
       }
     },
@@ -183,12 +187,12 @@
                       if (rules.length === 1) continue;
 
                       if (!c.div) {
-                        c.div = Fuse._doc.createElement('div');
+                        c.div = docNode.createElement('div');
                         c.div.className = c.className;
                         c.div.style.cssText = 'position:absolute;visibility:hidden;';
                       }
 
-                      Fuse._doc.body.appendChild(c.div);
+                      docNode.body.appendChild(c.div);
 
                       // when loaded clear cache entry
                       if (getStyle(c.div, 'marginTop') === '-1234px')
@@ -196,7 +200,7 @@
 
                       // cleanup
                       removeRule(c.sheet, lastIndex);
-                      Fuse._doc.body.removeChild(c.div);
+                      docNode.body.removeChild(c.div);
                     }
                   }
 
@@ -225,9 +229,9 @@
       // http://javascript.nwbox.com/IEContentLoaded/
       if (!isFramed)
         checkDomLoadedState = function() {
-          if (Fuse._doc.loaded) readyStatePoller.clear();
+          if (docObj.loaded) readyStatePoller.clear();
           else {
-            if (Fuse._doc.readyState === 'complete')
+            if (docNode.readyState === 'complete')
               fireDomLoadedEvent();
             else {
               try { Fuse._div.doScroll(); } catch(e) { return; }
@@ -237,9 +241,9 @@
         };
     }
     else if (Feature('ELEMENT_ADD_EVENT_LISTENER'))
-      Fuse._doc.observe('DOMContentLoaded', checkDomLoadedState);
+      docObj.observe('DOMContentLoaded', checkDomLoadedState);
 
     // readystate and poller are used (first one to complete wins)
-    Fuse._doc.observe('readystatechange', checkDomLoadedState);
+    docObj.observe('readystatechange', checkDomLoadedState);
     readyStatePoller = new Poller(checkDomLoadedState);
   })();
