@@ -1,3 +1,5 @@
+* Rename Fuse.Dom.Element#isFragment to Fuse.Dom.Element#isDetached. [jddalton]
+
 * Add nodeType constants DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, and ELEMENT_NODE. [jddalton, kangax]
 
 * Change all `foo.indexOf(blah) === -1` to `foo.indexOf(blah) < 0`. [Andrea Giammarchi, jddalton]

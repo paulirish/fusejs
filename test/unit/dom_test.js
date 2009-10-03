@@ -407,27 +407,28 @@ new Test.Unit.Runner({
     this.assertEqual(element.up(), wrapper);
   },
 
-  'testElementIsFragment': function() {
-    var div   = document.createElement('div'),
+  'testElementIsDetached': function() {
+    var div   = $(document.createElement('div')),
      fragment = document.createDocumentFragment(),
      clone    = $('testdiv').cloneNode(true);
 
-    this.assert(Element.isFragment(div), 'new div element');
-    this.assert(Element.isFragment(clone), 'clone of "testdiv"');
+    this.assert(div.isDetached(),
+      'New elements should be detached.');
+
+    this.assert(clone.isDetached(),
+      'New cloned elements should be detached.');
 
     div.appendChild(clone);
-    this.assert(clone.isFragment(), 'child of a detached element');
+    this.assert(clone.isDetached(),
+      'Child elements of detached elements should be detached.');
 
     fragment.appendChild(div);
 
-    this.assert(Element.isFragment(fragment),
-      'document fragment');
+    this.assert($(fragment.firstChild).isDetached(),
+      'Child elements of document fragments should be detached.');
 
-    this.assert(Element.isFragment(fragment.firstChild),
-      'child of a document fragment');
-
-    this.assert(!Element.isFragment(document),
-      'document object is not a fragment');
+    this.assert(!$(document.body).isDetached(),
+      'Elements attached to the document should not be detached.');
   },
 
   'testElementIsVisible': function(){

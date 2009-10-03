@@ -522,9 +522,10 @@
         if (isHash(insertions))
           insertions = insertions._object;
 
-        if (isString(insertions) || isNumber(insertions) ||
-            INSERTABLE_NODE_TYPES[(insertions.raw || insertions).nodeType] || insertions.toElement || insertions.toHTML)
-          insertions = { 'bottom': (insertions.raw || insertions) };
+        content = insertions.raw || insertions;
+        if (isString(content) || INSERTABLE_NODE_TYPES[content.nodeType] ||
+            content.toElement || content.toHTML)
+          insertions = { 'bottom': content };
       }
 
       for (position in insertions) {
@@ -704,30 +705,26 @@
       return identify;
     })();
 
-    plugin.isFragment = (function() {
-      var isFragment = function isFragment() {
-        var element = this.raw || this, nodeType = element.nodeType;
-        return nodeType === DOCUMENT_FRAGMENT_NODE ||
-          (nodeType === ELEMENT_NODE && !(element.parentNode &&
-            this.descendantOf(element.ownerDocument)));
+    plugin.isDetached = (function() {
+      var isDetached = function isDetached() {
+        var element = this.raw || this;
+        return !(element.parentNode && this.descendantOf(element.ownerDocument));
       };
 
       if (Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
-        isFragment = function isFragment() {
-          var element = this.raw || this, nodeType = element.nodeType;
-          return nodeType === DOCUMENT_FRAGMENT_NODE || (nodeType === ELEMENT_NODE &&
-            element.ownerDocument.all[element.sourceIndex] !== element);
+        isDetached = function isDetached() {
+          var element = this.raw || this;
+          return element.ownerDocument.all[element.sourceIndex] !== element;
         };
       }
       if (Feature('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
-        isFragment = function isFragment() {
+        isDetached = function isDetached() {
           /* DOCUMENT_POSITION_DISCONNECTED = 0x01 */
-          var element = this.raw || this, nodeType = element.nodeType;
-          return nodeType === DOCUMENT_FRAGMENT_NODE || (nodeType === ELEMENT_NODE &&
-            (element.ownerDocument.compareDocumentPosition(element) & 1) === 1);
+          var element = this.raw || this;
+          return (element.ownerDocument.compareDocumentPosition(element) & 1) === 1;
         };
       }
-      return isFragment;
+      return isDetached;
     })();
 
     plugin.hide = function hide() {
@@ -792,7 +789,7 @@
      empty =              nil,
      hide =               nil,
      getFuseId =          nil,
-     isFragment =         nil,
+     isDetached =         nil,
      remove =             nil,
      scrollTo =           nil,
      show =               nil,
