@@ -25,19 +25,18 @@
     function fireDomLoadedEvent() {
       readyStatePoller.clear();
       cssPoller && cssPoller.clear();
-
-      if (docObj.loaded) return;
-      return docObj.fire('dom:loaded');
+      return !decoratedDoc.loaded && !!decoratedDoc.fire('dom:loaded');
     }
 
     function checkCssAndFire() {
-      if (docObj.loaded) return fireDomLoadedEvent();
-      return !!(isCssLoaded() && fireDomLoadedEvent());
+      return decoratedDoc.loaded
+        ? fireDomLoadedEvent()
+        : !!(isCssLoaded() && fireDomLoadedEvent());
     }
 
     function getSheetElements() {
-      var i = 0, link, links = docNode.getElementsByTagName('LINK'),
-       results = Fuse.List.fromNodeList(docNode.getElementsByTagName('STYLE'));
+      var i = 0, link, links = doc.getElementsByTagName('LINK'),
+       results = Fuse.List.fromNodeList(doc.getElementsByTagName('STYLE'));
       while (link = links[i++])
         if (link.rel.toLowerCase() === 'stylesheet')
           results.push(link);
@@ -60,18 +59,22 @@
 
     var cssPoller, readyStatePoller,
 
-    docNode = Fuse._doc,
+    FINAL_DOCUMENT_READY_STATES = { 'complete': 1, 'loaded': 1 },
 
-    docObj = Fuse.get(docNode),
+    doc = Fuse._doc,
+
+    decoratedDoc = Fuse.get(doc),
 
     checkDomLoadedState = function(event) {
+      if (decoratedDoc.loaded)
+        return readyStatePoller.clear();
+
       // Not sure if readyState is ever `loaded` in Safari 2.x but
       // we check to be on the safe side
-      if (docObj.loaded) readyStatePoller.clear();
-      else if (event && event.type === 'DOMContentLoaded' ||
-          /^(loaded|complete)$/.test(docNode.readyState)) {
+      if (FINAL_DOCUMENT_READY_STATES[doc.readyState] ||
+          event && event.type === 'DOMContentLoaded') {
         readyStatePoller.clear();
-        docObj.stopObserving('readystatechange', checkDomLoadedState);
+        decoratedDoc.stopObserving('readystatechange', checkDomLoadedState);
         if (!checkCssAndFire()) cssPoller = new Poller(checkCssAndFire);
       }
     },
@@ -187,12 +190,12 @@
                       if (rules.length === 1) continue;
 
                       if (!c.div) {
-                        c.div = docNode.createElement('div');
+                        c.div = doc.createElement('div');
                         c.div.className = c.className;
                         c.div.style.cssText = 'position:absolute;visibility:hidden;';
                       }
 
-                      docNode.body.appendChild(c.div);
+                      doc.body.appendChild(c.div);
 
                       // when loaded clear cache entry
                       if (getStyle(c.div, 'marginTop') === '-1234px')
@@ -200,7 +203,7 @@
 
                       // cleanup
                       removeRule(c.sheet, lastIndex);
-                      docNode.body.removeChild(c.div);
+                      doc.body.removeChild(c.div);
                     }
                   }
 
@@ -229,21 +232,20 @@
       // http://javascript.nwbox.com/IEContentLoaded/
       if (!isFramed)
         checkDomLoadedState = function() {
-          if (docObj.loaded) readyStatePoller.clear();
+          if (decoratedDoc.loaded)
+            return readyStatePoller.clear();
+          if (doc.readyState === 'complete')
+            fireDomLoadedEvent();
           else {
-            if (docNode.readyState === 'complete')
-              fireDomLoadedEvent();
-            else {
-              try { Fuse._div.doScroll(); } catch(e) { return; }
-              fireDomLoadedEvent();
-            }
+            try { Fuse._div.doScroll(); } catch(e) { return; }
+            fireDomLoadedEvent();
           }
         };
     }
     else if (Feature('ELEMENT_ADD_EVENT_LISTENER'))
-      docObj.observe('DOMContentLoaded', checkDomLoadedState);
+      decoratedDoc.observe('DOMContentLoaded', checkDomLoadedState);
 
     // readystate and poller are used (first one to complete wins)
-    docObj.observe('readystatechange', checkDomLoadedState);
+    decoratedDoc.observe('readystatechange', checkDomLoadedState);
     readyStatePoller = new Poller(checkDomLoadedState);
   })();

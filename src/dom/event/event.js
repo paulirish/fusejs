@@ -233,28 +233,30 @@
     // executing its observers before allowing the
     // window onload event to proceed.
     function domLoadWrapper(event) {
-      var docObj = Fuse.get(Fuse._doc);
-      if (!docObj.loaded) {
+      var doc = Fuse._doc, docEl = Fuse._docEl,
+       decoratedDoc = Fuse.get(doc);
+
+      if (!decoratedDoc.loaded) {
         event = event || global.event;
         event.eventName = 'dom:loaded';
 
         // define pseudo private body and root properties
-        Fuse._body     = Fuse._doc.body;
-        Fuse._root     = Fuse._docEl;
-        Fuse._scrollEl = Fuse._body;
+        Fuse._body     =
+        Fuse._scrollEl = doc.body;
+        Fuse._root     = docEl;
 
         if (Bug('BODY_ACTING_AS_ROOT')) {
-          Fuse._root = Fuse._body;
+          Fuse._root = doc.body;
           Fuse._info.root = Fuse._info.body;
         }
         if (Bug('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT')) {
-          Fuse._scrollEl = Fuse._docEl;
+          Fuse._scrollEl = docEl;
           Fuse._info.scrollEl = Fuse._info.docEl;
         }
 
-        docObj.loaded = true;
+        decoratedDoc.loaded = true;
         domLoadDispatcher(event);
-        docObj.stopObserving('dom:loaded');
+        decoratedDoc.stopObserving('dom:loaded');
       }
     }
 
