@@ -123,7 +123,7 @@
 
   isElement =
   Obj.isElement = function isElement(value) {
-    return !!value && value.nodeType === 1;
+    return !!value && value.nodeType === ELEMENT_NODE;
   };
 
   isEmpty =

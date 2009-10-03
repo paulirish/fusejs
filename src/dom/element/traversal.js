@@ -22,7 +22,8 @@
         var nextSiblings, element = this.raw || this;
         if (!element[firstNode]) return NodeList();
 
-        while (element && element.nodeType !== 1) element = element[nextNode];
+        while (element && element.nodeType !== ELEMENT_NODE)
+          element = element[nextNode];
         if (!element) return NodeList();
 
         nextSiblings = this.nextSiblings;
@@ -50,12 +51,13 @@
           if (selectors && selectors.length) {
             match = Selector.match;
             do {
-              if (element.nodeType === 1 && element !== original && match(element, selectors))
+              if (element.nodeType === ELEMENT_NODE &&
+                  element !== original && match(element, selectors))
                 results[i++] = fromElement(element);
             } while (element = element[nextNode]);
           } else {
             do {
-              if (element.nodeType === 1 && element !== original)
+              if (element.nodeType === ELEMENT_NODE && element !== original)
                 results[i++] = fromElement(element);
             } while (element = element[nextNode]);
           }
@@ -92,11 +94,11 @@
           if (selectors && selectors.length) {
             match = Selector.match;
             while (node = nodes[i++])
-              if (node.nodeType === 1 && match(element, selectors))
+              if (node.nodeType === ELEMENT_NODE && match(element, selectors))
                 results.push(fromElement(node));
           } else {
             while (node = nodes[i++])
-              if (node.nodeType === 1)
+              if (node.nodeType === ELEMENT_NODE)
                 results.push(fromElement(node));
           }
           return results;
@@ -128,7 +130,8 @@
         descendantOf = function descendantOf(ancestor) {
           ancestor = Fuse.get(ancestor);
           var element, ancestorElem = ancestor.raw;
-          if (ancestorElem.nodeType !== 1) return __descendantOf.call(this, ancestor);
+          if (ancestorElem.nodeType !== ELEMENT_NODE)
+            return __descendantOf.call(this, ancestor);
           element = this.raw || this;
           return ancestorElem !== element && ancestorElem.contains(element);
         };
@@ -156,7 +159,7 @@
         getNth = function(nodes, index) {
           var count = 0, i = 0;
           while (node = nodes[i++])
-            if (node.nodeType === 1 && count++ === index)
+            if (node.nodeType === ELEMENT_NODE && count++ === index)
               return fromElement(node);
           return null;
         };
@@ -164,7 +167,8 @@
         getNthBySelector = function(nodes, selectors, index) {
           var count = 0, i = 0, match = Selector.match;
           while (node = nodes[i++])
-            if (node.nodeType === 1 && match(node, selectors) && count++ === index)
+            if (node.nodeType === ELEMENT_NODE &&
+                match(node, selectors) && count++ === index)
               return fromElement(node);
           return null;
         };
@@ -189,7 +193,8 @@
     plugin.firstDescendant = (function() {
       var firstDescendant = function firstDescendant() {
         var element = (this.raw || this).firstChild;
-        while (element && element.nodeType !== 1) element = element[nextNode];
+        while (element && element.nodeType !== ELEMENT_NODE)
+          element = element[nextNode];
         return fromElement(element);
       };
 
@@ -216,12 +221,13 @@
           if (selectors && selectors.length) {
             match = Selector.match;
             do {
-              if (element.nodeType === 1 && match(element, selectors) && count++ === index)
+              if (element.nodeType === ELEMENT_NODE &&
+                  match(element, selectors) && count++ === index)
                 return fromElement(element);
             } while (element = element[property]);
           } else {
             do {
-              if (element.nodeType === 1 && count++ === index)
+              if (element.nodeType === ELEMENT_NODE && count++ === index)
                 return fromElement(element);
             } while (element = element[property]);
           }
@@ -258,12 +264,12 @@
           if (selectors && selectors.length) {
             match = Selector.match;
             do {
-              if (element.nodeType === 1 && match(element, selectors))
+              if (element.nodeType === ELEMENT_NODE && match(element, selectors))
                 results[i++] = fromElement(element);
             } while (element = element[property]);
           } else {
             do {
-              if (element.nodeType === 1)
+              if (element.nodeType === ELEMENT_NODE)
                 results[i++] = fromElement(element);
             } while (element = element[property]);
           }

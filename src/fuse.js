@@ -2,13 +2,14 @@
 (function(global) {
 
   // private vars
-  var Fuse, Bug, Data, Document, Element, Enumerable, Feature, Form, Func, Obj,
-   Node, NodeList, $break, _extend, addListMethods, bind, capitalize, clone,
-   concatList, defer, eachKey, emptyFunction, escapeRegExpChars, expando,
-   fromElement, getDocument, getNodeName, getWindow, hasKey, inspect, isArray,
-   isElement, isEmpty, isHash, isHostObject, isFunction, isNumber, isPrimitive,
-   isRegExp, isSameOrigin, isString, isUndefined, K, nil, prependList,
-   returnOffset, slice, toInteger, toString, undef, userAgent;
+  var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, Fuse, Bug, Data,
+   Document, Element, Enumerable, Feature, Form, Func, Obj, Node, NodeList,
+   $break, _extend, addListMethods, bind, capitalize, clone, concatList, defer,
+   eachKey, emptyFunction, escapeRegExpChars, expando,fromElement, getDocument,
+   getNodeName, getWindow, hasKey, inspect, isArray, isElement, isEmpty, isHash,
+   isHostObject, isFunction, isNumber, isPrimitive, isRegExp, isSameOrigin,
+   isString, isUndefined, K, nil, prependList, returnOffset, slice, toInteger,
+   toString, undef, userAgent;
 
   Fuse =
   global.Fuse = function Fuse() { };
@@ -81,6 +82,15 @@
         : (number < 0 ? -1 : 1) * floor(abs(number));
     };
   })();
+
+  // global.document.createDocumentFragment() nodeType
+  DOCUMENT_FRAGMENT_NODE = 11;
+
+  // global.document nodeType
+  DOCUMENT_NODE = 9;
+
+  // element nodeType
+  ELEMENT_NODE = 1;
 
   // a unqiue 15 char id used throughout Fuse
   expando = '_fuse' + String(+new Date).slice(0, 10);

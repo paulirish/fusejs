@@ -33,7 +33,7 @@
   getDocument =
   Fuse.getDocument = function getDocument(element) {
     return element.ownerDocument || element.document ||
-      (element.nodeType === 9 ? element : Fuse._doc);
+      (element.nodeType === DOCUMENT_NODE ? element : Fuse._doc);
   };
 
   /* Based on work by Diego Perini */

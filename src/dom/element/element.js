@@ -45,10 +45,10 @@
       if (!object) return object;
 
       var nodeType = object.nodeType;
-      if (nodeType === 9) return Document(object);
+      if (nodeType === DOCUMENT_NODE) return Document(object);
 
       // bail on XML nodes, text nodes, and window objects
-      return (nodeType !== 1 || object == getWindow(object) ||
+      return (nodeType !== ELEMENT_NODE || object == getWindow(object) ||
         !object.ownerDocument.body) ? object : fromElement(object);
     }
 
@@ -346,7 +346,7 @@
        context = context || Fuse._body || Fuse._docEl;
        cache = cache || getFragmentCache(context.ownerDocument || context);
        var node = cache.node,
-        nodeName = context.nodeType === 9
+        nodeName = context.nodeType === DOCUMENT_NODE
           ? FROM_STRING_CHILDRENS_PARENT_KEYS[tagName.match(matchTagName)[1].toUpperCase()]
           : getNodeName(context),
 
@@ -707,14 +707,15 @@
     plugin.isFragment = (function() {
       var isFragment = function isFragment() {
         var element = this.raw || this, nodeType = element.nodeType;
-        return nodeType === 11 || (nodeType === 1 && !(element.parentNode &&
-          this.descendantOf(element.ownerDocument)));
+        return nodeType === DOCUMENT_FRAGMENT_NODE ||
+          (nodeType === ELEMENT_NODE && !(element.parentNode &&
+            this.descendantOf(element.ownerDocument)));
       };
 
       if (Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
         isFragment = function isFragment() {
           var element = this.raw || this, nodeType = element.nodeType;
-          return nodeType === 11 || (nodeType === 1 &&
+          return nodeType === DOCUMENT_FRAGMENT_NODE || (nodeType === ELEMENT_NODE &&
             element.ownerDocument.all[element.sourceIndex] !== element);
         };
       }
@@ -722,7 +723,7 @@
         isFragment = function isFragment() {
           /* DOCUMENT_POSITION_DISCONNECTED = 0x01 */
           var element = this.raw || this, nodeType = element.nodeType;
-          return nodeType === 11 || (nodeType === 1 &&
+          return nodeType === DOCUMENT_FRAGMENT_NODE || (nodeType === ELEMENT_NODE &&
             (element.ownerDocument.compareDocumentPosition(element) & 1) === 1);
         };
       }

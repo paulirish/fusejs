@@ -406,7 +406,7 @@
       fireEvent = function(element, event) {
         // In the W3C system, all calls to document.fire should treat
         // document.documentElement as the target
-        if (element.nodeType === 9)
+        if (element.nodeType === DOCUMENT_NODE)
           element = element.documentElement;
         element.dispatchEvent(event);
       };

@@ -3,7 +3,7 @@
   Document = (function() {
     var Document = function Document(node) {
       // bail if empty, already decorated, or not a document node
-      if (!node || node.raw || node.nodeType !== 9)
+      if (!node || node.raw || node.nodeType !== DOCUMENT_NODE)
         return node;
 
       var decorated, pluginViewport, viewport,

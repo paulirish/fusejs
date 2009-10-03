@@ -258,7 +258,7 @@
       // IE throws an error if the element is not in the document.
       // Many browsers report offsetParent as null if the element's
       // style is display:none.
-      if (this.isFragment() || element.nodeType === 9 ||
+      if (this.isFragment() || element.nodeType === DOCUMENT_NODE ||
           OFFSET_PARENT_EXIT_BEFORE_NODES[nodeName] ||
           !element.offsetParent && this.getStyle('display') != 'none')
         return null;
@@ -372,7 +372,7 @@
             break;
         }
         element = element.parentNode;
-      } while (element && element.nodeType === 1);
+      } while (element && element.nodeType === ELEMENT_NODE);
 
       if (onlyAncestors || ((nodeName = getNodeName(original)) &&
           nodeName === 'TEXTAREA' || nodeName === 'INPUT')) {
