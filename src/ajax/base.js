@@ -65,7 +65,7 @@
         }
 
         // ensure character encoding is set in headers of POST requests
-        if (method == 'post' && (headers['Content-type'] || '').indexOf('charset=') == -1) {
+        if (method == 'post' && (headers['Content-type'] || '').indexOf('charset=') < 0) {
           headers['Content-type'] = options.contentType +
             (encoding ? '; charset=' + encoding : '');
         }

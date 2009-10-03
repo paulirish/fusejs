@@ -135,7 +135,7 @@
       // non-http requests don't use http status codes
       // return true if request url is http(s) or, if relative, the pages url is http(s)
       this._useStatus = matchHTTP.test(url) ||
-        (url.slice(0, 6).indexOf(':') === -1 ?
+        (url.slice(0, 6).indexOf(':') < 0 ?
           matchHTTP.test(global.location.protocol) : false);
 
       // start timeout timer if provided

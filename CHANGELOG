@@ -1,3 +1,5 @@
+* Change all `foo.indexOf(blah) === -1` to `foo.indexOf(blah) < 0`. [Andrea Giammarchi, jddalton]
+
 * Rename Fuse.Dom.Element.decorate to Fuse.Dom.Element.fromElement to be consistent with the rest of the API. [jddalton]
 
 * Add Fuse.Dom.Document class and support for Fuse.get(document). [jddalton]
