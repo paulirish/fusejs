@@ -2,7 +2,7 @@
 
   Fuse.addNS('Ajax');
 
-  Fuse.Ajax.getTransport = (function() {
+  Fuse.Ajax.create = (function() {
 
     // The `Difference between MSXML2.XMLHTTP and Microsoft.XMLHTTP ProgIDs`
     // thread explains that the `Microsoft` namespace is deprecated and we should
@@ -15,24 +15,23 @@
     // Attempt ActiveXObject first because IE7+ implementation of
     // XMLHttpRequest doesn't work with local files.
 
-    var getTransport = function getTransport() { return false; };
-
+    var create = function create() { return false; };
     if (Feature('ACTIVE_X_OBJECT')) {
       try {
         new ActiveXObject('MSXML2.XMLHTTP');
-        getTransport = function getTransport() {
+        create = function create() {
           return new ActiveXObject('MSXML2.XMLHTTP');
         };
       } catch (e) {
-        getTransport = function getTransport() {
+        create = function create() {
           return new ActiveXObject('Microsoft.XMLHTTP');
         };
       }
     } else if (isHostObject(global, 'XMLHttpRequest')) {
-      getTransport = function getTransport() {
+      create = function create() {
         return new XMLHttpRequest();
       };
     }
 
-    return getTransport;
+    return create;
   })();

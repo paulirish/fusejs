@@ -76,15 +76,15 @@ function preservingBrowserDimensions(callback) {
 
   DOMParser.prototype.parseFromString = (function() {
     var parseFromString = function parseFromString(string, contentType) {
-      var transport = Fuse.Ajax.getTransport();
+      var xhr = Fuse.Ajax.create();
       if (!contentType) contentType = 'application/xml';
-      transport.open('GET', 'data:' + contentType + ';charset=utf-8,' +
+      xhr.open('GET', 'data:' + contentType + ';charset=utf-8,' +
         encodeURIComponent(string), false);
 
-      if (typeof transport.overrideMimeType !== 'undefined')
-        transport.overrideMimeType(contentType);
-      transport.send(null);
-      return transport.responseXML;
+      if (typeof xhr.overrideMimeType !== 'undefined')
+        xhr.overrideMimeType(contentType);
+      xhr.send(null);
+      return xhr.responseXML;
     };
 
     if (Fuse.Env.Feature('ACTIVE_X_OBJECT')) {

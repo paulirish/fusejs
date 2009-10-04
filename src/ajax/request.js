@@ -1,52 +1,57 @@
   /*---------------------------- AJAX: REQUEST -------------------------------*/
 
-  Fuse.Ajax.Request = Class(Fuse.Ajax.Base, {
-    'constructor': (function() {
-      function Request(url, options) {
-        if (!(this instanceof Request))
-          return new Request(url, options);
+  Fuse.Ajax.Request = (function() {
+    var Decorator = function() { },
 
-        var request = this, onStateChange = this.onStateChange,
-         onTimeout = this.onTimeout;
+    Request = function Request(url, options) {
+      var decorated  = new Decorator,
+       onStateChange = decorated.onStateChange,
+       onTimeout     = decorated.onTimeout;
 
-        this.transport = Fuse.Ajax.getTransport();
-        this.onTimeout = function() { onTimeout.call(request); };
-        this.onStateChange =
-          function(event, forceState) { onStateChange.call(request, event, forceState); };
+      decorated.raw = Fuse.Ajax.create();
 
-        this.request(url, options);
-      }
-      return Request;
-    })()
-  });
+      decorated.onTimeout =
+        function() { onTimeout.call(request); };
+
+      decorated.onStateChange =
+        function(event, forceState) { onStateChange.call(request, event, forceState); };
+
+      decorated.request(url, options);
+      return decorated;
+    };
+
+    Request = Class(Fuse.Ajax.Base, { 'constructor': Request });
+    Decorator.prototype = Request.plugin;
+    return Request;
+  })();
 
   Fuse.Ajax.Request.Events =
     Fuse.List('Unsent', 'Opened', 'HeadersReceived', 'Loading', 'Done');
 
   /*--------------------------------------------------------------------------*/
 
-  (function() {
+  (function(plugin) {
     var matchHTTP = /^https?:/,
       Responders = Fuse.Ajax.Responders;
 
-    this._useStatus   = true;
-    this._timerID     = nil;
-    this.aborted      = false;
-    this.readyState   = Fuse.Number(0);
-    this.responseText = Fuse.String('');
-    this.status       = Fuse.Number(0);
-    this.statusText   = Fuse.String('');
-    this.timedout     = false;
+    plugin._useStatus   = true;
+    plugin._timerID     = nil;
+    plugin.aborted      = false;
+    plugin.readyState   = Fuse.Number(0);
+    plugin.responseText = Fuse.String('');
+    plugin.status       = Fuse.Number(0);
+    plugin.statusText   = Fuse.String('');
+    plugin.timedout     = false;
 
-    this.headerJSON = this.responseJSON = this.responseXML = nil;
+    plugin.headerJSON = plugin.responseJSON = plugin.responseXML = nil;
 
-    this.abort = function abort() {
-      var transport = this.transport;
+    plugin.abort = function abort() {
+      var xhr = this.raw;
       if (this.readyState != 4) {
         // clear onreadystatechange handler to stop some browsers calling
         // it when the request is aborted
-        transport.onreadystatechange = emptyFunction;
-        transport.abort();
+        xhr.onreadystatechange = emptyFunction;
+        xhr.abort();
 
         // skip to complete readyState and flag it as aborted
         this.aborted = true;
@@ -54,7 +59,7 @@
       }
     };
 
-    this.dispatch = function dispatch(eventName, callback) {
+    plugin.dispatch = function dispatch(eventName, callback) {
       try {
         callback && callback(this, this.headerJSON);
       } catch (e) {
@@ -63,7 +68,7 @@
       Responders && Responders.dispatch(eventName, this, this.headerJSON);
     };
 
-    this.dispatchException = function dispatchException(exception) {
+    plugin.dispatchException = function dispatchException(exception) {
       var callback = this.options.onException;
       callback && callback(this, exception);
       Responders && Responders.dispatch('onException', this, exception);
@@ -72,23 +77,23 @@
       if (!callback) throw exception;
     };
 
-    this.getAllHeaders = function getAllHeaders() {
+    plugin.getAllHeaders = function getAllHeaders() {
       var result;
-      try { result = this.transport.getAllResponseHeaders(); } catch (e) { }
+      try { result = this.raw.getAllResponseHeaders(); } catch (e) { }
       return Fuse.String(result || '');
     };
 
-    this.getHeader = function getHeader(name) {
+    plugin.getHeader = function getHeader(name) {
       var result;
-      try { result = this.transport.getResponseHeader(name); } catch (e) { }
+      try { result = this.raw.getResponseHeader(name); } catch (e) { }
       return result ? Fuse.String(result) : null;
     };
 
-    this.onTimeout = function onTimeout() {
-      var transport = this.transport;
+    plugin.onTimeout = function onTimeout() {
+      var xhr = this.raw;
       if (this.readyState != 4) {
-        transport.onreadystatechange = emptyFunction;
-        transport.abort();
+        xhr.onreadystatechange = emptyFunction;
+        xhr.abort();
 
         // skip to complete readyState and flag it as timedout
         this.timedout = true;
@@ -96,9 +101,9 @@
       }
     };
 
-    this.onStateChange = function onStateChange(event, forceState) {
+    plugin.onStateChange = function onStateChange(event, forceState) {
       // ensure all states are fired and only fired once per change
-      var endState = this.transport.readyState, readyState = this.readyState;
+      var endState = this.raw.readyState, readyState = this.readyState;
       if (readyState < 4) {
         if (forceState != null) readyState = forceState - 1;
         while (readyState < endState)
@@ -106,7 +111,7 @@
       }
     };
 
-    this.request = function request(url, options) {
+    plugin.request = function request(url, options) {
       // treat request() as the constructor and call Base as $super
       // if first call or new options are passed
       if (!this.options || options)
@@ -119,8 +124,8 @@
        body      = this.body,
        headers   = options.headers,
        timeout   = options.timeout,
-       transport = this.transport,
-       url       = String(this.url);
+       url       = String(this.url),
+       xhr       = this.raw;
 
       // reset flags
       this.aborted = this.timedout = false;
@@ -151,16 +156,16 @@
       try {
         // attach onreadystatechange event after open() to avoid some browsers
         // firing duplicate readyState events
-        transport.open(this.method.toUpperCase(), url, async,
+        xhr.open(this.method.toUpperCase(), url, async,
           options.username, options.password);
-        transport.onreadystatechange = this.onStateChange;
+        xhr.onreadystatechange = this.onStateChange;
 
         // set headers
         for (key in headers)
-          transport.setRequestHeader(key, headers[key]);
+          xhr.setRequestHeader(key, headers[key]);
 
         // if body is a string ensure it's a primitive
-        transport.send(isString(body) ? String(body) : body);
+        xhr.send(isString(body) ? String(body) : body);
 
         // force Firefox to handle readyState 4 for synchronous requests
         if (!async) this.onStateChange();
@@ -170,7 +175,7 @@
       }
     };
 
-    this.setReadyState = function setReadyState(readyState) {
+    plugin.setReadyState = function setReadyState(readyState) {
       var eventName, json, responseText, status, statusText, successOrFailure, i = 0,
        aborted    = this.aborted,
        eventNames = [],
@@ -178,12 +183,12 @@
        options    = this.options,
        evalJSON   = options.evalJSON,
        timedout   = this.timedout,
-       transport  = this.transport,
-       url        = this.url;
+       url        = this.url,
+       xhr        = this.raw;
 
       // exit if no headers and wait for state 3 to fire states 2 and 3
       if (readyState == 2 && this.getAllHeaders() == '' &&
-        transport.readyState === 2) return;
+        xhr.readyState === 2) return;
 
       this.readyState = Fuse.Number(readyState);
 
@@ -204,8 +209,8 @@
         // Assume Firefox is throwing an error accessing status/statusText
         // caused by a 408 request timeout
         try {
-          status = transport.status;
-          statusText = transport.statusText;
+          status = xhr.status;
+          statusText = xhr.statusText;
         } catch(e) {
           status = 408;
           statusText = 'Request Timeout';
@@ -221,7 +226,7 @@
         if (readyState > 2) {
           // IE will throw an error when accessing responseText in state 3
           try {
-            if (responseText = transport.responseText)
+            if (responseText = xhr.responseText)
               this.responseText = Fuse.String(responseText);
           } catch (e) { }
         }
@@ -269,10 +274,10 @@
             successOrFailure : status)] = 1;
 
           // remove event handler to avoid memory leak in IE
-          transport.onreadystatechange = emptyFunction;
+          xhr.onreadystatechange = emptyFunction;
 
           // set responseXML
-          responseXML = transport.responseXML;
+          responseXML = xhr.responseXML;
           if (responseXML) this.responseXML = responseXML;
 
           // set responseJSON
@@ -308,7 +313,7 @@
       }
     };
 
-    this.isSuccess = function isSuccess() {
+    plugin.isSuccess = function isSuccess() {
       // http status code definitions
       // http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
       var status = this.status;
@@ -328,4 +333,4 @@
      onTimeout =         nil,
      request =           nil,
      setReadyState =     nil;
-  }).call(Fuse.Ajax.Request.plugin);
+  })(Fuse.Ajax.Request.plugin);
