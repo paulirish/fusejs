@@ -1,18 +1,20 @@
   /*------------------------------- LANG: RANGE ------------------------------*/
 
-  Fuse.Range = Class({
-    'constructor': (function() {
-      function Range(start, end, exclusive) {
-        if (!(this instanceof Range))
-          return new Range(start, end, exclusive);
+  Fuse.Range = (function() {
+    var Klass = function() { },
 
-        this.start = Fuse.Object(start);
-        this.end = Fuse.Object(end);
-        this.exclusive = exclusive;
-      }
-      return Range;
-    })()
-  });
+    Range = function Range(start, end, exclusive) {
+      var instance       = new Klass;
+      instance.start     = Obj(start);
+      instance.end       = Obj(end);
+      instance.exclusive = exclusive;
+      return instance;
+    };
+
+    Range = Class({ 'constructor': Range });
+    Klass.prototype = Range.plugin;
+    return Range;
+  })();
 
   Fuse.addNS('Util');
 

@@ -1,53 +1,54 @@
   /*------------------------------ AJAX: UPDATER -----------------------------*/
 
-  Fuse.Ajax.Updater = Class(Fuse.Ajax.Request, {
-    'constructor': (function() {
-      function Updater(container, url, options) {
-        if (!(this instanceof Updater))
-          return new Updater(container, url, options);
+  Fuse.Ajax.Updater = (function() {
+    var Klass = function() { },
 
-        this.container = {
-          'success': Fuse.get(container.success || container),
-          'failure': Fuse.get(container.failure || (container.success ? null : container))
-        };
+    Request = Fuse.Ajax.Request,
 
-        options = clone(options);
-        var updater = this, callbackName = 'on' + Request.Events[4],
-         onDone = options[callbackName];
+    Updater = function Updater(container, url, options) {
+      var onDone,
+       instance = new Klass,
+       callbackName = 'on' + Request.Events[4],
+       onDone = options[callbackName];
 
-        options[callbackName] = function(request, json) {
-          updater.updateContent(request.responseText);
-          onDone && onDone(request, json);
-        };
+      instance.container = {
+        'success': Fuse.get(container.success || container),
+        'failure': Fuse.get(container.failure || (container.success ? null : container))
+      };
 
-        // this._super() equivalent
-        Fuse.Ajax.Request.call(this, url, options);
-      }
+      options[callbackName] = function(request, json) {
+        instance.updateContent(request.responseText);
+        onDone && onDone(request, json);
+      };
 
-      var Request = Fuse.Ajax.Request;
-      return Updater;
-    })(),
+      // instance._super() equivalent
+      Fuse.Ajax.Request.call(instance, url, options);
+    };
 
-    'updateContent': (function() {
-      function updateContent(responseText) {
-        var insertion,
-         options = this.options,
-         receiver = this.container[this.isSuccess() ? 'success' : 'failure'];
+    Updater = Class(Fuse.Ajax.Request, { 'constructor': Updater });
+    Klass.prototype = Updater.plugin;
+    return Updater;
+  })();
 
-        if (receiver) {
-          if (!options.evalScripts)
-            responseText = responseText.stripScripts();
+  Fuse.Ajax.Updater.plugin.updateContent = (function() {
+    function updateContent(responseText) {
+      var insertion,
+       options = this.options,
+       receiver = this.container[this.isSuccess() ? 'success' : 'failure'];
 
-          if (options.insertion) {
-            if (isString(options.insertion)) {
-              insertion = { }; insertion[options.insertion] = responseText;
-              receiver.insert(insertion);
-            }
-            else options.insertion(receiver, responseText);
+      if (receiver) {
+        if (!options.evalScripts)
+          responseText = responseText.stripScripts();
+
+        if (options.insertion) {
+          if (isString(options.insertion)) {
+            insertion = { }; insertion[options.insertion] = responseText;
+            receiver.insert(insertion);
           }
-          else receiver.update(responseText);
+          else options.insertion(receiver, responseText);
         }
+        else receiver.update(responseText);
       }
-      return updateContent;
-    })()
-  });
+    }
+    return updateContent;
+  })();

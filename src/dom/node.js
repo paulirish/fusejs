@@ -2,7 +2,9 @@
 
   Node =
   Fuse.Dom.Node = (function() {
-    var Node = function Node(node) {
+    var Decorator = function() { },
+
+    Node = function Node(node) {
       // return if already decoratored or falsy
       if (!node || node.raw) return node;
 
@@ -28,10 +30,8 @@
       return decorated;
     };
 
-    function Decorator() { }
     Node = Class(Fuse.Dom, { 'constructor': Node });
     Decorator.prototype = Node.plugin;
-
     return Node;
   })();
 

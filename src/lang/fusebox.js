@@ -24,7 +24,7 @@
 
     createSandbox = (function() {
       if (mode === 'OBJECT__PROTO__')
-        return function () { return global; };
+        return function() { return global; };
 
       // IE requires the iframe/htmlfile remain in the cache or it will be
       // marked for garbage collection

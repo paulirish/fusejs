@@ -183,6 +183,8 @@
       'UL':       'UList'
     },
 
+    Decorator = function() { },
+
     Dom = Fuse.Dom,
 
     doc = Fuse._doc,
@@ -235,8 +237,6 @@
       else getOrCreateTagClass(tagName)
         .extend(statics, plugins, mixins);
     }
-
-    function Decorator() { }
 
     Element.fromElement = fromElement;
     Dom.extendByTag = extendByTag;

@@ -1,15 +1,41 @@
   /*------------------------------- LANG: HASH -------------------------------*/
 
-  Fuse.Hash = Class((function() {
+  Fuse.Hash = (function() {
+    var Klass = function () { },
 
-    function indexOfKey(hash, key) {
+    Hash = function Hash(object) {
+      return setWithObject((new Klass).clear(), object);
+    },
+
+    merge = function merge(object) {
+      return setWithObject(this.clone(), object);
+    },
+
+    set = function set(key, value) {
+      return isString(key)
+        ? setValue(this, key, value)
+        : setWithObject(this, key);
+    },
+
+    unset = function unset(key) {
+      var data = this._data, i = 0,
+       keys = isArray(key) ? key : arguments;
+
+      while (key = keys[i++])  {
+        if ((expando + key) in data)
+          unsetByIndex(this, indexOfKey(this, key));
+      }
+      return this;
+    },
+
+    indexOfKey = function(hash, key) {
       key = String(key);
       var index = 0, keys = hash._keys, length = keys.length;
       for ( ; index < length; index++)
         if (keys[index] == key) return index;
-    }
+    },
 
-    function setValue(hash, key, value) {
+    setValue = function(hash, key, value) {
       if (!key.length) return hash;
       var data = hash._data, expandoKey = expando + key, keys = hash._keys;
 
@@ -25,9 +51,9 @@
       hash._data[expandoKey] =
       hash._object[key] = value;
       return hash;
-    }
+    },
 
-    function setWithObject(hash, object) {
+    setWithObject = function(hash, object) {
       if (isHash(object)) {
         var pair, i = 0, pairs = object._pairs;
         while (pair = pairs[i++]) setValue(hash, pair[0], pair[1]);
@@ -38,9 +64,9 @@
         });
       }
       return hash;
-    }
+    },
 
-    function unsetByIndex(hash, index) {
+    unsetByIndex = function(hash, index) {
       var keys = hash._keys;
       delete hash._data[expando + keys[index]];
       delete hash._object[keys[index]];
@@ -48,49 +74,12 @@
       keys.splice(index, 1);
       hash._pairs.splice(index, 1);
       hash._values.splice(index, 1);
-    }
-
-    return {
-      'constructor': (function() {
-        function Hash(object) {
-          if (!(this instanceof Hash))
-            return new Hash(object);
-          return setWithObject(this.clear(), object);
-        }
-        return Hash;
-      })(),
-
-      'merge': (function() {
-        function merge(object) {
-          return setWithObject(this.clone(), object);
-        }
-        return merge;
-      })(),
-
-      'set': (function() {
-        function set(key, value) {
-          return isString(key)
-            ? setValue(this, key, value)
-            : setWithObject(this, key);
-        }
-        return set;
-      })(),
-
-      'unset': (function() {
-        function unset(key) {
-          var data = this._data, i = 0,
-           keys = isArray(key) ? key : arguments;
-
-          while (key = keys[i++])  {
-            if ((expando + key) in data)
-              unsetByIndex(this, indexOfKey(this, key));
-          }
-          return this;
-        }
-        return unset;
-      })()
     };
-  })());
+
+    Hash = Class({ 'constructor': Hash, 'merge': merge, 'set': set, 'unset': unset });
+    Klass.prototype = Hash.plugin;
+    return Hash;
+  })();
 
   /*--------------------------------------------------------------------------*/
 

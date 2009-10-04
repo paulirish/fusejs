@@ -1,43 +1,43 @@
   /*------------------------ LANG: TIMER -----------------------*/
 
-  Fuse.Timer = Class({
-    'constructor': (function() {
-      function Timer(callback, interval, options) {
-        if (!(this instanceof Timer))
-          return new Timer(callback, interval, options);
+  Fuse.Timer = (function() {
+    var Klass = function() { },
 
-        this.callback  = callback;
-        this.interval  = interval;
-        this.executing = false;
+    Timer = function Timer(callback, interval, options) {
+      var instance       = new Klass;
+      instance.callback  = callback;
+      instance.interval  = interval;
+      instance.executing = false;
 
-        var timer = this;
-        this.onTimerEvent = function() { onTimerEvent.call(timer); };
+      instance.onTimerEvent = function() { onTimerEvent.call(instance); };
+      instance.options = _extend(clone(Timer.options), options);
+      return instance;
+    },
 
-        this.options = _extend(clone(this.constructor.options), options);
-      }
+    onTimerEvent = function() {
+      if (!this.executing) {
+        this.executing = true;
 
-      function onTimerEvent() {
-        if (!this.executing) {
-          this.executing = true;
-
-          // IE6 bug with try/finally, the finally does not get executed if the
-          // exception is uncaught. So instead we set the flags and start the
-          // timer before throwing the error.
-          try {
-            this.execute();
-            this.executing = false;
-            if (this.timerID !== null) this.start();
-          }
-          catch (e) {
-            this.executing = false;
-            if (this.timerID !== null) this.start();
-            throw e;
-          }
+        // IE6 bug with try/finally, the finally does not get executed if the
+        // exception is uncaught. So instead we set the flags and start the
+        // timer before throwing the error.
+        try {
+          this.execute();
+          this.executing = false;
+          if (this.timerID !== null) this.start();
+        }
+        catch (e) {
+          this.executing = false;
+          if (this.timerID !== null) this.start();
+          throw e;
         }
       }
-      return Timer;
-    })()
-  });
+    };
+
+    Timer = Class({ 'constructor': Timer });
+    Klass.prototype = Timer.plugin;
+    return Timer;
+  })();
 
   (function(plugin) {
     plugin.execute = function execute() {

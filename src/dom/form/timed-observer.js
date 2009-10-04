@@ -29,36 +29,42 @@
     /*------------------------------------------------------------------------*/
 
     Field.Observer =
-    Field.TimedObserver = Class(BaseTimedObserver, {
-      'constructor': (function() {
-        function FieldTimedObserver(element, callback, interval, options) {
-          if (!(this instanceof FieldTimedObserver))
-            return new FieldTimedObserver(element, callback, interval, options);
-          BaseTimedObserver.call(this, element, callback, interval, options);
-        }
-        return FieldTimedObserver;
-      })(),
+    Field.TimedObserver = (function() {
+      var Klass = function() { },
 
-      'getValue': (function() {
-        function getValue() { return Field.getValue(this.element); }
-        return getValue;
-      })()
-    });
+      FieldTimedObserver = function FieldTimedObserver(element, callback, interval, options) {
+        var instance = new Klass;
+        BaseTimedObserver.call(instance, element, callback, interval, options);
+        return instance;
+      };
+
+      FieldTimedObserver = Class(BaseTimedObserver, { 'constructor': FieldTimedObserver });
+      Klass.prototype = FieldTimedObserver.plugin;
+      return FieldTimedObserver;
+    })();
+
+    Field.Observer.plugin.getValue = (function() {
+      function getValue() { return Field.getValue(this.element); }
+      return getValue;
+    })();
 
     Form.Observer =
-    Form.TimedObserver = Class(BaseTimedObserver, {
-      'constructor': (function() {
-        function FormTimedObserver(element, callback, interval, options) {
-          if (!(this instanceof FormTimedObserver))
-            return new FormTimedObserver(element, callback, interval, options);
-          BaseTimedObserver.call(this, element, callback, interval, options);
-        }
-        return FormTimedObserver;
-      })(),
+    Form.TimedObserver = (function() {
+      var Klass = function() { },
 
-      'getValue': (function() {
-        function getValue() { return Form.serialize(this.element); }
-        return getValue;
-      })()
-    });
+      FormTimedObserver = function FormTimedObserver(element, callback, interval, options) {
+        var instance = new Klass;
+        BaseTimedObserver.call(instance, element, callback, interval, options);
+        return instance;
+      };
+
+      FormTimedObserver = Class(BaseTimedObserver, { 'constructor': FormTimedObserver });
+      Klass.prototype = FormTimedObserver.plugin;
+      return FormTimedObserver;
+    })();
+
+    Form.Observer.plugin.getValue = (function() {
+      function getValue() { return Form.serialize(this.element); }
+      return getValue;
+    })();
   })();

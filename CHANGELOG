@@ -1,3 +1,5 @@
+* Remove `this instanceof` usage from FuseJS. [jddalton]
+
 * Rename Fuse.Ajax.getTransport to Fuse.Ajax.create and Fuse.Ajax.Request#transport to Fuse.Ajax.Request#raw. [jddalton]
   Note: Backwards compatibility warning.
 

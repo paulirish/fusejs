@@ -54,42 +54,48 @@
 
     /*------------------------------------------------------------------------*/
 
-    Field.EventObserver = Class(BaseEventObserver, {
-      'constructor': (function() {
-        function FieldEventObserver(element, callback) {
-          if (!(this instanceof FieldEventObserver))
-            return new FieldEventObserver(element, callback);
-          BaseEventObserver.call(this, element, callback);
-        }
-        return FieldEventObserver;
-      })(),
+    Field.EventObserver = (function() {
+      var Klass = function() { },
 
-      'getValue': (function() {
-        function getValue() {
-          if (this.group.length === 1)
-            return Field.getValue(this.element);
-          var member, value, i = 0;
-          while (member = this.group[i++])
-            if (value = Field.getValue(member))
-              return value;
-        }
-        return getValue;
-      })()
-    });
+      FieldEventObserver = function FieldEventObserver(element, callback) {
+        var instance = new Klass;
+        BaseEventObserver.call(instance, element, callback);
+        return instance;
+      };
 
-    Form.EventObserver = Class(BaseEventObserver, {
-      'constructor': (function() {
-        function FormEventObserver(element, callback) {
-          if (!(this instanceof FormEventObserver))
-            return new FormEventObserver(element, callback);
-          BaseEventObserver.call(this, element, callback);
-        }
-        return FormEventObserver;
-      })(),
+      FieldEventObserver = Class(BaseEventObserver, { 'constructor': FieldEventObserver });
+      Klass.prototype = FieldEventObserver.plugin;
+      return FieldEventObserver;
+    })();
 
-      'getValue': (function() {
-        function getValue() { return Form.serialize(this.element); }
-        return getValue;
-      })()
-    });
+    Field.EventObserver.plugin.getValue = (function() {
+      function getValue() {
+        if (this.group.length === 1)
+          return Field.getValue(this.element);
+        var member, value, i = 0;
+        while (member = this.group[i++])
+          if (value = Field.getValue(member))
+            return value;
+      }
+      return getValue;
+    })();
+
+    Form.EventObserver = (function() {
+      var Klass = function() { },
+
+      FormEventObserver = function FormEventObserver(element, callback) {
+        var instance = new Klass;
+        BaseEventObserver.call(instance, element, callback);
+        return instance;
+      };
+
+      FormEventObserver = Class(BaseEventObserver, { 'constructor': FormEventObserver });
+      Klass.prototype = FormEventObserver.plugin;
+      return FormEventObserver;
+    })();
+
+    Form.EventObserver.plugin.getValue = (function() {
+      function getValue() { return Form.serialize(this.element); }
+      return getValue;
+    })();
   })();

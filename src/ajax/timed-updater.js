@@ -1,42 +1,44 @@
   /*------------------------ AJAX: PERIODICAL UPDATER ------------------------*/
 
-  Fuse.Ajax.TimedUpdater = Class(Fuse.Ajax.Base, {
-    'constructor': (function() {
-      function TimedUpdater(container, url, options) {
-        if (!(this instanceof TimedUpdater))
-          return new TimedUpdater(container, url, options);
+  Fuse.Ajax.TimedUpdater = (function() {
+    var Klass = function() { },
 
-        options = _extend(clone(this.constructor.options), options);
+    Request = Fuse.Ajax.Request,
 
-        // this._super() equivalent
-        Fuse.Ajax.Base.call(this, url, options);
-        options = this.options;
+    TimedUpdater = function TimedUpdater(container, url, options) {
+      var onDone,
+       instance     = new Klass,
+       callbackName = 'on' + Request.Events[4],
+       options      = _extend(clone(TimedUpdater.options), options);
 
-        this.updater = { };
-        this.container = container;
-        this.frequency = options.frequency;
-        this.maxDecay  = options.maxDecay;
+      // this._super() equivalent
+      Fuse.Ajax.Base.call(instance, url, options);
+      options = instance.options;
 
-        // dynamically set readyState eventName to allow for easy customization
-        var timedUpdater = this, callbackName = 'on' + Request.Events[4],
-         onDone = options[callbackName];
+      // dynamically set readyState eventName to allow for easy customization
+      onDone = options[callbackName];
 
-        options[callbackName] = function(request, json) {
-          if (!request.aborted) {
-            timedUpdater.updateDone(request);
-            onDone && onDone(request, json);
-          }
-        };
+      instance.container = container;
+      instance.frequency = options.frequency;
+      instance.maxDecay  = options.maxDecay;
 
-        this.onStop = options.onStop;
-        this.onTimerEvent = function() { timedUpdater.start(); };
-        this.start();
-      }
+      options[callbackName] = function(request, json) {
+        if (!request.aborted) {
+          instance.updateDone(request);
+          onDone && onDone(request, json);
+        }
+      };
 
-      var Request = Fuse.Ajax.Request;
-      return TimedUpdater;
-    })()
-  });
+      instance.onStop = options.onStop;
+      instance.onTimerEvent = function() { instance.start(); };
+      instance.start();
+      return instance;
+    };
+
+    TimedUpdater = Class(Fuse.Ajax.Base, { 'constructor': TimedUpdater });
+    Klass.prototype = TimedUpdater.plugin;
+    return TimedUpdater;
+  })();
 
   (function(plugin) {
     plugin.updateDone = function updateDone(request) {

@@ -112,7 +112,7 @@
   Fuse.addNS = 
   Fuse.prototype.addNS = (function() {
     function addNS(path) {
-      var key, klass, parent,
+      var Klass, Parent, key,
        i          = 0,
        object     = this,
        keys       = path.split('.'),
@@ -120,16 +120,16 @@
        properties = slice.call(arguments, 1);
 
       if (typeof properties[0] === 'function')
-        parent = properties.shift();
+        Parent = properties.shift();
 
       while (key = keys[i++]) {
         if (!object[key]) {
           if (i === length) {
             if (!hasKey(properties, 'constructor')) properties.constructor = key;
-            klass = Class(parent || object, properties);
+            Klass = Class(Parent || object, properties);
           }
-          else klass = Class(object, { 'constructor': key });
-          object = object[key] = new klass;
+          else Klass = Class(object, { 'constructor': key });
+          object = object[key] = new Klass;
         }
         else object = object[key];
       }

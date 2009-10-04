@@ -2,7 +2,9 @@
 
   Document = 
   Fuse.Dom.Document = (function() {
-    var Document = function Document(node) {
+    var Decorator = function() { },
+
+    Document = function Document(node) {
       // bail if empty, already decorated, or not a document node
       if (!node || node.raw || node.nodeType !== DOCUMENT_NODE)
         return node;
@@ -31,10 +33,8 @@
       return decorated;
     };
 
-    function Decorator() { }
     Document = Class(Node, { 'constructor': Document });
     Decorator.prototype = Document.plugin;
-
     return Document;
   })();
 
