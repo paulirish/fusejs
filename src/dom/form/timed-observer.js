@@ -1,7 +1,7 @@
   /*-------------------------- FORM: TIMED OBSERVER --------------------------*/
 
   (function() {
-    var BaseTimedObserver = Fuse.Class(Fuse.Timer, {
+    var BaseTimedObserver = Class(Fuse.Timer, {
       'constructor': (function() {
         function BaseTimedObserver(element, callback, interval, options) {
           // this._super() equivalent
@@ -29,7 +29,7 @@
     /*------------------------------------------------------------------------*/
 
     Field.Observer =
-    Field.TimedObserver = Fuse.Class(BaseTimedObserver, {
+    Field.TimedObserver = Class(BaseTimedObserver, {
       'constructor': (function() {
         function FieldTimedObserver(element, callback, interval, options) {
           if (!(this instanceof FieldTimedObserver))
@@ -46,7 +46,7 @@
     });
 
     Form.Observer =
-    Form.TimedObserver = Fuse.Class(BaseTimedObserver, {
+    Form.TimedObserver = Class(BaseTimedObserver, {
       'constructor': (function() {
         function FormTimedObserver(element, callback, interval, options) {
           if (!(this instanceof FormTimedObserver))

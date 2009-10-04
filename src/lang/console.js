@@ -3,6 +3,7 @@
   Fuse.addNS('Console');
 
   (function(Console) {
+
     var object,
 
     error = function() { return false; },

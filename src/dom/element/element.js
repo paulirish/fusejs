@@ -6,12 +6,12 @@
     function Fuse(object, context) {
       return Fuse.get(object, context);
     }
-    return Obj.extend(__Fuse.Class({ 'constructor': Fuse }), __Fuse,
+    return Obj.extend(Class({ 'constructor': Fuse }), __Fuse,
       function(value, key, object) { if (hasKey(object, key)) object[key] = value; });
   })(Fuse);
 
   Element =
-  Fuse.addNS('Dom.Element', Node, {
+  Fuse.Dom.Element = Class(Node, {
     'constructor': (function() {
       function Element(tagName, attributes, context) {
         return isString(tagName)
@@ -182,8 +182,6 @@
       'TR':       'TableRow',
       'UL':       'UList'
     },
-
-    Class = Fuse.Class,
 
     Dom = Fuse.Dom,
 

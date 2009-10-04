@@ -1,6 +1,6 @@
   /*----------------------------- LANG: TEMPLATE -----------------------------*/
 
-  Fuse.addNS('Template', {
+  Fuse.Template = Class({
     'constructor': (function() {
       function Template(template, pattern) {
         if (!(this instanceof Template))

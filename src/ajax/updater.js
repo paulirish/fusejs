@@ -1,6 +1,6 @@
   /*------------------------------ AJAX: UPDATER -----------------------------*/
 
-  Fuse.addNS('Ajax.Updater', Fuse.Ajax.Request, {
+  Fuse.Ajax.Updater = Class(Fuse.Ajax.Request, {
     'constructor': (function() {
       function Updater(container, url, options) {
         if (!(this instanceof Updater))

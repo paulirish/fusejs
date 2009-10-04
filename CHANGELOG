@@ -1,3 +1,6 @@
+* Make all namespaces inheritable. [jddalton]
+  Example: Fuse.plugin.addNS = ...; Fuse.Dom.addNS('Data');
+
 * Rename Fuse.Dom.Element#isFragment to Fuse.Dom.Element#isDetached. [jddalton]
 
 * Add nodeType constants DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, and ELEMENT_NODE. [jddalton, kangax]

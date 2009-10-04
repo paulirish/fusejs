@@ -1,6 +1,6 @@
   /*------------------------ LANG: TIMER -----------------------*/
 
-  Fuse.addNS('Timer', {
+  Fuse.Timer = Class({
     'constructor': (function() {
       function Timer(callback, interval, options) {
         if (!(this instanceof Timer))

@@ -1,6 +1,6 @@
  /*------------------------------- AJAX: BASE -------------------------------*/
 
-  Fuse.addNS('Ajax.Base', {
+  Fuse.Ajax.Base = Class({
     'constructor': (function() {
       function Base(url, options) {
         var customHeaders, queryString,

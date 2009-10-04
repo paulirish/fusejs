@@ -1,5 +1,11 @@
   /*---------------------------------- DOM -----------------------------------*/
 
+  Data =
+  Fuse.addNS('Dom.Data');
+
+  Data['1'] = { };
+  Data['2'] = { };
+
   Fuse._doc   = global.document;
   Fuse._div   = Fuse._doc.createElement('div');
   Fuse._docEl = Fuse._doc.documentElement;
@@ -13,7 +19,9 @@
   Fuse._info.scrollEl =
     { 'nodeName': 'BODY', 'property': 'body' };
 
-  // set the debug flag based on script debug query parameter
+  /*--------------------------------------------------------------------------*/
+
+  // set the debug flag based on the fuse.js debug query parameter
   Fuse.debug = (function() {
     var script, i = 0,
      matchDebug = /(^|&)debug=(1|true)(&|$)/,
@@ -26,17 +34,13 @@
     return false;
   })();
 
-  getNodeName = Fuse._docEl.nodeName === 'HTML'
-    ? function(element) { return element.nodeName; }
-    : function(element) { return element.nodeName.toUpperCase(); };
-
   getDocument =
   Fuse.getDocument = function getDocument(element) {
     return element.ownerDocument || element.document ||
       (element.nodeType === DOCUMENT_NODE ? element : Fuse._doc);
   };
 
-  /* Based on work by Diego Perini */
+  // based on work by Diego Perini
   getWindow =
   Fuse.getWindow = (function() {
     var getWindow = function getWindow(element) {
@@ -60,6 +64,10 @@
     }
     return getWindow;
   })();
+
+  getNodeName = Fuse._docEl.nodeName === 'HTML'
+    ? function(element) { return element.nodeName; }
+    : function(element) { return element.nodeName.toUpperCase(); };
 
   returnOffset = function(left, top) {
     var result  = Fuse.Array(Fuse.Number(left), Fuse.Number(top));

@@ -1,6 +1,6 @@
   /*------------------------ AJAX: PERIODICAL UPDATER ------------------------*/
 
-  Fuse.addNS('Ajax.TimedUpdater', Fuse.Ajax.Base, {
+  Fuse.Ajax.TimedUpdater = Class(Fuse.Ajax.Base, {
     'constructor': (function() {
       function TimedUpdater(container, url, options) {
         if (!(this instanceof TimedUpdater))

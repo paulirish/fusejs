@@ -1,9 +1,7 @@
   /*----------------------------- DOM: NODELIST ------------------------------*/
 
-  Fuse.addNS('Dom');
-
   NodeList =
-  Fuse.Dom.NodeList = (new Fuse.Fusebox()).Array;
+  Fuse.Dom.NodeList = Fuse.Fusebox().Array;
 
   NodeList.plugin.push = (function() {
     function push() {

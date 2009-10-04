@@ -1,6 +1,7 @@
   /*----------------------------- DOM: DOCUMENT ------------------------------*/
 
-  Document = (function() {
+  Document = 
+  Fuse.Dom.Document = (function() {
     var Document = function Document(node) {
       // bail if empty, already decorated, or not a document node
       if (!node || node.raw || node.nodeType !== DOCUMENT_NODE)
@@ -31,7 +32,7 @@
     };
 
     function Decorator() { }
-    Document = Fuse.addNS('Dom.Document', Node, { 'constructor': Document });
+    Document = Class(Node, { 'constructor': Document });
     Decorator.prototype = Document.plugin;
 
     return Document;

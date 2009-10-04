@@ -1,6 +1,7 @@
   /*------------------------------ LANG: CLASS -------------------------------*/
   /* Based on work by Alex Arnell, John Resig, T.J. Crowder and Prototype core */
 
+  Class =
   Fuse.Class = (function() {
     function subclass() { };
 
@@ -54,7 +55,7 @@
 
       // add static methods/properties to the klass
       plugin = klass.plugin = klass.prototype;
-      Obj.extend(klass, Fuse.Class.Methods);
+      Obj.extend(klass, Class.Methods);
 
       klass.callSuper  = createCallSuper(plugin);
       klass.subclasses = Fuse.List();
@@ -72,6 +73,8 @@
   })();
 
   /*--------------------------------------------------------------------------*/
+
+  Class.Methods = { };
 
   (function(methods) {
     methods.extend = function extend() {
@@ -99,13 +102,13 @@
         eachKey(plugins, function(method, key) {
           var protoMethod = prototype[key],
            superMethod = superProto && superProto[key];
-  
+
           // avoid typeof === `function` because Safari 3.1+ mistakes
           // regexp instances as typeof `function`
           if (isFunction(method)) {
             if (isFunction(superMethod))
               method.$super = superMethod;
-  
+
             if (isFunction(protoMethod)) {
               i = subLength;
               while (i--) {
@@ -123,25 +126,22 @@
 
     // prevent JScript bug with named function expressions
     var extend = nil;
-  })(Fuse.Class.Methods = { });
+  })(Class.Methods);
 
   /*--------------------------------------------------------------------------*/
 
-  // replace placeholder objects with inheritable classes
-  global.Fuse = Fuse.Class({ 'constructor': Fuse });
-  Fuse.prototype = Fuse.plugin = Obj.plugin;
+  // replace placeholder objects with inheritable namespaces
+  global.Fuse = Class({ 'constructor': Fuse });
 
-  Fuse.Env = _extend(Fuse.Class(Fuse,
-    { 'constructor': 'Env' }), Fuse.Env);
+  (function(__Env) {
+    delete Fuse.Env;
+    var Env = Fuse.addNS('Env');
 
-  Fuse.Env.Agent = _extend(Fuse.Class(Fuse.Env,
-    { 'constructor': 'Agent' }), Fuse.Env.Agent);
+    Env.addNS('Agent');
+    Env.addNS('Bug');
+    Env.addNS('Feature');
 
-  Fuse.Env.Bug = Fuse.Class(Fuse.Env, { 'constructor': Bug });
-
-  Fuse.Env.Feature = Fuse.Class(Fuse.Env, { 'constructor': Feature });
-
-  Fuse.Class = Fuse.Class(Fuse, { 'constructor': Fuse.Class });
-
-  Fuse.Fusebox = Fuse.Class(Fuse,
-    { 'constructor': Fuse.Fusebox }, Fuse.Fusebox.prototype);
+    _extend(Env.Agent,   __Env.Agent);
+    _extend(Env.Bug,     __Env.Bug);
+    _extend(Env.Feature, __Env.Feature);
+  })(Fuse.Env);

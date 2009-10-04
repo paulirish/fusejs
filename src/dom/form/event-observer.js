@@ -1,7 +1,7 @@
   /*-------------------------- FORM: EVENT OBSERVER --------------------------*/
 
   (function() {
-    var BaseEventObserver = Fuse.Class({
+    var BaseEventObserver = Class({
       'constructor': (function() {
         function BaseEventObserver(element, callback) {
           this.element = Fuse.get(element);
@@ -54,7 +54,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    Field.EventObserver = Fuse.Class(BaseEventObserver, {
+    Field.EventObserver = Class(BaseEventObserver, {
       'constructor': (function() {
         function FieldEventObserver(element, callback) {
           if (!(this instanceof FieldEventObserver))
@@ -77,7 +77,7 @@
       })()
     });
 
-    Form.EventObserver = Fuse.Class(BaseEventObserver, {
+    Form.EventObserver = Class(BaseEventObserver, {
       'constructor': (function() {
         function FormEventObserver(element, callback) {
           if (!(this instanceof FormEventObserver))

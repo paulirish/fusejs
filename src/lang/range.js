@@ -1,6 +1,6 @@
   /*------------------------------- LANG: RANGE ------------------------------*/
 
-  Fuse.addNS('Range', {
+  Fuse.Range = Class({
     'constructor': (function() {
       function Range(start, end, exclusive) {
         if (!(this instanceof Range))

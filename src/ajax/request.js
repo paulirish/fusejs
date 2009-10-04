@@ -1,6 +1,6 @@
   /*---------------------------- AJAX: REQUEST -------------------------------*/
 
-  Fuse.addNS('Ajax.Request', Fuse.Ajax.Base, {
+  Fuse.Ajax.Request = Class(Fuse.Ajax.Base, {
     'constructor': (function() {
       function Request(url, options) {
         if (!(this instanceof Request))

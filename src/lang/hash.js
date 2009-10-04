@@ -1,6 +1,7 @@
   /*------------------------------- LANG: HASH -------------------------------*/
 
-  Fuse.addNS('Hash', (function() {
+  Fuse.Hash = Class((function() {
+
     function indexOfKey(hash, key) {
       key = String(key);
       var index = 0, keys = hash._keys, length = keys.length;

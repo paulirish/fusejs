@@ -2,8 +2,8 @@
 (function(global) {
 
   // private vars
-  var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, Fuse, Bug, Data,
-   Document, Element, Enumerable, Feature, Form, Func, Obj, Node, NodeList,
+  var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, Fuse, Bug, Class,
+   Data, Document, Element, Enumerable, Feature, Form, Func, Obj, Node, NodeList,
    $break, _extend, addListMethods, bind, capitalize, clone, concatList, defer,
    eachKey, emptyFunction, escapeRegExpChars, expando,fromElement, getDocument,
    getNodeName, getWindow, hasKey, inspect, isArray, isElement, isEmpty, isHash,
@@ -109,32 +109,29 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Fuse.addNS = (function() {
+  Fuse.addNS = 
+  Fuse.prototype.addNS = (function() {
     function addNS(path) {
-      var part, i = 0,
+      var key, klass, parent,
+       i          = 0,
        object     = this,
-       propIndex  = 0,
-       parts      = path.split('.'),
-       length     = parts.length,
+       keys       = path.split('.'),
+       length     = keys.length,
        properties = slice.call(arguments, 1);
 
-      // if parent is passed then incriment the propIndex by 1
-      if (typeof properties[0] === 'function') propIndex++;
-      properties[propIndex] = properties[propIndex] || { };
+      if (typeof properties[0] === 'function')
+        parent = properties.shift();
 
-      while (part = parts[i++]) {
-        if (object[part]) {
-          object = object[part];
-        } else {
+      while (key = keys[i++]) {
+        if (!object[key]) {
           if (i === length) {
-            // if no parent pass prepend object as parent
-            if (!propIndex) properties = prependList(properties, object);
-            object = object[part] = Fuse.Class.apply(global,
-              hasKey(properties[1], 'constructor') ? properties :
-                (properties[1].constructor = part) && properties);
+            if (!hasKey(properties, 'constructor')) properties.constructor = key;
+            klass = Class(parent || object, properties);
           }
-          else object = object[part] = Fuse.Class(object, { 'constructor': part });
+          else klass = Class(object, { 'constructor': key });
+          object = object[key] = new klass;
         }
+        else object = object[key];
       }
       return object;
     }
@@ -165,7 +162,6 @@
 
    'dom/dom.js',
    'dom/features.js',
-   'dom/data.js',
    'dom/node.js',
    'dom/document.js',
 
