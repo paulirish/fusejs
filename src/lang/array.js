@@ -273,8 +273,8 @@
 
       plugin.max = function max(callback, thisArg) {
         if (this == null) throw new TypeError;
-
         var result;
+
         if (!callback && (callback = K) && isArray(this)) {
           // John Resig's fast Array max|min:
           // http://ejohn.org/blog/fast-javascript-maxmin
@@ -299,8 +299,8 @@
 
       plugin.min = function min(callback, thisArg) {
         if (this == null) throw new TypeError;
-
         var result;
+
         if (!callback && (callback = K) && isArray(this)) {
           result = Math.min.apply(Math, this);
           if (!isNaN(result)) return result;
@@ -369,7 +369,6 @@
 
       plugin.zip = function zip() {
         if (this == null) throw new TypeError;
-
         var i = 0, results = Fuse.Array(), callback = K,
          args = slice.call(arguments, 0), object = Object(this),
          length = object.length >>> 0;
@@ -421,7 +420,6 @@
       if (!plugin.concat || Bug('ARRAY_CONCAT_ARGUMENTS_BUGGY'))
         plugin.concat = function concat() {
           if (this == null) throw new TypeError;
-
           var i = 0, args = arguments, length = args.length, object = Object(this),
            results = isArray(object) ? List.fromArray(object) : List(object);
 
@@ -466,8 +464,8 @@
       if (!plugin.forEach)
         plugin.forEach = function forEach(callback, thisArg) {
           if (this == null || !isFunction(callback)) throw new TypeError;
-
           var i = 0, object = Object(this), length = object.length >>> 0;
+
           if (thisArg) {
             for ( ; i < length; i++)
               i in object && callback.call(thisArg, object[i], i, object);
@@ -497,7 +495,6 @@
       if (!plugin.lastIndexOf)
         plugin.lastIndexOf = function lastIndexOf(item, fromIndex) {
           if (this == null) throw new TypeError;
-
           var object = Object(this), length = object.length >>> 0;
           fromIndex = fromIndex == null ? length : toInteger(fromIndex);
 

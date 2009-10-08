@@ -4,32 +4,38 @@
 
     var SKIP_METHODS_RETURNING_ARRAYS,
 
+    ACTIVE_X_OBJECT = 1,
+
+    OBJECT__PROTO__ = 2,
+
+    IFRAME = 3,
+
     cache = [],
 
     mode = (function()  {
       // avoids the htmlfile activeX warning when served from the file protocol
       if (Feature('ACTIVE_X_OBJECT') && global.location.protocol !== 'file:')
-        return 'ACTIVE_X_OBJECT';
+        return ACTIVE_X_OBJECT;
 
       // check "OBJECT__PROTO__" first because Firefox will permanently screw up
       // other iframes on the page if an iframe is inserted before the dom has loaded
       if (Feature('OBJECT__PROTO__'))
-        return 'OBJECT__PROTO__';
+        return OBJECT__PROTO__;
 
       var doc = global.document;
       if (isHostObject(global, 'frames') && doc &&
           isHostObject(doc, 'createElement'))
-        return 'IFRAME';
+        return IFRAME;
     })(),
 
     createSandbox = (function() {
-      if (mode === 'OBJECT__PROTO__')
+      if (mode === OBJECT__PROTO__)
         return function() { return global; };
 
       // IE requires the iframe/htmlfile remain in the cache or it will be
       // marked for garbage collection
-      var doc = global.document;
-      if (mode === 'ACTIVE_X_OBJECT')
+      var counter = 0, doc = global.document;
+      if (mode === ACTIVE_X_OBJECT)
         return function() {
           var htmlfile = new ActiveXObject('htmlfile');
           htmlfile.open();
@@ -39,8 +45,7 @@
           return htmlfile.global;
         };
 
-      if (mode === 'IFRAME') {
-        var counter = 0;
+      if (mode === IFRAME)
         return function() {
           var idoc, iframe, frame, result, i = 0,
            frames     = global.frames,
@@ -68,52 +73,29 @@
           cache.push(iframe);
           return result;
         };
-      }
 
       return function() {
         throw new Error('Fuse failed to create a sandbox.');
       };
     })(),
 
-    postProcess = function() {
-      // remove iframe
-      iframe = cache[cache.length -1];
-      iframe.parentNode.removeChild(iframe);
-    },
-
-    Fusebox = (function() {
-      var Fusebox = function Fusebox() {
-        if (this.prototype) return new Fusebox();
-        createFusebox(this);
-      };
-
-      if (mode === 'IFRAME')
-        Fusebox = function Fusebox() {
-          if (this.prototype) return new Fusebox();
-          createFusebox(this);
-          postProcess(this);
-        };
-      return Fusebox;
-    })();
-
-    /*------------------------------------------------------------------------*/
-
-    function createFusebox(thisArg) {
+    createFusebox = function() {
       var Array, Date, Function, Number, Object, RegExp, String, fromArray,
-       glSlice         = global.Array.prototype.slice,
-       glFunction      = global.Function,
-       matchStrict     = /^\s*(['"])use strict\1/,
-       sandbox         = createSandbox(),
-       toString        = global.Object.prototype.toString,
-       __Array         = sandbox.Array,
-       __Date          = sandbox.Date,
-       __Function      = sandbox.Function,
-       __Number        = sandbox.Number,
-       __Object        = sandbox.Object,
-       __RegExp        = sandbox.RegExp,
-       __String        = sandbox.String;
+       glSlice     = global.Array.prototype.slice,
+       glFunction  = global.Function,
+       matchStrict = /^\s*(['"])use strict\1/,
+       instance    = new Klass,
+       sandbox     = createSandbox(),
+       toString    = global.Object.prototype.toString,
+       __Array     = sandbox.Array,
+       __Date      = sandbox.Date,
+       __Function  = sandbox.Function,
+       __Number    = sandbox.Number,
+       __Object    = sandbox.Object,
+       __RegExp    = sandbox.RegExp,
+       __String    = sandbox.String;
 
-      if (mode === 'OBJECT__PROTO__') {
+      if (mode === OBJECT__PROTO__) {
         Array = function Array(length) {
           var result = arguments.length === 1
             ? new __Array(length)
@@ -347,31 +329,31 @@
       };
 
       Array.updateGenerics = function updateGenerics() {
-        thisArg.updateGenerics('Array');
+        instance.updateGenerics('Array');
       };
 
       Date.updateGenerics = function updateGenerics() {
-        thisArg.updateGenerics('Date');
+        instance.updateGenerics('Date');
       };
 
       Function.updateGenerics = function updateGenerics() {
-        thisArg.updateGenerics('Function');
+        instance.updateGenerics('Function');
       };
 
       Number.updateGenerics = function updateGenerics() {
-        thisArg.updateGenerics('Number');
+        instance.updateGenerics('Number');
       };
 
       Object.updateGenerics = function updateGenerics() {
-        thisArg.updateGenerics('Object');
+        instance.updateGenerics('Object');
       };
 
       RegExp.updateGenerics = function updateGenerics() {
-        thisArg.updateGenerics('RegExp');
+        instance.updateGenerics('RegExp');
       };
 
       String.updateGenerics = function updateGenerics() {
-        thisArg.updateGenerics('String');
+        instance.updateGenerics('String');
       };
 
       fromArray =
@@ -382,7 +364,7 @@
           return result;
         };
 
-        if (mode === 'OBJECT__PROTO__') {
+        if (mode === OBJECT__PROTO__) {
           fromArray = function fromArray(array) {
             var result = glSlice.call(array, 0);
             result['__proto__'] = Array.prototype;
@@ -770,53 +752,72 @@
        toLocaleUpperCase = nil, toPrecision = nil, toUpperCase = nil,
        trim = nil, updateGenerics = nil, unshift = nil;
 
-      thisArg.Array    = Array;
-      thisArg.Date     = Date;
-      thisArg.Function = Function;
-      thisArg.Number   = Number;
-      thisArg.Object   = Object;
-      thisArg.RegExp   = RegExp;
-      thisArg.String   = String;
-    }
+      instance.Array    = Array;
+      instance.Date     = Date;
+      instance.Function = Function;
+      instance.Number   = Number;
+      instance.Object   = Object;
+      instance.RegExp   = RegExp;
+      instance.String   = String;
+
+      return instance;
+    },
+
+    postProcess = function(thisArg) {
+      // remove iframe
+      var iframe = cache[cache.length -1];
+      iframe.parentNode.removeChild(iframe);
+      return thisArg;
+    },
+
+    Klass = function() { },
+
+    Fusebox = function Fusebox() { return createFusebox(); };
 
     /*------------------------------------------------------------------------*/
 
-    (function() {
-      var usesIframe = mode === 'IFRAME',
-       sandbox = createSandbox(),
-       Array = sandbox.Array;
+    switch (mode) {
+      case IFRAME:
+        Fusebox = function Fusebox() { return postProcess(createFusebox()); };
 
-      if (usesIframe) postProcess();
+      case ACTIVE_X_OBJECT: (function() {
+        var usesIframe = mode === IFRAME,
+         sandbox = createSandbox(),
+         Array = sandbox.Array;
 
-      // Chrome, IE, and Opera's Array accessors return sandboxed arrays
-      SKIP_METHODS_RETURNING_ARRAYS =
-        !(Array().slice(0) instanceof global.Array);
+        if (usesIframe) postProcess();
 
-      if (usesIframe && Array.prototype.map) {
-        // Opera 9.5 - 10a throws a security error when calling Array#map or String#lastIndexOf
-        // Opera 9.5 - 9.64 will error by simply calling the methods.
-        // Opera 10 will error when first accessing the contentDocument of
-        // another iframe and then accessing the methods.
-        createSandbox();
-        postProcess();
+        // IE, and Opera's Array accessors return sandboxed arrays
+        SKIP_METHODS_RETURNING_ARRAYS =
+          !(Array().slice(0) instanceof global.Array);
 
-        try { Array().map(K); }
-        catch (e) {
-         postProcess = (function(__postProcess) {
-            return function(thisArg) {
-              __postProcess();
-              thisArg.Array.prototype.map =
-              thisArg.String.prototype.lastIndexOf = nil;
-            };
-          })(postProcess);
+        if (usesIframe && Array.prototype.map) {
+          // Opera 9.5 - 10a throws a security error when calling Array#map or String#lastIndexOf
+          // Opera 9.5 - 9.64 will error by simply calling the methods.
+          // Opera 10 will error when first accessing the contentDocument of
+          // another iframe and then accessing the methods.
+          createSandbox();
+          postProcess();
+
+          try { Array().map(K); }
+          catch (e) {
+            postProcess = (function(__postProcess) {
+              return function(thisArg) {
+                thisArg.Array.prototype.map =
+                thisArg.String.prototype.lastIndexOf = nil;
+                return __postProcess(thisArg);
+              };
+            })(postProcess);
+          }
         }
-      }
 
-      // cleanup
-      sandbox = nil;
-      cache = [];
-    })();
+        // cleanup
+        sandbox = nil;
+        cache = [];
+      })();
+    }
 
+    Klass.prototype = Fusebox.prototype;
     return Fusebox;
   })();
 
@@ -824,11 +825,6 @@
 
   (Fuse.Fusebox.plugin =
   Fuse.Fusebox.prototype).updateGenerics = (function() {
-    var SKIPPED_PROPERTIES = {
-      'constructor': 1,
-      'prototype':   1,
-      'plugin':      1
-    };
 
     function createGeneric(methodName) {
       return new Function('', [
@@ -849,7 +845,7 @@
         // generics on the constructor
         constructor = this[n];
         Obj._each(constructor.prototype, function(value, key, object) {
-          if (!SKIPPED_PROPERTIES[key])
+          if (key !== 'constructor' && hasKey(object, key))
             constructor[key] = createGeneric(key);
         })
       }
