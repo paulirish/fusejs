@@ -43,6 +43,10 @@
         return Selector.select(selectors, this);
       };
 
+      plugin.rawQuery = function rawQuery(selectors) {
+        return Selector.rawSelect(selectors, this);
+      };
+
       plugin.siblings = function siblings(selectors) {
         var match, element = this.raw || this, i = 0,
          original = element, results = NodeList();
@@ -66,7 +70,7 @@
       };
 
       // prevent JScript bug with named function expressions
-      var childElements = nil, match = nil, query = nil, siblings = nil;
+      var childElements = nil, match = nil, query = nil, rawQuery = nil, siblings = nil;
     })();
 
     /*------------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
   /*--------------------------- SELECTOR: NWMATCHER --------------------------*/
 
-  (function(Selector, NodeList) {
+  (function(Selector, Node, NodeList) {
     Selector.match = function match(element, selector) {
       function match(element, selector) {
         return nwMatch(element.raw || element, String(selector || ''));
@@ -10,10 +10,23 @@
       return (Selector.match = match)(element, selector);
     };
 
+    Selector.rawSelect = function rawSelect(selector, context) {
+      function rawSelect(selector, context) {
+        context = context || Fuse._doc;
+        return nwSelect(String(selector || ''), context.raw || context);
+      }
+
+      nwSelect = NW.Dom.select;
+      return (Selector.rawSelect = rawSelect)(selector, context);
+    };
+
     Selector.select = function select(selector, context) {
       function select(selector, context) {
-        return nwSelect(String(selector || ''), 
-          context && context.raw || context || Fuse._doc, NodeList());
+        context = context || Fuse._doc;
+        var i = 0, results = NodeList();
+        nwSelect(String(selector || ''), context.raw || context, null,
+          function(element) { results[i++] = Node(element); });
+        return results;
       }
 
       nwSelect = NW.Dom.select;
@@ -21,4 +34,4 @@
     };
 
     var nwMatch, nwSelect, match = nil, select = nil;
-  })(Fuse.Dom.Selector, Fuse.Dom.NodeList);
+  })(Fuse.Dom.Selector, Fuse.Dom.Node, Fuse.Dom.NodeList);
