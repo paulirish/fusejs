@@ -14,7 +14,7 @@
         function() { onTimeout.call(request); };
 
       decorated.onStateChange =
-        function(event, forceState) { onStateChange.call(request, event, forceState); };
+        function(event, forceState) { onStateChange.call(decorated, event, forceState); };
 
       decorated.request(url, options);
       return decorated;
