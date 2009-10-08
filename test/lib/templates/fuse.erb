@@ -21,7 +21,7 @@
      $R = Fuse.Util.$R,
      $w = Fuse.Util.$w;
 
-    document.observe('dom:loaded', function() {
+    Fuse(document).observe('dom:loaded', function() {
       function refresh() {
         var loc = window.location;
         loc.href = loc.protocol + '//' + loc.hostname + loc.pathname +

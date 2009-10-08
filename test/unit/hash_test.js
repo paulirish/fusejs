@@ -153,21 +153,6 @@ new Test.Unit.Runner({
     }, this);
   },
 
-  'testGrep': function() {
-    // test empty pattern
-    this.assertHashEqual(Fixtures.many, $H(Fixtures.many).grep(''));
-    this.assertHashEqual(Fixtures.many, $H(Fixtures.many).grep(new RegExp('')));
-
-    this.assert(/(ab|ba)/.test($H(Fixtures.many).grep(/[AB]/).keys().join('')));
-    this.assert(/(CCD#D#|D#D#CC)/.test($H(Fixtures.many).grep(/[CD]/, function(v) {
-      return v + v;
-    }).values().join('')));
-
-    this.assert('toString' == $H(Fixtures.mixed_dont_enum).grep(/bar/, function(v) {
-      return v;
-    }).keys().join(''));
-  },
-
   'testHasKey': function() {
     this.assert($H(Fixtures.mixed_dont_enum).hasKey('valueOf'),
       'Failed to find key `valueOf`.');

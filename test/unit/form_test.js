@@ -3,7 +3,7 @@ new Test.Unit.Runner({
   // Make sure to set defaults in the test forms, as some browsers override this
   // with previously entered values on page reload
   'setup': function(){
-    $$('form').each(function(f){ f.reset() });
+    $$('form').each(function(f){ $(f).reset() });
 
     // hidden value does not reset (for some reason)
     $('bigform').raw['tf_hidden'].value = '';
@@ -23,8 +23,8 @@ new Test.Unit.Runner({
   },
 
   'testFormReset': function() {
-    $('input_enabled').value = 'something else';
-    Form.reset('form');
+    $('input_enabled').raw.value = 'something else';
+    $('form').reset();
     this.assertEqual(4, $F('input_enabled'));
   },
 
@@ -83,7 +83,7 @@ new Test.Unit.Runner({
     });
 
     // second part: multiple-select
-    Fuse.List(1, 2, 3).each(function(index) {
+    Fuse.Array(1, 2, 3).each(function(index) {
       $('multiSel1_opt' + index).selected = 1 == index;
     });
 
@@ -145,29 +145,30 @@ new Test.Unit.Runner({
   },
 
   'testFormEnabling': function(){
-    var form = $('bigform');
-    var input1 = $('dummy_disabled');
-    var input2 = $('focus_text');
+    var form = $('bigform'),
+     input1  = $('dummy_disabled'),
+     input2  = $('focus_text');
 
     this.assertDisabled(input1);
     this.assertEnabled(input2);
 
     form.disable();
     this.assertDisabled(input1, input2);
+    
     form.enable();
     this.assertEnabled(input1, input2);
+    
     input1.disable();
     this.assertDisabled(input1);
 
     // non-form elements:
-    var fieldset = $('selects_fieldset');
-    var fields = fieldset.childElements();
+    var fieldset = $('selects_fieldset'), fields = fieldset.childElements();
     fields.each(function(select) { this.assertEnabled(select) }, this);
 
-    Form.disable(fieldset)
+    fieldset.disable();
     fields.each(function(select) { this.assertDisabled(select) }, this);
 
-    Form.enable(fieldset)
+    fieldset.enable();
     fields.each(function(select) { this.assertEnabled(select) }, this);
   },
 
@@ -175,13 +176,16 @@ new Test.Unit.Runner({
     var field = $('input_disabled');
     field.enable();
     this.assertEnabled(field);
+
     field.disable();
     this.assertDisabled(field);
 
     field = $('input_enabled');
     this.assertEnabled(field);
+
     field.disable();
     this.assertDisabled(field);
+
     field.enable();
     this.assertEnabled(field);
   },
@@ -190,7 +194,8 @@ new Test.Unit.Runner({
   // we're simulating things here a little bit
   'testFormActivating': function(){
     // Firefox, IE, and Safari 2+
-    function getSelection(element){
+    function getSelection(decorator){
+      var element = decorator.raw || decorator;
       try {
         var result;
         if (typeof element.selectionStart == 'number') {
@@ -204,28 +209,29 @@ new Test.Unit.Runner({
     }
 
     // Form.focusFirstElement shouldn't focus disabled elements
-    var element = Form.findFirstElement('bigform');
+    var element = $('bigform').findFirstElement();
     this.assertEqual('submit', element.id);
 
     // Test IE doesn't select text on buttons
-    Form.focusFirstElement('bigform');
+    $('bigform').focusFirstElement();
     this.assertEqual('', getSelection(element));
 
     element = $('button_submit');
     this.assertEqual('', getSelection(element.activate()));
 
-    Fuse.List('form', 'button_elements').each(function(container) {
-      Element.query(container, '*[type="button"],*[type="submit"],*[type="reset"]')
-       .each(function(element) { this.assertEqual('', getSelection(element.activate())) }, this);
+    Fuse.Array('form', 'button_elements').each(function(container) {
+      $(container).query('*[type="button"],*[type="submit"],*[type="reset"]')
+        .each(function(element) { this.assertEqual('', getSelection(element.activate())) }, this);
     }, this);
 
     // Form.Element.activate should select text on text input elements
     element = $('focus_text');
-    this.assertEqual('Hello', getSelection(element.activate()), 'The browser may not be able to retreave selected text');
+    this.assertEqual('Hello', getSelection(element.activate()),
+      'The browser may not be able to retreave selected text');
 
     // Form.Element.activate shouldn't raise an exception when the form or field is hidden
     this.assertNothingRaised(function() {
-      Field.focus('form_focus_hidden');
+      $('form_focus_hidden').focus()
     });
 
     this.assertNothingRaised(function() {
@@ -239,14 +245,14 @@ new Test.Unit.Runner({
   },
 
   'testFormGetElements': function() {
-    var elements = Form.getElements('various'),
+    var elements = $('various').getElements(),
      names = $w('tf_selectOne tf_textarea tf_checkbox tf_selectMany tf_text tf_radio tf_hidden tf_password');
     this.assertEnumEqual(names, elements.pluck('name'))
   },
 
   'testFormGetInputs': function() {
     var form = $('form');
-    Fuse.List(form.getInputs(), Form.getInputs(form)).each(function(inputs){
+    Fuse.Array(form.getInputs(), form.getInputs()).each(function(inputs){
       this.assertEqual(5, inputs.length);
       this.assert(Fuse.Object.isArray(inputs));
       this.assert(inputs.every(function(input) { return (input.nodeName.toUpperCase() === 'INPUT') }));
@@ -274,7 +280,7 @@ new Test.Unit.Runner({
       'tf_password':  ''
     };
 
-    this.assertHashEqual(expected, Form.serialize('various', true));
+    this.assertHashEqual(expected, $('various').serialize(true));
 
     // set up some stuff
     form['tf_selectOne'].selectedIndex = 1;
@@ -296,11 +302,11 @@ new Test.Unit.Runner({
       'tf_radio':     'on'
     };
 
-    this.assertHashEqual(expected, Form.serialize('various', true));
+    this.assertHashEqual(expected, $('various').serialize(true));
 
     // return string
     expected = Fuse.Object.toQueryString(expected).split('&').sort();
-    this.assertEnumEqual(expected, Form.serialize('various').split('&').sort());
+    this.assertEnumEqual(expected, $('various').serialize().split('&').sort());
     this.assert(Fuse.Object.isString($('form').serialize({ 'hash': false })));
 
     // Checks that disabled element is not included in serialized form.
@@ -311,20 +317,20 @@ new Test.Unit.Runner({
 
     // should not eat empty values for duplicate names
     $('checkbox_hack').checked = false;
-    var data = Form.serialize('value_checks', true);
+    var data = $('value_checks').serialize(true);
 
     this.assertEnumEqual(['', 'siamese'], data['twin']);
     this.assertEqual('0', data['checky']);
 
-    $('checkbox_hack').checked = true;
-    this.assertEnumEqual($w('1 0'), Form.serialize('value_checks', true)['checky']);
+    $('checkbox_hack').raw.checked = true;
+    this.assertEnumEqual($w('1 0'), $('value_checks').serialize(true)['checky']);
 
     // all kinds of SELECT controls
-    var params = Form.serialize('selects_fieldset', true);
+    var params = $('selects_fieldset').serialize(true);
     expected = { 'nvm[]': ['One', 'Three'], 'evu': '', 'evm[]': ['', 'Three'] };
     this.assertHashEqual(expected, params);
 
-    params = Form.serialize('selects_wrapper', true);
+    params = $('selects_wrapper').serialize(true);
     this.assertHashEqual(Fuse.Object.extend(expected,
       { 'vu': 1, 'vm[]': [1, 3], 'nvu': 'One' }), params);
 
@@ -345,8 +351,8 @@ new Test.Unit.Runner({
     expected = { 'clicky':'click me', 'greeting': 'Hello', 'commit_img.x': 2,
       'commit_img.y': 4, 'commit_img': 1, 'search': 'search' };
 
-    this.assertHashEqual(expected, Form.serialize('inputs',
-      { 'submit': $('input_image'), 'x': 2, 'y': 4 }));
+    this.assertHashEqual(expected, $('inputs')
+      .serialize({ 'submit': $('input_image'), 'x': 2, 'y': 4 }));
 
     // test with button element
     expected = { 'clicky': 'click me', 'greeting': 'Hello', 'search': 'search', 'bu_submit': 1 };
@@ -357,7 +363,7 @@ new Test.Unit.Runner({
 
     // test control groups
     expected = { 'group_radio': '2r', 'group_checkbox': '2c' };
-    this.assertHashEqual(expected, Form.serialize('form_with_control_groups', true));
+    this.assertHashEqual(expected, $('form_with_control_groups').serialize(true));
 
     // test form elements names matching Object.prototype properties
     expected = { 'length':'', 'toString':'', 'valueOf':'' };
@@ -369,8 +375,8 @@ new Test.Unit.Runner({
     $('selects_wrapper').query('select')._each(function(element) { element.selectedIndex = -1 });
     $('multiSel1').selectedIndex = 2;
 
-    this.assertEqual('vm%5B%5D=3', Form.serialize('selects_wrapper'));
-    this.assertHashEqual(expected, Form.serialize('selects_wrapper', true));
+    this.assertEqual('vm%5B%5D=3', $('selects_wrapper').serialize());
+    this.assertHashEqual(expected, $('selects_wrapper').serialize(true));
   },
 
   'testFormMethodsOnExtendedElements': function() {
@@ -390,7 +396,7 @@ new Test.Unit.Runner({
     Fuse.Dom.InputElement.extend(
       { 'anInputMethod': function(input)  { return 'input'  } });
 
-    Fuse.Dom.SelectElement('SELECT',
+    Fuse.Dom.SelectElement.extend(
       { 'aSelectMethod': function(select) { return 'select' } });
 
     form = $('bigform');
@@ -437,7 +443,7 @@ new Test.Unit.Runner({
   },
 
   'testFormElementClear': function() {
-    Fuse.List('form','bigform').each(function(container) {
+    Fuse.Array('form','bigform').each(function(container) {
 
       // Form.Element#clear should clear text inputs,
       // uncheck checkboxes/radio buttons, and
@@ -446,18 +452,18 @@ new Test.Unit.Runner({
       // Form.Element#clear should NOT clear button
       // values of any kind.
 
-      Element.query(container, 'button,input,select,textarea').each(function(element) {
+      $(container).query('button,input,select,textarea').each(function(element) {
         var asserted = element.value,
          backup  = asserted,
          prop    = 'value',
          tagName = element.tagName.toUpperCase();
 
         if (tagName == 'BUTTON' ||
-           Fuse.List('button', 'image', 'reset', 'submit').contains(element.type)) {
+           Fuse.Array('button', 'image', 'reset', 'submit').contains(element.type)) {
           // default values for "asserted" and "prop"
         }
         else if (tagName == 'INPUT' || tagName  == 'TEXTAREA') {
-          if (Fuse.List('checkbox', 'radio').contains(element.type)) {
+          if (Fuse.Array('checkbox', 'radio').contains(element.type)) {
             backup = element.checked;
             element.checked = true;
             asserted = false;
@@ -475,7 +481,7 @@ new Test.Unit.Runner({
           prop = 'selectedIndex';
         }
 
-        Form.Element.clear(element);
+        $(element).clear();
 
         this.assertEqual(asserted, element[prop],
           element.inspect() + ';' + (element.name ? ' name="' +
@@ -566,18 +572,18 @@ new Test.Unit.Runner({
   'testFormMethodsReturnElement': function() {
     element = $('form');
     $w('disable enable focusFirstElement reset').each(function(method) {
-      this.assert(element === Form[method]('form'),
-        'Form.' + method + ' returned a non element value.');
+      this.assert(element === $('form')[method](),
+        'Fuse.Dom.FormElement#' + method + ' returned a non element value.');
     }, this);
   },
 
   'testFormElementMethodsReturnElement': function() {
     element = $('focus_text');
-    var backup = element.value;
+    var backup = element.raw.value;
 
     $w('activate clear disable enable focus select').each(function(method) {
-      this.assert(element === Form.Element[method]('focus_text'),
-        'Form.Element.' + method + ' returned a non element value.');
+      this.assert(element === $('focus_text')[method](),
+        'Fuse.Dom.InputElement#' + method + ' returned a non element value.');
     }, this);
 
     element.value = backup;

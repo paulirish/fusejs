@@ -272,38 +272,6 @@ new Test.Unit.Runner({
       'called with an object as the `this` value');
   },
 
-  'testGrep': function() {
-    var Selector = Fuse.Class({
-      'initialize': function(pattern) {
-        this.pattern = pattern;
-      },
-      'test': function(element) {
-        return Fuse.Dom.Selector.match(element, this.pattern);
-      }
-    });
-
-    // test empty pattern
-    this.assertEqual('abc', Fuse.List('a', 'b', 'c').grep('').join(''));
-    this.assertEqual('abc', Fuse.List('a', 'b', 'c').grep(new RegExp('')).join(''));
-
-    this.assertEqual('juanbond, jdd',
-      Fixtures.Nicknames.grep(/j/).join(', '));
-
-    this.assertEqual('JUANBOND, JDD',
-      Fixtures.Nicknames.grep(/j/, function(nickname) {
-        return nickname.toUpperCase();
-      }).join(', '));
-
-    this.assertEnumEqual($('grepHeader', 'grepCell'),
-      $('grepTable', 'grepTBody', 'grepRow', 'grepHeader', 'grepCell').grep(new Selector('.cell')));
-
-    this.assertEnumEqual([0, 2], Fuse.List.plugin.grep.call(Fixtures.Object, /\d/),
-      'called with an object as the `this` value');
-
-    this.assertEnumEqual([], Fuse.List.plugin.grep.call(Fixtures.Object, /undefined/),
-      'called with an object as the `this` value iterated over an undefined index');
-  },
-
   'testIndexOf': function() {
     this.assertEqual(-1, Fuse.List().indexOf(1));
     this.assertEqual(-1, Fuse.List.create(0).indexOf(1));

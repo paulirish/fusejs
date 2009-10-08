@@ -1,2 +1,1 @@
-Form.Element.Methods.coffee = Fuse.K;
-Element.addMethods();
+Fuse.Dom.InputElement.plugin.coffee = Fuse.K;

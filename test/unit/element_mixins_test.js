@@ -1,28 +1,27 @@
 new Test.Unit.Runner({
 
   'testInput': function() {
-    this.assert($('input').present != null);
-    this.assert(typeof $('input').present === 'function');
-    this.assert($('input').select != null);
+    var element = $('input');
+    this.assert(element.present != null);
+    this.assert(typeof element.present === 'function');
+    this.assert(element.select != null);
 
-    this.assertRespondsTo('present', Form.Element);
-    this.assertRespondsTo('present', Form.Element.Methods);
-    this.assertRespondsTo('coffee',  $('input'));
-
-    this.assertIdentical(Fuse.K,     Form.Element.coffee);
-    this.assertIdentical(Fuse.K,     Form.Element.Methods.coffee);
+    this.assertRespondsTo('present', element);
+    this.assertRespondsTo('coffee',  element);
   },
 
   'testForm': function() {
-    this.assert($('form').reset != null);
-    this.assert($('form').getInputs().length == 2);
+    var element = $('form');
+    this.assert(element.reset != null);
+    this.assert(element.getInputs().length == 2);
   },
 
   'testEvent': function() {
-    this.assert($('form').observe != null);
+    var element = $('form');
+    this.assert(element.observe != null);
 
     // Can't really test this one with TestUnit...
-    $('form').observe('submit', function(e) {
+    element.observe('submit', function(e) {
       alert('yeah!');
       Event.stop(e);
     });

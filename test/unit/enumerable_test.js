@@ -144,49 +144,6 @@ new Test.Unit.Runner({
     this.assertEnumEqual([],      Fixtures.Basic.first('r0x0r5'));
   },
 
-  'testGrep': function() {
-    var Selector = Fuse.Class({
-      'initialize': function(pattern) {
-        this.pattern = pattern;
-      },
-
-      'test': function(element) {
-        return Fuse.Dom.Selector.match(element, this.pattern);
-      }
-    });
-
-    // test empty pattern
-    this.assertEqual('abc',
-      new EnumObject(['a', 'b', 'c']).grep('').join(''));
-
-    this.assertEqual('abc',
-      new EnumObject(['a', 'b', 'c']).grep(new RegExp('')).join(''));
-
-    this.assertEqual('noradio, htonl',
-      Fixtures.Nicknames.grep(/o/).join(", "));
-
-    this.assertEqual('NORADIO, HTONL',
-      Fixtures.Nicknames.grep(/o/, function(nickname) {
-        return nickname.toUpperCase();
-      }).join(", "));
-
-    this.assertEnumEqual($('grepHeader', 'grepCell'),
-      $('grepTable', 'grepTBody', 'grepRow', 'grepHeader', 'grepCell')
-      .grep(new Selector('.cell')));
-  },
-
-  'testGrepEscapesRegExpSpecialCharacters': function() {
-    this.assertEqual(';-), :-)',
-      Fixtures.Emoticons.grep('-)').join(", "));
-
-    this.assertEnumEqual(['?a', 'c?'],     new EnumObject(['?a','b','c?']).grep('?'));
-    this.assertEnumEqual(['*a', 'c*'],     new EnumObject(['*a','b','c*']).grep('*'));
-    this.assertEnumEqual(['+a', 'c+'],     new EnumObject(['+a','b','c+']).grep('+'));
-    this.assertEnumEqual(['{1}a', 'c{1}'], new EnumObject(['{1}a','b','c{1}']).grep('{1}'));
-    this.assertEnumEqual(['(a', 'c('],     new EnumObject(['(a','b','c(']).grep('('));
-    this.assertEnumEqual(['|a', 'c|'],     new EnumObject(['|a','b','c|']).grep('|'));
-  },
-
   'testInGroupsOf': function() {
     this.assertEnumEqual([], new EnumObject([]).inGroupsOf(3));
 
@@ -239,18 +196,20 @@ new Test.Unit.Runner({
 
   'testInvokeOfNativeElementMethods': function() {
     var elements = new EnumObject([
-      new Element('div',  { 'title': 'foo' }),
-      new Element('span', { 'title': 'bar' }),
-      new Element('a',    { 'title': 'baz' })
+      Fuse('<div title="foo"></div>'),
+      Fuse('<span title="bar"></span>'),
+      Fuse('<a title="baz"></a>')
     ]);
 
     this.assertEnumEqual(['foo', 'bar', 'baz'],
-      elements.invoke('getAttribute', 'title'));
+      elements.invoke('readAttribute', 'title'),
+      'Should have called `readAttribute` on each decorated element.');
 
     // must attach input element to document before calling focus()
-    elements = new EnumObject([ new Element('input', { 'type': 'text' }) ]);
-    document.body.appendChild(elements.first());
-    this.assert(Fuse.List.isArray(elements.invoke('focus')));
+    elements = new EnumObject([ Fuse('<input type="text">') ]);
+    document.body.appendChild(elements.first().raw);
+    this.assert(Fuse.Array.isArray(elements.invoke('focus')),
+      'Should return an array.');
   },
 
   'testLast': function() {
