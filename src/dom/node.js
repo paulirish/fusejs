@@ -16,7 +16,7 @@
 
       var decorated,
        id = Node.getFuseId(node),
-       data = (Data[id] = Data[id] || { });
+       data = Data[id];
 
       // return cached if available
       if (data.decorator) return data.decorator;
@@ -56,12 +56,13 @@
       function getFuseId() {
         // if cache doesn't match, request a new id
         var c = Data[id];
-        if (c && c.node !== this)
+        if (c.node && c.node !== this)
           id = fuseId++;
         return id;
       }
       // private id variable
-      var id = fuseId++;
+      var id = fuseId;
+      Data[fuseId++] = { };
       return getFuseId;
     }
 
@@ -69,14 +70,18 @@
       node = node.raw || node;
 
       // keep a loose match because frame object !== document.parentWindow
-      var win = getWindow(node);
+      var id, win = getWindow(node);
       if (node == win) {
         if (node == global) return 1;
-        return getFuseId(win.frameElement) + '-1';
+        id = getFuseId(win.frameElement) + '-1';
+        Data[id] = Data[id] || { };
+        return id;
       }
       else if (node.nodeType === DOCUMENT_NODE) {
         if (node === Fuse._doc) return 2;
-        return getFuseId(win.frameElement) + '-2';
+        id = getFuseId(win.frameElement) + '-2';
+        Data[id] = Data[id] || { };
+        return id;
       }
       else if (node.getFuseId)
         return node.getFuseId();

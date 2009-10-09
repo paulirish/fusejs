@@ -57,7 +57,7 @@
           element.setAttribute(contentName, contentName);
         else {
           if (ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS &&
-              this.hasAttribute(name))
+              plugin.hasAttribute.call(name))
             element.removeAttribute(contentName);
           element.setAttribute(contentName, String(value));
         }

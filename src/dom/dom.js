@@ -70,7 +70,7 @@
     : function(element) { return element.nodeName.toUpperCase(); };
 
   returnOffset = function(left, top) {
-    var result  = Fuse.Array(Fuse.Number(left), Fuse.Number(top));
+    var result  = Fuse.Array(Fuse.Number(left || 0), Fuse.Number(top || 0));
     result.left = result[0];
     result.top  = result[1];
     return result;

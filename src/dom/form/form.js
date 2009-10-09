@@ -65,7 +65,7 @@
     };
 
     plugin.focusFirstElement = function focusFirstElement() {
-      var element = this.findFirstElement();
+      var element = plugin.findFirstElement.call(this);
       element && element.focus();
       return this;
     };
@@ -109,17 +109,17 @@
       options = clone(options);
 
       var params = options.parameters, submit = options.submit,
-       action = this.readAttribute('action');
+       action = plugin.readAttribute.call(this, 'action');
 
       delete options.submit;
-      options.parameters = this.serialize({ 'submit':submit, 'hash':true });
+      options.parameters = plugin.serialize.call(this, { 'submit':submit, 'hash':true });
 
       if (params) {
         if (isString(params)) params = Fuse.String.toQueryParams(params);
         _extend(options.parameters, params);
       }
 
-      if (this.hasAttribute('method') && !options.method)
+      if (plugin.hasAttribute.call(this, 'method') && !options.method)
         options.method = form.method;
 
       return new Fuse.Ajax.Request(action, options);
@@ -131,7 +131,7 @@
     };
 
     plugin.serialize = function serialize(options) {
-      return this.serializeElements(null, options);
+      return plugin.serializeElements.call(this, null, options);
     };
 
     plugin.serializeElements = function serializeElements(elements, options) {

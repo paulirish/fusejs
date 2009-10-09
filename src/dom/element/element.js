@@ -115,7 +115,7 @@
 
       context = context || doc;
       id = context === doc ? '0' : getFuseId(getWindow(context).frameElement);
-      data = Data[id] || (Data[id] = { });
+      data = Data[id];
       nodes = data.nodes || (data.nodes = { });
       element = nodes[tagName];
 
@@ -210,7 +210,7 @@
 
       var decorated, tagClass,
        id = getFuseId(element),
-       data = (Data[id] = Data[id] || { });
+       data = Data[id];
 
       // return cached if available
       if (data.decorator) return data.decorator;
@@ -295,7 +295,7 @@
       if (Feature('DOCUMENT_RANGE'))
         return function(ownerDoc) {
           var id = ownerDoc === doc ? '0' : getFuseId(getWindow(ownerDoc).frameElement),
-           data = Data[id] || (Data[id] = { });
+           data = Data[id];
           return (data.fragmentCache = data.fragmentCache || {
             'node':     ownerDoc.createElement('div'),
             'fragment': ownerDoc.createDocumentFragment(),
@@ -305,7 +305,7 @@
 
       return function(ownerDoc) {
         var id = ownerDoc === doc ? '0' : getFuseId(getWindow(ownerDoc).frameElement),
-         data = Data[id] || (Data[id] = { });
+         data = Data[id];
         return (data.fragmentCache = data.fragmentCache || {
           'node':     ownerDoc.createElement('div'),
           'fragment': ownerDoc.createDocumentFragment()
@@ -688,13 +688,14 @@
       function identify() {
         // use readAttribute to avoid issues with form elements and
         // child controls with ids/names of "id"
-        var element = this.raw || this, id = this.readAttribute('id');
+        var element = this.raw || this,
+         id = plugin.readAttribute.call(this, 'id');
         if (id.length) return id;
 
         var ownerDoc = element.ownerDocument;
         do { id = 'anonymous_element_' + counter++; }
         while (ownerDoc.getElementById(id));
-        this.writeAttribute('id', id);
+        plugin.writeAttribute.call(this, 'id', id);
         return Fuse.String(id);
       }
 
@@ -706,7 +707,8 @@
     plugin.isDetached = (function() {
       var isDetached = function isDetached() {
         var element = this.raw || this;
-        return !(element.parentNode && this.descendantOf(element.ownerDocument));
+        return !(element.parentNode &&
+          plugin.descendantOf.call(element.ownerDocument));
       };
 
       if (Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
@@ -731,14 +733,14 @@
        display = elemStyle.display;
 
       if (display && display !== 'none')
-        Data[element.getFuseId()].madeHidden = display;
+        Data[Node.getFuseId(element)].madeHidden = display;
       elemStyle.display = 'none';
       return this;
     };
 
     plugin.show = function show() {
       var element = this.raw || this,
-       data = Data[element.getFuseId()],
+       data = Data[Node.getFuseId(element)],
        elemStyle = element.style,
        display = elemStyle.display;
 
@@ -750,7 +752,7 @@
     };
 
     plugin.scrollTo = function scrollTo() {
-      var pos = this.cumulativeOffset();
+      var pos = plugin.cumulativeOffset.call(this);
       global.scrollTo(pos[0], pos[1]);
       return this;
     };
@@ -763,7 +765,7 @@
     };
 
     plugin.toggle = function toggle() {
-      return this[this.isVisible() ? 'hide' : 'show']();
+      return plugin[plugin.isVisible.call(this) ? 'hide' : 'show'].call(this);
     };
 
     plugin.wrap = function wrap(wrapper, attributes) {

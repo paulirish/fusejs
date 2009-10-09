@@ -11,7 +11,7 @@
 
       var decorated, pluginViewport, viewport,
        id = Node.getFuseId(node),
-       data = (Data[id] = Data[id] || { });
+       data = Data[id];
 
       // return cached if available
       if (data.decorator) return data.decorator;

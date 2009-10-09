@@ -1,3 +1,5 @@
+* Make all DOM methods work with a generic `this`. [jddalton]
+
 * Add Fuse.rawQuery, Fuse.Dom.RawList, Fuse.Dom.Element#rawQuery. [jddalton]
 
 * Add DOM methods to Fuse.Dom.NodeList. [jddalton]

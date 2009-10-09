@@ -31,7 +31,7 @@
 
     getOptionValue = function getValue() {
       var element = this.raw || this;
-      return element[this.hasAttribute('value') ? 'value' : 'text'];
+      return element[plugin.hasAttribute.call(this, 'value') ? 'value' : 'text'];
     };
 
 
@@ -50,7 +50,7 @@
       var element = this.raw || this;
       if (getNodeName(element) !== 'BUTTON' &&
           !INPUT_BUTTONS[element.type])
-        this.setValue(null);
+        plugin.setValue.call(this, null);
       return element;
     };
 
@@ -78,7 +78,7 @@
     inputPlugin.serialize = function serialize() {
       var value, pair, element = this.raw || this;
       if (!element.disabled && element.name) {
-        value = this.getValue();
+        value = plugin.getValue.call(this);
         if (isArray(value) && value.length < 2)
           value = value[0];
         if (value != null) {
@@ -107,11 +107,11 @@
     /* define getValue/setValue for each field class */
 
     buttonPlugin.getValue = function getValue() {
-      return this.readAttribute('value');
+      return plugin.readAttribute.call(this, 'value');
     };
 
     buttonPlugin.setValue = function setValue(value) {
-      this.writeAttribute('value', value);
+      plugin.writeAttribute.call(this, 'value', value);
     };
 
     inputPlugin.getValue = function getValue() {

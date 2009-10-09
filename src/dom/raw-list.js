@@ -21,15 +21,15 @@
         function() {
           var args = arguments, first = this[0];
           if (first) return args.length
-            ? first[key].apply(first, args)
-            : first[key]();
+            ? object[key].apply(first, args)
+            : object[key].call(first);
         } :
         // setters are called for each element in the list
         function() {
           var node, args = arguments, i = 0;
           if (args.length)
-            while (node = this[i++]) node[key].apply(node, args);
-          else while (node = this[i++]) node[key]();
+            while (node = this[i++]) object[key].apply(node, args);
+          else while (node = this[i++]) object[key].call(node);
           return this;
         };
     });

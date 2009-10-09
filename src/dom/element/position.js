@@ -15,7 +15,19 @@
 
     BODY_OFFSETS_INHERIT_ITS_MARGINS = nil,
 
-    ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH = nil;
+    ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH = nil,
+
+    getDimensions = plugin.getDimensions,
+
+    getHeight     = plugin.getHeight,
+
+    getWidth      = plugin.getWidth,
+
+    getStyle      = plugin.getStyle,
+
+    isDetached    = plugin.isDetached,
+
+    isVisible     = plugin.isVisible;
 
     function ensureLayout(decorator) {
       var element = (decorator.raw || decorator),
@@ -32,15 +44,15 @@
     /*------------------------------------------------------------------------*/
 
     plugin.makeAbsolute = function makeAbsolute() {
-      if (this.getStyle('position') != 'absolute') {
+      if (getStyle.call(this, 'position') != 'absolute') {
         var after,
          element   = this.raw || this,
          elemStyle = element.style,
-         width     = this.getWidth('content'),
-         height    = this.getHeight('content'),
-         offsets   = this.positionedOffset(),
-         before    = this.getDimensions(),
-         backup    = Data[element.getFuseId()].madeAbsolute = {
+         before    = getDimensions.call(this),
+         width     = getWidth.call(this,  'content'),
+         height    = getHeight.call(this, 'content'),
+         offsets   = plugin.positionedOffset.call(this),
+         backup    = Data[Node.getFuseId(element)].madeAbsolute = {
            'position':   elemStyle.position,
            'left':       elemStyle.left,
            'top':        elemStyle.top,
@@ -57,7 +69,7 @@
         elemStyle.width     = width         + 'px';
         elemStyle.height    = height        + 'px';
 
-        after = this.getDimensions();
+        after = getDimensions.call(this);
         elemStyle.width  = Math.max(0, width  + (before.width  - after.width))  + 'px';
         elemStyle.height = Math.max(0, height + (before.height - after.height)) + 'px';
       }
@@ -65,9 +77,9 @@
     },
 
     plugin.undoAbsolute = function undoAbsolute() {
-      if (this.getStyle('position') == 'absolute') {
+      if (getStyle.call(this, 'position') == 'absolute') {
         var element = this.raw || this,
-         data = Data[element.getFuseId()],
+         data = Data[Node.getFuseId(element)],
          backup = data.madeAbsolute,
          elemStyle = element.style;
 
@@ -88,18 +100,18 @@
     };
 
     plugin.makeClipping = function makeClipping() {
-      if (this.getStyle('overflow') != 'hidden') {
+      if (getStyle.call(this, 'overflow') != 'hidden') {
         var element = this.raw || this;
-        Data[element.getFuseId()].madeClipped = this.getStyle('overflow') || 'auto';
+        Data[Node.getFuseId(element)].madeClipped = getStyle.call(this, 'overflow') || 'auto';
         element.style.overflow = 'hidden';
       }
       return this;
     };
 
     plugin.undoClipping = function undoClipping() {
-      if (this.getStyle('overflow') == 'hidden') {
+      if (getStyle.call(this, 'overflow') == 'hidden') {
         var element = this.raw || this,
-         data = Data[element.getFuseId()],
+         data = Data[Node.getFuseId(element)],
          overflow = data.madeClipped;
 
         if (!overflow)
@@ -114,10 +126,10 @@
     plugin.makePositioned = function makePositioned() {
       var element = this.raw || this,
        elemStyle = element.style,
-       pos = this.getStyle('position');
+       pos = getStyle.call(this, 'position');
 
       if (!pos || pos == 'static') {
-        Data[element.getFuseId()].madePositioned = {
+        Data[Node.getFuseId(element)].madePositioned = {
           'position': elemStyle.position,
           'left':     elemStyle.left,
           'top':      elemStyle.top
@@ -132,9 +144,9 @@
     };
 
     plugin.undoPositioned = function undoPositioned() {
-      if (this.getStyle('position') == 'relative') {
+      if (getStyle.call(this, 'position') == 'relative') {
         var element = this.raw || this,
-        data = Data[element.getFuseId()],
+        data = Data[Node.getFuseId(element)],
         backup = data.madePositioned,
         elemStyle = element.style;
 
@@ -163,17 +175,19 @@
 
       var coord, borderHeight, borderWidth, paddingHeight, paddingWidth,
        elemDisplay, elemOffset, elemPos, elemVis, srcBackup,
-       appendCSS    = ';display:block;visibility:hidden;',
-       elemIsHidden = !this.isVisible(),
-       elemStyle    = this.style,
-       srcIsHidden  = !source.isVisible(),
-       srcStyle     = source.style;
+       appendCSS        = ';display:block;visibility:hidden;',
+       cumulativeOffset = plugin.cumulativeOffset,
+       elemStyle        = element.style,
+       srcStyle         = source.style,
+       elemIsHidden     = !isVisible.call(this),
+       srcIsHidden      = !isVisible.call(source);
 
       // attempt to unhide elements to get their styles
       if (srcIsHidden) {
         srcBackup = srcStyle.cssText;
         srcStyle.cssText += appendCSS;
       }
+
       if (elemIsHidden) {
         // backup individual style properties because we are changing several
         // others and don't want to pave them when the backup is restored
@@ -186,25 +200,26 @@
       // the difference between the source and element padding/border
       // to the height and width in an attempt to keep the same dimensions.
       if (options.setHeight) {
-        paddingHeight = source.getHeight('padding');
-        borderHeight  = source.getHeight('border');
+        paddingHeight = getHeight.call(source, 'padding');
+        borderHeight  = getHeight.call(source, 'border');
         elemStyle.height = Math.max(0,
-          (source.offsetHeight - paddingHeight - borderHeight) + // content height
-          (paddingHeight - this.getHeight('padding')) +          // padding diff
-          (borderHeight  - this.getHeight('border'))) + 'px';    // border diff
+          (source.offsetHeight - paddingHeight - borderHeight) +       // content height
+          (paddingHeight - getHeight.call(this, 'padding')) +       // padding diff
+          (borderHeight  - getHeight.call(this, 'border'))) + 'px'; // border diff
       }
+
       if (options.setWidth) {
-        paddingWidth = getWidth(source, 'padding');
-        borderWidth  = getWidth(source, 'border');
+        paddingWidth = getWidth.call(source, 'padding');
+        borderWidth  = getWidth.call(source, 'border');
         elemStyle.width = Math.max(0,
-          (source.offsetWidth - paddingWidth - borderWidth)  +  // content width
-          (paddingWidth - getWidth(element, 'padding')) +       // padding diff
-          (borderWidth  - getWidth(element, 'border'))) + 'px'; // border diff
+          (source.offsetWidth - paddingWidth - borderWidth)  +       // content width
+          (paddingWidth - getWidth.call(this, 'padding')) +       // padding diff
+          (borderWidth  - getWidth.call(this, 'border'))) + 'px'; // border diff
       }
 
       if (options.setLeft || options.setTop) {
 
-        elemPos = this.getStyle('position');
+        elemPos = getStyle.call(this, 'position');
 
         // clear element coords before getting
         // the cumulativeOffset because Opera
@@ -215,16 +230,16 @@
 
         // if an absolute element is a descendant of the source then
         // calculate its offset to the source and inverse it
-        if (elemPos == 'absolute' && this.descendantOf(source)) {
-          coord = this.cumulativeOffset(source);
+        if (elemPos == 'absolute' && plugin.descendantOf.call(this, source)) {
+          coord = cumulativeOffset.call(this, source);
           coord.left *= -1;
           coord.top  *= -1;
         }
         else {
-          coord = source.cumulativeOffset();
+          coord = cumulativeOffset.call(source);
           if (elemPos == 'relative') {
             // subtract the relative element's offset from the source's offsets
-            elemOffset  = element.cumulativeOffset();
+            elemOffset  = cumulativeOffset.call(this);
             coord.left -= elemOffset.left;
             coord.top  -= elemOffset.top;
           }
@@ -258,9 +273,9 @@
       // IE throws an error if the element is not in the document.
       // Many browsers report offsetParent as null if the element's
       // style is display:none.
-      if (this.isDetached() || element.nodeType === DOCUMENT_NODE ||
+      if (isDetached.call(this) || element.nodeType === DOCUMENT_NODE ||
           OFFSET_PARENT_EXIT_BEFORE_NODES[nodeName] ||
-          !element.offsetParent && this.getStyle('display') != 'none')
+          !element.offsetParent && getStyle.call(this, 'display') != 'none')
         return null;
 
       while (element = element.parentNode) {
@@ -276,9 +291,28 @@
     // TODO: overhaul with a thorough solution for finding the correct
     // offsetLeft and offsetTop values
     plugin.cumulativeOffset = (function() {
-      function getOffset(ancestor) {
-        var offsetParent, position, valueT = 0, valueL = 0;
 
+      function cumulativeOffset(ancestor) {
+        ancestor = Fuse.get(ancestor);
+        var backup, elemStyle, result, element = ensureLayout(this);
+        if (!isElement(ancestor)) ancestor = null;
+
+        // offsetLeft/offsetTop properties return 0 on elements
+        // with display:none, so show the element temporarily
+        if (!plugin.isVisible.call(this)) {
+          elemStyle  = element.style;
+          backup     = elemStyle.cssText;
+          s.cssText += ';display:block;visibility:hidden;';
+          result     = getOffset(element, ancestor);
+          s.cssText  = backup;
+        }
+        else result = getOffset(element, ancestor);
+
+        return result;
+      }
+
+      var getOffset = function(ancestor) {
+        var offsetParent, position, valueT, valueL;
         if (BODY_OFFSETS_INHERIT_ITS_MARGINS === null)
           BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS');
 
@@ -290,12 +324,12 @@
           valueT += element.offsetTop  || 0;
           valueL += element.offsetLeft || 0;
 
-          offsetParent = Element.getOffsetParent(element);
-          position     = getStyle(element, 'position');
+          offsetParent = plugin.getOffsetParent.call(element);
+          position     = getStyle.call(element, 'position');
 
           if (offsetParent && ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH) {
-            valueT += parseFloat(getStyle(offsetParent, 'borderTopWidth'))  || 0;
-            valueL += parseFloat(getStyle(offsetParent, 'borderLeftWidth')) || 0;
+            valueT += parseFloat(getStyle.call(offsetParent, 'borderTopWidth'))  || 0;
+            valueL += parseFloat(getStyle.call(offsetParent, 'borderLeftWidth')) || 0;
           }
           if (position == 'fixed' || offsetParent && (offsetParent === ancestor ||
              (BODY_OFFSETS_INHERIT_ITS_MARGINS && position == 'absolute' &&
@@ -303,72 +337,55 @@
             break;
           }
         } while (element = offsetParent);
+
         return returnOffset(valueL, valueT);
-      }
+      };
 
-      function cumulativeOffset(ancestor) {
-        ancestor = fromElement(ancestor);
-
-        var element = ensureLayout(this);
-        if (!isElement(ancestor)) ancestor = null;
-
-        // offsetLeft/offsetTop properties return 0 on elements
-        // with display:none, so show the element temporarily
-        var result;
-        if (!this.isVisible()) {
-          var elemStyle = element.style, backup = elemStyle.cssText;
-          s.cssText += ';display:block;visibility:hidden;';
-          result = getOffset(element, ancestor);
-          s.cssText = backup;
-        }
-        else result = getOffset(element, ancestor);
-        return result;
-      }
-
-      if (Feature('ELEMENT_BOUNDING_CLIENT_RECT')) {
+      if (Feature('ELEMENT_BOUNDING_CLIENT_RECT'))
         getOffset = (function(__getOffset) {
           return function(element, ancestor) {
-            if (ancestor) return __getOffset(element, ancestor);
+            var doc, info, rect, root, scrollEl, valueT, valueL;
 
-            var valueT = 0, valueL = 0;
-            if (!this.isDetached()) {
-              var doc = getDocument(element),
-               info = Fuse._info,
-               rect = element.getBoundingClientRect(),
-               root = doc[info.root.property],
-               scrollEl = doc[info.scrollEl.property];
+            if (ancestor)
+              return __getOffset(element, ancestor);
+
+            if (!isDetached.call(this)) {
+              doc      = getDocument(element);
+              info     = Fuse._info;
+              rect     = element.getBoundingClientRect();
+              root     = doc[info.root.property];
+              scrollEl = doc[info.scrollEl.property];
 
               valueT = Math.round(rect.top)  -
                 (root.clientTop  || 0) + (scrollEl.scrollTop  || 0);
               valueL = Math.round(rect.left) -
                 (root.clientLeft || 0) + (scrollEl.scrollLeft || 0);
             }
+
             return returnOffset(valueL, valueT);
           };
         })(getOffset);
-      }
+
       return cumulativeOffset;
     })();
 
     plugin.cumulativeScrollOffset = function cumulativeScrollOffset(onlyAncestors) {
       var nodeName,
-       valueT   = 0,
-       valueL   = 0,
        element  = this.raw || this,
        original = element,
        info     = Fuse._info,
        doc      = getDocument(element),
        scrollEl = doc[info.scrollEl.property],
-       skipEl   = info.scrollEl.nodeName === 'HTML'
-         ? doc[info.body.property]
-         : doc[info.docEl.property];
+       skipEl   = doc[info[info.scrollEl.nodeName === 'HTML' ? 'body' : 'docEl'].property],
+       valueT   = 0,
+       valueL   = 0;
 
-      do {
+       do {
         if (element !== skipEl) {
           valueT += element.scrollTop  || 0;
           valueL += element.scrollLeft || 0;
 
-          if (element === scrollEl || getStyle(element, 'position') == 'fixed')
+          if (element === scrollEl || getStyle.call(element, 'position') == 'fixed')
             break;
         }
         element = element.parentNode;
@@ -399,9 +416,10 @@
 
     plugin.viewportOffset = (function() {
       var viewportOffset = function viewportOffset() {
-        var scrollOffset = this.cumulativeScrollOffset(/*onlyAncestors*/ true),
-         cumulativeOffset = this.cumulativeOffset(),
-         valueT = cumulativeOffset.top, valueL = cumulativeOffset.left;
+        var cumulativeOffset = plugin.cumulativeOffset.call(this),
+         scrollOffset = plugin.cumulativeScrollOffset.call(this, /*onlyAncestors*/ true),
+         valueT = cumulativeOffset.top,
+         valueL = cumulativeOffset.left;
 
         // subtract the the scrollOffset totals from the element offset totals.
         valueT -= scrollOffset.top;
@@ -413,7 +431,7 @@
         viewportOffset = function viewportOffset() {
           var valueT = 0, valueL = 0;
 
-          if (!this.isDetached()) {
+          if (!isDetached.call(this)) {
             // IE window's upper-left is at 2,2 (pixels) with respect
             // to the true client when not in quirks mode.
             var element = this.raw || this,

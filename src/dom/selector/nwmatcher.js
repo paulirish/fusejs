@@ -1,6 +1,6 @@
   /*--------------------------- SELECTOR: NWMATCHER --------------------------*/
 
-  (function(Selector, Node, NodeList) {
+  (function(Selector, Node, NodeList, RawList) {
     Selector.match = function match(element, selector) {
       function match(element, selector) {
         return nwMatch(element.raw || element, String(selector || ''));
@@ -13,7 +13,7 @@
     Selector.rawSelect = function rawSelect(selector, context) {
       function rawSelect(selector, context) {
         context = context || Fuse._doc;
-        return nwSelect(String(selector || ''), context.raw || context);
+        return nwSelect(String(selector || ''), context.raw || context, RawList());
       }
 
       nwSelect = NW.Dom.select;
@@ -34,4 +34,4 @@
     };
 
     var nwMatch, nwSelect, match = nil, select = nil;
-  })(Fuse.Dom.Selector, Fuse.Dom.Node, Fuse.Dom.NodeList);
+  })(Fuse.Dom.Selector, Fuse.Dom.Node, Fuse.Dom.NodeList, Fuse.Dom.RawList);

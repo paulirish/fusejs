@@ -26,7 +26,7 @@
           element = element[nextNode];
         if (!element) return NodeList();
 
-        nextSiblings = this.nextSiblings;
+        nextSiblings = plugin.nextSiblings;
         return !selectors || !selectors.length ||
             selectors && Selector.match(this, selectors)
           ? prependList(nextSiblings.call(element, selectors), this, NodeList())
@@ -180,7 +180,7 @@
 
       function down(selectors, index) {
         if (selectors == null)
-          return this.firstDescendant();
+          return plugin.firstDescendant.call(this);
 
         if (isNumber(selectors)) {
           index = selectors; selectors = null;

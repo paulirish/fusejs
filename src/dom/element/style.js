@@ -24,6 +24,8 @@
 
     camelize = Fuse.String.plugin.camelize,
 
+    matchOpacity = /opacity:\s*(\d?\.?\d*)/,
+
     nullHandlers = [];
 
     function getComputedStyle(element, name) {
@@ -67,7 +69,7 @@
       if (isString(styles)) {
         elemStyle.cssText += ';' + styles;
         return styles.indexOf('opacity') > -1
-          ? this.setOpacity(styles.match(/opacity:\s*(\d?\.?\d*)/)[1])
+          ? plugin.setOpacity.call(this, styles.match(matchOpacity)[1])
           : this;
       }
 
@@ -76,7 +78,7 @@
 
       if (hasOpacity) {
         opacity = styles.opacity;
-        this.setOpacity(opacity);
+        plugin.setOpacity.call(opacity);
         delete styles.opacity;
       }
 
@@ -143,7 +145,7 @@
 
         // handle opacity
         if (name == 'opacity') {
-          result = String(this.getOpacity());
+          result = String(plugin.getOpacity.call(this));
           if (result.indexOf('.') < 0) result += '.0';
           return Fuse.String(result);
         }
@@ -213,7 +215,7 @@
   // Newline, tab and other whitespaces are not supported.
   (function(plugin) {
     plugin.addClassName = function addClassName(className) {
-      if (!this.hasClassName(className)) {
+      if (!plugin.hasClassName.call(this, className)) {
         var element = this.raw || this;
         element.className += (element.className ? ' ' : '') + className;
       }
@@ -249,8 +251,8 @@
     };
 
     plugin.toggleClassName = function toggleClassName(className) {
-      return this[this.hasClassName(className) ?
-        'removeClassName' : 'addClassName'](className);
+      return plugin[plugin.hasClassName.call(this, className) ?
+        'removeClassName' : 'addClassName'].call(this, className);
     };
 
     // prevent JScript bug with named function expressions
@@ -266,8 +268,8 @@
   (function(plugin) {
     plugin.getDimensions = function getDimensions(options) {
       return {
-        'width': this.getWidth(options),
-        'height': this.getHeight(options)
+        'width':  plugin.getWidth.call(this, options),
+        'height': plugin.getHeight.call(this, options)
       };
     };
 
@@ -297,7 +299,9 @@
     })();
 
     plugin.setOpacity = (function() {
-      var setOpacity = function setOpacity(value) {
+      var matchAlpha = /alpha\([^)]*\)/i,
+
+      setOpacity = function setOpacity(value) {
         this.style.opacity = (value == 1 || value == '' && isString(value)) ? '' :
           (value < 0.00001) ? '0' : value;
         return this;
@@ -336,8 +340,8 @@
           var element = this.raw || this,
            elemStyle  = element.style,
            currStyle  = element.currentStyle,
-           filter     = this.getStyle('filter').replace(/alpha\([^)]*\)/i, ''),
-           zoom      = elemStyle.zoom;
+           filter     = plugin.getStyle.call(this, 'filter').replace(matchAlpha, ''),
+           zoom       = elemStyle.zoom;
 
           // hasLayout is false then force it
           if (!(zoom && zoom !== 'normal' || currStyle && currStyle.hasLayout))
@@ -354,6 +358,7 @@
           return this;
         };
       }
+
       return setOpacity;
     })();
 
@@ -445,7 +450,7 @@
         // First get our offset(Width/Height) (visual)
         // offsetHeight/offsetWidth properties return 0 on elements
         // with display:none, so show the element temporarily
-        if (!this.isVisible()) {
+        if (!plugin.isVisible.call(this)) {
           elemStyle = this.style;
           backup = elemStyle.cssText;
           elemStyle.cssText += ';display:block;visibility:hidden;';
