@@ -52,7 +52,7 @@
          width     = getWidth.call(this,  'content'),
          height    = getHeight.call(this, 'content'),
          offsets   = plugin.positionedOffset.call(this),
-         backup    = Data[Node.getFuseId(element)].madeAbsolute = {
+         backup    = Data[Node.getFuseId(this)].madeAbsolute = {
            'position':   elemStyle.position,
            'left':       elemStyle.left,
            'top':        elemStyle.top,
@@ -79,7 +79,7 @@
     plugin.undoAbsolute = function undoAbsolute() {
       if (getStyle.call(this, 'position') == 'absolute') {
         var element = this.raw || this,
-         data = Data[Node.getFuseId(element)],
+         data = Data[Node.getFuseId(this)],
          backup = data.madeAbsolute,
          elemStyle = element.style;
 
@@ -102,7 +102,7 @@
     plugin.makeClipping = function makeClipping() {
       if (getStyle.call(this, 'overflow') != 'hidden') {
         var element = this.raw || this;
-        Data[Node.getFuseId(element)].madeClipped = getStyle.call(this, 'overflow') || 'auto';
+        Data[Node.getFuseId(this)].madeClipped = getStyle.call(this, 'overflow') || 'auto';
         element.style.overflow = 'hidden';
       }
       return this;
@@ -111,7 +111,7 @@
     plugin.undoClipping = function undoClipping() {
       if (getStyle.call(this, 'overflow') == 'hidden') {
         var element = this.raw || this,
-         data = Data[Node.getFuseId(element)],
+         data = Data[Node.getFuseId(this)],
          overflow = data.madeClipped;
 
         if (!overflow)
@@ -129,7 +129,7 @@
        pos = getStyle.call(this, 'position');
 
       if (!pos || pos == 'static') {
-        Data[Node.getFuseId(element)].madePositioned = {
+        Data[Node.getFuseId(this)].madePositioned = {
           'position': elemStyle.position,
           'left':     elemStyle.left,
           'top':      elemStyle.top
@@ -146,7 +146,7 @@
     plugin.undoPositioned = function undoPositioned() {
       if (getStyle.call(this, 'position') == 'relative') {
         var element = this.raw || this,
-        data = Data[Node.getFuseId(element)],
+        data = Data[Node.getFuseId(this)],
         backup = data.madePositioned,
         elemStyle = element.style;
 

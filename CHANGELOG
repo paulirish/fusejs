@@ -1,3 +1,5 @@
+* Pass the decorator, instead of the element, to Node.getFuseId() because it is resolved faster. [jddalton]
+
 * Make all DOM methods work with a generic `this`. [jddalton]
 
 * Add Fuse.rawQuery, Fuse.Dom.RawList, Fuse.Dom.Element#rawQuery. [jddalton]

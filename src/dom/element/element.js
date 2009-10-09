@@ -733,14 +733,14 @@
        display = elemStyle.display;
 
       if (display && display !== 'none')
-        Data[Node.getFuseId(element)].madeHidden = display;
+        Data[Node.getFuseId(this)].madeHidden = display;
       elemStyle.display = 'none';
       return this;
     };
 
     plugin.show = function show() {
       var element = this.raw || this,
-       data = Data[Node.getFuseId(element)],
+       data = Data[Node.getFuseId(this)],
        elemStyle = element.style,
        display = elemStyle.display;
 

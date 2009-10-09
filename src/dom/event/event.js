@@ -497,7 +497,7 @@
       var dispatcher, decorator = Fuse.get(element);
       element = decorator.raw || decorator;
 
-      dispatcher = addCache(Node.getFuseId(element), eventName, handler);
+      dispatcher = addCache(Node.getFuseId(decorator), eventName, handler);
       if (!dispatcher) return decorator;
 
       addObserver(element, eventName, dispatcher);
@@ -511,7 +511,7 @@
       element = decorator.raw || decorator;
       eventName = isString(eventName) ? eventName : null;
 
-      id = Node.getFuseId(element);
+      id = Node.getFuseId(decorator);
       events = Data[id].events;
 
       if (!events) return decorator;
