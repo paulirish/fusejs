@@ -34,8 +34,12 @@
       return get(element);
     }
 
-    function get(object, context) {
+    function get(object, attributes, context) {
       if (isString(object)) {
+        if (attributes && typeof attributes.nodeType !== 'string')
+          return Element.create(object, attributes, context);
+
+        context = attributes;
         if (object.charAt(0) == '<' && object.charAt(object.length - 1) == '>')
           return Element.create(object, context);
         object = (context || doc).getElementById(object || expando);
