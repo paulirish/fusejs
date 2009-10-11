@@ -39,12 +39,12 @@
           : selectors.match(this);
       };
 
-      plugin.query = function query(selectors) {
-        return Selector.select(selectors, this);
+      plugin.query = function query(selectors, callback) {
+        return Selector.select(selectors, this, callback);
       };
 
-      plugin.rawQuery = function rawQuery(selectors) {
-        return Selector.rawSelect(selectors, this);
+      plugin.rawQuery = function rawQuery(selectors, callback) {
+        return Selector.rawSelect(selectors, this, callback);
       };
 
       plugin.siblings = function siblings(selectors) {

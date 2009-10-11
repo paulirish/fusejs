@@ -492,7 +492,7 @@
             scripts = [node];
           else if (node.getElementsByTagName)
             scripts = node.getElementsByTagName('SCRIPT');
-          // Safari 2 fragments don't have GEBTN
+          // document fragments don't have GEBTN
           else scripts = getByTagName(node, 'SCRIPT');
         }
 
