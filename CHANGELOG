@@ -1,3 +1,5 @@
+* Fix regression bug with Fuse.Dom.Node.getFuseId() getting the proper id. [jddalton]
+
 * Add support for passing a callback to Fuse.query(selector, context, callback). [jddalton]
 
 * Add support for passing an attributes object to Fuse.get(tagName, attributes, context). [jddalton]

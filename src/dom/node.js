@@ -57,7 +57,7 @@
         // if cache doesn't match, request a new id
         var c = Data[id];
         if (c.node && c.node !== this)
-          id = fuseId++;
+          return (this.getFuseId = createGetter())();
         return id;
       }
       // private id variable

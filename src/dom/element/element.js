@@ -118,7 +118,7 @@
       }
 
       context = context || doc;
-      id = context === doc ? '0' : getFuseId(getWindow(context).frameElement);
+      id = context === doc ? '1' : getFuseId(getWindow(context).frameElement);
       data = Data[id];
       nodes = data.nodes || (data.nodes = { });
       element = nodes[tagName];
@@ -298,7 +298,7 @@
     getFragmentCache = (function() {
       if (Feature('DOCUMENT_RANGE'))
         return function(ownerDoc) {
-          var id = ownerDoc === doc ? '0' : getFuseId(getWindow(ownerDoc).frameElement),
+          var id = ownerDoc === doc ? '1' : getFuseId(getWindow(ownerDoc).frameElement),
            data = Data[id];
           return (data.fragmentCache = data.fragmentCache || {
             'node':     ownerDoc.createElement('div'),
@@ -308,7 +308,7 @@
         };
 
       return function(ownerDoc) {
-        var id = ownerDoc === doc ? '0' : getFuseId(getWindow(ownerDoc).frameElement),
+        var id = ownerDoc === doc ? '1' : getFuseId(getWindow(ownerDoc).frameElement),
          data = Data[id];
         return (data.fragmentCache = data.fragmentCache || {
           'node':     ownerDoc.createElement('div'),
