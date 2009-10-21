@@ -1,3 +1,5 @@
+* Support updateGenerics() methods on the DOM wrappers. [jddalton]
+
 * Tweak how String#unescapeHTML tokenizes tags. [jddalton]
 
 * Fix regression bug with Fuse.Dom.Node.getFuseId() getting the proper id. [jddalton]

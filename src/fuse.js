@@ -109,11 +109,17 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Fuse.addNS = 
-  Fuse.prototype.addNS = (function() {
+  (function() {
+
+    function getNS(path) {
+      var key, i = 0, keys = path.split('.'), object = this;
+      while (key = keys[i++])
+        if (!(object = object[key])) return false;
+      return object;
+    }
+
     function addNS(path) {
-      var Klass, Parent, key,
-       i          = 0,
+      var Klass, Parent, key, i = 0,
        object     = this,
        keys       = path.split('.'),
        length     = keys.length,
@@ -136,7 +142,36 @@
       return object;
     }
 
-    return addNS;
+    function updateSubClassGenerics(object) {
+      var subclass, subclasses = object.subclasses || [], i = 0;
+      while (subclass = subclasses[i++]) {
+        subclass.updateGenerics && subclass.updateGenerics();
+        updateSubClassGenerics(subclass);
+      }
+    }
+
+    function updateGenerics(path, deep) {
+      var paths, object, i = 0;
+      if (isString(paths)) paths = [paths];
+      if (!isArray(paths)) deep  = path;
+      if (!paths) paths = ['Array', 'Date', 'Number', 'Object', 'RegExp', 'String', 'Dom.Node']; 
+
+      while (path = paths[i++]) {
+        object = isString(path) ? Fuse.getNS(path) : path;
+        if (object) {
+          object.updateGenerics && object.updateGenerics();
+          deep && updateSubClassGenerics(object);
+        }
+      }
+    }
+
+    Fuse.getNS =
+    Fuse.prototype.getNS = getNS;
+
+    Fuse.addNS = 
+    Fuse.prototype.addNS = addNS;
+
+    Fuse.updateGenerics  = updateGenerics;
   })();
 
 <%= include(
@@ -195,7 +230,7 @@
   /*--------------------------------------------------------------------------*/
 
   // update native generics and element methods
-  Fuse.updateGenerics();
+  Fuse.updateGenerics(true);
 
   if (global.Event && global.Event.Methods)
     Event.addMethods();

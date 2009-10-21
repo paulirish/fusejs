@@ -328,34 +328,6 @@
         }
       };
 
-      Array.updateGenerics = function updateGenerics() {
-        instance.updateGenerics('Array');
-      };
-
-      Date.updateGenerics = function updateGenerics() {
-        instance.updateGenerics('Date');
-      };
-
-      Function.updateGenerics = function updateGenerics() {
-        instance.updateGenerics('Function');
-      };
-
-      Number.updateGenerics = function updateGenerics() {
-        instance.updateGenerics('Number');
-      };
-
-      Object.updateGenerics = function updateGenerics() {
-        instance.updateGenerics('Object');
-      };
-
-      RegExp.updateGenerics = function updateGenerics() {
-        instance.updateGenerics('RegExp');
-      };
-
-      String.updateGenerics = function updateGenerics() {
-        instance.updateGenerics('String');
-      };
-
       fromArray =
       Array.fromArray = (function() {
         var fromArray = function fromArray(array) {
@@ -750,7 +722,7 @@
        substring = nil, toExponential = nil, toFixed = nil, toISOString = nil,
        toJSON = nil, toLowerCase = nil, toLocaleLowerCase = nil,
        toLocaleUpperCase = nil, toPrecision = nil, toUpperCase = nil,
-       trim = nil, updateGenerics = nil, unshift = nil;
+       trim = nil, unshift = nil;
 
       instance.Array    = Array;
       instance.Date     = Date;
@@ -823,48 +795,34 @@
 
   /*--------------------------------------------------------------------------*/
 
-  (Fuse.Fusebox.plugin =
-  Fuse.Fusebox.prototype).updateGenerics = (function() {
-
-    function createGeneric(methodName) {
-      return new Function('', [
-        'function ' + methodName + '(thisArg) {',
-        'return this.prototype.' + methodName + '.apply(thisArg,',
-        'Array.prototype.slice.call(arguments, 1));',
-        '}', 'return ' + methodName].join('\n'))();
-    }
-
-    function updateGenerics() {
-      var constructor, n, i = 0,
-       natives = arguments.length ? arguments :
-        ['Array', 'Date', 'Number', 'Object', 'RegExp', 'String'];
-
-      // iterate over native constructors
-      while (n = natives[i++]) {
-        // convert methods on the object's prototype to
-        // generics on the constructor
-        constructor = this[n];
-        Obj._each(constructor.prototype, function(value, key, object) {
-          if (key !== 'constructor' && hasKey(object, key))
-            constructor[key] = createGeneric(key);
-        })
-      }
-    }
-
-    return updateGenerics;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
   // assign Fusebox natives to Fuse object
-  (function() {
-    // assign natives to Fuse
-    var n, i = 0;
-    while (n = arguments[i++]) Fuse[n] = this[n];
+  (function(fusebox) {
+    var SKIPPED_KEYS = { 'constructor': 1 };
 
-    // add generics updater
-    Fuse.updateGenerics = this.updateGenerics;
+    function createGeneric(proto, methodName) {
+      return new Function('proto, slice',
+        'function ' + methodName + '(thisArg) {' +
+        'var args = arguments;' +
+        'return args.length ? proto.' + methodName +
+        '.apply(thisArg, slice.call(args, 1)) : ' +
+        'proto.' + methodName + '.call(thisArg); }' +
+        'return ' + methodName)(proto, slice);
+    }
+
+    function updateGenerics(deep) {
+      var Klass = this;
+      if (deep) Fuse.updateGenerics(Klass, deep);
+      else Obj._each(Klass.prototype, function(value, key, proto) {
+        if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
+          Klass[key] = createGeneric(proto, key);
+      });
+    }
+
+    // assign sandboxed natives to Fuse and add `updateGeneric` methods
+    var key, keys = slice.call(arguments, 1), i = 0;
+    while (key = keys[i++])
+      (Fuse[key] = fusebox[key]).updateGenerics = updateGenerics;
 
     // alias
     Fuse.List = Fuse.Array;
-  }).call(Fuse.Fusebox(), 'Array', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String');
+  })(Fuse.Fusebox(), 'Array', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String');
