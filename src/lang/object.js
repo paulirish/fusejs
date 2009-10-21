@@ -49,6 +49,8 @@
 
   /*--------------------------------------------------------------------------*/
 
+  // Use Fuse.Object.hasKey() on object Objects only as it may error on DOM Classes
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=375344
   hasKey =
   Obj.hasKey = (function() {
     var objectProto = Object.prototype,
