@@ -21,6 +21,16 @@
 
   /*--------------------------------------------------------------------------*/
 
+  // make Fuse() pass to Fuse.get()
+  Fuse =
+  global.Fuse = (function(__Fuse) {
+    function Fuse(object, context) {
+      return Fuse.get(object, context);
+    }
+    return Obj.extend(Class({ 'constructor': Fuse }), __Fuse,
+      function(value, key, object) { if (hasKey(object, key)) object[key] = value; });
+  })(Fuse);
+
   // set the debug flag based on the fuse.js debug query parameter
   Fuse.debug = (function() {
     var script, i = 0,
@@ -34,36 +44,65 @@
     return false;
   })();
 
+  (function() {
+    function $(element) {
+      var elements, args = arguments, length = args.length;
+      if (length > 1) {
+        elements = NodeList();
+        while (length--) elements[length] = $(args[length]);
+        return elements;
+      }
+      if (isString(element))
+        element = doc.getElementById(element || expando);
+      return element && fromElement(element);
+    }
+
+    function get(object, attributes, context) {
+      if (isString(object)) {
+        if (attributes && typeof attributes.nodeType !== 'string')
+          return Element.create(object, attributes, context);
+
+        context = attributes;
+        if (object.charAt(0) == '<' && object.charAt(object.length - 1) == '>')
+          return Element.create(object, context);
+        object = (context || doc).getElementById(object || expando);
+        return object && fromElement(object);
+      }
+
+      return object && Node(object);
+    }
+
+    function getById(id, context) {
+      var element = (context || doc).getElementById(id || expando);
+      return element && fromElement(element);
+    }
+
+    var doc = Fuse._doc;
+
+    Fuse.get = get;
+    Fuse.getById = getById;
+
+    Fuse.addNS('Util');
+    Fuse.Util.$ = $;
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
   getDocument =
   Fuse.getDocument = function getDocument(element) {
     return element.ownerDocument || element.document ||
       (element.nodeType === DOCUMENT_NODE ? element : Fuse._doc);
   };
 
-  // based on work by Diego Perini
+  // Based on work by Diego Perini
   getWindow =
-  Fuse.getWindow = (function() {
-    var getWindow = function getWindow(element) {
-      var frame, i = 0, doc = getDocument(element), frames = global.frames;
-      if (Fuse._doc !== doc)
-        while (frame = frames[i++])
-          if (frame.document === doc) return frame;
-      return global;
-    };
-
-    // Safari 2.0.x returns `Abstract View` instead of `global`
-    if (isHostObject(Fuse._doc, 'defaultView') && Fuse._doc.defaultView === global) {
-      getWindow = function getWindow(element) {
-        return getDocument(element).defaultView || element;
-      };
-    }
-    else if (isHostObject(Fuse._doc, 'parentWindow')) {
-      getWindow = function getWindow(element) {
-        return getDocument(element).parentWindow || element;
-      };
-    }
-    return getWindow;
-  })();
+  Fuse.getWindow = function getWindow(element) {
+    var frame, i = 0, doc = getDocument(element), frames = global.frames;
+    if (Fuse._doc !== doc)
+      while (frame = frames[i++])
+        if (frame.document === doc) return frame;
+    return global;
+  };
 
   getNodeName = Fuse._docEl.nodeName === 'HTML'
     ? function(element) { return element.nodeName; }
@@ -75,3 +114,14 @@
     result.top  = result[1];
     return result;
   };
+
+  // Safari 2.0.x returns `Abstract View` instead of `global`
+  if (isHostObject(Fuse._doc, 'defaultView') && Fuse._doc.defaultView === global) {
+    getWindow = function getWindow(element) {
+      return getDocument(element).defaultView || element;
+    };
+  } else if (isHostObject(Fuse._doc, 'parentWindow')) {
+    getWindow = function getWindow(element) {
+      return getDocument(element).parentWindow || element;
+    };
+  }

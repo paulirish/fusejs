@@ -1,3 +1,5 @@
+* Move method definition of Fuse.Util.$, Fuse.get, and Fuse.getById to dom.js and cleanup element.js. [jddalton]
+
 * Switch from using Array#join for string concatenation to using the plus (+) operator for better minification. [jddalton]
 
 * Support updateGenerics() methods on the DOM wrappers. [jddalton]

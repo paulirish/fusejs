@@ -1,15 +1,5 @@
   /*-------------------------------- ELEMENT ---------------------------------*/
 
-  // make Fuse() pass to Fuse.get()
-  Fuse =
-  global.Fuse = (function(__Fuse) {
-    function Fuse(object, context) {
-      return Fuse.get(object, context);
-    }
-    return Obj.extend(Class({ 'constructor': Fuse }), __Fuse,
-      function(value, key, object) { if (hasKey(object, key)) object[key] = value; });
-  })(Fuse);
-
   Element =
   Fuse.Dom.Element = Class(Node, {
     'constructor': (function() {
@@ -18,238 +8,15 @@
           ? Element.create(tagName, attributes, context)
           : fromElement(tagName);
       }
-
       return Element;
     })()
   });
 
+  Element.updateGenerics = Node.updateGenerics;
+
+  /*--------------------------------------------------------------------------*/
+
   (function() {
-    function $(element) {
-      var elements, args = arguments, length = args.length;
-      if (length > 1) {
-        elements = NodeList();
-        while (length--) elements[length] = $(args[length]);
-        return elements;
-      }
-      return get(element);
-    }
-
-    function get(object, attributes, context) {
-      if (isString(object)) {
-        if (attributes && typeof attributes.nodeType !== 'string')
-          return Element.create(object, attributes, context);
-
-        context = attributes;
-        if (object.charAt(0) == '<' && object.charAt(object.length - 1) == '>')
-          return Element.create(object, context);
-        object = (context || doc).getElementById(object || expando);
-        return object && fromElement(object);
-      }
-
-      if (!object) return object;
-
-      var nodeType = object.nodeType;
-      if (nodeType === DOCUMENT_NODE) return Document(object);
-
-      // bail on XML nodes, text nodes, and window objects
-      return (nodeType !== ELEMENT_NODE || object == getWindow(object) ||
-        !object.ownerDocument.body) ? object : fromElement(object);
-    }
-
-    function getById(id, context) {
-      var element = (context || doc).getElementById(id || expando);
-      return element && fromElement(element);
-    }
-
-    var doc = Fuse._doc;
-
-    Element.from =
-    Fuse.get     = get;
-    Fuse.getById = getById;
-
-    Fuse.addNS('Util');
-    Fuse.Util.$ = $;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  // For speed we don't normalize tagName case.
-  // There is the potential for cache.div, cache.DIV, cache['<div name="x">']
-  // Please stick to either all uppercase or lowercase tagNames.
-  //
-  // IE7 and below need to use the sTag of createElement to set the `name` attribute
-  // http://msdn.microsoft.com/en-us/library/ms536389.aspx
-  //
-  // IE fails to set the BUTTON element's `type` attribute without using the sTag
-  // http://dev.rubyonrails.org/ticket/10548
-
-  Element.create = (function() {
-    var doc = Fuse._doc,
-
-    matchComplexTag = /^<([A-Za-z]+)>$/,
-
-    create = function create(tagName, attributes, context) {
-      var complexTag, data, element, fragment, id, html, length, nodes, result;
-
-      // caching html strings is not supported at the moment
-      if (tagName.charAt(0) == '<') {
-        context = attributes;
-
-        // support <div> format tags
-        if (complexTag = tagName.match(matchComplexTag)) {
-          tagName = complexTag[1];
-        }
-        else {
-          html     = tagName;
-          fragment = Fuse.Dom.getFragmentFromString(html, context);
-          length   = fragment.childNodes.length;
-
-          // single element return decorated element
-          if (length < 2)
-            result = fromElement(fragment.removeChild(fragment.firstChild));
-          // multiple elements return a NodeList
-          else {
-            result = NodeList();
-            while (length--)
-              result[length] = fromElement(fragment.removeChild(fragment.lastChild));
-          }
-          return result;
-        }
-      }
-
-      context = context || doc;
-      id = context === doc ? '1' : getFuseId(getWindow(context).frameElement);
-      data = Data[id];
-      nodes = data.nodes || (data.nodes = { });
-      element = nodes[tagName];
-
-      if (!element)
-        element = nodes[tagName] = context.createElement(tagName);
-
-      element = fromElement(element.cloneNode(false));
-      return attributes
-        ? element.writeAttribute(attributes)
-        : element;
-    };
-
-    if (Feature('CREATE_ELEMENT_WITH_HTML')) {
-      var __create = create;
-
-      create = function create(tagName, attributes, context) {
-        var name, type;
-        if (attributes && tagName.charAt(0) != '<' &&
-           ((name = attributes.name) || (type = attributes.type))) {
-          tagName = '<' + tagName +
-            (name ? ' name="' + name + '"' : '') +
-            (type ? ' type="' + type + '"' : '') + '>';
-          delete attributes.name; delete attributes.type;
-        }
-        return __create(tagName, attributes, context);
-      };
-    }
-    return create;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  fromElement =
-  (function() {
-    var TAG_NAME_CLASSES = {
-      'A':        'Anchor',
-      'CAPTION':  'TableCaption',
-      'COL':      'TableCol',
-      'COLGROUP': 'TableCol',
-      'DEL':      'Mod',
-      'DIR':      'Directory',
-      'DL':       'DList',
-      'H1':       'Heading',
-      'H2':       'Heading',
-      'H3':       'Heading',
-      'H4':       'Heading',
-      'H5':       'Heading',
-      'H6':       'Heading',
-      'IFRAME':   'IFrame',
-      'IMG':      'Image',
-      'INS':      'Mod',
-      'FIELDSET': 'FieldSet',
-      'FRAMESET': 'FrameSet',
-      'OL':       'OList',
-      'OPTGROUP': 'OptGroup',
-      'P':        'Paragraph',
-      'Q':        'Quote',
-      'TBODY':    'TableSection',
-      'TD':       'TableCell',
-      'TEXTAREA': 'TextArea',
-      'TH':       'TableCell',
-      'TFOOT':    'TableSection',
-      'THEAD':    'TableSection',
-      'TR':       'TableRow',
-      'UL':       'UList'
-    },
-
-    Decorator = function() { },
-
-    Dom = Fuse.Dom,
-
-    doc = Fuse._doc,
-
-    getFuseId = Node.getFuseId;
-
-    function getOrCreateTagClass(tagName) {
-      var tagClassName = (TAG_NAME_CLASSES[tagName.toUpperCase()] ||
-         capitalize.call(tagName)) + 'Element',
-       tagClass = Dom[tagClassName];
-
-      return tagClass || (Dom[tagClassName] = Class(Element, {
-        'constructor': function(element) {
-          return element && (element.raw ?
-            element : fromElement(element));
-        }
-      }));
-    }
-
-    function fromElement(element) {
-      // return if already a decorator
-      if (element.raw) return element;
-
-      var decorated, tagClass,
-       id = getFuseId(element),
-       data = Data[id];
-
-      // return cached if available
-      if (data.decorator) return data.decorator;
-
-      Decorator.prototype =
-        getOrCreateTagClass(element.nodeName).plugin;
-
-      data.decorator =
-      decorated = new Decorator;
-
-      data.node =
-      decorated.raw = element;
-      decorated.style = element.style;
-
-      return decorated;
-    }
-
-    function extendByTag(tagName, statics, plugins, mixins) {
-      if (isArray(tagName)) {
-        var i = 0;
-        while (tagName[i])
-          extendByTag(tagName[i++], statics, plugins, mixins);
-      }
-      else getOrCreateTagClass(tagName)
-        .extend(statics, plugins, mixins);
-    }
-
-    Element.fromElement = fromElement;
-    Dom.extendByTag = extendByTag;
-    return fromElement;
-  })();
-
-  /*--------------------------------------------------------------------------*/
-
-  Fuse.Dom.getFragmentFromString = (function() {
 
     var ELEMENT_TABLE_INNERHTML_INSERTS_TBODY =
       Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY'),
@@ -287,62 +54,218 @@
       return T;
     })(),
 
+    TAG_NAME_CLASSES = {
+      'A':        'Anchor',
+      'CAPTION':  'TableCaption',
+      'COL':      'TableCol',
+      'COLGROUP': 'TableCol',
+      'DEL':      'Mod',
+      'DIR':      'Directory',
+      'DL':       'DList',
+      'H1':       'Heading',
+      'H2':       'Heading',
+      'H3':       'Heading',
+      'H4':       'Heading',
+      'H5':       'Heading',
+      'H6':       'Heading',
+      'IFRAME':   'IFrame',
+      'IMG':      'Image',
+      'INS':      'Mod',
+      'FIELDSET': 'FieldSet',
+      'FRAMESET': 'FrameSet',
+      'OL':       'OList',
+      'OPTGROUP': 'OptGroup',
+      'P':        'Paragraph',
+      'Q':        'Quote',
+      'TBODY':    'TableSection',
+      'TD':       'TableCell',
+      'TEXTAREA': 'TextArea',
+      'TH':       'TableCell',
+      'TFOOT':    'TableSection',
+      'THEAD':    'TableSection',
+      'TR':       'TableRow',
+      'UL':       'UList'
+    };
+
     doc = Fuse._doc,
 
     getFuseId = Node.getFuseId,
+
+    matchComplexTag = /^<([A-Za-z]+)>$/,
 
     matchStartsWithTableRow = /^<[tT][rR]/,
 
     matchTagName= /^<([^> ]+)/,
 
-    getFragmentCache = (function() {
-      if (Feature('DOCUMENT_RANGE'))
-        return function(ownerDoc) {
-          var id = ownerDoc === doc ? '1' : getFuseId(getWindow(ownerDoc).frameElement),
-           data = Data[id];
-          return (data.fragmentCache = data.fragmentCache || {
-            'node':     ownerDoc.createElement('div'),
-            'fragment': ownerDoc.createDocumentFragment(),
-            'range':    ownerDoc.createRange()
-          });
-        };
+    Decorator = function() { },
 
-      return function(ownerDoc) {
-        var id = ownerDoc === doc ? '1' : getFuseId(getWindow(ownerDoc).frameElement),
-         data = Data[id];
-        return (data.fragmentCache = data.fragmentCache || {
-          'node':     ownerDoc.createElement('div'),
-          'fragment': ownerDoc.createDocumentFragment()
-        });
-      };
-    })(),
+    Dom = Fuse.Dom;
 
-    getFragmentFromChildNodes = (function() {
-      if (Feature('ELEMENT_REMOVE_NODE'))
-        return function(parentNode, cache) {
-          // removeNode: removes the parent but keeps the children
-          var fragment = cache.fragment;
-          fragment.appendChild(parentNode).removeNode();
-          return fragment;
-        };
 
-      if (Feature('DOCUMENT_RANGE'))
-        return function(parentNode, cache) {
-          var range = cache.range;
-          range.selectNodeContents(parentNode);
-          return range.extractContents() || cache.fragment;
-        };
+    // For speed we don't normalize tagName case.
+    // There is the potential for cache.div, cache.DIV, cache['<div name="x">']
+    // Please stick to either all uppercase or lowercase tagNames.
+    //
+    // IE7 and below need to use the sTag of createElement to set the `name` attribute
+    // http://msdn.microsoft.com/en-us/library/ms536389.aspx
+    //
+    // IE fails to set the BUTTON element's `type` attribute without using the sTag
+    // http://dev.rubyonrails.org/ticket/10548
 
-      return function(parentNode, cache) {
-        var fragment = cache.fragment,
-         nodes = parentNode.childNodes,
-         length = node.length;
+    function create(tagName, attributes, context) {
+      var complexTag, data, element, fragment, id, html, length, nodes, result;
 
-        while (length--)
-          fragment.insertBefore(nodes[length], fragment.firstChild);
-        return fragment;
-      };
-    })();
+      // caching html strings is not supported at the moment
+      if (tagName.charAt(0) == '<') {
+        // support <div> format tags
+        context = attributes;
+        complexTag = tagName.match(matchComplexTag);
+
+        if (!complexTag) {
+          html     = tagName;
+          fragment = Dom.getFragmentFromString(html, context);
+          length   = fragment.childNodes.length;
+
+          // single element return decorated element
+          if (length < 2)
+            result = fromElement(fragment.removeChild(fragment.firstChild));
+          // multiple elements return a NodeList
+          else {
+            result = NodeList();
+            while (length--)
+              result[length] = fromElement(fragment.removeChild(fragment.lastChild));
+          }
+          return result;
+        }
+        else tagName = complexTag[1];
+      }
+
+      context = context || doc;
+      id      = context === doc ? '1' : getFuseId(getWindow(context).frameElement);
+      data    = Data[id];
+      nodes   = data.nodes || (data.nodes = { });
+      element = nodes[tagName];
+
+      if (!element)
+        element = nodes[tagName] = context.createElement(tagName);
+
+      element = fromElement(element.cloneNode(false));
+      return attributes
+        ? element.writeAttribute(attributes)
+        : element;
+    }
+
+    function extendByTag(tagName, statics, plugins, mixins) {
+      if (isArray(tagName)) {
+        var i = 0;
+        while (tagName[i])
+          extendByTag(tagName[i++], statics, plugins, mixins);
+      }
+      else getOrCreateTagClass(tagName)
+        .extend(statics, plugins, mixins);
+    }
+
+    function from(object, attributes, context) {
+      if (isString(object)) {
+        if (attributes && typeof attributes.nodeType !== 'string')
+          return Element.create(object, attributes, context);
+  
+        context = attributes;
+        if (object.charAt(0) == '<' && object.charAt(object.length - 1) == '>')
+          return Element.create(object, context);
+        object = (context || doc).getElementById(object || expando);
+        return object && fromElement(object);
+      }
+
+      if (!object) return object;
+
+      var nodeType = object.nodeType;
+      if (nodeType === DOCUMENT_NODE) return Document(object);
+  
+      // bail on XML nodes, text nodes, and window objects
+      return (nodeType !== ELEMENT_NODE || object == getWindow(object) ||
+        !object.ownerDocument.body) ? object : fromElement(object);
+    }
+
+    function fromElement(element) {
+      // return if already a decorator
+      if (element.raw) return element;
+
+      var decorated, tagClass,
+       id = getFuseId(element),
+       data = Data[id];
+
+      // return cached if available
+      if (data.decorator) return data.decorator;
+
+      Decorator.prototype =
+        getOrCreateTagClass(element.nodeName).plugin;
+
+      data.decorator =
+      decorated = new Decorator;
+
+      data.node =
+      decorated.raw = element;
+      decorated.style = element.style;
+      decorated.tagName = element.tagName;
+      decorated.nodeName = element.nodeName;
+
+      return decorated;
+    }
+
+    function getOrCreateTagClass(tagName) {
+      var tagClassName = (TAG_NAME_CLASSES[tagName.toUpperCase()] ||
+         capitalize.call(tagName)) + 'Element',
+       tagClass = Dom[tagClassName];
+
+      if (!tagClass) {
+        (tagClass =
+        Dom[tagClassName] = Class(Element, {
+          'constructor': function(element) {
+            return element && (element.raw ?
+              element : fromElement(element));
+          }
+        })).updateGenerics = Node.updateGenerics;
+      }
+      return tagClass;
+    }
+
+    function getFragmentCache(ownerDoc) {
+      var id = ownerDoc === doc ? '1' : getFuseId(getWindow(ownerDoc).frameElement),
+       data = Data[id];
+      return (data.fragmentCache = data.fragmentCache || {
+        'node':     ownerDoc.createElement('div'),
+        'fragment': ownerDoc.createDocumentFragment()
+      });
+    }
+
+    function getFragmentFromChildNodes(parentNode, cache) {
+      var fragment = cache.fragment,
+       nodes = parentNode.childNodes,
+       length = node.length;
+
+      while (length--)
+        fragment.insertBefore(nodes[length], fragment.firstChild);
+      return fragment;
+    }
+
+    function getFromContextualFragment(html, context) {
+      // 1) Konqueror throws when trying to create a fragment from
+      //    incompatible markup such as table rows. Similar to IE's issue
+      //    with setting table's innerHTML.
+      //
+      // 2) WebKit and KHTML throw when creating contextual fragments from
+      //    orphaned elements.
+      try {
+        context = context || Fuse._body || Fuse._docEl;
+        var cache = getFragmentCache(context.ownerDocument || context),
+         range = cache.range;
+        range.selectNode(context.firstChild);
+        return range.createContextualFragment(html);
+      } catch (e) {
+        return getFromDocumentFragment(html, context, cache);
+      }
+    }
 
     function getFromDocumentFragment(html, context, cache) {
        context = context || Fuse._body || Fuse._docEl;
@@ -368,29 +291,61 @@
       return getFragmentFromChildNodes(node, cache);
     }
 
-    function getFromContextualFragment(html, context) {
-      try {
-        // 1) Konqueror throws when trying to create a fragment from
-        //    incompatible markup such as table rows. Similar to IE's issue
-        //    with setting table's innerHTML.
-        //
-        // 2) WebKit and KHTML throw when creating contextual fragments from
-        //    orphaned elements.
+    if (Feature('CREATE_ELEMENT_WITH_HTML')) 
+      var create = (function(__create) {
+        function create(tagName, attributes, context) {
+          var name, type;
+          if (attributes && tagName.charAt(0) != '<' &&
+             ((name = attributes.name) || (type = attributes.type))) {
+            tagName = '<' + tagName +
+              (name ? ' name="' + name + '"' : '') +
+              (type ? ' type="' + type + '"' : '') + '>';
+            delete attributes.name; delete attributes.type;
+          }
+          return __create(tagName, attributes, context);
+        };
+        return create;
+      })(create);
 
-        context = context || Fuse._body || Fuse._docEl;
-        var cache = getFragmentCache(context.ownerDocument || context),
-         range = cache.range;
-        range.selectNode(context.firstChild);
-        return range.createContextualFragment(html);
-      } catch (e) {
-        return getFromDocumentFragment(html, context, cache);
-      }
-    }
+    if (Feature('ELEMENT_REMOVE_NODE'))
+      var getFragmentFromChildNodes =  function(parentNode, cache) {
+        // removeNode: removes the parent but keeps the children
+        var fragment = cache.fragment;
+        fragment.appendChild(parentNode).removeNode();
+        return fragment;
+      };
 
-    return Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT')
+    if (Feature('DOCUMENT_RANGE'))
+      var getFragmentFromChildNodes = function(parentNode, cache) {
+        var range = cache.range;
+        range.selectNodeContents(parentNode);
+        return range.extractContents() || cache.fragment;
+      },
+
+      getFragmentCache = function(ownerDoc) {
+        var id = ownerDoc === doc ? '1' : getFuseId(getWindow(ownerDoc).frameElement),
+         data = Data[id];
+        return (data.fragmentCache = data.fragmentCache || {
+          'node':     ownerDoc.createElement('div'),
+          'fragment': ownerDoc.createDocumentFragment(),
+          'range':    ownerDoc.createRange()
+        });
+      };
+
+
+    Element.from = from;
+
+    Element.fromElement = fromElement;
+
+    Dom.extendByTag = extendByTag;
+
+    Dom.getFragmentFromString =
+      Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT')
       ? getFromContextualFragment
       : getFromDocumentFragment;
   })();
+
+  fromElement = Element.from;
 
   /*--------------------------------------------------------------------------*/
 
