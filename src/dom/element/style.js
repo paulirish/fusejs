@@ -171,7 +171,7 @@
         // set it on something we can grab a pixel value from.
         // Inspired by Dean Edwards' comment
         // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
-        if (/^\d+(\.\d+)?(?!px)[%a-z]+$/i.test(result)) {
+        if (/^-?\d+(\.\d+)?(?!px)[%a-z]+$/i.test(result)) {
           if (name == 'fontSize') {
             unit = result.match(/\D+$/)[0];
             if (unit === '%') {

@@ -1,3 +1,5 @@
+* Ensure IE Fuse.Dom.Element#getStyle converts negative non-px values to px. [jddalton, jakearchibald, kangax]
+
 * Normalize \t \n \r and multiple spaces to \x20 in element className methods. [jddalton]
 
 * Move method definition of Fuse.Util.$, Fuse.get, and Fuse.getById to dom.js and cleanup element.js. [jddalton]
