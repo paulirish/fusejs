@@ -40,11 +40,11 @@
       };
 
       plugin.query = function query(selectors, callback) {
-        return Selector.select(selectors, this, callback);
+        return Selector.select(selectors, this.raw || this, callback);
       };
 
       plugin.rawQuery = function rawQuery(selectors, callback) {
-        return Selector.rawSelect(selectors, this, callback);
+        return Selector.rawSelect(selectors, this.raw || this, callback);
       };
 
       plugin.siblings = function siblings(selectors) {
