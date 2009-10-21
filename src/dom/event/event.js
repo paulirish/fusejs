@@ -361,12 +361,12 @@
 
           // shallow copy handlers to avoid issues with nested
           // observe/stopObserving
-          var data = Data[id],
-           ec = data.events[eventName],
-           node = data.node,
-           context = data.decorator || node,
+          var data  = Data[id],
+           ec       = data.events[eventName],
+           node     = data.node,
+           context  = data.decorator || node,
            handlers = slice.call(ec.handlers, 0),
-           length = handlers.length;
+           length   = handlers.length;
 
           event = Event.extend(event || getWindow(node).event, node);
           while (length--) handlers[length].call(context, event);

@@ -2,9 +2,9 @@
 
   Document = 
   Fuse.Dom.Document = (function() {
-    var Decorator = function() { },
+    function Decorator() { }
 
-    Document = function Document(node) {
+    function Document(node) {
       // bail if empty, already decorated, or not a document node
       if (!node || node.raw || node.nodeType !== DOCUMENT_NODE)
         return node;
@@ -25,16 +25,18 @@
       data.node =
       viewport.ownerDocument =
       decorated.raw = node;
-
+      decorated.nodeName = node.nodeName;
+ 
       eachKey(pluginViewport, function(value, key, object) {
         if (hasKey(object, key)) viewport[key] = value;
       });
 
       return decorated;
-    };
+    }
 
-    Document = Class(Node, { 'constructor': Document });
+    var Document = Class(Node, { 'constructor': Document });
     Decorator.prototype = Document.plugin;
+    Document.updateGenerics = Node.updateGenerics;
     return Document;
   })();
 
