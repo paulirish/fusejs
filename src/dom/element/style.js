@@ -211,9 +211,13 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // Note: For performance we only support classNames containing \x20 spaces.
-  // Newline, tab and other whitespaces are not supported.
+  // Note: For performance we normalize all spaces to \x20.
+  // http://www.w3.org/TR/html5/infrastructure.html#space-character
   (function(plugin) {
+    var split = Fuse.String.plugin.split,
+     matchEdgeSpaces = /[\t\n\r\f]/g,
+     matchExtraSpaces = /\x20{2,}/g;
+
     plugin.addClassName = function addClassName(className) {
       if (!plugin.hasClassName.call(this, className)) {
         var element = this.raw || this;
@@ -223,22 +227,38 @@
     };
 
     plugin.classNames = function classNames() {
-      var cn = (this.raw || this).className;
-      return cn ? Fuse.String(cn).split(' ') : Fuse.List();
+      var element = this.raw || this, cn = element.className, original = cn;
+      if (cn.length) {
+        // normalize to optimize future calls
+        matchEdgeSpaces.lastIndex = matchExtraSpaces.lastIndex = 0;
+        cn = cn.replace(matchEdgeSpaces, ' ').replace(matchExtraSpaces, ' ');
+        if (cn !== original) element.className = cn;
+
+        return split.call(cn, ' ');
+      }
+      return Fuse.List();
     };
 
     plugin.hasClassName = function hasClassName(className) {
-      var cn = (this.raw || this).className;
-      return cn.length > 0 && (cn === className || (' ' + cn + ' ')
-        .indexOf(' ' + className + ' ') > -1);
+      var element = this.raw || this, cn = element.className, original = cn;
+      matchEdgeSpaces.lastIndex = 0;
+      if (cn.length && (cn === className ||
+          (' ' + (cn = cn.replace(matchEdgeSpaces, ' ')) + ' ')
+            .indexOf(' ' + className + ' ') > -1)) {
+        // normalize to optimize future calls
+        if (cn !== original) element.className = cn;
+        return true;
+      }
+      return false;
     };
 
     plugin.removeClassName = function removeClassName(className) {
-      var classNames, cn, length,
-       element = this.raw || this, i = 0, result = [];
+      var classNames, length, element = this.raw || this,
+       cn = element.className, i = 0, result = [];
 
-      if (cn = element.className) {
-        classNames = cn.split(' ');
+      if (cn.length) {
+        matchEdgeSpaces.lastIndex = 0;
+        classNames = cn.replace(matchEdgeSpaces, ' ').split(' ');
         length = classNames.length;
 
         while (i < length) {
@@ -308,6 +328,7 @@
       };
 
       // TODO: Is this really needed or the best approach ?
+      // Sniff for Safari 2.x
       if (Fuse.Env.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d+)/) || [])[1] < 500) {
         var __setOpacity = setOpacity;
 
@@ -326,6 +347,7 @@
           return this;
         };
       }
+      // Sniff Firefox 1.5.0.x
       else if (Fuse.Env.Agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
         setOpacity = function setOpacity(value) {
           this.style.opacity = (value == 1) ? 0.999999 :
