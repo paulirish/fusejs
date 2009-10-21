@@ -135,13 +135,10 @@
 
   (function(__Env) {
     delete Fuse.Env;
-    var Env = Fuse.addNS('Env');
+    var Env     = Fuse.addNS('Env');
+    Env.Bug     = __Env.Bug;
+    Env.Feature = __Env.Feature;
 
     Env.addNS('Agent');
-    Env.addNS('Bug');
-    Env.addNS('Feature');
-
-    _extend(Env.Agent,   __Env.Agent);
-    _extend(Env.Bug,     __Env.Bug);
-    _extend(Env.Feature, __Env.Feature);
+    _extend(Env.Agent, __Env.Agent);
   })(Fuse.Env);

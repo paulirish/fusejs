@@ -19,18 +19,16 @@
 
     (function() {
       plugin.childElements = function childElements(selectors) {
-        var nextSiblings, element = this.raw || this;
-        if (!element[firstNode]) return NodeList();
-
+        var nextSiblings, element = (this.raw || this)[firstNode];
         while (element && element.nodeType !== ELEMENT_NODE)
           element = element[nextNode];
         if (!element) return NodeList();
 
-        nextSiblings = plugin.nextSiblings;
+        element = fromElement(element);
         return !selectors || !selectors.length ||
-            selectors && Selector.match(this, selectors)
-          ? prependList(nextSiblings.call(element, selectors), this, NodeList())
-          : nextSiblings.call(element, selectors);
+            selectors && Selector.match(element, selectors)
+          ? prependList(plugin.nextSiblings.call(element, selectors), element, NodeList())
+          : plugin.nextSiblings.call(element, selectors);
       };
 
       plugin.match = function match(selectors) {
@@ -261,8 +259,8 @@
 
     (function() {
       function collect(decorator, property, selectors) {
-        var match, element = this.raw || this,
-         i = 0, results = NodeList();
+        var match, element = decorator.raw || decorator,
+         i = 0, results = [];
 
         if (element = element[property]) {
           if (selectors && selectors.length) {

@@ -80,7 +80,7 @@
     })(),
 
     createFusebox = function() {
-      var Array, Date, Function, Number, Object, RegExp, String, fromArray,
+      var Array, Date, Function, Number, Object, RegExp, String,
        glSlice     = global.Array.prototype.slice,
        glFunction  = global.Function,
        matchStrict = /^\s*(['"])use strict\1/,
@@ -97,10 +97,14 @@
 
       if (mode === OBJECT__PROTO__) {
         Array = function Array(length) {
-          var result = arguments.length === 1
-            ? new __Array(length)
-            : fromArray(arguments);
-          result['__proto__'] = Array.prototype;
+          var result, args = arguments, argLen = args.length;
+          if (argLen) {
+            result = argLen === 1 && length > -1
+              ? new __Array(length)
+              : Array.fromArray(args); 
+          } else result = new __Array();
+
+          result['__proto__'] = arrPlugin;
           return result;
         };
 
@@ -110,7 +114,7 @@
            result = arguments.length === 1
              ? new __Date(year)
              : new __Date(year, month, date || 1, hours || 0, minutes || 0, seconds || 0, ms || 0);
-           result['__proto__'] = Date.prototype;
+           result['__proto__'] = datePlugin;
           }
           else result = String(new __Date);
           return result;
@@ -121,13 +125,13 @@
           result = args.length < 3
            ? __Function(argN, body)
            : __Function.apply(__Function, args);
-          result['__proto__'] = Function.prototype;
+          result['__proto__'] = funcPlugin;
           return result;
         };
 
         Number = function Number(value) {
           var result = new __Number(value);
-          result['__proto__'] = Number.prototype;
+          result['__proto__'] = numPlugin;
           return result;
         };
 
@@ -144,19 +148,19 @@
            return value;
           }
           var result = new __Object;
-          result['__proto__'] = Object.prototype;
+          result['__proto__'] = objPlugin;
           return result;
         };
 
         RegExp = function RegExp(pattern, flags) {
           var result = new __RegExp(pattern, flags);
-          result['__proto__'] = RegExp.prototype;
+          result['__proto__'] = rePlugin;
           return result;
         };
 
         String = function String(value) {
           var result = new __String(arguments.length ? value : '');
-          result['__proto__'] = String.prototype;
+          result['__proto__'] = strPlugin;
           return result;
         };
 
@@ -170,9 +174,13 @@
       }
       else {
         Array = function Array(length) {
-          return arguments.length === 1
-           ? new __Array(length)
-           : fromArray(arguments);
+          var args = arguments, argLen = args.length;
+          if (argLen) {
+            return argLen === 1 && length > -1
+             ? new __Array(length)
+             : Array.fromArray(args);
+          }
+          return new __Array();
         };
 
         Date = function Date(year, month, date, hours, minutes, seconds, ms) {
@@ -240,11 +248,13 @@
 
       /*----------------------------------------------------------------------*/
 
-      var arrPlugin         = Array.plugin  = Array.prototype,
-       datePlugin           = Date.plugin   = Date.prototype,
-       numPlugin            = Number.plugin = Number.prototype,
-       rePlugin             = RegExp.plugin = RegExp.prototype,
-       strPlugin            = String.plugin = String.prototype,
+      var arrPlugin         = Array.plugin    = Array.prototype,
+       datePlugin           = Date.plugin     = Date.prototype,
+       funcPlugin           = Function.plugin = Function.prototype,
+       objPlugin            = Object.plugin   = Object.prototype,
+       numPlugin            = Number.plugin   = Number.prototype,
+       rePlugin             = RegExp.plugin   = RegExp.prototype,
+       strPlugin            = String.plugin   = String.prototype,
        __concat             = arrPlugin.concat,
        __every              = arrPlugin.every,
        __filter             = arrPlugin.filter,
@@ -328,7 +338,6 @@
         }
       };
 
-      fromArray =
       Array.fromArray = (function() {
         var fromArray = function fromArray(array) {
           var result = new __Array;
@@ -339,7 +348,7 @@
         if (mode === OBJECT__PROTO__) {
           fromArray = function fromArray(array) {
             var result = glSlice.call(array, 0);
-            result['__proto__'] = Array.prototype;
+            result['__proto__'] = arrPlugin;
             return result;
           };
         }
@@ -353,7 +362,7 @@
       })();
 
       Array.create = function create() {
-        return fromArray(arguments);
+        return Array.fromArray(arguments);
       };
 
       // ECMA-5 15.4.3.2
@@ -432,7 +441,7 @@
       if (!SKIP_METHODS_RETURNING_ARRAYS)
         arrPlugin.concat = function concat() {
           var args = arguments;
-          return fromArray(args.length
+          return Array.fromArray(args.length
             ? __concat.apply(this, args)
             : __concat.call(this));
         };
@@ -447,7 +456,7 @@
           var result = __filter.call(this, callback ||
             function(value) { return value != null; }, thisArg);
           return result.length
-            ? fromArray(result)
+            ? Array.fromArray(result)
             : Array();
         };
 
@@ -471,7 +480,7 @@
         arrPlugin.map = function map(callback, thisArg) {
           var result = __map.call(this, callback || K, thisArg);
           return result.length
-            ? fromArray(result)
+            ? Array.fromArray(result)
             : Array();
         };
 
@@ -486,7 +495,7 @@
         arrPlugin.slice = function slice(start, end) {
           var result = __slice.call(this, start, end == null ? this.length : end);
           return result.length
-            ? fromArray(result)
+            ? Array.fromArray(result)
             : Array();
         };
 
@@ -699,12 +708,11 @@
 
       arrPlugin.constructor  = Array;
       datePlugin.constructor = Date;
+      funcPlugin.constructor = Function;
+      objPlugin.constructor  = Object;
       numPlugin.constructor  = Number;
       rePlugin.constructor   = RegExp;
       strPlugin.constructor  = String;
-
-      (Function.plugin = Function.prototype).constructor = Function;
-      (Object.plugin   = Object.prototype).constructor = Object;
 
       /*----------------------------------------------------------------------*/
 

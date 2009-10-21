@@ -207,6 +207,8 @@
 
    'dom/form/field.js',
    'dom/form/form.js',
+   'dom/form/event-observer.js',
+   'dom/form/timed-observer.js',
 
    'lang/grep.js',
    'lang/inspect.js',

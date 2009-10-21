@@ -49,19 +49,21 @@
     };
 
     plugin.findFirstElement = function findFirstElement() {
-      var firstByIndex, node, firstNode = null, tabIndex, i = 0,
-       minTabIndex = Infinity;
+      var firstByIndex, node, tabIndex, i = 0,
+       firstNode = null, minTabIndex = Infinity;
 
       eachElement(this, function(node) {
-        if (node.type !== 'hidden' && !node.disabled && !firstNode)
-          firstNode = node;
-        if ((tabIndex = node.tabIndex) > -1 && tabIndex < minTabIndex) {
-          minTabIndex  = tabIndex;
-          firstByIndex = node;
+        if (node.type !== 'hidden' && !node.disabled) {
+          if (!firstNode) firstNode = node;
+          if (node.getAttributeNode('tabIndex') &&
+              (tabIndex = node.tabIndex) > -1 && tabIndex < minTabIndex) {
+            minTabIndex  = tabIndex;
+            firstByIndex = node;
+          }
         }
       });
 
-      return firstByIndex || firstNode;
+      return fromElement(firstByIndex || firstNode);
     };
 
     plugin.focusFirstElement = function focusFirstElement() {
@@ -77,8 +79,8 @@
       if (node = nodes[0]) {
         do {
           FIELD_NODE_NAMES[node.nodeName.toUpperCase()] &&
-            results.push(fromElement(node));
-        } while (node = element[i++]);
+            results.push(node);
+        } while (node = nodes[i++]);
       }
       return results;
     };
@@ -120,9 +122,9 @@
       }
 
       if (plugin.hasAttribute.call(this, 'method') && !options.method)
-        options.method = form.method;
+        options.method = (this.raw || this).method;
 
-      return new Fuse.Ajax.Request(action, options);
+      return Fuse.Ajax.Request(action, options);
     };
 
     plugin.reset = function reset() {
@@ -140,33 +142,39 @@
       else if (typeof options.hash === 'undefined')
         options.hash = true;
 
-      var element, key, value, isImageType, isSubmitButton, getValue, nodeName,
-       submitSerialized, type, i = 1,
+      var element, key, value, isImageType, isSubmitButton,
+       nodeName, submitSerialized, type, i = 1,
+       element     = this.raw || this,
        checkString = !!elements,
        doc         = Fuse._doc,
        Dom         = Fuse.Dom,
        result      = Fuse.Object(),
        submit      = options.submit;
 
+      if (submit && submit.raw)
+        submit = submit.raw;
       if (!elements)
-        elements = (this.raw || this).getElementsByTagName('*');
+        elements = element.getElementsByTagName('*');
+      if (!elements.length)
+        elements = [element];
 
       if (element = elements[0]) {
         do {
-
           // avoid checking for element ids if we are iterating the default nodeList
-          if (checkString && isString(element))
-            element = doc.getElementById(element);
+          if (checkString && isString(element) &&
+              !(element = doc.getElementById(element))) continue;
 
           // skip if a serializer does not exist for the element
-          nodeName = element.nodeName || '';
+          nodeName = element.nodeName;
           if (!FIELD_NODE_NAMES[nodeName.toUpperCase()]) continue;
 
-          key   = element.name;
-          type  = element.type;
           value = element.getValue
             ? element.getValue()
-            : Dom[capitalize.call(nodeName) + 'Element'].plugin.getValue.call(element);
+            : fromElement(element).getValue();
+
+          element = element.raw || element;
+          key     = element.name;
+          type    = element.type;
 
           isImageType = type === 'image';
           isSubmitButton = type === 'submit' || isImageType;

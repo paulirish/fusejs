@@ -84,11 +84,14 @@
       return splice;
     })(plugin.splice);
 
+    // make NodeList use Fuse.Array#map so values aren't passed through Fuse.Dom.Node
+    plugin.map = Fuse.Array.plugin.map;
+
     // add Element methods
     eachKey(Element.plugin, function(value, key, object) {
       if (SKIPPED_PROPERTIES[key] || !hasKey(object, key)) return;
 
-      plugin[key] = /^(?:(?:is|get|has)[A-Z]|ancestor|child|descendant|down|empty|first|identify|next|previous|read|scroll|sibling|visible)/.test(key) ?
+      plugin[key] = /^(?:(?:is|get|has)[A-Z]|ancestor|child|descendant|down|empty|first|identify|inspect|next|previous|read|scroll|sibling|visible)/.test(key) ?
         // getters return the value of the first element
         function() {
           var args = arguments, first = this[0];

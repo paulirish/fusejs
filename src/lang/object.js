@@ -265,19 +265,18 @@
       }
 
       function toQueryString(object) {
-        var results = Fuse.List();
+        var results = [];
         eachKey(object, function(value, key) {
           if (hasKey(object, key)) {
             key = encodeURIComponent(key);
-            if (value && typeof value === 'object') {
-              if (isArray(value)) {
-                var i = results.length, j = 0, length = i + value.length;
-                while (i < length) results[i++] = toQueryPair(key, value[j++]);
-              }
-            } else results.push(toQueryPair(key, value));
+            if (value && isArray(value)) {
+              var i = results.length, j = 0, length = i + value.length;
+              while (i < length) results[i++] = toQueryPair(key, value[j++]);
+            }
+            else results.push(toQueryPair(key, value));
           }
         });
-        return results.join('&');
+        return Fuse.String(results.join('&'));
       }
 
       return toQueryString;

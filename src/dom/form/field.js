@@ -29,9 +29,19 @@
 
     textAreaPlugin = Dom.TextAreaElement.plugin,
 
+    PLUGINS = {
+      'BUTTON':   buttonPlugin,
+      'INPUT':    inputPlugin,
+      'OPTION':   optionPlugin,
+      'SELECT':   selectPlugin,
+      'TEXTAREA': textAreaPlugin
+    },
+
     getOptionValue = function getValue() {
       var element = this.raw || this;
-      return element[plugin.hasAttribute.call(this, 'value') ? 'value' : 'text'];
+      return Fuse.String(element[optionPlugin.hasAttribute.call(this, 'value')
+        ? 'value'
+        : 'text']);
     };
 
 
@@ -47,11 +57,10 @@
     };
 
     inputPlugin.clear = function clear() {
-      var element = this.raw || this;
-      if (getNodeName(element) !== 'BUTTON' &&
-          !INPUT_BUTTONS[element.type])
-        plugin.setValue.call(this, null);
-      return element;
+      var element = this.raw || this, nodeName = getNodeName(element);
+      if (nodeName !== 'BUTTON' && !INPUT_BUTTONS[element.type])
+        PLUGINS[nodeName].setValue.call(this, null);
+      return this;
     };
 
     inputPlugin.disable = function disable() {
@@ -76,9 +85,11 @@
     };
 
     inputPlugin.serialize = function serialize() {
-      var value, pair, element = this.raw || this;
+      var value, pair,
+       element = this.raw || this, nodeName = getNodeName(element);
+
       if (!element.disabled && element.name) {
-        value = plugin.getValue.call(this);
+        value = PLUGINS[nodeName].getValue.call(this);
         if (isArray(value) && value.length < 2)
           value = value[0];
         if (value != null) {
@@ -87,7 +98,7 @@
           return Obj.toQueryString(pair);
         }
       }
-      return '';
+      return Fuse.String('');
     };
 
     inputPlugin.select = function select() {
@@ -107,18 +118,19 @@
     /* define getValue/setValue for each field class */
 
     buttonPlugin.getValue = function getValue() {
-      return plugin.readAttribute.call(this, 'value');
+      return buttonPlugin.readAttribute.call(this, 'value');
     };
 
     buttonPlugin.setValue = function setValue(value) {
-      plugin.writeAttribute.call(this, 'value', value);
+      buttonPlugin.writeAttribute.call(this, 'value', value);
+      return this;
     };
 
     inputPlugin.getValue = function getValue() {
       var element = this.raw || this;
-      return CHECKED_INPUT_TYPES[element.type.toUpperCase()]
-        ? element.checked ? element.value : null
-        : element.value;
+      return CHECKED_INPUT_TYPES[element.type.toUpperCase()] && !element.checked
+        ? null
+        : Fuse.String(element.value);
     };
 
     inputPlugin.setValue = function setValue(value) {
@@ -126,6 +138,7 @@
       if (CHECKED_INPUT_TYPES[element.type.toUpperCase()])
         element.checked = !!value;
       else element.value = value || '';
+      return this;
     };
 
     selectPlugin.getValue = function getValue() {
@@ -143,7 +156,7 @@
     };
 
     selectPlugin.setValue = function setValue(value) {
-      var i, node, element = this.raw || this;
+      var node, i = 0, element = this.raw || this;
       if (value === null)
         element.selectedIndex = -1;
 
@@ -154,18 +167,21 @@
           node.selected = value.indexOf(expando + getOptionValue.call(node) + expando) > -1;
       }
       else {
+        value = String(value);
         while (node = element.options[i++])
-          if (getOptionValue.call(node) === value) { node.selected = true; break; }
+          if (getOptionValue.call(node) == value) { node.selected = true; break; }
       }
+      return this;
     };
 
     textAreaPlugin.getValue = function getValue() {
-      return (this.raw || this).value;
+      return Fuse.String((this.raw || this).value);
     };
 
     textAreaPlugin.setValue =
     optionPlugin.setValue   = function setValue(value) {
-      return (this.raw || this).value  = value || '';
+      (this.raw || this).value  = value || '';
+      return this;
     };
 
     optionPlugin.getValue = getOptionValue;

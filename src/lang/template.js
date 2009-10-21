@@ -1,22 +1,36 @@
   /*----------------------------- LANG: TEMPLATE -----------------------------*/
 
   Fuse.Template = (function() {
-    var Klass = function() { },
+    function Klass() { }
 
-    Template = function Template(template, pattern) {
+    function Template(template, pattern) {
       pattern = pattern || Fuse.Template.Pattern;
       if (!isRegExp(pattern))
         pattern = Fuse.RegExp(escapeRegExpChars(pattern));
       if (!pattern.global)
         pattern = Fuse.RegExp.clone(pattern, { 'global': true });
 
-      var instance = new Klass;
+      var instance = this[expando] || new Klass;
+      delete this[expando];
+
       instance.template = Fuse.String(template);
       instance.pattern  = pattern;
       return instance;
+    }
+
+    var __apply = Template.apply, __call = Template.call,
+     Template = Class({ 'constructor': Template });
+
+    Template.call = function(thisArg) {
+      thisArg[expando] = thisArg;
+      return __call.apply(this, arguments);
     };
 
-    Template = Class({ 'constructor': Template });
+    Template.apply = function(thisArg, argArray) {
+      thisArg[expando] = thisArg;
+      return __apply.call(this, thisArg, argArray);
+    };
+
     Klass.prototype = Template.plugin;
     return Template;
   })();

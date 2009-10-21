@@ -28,43 +28,43 @@
 
     /*------------------------------------------------------------------------*/
 
+    var Field = Fuse.Dom.InputElement, getValue = nil;
+
     Field.Observer =
     Field.TimedObserver = (function() {
-      var Klass = function() { },
+      function Klass() { }
 
-      FieldTimedObserver = function FieldTimedObserver(element, callback, interval, options) {
+      function FieldTimedObserver(element, callback, interval, options) {
         var instance = new Klass;
         BaseTimedObserver.call(instance, element, callback, interval, options);
         return instance;
-      };
+      }
 
-      FieldTimedObserver = Class(BaseTimedObserver, { 'constructor': FieldTimedObserver });
+      var FieldTimedObserver = Class(BaseTimedObserver, { 'constructor': FieldTimedObserver });
       Klass.prototype = FieldTimedObserver.plugin;
       return FieldTimedObserver;
     })();
 
-    Field.Observer.plugin.getValue = (function() {
-      function getValue() { return Field.getValue(this.element); }
-      return getValue;
-    })();
+    Field.Observer.plugin.getValue = function getValue() {
+      return this.element.getValue();
+    };
 
     Form.Observer =
     Form.TimedObserver = (function() {
-      var Klass = function() { },
+      function Klass() { }
 
-      FormTimedObserver = function FormTimedObserver(element, callback, interval, options) {
+      function FormTimedObserver(element, callback, interval, options) {
         var instance = new Klass;
         BaseTimedObserver.call(instance, element, callback, interval, options);
         return instance;
-      };
+      }
 
-      FormTimedObserver = Class(BaseTimedObserver, { 'constructor': FormTimedObserver });
+      var FormTimedObserver = Class(BaseTimedObserver, { 'constructor': FormTimedObserver });
       Klass.prototype = FormTimedObserver.plugin;
       return FormTimedObserver;
     })();
 
-    Form.Observer.plugin.getValue = (function() {
-      function getValue() { return Form.serialize(this.element); }
-      return getValue;
-    })();
+    Form.Observer.plugin.getValue = function getValue() {
+      return this.element.serialize();
+    };
   })();

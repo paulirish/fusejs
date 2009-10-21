@@ -1,15 +1,15 @@
   /*------------------------------ AJAX: UPDATER -----------------------------*/
 
   Fuse.Ajax.Updater = (function() {
-    var Klass = function() { },
+    function Klass() { }
 
-    Request = Fuse.Ajax.Request,
-
-    Updater = function Updater(container, url, options) {
+    function Updater(container, url, options) {
       var onDone,
-       instance = new Klass,
+       instance     = this[expando] || new Klass,
        callbackName = 'on' + Request.Events[4],
-       onDone = options[callbackName];
+       onDone       = options[callbackName];
+
+      delete this[expando];
 
       instance.container = {
         'success': Fuse.get(container.success || container),
@@ -23,9 +23,22 @@
 
       // instance._super() equivalent
       Fuse.Ajax.Request.call(instance, url, options);
+    }
+
+    var __apply = Updater.apply, __call = Updater.call,
+     Request = Fuse.Ajax.Request,
+     Updater = Class(Fuse.Ajax.Request, { 'constructor': Updater });
+
+    Updater.call = function(thisArg) {
+      thisArg[expando] = thisArg;
+      return __call.apply(this, arguments);
     };
 
-    Updater = Class(Fuse.Ajax.Request, { 'constructor': Updater });
+    Updater.apply = function(thisArg, argArray) {
+      thisArg[expando] = thisArg;
+      return __apply.call(this, thisArg, argArray);
+    };
+
     Klass.prototype = Updater.plugin;
     return Updater;
   })();

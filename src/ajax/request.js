@@ -1,12 +1,14 @@
   /*---------------------------- AJAX: REQUEST -------------------------------*/
 
   Fuse.Ajax.Request = (function() {
-    var Decorator = function() { },
+    function Decorator() { }
 
-    Request = function Request(url, options) {
-      var decorated  = new Decorator,
+    function Request(url, options) {
+      var decorated  = this[expando] || new Decorator,
        onStateChange = decorated.onStateChange,
        onTimeout     = decorated.onTimeout;
+
+      delete this[expando];
 
       decorated.raw = Fuse.Ajax.create();
 
@@ -18,9 +20,21 @@
 
       decorated.request(url, options);
       return decorated;
+    }
+
+    var __apply = Request.apply, __call = Request.call,
+     Request = Class(Fuse.Ajax.Base, { 'constructor': Request });
+
+    Request.call = function(thisArg) {
+      thisArg[expando] = thisArg;
+      return __call.apply(this, arguments);
     };
 
-    Request = Class(Fuse.Ajax.Base, { 'constructor': Request });
+    Request.apply = function(thisArg, argArray) {
+      thisArg[expando] = thisArg;
+      return __apply.call(this, thisArg, argArray);
+    };
+
     Decorator.prototype = Request.plugin;
     return Request;
   })();

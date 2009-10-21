@@ -1,15 +1,15 @@
   /*------------------------ AJAX: PERIODICAL UPDATER ------------------------*/
 
   Fuse.Ajax.TimedUpdater = (function() {
-    var Klass = function() { },
+    function Klass() { }
 
-    Request = Fuse.Ajax.Request,
-
-    TimedUpdater = function TimedUpdater(container, url, options) {
+    function TimedUpdater(container, url, options) {
       var onDone,
-       instance     = new Klass,
+       instance     = this[expando] || new Klass,
        callbackName = 'on' + Request.Events[4],
        options      = _extend(clone(TimedUpdater.options), options);
+
+      delete this[expando];
 
       // this._super() equivalent
       Fuse.Ajax.Base.call(instance, url, options);
@@ -33,9 +33,22 @@
       instance.onTimerEvent = function() { instance.start(); };
       instance.start();
       return instance;
+    }
+
+    var __apply = TimedUpdater.apply, __call = TimedUpdater.call,
+     Request = Fuse.Ajax.Request,
+     TimedUpdater = Class(Fuse.Ajax.Base, { 'constructor': TimedUpdater });
+
+    TimedUpdater.call = function(thisArg) {
+      thisArg[expando] = thisArg;
+      return __call.apply(this, arguments);
     };
 
-    TimedUpdater = Class(Fuse.Ajax.Base, { 'constructor': TimedUpdater });
+    TimedUpdater.apply = function(thisArg, argArray) {
+      thisArg[expando] = thisArg;
+      return __apply.call(this, thisArg, argArray);
+    };
+
     Klass.prototype = TimedUpdater.plugin;
     return TimedUpdater;
   })();
