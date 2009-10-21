@@ -1,3 +1,5 @@
+* Tweak how String#unescapeHTML tokenizes tags. [jddalton]
+
 * Fix regression bug with Fuse.Dom.Node.getFuseId() getting the proper id. [jddalton]
 
 * Add support for passing a callback to Fuse.query(selector, context, callback). [jddalton]

@@ -197,17 +197,18 @@
 
   (function(plugin) {
 
-    var matchBlank      = Fuse.RegExp('^\\s*$'),
+    var replace         = plugin.replace,
+     matchBlank         = Fuse.RegExp('^\\s*$'),
      matchCapped        = /([A-Z]+)([A-Z][a-z])/g,
      matchCamelCases    = /([a-z\d])([A-Z])/g,
      matchDoubleColons  = /::/g,
-     matchHTMLComments  = Fuse.RegExp('<!--\\s*' + Fuse.scriptFragment + '\\s*-->', 'gi'),
      matchHyphens       = /-/g,
      matchHyphenated    = /-+(.)?/g,
      matchOpenScriptTag = /<script/i,
-     matchScripts       = new RegExp(Fuse.scriptFragment, 'gi'),
      matchUnderscores   = /_/g,
-     replace            = plugin.replace;
+     matchScripts       = new RegExp(Fuse.scriptFragment, 'gi'),
+     matchHTMLComments  = new RegExp('<!--[\\x20\\t\\n\\r]*' +
+       Fuse.scriptFragment + '[\\x20\\t\\n\\r]*-->', 'gi');
 
     plugin.blank = function blank() {
       if (this == null) throw new TypeError;
@@ -432,7 +433,7 @@
     // http://www.w3.org/TR/REC-xml-names/#ns-using
     var matchTags = (function() {
       var name   = '\\w+',
-       space     = '[\\x20\\t\\r\\n]', // \x20 \x09 \x0D \x0A
+       space     = '[\\x20\\t\\n\\r]',
        eq        = space + '?=' + space + '?',
        charRef   = '&#[0-9]+;',
        entityRef = '&' + name + ';',
@@ -446,12 +447,13 @@
 
     function define() {
       var tags      = [],
+       count        = 0,
        div          = Fuse._div,
        container    = Fuse._doc.createElement('pre'),
        textNode     = container.appendChild(Fuse._doc.createTextNode('')),
        replace      = plugin.replace,
        matchTagEnds = />/g,
-       matchToken   = new RegExp(expando + '\\d+' + expando, 'g');
+       matchTokens  = /@fusetoken/g;
 
        escapeHTML = function escapeHTML() {
          if (this == null) throw new TypeError;
@@ -464,13 +466,12 @@
        };
 
       function swapTagsToTokens(tag) {
-        var length = tags.length;
         tags.push(tag);
-        return expando + length + expando;
+        return '@fusetoken';
       }
 
-      function swapTokensToTags(token) {
-        return tags[token.slice(15).slice(0, -15)];
+      function swapTokensToTags() {
+        return tags[count++];
       }
 
       function unescapeHTML() {
@@ -479,7 +480,7 @@
 
         // tokenize tags before setting innerHTML then swap them after
         if (tokenized = string.indexOf('<') > -1) {
-          tags.length = 0;
+          tags.length = count = 0;
           string = replace.call(string, matchTags, swapTagsToTokens);
         }
 
@@ -487,7 +488,7 @@
         result = getText();
 
         return Fuse.String(tokenized
-          ? replace.call(result, matchToken, swapTokensToTags)
+          ? replace.call(result, matchTokens, swapTokensToTags)
           : result);
       }
 
