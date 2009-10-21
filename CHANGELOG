@@ -1,3 +1,5 @@
+* Switch from using Array#join for string concatenation to using the plus (+) operator for better minification. [jddalton]
+
 * Support updateGenerics() methods on the DOM wrappers. [jddalton]
 
 * Tweak how String#unescapeHTML tokenizes tags. [jddalton]

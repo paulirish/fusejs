@@ -6,10 +6,10 @@
     function Subclass() { };
 
     function createNamedClass(name) {
-      return new Function('', [
-        'function ' + name + '() {',
-        'return this.initialize && this.initialize.apply(this, arguments);',
-        '}', 'return ' + name].join('\n'))();
+      return new Function('',
+        'function ' + name + '() {' +
+        'return this.initialize && this.initialize.apply(this, arguments);' +
+        '} return ' + name)();
     }
 
     function createCallSuper(plugin) {
