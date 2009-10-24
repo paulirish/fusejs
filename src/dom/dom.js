@@ -7,7 +7,7 @@
   Data['2'] = { };
 
   Fuse._doc   = global.document;
-  Fuse._div   = Fuse._doc.createElement('div');
+  Fuse._div   = Fuse._doc.createElement('DiV');
   Fuse._docEl = Fuse._doc.documentElement;
   Fuse._info  = { };
 
@@ -63,7 +63,7 @@
           return Element.create(object, attributes, context);
 
         context = attributes;
-        if (object.charAt(0) == '<' && object.charAt(object.length - 1) == '>')
+        if (object.charAt(0) == '<')
           return Element.create(object, context);
         object = (context || doc).getElementById(object || expando);
         return object && fromElement(object);
@@ -104,7 +104,8 @@
     return global;
   };
 
-  getNodeName = Fuse._docEl.nodeName === 'HTML'
+  // HTML document coerce nodeName to uppercase
+  getNodeName = Fuse._div.nodeName === 'DIV'
     ? function(element) { return element.nodeName; }
     : function(element) { return element.nodeName.toUpperCase(); };
 

@@ -1,3 +1,5 @@
+* Reduce the complexity of the html check in Fuse.get() and Fuse.Dom.Element.create() and tweak the feature detection in getNodeName(). [jddalton, kangax]
+
 * Ensure IE Fuse.Dom.Element#getStyle converts negative non-px values to px. [jddalton, jakearchibald, kangax]
 
 * Normalize \t \n \r and multiple spaces to \x20 in element className methods. [jddalton]

@@ -171,7 +171,7 @@
           return Element.create(object, attributes, context);
   
         context = attributes;
-        if (object.charAt(0) == '<' && object.charAt(object.length - 1) == '>')
+        if (object.charAt(0) == '<')
           return Element.create(object, context);
         object = (context || doc).getElementById(object || expando);
         return object && fromElement(object);
