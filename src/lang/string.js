@@ -432,7 +432,7 @@
     // Tag parsing instructions:
     // http://www.w3.org/TR/REC-xml-names/#ns-using
     var matchTags = (function() {
-      var name   = '\\w+',
+      var name   = '[-\\w]+',
        space     = '[\\x20\\t\\n\\r]',
        eq        = space + '?=' + space + '?',
        charRef   = '&#[0-9]+;',

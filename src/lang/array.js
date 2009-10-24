@@ -527,7 +527,7 @@
           return results;
         };
 
-
+      // ECMA-5 15.4.4.10
       if (Bug('ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES'))
         plugin.slice = (function(__slice) {
           function slice(start, end) {

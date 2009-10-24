@@ -67,7 +67,7 @@
     }
 
     plugin.getFuseId = function getFuseId() {
-      return Node.getFuseId(this.raw|| this);
+      return Node.getFuseId(this.raw || this);
     };
 
     viewport.getDimensions = function getDimensions() {
