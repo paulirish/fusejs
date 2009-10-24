@@ -333,6 +333,8 @@
       };
 
 
+    Element.create = create;
+
     Element.from = from;
 
     Element.fromElement = fromElement;
