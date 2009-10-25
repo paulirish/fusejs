@@ -237,19 +237,19 @@ new Test.Unit.Runner({
 
     // first observer should execute and attach a new observer
     // the added observer should not be executed this time around.
-    document.observe('test:somethingHappened', function() {
-      document.observe('test:somethingHappened', observer);
+    $(document).observe('test:somethingHappened', function() {
+      $(document).observe('test:somethingHappened', observer);
     });
 
     // if there is a bug then this observer will be skipped
-    document.observe('test:somethingHappened', Fuse.emptyFunction);
+    $(document).observe('test:somethingHappened', Fuse.emptyFunction);
 
-    document.fire('test:somethingHappened');
+    $(document).fire('test:somethingHappened');
     this.assert(!fired, 'observer should NOT have fired');
 
-    document.fire('test:somethingHappened');
+    $(document).fire('test:somethingHappened');
     this.assert(fired, 'observer should have fired');
-    document.stopObserving('test:somethingHappened');
+    $(document).stopObserving('test:somethingHappened');
   },
 
   'testStopObservingInsideHandlers': function() {
@@ -257,25 +257,25 @@ new Test.Unit.Runner({
 
     // first observer should execute and stopObserving should not
     // effect this round of execution.
-    document.observe('test:somethingHappened', function() {
-      document.stopObserving('test:somethingHappened', observer);
+    $(document).observe('test:somethingHappened', function() {
+      $(document).stopObserving('test:somethingHappened', observer);
     }).observe('test:somethingHappened', observer);
 
     // Gecko and WebKit will fail this test at the moment (1.02.09)
-    document.fire('test:somethingHappened');
+    $(document).fire('test:somethingHappened');
 
     this.assert(fired, 'observer should NOT have been stopped');
 
     fired = false;
-    document.fire('test:somethingHappened');
-    document.stopObserving('test:somethingHappened');
+    $(document).fire('test:somethingHappened');
+    $(document).stopObserving('test:somethingHappened');
 
     this.assert(!fired, 'observer should have been stopped');
   },
 
   'testDocumentLoaded': function() {
     this.assert(!documentLoaded);
-    this.assert(document.loaded);
+    this.assert($(document).loaded);
   },
 
   'testCssLoadedBeforeDocumentContentLoadedFires': function() {

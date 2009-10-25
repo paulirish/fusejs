@@ -52,9 +52,12 @@
         while (length--) elements[length] = $(args[length]);
         return elements;
       }
-      if (isString(element))
+      if (isString(element)) {
         element = doc.getElementById(element || expando);
-      return element && fromElement(element);
+        return element && fromElement(element);
+      }
+
+      return Node(element);
     }
 
     function get(object, attributes, context) {
@@ -69,7 +72,7 @@
         return object && fromElement(object);
       }
 
-      return object && Node(object);
+      return Node(object);
     }
 
     function getById(id, context) {

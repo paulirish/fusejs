@@ -85,7 +85,7 @@
       'THEAD':    'TableSection',
       'TR':       'TableRow',
       'UL':       'UList'
-    };
+    },
 
     doc = Fuse._doc,
 

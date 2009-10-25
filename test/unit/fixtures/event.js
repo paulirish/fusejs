@@ -1,8 +1,8 @@
-var documentLoaded = document.loaded;
+var documentLoaded = $(document).loaded;
 
 /*--------------------------------------------------------------------------*/
 
-document.observe('dom:loaded', function(event) {
+$(document).observe('dom:loaded', function(event) {
   var body = $(document.body);
 
   eventResults.contentLoaded = {

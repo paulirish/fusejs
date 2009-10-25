@@ -5,21 +5,24 @@
     function Decorator() { }
 
     function Node(node) {
-      // return if already decoratored or falsy
+      // return if falsy or already decoratored
       if (!node || node.raw) return node;
 
-      // pass to element decorator
-      switch (node.nodeType) {
-        case 1: return fromElement(node);
-        case 9: return Document(node);
-      }
+      var decorated, ownerDoc, idLen,
+       id = Node.getFuseId(node), data = Data[id];
 
-      var decorated,
-       id = Node.getFuseId(node),
-       data = Data[id];
+      // return if window
+      if (id == '1' || id.indexOf('-1', (idLen = id.length)) === idLen)
+        return node;
 
       // return cached if available
       if (data.decorator) return data.decorator;
+
+      // pass to element decorator
+      switch (node.nodeType) {
+        case ELEMENT_NODE:  return fromElement(node);
+        case DOCUMENT_NODE: return Document(node);
+      }
 
       decorated =
       data.decorator = new Decorator;
@@ -86,7 +89,7 @@
         return id;
       }
       // private id variable
-      var id = fuseId;
+      var id = String(fuseId);
       Data[fuseId++] = { };
       return getFuseId;
     }
@@ -96,13 +99,13 @@
       var id, node = this.raw || this, win = getWindow(node);
 
       if (node == win) {
-        if (node == global) return 1;
+        if (node == global) return '1';
         id = getFuseId(win.frameElement) + '-1';
         Data[id] = Data[id] || { };
         return id;
       }
       else if (node.nodeType === DOCUMENT_NODE) {
-        if (node === Fuse._doc) return 2;
+        if (node === Fuse._doc) return '2';
         id = getFuseId(win.frameElement) + '-2';
         Data[id] = Data[id] || { };
         return id;
