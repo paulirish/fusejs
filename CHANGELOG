@@ -1,3 +1,5 @@
+* Optimize Fuse.Dom.Node() handling of window objects. [jddalton]
+
 * Make Fuse.String#stripTags allow tag names to contain hyphens as stated in spec. [jddalton]
 
 * Reduce the complexity of the html check in Fuse.get() and Fuse.Dom.Element.create() and tweak the feature detection in getNodeName(). [jddalton, kangax]

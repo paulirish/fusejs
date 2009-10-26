@@ -165,28 +165,6 @@
         .extend(statics, plugins, mixins);
     }
 
-    function from(object, attributes, context) {
-      if (isString(object)) {
-        if (attributes && typeof attributes.nodeType !== 'string')
-          return Element.create(object, attributes, context);
-  
-        context = attributes;
-        if (object.charAt(0) == '<')
-          return Element.create(object, context);
-        object = (context || doc).getElementById(object || expando);
-        return object && fromElement(object);
-      }
-
-      if (!object) return object;
-
-      var nodeType = object.nodeType;
-      if (nodeType === DOCUMENT_NODE) return Document(object);
-  
-      // bail on XML nodes, text nodes, and window objects
-      return (nodeType !== ELEMENT_NODE || object == getWindow(object) ||
-        !object.ownerDocument.body) ? object : fromElement(object);
-    }
-
     function fromElement(element) {
       // return if already a decorator
       if (element.raw) return element;
@@ -335,7 +313,7 @@
 
     Element.create = create;
 
-    Element.from = from;
+    Element.from = Fuse.get;
 
     Element.fromElement = fromElement;
 
@@ -347,7 +325,7 @@
       : getFromDocumentFragment;
   })();
 
-  fromElement = Element.from;
+  fromElement = Element.fromElement;
 
   /*--------------------------------------------------------------------------*/
 

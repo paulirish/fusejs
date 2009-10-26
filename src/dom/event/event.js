@@ -52,9 +52,9 @@
 
       // Fix a Safari bug where a text node gets passed as the target of an
       // anchor click rather than the anchor itself.
-      return node && node.nodeType === 3
-        ? fromElement(node.parentNode)
-        : Element(node);
+      return Fuse.get(node && node.nodeType === TEXT_NODE
+        ? node.parentNode
+        : node);
     };
 
     methods.findElement = function findElement(event, selectors) {

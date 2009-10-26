@@ -8,15 +8,16 @@
       // return if falsy or already decoratored
       if (!node || node.raw) return node;
 
-      var decorated, ownerDoc, idLen,
-       id = Node.getFuseId(node), data = Data[id];
+      // switch flag to bail early for window objects
+      retWindowId = false;
+      var data, decorated, ownerDoc, id = getFuseId.call(node);
 
       // return if window
-      if (id == '1' || id.indexOf('-1', (idLen = id.length)) === idLen)
-        return node;
+      retWindowId = true;
+      if (!id) return node;
 
       // return cached if available
-      if (data.decorator) return data.decorator;
+      if ((data = Data[id]).decorator) return data.decorator;
 
       // pass to element decorator
       switch (node.nodeType) {
@@ -34,24 +35,64 @@
       return decorated;
     }
 
-    var Node = Class({ 'constructor': Node });
+    function createIdGetter() {
+      function getFuseId() {
+        // if cache doesn't match, request a new id
+        var c = Data[id];
+        if (c.node && c.node !== this)
+          return (this.getFuseId = createIdGetter())();
+        return id;
+      }
+      // private id variable
+      var id = String(fuseId);
+      Data[fuseId++] = { };
+      return getFuseId;
+    }
+
+    function getFuseId() {
+      // keep a loose match because frame object !== document.parentWindow
+      var id = false,
+       node  = this.raw || this,
+       win   = getWindow(node);
+
+      if (node == win) {
+        if (retWindowId) {
+          id = '1';
+          if (node != global) {
+            id = getFuseId(win.frameElement) + '-1';
+            Data[id] = Data[id] || { };
+          }
+        }
+        return id;
+      }
+      else if (node.nodeType === DOCUMENT_NODE) {
+        if (node === Fuse._doc) return '2';
+        id = getFuseId(win.frameElement) + '-2';
+        Data[id] = Data[id] || { };
+        return id;
+      }
+      else if (node.getFuseId)
+        return node.getFuseId();
+
+      return (node.getFuseId = createIdGetter())();
+    }
+
+    var fuseId = 3, retWindowId = true,
+     Node = Class({ 'constructor': Node });
+
     Decorator.prototype = Node.plugin;
+    Node.plugin.getFuseId = getFuseId;
     return Node;
   })();
 
-  // constants
-  Node.DOCUMENT_FRAGMENT_NODE =      DOCUMENT_FRAGMENT_NODE;
-  Node.DOCUMENT_NODE =               DOCUMENT_NODE;
-  Node.ELEMENT_NODE =                ELEMENT_NODE;
-  Node.ATTRIBUTE_NODE =              2;
-  Node.TEXT_NODE =                   3;
-  Node.CDATA_SECTION_NODE =          4;
-  Node.ENTITY_REFERENCE_NODE =       5;
-  Node.ENTITY_NODE =                 6;
-  Node.PROCESSING_INSTRUCTION_NODE = 7;
-  Node.COMMENT_NODE =                8;
-  Node.DOCUMENT_TYPE_NODE =          10;
-  Node.NOTATION_NODE =               12;
+  /*--------------------------------------------------------------------------*/
+
+  Node.getFuseId = (function(__getFuseId) {
+    function getFuseId(node) {
+      return __getFuseId.call(node);
+    }
+    return getFuseId;
+  })(Node.plugin.getFuseId);
 
   Node.updateGenerics = (function() {
     var SKIPPED_KEYS = { 'constructor': 1, 'getFuseId': 1 };
@@ -79,52 +120,18 @@
     return updateGenerics;
   })();
 
-  Node.plugin.getFuseId = (function() {
-    function createGetter() {
-      function getFuseId() {
-        // if cache doesn't match, request a new id
-        var c = Data[id];
-        if (c.node && c.node !== this)
-          return (this.getFuseId = createGetter())();
-        return id;
-      }
-      // private id variable
-      var id = String(fuseId);
-      Data[fuseId++] = { };
-      return getFuseId;
-    }
-
-    function getFuseId() {
-      // keep a loose match because frame object !== document.parentWindow
-      var id, node = this.raw || this, win = getWindow(node);
-
-      if (node == win) {
-        if (node == global) return '1';
-        id = getFuseId(win.frameElement) + '-1';
-        Data[id] = Data[id] || { };
-        return id;
-      }
-      else if (node.nodeType === DOCUMENT_NODE) {
-        if (node === Fuse._doc) return '2';
-        id = getFuseId(win.frameElement) + '-2';
-        Data[id] = Data[id] || { };
-        return id;
-      }
-      else if (node.getFuseId)
-        return node.getFuseId();
-
-      return (node.getFuseId = createGetter())();
-    }
-
-    var fuseId = 3;
-    return getFuseId;
-  })();
-
-  Node.getFuseId = (function(__getFuseId) {
-    function getFuseId(node) {
-      return __getFuseId.call(node);
-    }
-    return getFuseId;
-  })(Node.plugin.getFuseId);
+  // constants
+  Node.DOCUMENT_FRAGMENT_NODE =      DOCUMENT_FRAGMENT_NODE;
+  Node.DOCUMENT_NODE =               DOCUMENT_NODE;
+  Node.ELEMENT_NODE =                ELEMENT_NODE;
+  Node.TEXT_NODE =                   TEXT_NODE;
+  Node.ATTRIBUTE_NODE =              2;
+  Node.CDATA_SECTION_NODE =          4;
+  Node.ENTITY_REFERENCE_NODE =       5;
+  Node.ENTITY_NODE =                 6;
+  Node.PROCESSING_INSTRUCTION_NODE = 7;
+  Node.COMMENT_NODE =                8;
+  Node.DOCUMENT_TYPE_NODE =          10;
+  Node.NOTATION_NODE =               12;
 
   Node.updateGenerics();
