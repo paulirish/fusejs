@@ -1,3 +1,5 @@
+* Make Fuse.Array#concat and Fuse.Array#slice replacements conform to ECMA 5 specification. [Prototype LH #843] [jddalton, Yaffle]
+
 * Optimize Fuse.Dom.Node() handling of window objects. [jddalton]
 
 * Make Fuse.String#stripTags allow tag names to contain hyphens as stated in spec. [jddalton]

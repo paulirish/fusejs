@@ -420,14 +420,22 @@
       if (!plugin.concat || Bug('ARRAY_CONCAT_ARGUMENTS_BUGGY'))
         plugin.concat = function concat() {
           if (this == null) throw new TypeError;
-          var i = 0, args = arguments, length = args.length, object = Object(this),
-           results = isArray(object) ? List.fromArray(object) : List(object);
+
+          var item, j, i = 0,
+           args    = arguments,
+           length  = args.length,
+           object  = Object(this),
+           results = isArray(object) ? List.fromArray(object) : List(object),
+           n       = results.length;
 
           for ( ; i < length; i++) {
-            if (isArray(args[i])) {
-              for (var j = 0, sub = args[i], subLen = sub.length; j < subLen; j++)
-                results.push(sub[j]);
-            } else results.push(args[i]);
+            item = args[i];
+            if (isArray(item)) {
+              j = 0; itemLen = item.length;
+              for ( ; j < itemLen; j++, n++) if (j in item)
+                results[n] = item[j];
+            }
+            else results[n++] = item;
           }
           return results;
         };
@@ -532,10 +540,12 @@
         plugin.slice = (function(__slice) {
           function slice(start, end) {
             if (this == null) throw new TypeError;
-            end = toInteger(end);
 
-            var result, object = Object(this),
-             length = object.length >>> 0, endIndex = end - 1;
+            var endIndex, result, object = Object(this),
+             length = object.length >>> 0;
+
+            end = typeof end === 'undefined' ? length : toInteger(end);
+            endIndex = end - 1;
 
             if (end > length || endIndex in object)
               return __slice.call(object, start, end);
