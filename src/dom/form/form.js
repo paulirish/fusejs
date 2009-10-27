@@ -49,7 +49,7 @@
     };
 
     plugin.findFirstElement = function findFirstElement() {
-      var firstByIndex, node, tabIndex, i = 0,
+      var firstByIndex, result, tabIndex, i = 0,
        firstNode = null, minTabIndex = Infinity;
 
       eachElement(this, function(node) {
@@ -63,7 +63,8 @@
         }
       });
 
-      return fromElement(firstByIndex || firstNode);
+      result = firstByIndex || firstNode;
+      return result && fromElement(result);
     };
 
     plugin.focusFirstElement = function focusFirstElement() {

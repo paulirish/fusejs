@@ -1,14 +1,14 @@
 new Test.Unit.Runner({
 
   'testSelectorWithTagName': function() {
-    this.assertEnumEqual($A(document.getElementsByTagName('li')), $$('li'));
+    this.assertEnumEqual($A(document.getElementsByTagName('li')), Fuse.rawQuery('li'));
     this.assertEnumEqual([$('strong')], $$('strong'));
     this.assertEnumEqual([], $$('nonexistent'));
 
     var allNodes = $A(document.getElementsByTagName('*'))
       .filter(function(node) { return node.nodeType === 1 });
 
-    this.assertEnumEqual(allNodes, $$('*'));
+    this.assertEnumEqual(allNodes, Fuse.rawQuery('*'));
   },
 
   'testSelectorWithId': function() {
@@ -604,7 +604,7 @@ new Test.Unit.Runner({
     });
 
     element.setAttribute('id', 'scratch_element');
-    $$('body')[0].appendChild(element);
+    $$('body')[0].insert(element);
 
     var results = $$('#scratch_element div');
     this.assert(typeof results[0].show == 'function');
@@ -628,7 +628,8 @@ new Test.Unit.Runner({
       'div.is_counted'
     );
 
-    $('counted_container').innerHTML += $('counted_container').innerHTML;
+    $('counted_container').raw.innerHTML +=
+      $('counted_container').raw.innerHTML;
 
     this.assertElementsMatch(
       Selector.matchElements($('counted_container').descendants(), 'div'),
@@ -645,7 +646,7 @@ new Test.Unit.Runner({
   },
 
   'testSelectorNotInsertedNodes': function() {
-    var wrapper = new Element('div');
+    var wrapper = Fuse('<div>');
     wrapper.update('<table><tr><td id="myTD"></td></tr></table>');
 
     this.assertNotNullOrUndefined(
@@ -663,8 +664,8 @@ new Test.Unit.Runner({
     this.assertNotNullOrUndefined(wrapper.down().query('[id=myTD]')[0],
       '[id=myTD] on wrapper child');
 
-    var clone = $('list').cloneNode(true);
-    this.assert(Element.query(clone, '#item_1')[0] == Element.down(clone));
+    var clone = $('list').raw.cloneNode(true);
+    this.assert($$('#item_1', clone)[0] == Fuse.Dom.Element.down(clone));
   },
 
   'testSelectorSpit': function() {

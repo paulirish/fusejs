@@ -273,7 +273,8 @@
               var i = results.length, j = 0, length = i + value.length;
               while (i < length) results[i++] = toQueryPair(key, value[j++]);
             }
-            else results.push(toQueryPair(key, value));
+            else if (toString.call(value) !== '[object Object]')
+              results.push(toQueryPair(key, value));
           }
         });
         return Fuse.String(results.join('&'));

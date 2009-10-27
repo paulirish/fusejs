@@ -1,13 +1,4 @@
-var $$ = (function() {
-  var slice = Array.prototype.slice;
-  return function() {
-    return Selector.findChildElements(document, slice.call(arguments));
-  };
-})();
-
 var $RunBenchmarks = false;
-
-/*--------------------------------------------------------------------------*/
 
 var Selector = Fuse.Class({
   'initialize': function(selector) {
@@ -19,7 +10,7 @@ var Selector = Fuse.Class({
   },
 
   'findElements': function(context) {
-     return Fuse.Dom.Selector.select(this.selector, $(context));
+     return Fuse.Dom.Selector.select(this.selector, $(context).raw);
   },
 
   'match': function(element) {
