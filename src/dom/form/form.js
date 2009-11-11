@@ -38,6 +38,10 @@
       }
     }
 
+    plugin.initialize = function initialize() {
+      this.options = this.raw.options;
+    };
+
     plugin.disable = function disable() {
       eachElement(this, function(node) { node.disabled = true; });
       return this;
@@ -221,7 +225,8 @@
     };
 
     // prevent JScript bug with named function expressions
-    var disable =        nil,
+    var initialize =     nil,
+     disable =           nil,
      enable =            nil,
      findFirstElement =  nil,
      focusFirstElement = nil,

@@ -339,7 +339,7 @@
          script = doc.createElement('SCRIPT');
 
         try {
-          script.appendChild(doc.createTextNode(code));
+          script.appendChild(doc.createTextNode('').cloneNode(false)).data = code;
         } catch (e) {
           hasText = 'text' in script;
         }

@@ -78,7 +78,7 @@
 
       if (hasOpacity) {
         opacity = styles.opacity;
-        plugin.setOpacity.call(opacity);
+        plugin.setOpacity.call(this, opacity);
         delete styles.opacity;
       }
 

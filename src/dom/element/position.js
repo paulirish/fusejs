@@ -177,7 +177,7 @@
        elemDisplay, elemOffset, elemPos, elemVis, srcBackup,
        appendCSS        = ';display:block;visibility:hidden;',
        cumulativeOffset = plugin.cumulativeOffset,
-       elemStyle        = element.style,
+       elemStyle        = this.style,
        srcStyle         = source.style,
        elemIsHidden     = !isVisible.call(this),
        srcIsHidden      = !isVisible.call(source);
@@ -302,16 +302,16 @@
         if (!plugin.isVisible.call(this)) {
           elemStyle  = element.style;
           backup     = elemStyle.cssText;
-          s.cssText += ';display:block;visibility:hidden;';
+          elemStyle.cssText += ';display:block;visibility:hidden;';
           result     = getOffset(element, ancestor);
-          s.cssText  = backup;
+          elemStyle.cssText  = backup;
         }
         else result = getOffset(element, ancestor);
 
         return result;
       }
 
-      var getOffset = function(ancestor) {
+      var getOffset = function(element, ancestor) {
         var offsetParent, position, valueT, valueL;
         if (BODY_OFFSETS_INHERIT_ITS_MARGINS === null)
           BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS');
@@ -349,7 +349,7 @@
             if (ancestor)
               return __getOffset(element, ancestor);
 
-            if (!isDetached.call(this)) {
+            if (!isDetached.call(element)) {
               doc      = getDocument(element);
               info     = Fuse._info;
               rect     = element.getBoundingClientRect();

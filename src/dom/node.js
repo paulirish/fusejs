@@ -55,12 +55,15 @@
        node  = this.raw || this,
        win   = getWindow(node);
 
-      if (node == win) {
+      if (node.getFuseId) {
+        return node.getFuseId();
+      }
+      else if (node == win) {
         if (retWindowId) {
           id = '1';
           if (node != global) {
             id = getFuseId(win.frameElement) + '-1';
-            Data[id] = Data[id] || { };
+            Data[id] || (Data[id] = { });
           }
         }
         return id;
@@ -68,12 +71,9 @@
       else if (node.nodeType === DOCUMENT_NODE) {
         if (node === Fuse._doc) return '2';
         id = getFuseId(win.frameElement) + '-2';
-        Data[id] = Data[id] || { };
+        Data[id] || (Data[id] = { 'nodes': { } });
         return id;
       }
-      else if (node.getFuseId)
-        return node.getFuseId();
-
       return (node.getFuseId = createIdGetter())();
     }
 

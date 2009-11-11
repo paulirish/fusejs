@@ -141,6 +141,10 @@
       return this;
     };
 
+    selectPlugin.initialize = function initialize() {
+      this.options = this.raw.options;
+    };
+
     selectPlugin.getValue = function getValue() {
       var i, node, element = this.raw || this, result = null;
       if (element.type === 'select-one') {
@@ -187,14 +191,15 @@
     optionPlugin.getValue = getOptionValue;
 
     // prevent JScript bug with named function expressions
-    var activate = nil,
-     clear =       nil,
-     disable =     nil,
-     enable =      nil,
-     focus =       nil,
-     getValue =    nil,
-     present =     nil,
-     select =      nil,
-     setValue =    nil,
-     serialize =   nil;
+    var initialize = nil,
+     activate =      nil,
+     clear =         nil,
+     disable =       nil,
+     enable =        nil,
+     focus =         nil,
+     getValue =      nil,
+     present =       nil,
+     select =        nil,
+     setValue =      nil,
+     serialize =     nil;
   })(Fuse.Dom);

@@ -76,21 +76,18 @@
 
   Class.Methods = { };
 
-  (function(methods) {
-    methods.extend = function extend() {
+  (function() {
+     function extend(statics, plugins, mixins) {
       var i, otherMethod,
-       args      = arguments,
-       argLength = args.length,
-
        Klass      = this,
        prototype  = Klass.prototype,
        superProto = Klass.superclass && Klass.superclass.prototype,
        subclasses = Klass.subclasses,
-       subLength  = subclasses.length,
+       subLength  = subclasses.length;
 
-       statics = argLength > 1 ? args[0] : null,
-       plugins = argLength < 3 ? args[argLength - 1] : args[1],
-       mixins  = argLength > 2 ? args[2] : null;
+       if (!plugins && !mixins) {
+         plugins = statics; statics = null;
+       }
 
       if (statics)
         eachKey(statics, function(method, key) { Klass[key] = method; });
@@ -122,11 +119,10 @@
         });
 
       return Klass;
-    };
+    }
 
-    // prevent JScript bug with named function expressions
-    var extend = nil;
-  })(Class.Methods);
+    Class.Methods.extend = extend;
+  })();
 
   /*--------------------------------------------------------------------------*/
 

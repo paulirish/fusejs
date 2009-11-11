@@ -237,7 +237,7 @@
 
       plugin.invoke = function invoke(method) {
         if (this == null) throw new TypeError;
-        var args, i = 0, results = List(), object = Object(this),
+        var args, i = 0, results = Fuse.Array(), object = Object(this),
          length = object.length >>> 0, funcProto = Function.prototype;
 
         if (arguments.length < 2) {

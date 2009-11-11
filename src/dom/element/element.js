@@ -54,38 +54,45 @@
       return T;
     })(),
 
-    TAG_NAME_CLASSES = {
-      'A':        'Anchor',
-      'CAPTION':  'TableCaption',
-      'COL':      'TableCol',
-      'COLGROUP': 'TableCol',
-      'DEL':      'Mod',
-      'DIR':      'Directory',
-      'DL':       'DList',
-      'H1':       'Heading',
-      'H2':       'Heading',
-      'H3':       'Heading',
-      'H4':       'Heading',
-      'H5':       'Heading',
-      'H6':       'Heading',
-      'IFRAME':   'IFrame',
-      'IMG':      'Image',
-      'INS':      'Mod',
-      'FIELDSET': 'FieldSet',
-      'FRAMESET': 'FrameSet',
-      'OL':       'OList',
-      'OPTGROUP': 'OptGroup',
-      'P':        'Paragraph',
-      'Q':        'Quote',
-      'TBODY':    'TableSection',
-      'TD':       'TableCell',
-      'TEXTAREA': 'TextArea',
-      'TH':       'TableCell',
-      'TFOOT':    'TableSection',
-      'THEAD':    'TableSection',
-      'TR':       'TableRow',
-      'UL':       'UList'
-    },
+    TAG_NAME_CLASSES = (function() {
+      var T = {
+        'A':        'AnchorElement',
+        'CAPTION':  'TableCaptionElement',
+        'COL':      'TableColElement',
+        'DEL':      'ModElement',
+        'DIR':      'DirectoryElement',
+        'DL':       'DListElement',
+        'H1':       'HeadingElement',
+        'IFRAME':   'IFrameElement',
+        'IMG':      'ImageElement',
+        'INS':      'ModElement',
+        'FIELDSET': 'FieldSetElement',
+        'FRAMESET': 'FrameSetElement',
+        'OL':       'OListElement',
+        'OPTGROUP': 'OptGroupElement',
+        'P':        'ParagraphElement',
+        'Q':        'QuoteElement',
+        'TBODY':    'TableSectionElement',
+        'TD':       'TableCellElement',
+        'TEXTAREA': 'TextAreaElement',
+        'TR':       'TableRowElement',
+        'UL':       'UListElement'
+      };
+
+      T['H2'] =
+      T['H3'] =
+      T['H4'] =
+      T['H5'] =
+      T['H6'] = T['H1'];
+
+      T['TFOOT'] =
+      T['THEAD'] =  T['TBODY'];
+
+      T['TH'] = T['TD']; 
+      T['COLGROUP'] = T['COL'];
+
+      return T;
+    })(),
 
     doc = Fuse._doc,
 
@@ -96,8 +103,6 @@
     matchStartsWithTableRow = /^<[tT][rR]/,
 
     matchTagName= /^<([^> ]+)/,
-
-    Decorator = function() { },
 
     Dom = Fuse.Dom;
 
@@ -113,43 +118,48 @@
     // http://dev.rubyonrails.org/ticket/10548
 
     function create(tagName, attributes, context) {
-      var complexTag, data, element, fragment, id, html, length, nodes, result;
+      var complexTag, data, element, fragment, id, length,
+       result = null;
 
       // caching html strings is not supported at the moment
       if (tagName.charAt(0) == '<') {
-        // support <div> format tags
         context = attributes;
-        complexTag = tagName.match(matchComplexTag);
 
-        if (!complexTag) {
-          html     = tagName;
-          fragment = Dom.getFragmentFromString(html, context);
-          length   = fragment.childNodes.length;
+        // support `<div>x</div>` format tags
+        if (!(complexTag = tagName.match(matchComplexTag))) {
+          fragment = Dom.getFragmentFromString(tagName, context);
+          length = fragment.childNodes.length;
 
-          // single element return decorated element
-          if (length < 2)
-            result = fromElement(fragment.removeChild(fragment.firstChild));
           // multiple elements return a NodeList
-          else {
+          if (length > 1) {
             result = NodeList();
-            while (length--)
-              result[length] = fromElement(fragment.removeChild(fragment.lastChild));
+            while (length--) {
+              element = fragment.removeChild(fragment.lastChild);
+              Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
+              result[length] = new Decorator(element);
+            }
+          // single element return decorated element
+          } else {
+            element = fragment.removeChild(fragment.firstChild);
+            Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
+            result = new Decorator(element);
           }
           return result;
         }
-        else tagName = complexTag[1];
+
+        // support `<div>` format tags
+        tagName = complexTag[1];
       }
 
-      context = context || doc;
-      id      = context === doc ? '1' : getFuseId(getWindow(context).frameElement);
-      data    = Data[id];
-      nodes   = data.nodes || (data.nodes = { });
-      element = nodes[tagName];
+      context || (context = doc);
+      id   = context === doc ? '2' : getFuseId(getWindow(context).frameElement);
+      data = Data[id].nodes;
+      element = data[tagName] || (data[tagName] = context.createElement(tagName));
 
-      if (!element)
-        element = nodes[tagName] = context.createElement(tagName);
+      // avoid adding the new element to the data cache
+      Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
+      element = new Decorator(element.cloneNode(false));
 
-      element = fromElement(element.cloneNode(false));
       return attributes
         ? element.writeAttribute(attributes)
         : element;
@@ -165,38 +175,44 @@
         .extend(statics, plugins, mixins);
     }
 
+    function Decorator(element) {
+      this.raw = element;
+      this.style = element.style;
+      this.tagName = element.tagName;
+      this.nodeName = element.nodeName;
+      this.nodeType = ELEMENT_NODE;
+      this.childNodes = element.childNodes;
+      this.initialize && this.initialize();
+    }
+
     function fromElement(element) {
       // return if already a decorator
       if (element.raw) return element;
 
-      var decorated, tagClass,
-       id = getFuseId(element),
-       data = Data[id];
-
       // return cached if available
+      var id = getFuseId(element), data = Data[id];
       if (data.decorator) return data.decorator;
 
-      Decorator.prototype =
-        getOrCreateTagClass(element.nodeName).plugin;
-
-      data.decorator =
-      decorated = new Decorator;
-
-      data.node =
-      decorated.raw = element;
-      decorated.style = element.style;
-      decorated.tagName = element.tagName;
-      decorated.nodeName = element.nodeName;
-
-      return decorated;
+      data.node = element;
+      Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
+      return (data.decorator = new Decorator(element));
     }
 
     function getOrCreateTagClass(tagName) {
-      var tagClassName = (TAG_NAME_CLASSES[tagName.toUpperCase()] ||
-         capitalize.call(tagName)) + 'Element',
-       tagClass = Dom[tagClassName];
+      var upperCased, tagClass, tagClassName = TAG_NAME_CLASSES[tagName];
 
-      if (!tagClass) {
+      if (!tagClassName) {
+        upperCased = tagName.toUpperCase();
+        tagClassName = TAG_NAME_CLASSES[upperCased];
+
+        if (!tagClassName) {
+          TAG_NAME_CLASSES[upperCased] =
+          tagClassName = capitalize.call(tagName) + 'Element';
+        }
+        TAG_NAME_CLASSES[tagName] = tagClassName;
+      }
+
+      if (!(tagClass = Dom[tagClassName])) {
         (tagClass =
         Dom[tagClassName] = Class(Element, {
           'constructor': function(element) {
@@ -235,10 +251,10 @@
       // 2) WebKit and KHTML throw when creating contextual fragments from
       //    orphaned elements.
       try {
-        context = context || Fuse._body || Fuse._docEl;
+        context = context || Fuse._doc;
         var cache = getFragmentCache(context.ownerDocument || context),
          range = cache.range;
-        range.selectNode(context.firstChild);
+        range.selectNode(context.body || context.firstChild);
         return range.createContextualFragment(html);
       } catch (e) {
         return getFromDocumentFragment(html, context, cache);
@@ -246,11 +262,11 @@
     }
 
     function getFromDocumentFragment(html, context, cache) {
-       context = context || Fuse._body || Fuse._docEl;
+       context = context || Fuse._doc;
        cache = cache || getFragmentCache(context.ownerDocument || context);
        var node = cache.node,
         nodeName = context.nodeType === DOCUMENT_NODE
-          ? FROM_STRING_CHILDRENS_PARENT_KEYS[tagName.match(matchTagName)[1].toUpperCase()]
+          ? FROM_STRING_CHILDRENS_PARENT_KEYS[html.match(matchTagName)[1].toUpperCase()]
           : getNodeName(context),
 
         wrapping = FROM_STRING_PARENT_WRAPPERS[nodeName];
@@ -368,8 +384,8 @@
 
     setScriptText = (function() {
       function setScriptText(element, text) {
-        element.removeChild(element.firstChild);
-        element.appendChild(textNode.cloneNode(false)).data = text;
+        (element.firstChild || element.appendChild(textNode.cloneNode(false)))
+          .data = text || '';
       }
 
       if (Feature('ELEMENT_SCRIPT_HAS_TEXT_PROPERTY'))
@@ -460,7 +476,8 @@
           insertions = insertions._object;
 
         content = insertions.raw || insertions;
-        if (isString(content) || INSERTABLE_NODE_TYPES[content.nodeType] ||
+        if (isString(content) || isNumber(content) ||
+            INSERTABLE_NODE_TYPES[content.nodeType] ||
             content.toElement || content.toHTML)
           insertions = { 'bottom': content };
       }
@@ -473,7 +490,7 @@
         if (content && content != '') {
           if (content.toElement) content = content.toElement();
           if (INSERTABLE_NODE_TYPES[content.nodeType]) {
-            insertContent(element, content);
+            insertContent(element, content.raw || content);
             continue;
           }
           content = Obj.toHTML(content);
@@ -501,6 +518,8 @@
         if (content.toElement)
           content = content.toElement();
         else if (INSERTABLE_NODE_TYPES[content.nodeType]) {
+          content = content.raw || content;
+        } else {
           html = Obj.toHTML(content);
           stripped = html.stripScripts();
           content = stripped == '' ? '' :
@@ -529,7 +548,7 @@
             content = content.toElement();
           if (INSERTABLE_NODE_TYPES[content.nodeType]) {
             element.innerHTML = '';
-            element.appendChild(content);
+            element.appendChild(content.raw || content);
           }
           else {
             content = Obj.toHTML(content);
@@ -563,8 +582,10 @@
           } else element.innerHTML = '';
 
           if (content && content != '') {
-            if (content.toElement) content = content.toElement();
-            if (INSERTABLE_NODE_TYPES[content.nodeType]) element.appendChild(content);
+            if (content.toElement)
+              content = content.toElement();
+            if (INSERTABLE_NODE_TYPES[content.nodeType])
+              element.appendChild(content.raw || content);
             else {
               content = Obj.toHTML(content);
               stripped = content.stripScripts();
@@ -708,18 +729,18 @@
     };
 
     plugin.wrap = function wrap(wrapper, attributes) {
-      var element = this.raw || this;
+      var rawWrapper, element = this.raw || this;
 
       if (isString(wrapper))
         wrapper = Element.create(wrapper, attributes);
-      if (isElement(wrapper = wrapper.raw || Fuse.get(wrapper)))
+      if (isElement(wrapper) && (wrapper = Fuse.get(wrapper)))
         wrapper.writeAttribute(attributes);
       else wrapper = Element.create('div', wrapper);
 
-      wrapper = wrapper.raw;
+      rawWrapper = wrapper.raw;
       if (element.parentNode)
-        element.parentNode.replaceChild(wrapper, element);
-      wrapper.appendChild(element);
+        element.parentNode.replaceChild(rawWrapper, element);
+      rawWrapper.appendChild(element);
       return wrapper;
     };
 

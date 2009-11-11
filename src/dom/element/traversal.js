@@ -202,7 +202,8 @@
 
       if (firstNode === firstElement)
         firstDescendant = function firstDescendant() {
-          return fromElement((this.raw || this).firstElementChild);
+          var element = (this.raw || this).firstElementChild;
+          return element && fromElement(element);
         };
 
       return firstDescendant;
@@ -260,7 +261,7 @@
     (function() {
       function collect(decorator, property, selectors) {
         var match, element = decorator.raw || decorator,
-         i = 0, results = [];
+         i = 0, results = NodeList();
 
         if (element = element[property]) {
           if (selectors && selectors.length) {

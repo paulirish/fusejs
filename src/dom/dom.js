@@ -4,7 +4,7 @@
   Fuse.addNS('Dom.Data');
 
   Data['1'] = { };
-  Data['2'] = { };
+  Data['2'] = { 'nodes': { } };
 
   Fuse._doc   = global.document;
   Fuse._div   = Fuse._doc.createElement('DiV');
