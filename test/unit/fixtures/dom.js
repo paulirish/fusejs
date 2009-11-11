@@ -6,7 +6,7 @@ var documentViewportProperties,
 function getInnerHTML(id) {
   var element = $(id);
   return Fuse.String(!element ? '' :
-    $(id).innerHTML.toString().toLowerCase().replace(/[\r\n\t]/g, ''));
+    $(id).raw.innerHTML.toString().toLowerCase().replace(/[\r\n\t]/g, ''));
 }
 
 function createParagraph(text, context) {
@@ -19,7 +19,7 @@ function createParagraph(text, context) {
 createParagraph.curry = Fuse.Function.plugin.curry;
 
 function getIframeDocument() {
-  var element = $('iframe');
+  var element = $('iframe').raw;
   return element.contentDocument || element.contentWindow && element.contentWindow.document;
 }
 
@@ -41,14 +41,14 @@ function isIframeAccessible() {
 
 function getElement(element, context) {
   if (!Fuse.Object.isString(element)) return element;
-  return Element.extend((context || document).getElementById(element));
+  return $((context || document).getElementById(element));
 }
 
 function preservingBrowserDimensions(callback) {
-  var original = document.viewport.getDimensions();
+  var original = $(document).viewport.getDimensions();
   window.resizeTo(640, 480);
 
-  var resized = document.viewport.getDimensions();
+  var resized = $(document).viewport.getDimensions();
   original.width += 640 - resized.width;
   original.height += 480 - resized.height;
 
@@ -125,18 +125,20 @@ Fuse.Env.Bug.set({
 
 /*--------------------------------------------------------------------------*/
 
-Element.addMethods({
+Fuse.Dom.Element.extend({
   'hashBrowns': function(element) { return 'hash browns' }
 });
 
-Element.addMethods('LI', {
+Fuse.Dom.extendByTag('LI', {
   'pancakes': function(element) { return 'pancakes' }
 });
 
-Element.addMethods('DIV', {
+Fuse.Dom.extendByTag('DIV', {
   'waffles': function(element) { return 'waffles' }
 });
 
-Element.addMethods($w('li div'), {
+Fuse.Dom.extendByTag($w('li div'), {
   'orangeJuice': function(element) { return 'orange juice' }
 });
+
+Fuse.Dom.Element.updateGenerics();
