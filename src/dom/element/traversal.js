@@ -197,7 +197,7 @@
         var element = (this.raw || this).firstChild;
         while (element && element.nodeType !== ELEMENT_NODE)
           element = element[nextNode];
-        return fromElement(element);
+        return element && fromElement(element);
       };
 
       if (firstNode === firstElement)

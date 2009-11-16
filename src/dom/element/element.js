@@ -288,13 +288,24 @@
     if (Feature('CREATE_ELEMENT_WITH_HTML')) 
       var create = (function(__create) {
         function create(tagName, attributes, context) {
-          var name, type;
+          var data, element, id, name, type;
           if (attributes && tagName.charAt(0) != '<' &&
              ((name = attributes.name) || (type = attributes.type))) {
             tagName = '<' + tagName +
               (name ? ' name="' + name + '"' : '') +
               (type ? ' type="' + type + '"' : '') + '>';
             delete attributes.name; delete attributes.type;
+            
+           context || (context = doc);
+           id   = context === doc ? '2' : getFuseId(getWindow(context).frameElement);
+           data = Data[id].nodes;
+           element = data[tagName] || (data[tagName] = context.createElement(tagName));
+
+           // avoid adding the new element to the data cache
+           Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
+           element = new Decorator(element.cloneNode(false));
+
+           return element.writeAttribute(attributes);  
           }
           return __create(tagName, attributes, context);
         };
@@ -438,6 +449,8 @@
 
       wrapper = function(method, element, node) {
         var textNode, i = 0, scripts = [];
+        method(element, node);
+
         if (INSERTABLE_NODE_TYPES[node.nodeType]) {
           if (getNodeName(node) === 'SCRIPT')
             scripts = [node];
@@ -447,7 +460,6 @@
           else scripts = getByTagName(node, 'SCRIPT');
         }
 
-        method(element, node);
         while (script = scripts[i++]) {
           textNode = script.firstChild;
           setScriptText(script, textNode && textNode.data || '');
@@ -668,7 +680,7 @@
       var isDetached = function isDetached() {
         var element = this.raw || this;
         return !(element.parentNode &&
-          plugin.descendantOf.call(element.ownerDocument));
+          plugin.descendantOf.call(element, element.ownerDocument));
       };
 
       if (Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {

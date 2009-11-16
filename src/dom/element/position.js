@@ -180,7 +180,8 @@
        elemStyle        = this.style,
        srcStyle         = source.style,
        elemIsHidden     = !isVisible.call(this),
-       srcIsHidden      = !isVisible.call(source);
+       srcIsHidden      = !isVisible.call(source),
+       srcElement       = source.raw || source;
 
       // attempt to unhide elements to get their styles
       if (srcIsHidden) {
@@ -203,18 +204,18 @@
         paddingHeight = getHeight.call(source, 'padding');
         borderHeight  = getHeight.call(source, 'border');
         elemStyle.height = Math.max(0,
-          (source.offsetHeight - paddingHeight - borderHeight) +       // content height
-          (paddingHeight - getHeight.call(this, 'padding')) +       // padding diff
-          (borderHeight  - getHeight.call(this, 'border'))) + 'px'; // border diff
+          (srcElement.offsetHeight - paddingHeight - borderHeight) + // content height
+          (paddingHeight - getHeight.call(this, 'padding')) +        // padding diff
+          (borderHeight  - getHeight.call(this, 'border'))) + 'px';  // border diff
       }
 
       if (options.setWidth) {
         paddingWidth = getWidth.call(source, 'padding');
         borderWidth  = getWidth.call(source, 'border');
         elemStyle.width = Math.max(0,
-          (source.offsetWidth - paddingWidth - borderWidth)  +       // content width
-          (paddingWidth - getWidth.call(this, 'padding')) +       // padding diff
-          (borderWidth  - getWidth.call(this, 'border'))) + 'px'; // border diff
+          (srcElement.offsetWidth - paddingWidth - borderWidth)  + // content width
+          (paddingWidth - getWidth.call(this, 'padding')) +        // padding diff
+          (borderWidth  - getWidth.call(this, 'border'))) + 'px';  // border diff
       }
 
       if (options.setLeft || options.setTop) {
@@ -294,25 +295,27 @@
 
       function cumulativeOffset(ancestor) {
         ancestor = Fuse.get(ancestor);
-        var backup, elemStyle, result, element = ensureLayout(this);
+        var backup, elemStyle, result;
         if (!isElement(ancestor)) ancestor = null;
+
+        ensureLayout(this);
 
         // offsetLeft/offsetTop properties return 0 on elements
         // with display:none, so show the element temporarily
         if (!plugin.isVisible.call(this)) {
-          elemStyle  = element.style;
-          backup     = elemStyle.cssText;
+          elemStyle  = this.style;
+          backup     = this.cssText;
           elemStyle.cssText += ';display:block;visibility:hidden;';
-          result     = getOffset(element, ancestor);
+          result     = getOffset(this, ancestor);
           elemStyle.cssText  = backup;
         }
-        else result = getOffset(element, ancestor);
+        else result = getOffset(this, ancestor);
 
         return result;
       }
 
       var getOffset = function(element, ancestor) {
-        var offsetParent, position, valueT, valueL;
+        var offsetParent, position, raw, valueT = 0, valueL = 0;
         if (BODY_OFFSETS_INHERIT_ITS_MARGINS === null)
           BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS');
 
@@ -321,8 +324,9 @@
             Bug('ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH');
 
         do {
-          valueT += element.offsetTop  || 0;
-          valueL += element.offsetLeft || 0;
+          raw = element.raw || element;
+          valueT += raw.offsetTop  || 0;
+          valueL += raw.offsetLeft || 0;
 
           offsetParent = plugin.getOffsetParent.call(element);
           position     = getStyle.call(element, 'position');
@@ -344,15 +348,16 @@
       if (Feature('ELEMENT_BOUNDING_CLIENT_RECT'))
         getOffset = (function(__getOffset) {
           return function(element, ancestor) {
-            var doc, info, rect, root, scrollEl, valueT, valueL;
+            var doc, info, rect, raw, root, scrollEl, valueT, valueL;
 
             if (ancestor)
               return __getOffset(element, ancestor);
 
             if (!isDetached.call(element)) {
-              doc      = getDocument(element);
+              raw      = element.raw || element;
+              doc      = getDocument(raw);
               info     = Fuse._info;
-              rect     = element.getBoundingClientRect();
+              rect     = raw.getBoundingClientRect();
               root     = doc[info.root.property];
               scrollEl = doc[info.scrollEl.property];
 
@@ -361,7 +366,6 @@
               valueL = Math.round(rect.left) -
                 (root.clientLeft || 0) + (scrollEl.scrollLeft || 0);
             }
-
             return returnOffset(valueL, valueT);
           };
         })(getOffset);

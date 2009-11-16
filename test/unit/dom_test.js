@@ -4,7 +4,7 @@ new Test.Unit.Runner({
     if (documentViewportProperties) return;
     // Based on properties check from http://www.quirksmode.org/viewport/compatibility.html
     documentViewportProperties = {
-      'properties': Fuse.List(
+      'properties': Fuse.Array(
         'self.pageXOffset',
         'self.pageYOffset',
         'self.screenX',
@@ -33,7 +33,7 @@ new Test.Unit.Runner({
         'document.body.offsetWidth',
         'document.body.offsetTop',
         'document.body.offsetLeft'
-      ).inject(Fuse.List(), function(properties, prop) {
+      ).inject(Fuse.Array(), function(properties, prop) {
         prop = Fuse.String(prop);
         if (!self.screen && prop.contains('self.screen') ||
             !document.body && prop.contains('document.body')) return properties;
@@ -45,7 +45,7 @@ new Test.Unit.Runner({
       }),
 
       'inspect': function() {
-        var props = Fuse.List();
+        var props = Fuse.Array();
         this.properties.each(function(prop) {
           if (eval(prop)) props[prop] = eval(prop);
         }, this);
@@ -69,6 +69,59 @@ new Test.Unit.Runner({
 
     // remove toString addition
     delete Fuse.Dom.DivElement.plugin.toOutput;
+  },
+
+  'testFuseGet': function() {
+    var element = $('element_extend_test');
+    this.assertRespondsTo('show', element);
+
+    var XHTML_TAGS = $w(
+      'a abbr acronym address applet area '+
+      'b bdo big blockquote br button caption '+
+      'cite code col colgroup dd del dfn div dl dt '+
+      'em embed fieldset form h1 h2 h3 h4 h5 h6 hr '+
+      'i iframe img input ins kbd label legend li '+
+      'map object ol optgroup option p param pre q samp '+
+      'script select small span strong style sub sup '+
+      'table tbody td textarea tfoot th thead tr tt ul var');
+
+    XHTML_TAGS.each(function(tag) {
+      var element = document.createElement(tag),
+       nodeName = element.nodeName.toUpperCase();
+
+      this.assertEqual(element, Fuse.get(element).raw,
+        nodeName + ' failed to return from Fuse(element)');
+
+      // test if elements are extended
+      this.assertRespondsTo('show',
+        Fuse.get(element),
+        nodeName + ' failed to be extended.');
+    }, this);
+
+    // ensure text nodes don't get extended
+    Fuse.Array(null, '', 'a', 'aa').each(function(content) {
+      var textNode = Fuse.get(document.createTextNode(content));
+      this.assert(typeof textNode.show === 'undefined');
+    }, this);
+
+    // don't extend XML documents
+    var xmlDoc = (new DOMParser()).parseFromString('<note><to>Sam</to></note>', 'text/xml');
+    this.assertUndefined(Fuse.get(xmlDoc.firstChild).hide);
+  },
+
+  'testFuseGetReextendsDiscardedNodes': function() {
+    this.assertRespondsTo('show', Fuse.get('discard_1'));
+
+    $('element_reextend_test').innerHTML += '<div id="discard_2"></div>';
+    this.assertRespondsTo('show', Fuse.get('discard_1'));
+  },
+
+  'testFuseGetAfterAddMethods': function() {
+    var span = Fuse.Dom.Element('span');
+    Fuse.Dom.Element.extend({ 'testMethod': Fuse.K });
+
+    this.assertRespondsTo('testMethod', Fuse.get(span));
+    delete Fuse.Dom.Element.plugin.testMethod;
   },
 
   'testDollarFunction': function() {
@@ -103,7 +156,7 @@ new Test.Unit.Runner({
 
   'testElementInsertWithHTML': function() {
     var container, main, msg,
-     documents = Fuse.List(document, getIframeDocument());
+     documents = Fuse.Array(document, getIframeDocument());
 
     if (!isIframeAccessible()) documents.pop();
 
@@ -136,7 +189,7 @@ new Test.Unit.Runner({
 
   'testElementInsertWithDOMNode': function() {
     var container, main, msg,
-     documents = Fuse.List(document, getIframeDocument());
+     documents = Fuse.Array(document, getIframeDocument());
 
     if (!isIframeAccessible()) documents.pop();
 
@@ -172,7 +225,7 @@ new Test.Unit.Runner({
   },
 
   'testElementInsertWithToElementMethod': function() {
-    var main, msg, documents = Fuse.List(document, getIframeDocument());
+    var main, msg, documents = Fuse.Array(document, getIframeDocument());
     if (!isIframeAccessible()) documents.pop();
 
     documents.each(function(context) {
@@ -190,7 +243,7 @@ new Test.Unit.Runner({
   },
 
   'testElementInsertWithToHTMLMethod': function() {
-    var main, msg, documents = Fuse.List(document, getIframeDocument());
+    var main, msg, documents = Fuse.Array(document, getIframeDocument());
     if (!isIframeAccessible()) documents.pop();
 
     documents.each(function(context) {
@@ -210,7 +263,7 @@ new Test.Unit.Runner({
   },
 
   'testElementInsertWithNonString': function() {
-    var main, msg, documents = Fuse.List(document, getIframeDocument());
+    var main, msg, documents = Fuse.Array(document, getIframeDocument());
     if (!isIframeAccessible()) documents.pop();
 
     documents.each(function(context) {
@@ -224,7 +277,7 @@ new Test.Unit.Runner({
 
   'testElementInsertInTables': function() {
     var element, table, cell, msg,
-     documents = Fuse.List(document, getIframeDocument());
+     documents = Fuse.Array(document, getIframeDocument());
 
     if (!isIframeAccessible()) documents.pop();
 
@@ -1073,7 +1126,7 @@ new Test.Unit.Runner({
     this.assertEqual(chained, chained.undoClipping());
     this.assertEqual(chained, chained.undoClipping().makeClipping());
 
-    Fuse.List('hidden','visible','scroll').each( function(overflowValue) {
+    Fuse.Array('hidden','visible','scroll').each( function(overflowValue) {
       var element = $('element_with_' + overflowValue + '_overflow');
       this.assertEqual(overflowValue, element.getStyle('overflow'));
 
@@ -1090,58 +1143,6 @@ new Test.Unit.Runner({
         this.assertEqual(overflowValue, element.getStyle('overflow'));
       }
     }, this);
-  },
-
-  'testElementExtend': function() {
-    var element = $('element_extend_test');
-    this.assertRespondsTo('show', element);
-
-    var XHTML_TAGS = $w(
-      'a abbr acronym address applet area '+
-      'b bdo big blockquote br button caption '+
-      'cite code col colgroup dd del dfn div dl dt '+
-      'em embed fieldset form h1 h2 h3 h4 h5 h6 hr '+
-      'i iframe img input ins kbd label legend li '+
-      'map object ol optgroup option p param pre q samp '+
-      'script select small span strong style sub sup '+
-      'table tbody td textarea tfoot th thead tr tt ul var');
-
-    XHTML_TAGS.each(function(tag) {
-      var element = document.createElement(tag),
-       nodeName = element.nodeName.toUpperCase();
-
-      this.assertEqual(element, Fuse(element).raw,
-        nodeName + ' failed to return from Fuse(element)');
-
-      // test if elements are extended
-      this.assertRespondsTo('show', Fuse(element),
-        nodeName + ' failed to be extended.');
-    }, this);
-
-    // ensure text nodes don't get extended
-    Fuse.Array(null, '', 'a', 'aa').each(function(content) {
-      var textNode = Fuse(document.createTextNode(content));
-      this.assert(typeof textNode.show === 'undefined');
-    }, this);
-
-    // don't extend XML documents
-    var xmlDoc = (new DOMParser()).parseFromString('<note><to>Sam</to></note>', 'text/xml');
-    this.assertUndefined(Fuse(xmlDoc.firstChild).hide);
-  },
-
-  'testElementExtendReextendsDiscardedNodes': function() {
-    this.assertRespondsTo('show', $('discard_1'));
-
-    $('element_reextend_test').innerHTML += '<div id="discard_2"></div>';
-    this.assertRespondsTo('show', $('discard_1'));
-  },
-
-  'testExtendingAfterAddMethods': function() {
-    var span = Fuse.Dom.Element('span');
-    Fuse.Dom.Element.extend({ 'testMethod': Fuse.K });
-
-    this.assertRespondsTo('testMethod', Fuse.Dom.Element(span));
-    delete Fuse.Dom.Element.plugin.testMethod;
   },
 
   'testElementCleanWhitespace': function() {
@@ -1303,7 +1304,7 @@ new Test.Unit.Runner({
   },
 
   'testElementSetOpacity': function() {
-    Fuse.List(0, 0.1, 0.5, 0.999).each(function(opacity) {
+    Fuse.Array(0, 0.1, 0.5, 0.999).each(function(opacity) {
       $('style_test_3').setOpacity(opacity);
       var realOpacity = $('style_test_3').getOpacity('opacity');
 
@@ -1321,9 +1322,18 @@ new Test.Unit.Runner({
       $('style_test_3').setOpacity(0.9999999).getStyle('opacity') > 0.999);
 
     if (Fuse.Env.Agent.IE) {
-      this.assert(Element._hasLayout($('style_test_4').setOpacity(0.5)));
+      var element = $('style_test_4');
+      $('style_test_4').setOpacity(0.5);
 
-      this.assert(2, $('style_test_5').setOpacity(0.5).getStyle('zoom'));
+      var currStyle = element.raw.currentStyle,
+       zoom = element.raw.style.zoom,
+       noLayout = element.getStyle('position') == 'static' &&
+         !(zoom && zoom !== 'normal' || currStyle && currStyle.hasLayout);
+
+      this.assert(!noLayout);
+
+      this.assert(2, $('style_test_5').setOpacity(0.5)
+        .getStyle('zoom'));
 
       this.assert(0.5, Fuse('<div>').setOpacity(0.5)
         .getOpacity());
@@ -1370,13 +1380,13 @@ new Test.Unit.Runner({
     this.assertEqual('1px',
       $('style_test_2').getStyle('margin-left'));
 
-    Fuse.List('not_floating_none', 'not_floating_style', 'not_floating_inline')
+    Fuse.Array('not_floating_none', 'not_floating_style', 'not_floating_inline')
       .each(function(element) {
         this.assertEqual('none', $(element).getStyle('float'));
         this.assertEqual('none', $(element).getStyle('cssFloat'));
       }, this);
 
-    Fuse.List('floating_style','floating_inline')
+    Fuse.Array('floating_style','floating_inline')
       .each(function(element) {
         this.assertEqual('left', $(element).getStyle('float'));
         this.assertEqual('left', $(element).getStyle('cssFloat'));
@@ -1436,7 +1446,7 @@ new Test.Unit.Runner({
 
     // ensure units convert to px correctly
     var tests = {
-      'unit_px_test_1': Fuse.List(
+      'unit_px_test_1': Fuse.Array(
         $w('width 192'),
         $w('height 76'),
         $w('margin-top 64'),
@@ -1450,7 +1460,7 @@ new Test.Unit.Runner({
         $w('padding-right 64')
       ),
 
-      'unit_px_test_1_1': Fuse.List(
+      'unit_px_test_1_1': Fuse.Array(
         $w('width 115'),
         $w('height 77'),
         $w('font-size 38'),
@@ -1458,15 +1468,15 @@ new Test.Unit.Runner({
         $w('border-left-width 1')
       ),
 
-      'unit_px_test_2': Fuse.List(
+      'unit_px_test_2': Fuse.Array(
         $w('font-size 32')
       ),
 
-      'unit_px_test_2_1': Fuse.List(
+      'unit_px_test_2_1': Fuse.Array(
         $w('font-size 16')
       ),
 
-      'unit_px_test_2_1_1': Fuse.List(
+      'unit_px_test_2_1_1': Fuse.Array(
         $w('font-size 16')
       )
     };
@@ -1553,11 +1563,11 @@ new Test.Unit.Runner({
     this.assertEqual('original',
       $('cloned_element_attributes_issue').readAttribute('foo'));
 
-    Fuse.List('href', 'accesskey', 'accesskey', 'title').each(function(attr) {
+    Fuse.Array('href', 'accesskey', 'accesskey', 'title').each(function(attr) {
       this.assertEqual('', $('attributes_with_issues_2').readAttribute(attr));
     }, this);
 
-    Fuse.List('checked','disabled','readonly','multiple').each(function(attr) {
+    Fuse.Array('checked','disabled','readonly','multiple').each(function(attr) {
       this.assertEqual(attr, $('attributes_with_issues_' + attr).readAttribute(attr));
     }, this);
 
@@ -2009,20 +2019,23 @@ new Test.Unit.Runner({
 
     // test elements with various positions and displays
     $w('hide show').each(function(method) {
-      Fuse.List($w('absolute relative'), $w('relative absolute'),
+      Fuse.Array($w('absolute relative'), $w('relative absolute'),
        $w('relative relative'), $w('absolute absolute'))
        .each(function(positions) {
-         var targID = 'clone_position_target_' + positions[0],
-          srcID = 'clone_position_source_' + positions[1];
+         var targOffset,
+          targID = 'clone_position_target_' + positions[0],
+          srcID  = 'clone_position_source_' + positions[1],
+          target = $(targID),
+          source = $(srcID);
 
-         var target = $(targID), source = $(srcID);
          target[method]();
+
          target.clonePosition(source, {
            'offsetTop': 25,
            'offsetLeft': 35
          });
 
-         var targOffset = target.cumulativeOffset();
+         targOffset = target.cumulativeOffset();
          targOffset[0] -= 35;
          targOffset[1] -= 25;
 
@@ -2165,7 +2178,7 @@ new Test.Unit.Runner({
   },
 
   'testElementScrollTo': function() {
-    $('scroll_test_2').raw.scrollTop = 0;
+    $('scroll_test_2').scrollTo();
 
     this.assertEqual(0, $('scroll_test_2').viewportOffset()[1]);
     window.scrollTo(0, 0);
@@ -2247,7 +2260,7 @@ new Test.Unit.Runner({
         $('absolute_fixed_absolute').positionedOffset());
 
       var afu = $('absolute_fixed_undefined');
-      this.assertEnumEqual([afu.offsetLeft, afu.offsetTop],
+      this.assertEnumEqual([afu.raw.offsetLeft, afu.raw.offsetTop],
         afu.positionedOffset());
 
       var offset = [], element = Fuse('<div>');
@@ -2357,20 +2370,20 @@ new Test.Unit.Runner({
 
   'testOffsetParent': function() {
     this.assertEqual('body_absolute',
-      $('absolute_absolute').getOffsetParent().id);
+      $('absolute_absolute').getOffsetParent().raw.id);
 
     this.assertEqual('body_absolute',
-      $('absolute_relative').getOffsetParent().id);
+      $('absolute_relative').getOffsetParent().raw.id);
 
     this.assertEqual($('body_absolute'),
       $('absolute_hidden').getOffsetParent(),
       'Failed to report an offsetParent on a hidden (display:none) element.');
 
     this.assertEqual('absolute_relative',
-      $('inline').getOffsetParent().id);
+      $('inline').getOffsetParent().raw.id);
 
     this.assertEqual('absolute_relative',
-      $('absolute_relative_undefined').getOffsetParent().id);
+      $('absolute_relative_undefined').getOffsetParent().raw.id);
 
     // Ensure IE doesn't error when requesting offsetParent from an not attached to the document.
     this.assertNothingRaised(
@@ -2378,7 +2391,7 @@ new Test.Unit.Runner({
 
     // IE with strict doctype may try to return documentElement as offsetParent on relatively positioned elements.
     this.assertEqual(document.body,
-      $('body_relative').getOffsetParent());
+      $('body_relative').getOffsetParent().raw);
 
     // Ensure null is returned even when using document.documentElement.
     this.assertEqual(null,
@@ -2598,8 +2611,6 @@ new Test.Unit.Runner({
   },
 
   'testNodeConstants': function() {
-    this.assert(window.Node, 'window.Node is unavailable');
-
     var constants = $H({
       'ELEMENT_NODE':                1,
       'ATTRIBUTE_NODE':              2,
@@ -2615,8 +2626,10 @@ new Test.Unit.Runner({
       'NOTATION_NODE':               12
     });
 
-    constants.each(function(pair) {
-      this.assertEqual(Fuse.Dom.Node[pair.key], pair.value);
-    }, this);
+    if (window.Node) {
+      constants.each(function(pair) {
+        this.assertEqual(Fuse.Dom.Node[pair.key], pair.value);
+      }, this);
+    }
   }
 });

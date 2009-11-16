@@ -339,9 +339,10 @@
          script = doc.createElement('SCRIPT');
 
         try {
-          script.appendChild(doc.createTextNode('').cloneNode(false)).data = code;
+          script.appendChild(doc.createTextNode(code));
         } catch (e) {
           hasText = 'text' in script;
+          script.text = code;
         }
 
         docEl.insertBefore(script, docEl.firstChild);
