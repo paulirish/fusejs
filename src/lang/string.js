@@ -251,7 +251,7 @@
       return String(this).indexOf(pattern) > -1;
     };
 
-    plugin.empty = function empty() {
+    plugin.isEmpty = function isEmpty() {
       if (this == null) throw new TypeError;
       return !String(this).length;
     };
@@ -412,11 +412,11 @@
     // prevent JScript bug with named function expressions
     var blank =        nil,
       contains =       nil,
-      empty =          nil,
       endsWith =       nil,
       evalScripts =    nil,
       extractScripts = nil,
       hyphenate =      nil,
+      isEmpty =        nil,
       startsWith =     nil,
       stripScripts =   nil,
       toArray =        nil,

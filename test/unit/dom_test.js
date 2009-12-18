@@ -150,8 +150,8 @@ new Test.Unit.Runner({
       'malformed direct access to "target"');
 
     this.assertNothingRaised(
-      function() { $( $('malformed-target-string').readAttribute('target') ) },
-      'malformed using Element#readAttribute');
+      function() { $( $('malformed-target-string').getAttribute('target') ) },
+      'malformed using Element#getAttribute');
   },
 
   'testElementInsertWithHTML': function() {
@@ -610,7 +610,7 @@ new Test.Unit.Runner({
 
   'testElementRemove': function(){
     $('removable').remove();
-    this.assert($('removable-container').empty());
+    this.assert($('removable-container').isEmpty());
   },
 
   'testElementUpdate': function() {
@@ -627,7 +627,7 @@ new Test.Unit.Runner({
     this.assertEqual('', $('testdiv').raw.innerHTML);
 
     Fuse.Dom.Element.update('testdiv', '&nbsp;');
-    this.assert(!Fuse.String.empty($('testdiv').raw.innerHTML));
+    this.assert(!Fuse.String.isEmpty($('testdiv').raw.innerHTML));
   },
 
   'testElementUpdateScriptElement': function() {
@@ -1168,10 +1168,10 @@ new Test.Unit.Runner({
     this.assertEqual(0, element.childNodes.length);
   },
 
-  'testElementEmpty': function() {
-    this.assert($('test-empty').empty());
-    this.assert($('test-empty-but-contains-whitespace').empty());
-    this.assert(!$('test-full').empty());
+  'testElementIsEmpty': function() {
+    this.assert($('test-empty').isEmpty());
+    this.assert($('test-empty-but-contains-whitespace').isEmpty());
+    this.assert(!$('test-full').isEmpty());
   },
 
   'testDescendantOf': function() {
@@ -1529,217 +1529,217 @@ new Test.Unit.Runner({
     this.assertEqual(0.45, $('op1').setOpacity(0.45).getOpacity());
   },
 
-  'testElementReadAttribute': function() {
+  'testElementgetAttribute': function() {
     var attribFormIssues = $('attributes_with_issues_form');
-    this.assert(Fuse.Object.isString(attribFormIssues.readAttribute('action')));
-    this.assert(Fuse.Object.isString(attribFormIssues.readAttribute('id')));
+    this.assert(Fuse.Object.isString(attribFormIssues.getAttribute('action')));
+    this.assert(Fuse.Object.isString(attribFormIssues.getAttribute('id')));
 
     this.assertEqual('blah-class',
-      attribFormIssues.readAttribute('class'));
+      attribFormIssues.getAttribute('class'));
 
     this.assertEqual('post',
-      attribFormIssues.readAttribute('method'));
+      attribFormIssues.getAttribute('method'));
 
     this.assertEqual('test.html',
-      $('attributes_with_issues_1').readAttribute('href'));
+      $('attributes_with_issues_1').getAttribute('href'));
 
     this.assertEqual('L',
-      $('attributes_with_issues_1').readAttribute('accesskey'));
+      $('attributes_with_issues_1').getAttribute('accesskey'));
 
     this.assertEqual('50',
-      $('attributes_with_issues_1').readAttribute('tabindex'));
+      $('attributes_with_issues_1').getAttribute('tabindex'));
 
     this.assertEqual('a link',
-      $('attributes_with_issues_1').readAttribute('title'));
+      $('attributes_with_issues_1').getAttribute('title'));
 
     // test cloned elements
-    $('cloned_element_attributes_issue').readAttribute('foo'); // <- required
+    $('cloned_element_attributes_issue').getAttribute('foo'); // <- required
     var clone = $($('cloned_element_attributes_issue').raw.cloneNode(true));
-    clone.writeAttribute('foo', 'cloned');
+    clone.setAttribute('foo', 'cloned');
 
     this.assertEqual('cloned',
-      clone.readAttribute('foo'));
+      clone.getAttribute('foo'));
 
     this.assertEqual('original',
-      $('cloned_element_attributes_issue').readAttribute('foo'));
+      $('cloned_element_attributes_issue').getAttribute('foo'));
 
     Fuse.Array('href', 'accesskey', 'accesskey', 'title').each(function(attr) {
-      this.assertEqual('', $('attributes_with_issues_2').readAttribute(attr));
+      this.assertEqual('', $('attributes_with_issues_2').getAttribute(attr));
     }, this);
 
     Fuse.Array('checked','disabled','readonly','multiple').each(function(attr) {
-      this.assertEqual(attr, $('attributes_with_issues_' + attr).readAttribute(attr));
+      this.assertEqual(attr, $('attributes_with_issues_' + attr).getAttribute(attr));
     }, this);
 
     this.assertEqual('alert(\'hello world\');',
-      $('attributes_with_issues_1').readAttribute('onclick'));
+      $('attributes_with_issues_1').getAttribute('onclick'));
 
     this.assertEqual('date',
-      $('attributes_with_issues_type').readAttribute('type'));
+      $('attributes_with_issues_type').getAttribute('type'));
 
     this.assertEqual('text',
-      $('attributes_with_issues_readonly').readAttribute('type'));
+      $('attributes_with_issues_readonly').getAttribute('type'));
 
     var elements = $('custom_attributes').childElements();
-    this.assertEnumEqual(['1', '2'], elements.invoke('readAttribute', 'foo'));
-    this.assertEnumEqual(['2', ''],  elements.invoke('readAttribute', 'bar'));
+    this.assertEnumEqual(['1', '2'], elements.invoke('getAttribute', 'foo'));
+    this.assertEnumEqual(['2', ''],  elements.invoke('getAttribute', 'bar'));
 
     // should return an empty string when the attribute is not found
     this.assertEqual('',
-      $(document.documentElement).readAttribute('class'));
+      $(document.documentElement).getAttribute('class'));
 
     this.assertEqual('',
-      $('attributes_with_issues_1').readAttribute('onmouseover'));
+      $('attributes_with_issues_1').getAttribute('onmouseover'));
 
     $('attributes_with_issues_1').raw.onmousedown = function() { return 'testing' };
     this.assertEqual('',
-      $('attributes_with_issues_1').readAttribute('onmousedown'));
+      $('attributes_with_issues_1').getAttribute('onmousedown'));
 
-    // test IE issue with readAttribute and invalid 'type' attribute of iframes
+    // test IE issue with getAttribute and invalid 'type' attribute of iframes
     this.assertNothingRaised(function() {
-      $('attributes_with_issues_iframe').readAttribute('type');
+      $('attributes_with_issues_iframe').getAttribute('type');
     });
 
-    $('attributes_with_issues_iframe').writeAttribute('type', 'foo');
+    $('attributes_with_issues_iframe').setAttribute('type', 'foo');
     this.assertEqual('foo',
-      $('attributes_with_issues_iframe').readAttribute('type'));
+      $('attributes_with_issues_iframe').getAttribute('type'));
 
     var table = $('write_attribute_table');
-    this.assertEqual('4', table.readAttribute('cellspacing'));
-    this.assertEqual('6', table.readAttribute('cellpadding'));
+    this.assertEqual('4', table.getAttribute('cellspacing'));
+    this.assertEqual('6', table.getAttribute('cellpadding'));
   },
 
-  'testElementWriteAttribute': function() {
+  'testElementsetAttribute': function() {
     var element = $(document.body.appendChild(document.createElement('p')));
 
-    this.assertRespondsTo('writeAttribute', element);
-    this.assertEqual(element, element.writeAttribute('id', 'write_attribute_test'));
+    this.assertRespondsTo('setAttribute', element);
+    this.assertEqual(element, element.setAttribute('id', 'write_attribute_test'));
     this.assertEqual('write_attribute_test', element.raw.id);
 
     // test null/undefined name argument
-    this.assertIdentical(element, element.writeAttribute(),
+    this.assertIdentical(element, element.setAttribute(),
       'Failed when passing no name.');
 
-    this.assertIdentical(element, element.writeAttribute(null),
+    this.assertIdentical(element, element.setAttribute(null),
       'Failed when passing a null name.');
 
-    this.assertIdentical(element, element.writeAttribute(undef),
+    this.assertIdentical(element, element.setAttribute(undef),
       'Failed when passing an undefined name.');
 
     element.remove();
 
     var element2 = $(document.createElement('p'));
-    element2.writeAttribute('id', 'write_attribute_without_hash');
+    element2.setAttribute('id', 'write_attribute_without_hash');
     this.assertEqual('write_attribute_without_hash', element2.raw.id);
 
-    element2.writeAttribute('animal', 'cat');
-    this.assertEqual('cat', element2.readAttribute('animal'));
+    element2.setAttribute('animal', 'cat');
+    this.assertEqual('cat', element2.getAttribute('animal'));
 
-    element2.writeAttribute($H({ 'id': 'write_from_hash' }));
+    element2.setAttribute($H({ 'id': 'write_from_hash' }));
     this.assertEqual('write_from_hash', element2.raw.id);
 
     this.assertEqual('http://fusejs.com/', $('write_attribute_link')
-      .writeAttribute({ 'href': 'http://fusejs.com/', 'title': 'Home of Fuse' }).raw.href);
+      .setAttribute({ 'href': 'http://fusejs.com/', 'title': 'Home of Fuse' }).raw.href);
     this.assertEqual('Home of Fuse', $('write_attribute_link').raw.title);
   },
 
-  'testElementWriteAttributeWithBooleans': function() {
+  'testElementsetAttributeWithBooleans': function() {
     var input = $('write_attribute_input'),
      select   = $('write_attribute_select'),
      checkbox = $('write_attribute_checkbox'),
      checkedCheckbox = $('write_attribute_checked_checkbox');
 
-    this.assert(input.writeAttribute('readonly')
+    this.assert(input.setAttribute('readonly')
       .hasAttribute('readonly'),
       'input set "readonly" with no value');
 
-    this.assert(input.writeAttribute('readonly', true)
+    this.assert(input.setAttribute('readonly', true)
       .hasAttribute('readonly'),
       'input set "readonly" with boolean true');
 
-    this.assert(!input.writeAttribute('readonly', false)
+    this.assert(!input.setAttribute('readonly', false)
       .hasAttribute('readonly'),
       'input set "readonly" with boolean false');
 
-    this.assert(!input.writeAttribute('readonly', null)
+    this.assert(!input.setAttribute('readonly', null)
       .hasAttribute('readonly'),
       'input set "readonly" with null value');
 
-    this.assert(input.writeAttribute('readonly', 'readonly')
+    this.assert(input.setAttribute('readonly', 'readonly')
       .hasAttribute('readonly'),
       'input set "readonly" with string value');
 
-    this.assert(select.writeAttribute('multiple')
+    this.assert(select.setAttribute('multiple')
       .hasAttribute('multiple'),
       'select element set "multiple" with string value');
 
-    this.assert(input.writeAttribute('disabled')
+    this.assert(input.setAttribute('disabled')
       .hasAttribute('disabled'),
       'input set "disabled" with no value');
 
-    this.assert(checkbox.writeAttribute('checked').raw.checked,
+    this.assert(checkbox.setAttribute('checked').raw.checked,
       'checkbox is checked when set with no value');
 
-    this.assert(!checkedCheckbox.writeAttribute('checked', false).raw.checked,
+    this.assert(!checkedCheckbox.setAttribute('checked', false).raw.checked,
       'checkbox is not checked when set with false');
   },
 
-  'testElementWriteAttributeWithIssues': function() {
-    var input = $('write_attribute_input').writeAttribute(
+  'testElementsetAttributeWithIssues': function() {
+    var input = $('write_attribute_input').setAttribute(
       { 'maxlength': 90, 'tabindex': 10});
 
-    var td = $('write_attribute_td').writeAttribute(
+    var td = $('write_attribute_td').setAttribute(
       { 'valign': 'bottom', 'colspan': 2, 'rowspan': 2 });
 
-    this.assertEqual(90, input.readAttribute('maxlength'));
-    this.assertEqual(10, input.readAttribute('tabindex'));
-    this.assertEqual(2,  td.readAttribute('colspan'));
-    this.assertEqual(2,  td.readAttribute('rowspan'));
-    this.assertEqual('bottom', td.readAttribute('valign'));
+    this.assertEqual(90, input.getAttribute('maxlength'));
+    this.assertEqual(10, input.getAttribute('tabindex'));
+    this.assertEqual(2,  td.getAttribute('colspan'));
+    this.assertEqual(2,  td.getAttribute('rowspan'));
+    this.assertEqual('bottom', td.getAttribute('valign'));
 
     var p = $('write_attribute_para'), label = $('write_attribute_label');
 
     this.assertEqual('some-class',
-      p.writeAttribute({ 'class': 'some-class' }).readAttribute('class'));
+      p.setAttribute({ 'class': 'some-class' }).getAttribute('class'));
 
     this.assertEqual('some-className',
-      p.writeAttribute({ 'className': 'some-className' }).readAttribute('class'));
+      p.setAttribute({ 'className': 'some-className' }).getAttribute('class'));
 
     this.assertEqual('some-id',
-      label.writeAttribute({ 'for': 'some-id' }).readAttribute('for'));
+      label.setAttribute({ 'for': 'some-id' }).getAttribute('for'));
 
     this.assertEqual('some-other-id',
-      label.writeAttribute({ 'htmlFor': 'some-other-id' }).readAttribute('for'));
+      label.setAttribute({ 'htmlFor': 'some-other-id' }).getAttribute('for'));
 
-    this.assert(p.writeAttribute({ 'style':'width: 5px;' }).readAttribute('style')
+    this.assert(p.setAttribute({ 'style':'width: 5px;' }).getAttribute('style')
       .toLowerCase().contains('width'));
 
     var table = $('write_attribute_table');
-    table.writeAttribute('cellspacing', '2');
-    table.writeAttribute('cellpadding', '3');
+    table.setAttribute('cellspacing', '2');
+    table.setAttribute('cellpadding', '3');
 
-    this.assertEqual('2', table.readAttribute('cellspacing'));
-    this.assertEqual('3', table.readAttribute('cellpadding'));
+    this.assertEqual('2', table.getAttribute('cellspacing'));
+    this.assertEqual('3', table.getAttribute('cellpadding'));
 
     var iframe = Fuse('iframe', { 'frameborder': 0 });
-    this.assertEqual(0, parseInt(iframe.readAttribute('frameborder')));
+    this.assertEqual(0, parseInt(iframe.getAttribute('frameborder')));
 
-    $('attributes_with_issues_form').writeAttribute('encType', 'multipart/form-data');
+    $('attributes_with_issues_form').setAttribute('encType', 'multipart/form-data');
     this.assertEqual('multipart/form-data',
-      $('attributes_with_issues_form').readAttribute('encType'));
+      $('attributes_with_issues_form').getAttribute('encType'));
 
     var theForm = Fuse('form',
       { 'name':'encTypeForm', 'method':'post', 'action':'myPage.php', 'enctype':'multipart/form-data' });
-    this.assertEqual('multipart/form-data', theForm.readAttribute('encType'));
+    this.assertEqual('multipart/form-data', theForm.getAttribute('encType'));
   },
 
-  'testElementWriteAttributeWithCustom': function() {
-    var p = $('write_attribute_para').writeAttribute(
+  'testElementsetAttributeWithCustom': function() {
+    var p = $('write_attribute_para').setAttribute(
       { 'name': 'martin', 'location': 'stockholm', 'age': 26});
 
-    this.assertEqual('martin',    p.readAttribute('name'));
-    this.assertEqual('stockholm', p.readAttribute('location'));
-    this.assertEqual('26',        p.readAttribute('age'));
+    this.assertEqual('martin',    p.getAttribute('name'));
+    this.assertEqual('stockholm', p.getAttribute('location'));
+    this.assertEqual('26',        p.getAttribute('age'));
   },
 
   'testElementHasAttribute': function() {
@@ -1797,7 +1797,7 @@ new Test.Unit.Runner({
         tagName = '<' + tagName + ' name="' + attributes.name + '">';
         delete attributes.name;
       }
-      return $(document.createElement(tagName)).writeAttribute(attributes || {});
+      return $(document.createElement(tagName)).setAttribute(attributes || {});
     };
 
     this.benchmark(function(){
@@ -1812,7 +1812,7 @@ new Test.Unit.Runner({
     this.assertRespondsTo('update', Fuse('<div>'));
 
     this.assertEqual('foobar',
-      Fuse('a', { 'custom': 'foobar'}).readAttribute('custom'));
+      Fuse('a', { 'custom': 'foobar'}).getAttribute('custom'));
 
     var input = document.body.appendChild(Fuse('input',
       { 'id': 'my_input_field_id', 'name': 'my_input_field' }).raw);
@@ -2035,11 +2035,11 @@ new Test.Unit.Runner({
            'offsetLeft': 35
          });
 
-         targOffset = target.cumulativeOffset();
+         targOffset = target.getCumulativeOffset();
          targOffset[0] -= 35;
          targOffset[1] -= 25;
 
-         this.assertEnumEqual(source.cumulativeOffset(), targOffset,
+         this.assertEnumEqual(source.getCumulativeOffset(), targOffset,
            'target: ' + targID + '; source: ' + srcID + ' (' + method + ')');
 
          // required because clonePosition won't work
@@ -2086,8 +2086,8 @@ new Test.Unit.Runner({
           target[method]();
           target.clonePosition(source);
 
-          this.assertEnumEqual(source.cumulativeOffset(),
-            target.cumulativeOffset(),
+          this.assertEnumEqual(source.getCumulativeOffset(),
+            target.getCumulativeOffset(),
             id + ' (' + method + ')');
 
           // required because clonePosition won't work
@@ -2180,13 +2180,13 @@ new Test.Unit.Runner({
   'testElementScrollTo': function() {
     $('scroll_test_2').scrollTo();
 
-    this.assertEqual(0, $('scroll_test_2').viewportOffset()[1]);
+    this.assertEqual(0, $('scroll_test_2').getViewportOffset()[1]);
     window.scrollTo(0, 0);
 
     var elem = $('scroll_test_2');
     elem.scrollTo();
 
-    //this.assertEqual(0, elem.viewportOffset()[1]);
+    //this.assertEqual(0, elem.getViewportOffset()[1]);
     window.scrollTo(0, 0);
   },
 
@@ -2241,31 +2241,31 @@ new Test.Unit.Runner({
     this.assertEqual('', element.raw.innerHTML);
   },
 
-  'testPositionedOffset': function() {
+  'testGetPositionedOffset': function() {
     this.assertEnumEqual([10,10],
-      $('body_absolute').positionedOffset());
+      $('body_absolute').getPositionedOffset());
 
     this.assertEnumEqual([10,10],
-      $('absolute_absolute').positionedOffset());
+      $('absolute_absolute').getPositionedOffset());
 
     this.assertEnumEqual([10,10],
-      $('absolute_relative').positionedOffset());
+      $('absolute_relative').getPositionedOffset());
 
     this.assertEnumEqual([0,10],
-      $('absolute_relative_undefined').positionedOffset());
+      $('absolute_relative_undefined').getPositionedOffset());
 
     // IE6 and lower do not support "fixed" positioned elements
     if (!isIE6AndLower) {
       this.assertEnumEqual([10,10],
-        $('absolute_fixed_absolute').positionedOffset());
+        $('absolute_fixed_absolute').getPositionedOffset());
 
       var afu = $('absolute_fixed_undefined');
       this.assertEnumEqual([afu.raw.offsetLeft, afu.raw.offsetTop],
-        afu.positionedOffset());
+        afu.getPositionedOffset());
 
       var offset = [], element = Fuse('<div>');
       this.assertNothingRaised(
-        function() { offset = element.positionedOffset() });
+        function() { offset = element.getPositionedOffset() });
 
       this.assertEnumEqual([0,0], offset);
       this.assertEqual(0, offset.top);
@@ -2273,17 +2273,17 @@ new Test.Unit.Runner({
     }
   },
 
-  'testCumulativeOffset': function() {
+  'testGetCumulativeOffset': function() {
     var offset = [], element = Fuse('<div>');
     this.assertNothingRaised(
-      function() { offset = element.cumulativeOffset() });
+      function() { offset = element.getCumulativeOffset() });
 
     this.assertEnumEqual([0,0], offset);
     this.assertEqual(0, offset.top);
     this.assertEqual(0, offset.left);
   },
 
-  'testViewportOffset': function() {
+  'testGetViewportOffset': function() {
     var msg,
      windows   = [window, getIframeWindow()],
      documents = Fuse.Array(document, getIframeDocument());
@@ -2297,23 +2297,23 @@ new Test.Unit.Runner({
       window.scrollTo(0, 0);
 
       this.assertEnumEqual([10,10],
-        getElement('body_absolute', context).viewportOffset(), msg);
+        getElement('body_absolute', context).getViewportOffset(), msg);
 
       this.assertEnumEqual([20,20],
-        getElement('absolute_absolute', context).viewportOffset(), msg);
+        getElement('absolute_absolute', context).getViewportOffset(), msg);
 
       this.assertEnumEqual([20,20],
-        getElement('absolute_relative', context).viewportOffset(), msg);
+        getElement('absolute_relative', context).getViewportOffset(), msg);
 
       this.assertEnumEqual([20,30],
-        getElement('absolute_relative_undefined', context).viewportOffset(), msg);
+        getElement('absolute_relative_undefined', context).getViewportOffset(), msg);
 
-      // Element.viewportOffset is forked for element.getBoundingClientRect usage.
+      // Element.getViewportOffset is forked for element.getBoundingClientRect usage.
       // Ensure each fork produces the same output when dealing with scroll offsets
       // on form fields
       var offsets = Fuse.Array(
-        getElement('scrollOffset_input', context).viewportOffset(),
-        getElement('scrollOffset_textarea', context).viewportOffset()
+        getElement('scrollOffset_input', context).getViewportOffset(),
+        getElement('scrollOffset_textarea', context).getViewportOffset()
       );
 
       getElement('scrollOffset_input', context).scrollLeft    =
@@ -2321,11 +2321,11 @@ new Test.Unit.Runner({
       getElement('scrollOffset_textarea', context).scrollTop  = 25;
 
       this.assertEnumEqual(offsets.first(),
-        getElement('scrollOffset_input', context).viewportOffset(),
+        getElement('scrollOffset_input', context).getViewportOffset(),
           'With scroll offsets on input field', msg);
 
       this.assertEnumEqual(offsets.last(),
-        getElement('scrollOffset_textarea', context).viewportOffset(),
+        getElement('scrollOffset_textarea', context).getViewportOffset(),
           'With scroll offsets on textarea', msg);
 
       getElement('scrollOffset_input').scrollLeft    =
@@ -2339,29 +2339,29 @@ new Test.Unit.Runner({
         var element = getElement('absolute_fixed', context);
         element.scrollTop = 20;
 
-        this.assertEnumEqual([10, 10], element.viewportOffset(), msg);
+        this.assertEnumEqual([10, 10], element.getViewportOffset(), msg);
 
         window.scrollTo(0, 0);
         element.scrollTop = 0;
 
-        this.assertEnumEqual([10, 10], element.viewportOffset(), msg);
+        this.assertEnumEqual([10, 10], element.getViewportOffset(), msg);
 
         var offset = [], element = Fuse('<div>');
         this.assertNothingRaised(
-          function() { offset = element.viewportOffset() }, msg);
+          function() { offset = element.getViewportOffset() }, msg);
 
         this.assertEnumEqual([0,0], offset, msg);
         this.assertEqual(0, offset.top, msg);
         this.assertEqual(0, offset.left, msg);
 
-        var offset = element.viewportOffset();
-        this.assertEnumEqual([offset.left,offset.top], element.viewportOffset(), msg);
+        var offset = element.getViewportOffset();
+        this.assertEnumEqual([offset.left,offset.top], element.getViewportOffset(), msg);
         window.scrollTo(0,30);
 
-        this.assertEnumEqual([offset.left,offset.top], element.viewportOffset(), msg);
+        this.assertEnumEqual([offset.left,offset.top], element.getViewportOffset(), msg);
         window.scrollTo(0,80);
 
-        this.assertEnumEqual([offset.left,offset.top], element.viewportOffset(), msg);
+        this.assertEnumEqual([offset.left,offset.top], element.getViewportOffset(), msg);
       }
 
       window.scrollTo(0,0);
@@ -2562,19 +2562,19 @@ new Test.Unit.Runner({
       }, this));
   },
 
-  'testCumulativeScrollOffset': function() {
+  'testGetCumulativeScrollOffset': function() {
     window.scrollTo(0, 30);
     $('body_absolute').raw.scrollTop = 20;
 
-    this.assertEnumEqual([0, 30], $('body_absolute').cumulativeScrollOffset());
-    this.assertEnumEqual([0, 30], $(document.body).cumulativeScrollOffset());
+    this.assertEnumEqual([0, 30], $('body_absolute').getCumulativeScrollOffset());
+    this.assertEnumEqual([0, 30], $(document.body).getCumulativeScrollOffset());
 
     $('body_absolute').raw.scrollTop = 0;
 
     /* scrollOffsets on input fields */
     var offsets = Fuse.Array(
-      $('scrollOffset_input').cumulativeScrollOffset(),
-      $('scrollOffset_textarea').cumulativeScrollOffset()
+      $('scrollOffset_input').getCumulativeScrollOffset(),
+      $('scrollOffset_textarea').getCumulativeScrollOffset()
     );
 
     $('scrollOffset_input').raw.scrollLeft    =
@@ -2582,11 +2582,11 @@ new Test.Unit.Runner({
     $('scrollOffset_textarea').raw.scrollTop  = 25;
 
     this.assertEnumEqual(offsets.first(),
-      $('scrollOffset_input').cumulativeScrollOffset(),
+      $('scrollOffset_input').getCumulativeScrollOffset(),
       'With scroll offsets on input field');
 
     this.assertEnumEqual(offsets.last(),
-      $('scrollOffset_textarea').cumulativeScrollOffset(),
+      $('scrollOffset_textarea').getCumulativeScrollOffset(),
       'With scroll offsets on textarea');
 
     $('scrollOffset_input').raw.scrollLeft    =
@@ -2599,10 +2599,10 @@ new Test.Unit.Runner({
       $('absolute_fixed').raw.scrollTop = 20;
 
       this.assertEnumEqual([0, 20],
-        $('absolute_fixed').cumulativeScrollOffset());
+        $('absolute_fixed').getCumulativeScrollOffset());
 
       this.assertEnumEqual([0, 0],
-        $('absolute_fixed').cumulativeScrollOffset(/*onlyAncestors*/ true));
+        $('absolute_fixed').getCumulativeScrollOffset(/*onlyAncestors*/ true));
 
       $('absolute_fixed').raw.scrollTop = 0;
     }

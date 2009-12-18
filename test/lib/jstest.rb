@@ -35,7 +35,7 @@ class Browser
 end
 
 class FirefoxBrowser < Browser
-  def initialize(path=File.join(ENV['ProgramFiles'] || 'c:\Program Files', '\Mozilla Firefox\firefox.exe'))
+  def initialize(path=File.join(ENV['ProgramFiles'] || 'c:\Program Files', '\Mozilla Firefox\3.0\firefox.exe'))
     @path = path
   end
 
@@ -77,16 +77,17 @@ class ChromeBrowser < Browser
 end
 
 class SafariBrowser < Browser
-  def supported?
-    macos?
+  def initialize(path=File.join(ENV['ProgramFiles'] || 'c:\Program Files', '\Safari\3.2.1\Safari.exe'))
+    @path = path
   end
   
   def setup
-    applescript('tell application "Safari" to make new document')
+    applescript('tell application "Safari" to make new document') if macos?
   end
   
   def visit(url)
-    applescript('tell application "Safari" to set URL of front document to "' + url + '"')
+    applescript('tell application "Safari" to set URL of front document to "' + url + '"') if macos?
+    system("#{@path} #{url}") if windows? 
   end
 
   def teardown
@@ -160,7 +161,7 @@ class KonquerorBrowser < Browser
 end
 
 class OperaBrowser < Browser
-  def initialize(path='c:\Program Files\Opera\Opera.exe')
+  def initialize(path='c:\Program Files\Opera\9.25\Opera.exe')
     @path = path
   end
   

@@ -122,7 +122,7 @@
     };
 
     buttonPlugin.setValue = function setValue(value) {
-      buttonPlugin.writeAttribute.call(this, 'value', value);
+      buttonPlugin.setAttribute.call(this, 'value', value);
       return this;
     };
 

@@ -51,7 +51,7 @@
          before    = getDimensions.call(this),
          width     = getWidth.call(this,  'content'),
          height    = getHeight.call(this, 'content'),
-         offsets   = plugin.positionedOffset.call(this),
+         offsets   = plugin.getPositionedOffset.call(this),
          backup    = Data[Node.getFuseId(this)].madeAbsolute = {
            'position':   elemStyle.position,
            'left':       elemStyle.left,
@@ -175,13 +175,13 @@
 
       var coord, borderHeight, borderWidth, paddingHeight, paddingWidth,
        elemDisplay, elemOffset, elemPos, elemVis, srcBackup,
-       appendCSS        = ';display:block;visibility:hidden;',
-       cumulativeOffset = plugin.cumulativeOffset,
-       elemStyle        = this.style,
-       srcStyle         = source.style,
-       elemIsHidden     = !isVisible.call(this),
-       srcIsHidden      = !isVisible.call(source),
-       srcElement       = source.raw || source;
+       appendCSS           = ';display:block;visibility:hidden;',
+       getCumulativeOffset = plugin.getCumulativeOffset,
+       elemStyle           = this.style,
+       srcStyle            = source.style,
+       elemIsHidden        = !isVisible.call(this),
+       srcIsHidden         = !isVisible.call(source),
+       srcElement          = source.raw || source;
 
       // attempt to unhide elements to get their styles
       if (srcIsHidden) {
@@ -223,7 +223,7 @@
         elemPos = getStyle.call(this, 'position');
 
         // clear element coords before getting
-        // the cumulativeOffset because Opera
+        // the getCumulativeOffset because Opera
         // will fumble the calculations if
         // you try to subtract the coords after
         if (options.setLeft) elemStyle.left = elemStyle.marginLeft = '0';
@@ -232,15 +232,15 @@
         // if an absolute element is a descendant of the source then
         // calculate its offset to the source and inverse it
         if (elemPos == 'absolute' && plugin.descendantOf.call(this, source)) {
-          coord = cumulativeOffset.call(this, source);
+          coord = getCumulativeOffset.call(this, source);
           coord.left *= -1;
           coord.top  *= -1;
         }
         else {
-          coord = cumulativeOffset.call(source);
+          coord = getCumulativeOffset.call(source);
           if (elemPos == 'relative') {
             // subtract the relative element's offset from the source's offsets
-            elemOffset  = cumulativeOffset.call(this);
+            elemOffset  = getCumulativeOffset.call(this);
             coord.left -= elemOffset.left;
             coord.top  -= elemOffset.top;
           }
@@ -291,9 +291,9 @@
 
     // TODO: overhaul with a thorough solution for finding the correct
     // offsetLeft and offsetTop values
-    plugin.cumulativeOffset = (function() {
+    plugin.getCumulativeOffset = (function() {
 
-      function cumulativeOffset(ancestor) {
+      function getCumulativeOffset(ancestor) {
         ancestor = Fuse.get(ancestor);
         var backup, elemStyle, result;
         if (!isElement(ancestor)) ancestor = null;
@@ -370,10 +370,10 @@
           };
         })(getOffset);
 
-      return cumulativeOffset;
+      return getCumulativeOffset;
     })();
 
-    plugin.cumulativeScrollOffset = function cumulativeScrollOffset(onlyAncestors) {
+    plugin.getCumulativeScrollOffset = function getCumulativeScrollOffset(onlyAncestors) {
       var nodeName,
        element  = this.raw || this,
        original = element,
@@ -404,7 +404,7 @@
       return returnOffset(valueL, valueT);
     };
 
-    plugin.positionedOffset = function positionedOffset() {
+    plugin.getPositionedOffset = function getPositionedOffset() {
       var element = ensureLayout(this),
        valueT = 0, valueL = 0;
 
@@ -418,12 +418,12 @@
       return returnOffset(valueL, valueT);
     },
 
-    plugin.viewportOffset = (function() {
-      var viewportOffset = function viewportOffset() {
-        var cumulativeOffset = plugin.cumulativeOffset.call(this),
+    plugin.getViewportOffset = (function() {
+      var getViewportOffset = function getViewportOffset() {
+        var offset = plugin.getCumulativeOffset.call(this),
          scrollOffset = plugin.cumulativeScrollOffset.call(this, /*onlyAncestors*/ true),
-         valueT = cumulativeOffset.top,
-         valueL = cumulativeOffset.left;
+         valueT = offset.top,
+         valueL = offset.left;
 
         // subtract the the scrollOffset totals from the element offset totals.
         valueT -= scrollOffset.top;
@@ -432,7 +432,7 @@
       };
 
       if (Feature('ELEMENT_BOUNDING_CLIENT_RECT')) {
-        viewportOffset = function viewportOffset() {
+        getViewportOffset = function getViewportOffset() {
           var valueT = 0, valueL = 0;
 
           if (!isDetached.call(this)) {
@@ -450,18 +450,18 @@
         };
       }
 
-      return viewportOffset;
+      return getViewportOffset;
     })();
 
     // prevent JScript bug with named function expressions
-    var makeAbsolute =        nil,
-     clonePosition =          nil,
-     cumulativeScrollOffset = nil,
-     getOffsetParent =        nil,
-     makeClipping =           nil,
-     makePositioned =         nil,
-     positionedOffset =       nil,
-     undoAbsolute =           nil,
-     undoClipping =           nil,
-     undoPositioned =         nil;
+    var makeAbsolute =           nil,
+     clonePosition =             nil,
+     getCumulativeScrollOffset = nil,
+     getOffsetParent =           nil,
+     getPositionedOffset =       nil,
+     makeClipping =              nil,
+     makePositioned =            nil,
+     undoAbsolute =              nil,
+     undoClipping =              nil,
+     undoPositioned =            nil;
   })(Element.plugin);

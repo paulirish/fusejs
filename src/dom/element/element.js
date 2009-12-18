@@ -161,7 +161,7 @@
       element = new Decorator(element.cloneNode(false));
 
       return attributes
-        ? element.writeAttribute(attributes)
+        ? element.setAttribute(attributes)
         : element;
     }
 
@@ -305,7 +305,7 @@
            Decorator.prototype = getOrCreateTagClass(element.nodeName).plugin;
            element = new Decorator(element.cloneNode(false));
 
-           return element.writeAttribute(attributes);  
+           return element.setAttribute(attributes);  
           }
           return __create(tagName, attributes, context);
         };
@@ -652,13 +652,13 @@
       return this;
     };
 
-    plugin.empty = function empty() {
+    plugin.isEmpty = function isEmpty() {
       return Fuse.String((this.raw || this).innerHTML).blank();
     };
 
     plugin.identify = (function() {
       function identify() {
-        // use readAttribute to avoid issues with form elements and
+        // use getAttributeto avoid issues with form elements and
         // child controls with ids/names of "id"
         var element = this.raw || this,
          id = plugin.readAttribute.call(this, 'id');
@@ -667,7 +667,7 @@
         var ownerDoc = element.ownerDocument;
         do { id = 'anonymous_element_' + counter++; }
         while (ownerDoc.getElementById(id));
-        plugin.writeAttribute.call(this, 'id', id);
+        plugin.setAttribute.call(this, 'id', id);
         return Fuse.String(id);
       }
 
@@ -724,7 +724,7 @@
     };
 
     plugin.scrollTo = function scrollTo() {
-      var pos = plugin.cumulativeOffset.call(this);
+      var pos = plugin.getCumulativeOffset.call(this);
       global.scrollTo(pos[0], pos[1]);
       return this;
     };
@@ -746,7 +746,7 @@
       if (isString(wrapper))
         wrapper = Element.create(wrapper, attributes);
       if (isElement(wrapper) && (wrapper = Fuse.get(wrapper)))
-        wrapper.writeAttribute(attributes);
+        wrapper.setAttribute(attributes);
       else wrapper = Element.create('div', wrapper);
 
       rawWrapper = wrapper.raw;
@@ -758,10 +758,10 @@
 
     // prevent JScript bug with named function expressions
     var cleanWhitespace = nil,
-     empty =              nil,
      hide =               nil,
      getFuseId =          nil,
      isDetached =         nil,
+     isEmpty =            nil,
      remove =             nil,
      scrollTo =           nil,
      show =               nil,

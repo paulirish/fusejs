@@ -753,12 +753,12 @@ new Test.Unit.Runner({
   },
 
   'testEmpty': function() {
-    this.assert(Fuse.String('').empty());
+    this.assert(Fuse.String('').isEmpty());
 
-    this.assert(!Fuse.String(' ').empty());
-    this.assert(!Fuse.String('\t\r\n ').empty());
-    this.assert(!Fuse.String('a').empty());
-    this.assert(!Fuse.String('\t y \n').empty());
+    this.assert(!Fuse.String(' ').isEmpty());
+    this.assert(!Fuse.String('\t\r\n ').isEmpty());
+    this.assert(!Fuse.String('a').isEmpty());
+    this.assert(!Fuse.String('\t y \n').isEmpty());
   },
 
   'testSucc': function() {

@@ -25,14 +25,14 @@ $(document).observe('dom:loaded', function(event) {
   $('img_load_test').observe('load', function(e) {
     if (e.element() !== this)
       eventResults.eventElement.imageOnLoadBug = true;
-  }).writeAttribute('src', '../fixtures/logo.gif');
+  }).setAttribute('src', '../fixtures/logo.gif');
 
   body.insert('<img id="img_error_test">');
 
   $('img_error_test').observe('error', function(e) {
     if (e.element() !== this)
       eventResults.eventElement.imageOnErrorBug = true;
-  }).writeAttribute('src', 'http://www.fusejs.com/xyz.gif');
+  }).setAttribute('src', 'http://www.fusejs.com/xyz.gif');
 
   try {
     eventResults.contentLoaded.eventElement = event.element();

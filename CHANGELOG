@@ -1,3 +1,6 @@
+* Rename Element#read/writeAttribute to get/setAttribute(), add `is` prefix to String/Element#empty and `get` prefix to element methods cumulativeOffset(), cumulativeScrollOffset(), positionedOffset(), and viewportOffset(), [jddalton, Joe Gornick]
+  Note: Backwards compatibility warning.
+
 * Add support for `context` and `callback` arguments to Fuse.Util.$$() and fix failing selector unit tests. [jddalton]
 
 * Make Fuse.Array#concat and Fuse.Array#slice replacements conform to ECMA 5 specification. [Prototype LH #843] [jddalton, Yaffle]
