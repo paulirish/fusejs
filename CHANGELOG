@@ -1,3 +1,6 @@
+* Rename Element#childElements to getChildren() and add `get` prefix to element methods ancestors(), classNames(), descendants(), siblings(), nextSiblings(), and previousSiblings(). [jddalton, Joe Gornick]
+  Note: Backwards compatibility warning.
+
 * Rename Element#read/writeAttribute to get/setAttribute(), add `is` prefix to String/Element#empty and `get` prefix to element methods cumulativeOffset(), cumulativeScrollOffset(), positionedOffset(), and viewportOffset(), [jddalton, Joe Gornick]
   Note: Backwards compatibility warning.
 

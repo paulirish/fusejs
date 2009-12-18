@@ -308,7 +308,7 @@ new Test.Unit.Runner({
       // test colgroup elements
       element = table.down('colgroup');
       element.insert('<col style="background-color:green;" />');
-      this.assertEqual(2, element.childElements().length, msg);
+      this.assertEqual(2, element.getChildren().length, msg);
     }, this);
   },
 
@@ -721,7 +721,7 @@ new Test.Unit.Runner({
     var colgroup = $('table').down('colgroup');
     colgroup.update('<col class="foo" /><col class="bar" />');
 
-    var children = colgroup.childElements();
+    var children = colgroup.getChildren();
     this.assertEnumEqual(['foo', 'bar'],
       [children[0].raw.className, children[1].raw.className],
       'Failed to update colgroup.');
@@ -944,10 +944,10 @@ new Test.Unit.Runner({
     this.assert(parent.down(3).raw.id !== parent.down(2).raw.id);
   },
 
-  'testElementAncestors': function() {
-    var ancestors = $('navigation_test_f').ancestors();
+  'testElementGetAncestors': function() {
+    var ancestors = $('navigation_test_f').getAncestors();
 
-    this.assertElementsMatch(ancestors.last().ancestors());
+    this.assertElementsMatch(ancestors.last().getAncestors());
 
     this.assertElementsMatch(ancestors,
       'ul', 'li', 'ul#navigation_test', 'div#nav_tests_isolator', 'body', 'html');
@@ -955,22 +955,22 @@ new Test.Unit.Runner({
     var dummy = Fuse('<div>');
     dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
 
-    this.assertRespondsTo('show', dummy.down().ancestors()[0]);
+    this.assertRespondsTo('show', dummy.down().getAncestors()[0]);
   },
 
-  'testElementDescendants': function() {
-    this.assertElementsMatch($('navigation_test').descendants(),
+  'testElementGetDescendants': function() {
+    this.assertElementsMatch($('navigation_test').getDescendants(),
       'li', 'em', 'li', 'em.dim', 'li', 'em', 'ul', 'li',
       'em.dim', 'li#navigation_test_f', 'em', 'li', 'em');
 
-    this.assertElementsMatch($('navigation_test_f').descendants(), 'em');
+    this.assertElementsMatch($('navigation_test_f').getDescendants(), 'em');
 
     var dummy = Fuse('<div>');
     dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
-    this.assertRespondsTo('show', dummy.descendants()[0]);
+    this.assertRespondsTo('show', dummy.getDescendants()[0]);
 
     var input = Fuse('<input type="text">');
-    this.assert(Fuse.Array.isArray(input.descendants()),
+    this.assert(Fuse.Array.isArray(input.getDescendants()),
       'Did not return an array.');
   },
 
@@ -979,55 +979,55 @@ new Test.Unit.Runner({
     this.assertNull($('navigation_test_next_sibling').firstDescendant());
   },
 
-  'testElementChildElements': function() {
-    this.assertElementsMatch($('navigation_test').childElements(),
+  'testElementGetChildren': function() {
+    this.assertElementsMatch($('navigation_test').getChildren(),
       'li.first', 'li', 'li#navigation_test_c', 'li.last');
 
     this.assertNotEqual(0,
       $('navigation_test_next_sibling').childNodes.length);
 
     this.assertEnumEqual([],
-      $('navigation_test_next_sibling').childElements());
+      $('navigation_test_next_sibling').getChildren());
 
     var dummy = Fuse('<div>');
     dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
-    this.assertRespondsTo('show', dummy.childElements()[0]);
+    this.assertRespondsTo('show', dummy.getChildren()[0]);
   },
 
-  'testElementPreviousSiblings': function() {
-    this.assertElementsMatch($('navigation_test').previousSiblings(),
+  'testElementGetPreviousSiblings': function() {
+    this.assertElementsMatch($('navigation_test').getPreviousSiblings(),
       'span#nav_test_prev_sibling', 'p.test', 'div', 'div#nav_test_first_sibling');
 
-    this.assertElementsMatch($('navigation_test_f').previousSiblings(), 'li');
+    this.assertElementsMatch($('navigation_test_f').getPreviousSiblings(), 'li');
 
     var dummy = Fuse('<div>');
     dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
-    this.assertRespondsTo('show', dummy.down(1).previousSiblings()[0]);
+    this.assertRespondsTo('show', dummy.down(1).getPreviousSiblings()[0]);
   },
 
-  'testElementNextSiblings': function() {
-    this.assertElementsMatch($('navigation_test').nextSiblings(),
+  'testElementGetNextSiblings': function() {
+    this.assertElementsMatch($('navigation_test').getNextSiblings(),
       'div#navigation_test_next_sibling', 'p');
 
-    this.assertElementsMatch($('navigation_test_f').nextSiblings());
+    this.assertElementsMatch($('navigation_test_f').getNextSiblings());
 
     var dummy = Fuse('<div>');
     dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
-    this.assertRespondsTo('show', dummy.down().nextSiblings()[0]);
+    this.assertRespondsTo('show', dummy.down().getNextSiblings()[0]);
   },
 
-  'testElementSiblings': function() {
-    this.assertElementsMatch($('navigation_test').siblings(),
+  'testElementGetSiblings': function() {
+    this.assertElementsMatch($('navigation_test').getSiblings(),
       'div#nav_test_first_sibling', 'div', 'p.test',
       'span#nav_test_prev_sibling', 'div#navigation_test_next_sibling', 'p');
 
     var dummy = Fuse('<div>');
     dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
-    this.assertRespondsTo('show', dummy.down().siblings()[0]);
+    this.assertRespondsTo('show', dummy.down().getSiblings()[0]);
   },
 
-  'testElementSiblingsWithSelector': function() {
-    var results = $('intended').siblings('p');
+  'testElementGetSiblingsWithSelector': function() {
+    var results = $('intended').getSiblings('p');
 
     this.assertEqual(results.length, 3,
       'incorrect number of results');
@@ -1038,7 +1038,7 @@ new Test.Unit.Runner({
     }, this);
 
     this.assertEqual(null,
-      $('test-adjacent').siblings('div a')[0],
+      $('test-adjacent').getSiblings('div a')[0],
       'should not match siblings children');
   },
 
@@ -1054,7 +1054,7 @@ new Test.Unit.Runner({
     this.assertEqual(undef, element.up('garbage'));
     this.assertEqual(undef, element.up(6));
 
-    this.assertElementsMatch(element.up('li').siblings(), 'li.first', 'li', 'li.last');
+    this.assertElementsMatch(element.up('li').getSiblings(), 'li.first', 'li', 'li.last');
     this.assertElementMatches(element.up('.non-existant, ul'), 'ul');
 
     var dummy = Fuse('<div>');
@@ -1580,7 +1580,7 @@ new Test.Unit.Runner({
     this.assertEqual('text',
       $('attributes_with_issues_readonly').getAttribute('type'));
 
-    var elements = $('custom_attributes').childElements();
+    var elements = $('custom_attributes').getChildren();
     this.assertEnumEqual(['1', '2'], elements.invoke('getAttribute', 'foo'));
     this.assertEnumEqual(['2', ''],  elements.invoke('getAttribute', 'bar'));
 
@@ -2123,10 +2123,10 @@ new Test.Unit.Runner({
   },
   */
 
-  'testClassNames': function() {
-    this.assertEnumEqual([], $('class_names').classNames());
-    this.assertEnumEqual(['A'], $('class_names').down().classNames());
-    this.assertEnumEqual(['A', 'B'], $('class_names_ul').classNames());
+  'testGetClassNames': function() {
+    this.assertEnumEqual([], $('class_names').getClassNames());
+    this.assertEnumEqual(['A'], $('class_names').down().getClassNames());
+    this.assertEnumEqual(['A', 'B'], $('class_names_ul').getClassNames());
   },
 
   'testHasClassName': function() {
@@ -2140,41 +2140,41 @@ new Test.Unit.Runner({
 
   'testAddClassName': function() {
     $('class_names').addClassName('added_className');
-    this.assertEnumEqual(['added_className'], $('class_names').classNames());
+    this.assertEnumEqual(['added_className'], $('class_names').getClassNames());
 
     $('class_names').addClassName('added_className'); // verify that className cannot be added twice.
-    this.assertEnumEqual(['added_className'], $('class_names').classNames());
+    this.assertEnumEqual(['added_className'], $('class_names').getClassNames());
 
     $('class_names').addClassName('another_added_className');
     this.assertEnumEqual(['added_className', 'another_added_className'],
-      $('class_names').classNames());
+      $('class_names').getClassNames());
   },
 
   'testRemoveClassName': function() {
     $('class_names').removeClassName('added_className');
-    this.assertEnumEqual(['another_added_className'], $('class_names').classNames());
+    this.assertEnumEqual(['another_added_className'], $('class_names').getClassNames());
 
     // verify that removing a non existent className is safe.
     $('class_names').removeClassName('added_className');
-    this.assertEnumEqual(['another_added_className'], $('class_names').classNames());
+    this.assertEnumEqual(['another_added_className'], $('class_names').getClassNames());
 
     $('class_names').removeClassName('another_added_className');
-    this.assertEnumEqual([], $('class_names').classNames());
+    this.assertEnumEqual([], $('class_names').getClassNames());
   },
 
   'testToggleClassName': function() {
     $('class_names').toggleClassName('toggled_className');
-    this.assertEnumEqual(['toggled_className'], $('class_names').classNames());
+    this.assertEnumEqual(['toggled_className'], $('class_names').getClassNames());
 
     $('class_names').toggleClassName('toggled_className');
-    this.assertEnumEqual([], $('class_names').classNames());
+    this.assertEnumEqual([], $('class_names').getClassNames());
 
     $('class_names_ul').toggleClassName('toggled_className');
     this.assertEnumEqual(['A', 'B', 'toggled_className'],
-      $('class_names_ul').classNames());
+      $('class_names_ul').getClassNames());
 
     $('class_names_ul').toggleClassName('toggled_className');
-    this.assertEnumEqual(['A', 'B'], $('class_names_ul').classNames());
+    this.assertEnumEqual(['A', 'B'], $('class_names_ul').getClassNames());
   },
 
   'testElementScrollTo': function() {
@@ -2466,7 +2466,7 @@ new Test.Unit.Runner({
   },
 
   'testMakeAndUndoAbsoluteNotAffectElementDimensions': function() {
-    $('make_absolute_dimensions_test').childElements().each(function(element) {
+    $('make_absolute_dimensions_test').getChildren().each(function(element) {
       var original    = element.getDimensions();
       original.width  = Number(original.width);
       original.height = Number(original.height);

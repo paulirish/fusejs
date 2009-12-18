@@ -226,7 +226,7 @@
       return this;
     };
 
-    plugin.classNames = function classNames() {
+    plugin.getClassNames = function getClassNames() {
       var element = this.raw || this, cn = element.className, original = cn;
       if (cn.length) {
         // normalize to optimize future calls
@@ -277,7 +277,7 @@
 
     // prevent JScript bug with named function expressions
     var addClassName = nil,
-     classNames =      nil,
+     getClassNames =   nil,
      hasClassName =    nil,
      removeClassName = nil,
      toggleClassName = nil;

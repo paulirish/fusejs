@@ -18,7 +18,7 @@
     }
 
     (function() {
-      plugin.childElements = function childElements(selectors) {
+      plugin.getChildren = function getChildren(selectors) {
         var nextSiblings, element = (this.raw || this)[firstNode];
         while (element && element.nodeType !== ELEMENT_NODE)
           element = element[nextNode];
@@ -27,8 +27,8 @@
         element = fromElement(element);
         return !selectors || !selectors.length ||
             selectors && Selector.match(element, selectors)
-          ? prependList(plugin.nextSiblings.call(element, selectors), element, NodeList())
-          : plugin.nextSiblings.call(element, selectors);
+          ? prependList(plugin.getNextSiblings.call(element, selectors), element, NodeList())
+          : plugin.getNextSiblings.call(element, selectors);
       };
 
       plugin.match = function match(selectors) {
@@ -45,7 +45,7 @@
         return Selector.rawSelect(selectors, this.raw || this, callback);
       };
 
-      plugin.siblings = function siblings(selectors) {
+      plugin.getSiblings = function getSiblings(selectors) {
         var match, element = this.raw || this, i = 0,
          original = element, results = NodeList();
 
@@ -68,13 +68,13 @@
       };
 
       // prevent JScript bug with named function expressions
-      var childElements = nil, match = nil, query = nil, rawQuery = nil, siblings = nil;
+      var getChildren = nil, match = nil, query = nil, rawQuery = nil, getSiblings = nil;
     })();
 
     /*------------------------------------------------------------------------*/
 
-    plugin.descendants = (function() {
-      var descendants = function descendants(selectors) {
+    plugin.getDescendants = (function() {
+      var getDescendants = function getDescendants(selectors) {
         var match, node, i = 0, results = NodeList(),
          nodes = (this.raw || this).getElementsByTagName('*');
 
@@ -89,7 +89,7 @@
       };
 
       if (Bug('GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES')) {
-        descendants = function descendants(selectors) {
+        getDescendants = function getDescendants(selectors) {
           var match, node, i = 0, results = NodeList(),
            nodes = (this.raw || this).getElementsByTagName('*');
 
@@ -106,7 +106,7 @@
           return results;
         };
       }
-      return descendants;
+      return getDescendants;
     })();
 
     plugin.descendantOf = (function() {
@@ -280,20 +280,20 @@
         return results;
       }
 
-      plugin.ancestors = function ancestors(selectors) {
+      plugin.getAncestors = function getAncestors(selectors) {
         return collect(this, 'parentNode', selectors);
       };
 
-      plugin.nextSiblings = function nextSiblings(selectors) {
+      plugin.getNextSiblings = function getNextSiblings(selectors) {
         return collect(this, nextNode, selectors);
       };
 
-      plugin.previousSiblings = function previousSiblings(selectors) {
+      plugin.getPreviousSiblings = function getPreviousSiblings(selectors) {
         return collect(this, prevNode, selectors);
       };
 
       // prevent JScript bug with named function expressions
-      var ancestors = nil, nextSiblings = nil, previousSiblings = nil;
+      var getAncestors = nil, getNextSiblings = nil, getPreviousSiblings = nil;
     })();
 
   })(Element.plugin, Fuse.Dom.Selector);
