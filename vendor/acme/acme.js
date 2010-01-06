@@ -645,8 +645,7 @@ if(typeof dojo != "undefined"){
 	var pseudos = {
 		"checked": function(name, condition){
 			return function(elem){
-				// FIXME: make this more portable!!
-				return !!d.attr(elem, "checked");
+				return !!("checked" in elem ? elem.checked : elem.selected);
 			}
 		},
 		"first-child": function(){ return _lookLeft; },
@@ -1098,7 +1097,7 @@ if(typeof dojo != "undefined"){
 				ret.nozip = true;
 			}
 			var gef = getElementsFunc(qp);
-			while(te = candidates[x--]){
+			for(var j = 0; (te = candidates[j]); j++){
 				// for every root, get the elements that match the descendant
 				// selector, adding them to the "ret" array and filtering them
 				// via membership in this level's bag. If there are more query
@@ -1190,7 +1189,19 @@ if(typeof dojo != "undefined"){
 		// see #5832
 		(!d.isSafari || (d.isSafari > 3.1) || is525 )
 	); 
+
+	//Don't bother with n+3 type of matches, IE complains if we modify those.
+	var infixSpaceRe = /n\+\d|([^ ])?([>~+])([^ =])?/g;
+	var infixSpaceFunc = function(match, pre, ch, post) {
+		return ch ? (pre ? pre + " " : "") + ch + (post ? " " + post : "") : /*n+3*/ match;
+	};
+
 	var getQueryFunc = function(query, forceDOM){
+		//Normalize query. The CSS3 selectors spec allows for omitting spaces around
+		//infix operators, >, ~ and +
+		//Do the work here since detection for spaces is used as a simple "not use QSA"
+		//test below.
+		query = query.replace(infixSpaceRe, infixSpaceFunc);
 
 		if(qsaAvail){
 			// if we've got a cached variant and we think we can do it, run it!
@@ -1230,7 +1241,11 @@ if(typeof dojo != "undefined"){
 			// FIXME:
 			//		need to tighten up browser rules on ":contains" and "|=" to
 			//		figure out which aren't good
-			(query.indexOf(":contains") == -1) &&
+			//		Latest webkit (around 531.21.8) does not seem to do well with :checked on option
+			//		elements, even though according to spec, selected options should
+			//		match :checked. So go nonQSA for it:
+			//		http://bugs.dojotoolkit.org/ticket/5179
+			(query.indexOf(":contains") == -1) && (query.indexOf(":checked") == -1) && 
 			(query.indexOf("|=") == -1) // some browsers don't grok it
 		);
 
