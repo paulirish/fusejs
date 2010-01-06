@@ -31,9 +31,10 @@
   // document.createElement('div').offsetParent -> unknown
   // document.createElement -> object
   isHostObject = (function() {
-    var HOST_TYPES = { 'function': 1, 'object': 1, 'unknown': 1 };
+    var NON_HOST_TYPES = { 'boolean': 1, 'number': 1, 'string': 1, 'undefined': 1 };
     return function(object, property) {
-      return !!HOST_TYPES[typeof object[property]];
+      var type = typeof object[property];
+      return type === 'object' ? !!object[property] : !NON_HOST_TYPES[type];
     };
   })();
 

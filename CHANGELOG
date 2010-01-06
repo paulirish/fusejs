@@ -1,3 +1,5 @@
+* Ensure isHostObject() avoids a false positive for null values. [jddalton, kangax]
+
 * Rename Element#childElements to getChildren() and add `get` prefix to element methods ancestors(), classNames(), descendants(), siblings(), nextSiblings(), and previousSiblings(). [jddalton, Joe Gornick]
   Note: Backwards compatibility warning.
 
