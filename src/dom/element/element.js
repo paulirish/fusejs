@@ -661,7 +661,7 @@
         // use getAttributeto avoid issues with form elements and
         // child controls with ids/names of "id"
         var element = this.raw || this,
-         id = plugin.readAttribute.call(this, 'id');
+         id = plugin.getAttribute.call(this, 'id');
         if (id.length) return id;
 
         var ownerDoc = element.ownerDocument;

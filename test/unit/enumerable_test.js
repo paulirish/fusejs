@@ -202,8 +202,8 @@ new Test.Unit.Runner({
     ]);
 
     this.assertEnumEqual(['foo', 'bar', 'baz'],
-      elements.invoke('readAttribute', 'title'),
-      'Should have called `readAttribute` on each decorated element.');
+      elements.invoke('getAttribute', 'title'),
+      'Should have called `getAttribute` on each decorated element.');
 
     // must attach input element to document before calling focus()
     elements = new EnumObject([ Fuse('<input type="text">') ]);

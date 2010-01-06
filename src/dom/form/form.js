@@ -116,7 +116,7 @@
       options = clone(options);
 
       var params = options.parameters, submit = options.submit,
-       action = plugin.readAttribute.call(this, 'action');
+       action = plugin.getAttribute.call(this, 'action');
 
       delete options.submit;
       options.parameters = plugin.serialize.call(this, { 'submit':submit, 'hash':true });

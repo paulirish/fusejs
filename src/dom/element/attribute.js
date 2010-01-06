@@ -26,7 +26,7 @@
       return hasAttribute;
     })();
 
-    plugin.getAttribute= function readAttribute(name) {
+    plugin.getAttribute= function getAttribute(name) {
       var result, element = this.raw || this, T = Element.Attribute;
       name = T.names[name] || name;
 

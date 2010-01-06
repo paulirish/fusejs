@@ -118,7 +118,7 @@
     /* define getValue/setValue for each field class */
 
     buttonPlugin.getValue = function getValue() {
-      return buttonPlugin.readAttribute.call(this, 'value');
+      return buttonPlugin.getAttribute.call(this, 'value');
     };
 
     buttonPlugin.setValue = function setValue(value) {
