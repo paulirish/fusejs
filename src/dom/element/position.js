@@ -231,7 +231,7 @@
 
         // if an absolute element is a descendant of the source then
         // calculate its offset to the source and inverse it
-        if (elemPos == 'absolute' && plugin.descendantOf.call(this, source)) {
+        if (elemPos == 'absolute' && plugin.contains.call(source, this)) {
           coord = getCumulativeOffset.call(this, source);
           coord.left *= -1;
           coord.top  *= -1;

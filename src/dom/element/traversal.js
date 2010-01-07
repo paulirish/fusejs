@@ -109,36 +109,41 @@
       return getDescendants;
     })();
 
-    plugin.descendantOf = (function() {
-      var descendantOf = function descendantOf(ancestor) {
-        ancestor = Fuse.get(ancestor).raw;
-        var element = this.raw || this;
-        while (element = element.parentNode)
-          if (element === ancestor) return true;
+    plugin.contains = (function() {
+      var contains = function contains(descendant) {
+        if (descendant = Fuse.get(descendant)) {
+          var element = this.raw || this;
+          descendant = descendant.raw || descendant;
+          while (descendant = descendant.parentNode)
+            if (descendant === element) return true;
+        }
         return false;
       };
 
       if (Feature('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
-        descendantOf = function descendantOf(ancestor) {
+        contains = function contains(descendant) {
           /* DOCUMENT_POSITION_CONTAINS = 0x08 */
-          ancestor = Fuse.get(ancestor).raw;
-          var element = this.raw || this;
-          return (element.compareDocumentPosition(ancestor) & 8) === 8;
+          if (descendant = Fuse.get(descendant)) {
+            var element = this.raw || this;
+            return ((descendant.raw || descendant)
+              .compareDocumentPosition(element) & 8) === 8;
+          }
+          return false;
         };
       }
       else if (Feature('ELEMENT_CONTAINS')) {
-        var __descendantOf = descendantOf;
+        var __contains = contains;
 
-        descendantOf = function descendantOf(ancestor) {
-          ancestor = Fuse.get(ancestor);
-          var element, ancestorElem = ancestor.raw;
-          if (ancestorElem.nodeType !== ELEMENT_NODE)
-            return __descendantOf.call(this, ancestor);
+        contains = function contains(descendant) {
+          descendant = Fuse.get(descendant);
+          var element, descendantElem = descendant.raw || descendant;
+          if (descendantElem.nodeType !== ELEMENT_NODE)
+            return __contains.call(this, descendant);
           element = this.raw || this;
-          return ancestorElem !== element && ancestorElem.contains(element);
+          return element !== descendantElem && element.contains(descendantElem);
         };
       }
-      return descendantOf;
+      return contains;
     })();
 
     plugin.down = (function() {

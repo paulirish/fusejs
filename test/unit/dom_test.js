@@ -288,7 +288,7 @@ new Test.Unit.Runner({
 
       element = getElement('third_row', context);
       element.insert({ after:'<tr id="forth_row"><td>Forth Row</td></tr>' });
-      this.assert(element.descendantOf(table), msg);
+      this.assert(table.contains(element), msg);
 
       cell.insert({ 'top': 'hello world' });
       this.assert(getInnerHTML(cell).startsWith('hello world'), msg);
@@ -1174,66 +1174,66 @@ new Test.Unit.Runner({
     this.assert(!$('test-full').isEmpty());
   },
 
-  'testDescendantOf': function() {
-    this.assert($('child').descendantOf('ancestor'));
-    this.assert($('child').descendantOf($('ancestor')));
+  'testContains': function() {
+    this.assert($('ancestor').contains('child'));
+    this.assert($('ancestor').contains($('child')));
 
-    this.assert($('great-grand-child').descendantOf('ancestor'),
-      'great-grand-child < ancestor');
+    this.assert($('ancestor').contains('great-grand-child'),
+      'ancestor > great-grand-child');
 
-    this.assert($('grand-child').descendantOf('ancestor'),
-      'grand-child < ancestor');
+    this.assert($('ancestor').contains('grand-child'),
+      'ancestor > grand-child');
 
-    this.assert($('great-grand-child').descendantOf('grand-child'),
-      'great-grand-child < grand-child');
+    this.assert($('grand-child').contains('great-grand-child'),
+      'grand-child > great-grand-child');
 
-    this.assert($('grand-child').descendantOf('child'),
-      'grand-child < child');
+    this.assert($('child').contains('grand-child'),
+      'child > grand-child');
 
-    this.assert($('great-grand-child').descendantOf('child'),
-      'great-grand-child < child');
+    this.assert($('child').contains('great-grand-child'),
+      'child > great-grand-child');
 
-    this.assert($('sibling').descendantOf('ancestor'),
-      'sibling < ancestor');
+    this.assert($('ancestor').contains('sibling'),
+      'ancestor > sibling');
 
-    this.assert($('grand-sibling').descendantOf('sibling'),
-      'grand-sibling < sibling');
+    this.assert($('sibling').contains('grand-sibling'),
+      'sibling > grand-sibling');
 
-    this.assert($('grand-sibling').descendantOf('ancestor'),
-      'grand-sibling < ancestor');
+    this.assert($('ancestor').contains('grand-sibling'),
+      'ancestor > grand-sibling');
 
-    this.assert($('grand-sibling').descendantOf(document.body),
-      'grand-sibling < body');
+    this.assert($(document.body).contains('grand-sibling'),
+      'body > grand-sibling');
 
-    this.assert(!$('ancestor').descendantOf($('child')));
+    this.assert(!$('child').contains($('ancestor')));
 
-    this.assert(!$('great-grand-child').descendantOf('great-grand-child'),
-      'great-grand-child < great-grand-child');
+    this.assert(!$('great-grand-child').contains('great-grand-child'),
+      'great-grand-child should not contain itself');
 
-    this.assert(!$('great-grand-child').descendantOf('sibling'),
-      'great-grand-child < sibling');
+    this.assert(!$('sibling').contains('great-grand-child'),
+      'sibling should not contain great-grand-child');
 
-    this.assert(!$('sibling').descendantOf('child'),
-      'sibling < child');
+    this.assert(!$('child').contains('sibling'),
+      'child should not contain sibling');
 
-    this.assert(!$('great-grand-child').descendantOf('not-in-the-family'),
-      'great-grand-child < not-in-the-family');
+    this.assert(!$('not-in-the-family').contains('great-grand-child'),
+      'not-in-the-family should not contain great-grand-child');
 
-    this.assert(!$('child').descendantOf('not-in-the-family'),
-      'child < not-in-the-family');
+    this.assert(!$('not-in-the-family').contains('child'),
+      'not-in-the-family should not contain child');
 
-    this.assert(!$(document.body).descendantOf('great-grand-child'));
+    this.assert(!$('great-grand-child').contains(document.body));
 
     // dynamically-created elements
     $('ancestor').insert(Fuse('<div id="weird-uncle">'));
-    this.assert($('weird-uncle').descendantOf('ancestor'));
+    this.assert($('ancestor').contains('weird-uncle'));
 
     $(document.body).insert(Fuse('<div id="impostor">'));
-    this.assert(!$('impostor').descendantOf('ancestor'));
+    this.assert(!$('ancestor').contains('impostor'));
 
-    // test descendantOf document
-    this.assert($(document.body).descendantOf(document));
-    this.assert($(document.documentElement).descendantOf(document));
+    // test descendants of document
+    this.assert($(document).contains(document.body));
+    this.assert($(document).contains(document.documentElement));
   },
 
   'testElementSetStyle': function() {

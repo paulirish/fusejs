@@ -680,7 +680,7 @@
       var isDetached = function isDetached() {
         var element = this.raw || this;
         return !(element.parentNode &&
-          plugin.descendantOf.call(element, element.ownerDocument));
+          plugin.contains.call(element.ownerDocument, element));
       };
 
       if (Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
