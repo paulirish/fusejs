@@ -143,13 +143,15 @@
 
   Bug.set({
     'ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS': function() {
-      // true for IE
+      // true for some IE6
       var node, clone, div = Fuse._div;
-      (node = document.createAttribute('name')).value = 'x';
+      (node = document.createAttribute('id')).value = 'x';
+
       div.setAttributeNode(node);
-      (clone = div.cloneNode(false)).setAttribute('name', 'y');
-      div.removeAttribute('name');
-      return (node = clone.getAttributeNode('name')) && node.value === 'x';
+      clone = div.cloneNode(false);
+      div.setAttribute('id', 'y');
+
+      return !!((node = clone.getAttributeNode('id')) && node.value == 'y');
     },
 
     'BODY_ACTING_AS_ROOT': function() {

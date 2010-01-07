@@ -612,7 +612,7 @@
       rePlugin.exec = function exec(string) {
         var length, results, output = __exec.call(this, string);
         if (output) {
-          length = output.length; results = Fuse.Array();
+          length = output.length; results = Array();
           while (length--) results[length] = String(output[length]);
         }
         return output && results;
@@ -650,7 +650,7 @@
       strPlugin.match = function match(pattern) {
         var length, results, output = __match.call(this, pattern);
         if (output) {
-          length = output.length; results = Fuse.Array();
+          length = output.length; results = Array();
           while (length--) results[length] = String(output[length]);
         }
         return output && results;
@@ -671,7 +671,7 @@
 
       strPlugin.split = function split(separator, limit) {
         var output = __split.call(this, separator, limit),
-         length = output.length, results = Fuse.Array();
+         length = output.length, results = Array();
         while (length--) results[length] = String(output[length]);
         return results;
       };

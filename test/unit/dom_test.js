@@ -1529,7 +1529,7 @@ new Test.Unit.Runner({
     this.assertEqual(0.45, $('op1').setOpacity(0.45).getOpacity());
   },
 
-  'testElementgetAttribute': function() {
+  'testElementGetAttribute': function() {
     var attribFormIssues = $('attributes_with_issues_form');
     this.assert(Fuse.Object.isString(attribFormIssues.getAttribute('action')));
     this.assert(Fuse.Object.isString(attribFormIssues.getAttribute('id')));
@@ -1609,7 +1609,7 @@ new Test.Unit.Runner({
     this.assertEqual('6', table.getAttribute('cellpadding'));
   },
 
-  'testElementsetAttribute': function() {
+  'testElementSetAttribute': function() {
     var element = $(document.body.appendChild(document.createElement('p')));
 
     this.assertRespondsTo('setAttribute', element);

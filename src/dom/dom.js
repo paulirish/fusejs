@@ -13,7 +13,7 @@
 
   Fuse._info.docEl =
   Fuse._info.root  =
-    { 'nodeName': 'HTML', 'property': 'documentElement' }
+    { 'nodeName': 'HTML', 'property': 'documentElement' };
 
   Fuse._info.body =
   Fuse._info.scrollEl =

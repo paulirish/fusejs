@@ -157,37 +157,37 @@ new Test.Unit.Runner({
 
   'testSelectorMatchElements': function() {
     this.assertElementsMatch(
-      Selector.matchElements($('list').descendants(), 'li'),
+      Selector.matchElements($('list').getDescendants(), 'li'),
       '#item_1', '#item_2', '#item_3');
 
     this.assertElementsMatch(
-      Selector.matchElements($('fixtures').descendants(), 'a.internal'),
+      Selector.matchElements($('fixtures').getDescendants(), 'a.internal'),
       '#link_1', '#link_2');
 
     this.assertEnumEqual([],
-      Selector.matchElements($('fixtures').descendants(),
+      Selector.matchElements($('fixtures').getDescendants(),
       'p.last'));
 
     this.assertElementsMatch(
-      Selector.matchElements($('fixtures').descendants(), '.inexistant, a.internal'),
+      Selector.matchElements($('fixtures').getDescendants(), '.inexistant, a.internal'),
       '#link_1', '#link_2');
   },
 
   'testSelectorFindElement': function() {
     this.assertElementMatches(
-       Selector.findElement($('list').descendants(), 'li'),
+       Selector.findElement($('list').getDescendants(), 'li'),
       'li#item_1.first');
 
     this.assertElementMatches(
-      Selector.findElement($('list').descendants(), 'li', 1),
+      Selector.findElement($('list').getDescendants(), 'li', 1),
       'li#item_2');
 
     this.assertElementMatches(
-      Selector.findElement($('list').descendants(), 'li#item_3'),
+      Selector.findElement($('list').getDescendants(), 'li#item_3'),
       'li');
 
     this.assertEqual(undef,
-      Selector.findElement($('list').descendants(),
+      Selector.findElement($('list').getDescendants(),
       'em'));
   },
 
@@ -624,7 +624,7 @@ new Test.Unit.Runner({
 
   'testCopiedNodesGetIncluded': function() {
     this.assertElementsMatch(
-      Selector.matchElements($('counted_container').descendants(), 'div'),
+      Selector.matchElements($('counted_container').getDescendants(), 'div'),
       'div.is_counted'
     );
 
@@ -632,7 +632,7 @@ new Test.Unit.Runner({
       $('counted_container').raw.innerHTML;
 
     this.assertElementsMatch(
-      Selector.matchElements($('counted_container').descendants(), 'div'),
+      Selector.matchElements($('counted_container').getDescendants(), 'div'),
       'div.is_counted',
       'div.is_counted'
     );
