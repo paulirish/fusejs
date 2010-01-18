@@ -8,29 +8,35 @@
       // return if falsy or already decoratored
       if (!node || node.raw) return node;
 
-      // switch flag to bail early for window objects
-      retWindowId = false;
-      var data, decorated, ownerDoc, id = getFuseId.call(node);
+      var data, decorated, id, ownerDoc;
+      if (node.nodeType !== TEXT_NODE) {
 
-      // return if window
-      retWindowId = true;
-      if (!id) return node;
+        // switch flag to bail early for window objects
+        retWindowId = false;
+        id = getFuseId.call(node);
+        retWindowId = true;
 
-      // return cached if available
-      if ((data = Data[id]).decorator) return data.decorator;
+        // return if window
+        if (!id) return node;
 
-      // pass to element decorator
-      switch (node.nodeType) {
-        case ELEMENT_NODE:  return fromElement(node);
-        case DOCUMENT_NODE: return Document(node);
+        // return cached if available
+        if ((data = Data[id]).decorator) return data.decorator;
+
+        // pass to element decorator
+        switch (node.nodeType) {
+          case ELEMENT_NODE:  return fromElement(node);
+          case DOCUMENT_NODE: return Document(node);
+        }
       }
 
-      decorated =
-      data.decorator = new Decorator;
-
-      data.node =
+      decorated = new Decorator;
       decorated.raw = node;
       decorated.nodeName = node.nodeName;
+
+      if (data) {
+        data.node = node;
+        data.decorator = decorated;
+      }
 
       return decorated;
     }

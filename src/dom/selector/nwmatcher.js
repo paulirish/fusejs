@@ -1,37 +1,42 @@
   /*--------------------------- SELECTOR: NWMATCHER --------------------------*/
 
   (function(Selector, Node, NodeList, RawList) {
-    Selector.match = function match(element, selector) {
-      function match(element, selector) {
-        return nwMatch(element.raw || element, String(selector || ''));
+    Selector.match = function match(element, selector, context) {
+      function match(element, selector, context) {
+        return __match(element.raw || element, String(selector || ''), context);
       }
 
-      nwMatch = NW.Dom.match;
-      return (Selector.match = match)(element, selector);
+      __match = NW.Dom.match;
+      return (Selector.match = match)(element, selector, context);
     };
 
     Selector.rawSelect = function rawSelect(selector, context, callback) {
       function rawSelect(selector, context, callback) {
-        return nwSelect(String(selector || ''), context, RawList(), callback);
-      }
-
-      nwSelect = NW.Dom.select;
-      return (Selector.rawSelect = rawSelect)(selector, context, callback);
-    };
-
-    Selector.select = function select(selector, context, callback) {
-      function select(selector, context, callback) {
-        var i = 0, results = NodeList();
-        nwSelect(String(selector || ''), context, null, function(node) {
-          node = results[i++] = Node(node);
+        var i = -1, results = RawList();
+        __select(String(selector || ''), context, function(node) {
+          results[++i] = node;
           callback && callback(node);
         });
         return results;
       }
 
-      nwSelect = NW.Dom.select;
+      __select = NW.Dom.select;
+      return (Selector.rawSelect = rawSelect)(selector, context, callback);
+    };
+
+    Selector.select = function select(selector, context, callback) {
+      function select(selector, context, callback) {
+        var i = -1, results = NodeList();
+        __select(String(selector || ''), context, function(node) {
+          node = results[++i] = Node(node);
+          callback && callback(node);
+        });
+        return results;
+      }
+
+      __select = NW.Dom.select;
       return (Selector.select = select)(selector, context, callback);
     };
 
-    var nwMatch, nwSelect, match = nil, select = nil;
+    var __match, __select, match = nil, select = nil;
   })(Fuse.Dom.Selector, Fuse.Dom.Node, Fuse.Dom.NodeList, Fuse.Dom.RawList);

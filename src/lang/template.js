@@ -10,25 +10,25 @@
       if (!pattern.global)
         pattern = Fuse.RegExp.clone(pattern, { 'global': true });
 
-      var instance = this[expando] || new Klass;
-      delete this[expando];
+      var instance = __instance || new Klass;
+      __instance = null;
 
       instance.template = Fuse.String(template);
       instance.pattern  = pattern;
       return instance;
     }
 
-    var __apply = Template.apply, __call = Template.call,
+    var __instance, __apply = Template.apply, __call = Template.call,
      Template = Class({ 'constructor': Template });
 
-    Template.call = function(thisArg) {
-      thisArg[expando] = thisArg;
-      return __call.apply(this, arguments);
+    Template.apply = function(thisArg, argArray) {
+      __instance = thisArg;
+      return __apply.call(this, thisArg, argArray);
     };
 
-    Template.apply = function(thisArg, argArray) {
-      thisArg[expando] = thisArg;
-      return __apply.call(this, thisArg, argArray);
+    Template.call = function(thisArg) {
+      __instance = thisArg;
+      return __call.apply(this, arguments);
     };
 
     Klass.prototype = Template.plugin;

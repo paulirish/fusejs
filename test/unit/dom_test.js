@@ -924,7 +924,7 @@ new Test.Unit.Runner({
     this.assertEqual('hello',
       getInnerHTML('testdiv-replace-container-tohtml'));
   },
-  
+
   'testElementQueryMethod': function() {
     var results = $('container').query('p.test');
 
@@ -1231,9 +1231,7 @@ new Test.Unit.Runner({
     $(document.body).insert(Fuse('<div id="impostor">'));
     this.assert(!$('ancestor').contains('impostor'));
 
-    // test descendants of document
-    this.assert($(document).contains(document.body));
-    this.assert($(document).contains(document.documentElement));
+    this.assert($(document.documentElement).contains(document.body));
   },
 
   'testElementSetStyle': function() {
@@ -2186,7 +2184,7 @@ new Test.Unit.Runner({
     var elem = $('scroll_test_2');
     elem.scrollTo();
 
-    //this.assertEqual(0, elem.getViewportOffset()[1]);
+    this.assertEqual(0, elem.getViewportOffset()[1]);
     window.scrollTo(0, 0);
   },
 

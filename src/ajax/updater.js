@@ -4,12 +4,11 @@
     function Klass() { }
 
     function Updater(container, url, options) {
-      var onDone,
-       instance     = this[expando] || new Klass,
-       callbackName = 'on' + Request.Events[4],
-       onDone       = options[callbackName];
+      var callbackName = 'on' + Request.Events[4],
+       instance = __instance || new Klass,
+       onDone = options[callbackName];
 
-      delete this[expando];
+      __instance = null;
 
       instance.container = {
         'success': Fuse.get(container.success || container),
@@ -25,17 +24,17 @@
       Fuse.Ajax.Request.call(instance, url, options);
     }
 
-    var __apply = Updater.apply, __call = Updater.call,
+    var __instance, __apply = Updater.apply, __call = Updater.call,
      Request = Fuse.Ajax.Request,
      Updater = Class(Fuse.Ajax.Request, { 'constructor': Updater });
 
     Updater.call = function(thisArg) {
-      thisArg[expando] = thisArg;
+      __instance = thisArg;
       return __call.apply(this, arguments);
     };
 
     Updater.apply = function(thisArg, argArray) {
-      thisArg[expando] = thisArg;
+      __instance = thisArg;
       return __apply.call(this, thisArg, argArray);
     };
 

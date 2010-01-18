@@ -723,12 +723,6 @@
       return this;
     };
 
-    plugin.scrollTo = function scrollTo() {
-      var pos = plugin.getCumulativeOffset.call(this);
-      global.scrollTo(pos[0], pos[1]);
-      return this;
-    };
-
     plugin.remove = function remove() {
       var element = this.raw || this;
       element.parentNode &&
@@ -763,7 +757,6 @@
      isDetached =         nil,
      isEmpty =            nil,
      remove =             nil,
-     scrollTo =           nil,
      show =               nil,
      toggle =             nil,
      wrap =               nil;

@@ -122,7 +122,7 @@ new Test.Unit.Runner({
   },
 
   'testSelectorWithTagNameAndNegatedAttributeValue': function() {
-    this.assertEnumEqual([], $$('a[href!="#"]'));
+    this.assertEnumEqual([], $$('a:not([href="#"])'));
   },
 
   'testSelectorWithBracketAttributeValue': function() {
@@ -151,8 +151,8 @@ new Test.Unit.Runner({
      'a[class~=external][href="#"]');
 
     this.assertEnumEqual([],
-      $$('a[class~=external][href!="#"]'),
-     'a[class~=external][href!="#"]');
+      $$('a[class~=external]:not([href="#"])'),
+     'a[class~=external]:not([href="#"])');
   },
 
   'testSelectorMatchElements': function() {
@@ -526,7 +526,7 @@ new Test.Unit.Runner({
   },
 
   'testSelectorWithEmpty': function() {
-    $('level3_1').innerHTML = '';
+    $('level3_1').raw.innerHTML = '';
  
     this.assertEnumEqual($('level3_1', 'level3_2', 'level2_3'),
      $$('#level1 *:empty'),

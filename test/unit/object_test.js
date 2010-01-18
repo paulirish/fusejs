@@ -363,7 +363,7 @@ new Test.Unit.Runner({
         urlDomain = parts[2];
         domainIndex = urlDomain.indexOf(docDomain);
         result = parts[1] === protocol &&
-          domainIndex > -1 && (!domainIndex || urlDomain.charAt(domainIndex -1) == '.') &&
+          (!domainIndex || urlDomain.charAt(domainIndex -1) == '.') &&
             (parts[3] || defaultPort) === (port || defaultPort);
       }
       return result;

@@ -1,3 +1,23 @@
+* Remove `delete this[expando]` from Ajax.Updater, Ajax.TimedUpdater, Range, Template, and Timer classes to avoid issues when `this` is the global object in IE. [jddalton]
+
+* Move the Element#scrollTo method to the position.js. [jddalton]
+
+* Add `selected` to the list of flag attributes in attribute.js. [Diego Perini, jddalton]
+
+* Make Event.extend() work on events originating from a secondary document. [jddalton]
+
+* Convert unit tests with the `!=` selector to `:not()`. [jddalton]
+
+* Update NWMatcher adapter to work with v1.2.1 [jddalton]
+
+* Make Fuse.Dom.Node() not error with textNodes. [jddalton]
+
+* Remove extraneous check from Fuse.Object.isSameOrigin(). [jddalton]
+
+* Fix regression bugs with Element#contains and Element#getViewportOffset that prevented unit tests from passing. [jddalton]
+
+* Update browser.html, interpreter.html, functional event tests, and remaining unit tests to work with dom wrappers. [jddalton]
+
 * Rename Element#descendantOf to Element#contains and flip the functionality. [jddalton, Joe Gornick]
   Note: Backwards compatibility warning.
 

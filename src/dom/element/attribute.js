@@ -122,7 +122,7 @@
     T.write.checked = setChecked;
 
     // mandate flag attributes return their name
-    Fuse.Util.$w('checked disabled isMap multiple readOnly')._each(function(attr) {
+    Fuse.Util.$w('checked disabled isMap multiple readOnly selected')._each(function(attr) {
       T.read[attr] = getFlag(attr);
     });
 

@@ -50,7 +50,7 @@ new Test.Unit.Runner({
       Fuse.RegExp.clone(pattern, { 'multiline': true, 'global': true })),
       'Clone did not respect flag combination of `multiline` flag as true and `global` flag as true.');
 
-    this.assertEnumEqual([], source.match(
+    this.assertNull(source.match(
       Fuse.RegExp.clone(pattern, { 'multiline': false })),
       'Clone did not respect the `multiline` flag as false.');
   },

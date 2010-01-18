@@ -165,13 +165,13 @@ new Test.Unit.Runner({
     this.assertDisabled(input1);
 
     // non-form elements:
-    var fieldset = $('selects_fieldset'), fields = fieldset.childElements();
-    fields.each(function(select) { this.assertEnabled(select) }, this);
+    var fieldset = $('selects_fieldset'), fields = fieldset.getChildren();
+    fields.each(function(select) { alert(select); this.assertEnabled(select) }, this);
 
-    Form.disable(fieldset);
+    //Form.disable(fieldset);
     fields.each(function(select) { this.assertDisabled(select) }, this);
 
-    Form.enable(fieldset);
+    //Form.enable(fieldset);
     fields.each(function(select) { this.assertEnabled(select) }, this);
   },
 
@@ -361,7 +361,7 @@ new Test.Unit.Runner({
 
     // test with button element
     expected = { 'clicky': 'click me', 'greeting': 'Hello', 'search': 'search', 'bu_submit': 1 };
-    var elements = $('inputs').childElements().concat($('button_submit'));
+    var elements = $('inputs').getChildren().concat($('button_submit'));
 
     this.assertHashEqual(expected,
       serializeElements('bigform', elements, { 'submit': $('button_submit') }));

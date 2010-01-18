@@ -4,8 +4,8 @@
     function Klass() { }
 
     function Range(start, end, exclusive) {
-      var instance = this[expando] || new Klass;
-      delete this[expando];
+      var instance = __instance || new Klass;
+      __instance = null;
 
       instance.start     = Obj(start);
       instance.end       = Obj(end);
@@ -13,16 +13,16 @@
       return instance;
     }
 
-    var __apply = Range.apply, __call = Range.call,
+    var __instance, __apply = Range.apply, __call = Range.call,
      Range = Class({ 'constructor': Range });
 
     Range.call = function(thisArg) {
-      thisArg[expando] = thisArg;
+      __instance = thisArg;
       return __call.apply(this, arguments);
     };
 
     Range.apply = function(thisArg, argArray) {
-      thisArg[expando] = thisArg;
+      __instance = thisArg;
       return __apply.call(this, thisArg, argArray);
     };
 

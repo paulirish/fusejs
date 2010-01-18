@@ -421,7 +421,7 @@
     plugin.getViewportOffset = (function() {
       var getViewportOffset = function getViewportOffset() {
         var offset = plugin.getCumulativeOffset.call(this),
-         scrollOffset = plugin.cumulativeScrollOffset.call(this, /*onlyAncestors*/ true),
+         scrollOffset = plugin.getCumulativeScrollOffset.call(this, /*onlyAncestors*/ true),
          valueT = offset.top,
          valueL = offset.left;
 
@@ -453,6 +453,12 @@
       return getViewportOffset;
     })();
 
+    plugin.scrollTo = function scrollTo() {
+      var pos = plugin.getCumulativeOffset.call(this);
+      global.scrollTo(pos[0], pos[1]);
+      return this;
+    };
+
     // prevent JScript bug with named function expressions
     var makeAbsolute =           nil,
      clonePosition =             nil,
@@ -461,6 +467,7 @@
      getPositionedOffset =       nil,
      makeClipping =              nil,
      makePositioned =            nil,
+     scrollTo =                  nil,
      undoAbsolute =              nil,
      undoClipping =              nil,
      undoPositioned =            nil;

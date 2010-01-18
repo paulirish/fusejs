@@ -135,11 +135,13 @@
         var __contains = contains;
 
         contains = function contains(descendant) {
-          descendant = Fuse.get(descendant);
-          var element, descendantElem = descendant.raw || descendant;
-          if (descendantElem.nodeType !== ELEMENT_NODE)
+          if (this.nodeType !== ELEMENT_NODE)
             return __contains.call(this, descendant);
-          element = this.raw || this;
+
+          descendant = Fuse.get(descendant);
+          var descendantElem = descendant.raw || descendant,
+           element = this.raw || this;
+
           return element !== descendantElem && element.contains(descendantElem);
         };
       }

@@ -85,6 +85,7 @@
       this.name    = name;
       this.value   = value;
       this.history = Fuse.List();
+
       Fuse.Object.extend(this, options);
       this.reset();
     },
@@ -96,19 +97,19 @@
     'refresh': function() {
       var elements = this.history.slice(-3).pluck('element');
 
-      Fuse.Util.$A(this.element.childNodes).each(function(element) {
-        if (element && !elements.contains(element))
-          this.element.removeChild(element);
-      }, this);
+      this.element.getChildren().each(function(element) {
+        if (!elements.contains(element))
+          element.remove();
+      });
 
-      var children = Fuse.Util.$A(this.element.childNodes);
+      var children = this.element.getChildren();
       elements.each(function(element, index) {
-        Element.removeClassName(element, 'active');
+        element.removeClassName('active');
         var child = children[index];
         if (!child)
-          this.element.appendChild(element);
-        else if (!element.parentNode)
-          this.element.insertBefore(element, child);
+          this.element.insert(element);
+        else if (!element.raw.parentNode)
+          this.element.raw.insertBefore(element, child.raw);
       }, this);
 
       this.setTitle();
@@ -117,13 +118,13 @@
 
     'setTitle': function() {
       if (this.titleElement)
-        this.titleElement.innerHTML =
+        this.titleElement.raw.innerHTML =
           this.history.pluck('name').invoke('escapeHTML').join('.');
     },
 
     'setValue': function() {
       if (this.valueElement)
-        this.valueElement.innerHTML =
+        this.valueElement.raw.innerHTML =
           this.currentValue().escapeHTML() + '&nbsp;';
     },
 
@@ -143,8 +144,9 @@
       var from = this.history.last();
       this.history.push(new Inspector(this, name, value));
       this.refresh();
-      if (from)
-        Element.addClassName(from.element, 'active');
+      if (from) {
+        from.element.addClassName('active');
+      }
     }
   });
 
@@ -153,7 +155,7 @@
       this.browser = browser;
       this.name    = Fuse.String(name);
       this.value   = value;
-      this.id      = 'inspector_' + new Date().getTime();
+      this.id      = 'inspector_' + new Date();
       this.history = this.browser.history.toArray();
       this.history.push(this);
       this.createElement();
@@ -169,20 +171,18 @@
     },
 
     'createElement': function() {
-      var element = document.createElement('div');
-      element.className = 'inspector';
-      element.id = this.id;
+      var element = Fuse('<div>');
+      element.raw.className = 'inspector';
+      element.raw.id = this.id;
       this.element = element;
 
-      var title = document.createElement('h2');
-      title.innerHTML = Fuse.String(this.name).escapeHTML();
+      var title = Fuse('<h2>');
+      title.raw.innerHTML = Fuse.String(this.name).escapeHTML();
       this.titleElement = title;
 
-      var list = document.createElement('ul');
+      var list = Fuse('<ul>');
       this.listElement = list;
-
-      element.appendChild(title);
-      element.appendChild(list);
+      element.insert(title).insert(list);
     },
 
     'populate': function() {
@@ -191,21 +191,20 @@
         li.innerHTML = Fuse.String(property).escapeHTML();
         li.onclick   = Fuse.Function.bind(this.select, this, li);
         li._property = property;
-        this.listElement.appendChild(li);
+        this.listElement.insert(li);
       }, this);
     },
 
     'select': function(element) {
       this.unselect();
-      Element.addClassName(element, 'selected');
-      this.selectedProperty = element;
+      this.selectedProperty = $(element).addClassName('selected');
       this.browser.history = this.history.toArray();
       this.browser.go(element._property, this.value[element._property]);
     },
 
     'unselect': function() {
       if (this.selectedProperty)
-        Element.removeClassName(this.selectedProperty, 'selected');
+        this.selectedProperty.removeClassName('selected');
       this.selectedProperty = null;
     }
   });

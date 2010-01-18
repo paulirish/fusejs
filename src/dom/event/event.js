@@ -451,17 +451,31 @@
          !hasKey(proto, 'target') &&
          !hasKey(proto, 'currentTarget')) {
 
-        extend = function extend(event, element) {
-          return event && !event._extendedByFuse
-            ? addLevel2Properties(event, element)
-            : event;
-        };
+        extend = (function(__extend) {
+          function extend(event, element) {
+            if (event.constructor !== Event) {
+              return __extend(event, element);
+            }
+            return event && !event._extendedByFuse
+              ? addLevel2Properties(event, element)
+              : event;
+          }
+          return extend;
+        })(extend);
 
         // initially add methods
         addMethods();
         addLevel2Methods(proto);
       }
-      else extend = K;
+      else extend = (function(__extend) {
+        function extend(event, element) {
+          if (event.constructor !== Event) {
+            return __extend(event, element);
+          }
+          return event;
+        }
+        return extend;
+      })(extend);
     }
 
     // avoid Function#wrap for better performance esp.

@@ -10,16 +10,16 @@
 <script type="text/javascript">
   var $ = Fuse.Util.$;
 
-  Element.addMethods({
-    'passed': function(el, message) {
-      el = $(el);
-      el.className = 'passed';
+  Fuse.Dom.Element.extend({
+    'passed': function(message) {
+      var el = this;
+      (el.raw || el).className = 'passed';
       (el.down('span') || el).update(message || 'Test passed!');
     },
 
-    'failed': function(el, message) {
-      el = $(el);
-      el.className = 'failed';
+    'failed': function(message) {
+      var el = this;
+      (el.raw || el).className = 'failed';
       (el.down('span') || el).update(message || 'Test failed');
     }
   });
@@ -42,9 +42,9 @@
   <script type="text/javascript">
     (function() {
       var pointer = $('pointer');
-      Event.observe(document.documentElement, 'mousemove', function(e) {
-        pointer.innerHTML = 'x:' +e.pageX +', y:'+ e.pointerY();
-      });
+      //Event.observe(document.documentElement, 'mousemove', function(e) {
+      //  pointer.innerHTML = 'x:' +e.pageX +', y:'+ e.pointerY();
+      //});
     })();
   </script>
 
@@ -97,7 +97,7 @@
 
   <script type="text/javascript">
     $('hijack').observe('click', function(e){
-      var el = $(this.parentNode);
+      var el = this.up();
       log(e); // this makes it fail?!?
       e.preventDefault();
 
@@ -118,7 +118,7 @@
   <script type="text/javascript">
     Fuse.Util.$w('left middle right').each(function(button) {
       Event.observe(button, 'mousedown', function(e) {
-        if (Event['is' + Fuse.String(this.id).capitalize() + 'Click'](e))
+        if (Event['is' + Fuse.String(this.raw.id).capitalize() + 'Click'](e))
           this.passed('Squeak!')
         else this.failed('OH NO!');
         log(e);
@@ -140,7 +140,7 @@
 
   <script type="text/javascript">
     $('target').observe('click', function(e) {
-      if (e.element() == this && e.target == this) this.passed();
+      if (e.element() == this && e.target == this.raw) this.passed();
       else this.failed();
       log(e);
     });
@@ -157,9 +157,9 @@
   <script type="text/javascript">
     (function() {
       var count = 0, prevID = '';
-      $('eventElementRadioButton').childElements().invoke('observe', 'click', function(e) {
+      $('eventElementRadioButton').getChildren().invoke('observe', 'click', function(e) {
         count++;
-        if (e.element().id === prevID) {
+        if (e.element().raw.id === prevID) {
           $('eventElementRadioButton').failed();
         } else if (count === 3) {
           $('eventElementRadioButton').passed();
@@ -174,7 +174,7 @@
 
   <script type="text/javascript">
     $('currentTarget').observe('click', function(e){
-      if (e.currentTarget !== this) this.failed();
+      if (e.currentTarget !== this.raw) this.failed();
       else this.passed();
       log(e);
     })
@@ -184,7 +184,7 @@
 
   <script type="text/javascript">
     $('findElement').observe('click', function(e){
-      if (e.findElement('p') == this && e.findElement('body') == document.body &&
+      if (e.findElement('p') == this && e.findElement('body').raw == document.body &&
          e.findElement('foo') == null) this.passed();
       else this.failed();
       log(e);
@@ -213,7 +213,7 @@
   <script type="text/javascript">
     $('keyup').observe('keyup', function(e){
       var el = $('keyup_log');
-      el.passed('Key captured: the length is ' + $('keyup').value.length);
+      el.passed('Key captured: the length is ' + $('keyup').raw.value.length);
       log(e);
     })
   </script>
@@ -277,7 +277,7 @@
 
   <form action="blah">
      <p id="field_event_observer_single">
-       Test Field.EventObserver (single): Type input then <strong>click here</strong>
+       Test Fuse.Dom.InputElement.EventObserver (single): Type input then <strong>click here</strong>
        <input type="text" value="">
      </p>
   </form>
@@ -288,7 +288,7 @@
        el = $('field_event_observer_single'),
        input = el.down('input');
 
-      new Field.EventObserver(input, function(){ count++ });
+      new Fuse.Dom.InputElement.EventObserver(input, function(){ count++ });
       input.observe('change', function() {
         this.stopObserving('change', arguments.callee);
         Fuse.Function.defer(function() { el[count ? 'passed' : 'failed']() });
@@ -298,7 +298,7 @@
 
   <form action="blah">
      <p id="field_event_observer_group">
-       Test Field.EventObserver (group): Click a radio button
+       Test Fuse.Dom.InputElement.EventObserver (group): Click a radio button
        <input type="radio" name="group_radio"  value="1r">
        <input type="radio" name="group_radio"  value="2r">
        <input type="radio" name="group_radio"  value="3r">
@@ -311,7 +311,7 @@
        el = $('field_event_observer_group'),
        radios = Fuse.List.from(el.query('input[type="radio"]'));
 
-      new Field.EventObserver(radios[1], function(){ count++ });
+      new Fuse.Dom.InputElement.EventObserver(radios[1], function(){ count++ });
       radios.invoke('observe', 'click', function() {
         radios.invoke('stopObserving', 'click', arguments.callee);
         Fuse.Function.defer(function() { el[count ? 'passed' : 'failed']() });
@@ -322,10 +322,10 @@
   <iframe id="iframe" src="iframe.html" height="200" width="500"></iframe>
 
   <script type="text/javascript">
-    $('iframe').observe('load', function() {
+    $('iframe').observe('load', function(e) {
       var frame = window.frames[0],
-       pointer = Element.extend(frame.document.getElementById('pointer')),
-       elFire  = Element.extend(frame.document.getElementById('element-fire'));
+       pointer = frame.document.getElementById('pointer'),
+       elFire  = $(frame.document.getElementById('element-fire'));
 
       // test pointer methods
       Event.observe(frame.document.documentElement, 'mousemove', function(e) {

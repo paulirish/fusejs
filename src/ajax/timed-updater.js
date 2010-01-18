@@ -5,11 +5,11 @@
 
     function TimedUpdater(container, url, options) {
       var onDone,
-       instance     = this[expando] || new Klass,
        callbackName = 'on' + Request.Events[4],
+       instance     = __instance || new Klass,
        options      = _extend(clone(TimedUpdater.options), options);
 
-      delete this[expando];
+      __instance = null;
 
       // this._super() equivalent
       Fuse.Ajax.Base.call(instance, url, options);
@@ -35,17 +35,17 @@
       return instance;
     }
 
-    var __apply = TimedUpdater.apply, __call = TimedUpdater.call,
+    var __instance, __apply = TimedUpdater.apply, __call = TimedUpdater.call,
      Request = Fuse.Ajax.Request,
      TimedUpdater = Class(Fuse.Ajax.Base, { 'constructor': TimedUpdater });
 
     TimedUpdater.call = function(thisArg) {
-      thisArg[expando] = thisArg;
+      __instance = thisArg;
       return __call.apply(this, arguments);
     };
 
     TimedUpdater.apply = function(thisArg, argArray) {
-      thisArg[expando] = thisArg;
+      __instance = thisArg;
       return __apply.call(this, thisArg, argArray);
     };
 

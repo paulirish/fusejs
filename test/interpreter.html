@@ -52,39 +52,39 @@
 <script type="text/javascript">
   var $ = Fuse.Util.$;
 
-  Fuse.addNS('Interpreter', {
+  Fuse.Interpreter = Fuse.Class({
     'initialize': function(element, form, input) {
       this.element = $(element);
       this.form    = $(form);
       this.input   = $(input);
       this.context = Fuse.Function.bind(window.eval, window);
       this.registerCallbacks();
+
       document.title = 'FuseJS: Interpreter (' + Fuse.version + ')';
-      Field.activate(this.input);
+      this.input.activate();
     },
 
     'registerCallbacks': function() {
       Event.observe(this.form, 'submit', Fuse.Function.bind(
         function(event) {
-          this.eval(Fuse.Util.$F(this.input));
-          this.input.value = '';
-          Field.activate(this.input);
+          this.eval(this.input.getValue());
+          this.input.setValue('').activate();
           Event.stop(event);
         }, this));
     },
 
     'log': function(type, message) {
-      $(this.element).insert(
+      this.element.insert(
         '<tr class="' + type + '"><td>' +
         Fuse.String(message).escapeHTML() + '<\/td><\/tr>');
-      Element.scrollTo(this.form);
+      this.form.scrollTo();
     },
 
     'eval': function(expression) {
       if (expression.match(/^\s*$/)) return;
       try {
         this.log('input', expression);
-        window.$_ = this.context.call(window, expression);
+        window.$_ = this.context.call(window, String(expression));
         this.log('output', Fuse.Object.inspect($_));
       } catch (e) {
         alert(e.toString());
@@ -93,7 +93,7 @@
     },
 
     'clear': function() {
-      this.element.innerHTML = '';
+      this.element.raw.innerHTML = '';
     }
   });
 </script>

@@ -4,8 +4,8 @@
     function Klass() { }
 
     function Timer(callback, interval, options) {
-      var instance = this[expando] || new Klass;
-      delete this[expando];
+      var instance = __instance || new Klass;
+      __instance = null;
 
       instance.callback  = callback;
       instance.interval  = interval;
@@ -36,16 +36,16 @@
       }
     }
 
-    var __apply = Timer.apply, __call = Timer.call,
+    var __instance, __apply = Timer.apply, __call = Timer.call,
      Timer = Class({ 'constructor': Timer });
 
     Timer.call = function(thisArg) {
-      thisArg[expando] = thisArg;
+      __instance = thisArg;
       return __call.apply(this, arguments);
     };
 
     Timer.apply = function(thisArg, argArray) {
-      thisArg[expando] = thisArg;
+      __instance = thisArg;
       return __apply.call(this, thisArg, argArray);
     };
 
