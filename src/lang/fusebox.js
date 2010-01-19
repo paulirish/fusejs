@@ -13,12 +13,28 @@
     cache = [],
 
     mode = (function()  {
-      // avoids the htmlfile activeX warning when served from the file protocol
-      if (Feature('ACTIVE_X_OBJECT') && global.location.protocol !== 'file:')
-        return ACTIVE_X_OBJECT;
+      // true for IE >= 5.5 (ActiveX object by itself is supported by IE4)
+      // note: use iframes when served from the file protocol to avoid an ActiveX warning.
 
-      // check "OBJECT__PROTO__" first because Firefox will permanently screw up
-      // other iframes on the page if an iframe is inserted before the dom has loaded
+      // The htmlfile ActiveX object avoids https mixed content warnings and is a
+      // workaround for access denied errors thrown when using iframes to create
+      // sandboxes after the document.domain is set. Access will be denied until
+      // the iframe is loaded which disqualifies its use as a synchronous solution
+      // (Opera 9.25 is out of luck here).
+      if (Feature('ACTIVE_X_OBJECT') &&
+          global.location && global.location.protocol !== 'file:') {
+        try {
+          // ensure ActiveX is enabled
+          result = new ActiveXObject('htmlfile') && ACTIVE_X_OBJECT;
+          return result;
+        } catch (e) { }
+      }
+
+      // true for JavaScriptCore, KJS, Rhino, SpiderMonkey, SquirrelFish, Tamarin, TraceMonkey, V8
+      
+      // Check "OBJECT__PROTO__" first because Firefox will permanently screw up
+      // other iframes on the page if an iframe is inserted and removed before the
+      // dom has loaded.
       if (Feature('OBJECT__PROTO__'))
         return OBJECT__PROTO__;
 
@@ -39,7 +55,7 @@
         return function() {
           var htmlfile = new ActiveXObject('htmlfile');
           htmlfile.open();
-          htmlfile.write('<script>document.domain="' + doc.domain + '";document.global = this;<\/script>');
+          htmlfile.write('<script>document.global = this;<\/script>');
           htmlfile.close();
           cache.push(htmlfile);
           return htmlfile.global;
@@ -47,25 +63,30 @@
 
       if (mode === IFRAME)
         return function() {
-          var idoc, iframe, frame, result, i = 0,
-           frames     = global.frames,
-           iframe     = doc.createElement('iframe'),
+          var idoc, iframe, result,
            parentNode = doc.body || doc.documentElement,
-           id         = 'iframe_' + expando + counter++;
+           name       = 'sb_' + expando + counter++;
 
-          iframe.id = id;
-          iframe.style.cssText = 'position:absolute;left:-1000px;width:0;height:0;overflow:hidden';
-          parentNode.insertBefore(iframe, parentNode.firstChild);
-
-          while (frame = frames[i++]) {
-            if (frame.frameElement.id === id) {
-              idoc = frame.document; break;
-            }
+          try {
+            // set name attribute for IE6/7
+            iframe = doc.createElement('<iframe name="' + name + '">');
+          } catch (e) {
+            (iframe = doc.createElement('iframe')).name = name;
           }
 
-          idoc.open();
-          idoc.write('<script>parent.Fuse.' + expando + ' = this;<\/script>');
-          idoc.close();
+          iframe.style.display = 'none';
+          parentNode.insertBefore(iframe, parentNode.firstChild);
+
+          try {
+            (idoc = global.frames[name].document).open();
+            idoc.write('<script>parent.Fuse.' + expando + ' = this;<\/script>');
+            idoc.close();
+          } catch (e) {
+            // Opera 9.25 throws security error when trying to write to an iframe
+            // after the document.domain is set. Also Opera < 9 doesn't support
+            // inserting an iframe into the document.documentElement.
+            throw new Error('Fusebox failed to create a sandbox by iframe.');
+          }
 
           result = Fuse[expando];
           delete Fuse[expando];
@@ -75,7 +96,7 @@
         };
 
       return function() {
-        throw new Error('Fuse failed to create a sandbox.');
+        throw new Error('Fusebox failed to create a sandbox.');
       };
     })(),
 
@@ -83,8 +104,8 @@
       var Array, Date, Function, Number, Object, RegExp, String,
        glSlice     = global.Array.prototype.slice,
        glFunction  = global.Function,
-       matchStrict = /^\s*(['"])use strict\1/,
        instance    = new Klass,
+       matchStrict = /^\s*(['"])use strict\1/,
        sandbox     = createSandbox(),
        toString    = global.Object.prototype.toString,
        __Array     = sandbox.Array,
@@ -101,7 +122,7 @@
           if (argLen) {
             result = argLen === 1 && length > -1
               ? new __Array(length)
-              : Array.fromArray(args); 
+              : Array.fromArray(args);
           } else result = new __Array();
 
           result['__proto__'] = arrPlugin;
@@ -164,6 +185,7 @@
           return result;
         };
 
+        // make native wrappers inherit from regular natives
         Array.prototype['__proto__']    = __Array.prototype;
         Date.prototype['__proto__']     = __Date.prototype;
         Function.prototype['__proto__'] = __Function.prototype;
@@ -193,21 +215,26 @@
         };
 
         Function = function Function(argN, body) {
-          var result, args = glSlice.call(arguments, 0),
+          var fn, result, args = glSlice.call(arguments, 0),
           originalBody = body = args.pop();
           argN = args.join(',');
 
-          // ensure we aren't in strict mode
+          // ensure we aren't in strict mode and map arguments.callee to the wrapper
           if (body && body.search(matchStrict) < 0)
             body = 'arguments.callee = arguments.callee.' + expando + '; ' + body;
 
-          result = new glFunction(argN, body);
-          result[expando] = new __Function('global, result',
-            'var sandbox = this; return function() { return result.apply(this == sandbox ? global : this, arguments) }')(global, result);
+          // create function using global.Function constructor
+          fn = new glFunction(argN, body);
 
+          // ensure `thisArg` isn't set to the sandboxed global
+          result = fn[expando] = new __Function('global, fn',
+            'var sandbox = this; return function() { return fn.apply(this == sandbox ? global : this, arguments) }')(global, fn);
+
+          // make toString() return the unmodified function body
           function toString() { return originalBody; }
-          result[expando].toString = toString;
-          return result[expando];
+          result.toString = toString;
+
+          return result;
         };
 
         Number = function Number(value) {
@@ -237,6 +264,7 @@
           return new __String(arguments.length ? value : '');
         };
 
+        // map native wrappers prototype to those of the sandboxed natives
         Array.prototype    = __Array.prototype;
         Date.prototype     = __Date.prototype;
         Function.prototype = __Function.prototype;
@@ -322,13 +350,13 @@
 
       RegExp.SPECIAL_CHARS = {
         's': {
-          /* whitespace */
+          // whitespace
           '\x09': '\\x09', '\x0B': '\\x0B', '\x0C': '\\x0C', '\x20': '\\x20', '\xA0': '\\xA0',
 
-          /* line terminators */
+          // line terminators
           '\x0A': '\\x0A', '\x0D': '\\x0D', '\u2028': '\\u2028', '\u2029': '\\u2029',
 
-          /* unicode category "Zs" space separators */
+          // unicode category "Zs" space separators
           '\u1680': '\\u1680', '\u180e': '\\u180e', '\u2000': '\\u2000',
           '\u2001': '\\u2001', '\u2002': '\\u2002', '\u2003': '\\u2003',
           '\u2004': '\\u2004', '\u2005': '\\u2005', '\u2006': '\\u2006',
@@ -398,37 +426,33 @@
       };
 
       // versions of WebKit and IE have non-spec-conforming /\s/
-      // so we emulate it (see: ECMA-5 15.10.2.12)
+      // so we standardize it (see: ECMA-5 15.10.2.12)
       // http://www.unicode.org/Public/UNIDATA/PropList.txt
       RegExp = (function(RE) {
         var character,
          RegExp = RE,
-         matchWhitespace = /\s/,
-         matchEscapedWhiteSpace = /\\s/g,
-         sCharClass = ['\\s'],
-         sMap = RE.SPECIAL_CHARS.s;
+         matchCharClass = /\\s/g,
+         newCharClass = [],
+         charMap = RE.SPECIAL_CHARS.s;
 
-        for (character in sMap)
-          if (character.replace(matchWhitespace, '').length)
-            sCharClass.push(sMap[character]);
+        // catch whitespace chars that are missed by erroneous \s
+        for (character in charMap) {
+          if (character.replace(/\s/, '').length)
+            newCharClass.push(charMap[character]);
+        }
 
-        sCharClass = sCharClass.length > 1
-          ? '(?:' + sCharClass.join('|') + ')'
-          : sCharClass[0];
+        if (newCharClass.length) {
+          newCharClass.push('\\s');
+          newCharClass = '(?:' + newCharClass.join('|') + ')';
 
-        if (sCharClass !== '\\s') {
+          // redefine RegExp to auto-fix \s issues
           RegExp = function RegExp(pattern, flags) {
-            if (toString.call(pattern) === '[object RegExp]') {
-              if (pattern.global || pattern.ignoreCase || pattern.multiline)
-                throw new TypeError;
-              if (pattern.source.indexOf('\\s') > -1)
-                pattern = pattern.source.replace(matchEscapedWhiteSpace, sCharClass);
-            }
-            else pattern = String(pattern).replace(matchEscapedWhiteSpace, sCharClass);
-
-            return new RE(pattern, flags);
+            return new RE((toString.call(pattern) === '[object RegExp]' ?
+              pattern.source : String(pattern))
+                .replace(matchCharClass, newCharClass), flags);
           };
 
+          // associate properties of old RegExp to the redefined one
           RegExp.SPECIAL_CHARS = RE.SPECIAL_CHARS;
           rePlugin = RegExp.plugin = RegExp.prototype = RE.prototype;
         }
@@ -706,6 +730,7 @@
           return String(__trim.call(this));
         };
 
+      // point constructor properties to the native wrappers
       arrPlugin.constructor  = Array;
       datePlugin.constructor = Date;
       funcPlugin.constructor = Function;
@@ -732,6 +757,7 @@
        toLocaleUpperCase = nil, toPrecision = nil, toUpperCase = nil,
        trim = nil, unshift = nil;
 
+      // assign native wrappers to Fusebox instance and return
       instance.Array    = Array;
       instance.Date     = Date;
       instance.Function = Function;
@@ -743,12 +769,7 @@
       return instance;
     },
 
-    postProcess = function(thisArg) {
-      // remove iframe
-      var iframe = cache[cache.length -1];
-      iframe.parentNode.removeChild(iframe);
-      return thisArg;
-    },
+    postProcess = emptyFunction,
 
     Klass = function() { },
 
@@ -756,81 +777,117 @@
 
     /*------------------------------------------------------------------------*/
 
-    switch (mode) {
-      case IFRAME:
-        Fusebox = function Fusebox() { return postProcess(createFusebox()); };
+    // redefine Fusebox to remove the iframe from the document
+    if (mode === IFRAME) {
+      Fusebox = function Fusebox() {
+        return postProcess(createFusebox());
+      };
 
-      case ACTIVE_X_OBJECT: (function() {
-        var usesIframe = mode === IFRAME,
+      postProcess = function(thisArg) {
+        // remove iframe
+        var iframe = cache[cache.length -1];
+        iframe.parentNode.removeChild(iframe);
+        return thisArg;
+      };
+    }
+
+    if (mode != OBJECT__PROTO__) {
+      (function() {
+        var div,
          sandbox = createSandbox(),
          Array = sandbox.Array;
 
-        if (usesIframe) postProcess();
-
-        // IE, and Opera's Array accessors return sandboxed arrays
+        // IE and Opera's Array accessors return
+        // sandboxed arrays so we can skip wrapping them
         SKIP_METHODS_RETURNING_ARRAYS =
           !(Array().slice(0) instanceof global.Array);
 
-        if (usesIframe && Array.prototype.map) {
+        if (mode === IFRAME) {
+          // remove iframe from document
+          postProcess();
+
           // Opera 9.5 - 10a throws a security error when calling Array#map or String#lastIndexOf
           // Opera 9.5 - 9.64 will error by simply calling the methods.
           // Opera 10 will error when first accessing the contentDocument of
           // another iframe and then accessing the methods.
-          createSandbox();
-          postProcess();
+          if (Array.prototype.map) {
+            // create second iframe
+            createSandbox();
+            // remove second iframe from document
+            postProcess();
+            // test to see if Array#map is corrupted
+            try { Array().map(K); }
+            catch (e) {
+              postProcess = (function(__postProcess) {
+                return function(thisArg) {
+                  thisArg.Array.prototype.map =
+                  thisArg.String.prototype.lastIndexOf = nil;
+                  return __postProcess(thisArg);
+                };
+              })(postProcess);
+            }
+          }
 
-          try { Array().map(K); }
-          catch (e) {
-            postProcess = (function(__postProcess) {
-              return function(thisArg) {
-                thisArg.Array.prototype.map =
-                thisArg.String.prototype.lastIndexOf = nil;
-                return __postProcess(thisArg);
-              };
-            })(postProcess);
+          // pave cache
+          // avoid IE memory leak with nodes removed by removeChild()
+          div = global.document.createElement('div');
+          while (cache.length) {
+            div.appendChild(cache.pop());
+            div.innerHTML = '';
           }
         }
 
         // cleanup
-        sandbox = nil;
         cache = [];
+        div = sandbox = nil;
       })();
     }
 
+    // map Fusebox.prototype to Klass so Fusebox can be called without the `new` expression
     Klass.prototype = Fusebox.prototype;
+
+    /*--------------------------------------------------------------------------*/
+
+    // assign Fusebox natives to Fuse object
+    (function() {
+      var key, i = -1, fb = Fusebox(),
+       SKIPPED_KEYS = { 'constructor': 1 };
+
+      function createGeneric(proto, methodName) {
+        return new Function('proto, slice',
+          'function ' + methodName + '(thisArg) {' +
+          'var args = arguments;' +
+          'return args.length ? proto.' + methodName +
+          '.apply(thisArg, slice.call(args, 1)) : ' +
+          'proto.' + methodName + '.call(thisArg); }' +
+          'return ' + methodName)(proto, slice);
+      }
+
+      function updateGenerics(deep) {
+        var Klass = this;
+        if (deep) Fuse.updateGenerics(Klass, deep);
+        else Obj._each(Klass.prototype, function(value, key, proto) {
+          if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
+            Klass[key] = createGeneric(proto, key);
+        });
+      }
+
+      // break fb.Object.prototype's relationship to other fb natives
+      // for consistency across sandbox variations.
+      if (mode !== OBJECT__PROTO__) {
+        fb.Object.plugin =
+        fb.Object.prototype = createSandbox().Object.prototype;
+        postProcess(fb);
+      }
+
+      // assign sandboxed natives to Fuse and add `updateGeneric` methods
+      while (key = arguments[++i]) {
+        (Fuse[key] = fb[key]).updateGenerics = updateGenerics;
+      }
+
+      // alias
+      Fuse.List = Fuse.Array;
+    })('Array', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String');
+
     return Fusebox;
   })();
-
-  /*--------------------------------------------------------------------------*/
-
-  // assign Fusebox natives to Fuse object
-  (function(fusebox) {
-    var SKIPPED_KEYS = { 'constructor': 1 };
-
-    function createGeneric(proto, methodName) {
-      return new Function('proto, slice',
-        'function ' + methodName + '(thisArg) {' +
-        'var args = arguments;' +
-        'return args.length ? proto.' + methodName +
-        '.apply(thisArg, slice.call(args, 1)) : ' +
-        'proto.' + methodName + '.call(thisArg); }' +
-        'return ' + methodName)(proto, slice);
-    }
-
-    function updateGenerics(deep) {
-      var Klass = this;
-      if (deep) Fuse.updateGenerics(Klass, deep);
-      else Obj._each(Klass.prototype, function(value, key, proto) {
-        if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
-          Klass[key] = createGeneric(proto, key);
-      });
-    }
-
-    // assign sandboxed natives to Fuse and add `updateGeneric` methods
-    var key, keys = slice.call(arguments, 1), i = 0;
-    while (key = keys[i++])
-      (Fuse[key] = fusebox[key]).updateGenerics = updateGenerics;
-
-    // alias
-    Fuse.List = Fuse.Array;
-  })(Fuse.Fusebox(), 'Array', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String');

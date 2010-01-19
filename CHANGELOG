@@ -1,3 +1,13 @@
+* Add a lot of comments to Fuse.Fusebox() and cleanup its codebase. [jddalton]
+
+* Break Fuse.Object.prototype's relationship to other sandboxed natives for consistency across sandbox variations. [jddalton]
+
+* Remove extraneous document.domain setter in the ACTIVE_X_OBJECT branch of createSandbox(). [jddalton]
+
+* Simplify accessing the created iframe in createSandbox(). [jddalton]
+
+* Simplify the RegExp wrapper for broken `\s` in createFusebox(). [jddalton]
+
 * Remove `delete this[expando]` from Ajax.Updater, Ajax.TimedUpdater, Range, Template, and Timer classes to avoid issues when `this` is the global object in IE. [jddalton]
 
 * Move the Element#scrollTo method to the position.js. [jddalton]
