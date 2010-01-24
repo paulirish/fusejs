@@ -1,3 +1,5 @@
+* Add the overlooked reverse(), sort(), and splice() methods to the Fuseboxed Array.prototype. [jddalton]
+
 * Make Fuseboxed constructor's prototype values of the OBJECT__PROTO__ branch conform to ECMA specifications. [jddalton]
 
 * Add sandboxed Boolean constructor to Fusebox. [jddalton]
