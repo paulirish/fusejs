@@ -1,3 +1,5 @@
+* Make Fuseboxed constructor's prototype values of the OBJECT__PROTO__ branch conform to ECMA specifications. [jddalton]
+
 * Add sandboxed Boolean constructor to Fusebox. [jddalton]
 
 * Add a lot of comments to Fuse.Fusebox() and cleanup its codebase. [jddalton]
