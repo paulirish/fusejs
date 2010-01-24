@@ -101,7 +101,7 @@
     })(),
 
     createFusebox = function() {
-      var Array, Date, Function, Number, Object, RegExp, String,
+    var Array, Boolean, Date, Function, Number, Object, RegExp, String,
        glSlice     = global.Array.prototype.slice,
        glFunction  = global.Function,
        instance    = new Klass,
@@ -109,6 +109,7 @@
        sandbox     = createSandbox(),
        toString    = global.Object.prototype.toString,
        __Array     = sandbox.Array,
+       __Boolean   = sandbox.Boolean,
        __Date      = sandbox.Date,
        __Function  = sandbox.Function,
        __Number    = sandbox.Number,
@@ -126,6 +127,12 @@
           } else result = new __Array();
 
           result['__proto__'] = arrPlugin;
+          return result;
+        };
+
+        Boolean = function Boolean(value) {
+          var result = new __Boolean(value);
+          result['__proto__'] = boolPlugin;
           return result;
         };
 
@@ -159,7 +166,7 @@
         Object = function Object(value) {
           if (value != null) {
            switch (toString.call(value)) {
-             case '[object Boolean]': return new Boolean(value);
+             case '[object Boolean]': return Boolean(value);
              case '[object Number]':  return Number(value);
              case '[object String]':  return String(value);
              case '[object Array]':
@@ -205,6 +212,10 @@
           return new __Array();
         };
 
+        Boolean = function Boolean(value) {
+          return new __Boolean(value);
+        };
+
         Date = function Date(year, month, date, hours, minutes, seconds, ms) {
           if (this.constructor === Date) {
            return arguments.length === 1
@@ -244,7 +255,7 @@
         Object = function Object(value) {
           if (value != null) {
            switch (toString.call(value)) {
-             case '[object Boolean]': return new Boolean(value);
+             case '[object Boolean]': return Boolean(value);
              case '[object Number]':  return Number(value);
              case '[object String]':  return String(value);
              case '[object Array]':
@@ -266,6 +277,7 @@
 
         // map native wrappers prototype to those of the sandboxed natives
         Array.prototype    = __Array.prototype;
+        Boolean.prototype  = __Boolean.prototype;
         Date.prototype     = __Date.prototype;
         Function.prototype = __Function.prototype;
         Number.prototype   = __Number.prototype;
@@ -277,6 +289,7 @@
       /*----------------------------------------------------------------------*/
 
       var arrPlugin         = Array.plugin    = Array.prototype,
+       boolPlugin           = Boolean.plugin  = Boolean.prototype,
        datePlugin           = Date.plugin     = Date.prototype,
        funcPlugin           = Function.plugin = Function.prototype,
        objPlugin            = Object.plugin   = Object.prototype,
@@ -732,6 +745,7 @@
 
       // point constructor properties to the native wrappers
       arrPlugin.constructor  = Array;
+      boolPlugin.constructor = Boolean;
       datePlugin.constructor = Date;
       funcPlugin.constructor = Function;
       objPlugin.constructor  = Object;
@@ -759,6 +773,7 @@
 
       // assign native wrappers to Fusebox instance and return
       instance.Array    = Array;
+      instance.Boolean  = Boolean;
       instance.Date     = Date;
       instance.Function = Function;
       instance.Number   = Number;
@@ -887,7 +902,7 @@
 
       // alias
       Fuse.List = Fuse.Array;
-    })('Array', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String');
+    })('Array', 'Boolean', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String');
 
     return Fusebox;
   })();

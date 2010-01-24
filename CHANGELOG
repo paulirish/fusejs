@@ -1,3 +1,5 @@
+* Add sandboxed Boolean constructor to Fusebox. [jddalton]
+
 * Add a lot of comments to Fuse.Fusebox() and cleanup its codebase. [jddalton]
 
 * Break Fuse.Object.prototype's relationship to other sandboxed natives for consistency across sandbox variations. [jddalton]
