@@ -115,7 +115,7 @@
     },
 
     getStyle = function(element, styleName) {
-      return (getStyle = Feature('ELEMENT_COMPUTED_STYLE')
+      return (getStyle = envTest('ELEMENT_COMPUTED_STYLE')
         ? function(element, styleName) {
             var style = element.ownerDocument.defaultView.getComputedStyle(element, null);
             return (style || element.style)[styleName];
@@ -221,7 +221,7 @@
     // Ensure the document is not in a frame because
     // doScroll() will not throw an error when the document
     // is framed. Fallback on document readyState.
-    if (!Feature('ELEMENT_ADD_EVENT_LISTENER') && Feature('ELEMENT_DO_SCROLL')) {
+    if (!envTest('ELEMENT_ADD_EVENT_LISTENER') && envTest('ELEMENT_DO_SCROLL')) {
 
       // Avoid a potential browser hang when checking global.top (thanks Rich Dougherty)
       // Checking global.frameElement could throw if not accessible.
@@ -242,7 +242,7 @@
           }
         };
     }
-    else if (Feature('ELEMENT_ADD_EVENT_LISTENER'))
+    else if (envTest('ELEMENT_ADD_EVENT_LISTENER'))
       decoratedDoc.observe('DOMContentLoaded', checkDomLoadedState);
 
     // readystate and poller are used (first one to complete wins)

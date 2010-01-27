@@ -27,7 +27,7 @@
 
     // ECMA-5 15.5.4.11
     // For IE
-    if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX'))
+    if (envTest('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX'))
       plugin.replace = (function(__replace) {
         function replace(pattern, replacement) {
           var __replacement, result;
@@ -50,8 +50,8 @@
     // For Safari 2.0.2- and Chrome 1+
     // Based on work by Dean Edwards:
     // http://code.google.com/p/base2/source/browse/trunk/lib/src/base2-legacy.js?r=239#174
-    if (Bug('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
-        Bug('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN'))
+    if (envTest('STRING_REPLACE_COERCE_FUNCTION_TO_STRING') ||
+        envTest('STRING_REPLACE_BUGGY_WITH_GLOBAL_FLAG_AND_EMPTY_PATTERN'))
       plugin.replace = (function(__replace) {
         function replace(pattern, replacement) {
           if (typeof replacement !== 'function')
@@ -128,7 +128,7 @@
       };
 
     // For Chome 1+
-    if (Bug('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION'))
+    if (envTest('STRING_LAST_INDEX_OF_BUGGY_WITH_NEGATIVE_POSITION'))
       plugin.lastIndexOf = (function(__lastIndexOf) {
         function lastIndexOf(searchString, position) {
           position = +position;
@@ -141,7 +141,7 @@
 
     // ECMA-5 15.5.4.10
     // For IE
-    if (Bug('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX'))
+    if (envTest('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX'))
       plugin.match = (function(__match) {
         function match(pattern) {
           var result = __match.call(this, pattern);
@@ -508,10 +508,10 @@
           return fuse.String(container.innerHTML.replace(matchTagEnds, '&gt;'));
         };
 
-      if (!Feature('ELEMENT_TEXT_CONTENT')) {
+      if (!envTest('ELEMENT_TEXT_CONTENT')) {
         div.innerHTML = '<pre>&lt;p&gt;x&lt;/p&gt;<\/pre>';
 
-        if (Feature('ELEMENT_INNER_TEXT') && div.firstChild.innerText === '<p>x<\/p>')
+        if (envTest('ELEMENT_INNER_TEXT') && div.firstChild.innerText === '<p>x<\/p>')
           getText = function() { return div.firstChild.innerText.replace(/\r/g, ''); };
 
         else if (div.firstChild.innerHTML === '<p>x<\/p>')

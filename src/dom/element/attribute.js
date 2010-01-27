@@ -9,7 +9,7 @@
 
   (function(plugin) {
     var ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS =
-      Bug('ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS');
+      envTest('ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS');
 
     plugin.hasAttribute = (function() {
       var hasAttribute = function hasAttribute(attribute) {
@@ -184,7 +184,7 @@
 
       // get `href` and other uri attributes
       // TODO: Check others attributes like cite, codeBase, lowsrc, and useMap.
-      if (Feature('ELEMENT_GET_ATTRIBUTE_IFLAG')) {
+      if (envTest('ELEMENT_GET_ATTRIBUTE_IFLAG')) {
         // Exclude `action` attribute because:
         // Opera 9.25 will automatically translate the URI from relative to absolute.
         // In IE this fix has the reverse effect.

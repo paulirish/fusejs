@@ -1,43 +1,42 @@
   /*--------------------------- FEATURE/BUG TESTER ---------------------------*/
 
-  (function() {
-    function createTester(name) {
-      var Tester = new Function('', [
-        'function ' + name + '() {',
-        'var title, o = ' + name + '._object, i = 0;',
-      	'while (title = arguments[i++]) {',
-        'if (typeof o[title] === "function") o[title] = o[title]();',
-        'if (o[title] !== true) return false;',
-        '}', 'return true;',
-        '}', 'return ' + name].join('\n'))();
-
-      Tester.set = function(name, value) {
-        var o = this._object;
-        if (typeof name === 'object'){
-          for (var i in name) o[i] = name[i];
-        } else o[name] = value;
-      };
-
-      Tester.unset = function(name) {
-        var o = this._object;
-        name = name.valueOf();
-        if (typeof name === 'string') delete o[name];
-        else {
-          for (var i in name) delete o[i];
-        }
-      };
-
-      Tester._object = { };
-      return Tester;
+  (function(env) {
+    function addTest(name, value) {
+      if (typeof name === 'object') {
+        for (var i in name) cache[i] = name[i];
+      } else cache[name] = value;
     }
 
-    Bug = fuse.env.Bug = createTester('Bug');
-    Feature = fuse.env.Feature = createTester('Feature');
-  })();
+    function removeTest(name) {
+      name = name.valueOf();
+      if (typeof name === 'string') delete cache[name];
+      else { for (var i in name) delete cache[i]; }
+    }
+
+    function test(name) {
+      var i = 0;
+      while (name = arguments[i++]) {
+        if (typeof cache[name] === 'function')
+          cache[name] = cache[name]();
+        if (cache[name] !== true) return false;
+      }
+      return true;
+    }
+
+    var cache = { };
+
+    envAddTest =
+    env.addTest = addTest;
+
+    envTest =
+    env.test = test;
+
+    env.removeText = removeTest;
+  })(fuse.env);
 
   /*----------------------------- LANG FEATURES ------------------------------*/
 
-  Feature.set({
+  envAddTest({
     'ACTIVE_X_OBJECT': function() {
       // true for IE
       return isHostObject(global, 'ActiveXObject');
@@ -58,7 +57,7 @@
 
     'OBJECT__COUNT__': function() {
       // true for Gecko
-      if (Feature('OBJECT__PROTO__')) {
+      if (envTest('OBJECT__PROTO__')) {
         var o = { 'x':0 };
         delete o['__count__'];
         return typeof o['__count__'] === 'number' && o['__count__'] === 1;
@@ -68,7 +67,7 @@
 
   /*-------------------------------- LANG BUGS -------------------------------*/
 
-  Bug.set({
+  envAddTest({
     'ARRAY_CONCAT_ARGUMENTS_BUGGY': function() {
       // true for Opera
       var array = [];

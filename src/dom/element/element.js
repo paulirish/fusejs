@@ -19,7 +19,7 @@
   (function() {
 
     var ELEMENT_TABLE_INNERHTML_INSERTS_TBODY =
-      Bug('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY'),
+      envTest('ELEMENT_TABLE_INNERHTML_INSERTS_TBODY'),
 
     FROM_STRING_PARENT_WRAPPERS = (function() {
       var T = {
@@ -285,7 +285,7 @@
       return getFragmentFromChildNodes(node, cache);
     }
 
-    if (Feature('CREATE_ELEMENT_WITH_HTML')) 
+    if (envTest('CREATE_ELEMENT_WITH_HTML')) 
       var create = (function(__create) {
         function create(tagName, attributes, context) {
           var data, element, id, name, type;
@@ -312,7 +312,7 @@
         return create;
       })(create);
 
-    if (Feature('ELEMENT_REMOVE_NODE'))
+    if (envTest('ELEMENT_REMOVE_NODE'))
       var getFragmentFromChildNodes =  function(parentNode, cache) {
         // removeNode: removes the parent but keeps the children
         var fragment = cache.fragment;
@@ -320,7 +320,7 @@
         return fragment;
       };
 
-    if (Feature('DOCUMENT_RANGE'))
+    if (envTest('DOCUMENT_RANGE'))
       var getFragmentFromChildNodes = function(parentNode, cache) {
         var range = cache.range;
         range.selectNodeContents(parentNode);
@@ -347,7 +347,7 @@
     dom.extendByTag = extendByTag;
 
     dom.getFragmentFromString =
-      Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT')
+      envTest('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT')
       ? getFromContextualFragment
       : getFromDocumentFragment;
   })();
@@ -399,11 +399,11 @@
           .data = text || '';
       }
 
-      if (Feature('ELEMENT_SCRIPT_HAS_TEXT_PROPERTY'))
+      if (envTest('ELEMENT_SCRIPT_HAS_TEXT_PROPERTY'))
         return function(element, text) { element.text = text; };
 
       var textNode = fuse._doc.createTextNode('');
-      if (!Bug('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT'))
+      if (!envTest('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT'))
         return setScriptText;
 
       textNode = fuse._doc.createComment('');
@@ -418,7 +418,7 @@
         element.parentNode.replaceChild(node, element);
       }
 
-      if (!Bug('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT'))
+      if (!envTest('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT'))
         return replaceElement;
 
       var T = ELEMENT_INSERT_METHODS,
@@ -582,13 +582,13 @@
         var stripped,
          element  = this.raw || this,
          nodeName = getNodeName(element),
-         isBuggy  = BUGGY[nodeName];
+         envTestgy  = BUGGY[nodeName];
 
         if (nodeName === 'SCRIPT') {
           setScriptText(element, content);
         } else {
           // remove children
-          if (isBuggy) {
+          if (envTestgy) {
             while (element.lastChild)
               element.removeChild(element.lastChild);
           } else element.innerHTML = '';
@@ -602,7 +602,7 @@
               content = Obj.toHTML(content);
               stripped = content.stripScripts();
 
-              if (isBuggy) {
+              if (envTestgy) {
                 if (stripped != '')
                   element.appendChild(fuse.dom.getFragmentFromString(stripped, element));
               }
@@ -617,13 +617,13 @@
       };
 
       var BUGGY = { };
-      if (Bug('ELEMENT_COLGROUP_INNERHTML_BUGGY'))
+      if (envTest('ELEMENT_COLGROUP_INNERHTML_BUGGY'))
         BUGGY.COLGROUP = 1;
-      if (Bug('ELEMENT_OPTGROUP_INNERHTML_BUGGY'))
+      if (envTest('ELEMENT_OPTGROUP_INNERHTML_BUGGY'))
         BUGGY.OPTGROUP = 1;
-      if (Bug('ELEMENT_SELECT_INNERHTML_BUGGY'))
+      if (envTest('ELEMENT_SELECT_INNERHTML_BUGGY'))
         BUGGY.SELECT   = 1;
-      if (Bug('ELEMENT_TABLE_INNERHTML_BUGGY'))
+      if (envTest('ELEMENT_TABLE_INNERHTML_BUGGY'))
         BUGGY.TABLE = BUGGY.TBODY = BUGGY.TR = BUGGY.TD =
         BUGGY.TFOOT = BUGGY.TH    = BUGGY.THEAD = 1;
 
@@ -683,13 +683,13 @@
           plugin.contains.call(element.ownerDocument, element));
       };
 
-      if (Feature('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
+      if (envTest('ELEMENT_SOURCE_INDEX', 'DOCUMENT_ALL_COLLECTION')) {
         isDetached = function isDetached() {
           var element = this.raw || this;
           return element.ownerDocument.all[element.sourceIndex] !== element;
         };
       }
-      if (Feature('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
+      if (envTest('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
         isDetached = function isDetached() {
           /* DOCUMENT_POSITION_DISCONNECTED = 0x01 */
           var element = this.raw || this;

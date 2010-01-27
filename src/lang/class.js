@@ -131,9 +131,10 @@
 
   (function(__env) {
     delete fuse.env;
-    var env     = fuse.addNS('env');
-    env.Bug     = __env.Bug;
-    env.Feature = __env.Feature;
+    var env        = fuse.addNS('env');
+    env.addTest    = __env.addTest;
+    env.removeTest = __env.removeTest;
+    env.test       = __env.test;
 
     env.addNS('agent');
     _extend(env.agent, __env.agent);

@@ -1835,7 +1835,7 @@ new Test.Unit.Runner({
 
     /*
     // No longer needed as FuseJS wraps elements
-    if (originalElement && fuse.env.Feature('ELEMENT_EXTENSIONS')) {
+    if (originalElement && fuse.env.test('ELEMENT_EXTENSIONS')) {
       Element.prototype.fooBar = fuse.emptyFunction;
       this.assertRespondsTo('fooBar', fuse('<div>'));
     }
@@ -2099,7 +2099,7 @@ new Test.Unit.Runner({
     source.setStyle({ 'width': '70px','height': '40px' });
     var srcDims = source.getDimensions();
 
-    if (!fuse.env.Bug('ELEMENT_STYLE_OVERFLOW_VISIBLE_EXPANDS_TO_FIT_CONTENT')) {
+    if (!fuse.env.test('ELEMENT_STYLE_OVERFLOW_VISIBLE_EXPANDS_TO_FIT_CONTENT')) {
       targets.each(function(id, index) {
         var target = window.$(id);
         target.clonePosition(source);

@@ -1,6 +1,6 @@
   /*----------------------------- DOM: FEATURES ------------------------------*/
 
-  Feature.set({
+  envAddTest({
     'CREATE_ELEMENT_WITH_HTML': function() {
       try { // true for IE
         var div = fuse._doc.createElement('<div id="x">');
@@ -31,7 +31,7 @@
     },
 
     'DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT': function() {
-      if (Feature('DOCUMENT_RANGE'))
+      if (envTest('DOCUMENT_RANGE'))
         return isHostObject(fuse._doc.createRange(), 'createContextualFragment');
     },
 
@@ -43,7 +43,7 @@
     'ELEMENT_ATTACH_EVENT': function() {
       // true for IE
       return isHostObject(fuse._doc, 'attachEvent') &&
-        !Feature('ELEMENT_ADD_EVENT_LISTENER');
+        !envTest('ELEMENT_ADD_EVENT_LISTENER');
     },
 
     'ELEMENT_BOUNDING_CLIENT_RECT': function() {
@@ -65,7 +65,7 @@
     'ELEMENT_CURRENT_STYLE': function() {
       // true for IE
       return isHostObject(fuse._docEl, 'currentStyle') &&
-        !Feature('ELEMENT_COMPUTED_STYLE');
+        !envTest('ELEMENT_COMPUTED_STYLE');
     },
 
     'ELEMENT_CONTAINS': function() {
@@ -111,7 +111,7 @@
 
     'ELEMENT_INNER_TEXT': function() {
       // true for IE
-      return !Feature('ELEMENT_TEXT_CONTENT') &&
+      return !envTest('ELEMENT_TEXT_CONTENT') &&
         typeof fuse._div.innerText === 'string';
     },
 
@@ -141,7 +141,7 @@
 
   /*-------------------------------- DOM BUGS --------------------------------*/
 
-  Bug.set({
+  envAddTest({
     'ATTRIBUTE_NODES_PERSIST_ON_CLONED_ELEMENTS': function() {
       // true for some IE6
       var node, clone, div = fuse._div;
@@ -171,7 +171,7 @@
 
       // check scroll coords
       var scrollTop = docEl.scrollTop;
-      Bug.set('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT',
+      envAddTest('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT',
         ++docEl.scrollTop && docEl.scrollTop === scrollTop + 1);
       docEl.scrollTop = scrollTop;
 
@@ -194,7 +194,7 @@
     },
 
     'ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO': function() {
-      if (Feature('ELEMENT_COMPUTED_STYLE')) {
+      if (envTest('ELEMENT_COMPUTED_STYLE')) {
         // true for Opera
         var result, des = fuse._docEl.style, backup = des.cssText;
         des.position = 'static';
@@ -208,7 +208,7 @@
     },
 
     'ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX': function() {
-      if (Feature('ELEMENT_COMPUTED_STYLE')) {
+      if (envTest('ELEMENT_COMPUTED_STYLE')) {
         // true for Opera 9.2x
         var docEl = fuse._docEl, des = docEl.style, backup = des.paddingBottom;
         des.paddingBottom = '1px';
@@ -220,7 +220,7 @@
     },
 
     'ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN': function() {
-      if (Feature('ELEMENT_COMPUTED_STYLE')) {
+      if (envTest('ELEMENT_COMPUTED_STYLE')) {
         // true for Opera
         var des = fuse._docEl.style, backup = des.display;
         des.display = 'none';
@@ -255,7 +255,7 @@
       // HTMLObjectElement, HTMLAppletElement and HTMLEmbedElement objects
       // don't inherit from their prototypes. Creating an APPLET element
       // will alert a warning message if Java is not installed.
-      if (Feature('ELEMENT_SPECIFIC_EXTENSIONS')) {
+      if (envTest('ELEMENT_SPECIFIC_EXTENSIONS')) {
         var element = fuse._doc.createElement('object'),
          prototype = global.Element.prototype;
         prototype[expando] = true;
@@ -293,7 +293,7 @@
     }
   });
 
-  Bug.set((function() {
+  envAddTest((function() {
     function createInnerHTMLTest(source, innerHTML, targetNode) {
       return function() {
         var element, div = fuse._div, result = true;
@@ -356,19 +356,19 @@
         docEl.removeChild(script);
         delete fuse[expando];
 
-        Feature.set({
+        envAddTest({
           'ELEMENT_SCRIPT_HAS_TEXT_PROPERTY': hasText });
 
-        Bug.set({
+        envAddTest({
           'ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT': evalFailed });
 
         return ({ 'feature': hasText, 'bug': evalFailed })[testType];
       };
     }
 
-    Feature.set({
+    envAddTest({
       'ELEMENT_SCRIPT_HAS_TEXT_PROPERTY': createScriptTest('feature') });
 
-    Bug.set({
+    envAddTest({
       'ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT': createScriptTest('bug') });
   })();

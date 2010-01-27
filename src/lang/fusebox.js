@@ -21,7 +21,7 @@
       // sandboxes after the document.domain is set. Access will be denied until
       // the iframe is loaded which disqualifies its use as a synchronous solution
       // (Opera 9.25 is out of luck here).
-      if (Feature('ACTIVE_X_OBJECT') &&
+      if (envTest('ACTIVE_X_OBJECT') &&
           global.location && global.location.protocol !== 'file:') {
         try {
           // ensure ActiveX is enabled
@@ -35,7 +35,7 @@
       // Check "OBJECT__PROTO__" first because Firefox will permanently screw up
       // other iframes on the page if an iframe is inserted and removed before the
       // dom has loaded.
-      if (Feature('OBJECT__PROTO__'))
+      if (envTest('OBJECT__PROTO__'))
         return OBJECT__PROTO__;
 
       var doc = global.document;

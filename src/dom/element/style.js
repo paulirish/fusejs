@@ -51,13 +51,13 @@
       return false;
     }
 
-    if (Bug('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO'))
+    if (envTest('ELEMENT_COMPUTED_STYLE_DEFAULTS_TO_ZERO'))
       nullHandlers.push(function(element, name) {
         return POSITION_NAMES[name] &&
           getComputedStyle(element, 'position') === 'static';
       });
 
-    if (Bug('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN'))
+    if (envTest('ELEMENT_COMPUTED_STYLE_HEIGHT_IS_ZERO_WHEN_HIDDEN'))
       nullHandlers.push(function(element, name) {
         return DIMENSION_NAMES[name] && getComputedStyle(element, 'display') === 'none';
       });
@@ -91,14 +91,14 @@
 
 
     // fallback for browsers without computedStyle or currentStyle
-    if (!Feature('ELEMENT_COMPUTED_STYLE') && !Feature('ELEMENT_CURRENT_STYLE'))
+    if (!envTest('ELEMENT_COMPUTED_STYLE') && !envTest('ELEMENT_CURRENT_STYLE'))
       plugin.getStyle = function getStyle(name) {
         var result = getValue(this, camelize.call(name));
         return result === null ? result : fuse.String(result);
       };
 
     // Opera 9.2x
-    else if (Bug('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX'))
+    else if (envTest('ELEMENT_COMPUTED_STYLE_DIMENSIONS_EQUAL_BORDER_BOX'))
       plugin.getStyle = function getStyle(name) {
         name = camelize.call(name);
         var dim, result, element = this.raw || this;
@@ -118,7 +118,7 @@
       };
 
     // Firefox, Safari, Opera 9.5+
-    else if (Feature('ELEMENT_COMPUTED_STYLE'))
+    else if (envTest('ELEMENT_COMPUTED_STYLE'))
       plugin.getStyle = function getStyle(name) {
         name = camelize.call(name);
         var result, element = this.raw || this;
@@ -298,7 +298,7 @@
         return fuse.Number(parseFloat(this.style.opacity));
       };
 
-      if (Feature('ELEMENT_COMPUTED_STYLE')) {
+      if (envTest('ELEMENT_COMPUTED_STYLE')) {
         getOpacity = function getOpacity() {
           var element = this.raw || this,
            style = element.ownerDocument.defaultView.getComputedStyle(element, null);
@@ -307,7 +307,7 @@
             : element.style.opacity));
         };
       }
-      else if (Feature('ELEMENT_MS_CSS_FILTERS')) {
+      else if (envTest('ELEMENT_MS_CSS_FILTERS')) {
         getOpacity = function getOpacity() {
           var element = this.raw || this,
            currStyle = element.currentStyle || element.style,
@@ -356,7 +356,7 @@
           return this;
         };
       }
-      else if (Feature('ELEMENT_MS_CSS_FILTERS')) {
+      else if (envTest('ELEMENT_MS_CSS_FILTERS')) {
         setOpacity = function setOpacity(value) {
           // strip alpha from filter style
           var element = this.raw || this,
@@ -394,7 +394,7 @@
           !!(element.offsetHeight || element.offsetWidth);
       };
 
-      if (Feature('ELEMENT_COMPUTED_STYLE')) {
+      if (envTest('ELEMENT_COMPUTED_STYLE')) {
         isVisible = function isVisible() {
           var element = this.raw || this,
            compStyle = element.ownerDocument.defaultView.getComputedStyle(element, null);
@@ -402,7 +402,7 @@
         };
       }
 
-      if (Bug('TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN')) {
+      if (envTest('TABLE_ELEMENTS_RETAIN_OFFSET_DIMENSIONS_WHEN_HIDDEN')) {
         var __isVisible = isVisible;
 
         isVisible = function isVisible() {

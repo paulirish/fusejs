@@ -2,14 +2,14 @@
 (function(global) {
 
   // private vars
-  var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE, fuse, Bug,
-   Class, Data, Document, Element, Enumerable, Feature, Form, Func, Obj, Node,
-   NodeList, RawList, $break, _extend, addListMethods, bind, capitalize, clone,
-   concatList, defer, eachKey, emptyFunction, escapeRegExpChars, expando,
-   fromElement, getDocument, getNodeName, getWindow, hasKey, inspect, isArray,
-   isElement, isEmpty, isHash, isHostObject, isFunction, isNumber, isPrimitive,
-   isRegExp, isSameOrigin, isString, isUndefined, K, nil, prependList,
-   returnOffset, slice, toInteger, toString, undef, userAgent;
+  var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE, Class,
+   Data, Document, Element, Enumerable, Form, Func, Obj, Node, NodeList,
+   RawList, $break, _extend, fuse, addArrayMethods, bind, capitalize, clone,
+   concatList, defer, eachKey, emptyFunction, envAddTest, envTest,
+   escapeRegExpChars, expando, fromElement, getDocument, getNodeName, getWindow,
+   hasKey, inspect, isArray, isElement, isEmpty, isHash, isHostObject, isFunction,
+   isNumber, isPrimitive, isRegExp, isSameOrigin, isString, isUndefined, K, nil,
+   prependList, returnOffset, slice, toInteger, toString, undef, userAgent;
 
   fuse =
   global.fuse = function fuse() { };

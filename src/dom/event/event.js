@@ -3,8 +3,8 @@
   if (!global.Event) global.Event = { };
 
   Event.CUSTOM_EVENT_NAME =
-    Feature('ELEMENT_ADD_EVENT_LISTENER') ? 'dataavailable' :
-    Feature('ELEMENT_ATTACH_EVENT') ? 'beforeupdate' : 'keyup';
+    envTest('ELEMENT_ADD_EVENT_LISTENER') ? 'dataavailable' :
+    envTest('ELEMENT_ATTACH_EVENT') ? 'beforeupdate' : 'keyup';
 
   Event.Methods = { };
 
@@ -245,11 +245,11 @@
         fuse._scrollEl = doc.body;
         fuse._root     = docEl;
 
-        if (Bug('BODY_ACTING_AS_ROOT')) {
+        if (envTest('BODY_ACTING_AS_ROOT')) {
           fuse._root = doc.body;
           fuse._info.root = fuse._info.body;
         }
-        if (Bug('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT')) {
+        if (envTest('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT')) {
           fuse._scrollEl = docEl;
           fuse._info.scrollEl = fuse._info.docEl;
         }
@@ -346,7 +346,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    if (Feature('ELEMENT_ADD_EVENT_LISTENER') || Feature('ELEMENT_ATTACH_EVENT')) {
+    if (envTest('ELEMENT_ADD_EVENT_LISTENER') || envTest('ELEMENT_ATTACH_EVENT')) {
       // Event dispatchers manage several handlers and ensure
       // FIFO execution order. They are attached as the event
       // listener and execute all the handlers they manage.
@@ -374,7 +374,7 @@
       };
 
       // DOM Level 2
-      if (Feature('ELEMENT_ADD_EVENT_LISTENER')) {
+      if (envTest('ELEMENT_ADD_EVENT_LISTENER')) {
         addObserver = function(element, eventName, handler) {
           element.addEventListener(getEventName(eventName), handler, false);
         };
@@ -384,7 +384,7 @@
         };
       }
       // JScript
-      else if (Feature('ELEMENT_ATTACH_EVENT')) {
+      else if (envTest('ELEMENT_ATTACH_EVENT')) {
         addObserver = function(element, eventName, handler) {
           element.attachEvent('on' + getEventName(eventName), handler);
         };
@@ -396,7 +396,7 @@
     }
 
     // DOM Level 2
-    if (Feature('DOCUMENT_CREATE_EVENT') && Feature('ELEMENT_DISPATCH_EVENT')) {
+    if (envTest('DOCUMENT_CREATE_EVENT') && envTest('ELEMENT_DISPATCH_EVENT')) {
       createEvent = function(context, eventType) {
         var event = getDocument(context).createEvent('HTMLEvents');
         eventType && event.initEvent(eventType, true, true);
@@ -412,7 +412,7 @@
       };
     }
     // JScript
-    else if(Feature('DOCUMENT_CREATE_EVENT_OBJECT') && Feature('ELEMENT_FIRE_EVENT')) {
+    else if(envTest('DOCUMENT_CREATE_EVENT_OBJECT') && envTest('ELEMENT_FIRE_EVENT')) {
       createEvent = function(context, eventType) {
         var event = getDocument(context).createEventObject();
         eventType && (event.eventType = 'on' + eventType);
@@ -426,7 +426,7 @@
 
 
     // extend Event.prototype
-    if (proto || Feature('OBJECT__PROTO__')) {
+    if (proto || envTest('OBJECT__PROTO__')) {
 
       // redefine addMethods to support Event.prototype
       addMethods = function addMethods(methods) {

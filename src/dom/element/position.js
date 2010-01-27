@@ -317,11 +317,11 @@
       var getOffset = function(element, ancestor) {
         var offsetParent, position, raw, valueT = 0, valueL = 0;
         if (BODY_OFFSETS_INHERIT_ITS_MARGINS === null)
-          BODY_OFFSETS_INHERIT_ITS_MARGINS = Bug('BODY_OFFSETS_INHERIT_ITS_MARGINS');
+          BODY_OFFSETS_INHERIT_ITS_MARGINS = envTest('BODY_OFFSETS_INHERIT_ITS_MARGINS');
 
         if (ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH === null)
           ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH =
-            Bug('ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH');
+            envTest('ELEMENT_COORD_OFFSETS_DONT_INHERIT_ANCESTOR_BORDER_WIDTH');
 
         do {
           raw = element.raw || element;
@@ -345,7 +345,7 @@
         return returnOffset(valueL, valueT);
       };
 
-      if (Feature('ELEMENT_BOUNDING_CLIENT_RECT'))
+      if (envTest('ELEMENT_BOUNDING_CLIENT_RECT'))
         getOffset = (function(__getOffset) {
           return function(element, ancestor) {
             var doc, info, rect, raw, root, scrollEl, valueT, valueL;
@@ -431,7 +431,7 @@
         return returnOffset(valueL, valueT);
       };
 
-      if (Feature('ELEMENT_BOUNDING_CLIENT_RECT')) {
+      if (envTest('ELEMENT_BOUNDING_CLIENT_RECT')) {
         getViewportOffset = function getViewportOffset() {
           var valueT = 0, valueL = 0;
 

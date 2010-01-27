@@ -416,7 +416,7 @@
       // Opera's implementation of Array.prototype.concat treats a functions arguments
       // object as an array so we overwrite concat to fix it.
       // ECMA-5 15.4.4.4
-      if (!plugin.concat || Bug('ARRAY_CONCAT_ARGUMENTS_BUGGY'))
+      if (!plugin.concat || envTest('ARRAY_CONCAT_ARGUMENTS_BUGGY'))
         plugin.concat = function concat() {
           if (this == null) throw new TypeError;
 
@@ -535,7 +535,7 @@
         };
 
       // ECMA-5 15.4.4.10
-      if (Bug('ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES'))
+      if (envTest('ARRAY_SLICE_EXLUDES_TRAILING_UNDEFINED_INDEXES'))
         plugin.slice = (function(__slice) {
           function slice(start, end) {
             if (this == null) throw new TypeError;

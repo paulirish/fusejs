@@ -88,7 +88,7 @@
         return results;
       };
 
-      if (Bug('GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES')) {
+      if (envTest('GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES')) {
         getDescendants = function getDescendants(selectors) {
           var match, node, i = 0, results = NodeList(),
            nodes = (this.raw || this).getElementsByTagName('*');
@@ -120,7 +120,7 @@
         return false;
       };
 
-      if (Feature('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
+      if (envTest('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
         contains = function contains(descendant) {
           /* DOCUMENT_POSITION_CONTAINS = 0x08 */
           if (descendant = fuse.get(descendant)) {
@@ -131,7 +131,7 @@
           return false;
         };
       }
-      else if (Feature('ELEMENT_CONTAINS')) {
+      else if (envTest('ELEMENT_CONTAINS')) {
         var __contains = contains;
 
         contains = function contains(descendant) {
@@ -164,7 +164,7 @@
         return null;
       }
 
-      if (Bug('GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES')) {
+      if (envTest('GET_ELEMENTS_BY_TAG_NAME_RETURNS_COMMENT_NODES')) {
         getNth = function(nodes, index) {
           var count = 0, i = 0;
           while (node = nodes[i++])

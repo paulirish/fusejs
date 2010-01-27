@@ -87,7 +87,7 @@ function preservingBrowserDimensions(callback) {
       return xhr.responseXML;
     };
 
-    if (fuse.env.Feature('ACTIVE_X_OBJECT')) {
+    if (fuse.env.test('ACTIVE_X_OBJECT')) {
       parseFromString = function parseFromString(string, contentType) {
         var xmldata = new ActiveXObject('MSXML.DomDocument');
         xmldata.async = false;
@@ -104,7 +104,7 @@ function preservingBrowserDimensions(callback) {
 
 /*--------------------------------------------------------------------------*/
 
-fuse.env.Bug.set({
+fuse.env.addTest({
   'ELEMENT_STYLE_OVERFLOW_VISIBLE_EXPANDS_TO_FIT_CONTENT': function() {
     // IE 6 and lower
     var div = fuse._div, clone = div.cloneNode(false), ds = div.style, cs = clone.style;

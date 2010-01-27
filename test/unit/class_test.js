@@ -185,7 +185,7 @@ new Test.Unit.Runner({
       'm2': function() { return Child.callSuper(this, 'm2') + ' child' }
     });
 
-    if (fuse.env.Feature('FUNCTION_TO_STRING_RETURNS_SOURCE'))
+    if (fuse.env.test('FUNCTION_TO_STRING_RETURNS_SOURCE'))
       this.assert(new Child().m1.toString().indexOf(' child') > -1);
 
     this.assertEqual('toString', new Foo().toString());

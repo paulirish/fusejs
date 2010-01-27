@@ -1,3 +1,5 @@
+* Rename fuse.env.Bug/Feature to fuse.env.test and add fuse.env.addTest and fuse.env.removeTest methods. [FuseJS LH #44] [jddalton, Joe Gornick, kangax]
+
 * Lowercase the Fuse namespaces and remove the List aliases. [jddalton]
 
 * Add the overlooked reverse(), sort(), and splice() methods to the Fuseboxed Array.prototype. [jddalton]
