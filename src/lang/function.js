@@ -1,7 +1,7 @@
   /*----------------------------- LANG: FUNCTIONS ----------------------------*/
 
   Func =
-  Fuse.Function;
+  fuse.Function;
 
   // ECMA-5 15.3.4.5
   bind =

@@ -36,16 +36,16 @@
      return toString.call(object) === '[object Function]';
    },
 
-   zip = Fuse.Array.plugin.zip;
+   zip = fuse.Array.plugin.zip;
 
 
   global.Test = {
     'Unit': {
-      'inspect': Fuse.Object.inspect // security exception workaround
+      'inspect': fuse.Object.inspect // security exception workaround
     }
   };
 
-  Test.Unit.Logger = Fuse.Class({
+  Test.Unit.Logger = fuse.Class({
     'initialize': function(id) {
       if (typeof id === 'string')
         id = document.getElementById(id);
@@ -107,7 +107,7 @@
     },
 
     '_toHTML': function(txt) {
-      return Fuse.String(txt).escapeHTML().replace(/\n/g,'<br />');
+      return fuse.String(txt).escapeHTML().replace(/\n/g,'<br />');
     }
   });
 
@@ -124,9 +124,9 @@
   };
   Event.observe(window, 'load', Test.Unit.AutoRunner.run);
 
-  Test.Unit.Runner = Fuse.Class({
+  Test.Unit.Runner = fuse.Class({
     'initialize': function(testcases) {
-      var options = this.options = Fuse.Object.extend({
+      var options = this.options = fuse.Object.extend({
         testLog: 'testlog'
       }, arguments[1] || { });
 
@@ -139,17 +139,17 @@
 
     'run': function() {
       this.logger = new Test.Unit.Logger(this.options.testLog);
-      Fuse.Function.delay(Fuse.Function.bind(this.runTests, this), 0.1);
+      fuse.Function.delay(fuse.Function.bind(this.runTests, this), 0.1);
     },
 
-    'queryParams': Fuse.String(window.location.search).parseQuery(),
+    'queryParams': fuse.String(window.location.search).parseQuery(),
 
     'getTests': function(testcases) {
       var tests, options = this.options;
       if (this.queryParams.tests) tests = this.queryParams.tests.split(',');
       else if (options.tests) tests = options.tests;
       else if (options.test) tests = [option.test];
-      else tests = Fuse.Object.keys(testcases).grep(/^test/);
+      else tests = fuse.Object.keys(testcases).grep(/^test/);
 
       return tests.map(function(test) {
         if (testcases[test])
@@ -178,7 +178,7 @@
         window.postUnittestResults(this.getResult());
       }
       else if (this.options.resultsURL) {
-        new Fuse.Ajax.Request(this.options.resultsURL,
+        new fuse.ajax.Request(this.options.resultsURL,
           { 'method': 'get', 'parameters': this.getResult(), 'asynchronous': false });
       }
     },
@@ -192,7 +192,7 @@
 
       if (test.isWaiting) {
         this.logger.message('Waiting for ' + test.timeToWait + 'ms');
-        setTimeout(Fuse.Function.bind(this.runTests, this), test.timeToWait || 1000);
+        setTimeout(fuse.Function.bind(this.runTests, this), test.timeToWait || 1000);
         return;
       }
 
@@ -210,15 +210,15 @@
     },
 
     'summary': function() {
-      return Fuse.String('#{tests} tests, #{assertions} assertions, #{failures} failures, #{errors} errors')
+      return fuse.String('#{tests} tests, #{assertions} assertions, #{failures} failures, #{errors} errors')
         .interpolate(this.getResult());
     }
   });
 
-  Test.Unit.MessageTemplate = Fuse.Class({
+  Test.Unit.MessageTemplate = fuse.Class({
     'initialize': function(string) {
-      var parts = Fuse.Array();
-      Fuse.String(string || '').replace(/(?=[^\\])\?|(?:\\\?|[^\?])+/g, function(part) {
+      var parts = fuse.Array();
+      fuse.String(string || '').replace(/(?=[^\\])\?|(?:\\\?|[^\?])+/g, function(part) {
         parts.push(part);
       });
       this.parts = parts;
@@ -292,8 +292,8 @@
     }
 
     function assertEnumNotEqual(expected, actual, message) {
-      expected = Fuse.Util.$A(expected);
-      actual   = Fuse.Util.$A(actual);
+      expected = fuse.util.$A(expected);
+      actual   = fuse.util.$A(actual);
       message  = buildMessage(message || 'assertEnumNotEqual', '<?> was the same as <?>', expected, actual);
 
       this.assertBlock(message, function() {
@@ -309,8 +309,8 @@
           expected_array.zip(actual_array).every(_assertPairEqual);
       }
 
-      expected = Fuse.Hash(expected);
-      actual   = Fuse.Hash(actual);
+      expected = fuse.Hash(expected);
+      actual   = fuse.Hash(actual);
 
       var expected_array = expected.toArray().sort(), actual_array = actual.toArray().sort();
       message = buildMessage(message || 'assertHashEqual', 'expected: <?>, actual: <?>', expected, actual);
@@ -324,8 +324,8 @@
           expected_array.zip(actual_array).every(_assertPairEqual));
       }
 
-      expected = Fuse.Hash(expected);
-      actual   = Fuse.Hash(actual);
+      expected = fuse.Hash(expected);
+      actual   = fuse.Hash(actual);
 
       var expected_array = expected.toArray().sort(), actual_array = actual.toArray().sort();
       message = buildMessage(message || 'assertHashNotEqual', '<?> was the same as <?>', expected, actual);
@@ -427,7 +427,7 @@
     }
 
     function isVisible(element) {
-      return Fuse.get(element).isVisible();
+      return fuse.get(element).isVisible();
     }
 
     function assertVisible(element, message) {
@@ -450,7 +450,7 @@
         pass = false;
       }
 
-      zip.call(elements, expressions).every(Fuse.Function.bind(function(pair, index) {
+      zip.call(elements, expressions).every(fuse.Function.bind(function(pair, index) {
         var element = $(pair.first()), expression = pair.last();
         if (element.match(expression)) return true;
         message = buildMessage('assertElementsMatch', 'In index <?>: expected <?> but got ?', index, expression, element);
@@ -499,7 +499,7 @@
     }
   })();
 
-  Test.Unit.Testcase = Fuse.Class(Test.Unit.Assertions, {
+  Test.Unit.Testcase = fuse.Class(Test.Unit.Assertions, {
     'initialize': function(name, test, setup, teardown) {
       this.name     = name;
       this.test     = test     || emptyFunction;
@@ -547,7 +547,7 @@
     },
 
     'summary': function() {
-      var msg = Fuse.String('#{assertions} assertions, #{failures} failures, #{errors} errors\n');
+      var msg = fuse.String('#{assertions} assertions, #{failures} failures, #{errors} errors\n');
       return msg.interpolate(this) + this.messages.join('\n');
     },
 

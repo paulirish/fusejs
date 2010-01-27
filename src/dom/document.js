@@ -1,7 +1,7 @@
   /*----------------------------- DOM: DOCUMENT ------------------------------*/
 
   Document = 
-  Fuse.Dom.Document = (function() {
+  fuse.dom.Document = (function() {
     function Decorator() { }
 
     function Document(node) {
@@ -46,18 +46,18 @@
 
     function define() {
       function getHeight() {
-        return Fuse.Number(dimensionNode.clientHeight);
+        return fuse.Number(dimensionNode.clientHeight);
       }
 
       function getWidth() {
-        return Fuse.Number(dimensionNode.clientWidth);
+        return fuse.Number(dimensionNode.clientWidth);
       }
 
       // Safari < 3 -> doc
       // Opera  < 9.5, Quirks mode -> body
       // Others -> docEl
       var doc = this.ownerDocument,
-       dimensionNode = 'clientWidth' in doc ? doc : doc[Fuse._info.root.property];
+       dimensionNode = 'clientWidth' in doc ? doc : doc[fuse._info.root.property];
 
       // lazy define methods
       this.getHeight = getHeight;
@@ -89,7 +89,7 @@
 
       if (typeof global.pageXOffset !== 'number')
         getScrollOffsets = function getScrollOffsets() {
-          var scrollEl = Fuse._scrollEl;
+          var scrollEl = fuse._scrollEl;
           return returnOffset(scrollEl.scrollLeft, scrollEl.scrollTop);
         };
 

@@ -13,15 +13,15 @@
   <script src="../../lib/assets/unittest.js" type="text/javascript"></script>
   <script type="text/javascript">
     var undef, nil = null,
-     $  = Fuse.Util.$,
-     $$ = Fuse.Util.$$,
-     $A = Fuse.Util.$A,
-     $F = Fuse.Util.$F,
-     $H = Fuse.Util.$H,
-     $R = Fuse.Util.$R,
-     $w = Fuse.Util.$w;
+     $  = fuse.util.$,
+     $$ = fuse.util.$$,
+     $A = fuse.util.$A,
+     $F = fuse.util.$F,
+     $H = fuse.util.$H,
+     $R = fuse.util.$R,
+     $w = fuse.util.$w;
 
-    Fuse(document).observe('dom:loaded', function() {
+    fuse(document).observe('dom:loaded', function() {
       function refresh() {
         var loc = window.location;
         loc.href = loc.protocol + '//' + loc.hostname + loc.pathname +
@@ -35,9 +35,9 @@
       }
 
       var loadScriptFile = (function() {
-        var head = Fuse.get(document.getElementsByTagName('HEAD')[0]);
+        var head = fuse.get(document.getElementsByTagName('HEAD')[0]);
         return function(url) {
-          Fuse.Ajax.Request(url, {
+          fuse.ajax.Request(url, {
             'method': 'get',
             'evalJS': false,
             'asynchronous': false,
@@ -68,7 +68,7 @@
       }
 
       // set debug flag
-      Fuse.debug = debugParam;
+      fuse.debug = debugParam;
 
       // load selector engine and Fuse engine adapter
       loadScriptFile('../../../vendor/' + engineItem.value);

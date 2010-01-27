@@ -1,8 +1,8 @@
   /*---------------------------------- AJAX ----------------------------------*/
 
-  Fuse.addNS('Ajax');
+  fuse.addNS('ajax');
 
-  Fuse.Ajax.create = (function() {
+  fuse.ajax.create = (function() {
 
     // The `Difference between MSXML2.XMLHTTP and Microsoft.XMLHTTP ProgIDs`
     // thread explains that the `Microsoft` namespace is deprecated and we should

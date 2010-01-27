@@ -1,7 +1,7 @@
   /*-------------------------------- ELEMENT ---------------------------------*/
 
   Element =
-  Fuse.Dom.Element = Class(Node, {
+  fuse.dom.Element = Class(Node, {
     'constructor': (function() {
       function Element(tagName, attributes, context) {
         return isString(tagName)
@@ -94,7 +94,7 @@
       return T;
     })(),
 
-    doc = Fuse._doc,
+    doc = fuse._doc,
 
     getFuseId = Node.getFuseId,
 
@@ -104,7 +104,7 @@
 
     matchTagName= /^<([^> ]+)/,
 
-    Dom = Fuse.Dom;
+    dom = fuse.dom;
 
 
     // For speed we don't normalize tagName case.
@@ -127,7 +127,7 @@
 
         // support `<div>x</div>` format tags
         if (!(complexTag = tagName.match(matchComplexTag))) {
-          fragment = Dom.getFragmentFromString(tagName, context);
+          fragment = dom.getFragmentFromString(tagName, context);
           length = fragment.childNodes.length;
 
           // multiple elements return a NodeList
@@ -212,9 +212,9 @@
         TAG_NAME_CLASSES[tagName] = tagClassName;
       }
 
-      if (!(tagClass = Dom[tagClassName])) {
+      if (!(tagClass = dom[tagClassName])) {
         (tagClass =
-        Dom[tagClassName] = Class(Element, {
+        dom[tagClassName] = Class(Element, {
           'constructor': function(element) {
             return element && (element.raw ?
               element : fromElement(element));
@@ -251,7 +251,7 @@
       // 2) WebKit and KHTML throw when creating contextual fragments from
       //    orphaned elements.
       try {
-        context = context || Fuse._doc;
+        context = context || fuse._doc;
         var cache = getFragmentCache(context.ownerDocument || context),
          range = cache.range;
         range.selectNode(context.body || context.firstChild);
@@ -262,7 +262,7 @@
     }
 
     function getFromDocumentFragment(html, context, cache) {
-       context = context || Fuse._doc;
+       context = context || fuse._doc;
        cache = cache || getFragmentCache(context.ownerDocument || context);
        var node = cache.node,
         nodeName = context.nodeType === DOCUMENT_NODE
@@ -340,13 +340,13 @@
 
     Element.create = create;
 
-    Element.from = Fuse.get;
+    Element.from = fuse.get;
 
     Element.fromElement = fromElement;
 
-    Dom.extendByTag = extendByTag;
+    dom.extendByTag = extendByTag;
 
-    Dom.getFragmentFromString =
+    dom.getFragmentFromString =
       Feature('DOCUMENT_RANGE_CREATE_CONTEXTUAL_FRAGMENT')
       ? getFromContextualFragment
       : getFromDocumentFragment;
@@ -402,11 +402,11 @@
       if (Feature('ELEMENT_SCRIPT_HAS_TEXT_PROPERTY'))
         return function(element, text) { element.text = text; };
 
-      var textNode = Fuse._doc.createTextNode('');
+      var textNode = fuse._doc.createTextNode('');
       if (!Bug('ELEMENT_SCRIPT_FAILS_TO_EVAL_TEXT'))
         return setScriptText;
 
-      textNode = Fuse._doc.createComment('');
+      textNode = fuse._doc.createComment('');
       return function(element, text) {
         setScriptText(element, text);
         global.eval(element.firstChild.data);
@@ -512,7 +512,7 @@
         if (content != '') {
           stripped = content.stripScripts();
           if (stripped != '')
-            insertContent(element, Fuse.Dom.getFragmentFromString(stripped,
+            insertContent(element, fuse.dom.getFragmentFromString(stripped,
               INSERT_POSITIONS_USING_PARENT_NODE[position] ? element.parentNode : element));
 
           // only evalScripts if there are scripts
@@ -535,7 +535,7 @@
           html = Obj.toHTML(content);
           stripped = html.stripScripts();
           content = stripped == '' ? '' :
-            Fuse.Dom.getFragmentFromString(stripped, element.parentNode);
+            fuse.dom.getFragmentFromString(stripped, element.parentNode);
 
           if (content.length !== stripped.length)
             setTimeout(function() { html.evalScripts(); }, 10);
@@ -604,7 +604,7 @@
 
               if (isBuggy) {
                 if (stripped != '')
-                  element.appendChild(Fuse.Dom.getFragmentFromString(stripped, element));
+                  element.appendChild(fuse.dom.getFragmentFromString(stripped, element));
               }
               else element.innerHTML = stripped;
 
@@ -653,7 +653,7 @@
     };
 
     plugin.isEmpty = function isEmpty() {
-      return Fuse.String((this.raw || this).innerHTML).blank();
+      return fuse.String((this.raw || this).innerHTML).blank();
     };
 
     plugin.identify = (function() {
@@ -668,7 +668,7 @@
         do { id = 'anonymous_element_' + counter++; }
         while (ownerDoc.getElementById(id));
         plugin.setAttribute.call(this, 'id', id);
-        return Fuse.String(id);
+        return fuse.String(id);
       }
 
       // private counter
@@ -739,7 +739,7 @@
 
       if (isString(wrapper))
         wrapper = Element.create(wrapper, attributes);
-      if (isElement(wrapper) && (wrapper = Fuse.get(wrapper)))
+      if (isElement(wrapper) && (wrapper = fuse.get(wrapper)))
         wrapper.setAttribute(attributes);
       else wrapper = Element.create('div', wrapper);
 

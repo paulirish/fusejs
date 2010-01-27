@@ -2,25 +2,25 @@
 
   (function(plugin) {
     plugin.abs = (function() {
-      function abs() { return Fuse.Number(__abs(this)); }
+      function abs() { return fuse.Number(__abs(this)); }
       var __abs = Math.abs;
       return abs;
     })();
 
     plugin.ceil = (function() {
-      function ceil() { return Fuse.Number(__ceil(this)); }
+      function ceil() { return fuse.Number(__ceil(this)); }
       var __ceil = Math.ceil;
       return ceil;
     })();
 
     plugin.floor = (function() {
-      function floor() { return Fuse.Number(__floor(this)); }
+      function floor() { return fuse.Number(__floor(this)); }
       var __floor = Math.floor;
       return floor;
     })();
 
     plugin.round = (function() {
-      function round() { return Fuse.Number(__round(this)); }
+      function round() { return fuse.Number(__round(this)); }
       var __round = Math.round;
       return round;
     })();
@@ -42,9 +42,9 @@
     plugin.toPaddedString = (function() {
       function toPaddedString(length, radix) {
         var string = toInteger(this).toString(radix || 10);
-        if (length <= string.length) return Fuse.String(string);
+        if (length <= string.length) return fuse.String(string);
         if (length > pad.length) pad = new Array(length + 1).join('0');
-        return Fuse.String((pad + string).slice(-length));
+        return fuse.String((pad + string).slice(-length));
       }
 
       var pad = '000000';
@@ -53,4 +53,4 @@
 
     // prevent JScript bug with named function expressions
     var times = nil, toColorPart = nil;
-  })(Fuse.Number.plugin);
+  })(fuse.Number.plugin);

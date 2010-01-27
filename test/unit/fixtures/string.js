@@ -3,13 +3,13 @@ var attackTarget,
  largeTextEscaped   = '&lt;span&gt;test&lt;/span&gt;', 
  largeTextUnescaped = '<span>test</span>';
 
-Fuse.Number(2048).times(function(){ 
+fuse.Number(2048).times(function(){ 
   largeTextEscaped += ' ABC';
   largeTextUnescaped += ' ABC';
 });
 
-largeTextEscaped = Fuse.String(largeTextEscaped);
-largeTextUnescaped = Fuse.String(largeTextUnescaped);
+largeTextEscaped = fuse.String(largeTextEscaped);
+largeTextUnescaped = fuse.String(largeTextUnescaped);
 
 /*--------------------------------------------------------------------------*/
 

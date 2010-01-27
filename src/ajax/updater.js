@@ -1,6 +1,6 @@
   /*------------------------------ AJAX: UPDATER -----------------------------*/
 
-  Fuse.Ajax.Updater = (function() {
+  fuse.ajax.Updater = (function() {
     function Klass() { }
 
     function Updater(container, url, options) {
@@ -11,8 +11,8 @@
       __instance = null;
 
       instance.container = {
-        'success': Fuse.get(container.success || container),
-        'failure': Fuse.get(container.failure || (container.success ? null : container))
+        'success': fuse.get(container.success || container),
+        'failure': fuse.get(container.failure || (container.success ? null : container))
       };
 
       options[callbackName] = function(request, json) {
@@ -21,12 +21,12 @@
       };
 
       // instance._super() equivalent
-      Fuse.Ajax.Request.call(instance, url, options);
+      fuse.ajax.Request.call(instance, url, options);
     }
 
     var __instance, __apply = Updater.apply, __call = Updater.call,
-     Request = Fuse.Ajax.Request,
-     Updater = Class(Fuse.Ajax.Request, { 'constructor': Updater });
+     Request = fuse.ajax.Request,
+     Updater = Class(fuse.ajax.Request, { 'constructor': Updater });
 
     Updater.call = function(thisArg) {
       __instance = thisArg;
@@ -42,7 +42,7 @@
     return Updater;
   })();
 
-  Fuse.Ajax.Updater.plugin.updateContent = (function() {
+  fuse.ajax.Updater.plugin.updateContent = (function() {
     function updateContent(responseText) {
       var insertion,
        options = this.options,

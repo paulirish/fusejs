@@ -1,18 +1,18 @@
 new Test.Unit.Runner({
 
   'testArrayGrep': function() {
-    var Selector = Fuse.Class({
+    var Selector = fuse.Class({
       'initialize': function(pattern) {
         this.pattern = pattern;
       },
       'test': function(element) {
-        return Fuse.Dom.Selector.match(element, this.pattern);
+        return fuse.dom.Selector.match(element, this.pattern);
       }
     });
 
     // test empty pattern
-    this.assertEqual('abc', Fuse.List('a', 'b', 'c').grep('').join(''));
-    this.assertEqual('abc', Fuse.List('a', 'b', 'c').grep(new RegExp('')).join(''));
+    this.assertEqual('abc', fuse.Array('a', 'b', 'c').grep('').join(''));
+    this.assertEqual('abc', fuse.Array('a', 'b', 'c').grep(new RegExp('')).join(''));
 
     this.assertEqual('juanbond, jdd',
       Fixtures.Nicknames.grep(/j/).join(', '));
@@ -25,22 +25,22 @@ new Test.Unit.Runner({
     this.assertEnumEqual($('grepHeader', 'grepCell'),
       $('grepTable', 'grepTBody', 'grepRow', 'grepHeader', 'grepCell').grep(new Selector('.cell')));
 
-    this.assertEnumEqual([0, 2], Fuse.List.plugin.grep.call(Fixtures.Object, /\d/),
+    this.assertEnumEqual([0, 2], fuse.Array.plugin.grep.call(Fixtures.Object, /\d/),
       'called with an object as the `this` value');
 
-    this.assertEnumEqual([], Fuse.List.plugin.grep.call(Fixtures.Object, /undefined/),
+    this.assertEnumEqual([], fuse.Array.plugin.grep.call(Fixtures.Object, /undefined/),
       'called with an object as the `this` value iterated over an undefined index');
   },
 
 
   'testEnumerableGrep': function() {
-    var Selector = Fuse.Class({
+    var Selector = fuse.Class({
       'initialize': function(pattern) {
         this.pattern = pattern;
       },
 
       'test': function(element) {
-        return Fuse.Dom.Selector.match(element, this.pattern);
+        return fuse.dom.Selector.match(element, this.pattern);
       }
     });
 

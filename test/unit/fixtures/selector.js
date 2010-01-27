@@ -1,20 +1,20 @@
 var $RunBenchmarks = false;
 
-var Selector = Fuse.Class({
+var Selector = fuse.Class({
   'initialize': function(selector) {
-    this.selector = Fuse.String(selector);
+    this.selector = fuse.String(selector);
   },
 
   'inspect': function() {
-    return Fuse.String('#<Selector:' + this.selector.inspect() + '>');
+    return fuse.String('#<Selector:' + this.selector.inspect() + '>');
   },
 
   'findElements': function(context) {
-     return Fuse.Dom.Selector.select(this.selector, $(context).raw);
+     return fuse.dom.Selector.select(this.selector, $(context).raw);
   },
 
   'match': function(element) {
-    return Fuse.Dom.Selector.match($(element), this.selector);
+    return fuse.dom.Selector.match($(element), this.selector);
   },
 
   'toString': function() {
@@ -22,32 +22,32 @@ var Selector = Fuse.Class({
   }
 });
 
-Fuse.Object.extend(Selector, {
+fuse.Object.extend(Selector, {
   'findElement': function(elements, selector, index) {
-    if (Fuse.Object.isNumber(selector)) {
+    if (fuse.Object.isNumber(selector)) {
       index = selector; selector = false;
     }
     return Selector.matchElements(elements, selector || '*')[index || 0];
   },
 
   'findChildElements': function(element, selectors) {
-    return Fuse.Dom.Selector
+    return fuse.dom.Selector
       .select(Selector.split(selectors.join(',')).join(','), $(element));
   },
 
   'matchElements': function(elements, selector) {
-    elements = Fuse.List.fromNodeList(elements);
+    elements = fuse.Array.fromNodeList(elements);
     var element, i = 0, results = [];
     while (element = $(elements[i++]))
-      if (Fuse.Dom.Selector.match(element, selector))
+      if (fuse.dom.Selector.match(element, selector))
         results.push(element);
     return results;
   },
 
   'split': function(selector) {
-    var results = Fuse.List();
-    Fuse.String(selector).replace(/(([\w#:.~>+()\s-]|\*|\[.*?\])+)\s*(,|$)/g,
-      function(match, captured) { results.push(Fuse.String(captured).trim()) });
+    var results = fuse.Array();
+    fuse.String(selector).replace(/(([\w#:.~>+()\s-]|\*|\[.*?\])+)\s*(,|$)/g,
+      function(match, captured) { results.push(fuse.String(captured).trim()) });
     return results;
   }
 });

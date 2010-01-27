@@ -163,7 +163,7 @@
     };
 
     plugin.clonePosition = function clonePosition(source, options) {
-      source  = Fuse.get(source);
+      source  = fuse.get(source);
       options = _extend({
         'offsetLeft': 0,
         'offsetTop':  0,
@@ -294,7 +294,7 @@
     plugin.getCumulativeOffset = (function() {
 
       function getCumulativeOffset(ancestor) {
-        ancestor = Fuse.get(ancestor);
+        ancestor = fuse.get(ancestor);
         var backup, elemStyle, result;
         if (!isElement(ancestor)) ancestor = null;
 
@@ -356,7 +356,7 @@
             if (!isDetached.call(element)) {
               raw      = element.raw || element;
               doc      = getDocument(raw);
-              info     = Fuse._info;
+              info     = fuse._info;
               rect     = raw.getBoundingClientRect();
               root     = doc[info.root.property];
               scrollEl = doc[info.scrollEl.property];
@@ -377,7 +377,7 @@
       var nodeName,
        element  = this.raw || this,
        original = element,
-       info     = Fuse._info,
+       info     = fuse._info,
        doc      = getDocument(element),
        scrollEl = doc[info.scrollEl.property],
        skipEl   = doc[info[info.scrollEl.nodeName === 'HTML' ? 'body' : 'docEl'].property],
@@ -441,7 +441,7 @@
             var element = this.raw || this,
              doc  = getDocument(element),
              rect = element.getBoundingClientRect(),
-             root = doc[Fuse._info.root.property];
+             root = doc[fuse._info.root.property];
 
             valueT = Math.round(rect.top)  - (root.clientTop  || 0);
             valueL = Math.round(rect.left) - (root.clientLeft || 0);

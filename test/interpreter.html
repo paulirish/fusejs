@@ -50,22 +50,22 @@
 </style>
 <script src="../dist/fuse.js" type="text/javascript"></script>
 <script type="text/javascript">
-  var $ = Fuse.Util.$;
+  var $ = fuse.util.$;
 
-  Fuse.Interpreter = Fuse.Class({
+  fuse.Interpreter = fuse.Class({
     'initialize': function(element, form, input) {
       this.element = $(element);
       this.form    = $(form);
       this.input   = $(input);
-      this.context = Fuse.Function.bind(window.eval, window);
+      this.context = fuse.Function.bind(window.eval, window);
       this.registerCallbacks();
 
-      document.title = 'FuseJS: Interpreter (' + Fuse.version + ')';
+      document.title = 'FuseJS: Interpreter (' + fuse.version + ')';
       this.input.activate();
     },
 
     'registerCallbacks': function() {
-      Event.observe(this.form, 'submit', Fuse.Function.bind(
+      Event.observe(this.form, 'submit', fuse.Function.bind(
         function(event) {
           this.eval(this.input.getValue());
           this.input.setValue('').activate();
@@ -76,7 +76,7 @@
     'log': function(type, message) {
       this.element.insert(
         '<tr class="' + type + '"><td>' +
-        Fuse.String(message).escapeHTML() + '<\/td><\/tr>');
+        fuse.String(message).escapeHTML() + '<\/td><\/tr>');
       this.form.scrollTo();
     },
 
@@ -85,7 +85,7 @@
       try {
         this.log('input', expression);
         window.$_ = this.context.call(window, String(expression));
-        this.log('output', Fuse.Object.inspect($_));
+        this.log('output', fuse.Object.inspect($_));
       } catch (e) {
         alert(e.toString());
         this.log('error', e.toString());
@@ -109,7 +109,7 @@
     <input type="submit" value="Evaluate">
   </form>
   <script type="text/javascript">
-    window.interpreter = new Fuse.Interpreter('interpreter', 'input-form', 'input');
+    window.interpreter = new fuse.Interpreter('interpreter', 'input-form', 'input');
   </script>
 </body>
 </html>

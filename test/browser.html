@@ -77,16 +77,16 @@
 </style>
 <script type="text/javascript" src="../dist/fuse.js"></script>
 <script type="text/javascript">
-  var $ = Fuse.Util.$;
+  var $ = fuse.util.$;
 
-  var Browser = Fuse.Class({
+  var Browser = fuse.Class({
     'initialize': function(element, name, value, options) {
       this.element = $(element);
       this.name    = name;
       this.value   = value;
-      this.history = Fuse.List();
+      this.history = fuse.Array();
 
-      Fuse.Object.extend(this, options);
+      fuse.Object.extend(this, options);
       this.reset();
     },
 
@@ -130,9 +130,9 @@
 
     'currentValue': function() {
       try {
-        return Fuse.Object.inspect(this.current());
+        return fuse.Object.inspect(this.current());
       } catch (e) {
-        return Fuse.String('(Internal Function)');
+        return fuse.String('(Internal Function)');
       }
     },
 
@@ -150,10 +150,10 @@
     }
   });
 
-  var Inspector = Fuse.Class({
+  var Inspector = fuse.Class({
     'initialize': function(browser, name, value) {
       this.browser = browser;
-      this.name    = Fuse.String(name);
+      this.name    = fuse.String(name);
       this.value   = value;
       this.id      = 'inspector_' + new Date();
       this.history = this.browser.history.toArray();
@@ -163,7 +163,7 @@
     },
 
     'properties': function() {
-      var properties = Fuse.List();
+      var properties = fuse.Array();
       for (var property in this.value)
         properties.push(property);
       properties.sort();
@@ -171,16 +171,16 @@
     },
 
     'createElement': function() {
-      var element = Fuse('<div>');
+      var element = fuse('<div>');
       element.raw.className = 'inspector';
       element.raw.id = this.id;
       this.element = element;
 
-      var title = Fuse('<h2>');
-      title.raw.innerHTML = Fuse.String(this.name).escapeHTML();
+      var title = fuse('<h2>');
+      title.raw.innerHTML = fuse.String(this.name).escapeHTML();
       this.titleElement = title;
 
-      var list = Fuse('<ul>');
+      var list = fuse('<ul>');
       this.listElement = list;
       element.insert(title).insert(list);
     },
@@ -188,8 +188,8 @@
     'populate': function() {
       this.properties().each(function(property) {
         var li = document.createElement('li');
-        li.innerHTML = Fuse.String(property).escapeHTML();
-        li.onclick   = Fuse.Function.bind(this.select, this, li);
+        li.innerHTML = fuse.String(property).escapeHTML();
+        li.onclick   = fuse.Function.bind(this.select, this, li);
         li._property = property;
         this.listElement.insert(li);
       }, this);

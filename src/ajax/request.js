@@ -1,6 +1,6 @@
   /*---------------------------- AJAX: REQUEST -------------------------------*/
 
-  Fuse.Ajax.Request = (function() {
+  fuse.ajax.Request = (function() {
     function Decorator() { }
 
     function Request(url, options) {
@@ -10,7 +10,7 @@
 
       delete this[expando];
 
-      decorated.raw = Fuse.Ajax.create();
+      decorated.raw = fuse.ajax.create();
 
       decorated.onTimeout =
         function() { onTimeout.call(request); };
@@ -23,7 +23,7 @@
     }
 
     var __apply = Request.apply, __call = Request.call,
-     Request = Class(Fuse.Ajax.Base, { 'constructor': Request });
+     Request = Class(fuse.ajax.Base, { 'constructor': Request });
 
     Request.call = function(thisArg) {
       thisArg[expando] = thisArg;
@@ -39,22 +39,22 @@
     return Request;
   })();
 
-  Fuse.Ajax.Request.Events =
-    Fuse.List('Unsent', 'Opened', 'HeadersReceived', 'Loading', 'Done');
+  fuse.ajax.Request.Events =
+    fuse.Array('Unsent', 'Opened', 'HeadersReceived', 'Loading', 'Done');
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
     var matchHTTP = /^https?:/,
-      Responders = Fuse.Ajax.Responders;
+      Responders = fuse.ajax.Responders;
 
     plugin._useStatus   = true;
     plugin._timerID     = nil;
     plugin.aborted      = false;
-    plugin.readyState   = Fuse.Number(0);
-    plugin.responseText = Fuse.String('');
-    plugin.status       = Fuse.Number(0);
-    plugin.statusText   = Fuse.String('');
+    plugin.readyState   = fuse.Number(0);
+    plugin.responseText = fuse.String('');
+    plugin.status       = fuse.Number(0);
+    plugin.statusText   = fuse.String('');
     plugin.timedout     = false;
 
     plugin.headerJSON = plugin.responseJSON = plugin.responseXML = nil;
@@ -94,13 +94,13 @@
     plugin.getAllHeaders = function getAllHeaders() {
       var result;
       try { result = this.raw.getAllResponseHeaders(); } catch (e) { }
-      return Fuse.String(result || '');
+      return fuse.String(result || '');
     };
 
     plugin.getHeader = function getHeader(name) {
       var result;
       try { result = this.raw.getResponseHeader(name); } catch (e) { }
-      return result ? Fuse.String(result) : null;
+      return result ? fuse.String(result) : null;
     };
 
     plugin.onTimeout = function onTimeout() {
@@ -129,7 +129,7 @@
       // treat request() as the constructor and call Base as $super
       // if first call or new options are passed
       if (!this.options || options)
-        Fuse.Ajax.Base.call(this, url, options);
+        fuse.ajax.Base.call(this, url, options);
 
       options = this.options;
 
@@ -146,10 +146,10 @@
 
       // reset response values
       this.headerJSON   = this.responseJSON = this.responseXML = null;
-      this.readyState   = Fuse.Number(0);
-      this.responseText = Fuse.String('');
-      this.status       = Fuse.Number(0);
-      this.statusText   = Fuse.String('');
+      this.readyState   = fuse.Number(0);
+      this.responseText = fuse.String('');
+      this.status       = fuse.Number(0);
+      this.statusText   = fuse.String('');
 
       // non-http requests don't use http status codes
       // return true if request url is http(s) or, if relative, the pages url is http(s)
@@ -204,14 +204,14 @@
       if (readyState == 2 && this.getAllHeaders() == '' &&
         xhr.readyState === 2) return;
 
-      this.readyState = Fuse.Number(readyState);
+      this.readyState = fuse.Number(readyState);
 
       // clear response values on aborted/timedout requests
       if (aborted || timedout) {
         this.headerJSON   = this.responseJSON = this.responseXML = null;
-        this.responseText = Fuse.String('');
-        this.status       = Fuse.Number(0);
-        this.statusText   = Fuse.String('');
+        this.responseText = fuse.String('');
+        this.status       = fuse.Number(0);
+        this.statusText   = fuse.String('');
       }
       else if (readyState > 1) {
         // Request status/statusText have really bad cross-browser consistency.
@@ -231,17 +231,17 @@
         }
 
         // IE will return 1223 for 204 no content
-        this.status = Fuse.Number(status == 1223 ? 204 : status);
+        this.status = fuse.Number(status == 1223 ? 204 : status);
 
         // set statusText
-        this.statusText = Fuse.String(statusText);
+        this.statusText = fuse.String(statusText);
 
         // set responseText
         if (readyState > 2) {
           // IE will throw an error when accessing responseText in state 3
           try {
             if (responseText = xhr.responseText)
-              this.responseText = Fuse.String(responseText);
+              this.responseText = fuse.String(responseText);
           } catch (e) { }
         }
         else if (readyState == 2 && evalJSON &&
@@ -310,7 +310,7 @@
               isSameOrigin(url) &&
               contentType.match(/^\s*(text|application)\/(x-)?(java|ecma)script(;|\s|$)/i))) {
             try {
-              global.eval(String(Fuse.String.unfilterJSON(responseText)));
+              global.eval(String(fuse.String.unfilterJSON(responseText)));
             } catch (e) {
               this.dispatchException(e);
             }
@@ -319,7 +319,7 @@
       }
 
       // add readyState to the list of events to dispatch
-      eventNames.push(Fuse.Ajax.Request.Events[readyState]);
+      eventNames.push(fuse.ajax.Request.Events[readyState]);
 
       while (eventName = eventNames[i++]) {
         eventName = 'on' + eventName;
@@ -347,4 +347,4 @@
      onTimeout =         nil,
      request =           nil,
      setReadyState =     nil;
-  })(Fuse.Ajax.Request.plugin);
+  })(fuse.ajax.Request.plugin);

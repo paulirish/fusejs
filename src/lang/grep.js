@@ -1,14 +1,14 @@
   /*------------------------------- LANG: GREP -------------------------------*/
 
   (function() {
-    Fuse.Array.plugin.grep = (function() {
+    fuse.Array.plugin.grep = (function() {
       function grep(pattern, callback, thisArg) {
         if (this == null) throw new TypeError;
         if (toArray && (!pattern || pattern == '' || isRegExp(pattern) &&
            !pattern.source)) return toArray.call(this);
 
         callback = callback || K;
-        var item, i = 0, results = Fuse.Array(), object = Object(this),
+        var item, i = 0, results = fuse.Array(), object = Object(this),
          length = object.length >>> 0;
 
         if (isString(pattern))
@@ -20,17 +20,17 @@
         return results;
       }
 
-      var toArray = Fuse.Array.plugin.toArray;
+      var toArray = fuse.Array.plugin.toArray;
       return grep;
     })();
 
     if (Enumerable)
       Enumerable.grep = function grep(pattern, callback, thisArg) {
         if (!pattern || pattern == '' || isRegExp(pattern) &&
-           !pattern.source) return this.toList();
+           !pattern.source) return this.toArray();
 
         callback = callback || K;
-        var results = Fuse.List();
+        var results = fuse.Array();
         if (isString(pattern))
           pattern = new RegExp(escapeRegExpChars(pattern));
 
@@ -41,8 +41,8 @@
         return results;
       };
 
-    if (Fuse.Hash)
-      Fuse.Hash.plugin.grep = function grep(pattern, callback, thisArg) {
+    if (fuse.Hash)
+      fuse.Hash.plugin.grep = function grep(pattern, callback, thisArg) {
         if (!pattern || pattern == '' || isRegExp(pattern) &&
            !pattern.source) return this.clone();
 

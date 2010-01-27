@@ -1,6 +1,6 @@
   /*------------------------------- LANG: HASH -------------------------------*/
 
-  Fuse.Hash = (function() {
+  fuse.Hash = (function() {
     var Klass = function () { },
 
     Hash = function Hash(object) {
@@ -43,9 +43,9 @@
       if (expandoKey in data)
         unsetByIndex(hash, indexOfKey(hash, key));
 
-      keys.push(key = Fuse.String(key));
+      keys.push(key = fuse.String(key));
 
-      hash._pairs.push(Fuse.List(key, value));
+      hash._pairs.push(fuse.Array(key, value));
       hash._values.push(value);
 
       hash._data[expandoKey] =
@@ -86,7 +86,7 @@
   (function(plugin) {
     function _returnPair(pair) {
       var key, value;
-      pair = Fuse.List(key = pair[0], value = pair[1]);
+      pair = fuse.Array(key = pair[0], value = pair[1]);
       pair.key = key;
       pair.value = value;
       return pair;
@@ -110,7 +110,7 @@
         }
       }
       else {
-        var count = +callback, results = Fuse.List();
+        var count = +callback, results = fuse.Array();
         if (isNaN(count)) return results;
         count = count < 1 ? 1 : count;
         while (i < count && (pair = pairs[i])) results[i++] = _returnPair(pair);
@@ -131,7 +131,7 @@
         }
       }
       else {
-        var count = +callback, results = Fuse.List();
+        var count = +callback, results = fuse.Array();
         if (isNaN(count)) return results;
         count = count < 1 ? 1 : count > length ? length : count;
         var  pad = length - count;
@@ -143,7 +143,7 @@
 
     // prevent JScript bug with named function expressions
     var _each = nil, first = nil, last = nil;
-  })(Fuse.Hash.plugin);
+  })(fuse.Hash.plugin);
 
   /*--------------------------------------------------------------------------*/
 
@@ -151,9 +151,9 @@
     plugin.clear = function clear() {
       this._data   = { };
       this._object = { };
-      this._keys   = Fuse.List();
-      this._pairs  = Fuse.List();
-      this._values = Fuse.List();
+      this._keys   = fuse.Array();
+      this._pairs  = fuse.Array();
+      this._values = fuse.Array();
       return this;
     };
 
@@ -199,11 +199,11 @@
         if (value === pair[1])
           return pair[0];
       }
-      return Fuse.Number(-1);
+      return fuse.Number(-1);
     };
 
     plugin.keys = function keys() {
-      return Fuse.List.fromArray(this._keys);
+      return fuse.Array.fromArray(this._keys);
     };
 
     plugin.map = function map(callback, thisArg) {
@@ -228,19 +228,19 @@
       while (pair = pairs[i++])
         (callback.call(thisArg, value = pair[1], key = pair[0], this) ?
           trues : falses).set(key, value);
-      return Fuse.List(trues, falses);
+      return fuse.Array(trues, falses);
     };
 
     plugin.size = function size() {
-      return Fuse.Number(this._keys.length);
+      return fuse.Number(this._keys.length);
     };
 
     plugin.toArray = function toArray() {
-      return Fuse.List.fromArray(this._pairs);
+      return fuse.Array.fromArray(this._pairs);
     };
 
     plugin.toObject = function toObject() {
-      var pair, i = 0, pairs = this._pairs, result = Fuse.Object();
+      var pair, i = 0, pairs = this._pairs, result = fuse.Object();
       while (pair = pairs[i++]) result[pair[0]] = pair[1];
       return result;
     };
@@ -250,7 +250,7 @@
     };
 
     plugin.values = function values() {
-      return Fuse.List.fromArray(this._values);
+      return fuse.Array.fromArray(this._values);
     };
 
     plugin.zip = (function() {
@@ -273,7 +273,7 @@
 
         var j, key, pair, i = 0, pairs = this._pairs;
         while (pair = pairs[i++]) {
-          j = 0; values = Fuse.List(); key = pair[0];
+          j = 0; values = fuse.Array(); key = pair[0];
           while (j < length) values[j] = hashes[j++]._data[expando + key];
           result.set(key, callback(values, key, this));
         }
@@ -282,9 +282,6 @@
 
       return zip;
     })();
-
-    // alias
-    plugin.toList = plugin.toArray;
 
     // assign any missing Enumerable methods
     if (Enumerable) {
@@ -308,10 +305,10 @@
      toObject =      nil,
      toQueryString = nil,
      values =        nil;
-  })(Fuse.Hash.plugin, Fuse.Hash);
+  })(fuse.Hash.plugin, fuse.Hash);
 
   /*--------------------------------------------------------------------------*/
 
-  Fuse.addNS('Util');
+  fuse.addNS('util');
 
-  Fuse.Util.$H = Fuse.Hash.from = Fuse.Hash;
+  fuse.util.$H = fuse.Hash.from = fuse.Hash;

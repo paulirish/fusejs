@@ -10,8 +10,8 @@
      nextElement  = 'nextElementSibling',
      prevElement  = 'previousElementSibling';
 
-    if (isHostObject(Fuse._docEl, nextElement) &&
-        isHostObject(Fuse._docEl, prevElement)) {
+    if (isHostObject(fuse._docEl, nextElement) &&
+        isHostObject(fuse._docEl, prevElement)) {
       firstNode = firstElement;
       nextNode  = nextElement;
       prevNode  = prevElement;
@@ -111,7 +111,7 @@
 
     plugin.contains = (function() {
       var contains = function contains(descendant) {
-        if (descendant = Fuse.get(descendant)) {
+        if (descendant = fuse.get(descendant)) {
           var element = this.raw || this;
           descendant = descendant.raw || descendant;
           while (descendant = descendant.parentNode)
@@ -123,7 +123,7 @@
       if (Feature('ELEMENT_COMPARE_DOCUMENT_POSITION')) {
         contains = function contains(descendant) {
           /* DOCUMENT_POSITION_CONTAINS = 0x08 */
-          if (descendant = Fuse.get(descendant)) {
+          if (descendant = fuse.get(descendant)) {
             var element = this.raw || this;
             return ((descendant.raw || descendant)
               .compareDocumentPosition(element) & 8) === 8;
@@ -138,7 +138,7 @@
           if (this.nodeType !== ELEMENT_NODE)
             return __contains.call(this, descendant);
 
-          descendant = Fuse.get(descendant);
+          descendant = fuse.get(descendant);
           var descendantElem = descendant.raw || descendant,
            element = this.raw || this;
 
@@ -303,4 +303,4 @@
       var getAncestors = nil, getNextSiblings = nil, getPreviousSiblings = nil;
     })();
 
-  })(Element.plugin, Fuse.Dom.Selector);
+  })(Element.plugin, fuse.dom.Selector);

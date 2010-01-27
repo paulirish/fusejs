@@ -1,9 +1,9 @@
   /*----------------------------- DOM: NODELIST ------------------------------*/
 
   NodeList =
-  Fuse.Dom.NodeList = Fuse.Fusebox().Array;
+  fuse.dom.NodeList = fuse.Fusebox().Array;
 
-  addListMethods(NodeList);
+  addArrayMethods(NodeList);
 
   (function(plugin) {
     var SKIPPED_PROPERTIES = {
@@ -14,7 +14,7 @@
 
     NodeList.from = function from(iterable) {
       if (!iterable || iterable == '') return NodeList();
-      var object = Fuse.Object(iterable);
+      var object = fuse.Object(iterable);
       if ('toArray' in object) return object.toArray();
       if ('item' in iterable)  return NodeList.fromNodeList(iterable);
 
@@ -84,8 +84,8 @@
       return splice;
     })(plugin.splice);
 
-    // make NodeList use Fuse.Array#map so values aren't passed through Fuse.Dom.Node
-    plugin.map = Fuse.Array.plugin.map;
+    // make NodeList use fuse.Array#map so values aren't passed through fuse.dom.Node
+    plugin.map = fuse.Array.plugin.map;
 
     // add Element methods
     eachKey(Element.plugin, function(value, key, object) {

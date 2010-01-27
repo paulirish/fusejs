@@ -20,10 +20,10 @@
     // used by this closure only
     inspectObject =
 
-    // Fuse.Object.inspect
+    // fuse.Object.inspect
     Obj.inspect = function inspect(value) {
       if (value != null) {
-        var object = Fuse.Object(value);
+        var object = fuse.Object(value);
         if (isFunction(object.inspect))
           return object.inspect();
 
@@ -39,18 +39,18 @@
               hasKey(object, key) &&
                 results.push(inspectString.call(key) + ': ' + inspect(object[key]));
             });
-            return Fuse.String('{' + results.join(', ') + '}');
+            return fuse.String('{' + results.join(', ') + '}');
           }
         } catch (e) { }
       }
 
       // try coercing to string
       try {
-        return Fuse.String(value);
+        return fuse.String(value);
       } catch (e) {
         // probably caused by having the `toString` of an object call inspect()
         if (e.constructor === global.RangeError)
-          return Fuse.String('...');
+          return fuse.String('...');
         throw e;
       }
     };
@@ -59,27 +59,27 @@
     /*------------------------------------------------------------------------*/
 
 
-    // Fuse.Array#inspect
+    // fuse.Array#inspect
     (function(plugin) {
       function inspect() {
         if (this == null) throw new TypeError;
 
-        // called Obj.inspect(Fuse.Array.plugin)
+        // called Obj.inspect(fuse.Array.plugin)
         if (this === plugin) return inspectPlugin(plugin);
 
-        // called normally Fuse.Array(...).inspect()
+        // called normally fuse.Array(...).inspect()
         var i = 0, results = result = [], object = Object(this),
          length = object.length >>> 0;
 
         while (length--) results[length] = inspectObject(object[length]);
-        return Fuse.String('[' + results.join(', ') + ']');
+        return fuse.String('[' + results.join(', ') + ']');
       }
 
       plugin.inspect = inspect;
-    })(Fuse.Array.plugin);
+    })(fuse.Array.plugin);
 
 
-    // Fuse.String#inspect
+    // fuse.String#inspect
     inspectString = (function(plugin) {
       function escapeSpecialChars(match) {
         var character = specialChar[match];
@@ -93,12 +93,12 @@
       function inspect(useDoubleQuotes) {
         if (this == null) throw new TypeError;
 
-        // called Obj.inspect(Fuse.String.plugin)
+        // called Obj.inspect(fuse.String.plugin)
         if (this === plugin) return inspectPlugin(plugin);
 
-        // called normally Fuse.String(...).inspect()
-        var string = Fuse.String(this);
-        return Fuse.String(useDoubleQuotes
+        // called normally fuse.String(...).inspect()
+        var string = fuse.String(this);
+        return fuse.String(useDoubleQuotes
           ? '"' + string.replace(matchWithDoubleQuotes, escapeSpecialChars) + '"'
           : "'" + string.replace(matchWithSingleQuotes, escapeSpecialChars) + "'");
       }
@@ -120,34 +120,34 @@
       // charCodes 0-31 and \ and "
       matchWithDoubleQuotes = /[\x00-\x1f\\"]/g;
 
-      // set Fuse.String.plugin.inspect and return a reference
+      // set fuse.String.plugin.inspect and return a reference
       return (plugin.inspect = inspect);
-    })(Fuse.String.plugin);
+    })(fuse.String.plugin);
 
 
-    // Fuse.Enumerable#inspect
+    // fuse.Enumerable#inspect
     if (Enumerable)
     (function() {
       function inspect() {
-        // called normally or called Obj.inspect(Fuse.Enumerable)
+        // called normally or called Obj.inspect(fuse.Enumerable)
         return isFunction(this._each)
-          ? Fuse.String('#<Enumerable:' + this.toList().inspect() + '>')
-          : inspectPlugin(Fuse.Enumerable);
+          ? fuse.String('#<Enumerable:' + this.toArray().inspect() + '>')
+          : inspectPlugin(fuse.Enumerable);
       }
 
       Enumerable.inspect = inspect;
     })();
 
 
-    // Fuse.Hash#inspect
-    if (Fuse.Hash)
+    // fuse.Hash#inspect
+    if (fuse.Hash)
     (function(plugin) {
       function inspect() {
-        // called Obj.inspect(Fuse.Hash.plugin)
+        // called Obj.inspect(fuse.Hash.plugin)
         if (this === plugin)
           return inspectPlugin(plugin);
 
-        // called normally Fuse.Hash(...).inspect()
+        // called normally fuse.Hash(...).inspect()
         var pair, i = 0, pairs = this._pairs, result = [];
         while (pair = pairs[i])
           result[i++] = pair[0].inspect() + ': ' + inspectObject(pair[1]);
@@ -155,7 +155,7 @@
       }
 
       plugin.inspect = inspect;
-    })(Fuse.Hash.plugin);
+    })(fuse.Hash.plugin);
 
 
     // Element#inspect
@@ -175,9 +175,9 @@
         for (property in translation) {
           attribute = translation[property];
           value = element[property] || '';
-          if (value) result += ' ' + attribute + '=' + Fuse.String(value).inspect(true);
+          if (value) result += ' ' + attribute + '=' + fuse.String(value).inspect(true);
         }
-        return Fuse.String(result + '>');
+        return fuse.String(result + '>');
       }
 
       plugin.inspect = inspect;

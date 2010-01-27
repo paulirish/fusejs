@@ -1,6 +1,6 @@
   /*------------------------ AJAX: PERIODICAL UPDATER ------------------------*/
 
-  Fuse.Ajax.TimedUpdater = (function() {
+  fuse.ajax.TimedUpdater = (function() {
     function Klass() { }
 
     function TimedUpdater(container, url, options) {
@@ -12,7 +12,7 @@
       __instance = null;
 
       // this._super() equivalent
-      Fuse.Ajax.Base.call(instance, url, options);
+      fuse.ajax.Base.call(instance, url, options);
       options = instance.options;
 
       // dynamically set readyState eventName to allow for easy customization
@@ -36,8 +36,8 @@
     }
 
     var __instance, __apply = TimedUpdater.apply, __call = TimedUpdater.call,
-     Request = Fuse.Ajax.Request,
-     TimedUpdater = Class(Fuse.Ajax.Base, { 'constructor': TimedUpdater });
+     Request = fuse.ajax.Request,
+     TimedUpdater = Class(fuse.ajax.Base, { 'constructor': TimedUpdater });
 
     TimedUpdater.call = function(thisArg) {
       __instance = thisArg;
@@ -70,7 +70,7 @@
     };
 
     plugin.start = function start() {
-      this.updater = new Fuse.Ajax.Updater(this.container, this.url, this.options);
+      this.updater = new fuse.ajax.Updater(this.container, this.url, this.options);
     };
 
     plugin.stop = function stop() {
@@ -82,9 +82,9 @@
 
     // prevent JScript bug with named function expressions
     var updateDone = nil, start = nil, stop = nil;
-  })(Fuse.Ajax.TimedUpdater.plugin);
+  })(fuse.ajax.TimedUpdater.plugin);
 
-  Fuse.Ajax.TimedUpdater.options = {
+  fuse.ajax.TimedUpdater.options = {
     'decay':     1,
     'frequency': 2,
     'maxDecay':  Infinity

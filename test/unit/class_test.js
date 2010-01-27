@@ -1,7 +1,7 @@
 new Test.Unit.Runner({
 
   'testClassCreate': function() {
-    this.assert(Fuse.Object.isFunction(Fixtures.Animal),
+    this.assert(fuse.Object.isFunction(Fixtures.Animal),
       'Fixtures.Animal is not a constructor');
 
     this.assertEnumEqual([Fixtures.Cat,
@@ -11,15 +11,15 @@ new Test.Unit.Runner({
     Fixtures.Animal.subclasses.each(function(subclass) {
       this.assertEqual(Fixtures.Animal, subclass.superclass) }, this);
 
-    var Bird = Fuse.Class(Fixtures.Animal);
+    var Bird = fuse.Class(Fixtures.Animal);
     this.assertEqual(Bird, Fixtures.Animal.subclasses.last());
-    this.assertEnumEqual(Fuse.Object.keys(new Fixtures.Animal).sort(),
-      Fuse.Object.keys(new Bird).sort());
+    this.assertEnumEqual(fuse.Object.keys(new Fixtures.Animal).sort(),
+      fuse.Object.keys(new Bird).sort());
 
     // Safari 3.1+ mistakes regular expressions as typeof `function`
     var klass = function() { }, regexp = /foo/;
     this.assertNothingRaised(function() {
-      klass = Fuse.Class(Fixtures.Animal, { '_regexp': regexp });
+      klass = fuse.Class(Fixtures.Animal, { '_regexp': regexp });
     }, 'Class creation failed when the subclass contains a regular expression as a property.');
 
     this.assertEqual(regexp, new klass()._regexp, 'The regexp property should exist.');
@@ -38,12 +38,12 @@ new Test.Unit.Runner({
 
     this.assertUndefined(pet.superclass);
 
-    var Empty = Fuse.Class();
+    var Empty = fuse.Class();
     this.assert('object', typeof new Empty);
   },
 
   'testConstructorExplicitReturn': function() {
-    var $decorator = Fuse.Class({
+    var $decorator = fuse.Class({
       'initialize': function(element) {
         if (element.constructor === $decorator)
           return element;
@@ -79,7 +79,7 @@ new Test.Unit.Runner({
     this.assertEqual('Tom: Yum!', tom.eat(new Fixtures.Mouse));
 
     // augment the constructor and test
-    var Dodo = Fuse.Class(Fixtures.Animal, {
+    var Dodo = fuse.Class(Fixtures.Animal, {
       'initialize': function(name) {
         Dodo.callSuper(this, 'initialize', name);
         this.extinct = true;
@@ -170,22 +170,22 @@ new Test.Unit.Runner({
   },
 
   'testClassWithToStringAndValueOfMethods': function() {
-    var Foo = Fuse.Class({
+    var Foo = fuse.Class({
       'toString': function() { return 'toString' },
       'valueOf':  function() { return 'valueOf'  }
     }),
 
-    Parent = Fuse.Class({
+    Parent = fuse.Class({
       'm1': function(){ return 'm1' },
       'm2': function(){ return 'm2' }
     }),
 
-    Child = Fuse.Class(Parent, {
+    Child = fuse.Class(Parent, {
       'm1': function() { return Child.callSuper(this, 'm1') + ' child' },
       'm2': function() { return Child.callSuper(this, 'm2') + ' child' }
     });
 
-    if (Fuse.Env.Feature('FUNCTION_TO_STRING_RETURNS_SOURCE'))
+    if (fuse.env.Feature('FUNCTION_TO_STRING_RETURNS_SOURCE'))
       this.assert(new Child().m1.toString().indexOf(' child') > -1);
 
     this.assertEqual('toString', new Foo().toString());
@@ -193,19 +193,19 @@ new Test.Unit.Runner({
   },
 
   'testGrandChildClass': function() {
-    var Parent = Fuse.Class({
+    var Parent = fuse.Class({
       'say': function() {
         return 'Parent#say';
       }
     }),
 
-    Child = Fuse.Class(Parent, {
+    Child = fuse.Class(Parent, {
       'say': function() {
         return 'Child#say > ' + Child.callSuper(this, 'say');
       }
     }),
 
-    GrandChild = Fuse.Class(Child, {
+    GrandChild = fuse.Class(Child, {
       'say': function() {
         return 'GrandChild#say > ' + GrandChild.callSuper(this, 'say');
       }

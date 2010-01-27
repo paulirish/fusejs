@@ -1,21 +1,21 @@
   /*------------------------------ LANG: STRING ------------------------------*/
 
-  Fuse.scriptFragment = '<script[^>]*>([^\\x00]*?)<\/script>';
+  fuse.scriptFragment = '<script[^>]*>([^\\x00]*?)<\/script>';
 
-  Fuse.addNS('Util');
+  fuse.addNS('util');
 
-  Fuse.Util.$w = (function() {
+  fuse.util.$w = (function() {
     function $w(string) {
-      if (!isString(string)) return Fuse.Array();
+      if (!isString(string)) return fuse.Array();
       string = plugin.trim.call(string);
-      return string != '' ? string.split(/\s+/) : Fuse.Array();
+      return string != '' ? string.split(/\s+/) : fuse.Array();
     }
-    var plugin = Fuse.String.plugin;
+    var plugin = fuse.String.plugin;
     return $w;
   })();
 
-  Fuse.String.interpret = (function() {
-    function interpret(value) { return Fuse.String(value == null ? '' : value); }
+  fuse.String.interpret = (function() {
+    function interpret(value) { return fuse.String(value == null ? '' : value); }
     return interpret;
   })();
 
@@ -23,7 +23,7 @@
 
   (function(plugin) {
 
-    var sMap = Fuse.RegExp.SPECIAL_CHARS.s;
+    var sMap = fuse.RegExp.SPECIAL_CHARS.s;
 
     // ECMA-5 15.5.4.11
     // For IE
@@ -91,7 +91,7 @@
           // append the remaining source to the result
           if (lastIndex < srcLength)
             result += source.slice(lastIndex, srcLength);
-          return Fuse.String(result);
+          return fuse.String(result);
         }
 
         var exec = RegExp.prototype.exec;
@@ -111,20 +111,20 @@
          searchLen = searchString.length;
 
         if (searchLen > len)
-          return Fuse.Number(-1);
+          return fuse.Number(-1);
 
         if (position < 0) position = 0;
         else if (isNaN(position) || position > len - searchLen)
           position = len - searchLen;
 
         if (!searchLen)
-          return Fuse.Number(position);
+          return fuse.Number(position);
 
         position++;
         while (position--)
           if (string.slice(position, position + searchLen) === searchString)
-            return Fuse.Number(position);
-        return Fuse.Number(-1);
+            return fuse.Number(position);
+        return fuse.Number(-1);
       };
 
     // For Chome 1+
@@ -159,12 +159,12 @@
         if (this == null) throw new TypeError;
         var string = String(this), start = -1, end = string.length;
 
-        if (!end) return Fuse.String(string);
+        if (!end) return fuse.String(string);
         while (sMap[string.charAt(++start)]);
-        if (start === end) return Fuse.String('');
+        if (start === end) return fuse.String('');
 
         while (sMap[string.charAt(--end)]);
-        return Fuse.String(string.slice(start, end + 1));
+        return fuse.String(string.slice(start, end + 1));
       };
 
     // non-standard
@@ -173,9 +173,9 @@
         if (this == null) throw new TypeError;
         var string = String(this), start = -1;
 
-        if (!string) return Fuse.String(string);
+        if (!string) return fuse.String(string);
         while (sMap[string.charAt(++start)]);
-        return Fuse.String(string.slice(start));
+        return fuse.String(string.slice(start));
       };
 
     // non-standard
@@ -184,21 +184,21 @@
         if (this == null) throw new TypeError;
         var string = String(this), end = string.length;
 
-        if (!end) return Fuse.String(string);
+        if (!end) return fuse.String(string);
         while (sMap[string.charAt(--end)]);
-        return Fuse.String(string.slice(0, end + 1));
+        return fuse.String(string.slice(0, end + 1));
       };
 
     // prevent JScript bug with named function expressions
     var lastIndexOf = nil, match = nil, trim = nil, trimLeft = nil, trimRight = nil;
-  })(Fuse.String.plugin);
+  })(fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
 
     var replace         = plugin.replace,
-     matchBlank         = Fuse.RegExp('^\\s*$'),
+     matchBlank         = fuse.RegExp('^\\s*$'),
      matchCapped        = /([A-Z]+)([A-Z][a-z])/g,
      matchCamelCases    = /([a-z\d])([A-Z])/g,
      matchDoubleColons  = /::/g,
@@ -206,9 +206,9 @@
      matchHyphenated    = /-+(.)?/g,
      matchOpenScriptTag = /<script/i,
      matchUnderscores   = /_/g,
-     matchScripts       = new RegExp(Fuse.scriptFragment, 'gi'),
+     matchScripts       = new RegExp(fuse.scriptFragment, 'gi'),
      matchHTMLComments  = new RegExp('<!--[\\x20\\t\\n\\r]*' +
-       Fuse.scriptFragment + '[\\x20\\t\\n\\r]*-->', 'gi');
+       fuse.scriptFragment + '[\\x20\\t\\n\\r]*-->', 'gi');
 
     plugin.blank = function blank() {
       if (this == null) throw new TypeError;
@@ -238,7 +238,7 @@
         if (this == null) throw new TypeError;
         var string = String(this), expandoKey = expando + string;
         return cache[expandoKey] ||
-          (cache[expandoKey] = Fuse.String(string.charAt(0).toUpperCase() +
+          (cache[expandoKey] = fuse.String(string.charAt(0).toUpperCase() +
             string.slice(1).toLowerCase()));
       }
 
@@ -266,8 +266,8 @@
 
     plugin.evalScripts = function evalScripts() {
       if (this == null) throw new TypeError;
-      results = Fuse.Array();
-      Fuse.String(this).extractScripts(function(script) {
+      results = fuse.Array();
+      fuse.String(this).extractScripts(function(script) {
         results.push(global.eval(String(script)));
       });
 
@@ -277,7 +277,7 @@
     plugin.extractScripts = function extractScripts(callback) {
       if (this == null) throw new TypeError;
       var match, script, striptTags,
-       string = String(this), results = Fuse.List();
+       string = String(this), results = fuse.Array();
 
       if (!matchOpenScriptTag.test(string)) return results;
 
@@ -298,7 +298,7 @@
     plugin.hyphenate = function hyphenate() {
       if (this == null) throw new TypeError;
       matchUnderscores.lastIndex = 0;
-      return Fuse.String(String(this).replace(matchUnderscores, '-'));
+      return fuse.String(String(this).replace(matchUnderscores, '-'));
     };
 
     plugin.startsWith = function startsWith(pattern) {
@@ -311,7 +311,7 @@
     plugin.stripScripts = function stripScripts() {
       if (this == null) throw new TypeError;
       matchScripts.lastIndex = 0;
-      return Fuse.String(String(this).replace(matchScripts, ''));
+      return fuse.String(String(this).replace(matchScripts, ''));
     };
 
     plugin.times = (function() {
@@ -327,7 +327,7 @@
 
       function times(count) {
         if (this == null) throw new TypeError;
-        return Fuse.String(__times(String(this), toInteger(count)));
+        return fuse.String(__times(String(this), toInteger(count)));
       }
 
       return times;
@@ -335,12 +335,12 @@
 
     plugin.toArray = function toArray() {
       if (this == null) throw new TypeError;
-      return Fuse.String(this).split('');
+      return fuse.String(this).split('');
     };
 
     plugin.toQueryParams = function toQueryParams(separator) {
       if (this == null) throw new TypeError;
-      var match = String(this).split('?'), object = Fuse.Object();
+      var match = String(this).split('?'), object = fuse.Object();
 
       // if ? (question mark) is present and there is no query after it
       if (match.length > 1 && !match[1]) return object;
@@ -388,7 +388,7 @@
         endIndex = length - truncation.length;
         string = endIndex > 0 ? string.slice(0, endIndex) + truncation : truncation;
       }
-      return Fuse.String(string);
+      return fuse.String(string);
     };
 
     plugin.underscore = function underscore() {
@@ -398,7 +398,7 @@
       matchCamelCases.lastIndex   =
       matchHyphens.lastIndex      = 0;
 
-      return Fuse.String(String(this)
+      return fuse.String(String(this)
         .replace(matchDoubleColons, '/')
         .replace(matchCapped,       '$1_$2')
         .replace(matchCamelCases,   '$1_$2')
@@ -406,7 +406,6 @@
     };
 
     // aliases
-    plugin.toList = plugin.toArray;
     plugin.parseQuery = plugin.toQueryParams;
 
     // prevent JScript bug with named function expressions
@@ -423,7 +422,7 @@
       toQueryParams =  nil,
       truncate =       nil,
       underscore =     nil;
-  })(Fuse.String.plugin);
+  })(fuse.String.plugin);
 
   /*--------------------------------------------------------------------------*/
 
@@ -448,9 +447,9 @@
     function define() {
       var tags      = [],
        count        = 0,
-       div          = Fuse._div,
-       container    = Fuse._doc.createElement('pre'),
-       textNode     = container.appendChild(Fuse._doc.createTextNode('')),
+       div          = fuse._div,
+       container    = fuse._doc.createElement('pre'),
+       textNode     = container.appendChild(fuse._doc.createTextNode('')),
        replace      = plugin.replace,
        matchTagEnds = />/g,
        matchTokens  = /@fusetoken/g;
@@ -458,7 +457,7 @@
        escapeHTML = function escapeHTML() {
          if (this == null) throw new TypeError;
          textNode.data = String(this);
-         return Fuse.String(container.innerHTML);
+         return fuse.String(container.innerHTML);
        },
 
        getText = function() {
@@ -487,7 +486,7 @@
         div.innerHTML = '<pre>' + string + '<\/pre>';
         result = getText();
 
-        return Fuse.String(tokenized
+        return fuse.String(tokenized
           ? replace.call(result, matchTokens, swapTokensToTags)
           : result);
       }
@@ -497,8 +496,8 @@
       // element so we use the deprecated `xmp` element instead.
       textNode.data = '&';
       if (container.innerHTML !== '&amp;')
-        textNode = (container = Fuse._doc.createElement('xmp'))
-          .appendChild(Fuse._doc.createTextNode(''));
+        textNode = (container = fuse._doc.createElement('xmp'))
+          .appendChild(fuse._doc.createTextNode(''));
 
       // Safari 3.x has issues with escaping the ">" character
       textNode.data = '>';
@@ -506,7 +505,7 @@
         escapeHTML = function escapeHTML() {
           if (this == null) throw new TypeError;
           textNode.data = String(this);
-          return Fuse.String(container.innerHTML.replace(matchTagEnds, '&gt;'));
+          return fuse.String(container.innerHTML.replace(matchTagEnds, '&gt;'));
         };
 
       if (!Feature('ELEMENT_TEXT_CONTENT')) {
@@ -542,9 +541,9 @@
 
     plugin.stripTags = function stripTags() {
       if (this == null) throw new TypeError;
-      return Fuse.String(String(this).replace(matchTags, ''));
+      return fuse.String(String(this).replace(matchTags, ''));
     };
 
     // prevent JScript bug with named function expressions
     var escapeHTML = nil, stripTags = nil, unescapeHTML = nil;
-  })(Fuse.String.plugin);
+  })(fuse.String.plugin);

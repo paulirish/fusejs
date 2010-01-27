@@ -1,10 +1,10 @@
   /*--------------------------------- FIELD ----------------------------------*/
 
-  (function(Dom) {
+  (function(dom) {
     (function() {
       var tagName, i = 0,
        tagNames = ['button', 'input', 'option', 'select', 'textarea'];
-      while (tagName = tagNames[i++]) Dom.extendByTag(tagName);
+      while (tagName = tagNames[i++]) dom.extendByTag(tagName);
     })();
 
     var CHECKED_INPUT_TYPES = {
@@ -19,15 +19,15 @@
       'submit': 1
     },
 
-    buttonPlugin   = Dom.ButtonElement.plugin,
+    buttonPlugin   = dom.ButtonElement.plugin,
 
-    inputPlugin    = Dom.InputElement.plugin,
+    inputPlugin    = dom.InputElement.plugin,
 
-    optionPlugin   = Dom.OptionElement.plugin,
+    optionPlugin   = dom.OptionElement.plugin,
 
-    selectPlugin   = Dom.SelectElement.plugin,
+    selectPlugin   = dom.SelectElement.plugin,
 
-    textAreaPlugin = Dom.TextAreaElement.plugin,
+    textAreaPlugin = dom.TextAreaElement.plugin,
 
     PLUGINS = {
       'BUTTON':   buttonPlugin,
@@ -39,7 +39,7 @@
 
     getOptionValue = function getValue() {
       var element = this.raw || this;
-      return Fuse.String(element[optionPlugin.hasAttribute.call(this, 'value')
+      return fuse.String(element[optionPlugin.hasAttribute.call(this, 'value')
         ? 'value'
         : 'text']);
     };
@@ -98,7 +98,7 @@
           return Obj.toQueryString(pair);
         }
       }
-      return Fuse.String('');
+      return fuse.String('');
     };
 
     inputPlugin.select = function select() {
@@ -130,7 +130,7 @@
       var element = this.raw || this;
       return CHECKED_INPUT_TYPES[element.type.toUpperCase()] && !element.checked
         ? null
-        : Fuse.String(element.value);
+        : fuse.String(element.value);
     };
 
     inputPlugin.setValue = function setValue(value) {
@@ -152,7 +152,7 @@
         if (index > -1) result = getOptionValue.call(element.options[index]);
       }
       else if (element.options.length) {
-        result = Fuse.List(); i = 0;
+        result = fuse.Array(); i = 0;
         while (node = element.options[i++])
           if (node.selected) result.push(getOptionValue.call(node));
       }
@@ -179,7 +179,7 @@
     };
 
     textAreaPlugin.getValue = function getValue() {
-      return Fuse.String((this.raw || this).value);
+      return fuse.String((this.raw || this).value);
     };
 
     textAreaPlugin.setValue =
@@ -202,4 +202,4 @@
      select =        nil,
      setValue =      nil,
      serialize =     nil;
-  })(Fuse.Dom);
+  })(fuse.dom);

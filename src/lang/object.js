@@ -1,6 +1,6 @@
   /*------------------------------ LANG: OBJECT ------------------------------*/
 
-  Obj = Fuse.Object;
+  Obj = fuse.Object;
 
   eachKey =
   Obj._each = (function() {
@@ -49,7 +49,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // Use Fuse.Object.hasKey() on object Objects only as it may error on DOM Classes
+  // Use fuse.Object.hasKey() on object Objects only as it may error on DOM Classes
   // https://bugzilla.mozilla.org/show_bug.cgi?id=375344
   hasKey =
   Obj.hasKey = (function() {
@@ -117,11 +117,11 @@
   Obj.clone = function clone(object) {
     if (object && typeof object.clone === 'function')
       return object.clone();
-    return Obj.extend(Fuse.Object(), object);
+    return Obj.extend(fuse.Object(), object);
   };
 
   isArray =
-  Obj.isArray = Fuse.List.isArray;
+  Obj.isArray = fuse.Array.isArray;
 
   isElement =
   Obj.isElement = function isElement(value) {
@@ -153,7 +153,7 @@
 
   isHash =
   Obj.isHash = function isHash(value) {
-    var Hash = Fuse.Hash;
+    var Hash = fuse.Hash;
     return !!value && value.constructor === Hash && value !== Hash.prototype;
   };
 
@@ -181,7 +181,7 @@
     function isSameOrigin(url) {
       var domainIndex, urlDomain,
        result    = true,
-       docDomain = Fuse._doc.domain,
+       docDomain = fuse._doc.domain,
        parts     = String(url).match(matchUrlParts) || [];
 
       if (parts[0]) {
@@ -235,7 +235,7 @@
     if (!Obj.keys) Obj.keys = function keys(object) {
       if (isPrimitive(object)) throw new TypeError;
 
-      var results = Fuse.List();
+      var results = fuse.Array();
       eachKey(object, function(value, key) {
         hasKey(object, key) && results.push(key);
       });
@@ -245,7 +245,7 @@
     Obj.values = function values(object) {
       if (isPrimitive(object)) throw new TypeError;
 
-      var results = Fuse.List();
+      var results = fuse.Array();
       eachKey(object, function(value, key) {
         hasKey(object, key) && results.push(value);
       });
@@ -254,13 +254,13 @@
 
     Obj.toHTML = function toHTML(object) {
       return object && typeof object.toHTML === 'function'
-        ? Fuse.String(object.toHTML())
-        : Fuse.String.interpret(object);
+        ? fuse.String(object.toHTML())
+        : fuse.String.interpret(object);
     };
 
     Obj.toQueryString = (function() {
       function toQueryPair(key, value) {
-        return Fuse.String(typeof value === 'undefined' ? key :
+        return fuse.String(typeof value === 'undefined' ? key :
           key + '=' + encodeURIComponent(value == null ? '' : value));
       }
 
@@ -277,7 +277,7 @@
               results.push(toQueryPair(key, value));
           }
         });
-        return Fuse.String(results.join('&'));
+        return fuse.String(results.join('&'));
       }
 
       return toQueryString;

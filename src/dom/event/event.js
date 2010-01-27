@@ -52,7 +52,7 @@
 
       // Fix a Safari bug where a text node gets passed as the target of an
       // anchor click rather than the anchor itself.
-      return Fuse.get(node && node.nodeType === TEXT_NODE
+      return fuse.get(node && node.nodeType === TEXT_NODE
         ? node.parentNode
         : node);
     };
@@ -103,7 +103,7 @@
   // lazy define Event.pointerX() and Event.pointerY()
   (function(methods) {
     function define(methodName, event) {
-      if (!Fuse._body) return 0;
+      if (!fuse._body) return 0;
       if (typeof event.pageX === 'number') {
         Event.pointerX =
         methods.pointerX = function(event) { return event.pageX; };
@@ -114,7 +114,7 @@
       else {
         Event.pointerX =
         methods.pointerX = function(event) {
-          var info = Fuse._info,
+          var info = fuse._info,
            doc = getDocument(event.srcElement || global),
            result = event.clientX + doc[info.scrollEl.property].scrollLeft -
              doc[info.root.property].clientLeft;
@@ -124,7 +124,7 @@
 
         Event.pointerY =
         methods.pointerY = function(event) {
-          var info = Fuse._info,
+          var info = fuse._info,
            doc = getDocument(event.srcElement || global),
            result = event.clientY + doc[info.scrollEl.property].scrollTop -
              doc[info.root.property].clientTop;
@@ -233,25 +233,25 @@
     // executing its observers before allowing the
     // window onload event to proceed.
     function domLoadWrapper(event) {
-      var doc = Fuse._doc, docEl = Fuse._docEl,
-       decoratedDoc = Fuse.get(doc);
+      var doc = fuse._doc, docEl = fuse._docEl,
+       decoratedDoc = fuse.get(doc);
 
       if (!decoratedDoc.loaded) {
         event = event || global.event;
         event.eventName = 'dom:loaded';
 
         // define pseudo private body and root properties
-        Fuse._body     =
-        Fuse._scrollEl = doc.body;
-        Fuse._root     = docEl;
+        fuse._body     =
+        fuse._scrollEl = doc.body;
+        fuse._root     = docEl;
 
         if (Bug('BODY_ACTING_AS_ROOT')) {
-          Fuse._root = doc.body;
-          Fuse._info.root = Fuse._info.body;
+          fuse._root = doc.body;
+          fuse._info.root = fuse._info.body;
         }
         if (Bug('BODY_SCROLL_COORDS_ON_DOCUMENT_ELEMENT')) {
-          Fuse._scrollEl = docEl;
-          Fuse._info.scrollEl = Fuse._info.docEl;
+          fuse._scrollEl = docEl;
+          fuse._info.scrollEl = fuse._info.docEl;
         }
 
         decoratedDoc.loaded = true;
@@ -262,7 +262,7 @@
 
     function winLoadWrapper(event) {
       event = event || global.event;
-      if (!Fuse.get(Fuse._doc).loaded)
+      if (!fuse.get(fuse._doc).loaded)
         domLoadWrapper(event);
       else if (Data['2'] && Data['2'].events['dom:loaded'])
         return setTimeout(function() { winLoadWrapper(event); }, 10);
@@ -276,7 +276,7 @@
 
     var Methods, domLoadDispatcher, winLoadDispatcher,
 
-    arrayIndexOf = Array.prototype.indexOf || Fuse.Array.plugin.indexOf,
+    arrayIndexOf = Array.prototype.indexOf || fuse.Array.plugin.indexOf,
 
     setTimeout = global.setTimeout,
 
@@ -440,7 +440,7 @@
 
       // Safari 2 support
       if (!proto)
-        proto = Event.prototype = createEvent(Fuse._doc)['__proto__'];
+        proto = Event.prototype = createEvent(fuse._doc)['__proto__'];
 
       // IE8 supports Event.prototype but still needs
       // DOM Level 2 event methods and properties.
@@ -481,7 +481,7 @@
     // avoid Function#wrap for better performance esp.
     // in winLoadWrapper which could be called every 10ms
     domLoadDispatcher = createDispatcher(2, 'dom:loaded');
-    addObserver(Fuse._doc, 'dom:loaded',
+    addObserver(fuse._doc, 'dom:loaded',
       (getOrCreateCache(2, 'dom:loaded').dispatcher = domLoadWrapper));
 
     winLoadDispatcher = createDispatcher(1, 'load');
@@ -495,7 +495,7 @@
     Event.extend = extend;
 
     Event.fire = function fire(element, eventName, memo) {
-      var event, decorator = Fuse.get(element);
+      var event, decorator = fuse.get(element);
       element = decorator.raw || decorator;
       event = createEvent(element, Event.CUSTOM_EVENT_NAME);
 
@@ -508,7 +508,7 @@
     };
 
     Event.observe = function observe(element, eventName, handler) {
-      var dispatcher, decorator = Fuse.get(element);
+      var dispatcher, decorator = fuse.get(element);
       element = decorator.raw || decorator;
 
       dispatcher = addCache(Node.getFuseId(decorator), eventName, handler);
@@ -520,7 +520,7 @@
 
     Event.stopObserving = function stopObserving(element, eventName, handler) {
       var dispatcher, ec, events, foundAt, id, length,
-       decorator = Fuse.get(element);
+       decorator = fuse.get(element);
 
       element = decorator.raw || decorator;
       eventName = isString(eventName) ? eventName : null;

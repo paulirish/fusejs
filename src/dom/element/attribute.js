@@ -16,7 +16,7 @@
         return (this.raw || this).hasAttribute(attribute);
       };
 
-      if (!isHostObject(Fuse._docEl, 'hasAttribute'))
+      if (!isHostObject(fuse._docEl, 'hasAttribute'))
         hasAttribute = function hasAttribute(attribute) {
           var node =(this.raw || this)
             .getAttributeNode(Element.Attribute.names[attribute] || attribute);
@@ -33,7 +33,7 @@
       if (T.read[name])
         result = T.read[name](element, name);
       else result = (result = element.getAttributeNode(name)) && result.value;
-      return Fuse.String(result || '');
+      return fuse.String(result || '');
     };
 
     plugin.setAttribute = function setAttribute(name, value) {
@@ -122,19 +122,19 @@
     T.write.checked = setChecked;
 
     // mandate flag attributes return their name
-    Fuse.Util.$w('checked disabled isMap multiple readOnly selected')._each(function(attr) {
+    fuse.util.$w('checked disabled isMap multiple readOnly selected')._each(function(attr) {
       T.read[attr] = getFlag(attr);
     });
 
     // mandate event attribute getter
-    Fuse.Util.$w('blur change click contextmenu dblclick error focus load keydown ' +
+    fuse.util.$w('blur change click contextmenu dblclick error focus load keydown ' +
        'keypress keyup mousedown mousemove mouseout mouseover mouseup ' +
        'readystatechange reset submit select unload')._each(function(attr) {
       T.read['on' + attr] = getEvent;
     });
 
     // add camel-cased attributes to name translations
-    Fuse.Util.$w('bgColor codeBase codeType cellPadding cellSpacing colSpan rowSpan ' +
+    fuse.util.$w('bgColor codeBase codeType cellPadding cellSpacing colSpan rowSpan ' +
        'vAlign vLink aLink dateTime accessKey tabIndex encType maxLength ' +
        'readOnly longDesc frameBorder isMap useMap noHref noResize noShade ' +
        'noWrap marginWidth marginHeight')._each(function(attr) {
@@ -144,14 +144,14 @@
 
     // capability checks
     (function() {
-      var node, value, form = Fuse._doc.createElement('form'),
-       label  = Fuse._doc.createElement('label'),
-       button = Fuse._doc.createElement('button');
+      var node, value, form = fuse._doc.createElement('form'),
+       label  = fuse._doc.createElement('label'),
+       button = fuse._doc.createElement('button');
 
       label.htmlFor = label.className = 'x';
       label.setAttribute('style', 'display:block');
       form.setAttribute('encType', 'multipart/form-data');
-      button.appendChild(Fuse._doc.createTextNode('y'));
+      button.appendChild(fuse._doc.createTextNode('y'));
       button.setAttribute('value', 'x');
 
       // translate content name `htmlFor`
@@ -188,7 +188,7 @@
         // Exclude `action` attribute because:
         // Opera 9.25 will automatically translate the URI from relative to absolute.
         // In IE this fix has the reverse effect.
-        Fuse.Util.$w('data href longDesc src')
+        fuse.util.$w('data href longDesc src')
           ._each(function(attr) { T.read[attr] = getExact; });
       }
     })();

@@ -1,14 +1,14 @@
   /*---------------------------------- FORM ----------------------------------*/
 
-  Fuse.Dom.extendByTag('form');
+  fuse.dom.extendByTag('form');
 
-  Form = Fuse.Dom.FormElement;
+  Form = fuse.dom.FormElement;
 
-  Fuse.addNS('Util');
+  fuse.addNS('util');
 
-  Fuse.Util.$F = (function() {
+  fuse.util.$F = (function() {
     function $F(element) {
-      element = Fuse.get(element);
+      element = fuse.get(element);
       return element && element.getValue
         ? element.getValue()
         : null;
@@ -95,7 +95,7 @@
       name = String(typeName || '');
 
       var input, inputs = (this.raw || this).getElementsByTagName('input'),
-       results = Fuse.List(), i = 0;
+       results = fuse.Array(), i = 0;
 
       if (!typeName && !name) {
         while (input = inputs[i]) results[i++] = fromElement(input);
@@ -122,14 +122,14 @@
       options.parameters = plugin.serialize.call(this, { 'submit':submit, 'hash':true });
 
       if (params) {
-        if (isString(params)) params = Fuse.String.toQueryParams(params);
+        if (isString(params)) params = fuse.String.toQueryParams(params);
         _extend(options.parameters, params);
       }
 
       if (plugin.hasAttribute.call(this, 'method') && !options.method)
         options.method = (this.raw || this).method;
 
-      return Fuse.Ajax.Request(action, options);
+      return fuse.ajax.Request(action, options);
     };
 
     plugin.reset = function reset() {
@@ -151,9 +151,9 @@
        nodeName, submitSerialized, type, i = 1,
        element     = this.raw || this,
        checkString = !!elements,
-       doc         = Fuse._doc,
-       Dom         = Fuse.Dom,
-       result      = Fuse.Object(),
+       doc         = fuse._doc,
+       dom         = fuse.dom,
+       result      = fuse.Object(),
        submit      = options.submit;
 
       if (submit && submit.raw)

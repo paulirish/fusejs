@@ -1,6 +1,6 @@
   /*------------------------ LANG: TIMER -----------------------*/
 
-  Fuse.Timer = (function() {
+  fuse.Timer = (function() {
     function Klass() { }
 
     function Timer(callback, interval, options) {
@@ -74,8 +74,8 @@
 
     // prevent JScript bug with named function expressions
     var execute = nil, start = nil, stop = nil;
-  })(Fuse.Timer.plugin);
+  })(fuse.Timer.plugin);
 
-  Fuse.Timer.options = {
+  fuse.Timer.options = {
     'multiplier': 1
   };

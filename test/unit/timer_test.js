@@ -7,7 +7,7 @@ new Test.Unit.Runner({
     }
 
     var timerEventCount = 0,
-     timer = Fuse.Timer(timerEventFired, 50).start();
+     timer = fuse.Timer(timerEventFired, 50).start();
 
     this.wait(600, function() {
       this.assertEqual(3, timerEventCount);
@@ -20,11 +20,11 @@ new Test.Unit.Runner({
       throw new Error;
     }
 
-    var timer = Fuse.Timer(timerEventFired, 50);
+    var timer = fuse.Timer(timerEventFired, 50);
 
     // we don't want to stop timer's callback from throwing errors
-    timer.onTimerEvent = Fuse.Function.wrap(timer.onTimerEvent,
-      Fuse.Function.bind(function(proceed) { this.assertRaise('Error', proceed) }, this));
+    timer.onTimerEvent = fuse.Function.wrap(timer.onTimerEvent,
+      fuse.Function.bind(function(proceed) { this.assertRaise('Error', proceed) }, this));
 
     timer.start();
 
@@ -40,11 +40,11 @@ new Test.Unit.Runner({
     }
 
     var timerEventCount = 0,
-     backup = Fuse.Object.clone(Fuse.Timer.options);
+     backup = fuse.Object.clone(fuse.Timer.options);
 
-    Fuse.Object.extend(Fuse.Timer.options,  { 'multiplier': 1000 });
+    fuse.Object.extend(fuse.Timer.options,  { 'multiplier': 1000 });
 
-    var timer = Fuse.Timer(timerEventFired, 2).start();
+    var timer = fuse.Timer(timerEventFired, 2).start();
 
     this.wait(50, function() {
       this.assertEqual(0, timerEventCount);
@@ -55,6 +55,6 @@ new Test.Unit.Runner({
     });
 
     // restore
-    Fuse.Timer.options = backup;
+    fuse.Timer.options = backup;
   }
 });

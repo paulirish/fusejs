@@ -1,6 +1,6 @@
   /*------------------------------- LANG: RANGE ------------------------------*/
 
-  Fuse.Range = (function() {
+  fuse.Range = (function() {
     function Klass() { }
 
     function Range(start, end, exclusive) {
@@ -30,18 +30,18 @@
     return Range;
   })();
 
-  Fuse.addNS('Util');
+  fuse.addNS('util');
 
-  Fuse.Util.$R = Fuse.Range;
+  fuse.util.$R = fuse.Range;
 
   /*--------------------------------------------------------------------------*/
 
   (function(plugin) {
     function buildCache(thisArg, callback) {
-      var c = thisArg._cache = Fuse.List(), i = 0,
-       value = c.start = thisArg.start = Fuse.Object(thisArg.start);
+      var c = thisArg._cache = fuse.Array(), i = 0,
+       value = c.start = thisArg.start = fuse.Object(thisArg.start);
 
-      c.end = thisArg.end = Fuse.Object(thisArg.end);
+      c.end = thisArg.end = fuse.Object(thisArg.end);
       c.exclusive = thisArg.exclusive;
 
       if (callback) {
@@ -113,15 +113,15 @@
       var c = this._cache;
       if (isExpired(this)) {
         if (isNumber(this.start) && isNumber(this.end))
-          return Fuse.Number(this.end - this.start + (this.exclusive ? 0 : 1));
+          return fuse.Number(this.end - this.start + (this.exclusive ? 0 : 1));
         buildCache(this);
       }
-      return Fuse.Number(this._cache.length);
+      return fuse.Number(this._cache.length);
     };
 
     plugin.toArray = function toArray() {
       isExpired(this) && buildCache(this);
-      return Fuse.List.fromArray(this._cache);
+      return fuse.Array.fromArray(this._cache);
     };
 
     // assign any missing Enumerable methods
@@ -134,19 +134,19 @@
 
     // prevent JScript bug with named function expressions
     var _each = nil, size = nil, toArray = nil;
-  })(Fuse.Range.plugin);
+  })(fuse.Range.plugin);
 
   /*--------------------------------------------------------------------------*/
 
   (function() {
-    Fuse.Number.plugin.succ = function succ() {
-      return Fuse.Number(toInteger(this) + 1);
+    fuse.Number.plugin.succ = function succ() {
+      return fuse.Number(toInteger(this) + 1);
     };
 
-    Fuse.String.plugin.succ = function succ() {
+    fuse.String.plugin.succ = function succ() {
       if (this == null) throw new TypeError;
       var index = this.length -1;
-      return Fuse.String(this.slice(0, index) +
+      return fuse.String(this.slice(0, index) +
         String.fromCharCode(this.charCodeAt(index) + 1));
     };
 

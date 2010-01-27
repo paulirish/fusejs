@@ -1,6 +1,6 @@
   /*------------------------------ LANG: ARRAY -------------------------------*/
 
-  addListMethods = function(List) {
+  addArrayMethods = function(List) {
     (function() {
       List.from = function from(iterable) {
         if (!iterable || iterable == '') return List();
@@ -8,7 +8,7 @@
         // Safari 2.x will crash when accessing a non-existent property of a
         // node list, not in the document, that contains a text node unless we
         // use the `in` operator
-        var object = Fuse.Object(iterable);
+        var object = fuse.Object(iterable);
         if ('toArray' in object) return object.toArray();
         if ('item' in iterable)  return List.fromNodeList(iterable);
 
@@ -237,7 +237,7 @@
 
       plugin.invoke = function invoke(method) {
         if (this == null) throw new TypeError;
-        var args, i = 0, results = Fuse.Array(), object = Object(this),
+        var args, i = 0, results = fuse.Array(), object = Object(this),
          length = object.length >>> 0, funcProto = Function.prototype;
 
         if (arguments.length < 2) {
@@ -331,12 +331,12 @@
         for ( ; i < length; i++) if (i in object)
           (callback.call(thisArg, object[i], i, object) ?
             trues : falses).push(object[i]);
-        return Fuse.Array(trues, falses);
+        return fuse.Array(trues, falses);
       };
 
       plugin.pluck = function pluck(property) {
         if (this == null) throw new TypeError;
-        var i = 0, results = Fuse.Array(), object = Object(this),
+        var i = 0, results = fuse.Array(), object = Object(this),
          length = object.length >>> 0;
 
         for ( ; i < length; i++) if (i in object)
@@ -346,7 +346,7 @@
 
       plugin.size = function size() {
         if (this == null) throw new TypeError;
-        return Fuse.Number(Object(this).length >>> 0);
+        return fuse.Number(Object(this).length >>> 0);
       };
 
       plugin.sortBy = function sortBy(callback, thisArg) {
@@ -369,7 +369,7 @@
 
       plugin.zip = function zip() {
         if (this == null) throw new TypeError;
-        var i = 0, results = Fuse.Array(), callback = K,
+        var i = 0, results = fuse.Array(), callback = K,
          args = slice.call(arguments, 0), object = Object(this),
          length = object.length >>> 0;
 
@@ -377,15 +377,14 @@
         if (typeof args[args.length - 1] === 'function')
           callback = args.pop();
 
-        var collection = prependList(plugin.map.call(args, List.from), object, Fuse.Array());
+        var collection = prependList(plugin.map.call(args, List.from), object, fuse.Array());
         for ( ; i < length; i++)
           results.push(callback(collection.pluck(i), i, object));
         return results;
       };
 
       // aliases
-      plugin.toArray =
-      plugin.toList  = plugin.clone;
+      plugin.toArray = plugin.clone;
 
       // prevent JScript bug with named function expressions
       var _each =  nil,
@@ -495,8 +494,8 @@
           // ECMA-5 draft oversight, should use [[HasProperty]] instead of [[Get]]
           for ( ; fromIndex < length; fromIndex++)
             if (fromIndex in object && object[fromIndex] === item)
-              return Fuse.Number(fromIndex);
-          return Fuse.Number(-1);
+              return fuse.Number(fromIndex);
+          return fuse.Number(-1);
         };
 
       // ECMA-5 15.4.4.15
@@ -506,14 +505,14 @@
           var object = Object(this), length = object.length >>> 0;
           fromIndex = fromIndex == null ? length : toInteger(fromIndex);
 
-          if (!length) return Fuse.Number(-1);
+          if (!length) return fuse.Number(-1);
           if (fromIndex > length) fromIndex = length - 1;
           if (fromIndex < 0) fromIndex = length + fromIndex;
 
           // ECMA-5 draft oversight, should use [[HasProperty]] instead of [[Get]]
           for ( ; fromIndex > -1; fromIndex--)
             if (fromIndex in object && object[fromIndex] === item) break;
-          return Fuse.Number(fromIndex);
+          return fuse.Number(fromIndex);
         };
 
       // ECMA-5 15.4.4.19
@@ -594,8 +593,8 @@
 
   /*--------------------------------------------------------------------------*/
 
-  addListMethods(Fuse.Array);
+  addArrayMethods(fuse.Array);
 
-  Fuse.addNS('Util');
+  fuse.addNS('util');
 
-  Fuse.Util.$A = Fuse.Array.from;
+  fuse.util.$A = fuse.Array.from;

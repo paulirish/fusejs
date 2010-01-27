@@ -1,14 +1,14 @@
 new Test.Unit.Runner({
 
   'testSelectorWithTagName': function() {
-    this.assertEnumEqual($A(document.getElementsByTagName('li')), Fuse.rawQuery('li'));
+    this.assertEnumEqual($A(document.getElementsByTagName('li')), fuse.rawQuery('li'));
     this.assertEnumEqual([$('strong')], $$('strong'));
     this.assertEnumEqual([], $$('nonexistent'));
 
     var allNodes = $A(document.getElementsByTagName('*'))
       .filter(function(node) { return node.nodeType === 1 });
 
-    this.assertEnumEqual(allNodes, Fuse.rawQuery('*'));
+    this.assertEnumEqual(allNodes, fuse.rawQuery('*'));
   },
 
   'testSelectorWithId': function() {
@@ -265,7 +265,7 @@ new Test.Unit.Runner({
   // AND NOW COME THOSE NEW TESTS AFTER ANDREW'S REWRITE!
 
   'testSelectorWithNamespacedAttributes': function() {
-    if (Fuse.Env.Feature('XPATH')) {
+    if (fuse.env.Feature('XPATH')) {
       this.assertUndefined(new Selector('html div[xml:lang]').xpath);
       this.assertUndefined(new Selector('body p[xml:lang]').xpath);
     }
@@ -599,7 +599,7 @@ new Test.Unit.Runner({
   'testSelectorExtendsAllNodes': function(){
     var element = document.createElement('div');
 
-    Fuse.Number(3).times(function() {
+    fuse.Number(3).times(function() {
       element.appendChild(document.createElement('div'));
     });
 
@@ -646,7 +646,7 @@ new Test.Unit.Runner({
   },
 
   'testSelectorNotInsertedNodes': function() {
-    var wrapper = Fuse('<div>');
+    var wrapper = fuse('<div>');
     wrapper.update('<table><tr><td id="myTD"></td></tr></table>');
 
     this.assertNotNullOrUndefined(
@@ -665,7 +665,7 @@ new Test.Unit.Runner({
       '[id=myTD] on wrapper child');
 
     var clone = $('list').raw.cloneNode(true);
-    this.assert($$('#item_1', clone)[0] == Fuse.Dom.Element.down(clone));
+    this.assert($$('#item_1', clone)[0] == fuse.dom.Element.down(clone));
   },
 
   'testSelectorSpit': function() {

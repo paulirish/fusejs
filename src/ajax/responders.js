@@ -1,14 +1,12 @@
   /*---------------------------- AJAX: RESPONDERS ----------------------------*/
 
-  Fuse.addNS('Ajax.Responders');
-
-  Fuse.Ajax.activeRequestCount = 0;
+  fuse.ajax.activeRequestCount = 0;
 
   // TODO: Utilize custom events for responders
   (function(Responders) {
     Responders.responders = {
-      'onCreate': Fuse.List(function() { Fuse.Ajax.activeRequestCount++; }),
-      'onDone':   Fuse.List(function() { Fuse.Ajax.activeRequestCount--; })
+      'onCreate': fuse.Array(function() { fuse.ajax.activeRequestCount++; }),
+      'onDone':   fuse.Array(function() { fuse.ajax.activeRequestCount--; })
     };
 
     Responders.dispatch = (function() {
@@ -66,7 +64,7 @@
           handler.__method = method;
 
           // create handlers list if non-existent and add handler
-          if (!handlers) responders[name] = handlers = Fuse.List();
+          if (!handlers) responders[name] = handlers = fuse.Array();
           handlers.push(handler);
         }
       }
@@ -82,7 +80,7 @@
         if (handlers = responders[name]) {
           i = 0;
           method = responder[name];
-          results = Fuse.List(); 
+          results = fuse.Array(); 
 
           // rebuild handlers list excluding the handle that is tied to the responder method
           while (handler = handlers[i++])
@@ -94,4 +92,4 @@
 
     // prevent JScript bug with named function expressions
     var register = nil, unregister = nil;
-  })(Fuse.Ajax.Responders);
+  })(fuse.ajax.Responders = { });

@@ -1,13 +1,13 @@
   /*-------------------------- FORM: TIMED OBSERVER --------------------------*/
 
   (function() {
-    var BaseTimedObserver = Class(Fuse.Timer, {
+    var BaseTimedObserver = Class(fuse.Timer, {
       'constructor': (function() {
         function BaseTimedObserver(element, callback, interval, options) {
           // this._super() equivalent
-          Fuse.Timer.call(this, callback, interval, options);
+          fuse.Timer.call(this, callback, interval, options);
 
-          this.element = Fuse.get(element);
+          this.element = fuse.get(element);
           this.lastValue = this.getValue();
           this.start();
         }
@@ -28,7 +28,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    var Field = Fuse.Dom.InputElement, getValue = nil;
+    var Field = fuse.dom.InputElement, getValue = nil;
 
     Field.Observer =
     Field.TimedObserver = (function() {

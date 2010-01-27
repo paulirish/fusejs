@@ -1,13 +1,13 @@
 new Test.Unit.Runner({
 
   'testConstruct': function() {
-    var object = Fuse.Object.clone(Fixtures.one);
-    var h = Fuse.Hash(object), h2 = $H(object);
+    var object = fuse.Object.clone(Fixtures.one);
+    var h = fuse.Hash(object), h2 = $H(object);
 
-    this.assertInstanceOf(Fuse.Hash, h);
-    this.assertInstanceOf(Fuse.Hash, h2);
+    this.assertInstanceOf(fuse.Hash, h);
+    this.assertInstanceOf(fuse.Hash, h2);
 
-    this.assertHashEqual({}, Fuse.Hash());
+    this.assertHashEqual({}, fuse.Hash());
     this.assertHashEqual(object, h);
     this.assertHashEqual(object, h2);
 
@@ -15,12 +15,12 @@ new Test.Unit.Runner({
     this.assertHashNotEqual(object, h);
 
     var clone = $H(h);
-    this.assertInstanceOf(Fuse.Hash, clone);
+    this.assertInstanceOf(fuse.Hash, clone);
     this.assertHashEqual(h, clone);
 
     h.set('foo', 'foo');
     this.assertHashNotEqual(h, clone);
-    this.assertIdentical($H, Fuse.Hash.from);
+    this.assertIdentical($H, fuse.Hash.from);
   },
 
   'testAbilityToContainAnyKey': function() {
@@ -32,12 +32,12 @@ new Test.Unit.Runner({
   },
 
   'testHashUsedInTemplate': function() {
-    var template = Fuse.Template('#{a} #{b}'), hash = $H({ 'a': 'hello', 'b': 'world' });
+    var template = fuse.Template('#{a} #{b}'), hash = $H({ 'a': 'hello', 'b': 'world' });
 
     this.assertEqual('hello world', template.evaluate(hash.toObject()));
     this.assertEqual('hello world', template.evaluate(hash));
 
-    this.assertEqual('hello', Fuse.String.interpolate('#{a}', hash));
+    this.assertEqual('hello', fuse.String.interpolate('#{a}', hash));
   },
 
   'testPreventIterationOverShadowedProperties': function() {
@@ -49,19 +49,19 @@ new Test.Unit.Runner({
     FooMaker.prototype.key = 'foo';
 
     var foo = new FooMaker('bar');
-    this.assertEqual("key=bar", Fuse.Hash(foo).toQueryString());
-    this.assertEqual("key=bar", Fuse.Hash(Fuse.Hash(foo)).toQueryString());
+    this.assertEqual("key=bar", fuse.Hash(foo).toQueryString());
+    this.assertEqual("key=bar", fuse.Hash(fuse.Hash(foo)).toQueryString());
   },
 
   'testClear': function() {
-    this.assertHashEqual(Fuse.Hash(), $H(Fixtures.one).clear());
-    this.assertInstanceOf(Fuse.Hash,  $H(Fixtures.one).clear());
+    this.assertHashEqual(fuse.Hash(), $H(Fixtures.one).clear());
+    this.assertInstanceOf(fuse.Hash,  $H(Fixtures.one).clear());
   },
 
   'testClone': function() {
     var h = $H(Fixtures.many);
     this.assertHashEqual(h, h.clone());
-    this.assertInstanceOf(Fuse.Hash, h.clone());
+    this.assertInstanceOf(fuse.Hash, h.clone());
     this.assertNotIdentical(h, h.clone());
   },
 
@@ -73,10 +73,10 @@ new Test.Unit.Runner({
     this.assert(!$H(Fixtures.many).contains('Z'));
     this.assert(!$H().contains('foo'));
 
-    this.assert($H(Fixtures.value_zero).contains(Fuse.Number(0)),
+    this.assert($H(Fixtures.value_zero).contains(fuse.Number(0)),
       'Should match Number object instances');
 
-    this.assert($H(Fixtures.many).contains(Fuse.String('A')),
+    this.assert($H(Fixtures.many).contains(fuse.String('A')),
       'Should match String object instances');
   },
 
@@ -139,7 +139,7 @@ new Test.Unit.Runner({
 
   'testGet': function() {
     var h = $H({ 'a': 'A' }), empty = $H({ }),
-     properties = Fuse.List('constructor', 'hasOwnProperty', 'isPrototypeOf',
+     properties = fuse.Array('constructor', 'hasOwnProperty', 'isPrototypeOf',
        'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf');
 
     this.assertEqual('A', h.get('a'));
@@ -175,7 +175,7 @@ new Test.Unit.Runner({
     this.assertEqual(-1, $H(Fixtures.many).keyOf('Z'));
 
     var hash = $H({ 'a':1, 'b':'2', 'c':1, 'toString':'foo', 'valueOf':'' });
-    this.assert(Fuse.List('a','c').contains(hash.keyOf(1)));
+    this.assert(fuse.Array('a','c').contains(hash.keyOf(1)));
     this.assertEqual('toString', hash.keyOf('foo'));
     this.assertEqual('valueOf', hash.keyOf(''));
 
@@ -226,8 +226,8 @@ new Test.Unit.Runner({
     this.assertNotIdentical(h, h.merge());
     this.assertNotIdentical(h, h.merge({ }));
 
-    this.assertInstanceOf(Fuse.Hash, h.merge());
-    this.assertInstanceOf(Fuse.Hash, h.merge({ }));
+    this.assertInstanceOf(fuse.Hash, h.merge());
+    this.assertInstanceOf(fuse.Hash, h.merge({ }));
 
     this.assertHashEqual(h, h.merge());
     this.assertHashEqual(h, h.merge({ }));
@@ -275,64 +275,64 @@ new Test.Unit.Runner({
 
   'testToArray': function() {
     var expected = [['a', 'A'], ['b', 'B'], ['c', 'C'], ['d', 'D#']];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.many).toArray().inspect(),
       'Fixtures.many');
 
     expected = [['a', 'A'], ['b', 'B'], ['toString', 'bar'], ['valueOf', '']];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.mixed_dont_enum).toArray().inspect(),
       'Fixtures.mixed_dont_enum');
 
     expected = [['quad', function(n) { return n * n }], ['plus', function(n) { return n + n }]];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.functions).toArray().inspect(),
       'Fixtures.functions');
 
     expected = [['color', ['r', 'g', 'b']]];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.multiple).toArray().inspect(),
       'Fixtures.multiple');
 
     expected = [['color', ['r', null, 'g', undef, 0]]];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.multiple_nil).toArray().inspect(),
       'Fixtures.multiple_nil');
 
     expected = [['color', [null, undef]]];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.multiple_all_nil).toArray().inspect(),
       'Fixtures.multiple_all_nil');
 
     expected = [['color', []]];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.multiple_empty).toArray().inspect(),
       'Fixtures.multiple_empty');
 
     expected = [['stuff[]', ['$', 'a', ';']]];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.multiple_special).toArray().inspect(),
       'Fixtures.multiple_special');
 
     expected = [['a', 'b'], ['c', undef]];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.value_undefined).toArray().inspect(),
       'Fixtures.value_undefined');
 
     expected = [['a', 'b'], ['c', null]];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.value_null).toArray().inspect(),
       'Fixtures.value_null');
 
     expected = [['a', 'b'], ['c', 0]];
-    this.assertEqual(Fuse.List.inspect(expected),
+    this.assertEqual(fuse.Array.inspect(expected),
       $H(Fixtures.value_zero).toArray().inspect(),
       'Fixtures.value_zero');
   },
 
   'testToObject': function() {
     var hash = $H(Fixtures.many), object = hash.toObject();
-    this.assertInstanceOf(Fuse.Object, object);
+    this.assertInstanceOf(fuse.Object, object);
     this.assertHashEqual(Fixtures.many, object);
     this.assertNotIdentical(Fixtures.many, object);
 
@@ -346,7 +346,7 @@ new Test.Unit.Runner({
     this.assertEqual('a=A%23',             $H(Fixtures.one).toQueryString());
     this.assertEqual('a=A&b=B&c=C&d=D%23', $H(Fixtures.many).toQueryString());
     this.assertEqual('a=b&c',              $H(Fixtures.value_undefined).toQueryString());
-    this.assertEqual('a=b&c',              $H(Fuse.String.toQueryParams('a=b&c')).toQueryString());
+    this.assertEqual('a=b&c',              $H(fuse.String.toQueryParams('a=b&c')).toQueryString());
     this.assertEqual('a=b&c=',             $H(Fixtures.value_null).toQueryString());
     this.assertEqual('a=b&c=0',            $H(Fixtures.value_zero).toQueryString());
 
@@ -372,7 +372,7 @@ new Test.Unit.Runner({
       $H(Fixtures.mixed_dont_enum).toQueryString());
 
     this.assertEqual('0=a&1=b&2=c',
-      $H(Fuse.List('a', 'b', 'c')).toQueryString(),
+      $H(fuse.Array('a', 'b', 'c')).toQueryString(),
       'Enumerated over inherited properties');
   },
 
@@ -399,15 +399,15 @@ new Test.Unit.Runner({
   },
 
   'testZip': function() {
-    var jq = $H({ 'name':'jquery',    'size':'18kb' }),
-     proto = $H({ 'name':'prototype', 'size':'28kb' }),
-     fuse  = $H({ 'name': 'fusejs',   'size':'29kb' });
+    var jq  = $H({ 'name':'jquery',    'size':'18kb' }),
+     proto  = $H({ 'name':'prototype', 'size':'28kb' }),
+     fusejs = $H({ 'name': 'fusejs',   'size':'29kb' });
 
-    var result = jq.zip(proto, fuse);
+    var result = jq.zip(proto, fusejs);
     this.assertHashEqual({ 'name':['jquery', 'prototype', 'fusejs'], 'size':['18kb', '28kb', '29kb'] },
       result);
 
-    result = jq.zip(proto, fuse, function(values) { return values.join(', ') })
+    result = jq.zip(proto, fusejs, function(values) { return values.join(', ') })
     this.assertHashEqual({ 'name':'jquery, prototype, fusejs', 'size':'18kb, 28kb, 29kb' },
       result);
   }

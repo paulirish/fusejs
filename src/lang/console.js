@@ -1,6 +1,6 @@
   /*------------------------------ LANG: CONSOLE -----------------------------*/
 
-  Fuse.addNS('Console');
+  fuse.addNS('Console');
 
   (function(Console) {
 
@@ -11,8 +11,8 @@
     info = error,
 
     consoleWrite = function(type, message) {
-      Fuse._div.innerHTML = '<div id="fusejs-console"><pre>x</pre></div>';
-      var consoleElement = Fuse._body.appendChild(Fuse._div.firstChild),
+      fuse._div.innerHTML = '<div id="fusejs-console"><pre>x</pre></div>';
+      var consoleElement = fuse._body.appendChild(fuse._div.firstChild),
        textNode = consoleElement.firstChild.firstChild;
       textNode.data = '';
 
@@ -52,7 +52,7 @@
         object.error(message, exception);
       };
     }
-    else if (Fuse._doc) {
+    else if (fuse._doc) {
       info  = function info (message) { consoleWrite('Info', message); };
       error = function error(message, error) {
         var result = message ? [message] : [];
@@ -68,4 +68,4 @@
 
     Console.error = error;
     Console.info  = info;
-  })(Fuse.Console);
+  })(fuse.Console);

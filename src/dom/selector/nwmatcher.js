@@ -39,4 +39,4 @@
     };
 
     var __match, __select, match = nil, select = nil;
-  })(Fuse.Dom.Selector, Fuse.Dom.Node, Fuse.Dom.NodeList, Fuse.Dom.RawList);
+  })(fuse.dom.Selector, fuse.dom.Node, fuse.dom.NodeList, fuse.dom.RawList);

@@ -1,5 +1,5 @@
 function extendDefault(options) {
-  return Fuse.Object.extend({
+  return fuse.Object.extend({
     'asynchronous': false,
     'method':      'get',
     'onException': function(e) { throw e; }
@@ -8,8 +8,8 @@ function extendDefault(options) {
 
 function getInnerHTML(id) {
   var element = $(id);
-  return Fuse.String(!element ? '' :
-    $(id).innerHTML.toString().toLowerCase().replace(/[\r\n\t]/g, ''));
+  return fuse.String(!element ? '' :
+    $(id).raw.innerHTML.toString().toLowerCase().replace(/[\r\n\t]/g, ''));
 }
 
 var message  = 'You must be running your tests from rake to test this feature.',
@@ -54,4 +54,4 @@ var Fixtures = {
 };
 
 // make all timers/delays use seconds
-Fuse.Timer.options.multiplier = 1000;
+fuse.Timer.options.multiplier = 1000;

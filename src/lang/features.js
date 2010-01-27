@@ -31,8 +31,8 @@
       return Tester;
     }
 
-    Bug = Fuse.Env.Bug = createTester('Bug');
-    Feature = Fuse.Env.Feature = createTester('Feature');
+    Bug = fuse.env.Bug = createTester('Bug');
+    Feature = fuse.env.Feature = createTester('Feature');
   })();
 
   /*----------------------------- LANG FEATURES ------------------------------*/

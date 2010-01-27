@@ -1,8 +1,8 @@
   /*------------------------------ LANG: REGEXP ------------------------------*/
 
   (function(plugin) {
-    Fuse.RegExp.escape = function escape(string) {
-      return Fuse.String(escapeRegExpChars(string));
+    fuse.RegExp.escape = function escape(string) {
+      return fuse.String(escapeRegExpChars(string));
     };
 
     plugin.clone = function clone(options) {
@@ -12,7 +12,7 @@
         'multiline':  this.multiline
       }, options);
 
-      return Fuse.RegExp(this.source,
+      return fuse.RegExp(this.source,
         (options.global     ? 'g' : '') +
         (options.ignoreCase ? 'i' : '') +
         (options.multiline  ? 'm' : ''));
@@ -23,4 +23,4 @@
 
     // prevent JScript bug with named function expressions
     var clone = nil, escape = nil;
-  })(Fuse.RegExp.plugin);
+  })(fuse.RegExp.plugin);

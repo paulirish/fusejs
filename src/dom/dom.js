@@ -1,42 +1,44 @@
   /*---------------------------------- DOM -----------------------------------*/
 
+  fuse.addNS('dom');
+
   Data =
-  Fuse.addNS('Dom.Data');
+  fuse.dom.Data = { };
 
   Data['1'] = { };
   Data['2'] = { 'nodes': { } };
 
-  Fuse._doc   = global.document;
-  Fuse._div   = Fuse._doc.createElement('DiV');
-  Fuse._docEl = Fuse._doc.documentElement;
-  Fuse._info  = { };
+  fuse._doc   = global.document;
+  fuse._div   = fuse._doc.createElement('DiV');
+  fuse._docEl = fuse._doc.documentElement;
+  fuse._info  = { };
 
-  Fuse._info.docEl =
-  Fuse._info.root  =
+  fuse._info.docEl =
+  fuse._info.root  =
     { 'nodeName': 'HTML', 'property': 'documentElement' };
 
-  Fuse._info.body =
-  Fuse._info.scrollEl =
+  fuse._info.body =
+  fuse._info.scrollEl =
     { 'nodeName': 'BODY', 'property': 'body' };
 
   /*--------------------------------------------------------------------------*/
 
-  // make Fuse() pass to Fuse.get()
-  Fuse =
-  global.Fuse = (function(__Fuse) {
-    function Fuse(object, context) {
-      return Fuse.get(object, context);
+  // make fuse() pass to fuse.get()
+  fuse =
+  global.fuse = (function(__fuse) {
+    function fuse(object, context) {
+      return fuse.get(object, context);
     }
-    return Obj.extend(Class({ 'constructor': Fuse }), __Fuse,
+    return Obj.extend(Class({ 'constructor': fuse }), __fuse,
       function(value, key, object) { if (hasKey(object, key)) object[key] = value; });
-  })(Fuse);
+  })(fuse);
 
   // set the debug flag based on the fuse.js debug query parameter
-  Fuse.debug = (function() {
+  fuse.debug = (function() {
     var script, i = 0,
      matchDebug = /(^|&)debug=(1|true)(&|$)/,
      matchFilename = /(^|\/)fuse\.js\?/,
-     scripts = Fuse._doc.getElementsByTagName('script');
+     scripts = fuse._doc.getElementsByTagName('script');
 
     while (script = scripts[i++])
       if (matchFilename.test(script.src) &&
@@ -80,51 +82,51 @@
       return element && fromElement(element);
     }
 
-    var doc = Fuse._doc;
+    var doc = fuse._doc;
 
-    Fuse.get = get;
-    Fuse.getById = getById;
+    fuse.get = get;
+    fuse.getById = getById;
 
-    Fuse.addNS('Util');
-    Fuse.Util.$ = $;
+    fuse.addNS('util');
+    fuse.util.$ = $;
   })();
 
   /*--------------------------------------------------------------------------*/
 
   getDocument =
-  Fuse.getDocument = function getDocument(element) {
+  fuse.getDocument = function getDocument(element) {
     return element.ownerDocument || element.document ||
-      (element.nodeType === DOCUMENT_NODE ? element : Fuse._doc);
+      (element.nodeType === DOCUMENT_NODE ? element : fuse._doc);
   };
 
   // Based on work by Diego Perini
   getWindow =
-  Fuse.getWindow = function getWindow(element) {
+  fuse.getWindow = function getWindow(element) {
     var frame, i = 0, doc = getDocument(element), frames = global.frames;
-    if (Fuse._doc !== doc)
+    if (fuse._doc !== doc)
       while (frame = frames[i++])
         if (frame.document === doc) return frame;
     return global;
   };
 
   // HTML document coerce nodeName to uppercase
-  getNodeName = Fuse._div.nodeName === 'DIV'
+  getNodeName = fuse._div.nodeName === 'DIV'
     ? function(element) { return element.nodeName; }
     : function(element) { return element.nodeName.toUpperCase(); };
 
   returnOffset = function(left, top) {
-    var result  = Fuse.Array(Fuse.Number(left || 0), Fuse.Number(top || 0));
+    var result  = fuse.Array(fuse.Number(left || 0), fuse.Number(top || 0));
     result.left = result[0];
     result.top  = result[1];
     return result;
   };
 
   // Safari 2.0.x returns `Abstract View` instead of `global`
-  if (isHostObject(Fuse._doc, 'defaultView') && Fuse._doc.defaultView === global) {
+  if (isHostObject(fuse._doc, 'defaultView') && fuse._doc.defaultView === global) {
     getWindow = function getWindow(element) {
       return getDocument(element).defaultView || element;
     };
-  } else if (isHostObject(Fuse._doc, 'parentWindow')) {
+  } else if (isHostObject(fuse._doc, 'parentWindow')) {
     getWindow = function getWindow(element) {
       return getDocument(element).parentWindow || element;
     };

@@ -7,9 +7,9 @@
 
     Selector.select = function select(selector, context) {
       return Sly(String(selector || ''),
-        context && context.raw || context || Fuse._doc, NodeList());
+        context && context.raw || context || fuse._doc, NodeList());
     };
 
     // prevent JScript bug with named function expressions
     var match = nil, select = nil;
-  })(Fuse.Dom.Selector, Fuse.Dom.NodeList);
+  })(fuse.dom.Selector, fuse.dom.NodeList);

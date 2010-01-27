@@ -14,7 +14,7 @@ $(document).observe('dom:loaded', function(event) {
     'eventElement':       false
   };
 
-  Fuse.Object.extend(eventResults.eventElement, {
+  fuse.Object.extend(eventResults.eventElement, {
     'imageOnLoadBug':   false,
     'imageOnErrorBug':  false,
     'contentLoadedBug': false

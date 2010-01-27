@@ -2,7 +2,7 @@
 (function(global) {
 
   // private vars
-  var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE, Fuse, Bug,
+  var DOCUMENT_FRAGMENT_NODE, DOCUMENT_NODE, ELEMENT_NODE, TEXT_NODE, fuse, Bug,
    Class, Data, Document, Element, Enumerable, Feature, Form, Func, Obj, Node,
    NodeList, RawList, $break, _extend, addListMethods, bind, capitalize, clone,
    concatList, defer, eachKey, emptyFunction, escapeRegExpChars, expando,
@@ -11,19 +11,19 @@
    isRegExp, isSameOrigin, isString, isUndefined, K, nil, prependList,
    returnOffset, slice, toInteger, toString, undef, userAgent;
 
-  Fuse =
-  global.Fuse = function Fuse() { };
+  fuse =
+  global.fuse = function fuse() { };
 
-  Fuse._body  =
-  Fuse._div   =
-  Fuse._doc   =
-  Fuse._docEl =
-  Fuse._info  =
-  Fuse._root  =
-  Fuse._scrollEl = null;
+  fuse._body  =
+  fuse._div   =
+  fuse._doc   =
+  fuse._docEl =
+  fuse._info  =
+  fuse._root  =
+  fuse._scrollEl = null;
 
-  Fuse.debug   = false;
-  Fuse.version = '<%= FUSEJS_VERSION %>';
+  fuse.debug   = false;
+  fuse.version = '<%= FUSEJS_VERSION %>';
 
   /*--------------------------------------------------------------------------*/
 
@@ -39,13 +39,13 @@
   })();
 
   $break =
-  Fuse.$break = function $break() { };
+  fuse.$break = function $break() { };
 
   emptyFunction =
-  Fuse.emptyFunction = function emptyFunction() { };
+  fuse.emptyFunction = function emptyFunction() { };
 
   K =
-  Fuse.K = function K(x) { return x };
+  fuse.K = function K(x) { return x };
 
   concatList = function(list, otherList) {
     var pad = list.length, length = otherList.length;
@@ -96,7 +96,7 @@
   // textNode type
   TEXT_NODE = 3;
 
-  // a unqiue 15 char id used throughout Fuse
+  // a unqiue 15 char id used throughout fuse
   expando = '_fuse' + String(+new Date).slice(0, 10);
 
   // helps minify nullifying the JScript function declarations
@@ -158,10 +158,10 @@
       var paths, object, i = 0;
       if (isString(paths)) paths = [paths];
       if (!isArray(paths)) deep  = path;
-      if (!paths) paths = ['Array', 'Date', 'Number', 'Object', 'RegExp', 'String', 'Dom.Node']; 
+      if (!paths) paths = ['Array', 'Date', 'Number', 'Object', 'RegExp', 'String', 'dom.Node']; 
 
       while (path = paths[i++]) {
-        object = isString(path) ? Fuse.getNS(path) : path;
+        object = isString(path) ? fuse.getNS(path) : path;
         if (object) {
           object.updateGenerics && object.updateGenerics();
           deep && updateSubClassGenerics(object);
@@ -169,13 +169,13 @@
       }
     }
 
-    Fuse.getNS =
-    Fuse.prototype.getNS = getNS;
+    fuse.getNS =
+    fuse.prototype.getNS = getNS;
 
-    Fuse.addNS = 
-    Fuse.prototype.addNS = addNS;
+    fuse.addNS = 
+    fuse.prototype.addNS = addNS;
 
-    Fuse.updateGenerics  = updateGenerics;
+    fuse.updateGenerics  = updateGenerics;
   })();
 
 <%= include(
@@ -236,7 +236,7 @@
   /*--------------------------------------------------------------------------*/
 
   // update native generics and element methods
-  Fuse.updateGenerics(true);
+  fuse.updateGenerics(true);
 
   if (global.Event && global.Event.Methods)
     Event.addMethods();

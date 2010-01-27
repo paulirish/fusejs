@@ -2,7 +2,7 @@
   /* Based on work by Alex Arnell, John Resig, T.J. Crowder and Prototype core */
 
   Class =
-  Fuse.Class = (function() {
+  fuse.Class = (function() {
     function Subclass() { };
 
     function createNamedClass(name) {
@@ -58,7 +58,7 @@
       Obj.extend(Klass, Class.Methods);
 
       Klass.callSuper  = createCallSuper(plugin);
-      Klass.subclasses = Fuse.List();
+      Klass.subclasses = fuse.Array();
       Klass.superclass = Parent;
 
       // add methods to Klass.plugin
@@ -127,14 +127,14 @@
   /*--------------------------------------------------------------------------*/
 
   // replace placeholder objects with inheritable namespaces
-  global.Fuse = Class({ 'constructor': Fuse });
+  global.fuse = Class({ 'constructor': fuse });
 
-  (function(__Env) {
-    delete Fuse.Env;
-    var Env     = Fuse.addNS('Env');
-    Env.Bug     = __Env.Bug;
-    Env.Feature = __Env.Feature;
+  (function(__env) {
+    delete fuse.env;
+    var env     = fuse.addNS('env');
+    env.Bug     = __env.Bug;
+    env.Feature = __env.Feature;
 
-    Env.addNS('Agent');
-    _extend(Env.Agent, __Env.Agent);
-  })(Fuse.Env);
+    env.addNS('agent');
+    _extend(env.agent, __env.agent);
+  })(fuse.env);

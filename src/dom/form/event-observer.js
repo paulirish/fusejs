@@ -4,7 +4,7 @@
     var BaseEventObserver = Class({
       'constructor': (function() {
         function BaseEventObserver(element, callback) {
-          this.element = Fuse.get(element);
+          this.element = fuse.get(element);
           element = element.raw || element;
 
           var eventObserver = this, onElementEvent = this.onElementEvent;
@@ -14,7 +14,7 @@
             return this.registerFormCallbacks();
 
           var member, name = element.name, i = 0;
-          this.group = (name && Fuse.query(element.nodeName +
+          this.group = (name && fuse.query(element.nodeName +
             '[name="' + name + '"]', getDocument(this.element))) || NodeList(this.element);
 
           this.callback = callback;
@@ -58,7 +58,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    var Field = Fuse.Dom.InputElement, getValue = nil;
+    var Field = fuse.dom.InputElement, getValue = nil;
 
     Field.EventObserver = (function() {
       function Klass() { }

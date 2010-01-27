@@ -3,7 +3,7 @@ new Test.Unit.Runner({
   'testEachBreak': function() {
     var result = 0;
     Fixtures.Basic.each(function(value) {
-      if ((result = value) == 2) throw Fuse.$break;
+      if ((result = value) == 2) throw fuse.$break;
     });
 
     this.assertEqual(2, result);
@@ -25,13 +25,13 @@ new Test.Unit.Runner({
       self.assertEqual(1, item);
       self.assertEqual(0, index);
       self.assertEqual(Fixtures.Basic, iterable);
-      throw Fuse.$break;
+      throw fuse.$break;
     });
   },
 
   'testEachChaining': function() {
-    this.assertEqual(Fixtures.Primes, Fixtures.Primes.each(Fuse.emptyFunction));
-    this.assertEqual(3, Fixtures.Basic.each(Fuse.emptyFunction).size());
+    this.assertEqual(Fixtures.Primes, Fixtures.Primes.each(fuse.emptyFunction));
+    this.assertEqual(3, Fixtures.Basic.each(fuse.emptyFunction).size());
   },
 
   'testEnumContext': function() {
@@ -64,10 +64,10 @@ new Test.Unit.Runner({
     this.assert(!Fixtures.Basic.contains('2'));
     this.assert(!Fixtures.Basic.contains('4'));
 
-    this.assert(Fixtures.Basic.contains(Fuse.Number(2)),
+    this.assert(Fixtures.Basic.contains(fuse.Number(2)),
       'Should match Number object instances');
 
-    this.assert(Fixtures.Nicknames.contains(Fuse.String('sam-')),
+    this.assert(Fixtures.Nicknames.contains(fuse.String('sam-')),
       'Should match String object instances');
   },
 
@@ -196,9 +196,9 @@ new Test.Unit.Runner({
 
   'testInvokeOfNativeElementMethods': function() {
     var elements = new EnumObject([
-      Fuse('<div title="foo"></div>'),
-      Fuse('<span title="bar"></span>'),
-      Fuse('<a title="baz"></a>')
+      fuse('<div title="foo"></div>'),
+      fuse('<span title="bar"></span>'),
+      fuse('<a title="baz"></a>')
     ]);
 
     this.assertEnumEqual(['foo', 'bar', 'baz'],
@@ -206,9 +206,9 @@ new Test.Unit.Runner({
       'Should have called `getAttribute` on each decorated element.');
 
     // must attach input element to document before calling focus()
-    elements = new EnumObject([ Fuse('<input type="text">') ]);
+    elements = new EnumObject([ fuse('<input type="text">') ]);
     document.body.appendChild(elements.first().raw);
-    this.assert(Fuse.Array.isArray(elements.invoke('focus')),
+    this.assert(fuse.Array.isArray(elements.invoke('focus')),
       'Should return an array.');
   },
 

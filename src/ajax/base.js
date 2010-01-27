@@ -1,11 +1,11 @@
  /*------------------------------- AJAX: BASE -------------------------------*/
 
-  Fuse.Ajax.Base = Class({
+  fuse.ajax.Base = Class({
     'constructor': (function() {
       function Base(url, options) {
         var customHeaders, queryString,
          body = null,
-         defaultOptions = Fuse.Ajax.Base.options,
+         defaultOptions = fuse.ajax.Base.options,
          defaultHeaders = defaultOptions.headers,
          location = global.location;
 
@@ -18,7 +18,7 @@
         // clone default options/headers and overwrite with user options
         delete defaultOptions.headers;
         defaultOptions = clone(defaultOptions);
-        Fuse.Ajax.Base.options.headers = defaultHeaders;
+        fuse.ajax.Base.options.headers = defaultHeaders;
 
         defaultOptions.headers = clone(defaultHeaders);
         options = this.options = _extend(defaultOptions, options);
@@ -37,7 +37,7 @@
 
         // convert string/hash parameters to an object
         if (isString(params))
-          params = Fuse.String(params).toQueryParams();
+          params = fuse.String(params).toQueryParams();
         else if (isHash(params))
           params = params.toObject();
         else params = clone(params);
@@ -72,7 +72,7 @@
 
         // set default timeout multiplier
         this.timerMultiplier = options.timerMultiplier ||
-          Fuse.Timer && Fuse.Timer.options.multiplier || 1;
+          fuse.Timer && fuse.Timer.options.multiplier || 1;
 
         // Playing it safe here, even though we could not reproduce this bug,
         // jQuery tickets #2570, #2865 report versions of Opera will display a
@@ -85,27 +85,27 @@
           body = options.postBody || queryString;
 
         this.body       = body;
-        this.method     = Fuse.String(method);
+        this.method     = fuse.String(method);
         this.parameters = params;
-        this.url        = Fuse.String(url);
+        this.url        = fuse.String(url);
       }
 
       return Base;
     })()
   });
 
-  Fuse.Ajax.Base.options = {
+  fuse.ajax.Base.options = {
     'asynchronous': true,
     'contentType':  'application/x-www-form-urlencoded',
     'encoding':     'UTF-8',
     'evalJS':       true,
-    'evalJSON':     !!Fuse.String.plugin.evalJSON,
+    'evalJSON':     !!fuse.String.plugin.evalJSON,
     'forceMethod':  false,
     'method':       'post',
     'parameters':   '',
     'headers':      {
       'Accept': 'text/javascript, text/html, application/xml, text/xml, */*',
-      'X-Fuse-Version': Fuse.version,
+      'X-Fuse-Version': fuse.version,
       'X-Requested-With': 'XMLHttpRequest'
     }
   };

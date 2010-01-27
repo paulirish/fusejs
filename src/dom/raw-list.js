@@ -1,9 +1,9 @@
   /*------------------------------ DOM: RAWLIST ------------------------------*/
 
   RawList =
-  Fuse.Dom.RawList = Fuse.Fusebox().Array;
+  fuse.dom.RawList = fuse.Fusebox().Array;
 
-  addListMethods(RawList);
+  addArrayMethods(RawList);
 
   (function(plugin) {
     var SKIPPED_PROPERTIES = {

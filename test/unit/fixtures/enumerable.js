@@ -4,14 +4,14 @@ function prime(value) {
   return true;
 }
 
-var EnumObject = Fuse.Class(Fuse.Enumerable, {
+var EnumObject = fuse.Class(fuse.Enumerable, {
   'initialize': function(interior) {
     this.interior = interior;
   },
   
   '_each': function(callback) {
     for (key in this.interior) {
-      if (Fuse.Object.hasKey(this.interior, key))
+      if (fuse.Object.hasKey(this.interior, key))
         callback(this.interior[key], key, this);
     }
   }

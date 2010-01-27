@@ -129,7 +129,7 @@ new Test.Unit.Runner({
     this.assertEqual(11, range.size(),
       'non-cached of exclusive numeric range');
 
-    range._each(Fuse.emptyFunction);
+    range._each(fuse.emptyFunction);
     this.assertEqual(11, range._cache.length,
       'cached exclusive numberic range');
 
@@ -141,7 +141,7 @@ new Test.Unit.Runner({
     this.assertEqual(3, range.size(),
       'exclusive character range');
 
-    range._each(Fuse.emptyFunction);
+    range._each(fuse.emptyFunction);
     this.assertEqual(3, range._cache.length,
       'cached exclusive character range');
 

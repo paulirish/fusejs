@@ -1,11 +1,11 @@
 var documentViewportProperties,
- isIE6AndLower = Fuse.Env.Agent.IE && !window.XMLHttpRequest,
+ isIE6AndLower = fuse.env.agent.IE && !window.XMLHttpRequest,
  testVar  = 'to be updated',
  testVar2 = '';
 
 function getInnerHTML(id) {
   var element = $(id);
-  return Fuse.String(!element ? '' :
+  return fuse.String(!element ? '' :
     $(id).raw.innerHTML.toString().toLowerCase().replace(/[\r\n\t]/g, ''));
 }
 
@@ -16,7 +16,7 @@ function createParagraph(text, context) {
   return p;
 }
 
-createParagraph.curry = Fuse.Function.plugin.curry;
+createParagraph.curry = fuse.Function.plugin.curry;
 
 function getIframeDocument() {
   var element = $('iframe').raw;
@@ -40,7 +40,7 @@ function isIframeAccessible() {
 }
 
 function getElement(element, context) {
-  if (!Fuse.Object.isString(element)) return element;
+  if (!fuse.Object.isString(element)) return element;
   return $((context || document).getElementById(element));
 }
 
@@ -76,7 +76,7 @@ function preservingBrowserDimensions(callback) {
 
   DOMParser.prototype.parseFromString = (function() {
     var parseFromString = function parseFromString(string, contentType) {
-      var xhr = Fuse.Ajax.create();
+      var xhr = fuse.ajax.create();
       if (!contentType) contentType = 'application/xml';
       xhr.open('GET', 'data:' + contentType + ';charset=utf-8,' +
         encodeURIComponent(string), false);
@@ -87,7 +87,7 @@ function preservingBrowserDimensions(callback) {
       return xhr.responseXML;
     };
 
-    if (Fuse.Env.Feature('ACTIVE_X_OBJECT')) {
+    if (fuse.env.Feature('ACTIVE_X_OBJECT')) {
       parseFromString = function parseFromString(string, contentType) {
         var xmldata = new ActiveXObject('MSXML.DomDocument');
         xmldata.async = false;
@@ -104,20 +104,20 @@ function preservingBrowserDimensions(callback) {
 
 /*--------------------------------------------------------------------------*/
 
-Fuse.Env.Bug.set({
+fuse.env.Bug.set({
   'ELEMENT_STYLE_OVERFLOW_VISIBLE_EXPANDS_TO_FIT_CONTENT': function() {
     // IE 6 and lower
-    var div = Fuse._div, clone = div.cloneNode(false), ds = div.style, cs = clone.style;
+    var div = fuse._div, clone = div.cloneNode(false), ds = div.style, cs = clone.style;
     ds.cssText = cs.cssText = 'overflow:visible;padding:0;margin:0;';
     ds.width = '20px'; cs.width = '21px';
 
-    Fuse._body.appendChild(div);
+    fuse._body.appendChild(div);
     var value = div.offsetWidth;
 
     div.appendChild(clone);
     var result = (value !== div.offsetWidth);
 
-    Fuse._body.removeChild(div);
+    fuse._body.removeChild(div);
     div.innerHTML = ds.cssText = '';
     return result;
   }
@@ -125,20 +125,20 @@ Fuse.Env.Bug.set({
 
 /*--------------------------------------------------------------------------*/
 
-Fuse.Dom.Element.extend({
+fuse.dom.Element.extend({
   'hashBrowns': function(element) { return 'hash browns' }
 });
 
-Fuse.Dom.extendByTag('LI', {
+fuse.dom.extendByTag('LI', {
   'pancakes': function(element) { return 'pancakes' }
 });
 
-Fuse.Dom.extendByTag('DIV', {
+fuse.dom.extendByTag('DIV', {
   'waffles': function(element) { return 'waffles' }
 });
 
-Fuse.Dom.extendByTag($w('li div'), {
+fuse.dom.extendByTag($w('li div'), {
   'orangeJuice': function(element) { return 'orange juice' }
 });
 
-Fuse.Dom.Element.updateGenerics();
+fuse.dom.Element.updateGenerics();

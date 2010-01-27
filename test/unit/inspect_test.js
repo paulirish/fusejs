@@ -1,17 +1,17 @@
 new Test.Unit.Runner({
 
   'testArrayInspect': function() {
-    this.assertEqual('[]', Fuse.List().inspect());
-    this.assertEqual('[1]', Fuse.List.create(1).inspect());
-    this.assertEqual('[\'a\']', Fuse.List('a').inspect());
-    this.assertEqual('[\'a\', 1]', Fuse.List('a', 1).inspect());
+    this.assertEqual('[]', fuse.Array().inspect());
+    this.assertEqual('[1]', fuse.Array.create(1).inspect());
+    this.assertEqual('[\'a\']', fuse.Array('a').inspect());
+    this.assertEqual('[\'a\', 1]', fuse.Array('a', 1).inspect());
 
     this.assertEqual('[0, undefined, 2]',
-      Fuse.List.plugin.inspect.call({ '0':0, '2':2, 'length':3 }),
+      fuse.Array.plugin.inspect.call({ '0':0, '2':2, 'length':3 }),
       'called with an object as the `this` value');
 
-    this.assert('[]' != Fuse.Object.inspect(Fuse.Array.plugin),
-      'Failed to inspect Fuse.Array.plugin');
+    this.assert('[]' != fuse.Object.inspect(fuse.Array.plugin),
+      'Failed to inspect fuse.Array.plugin');
   },
 
   'testElementInspect': function() {
@@ -30,23 +30,23 @@ new Test.Unit.Runner({
       'element with no className or id');
 
     this.assertNothingRaised(
-      function() { Fuse.Object.inspect(Element) },
+      function() { fuse.Object.inspect(Element) },
       'Failed to inspect Element');
 
     this.assertNothingRaised(
-      function() { Fuse.Object.inspect(Element.Methods) },
+      function() { fuse.Object.inspect(Element.Methods) },
       'Failed to inspect Element.Methods');
   },
 
   'testEnumerableInspect': function() {
-    var EnumObject = Fuse.Class(Fuse.Enumerable, {
+    var EnumObject = fuse.Class(fuse.Enumerable, {
       'initialize': function(interior) {
         this.interior = interior;
       },
 
       '_each': function(callback) {
         for (key in this.interior) {
-          if (Fuse.Object.hasKey(this.interior, key))
+          if (fuse.Object.hasKey(this.interior, key))
             callback(this.interior[key], key, this);
         }
       }
@@ -58,12 +58,12 @@ new Test.Unit.Runner({
     this.assertEqual("#<Enumerable:['a', 'A', 'b', 'B', 'c', 'C', 'd', 'D#']>",
       new EnumObject(many).inspect());
 
-    this.assert('#<Enumerable:[]>' != Fuse.Object.inspect(Fuse.Enumerable.plugin),
-      'Failed to inspect Fuse.Enumerable.plugin');
+    this.assert('#<Enumerable:[]>' != fuse.Object.inspect(fuse.Enumerable.plugin),
+      'Failed to inspect fuse.Enumerable.plugin');
   },
 
   'testEventInspect': function() {
-    this.assert('[object Event]' != Fuse.Object.inspect(Event.Methods),
+    this.assert('[object Event]' != fuse.Object.inspect(Event.Methods),
       'Failed to inspect Event.Methods');
   },
 
@@ -83,51 +83,51 @@ new Test.Unit.Runner({
       $H(mixed_dont_enum).inspect());
 
     this.assertNothingRaised(
-      function() {Fuse.Object.inspect(Fuse.Hash.plugin) },
-      'Failed to inspect Fuse.Hash.plugin');
+      function() {fuse.Object.inspect(fuse.Hash.plugin) },
+      'Failed to inspect fuse.Hash.plugin');
   },
 
   'testObjectInspect': function() {
-    this.assertEqual('undefined', Fuse.Object.inspect());
-    this.assertEqual('undefined', Fuse.Object.inspect(undef));
-    this.assertEqual('null',      Fuse.Object.inspect(null));
-    this.assertEqual('[]',        Fuse.Object.inspect([]));
+    this.assertEqual('undefined', fuse.Object.inspect());
+    this.assertEqual('undefined', fuse.Object.inspect(undef));
+    this.assertEqual('null',      fuse.Object.inspect(null));
+    this.assertEqual('[]',        fuse.Object.inspect([]));
 
-    this.assertEqual("'foo\\\\b\\\'ar'",  Fuse.Object.inspect('foo\\b\'ar'));
-    this.assertNothingRaised(function() { Fuse.Object.inspect(window.Node) });
+    this.assertEqual("'foo\\\\b\\\'ar'",  fuse.Object.inspect('foo\\b\'ar'));
+    this.assertNothingRaised(function() { fuse.Object.inspect(window.Node) });
 
     // test Object object
     this.assertEqual("{'a': 'A', 'b': 'B', 'c': 'C'}",
-      Fuse.Object.inspect({ 'a': 'A', 'b': 'B', 'c': 'C' }), 'Object object');
+      fuse.Object.inspect({ 'a': 'A', 'b': 'B', 'c': 'C' }), 'Object object');
   },
 
   'testStringInspect': function() {
     this.assertEqual('\'\'',
-      Fuse.String('').inspect());
+      fuse.String('').inspect());
 
     this.assertEqual('\'test\'',
-      Fuse.String('test').inspect());
+      fuse.String('test').inspect());
 
     this.assertEqual('\'test \\\'test\\\' "test"\'',
-      Fuse.String('test \'test\' "test"').inspect());
+      fuse.String('test \'test\' "test"').inspect());
 
     this.assertEqual('\"test \'test\' \\"test\\"\"',
-      Fuse.String('test \'test\' "test"').inspect(true));
+      fuse.String('test \'test\' "test"').inspect(true));
 
     this.assertEqual('\'\\b\\t\\n\\f\\r"\\\\\'',
-      Fuse.String('\b\t\n\f\r"\\').inspect());
+      fuse.String('\b\t\n\f\r"\\').inspect());
 
     this.assertEqual('\"\\b\\t\\n\\f\\r\\"\\\\\"',
-      Fuse.String('\b\t\n\f\r"\\').inspect(true));
+      fuse.String('\b\t\n\f\r"\\').inspect(true));
 
     this.assertEqual('\'\\b\\t\\n\\f\\r\'',
-      Fuse.String('\x08\x09\x0a\x0c\x0d').inspect());
+      fuse.String('\x08\x09\x0a\x0c\x0d').inspect());
 
     this.assertEqual('\'\\u001a\'',
-      Fuse.String('\x1a').inspect());
+      fuse.String('\x1a').inspect());
 
     this.assertNothingRaised(
-      function() {Fuse.Object.inspect(Fuse.String.plugin) },
-      'Failed to inspect Fuse.String.plugin');
+      function() {fuse.Object.inspect(fuse.String.plugin) },
+      'Failed to inspect fuse.String.plugin');
   }
 });

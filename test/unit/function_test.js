@@ -4,7 +4,7 @@ new Test.Unit.Runner({
     function methodWithoutArguments() { return this.hi };
     function methodWithArguments() { return this.hi + ',' + $A(arguments).join(',') };
 
-    var bind = Fuse.Function.bind, func = Fuse.emptyFunction;
+    var bind = fuse.Function.bind, func = fuse.emptyFunction;
 
     this.assertIdentical(func, bind(func));
     this.assertIdentical(func, bind(func, undef));
@@ -37,8 +37,8 @@ new Test.Unit.Runner({
     },
 
   'testFunctionBindAsEventListener': function() {
-    var bind = Fuse.Function.bind,
-     bindAsEventListener = Fuse.Function.bindAsEventListener;
+    var bind = fuse.Function.bind,
+     bindAsEventListener = fuse.Function.bindAsEventListener;
 
     var tobj = new TestObj();
     var eventTest = { 'test': true };
@@ -72,7 +72,7 @@ new Test.Unit.Runner({
     function split(delimiter, string) { return string.split(delimiter) };
     function methodWithArguments()    { return $A(arguments).join(',') };
 
-    var curry = Fuse.Function.curry,
+    var curry = fuse.Function.curry,
      splitOnColons = curry(split, ':'),
      curried = curry(methodWithArguments, 'arg1');
 
@@ -98,7 +98,7 @@ new Test.Unit.Runner({
     function delayedFunctionWithArgs() { window.delayedWithArgs = $A(arguments).join(' ') };
     function lazyDelayedFunctionWithArgs() { window.lazyDelayed = $A(arguments).join(' ') };
 
-    var delay = Fuse.Function.delay;
+    var delay = fuse.Function.delay;
     window.delayed = window.lazyDelayed = undef;
 
     delay(delayedFunction, 0.8);
@@ -128,25 +128,25 @@ new Test.Unit.Runner({
   'testFunctionWrap': function() {
     function sayHello() { return 'hello world' }
 
-    var wrap = Fuse.Function.wrap;
+    var wrap = fuse.Function.wrap;
     this.assertEqual('HELLO WORLD', wrap(sayHello, function(proceed) {
       return proceed().toUpperCase();
     })());
 
-    var temp = Fuse.String.plugin.capitalize;
-    Fuse.String.plugin.capitalize = wrap(
-      Fuse.String.plugin.capitalize,
+    var temp = fuse.String.plugin.capitalize;
+    fuse.String.plugin.capitalize = wrap(
+      fuse.String.plugin.capitalize,
       function(proceed, eachWord) {
         if (eachWord && this.contains(' '))
           return this.split(' ').map(function(str){ return str.capitalize() }).join(' ');
         return proceed();
     });
 
-    this.assertEqual('Hello world', Fuse.String('hello world').capitalize());
-    this.assertEqual('Hello World', Fuse.String('hello world').capitalize(true));
-    this.assertEqual('Hello',       Fuse.String('hello').capitalize());
+    this.assertEqual('Hello world', fuse.String('hello world').capitalize());
+    this.assertEqual('Hello World', fuse.String('hello world').capitalize(true));
+    this.assertEqual('Hello',       fuse.String('hello').capitalize());
 
-    Fuse.String.plugin.capitalize = temp;
+    fuse.String.plugin.capitalize = temp;
 
     // test lazy defined syntax support
     var lazy = { 'test': function() { window.lazyDelayed = 'old' } };
@@ -163,7 +163,7 @@ new Test.Unit.Runner({
     function deferredFunctionWithArgs() { window.deferredWithArgs = $A(arguments).join(' ') };
     function lazyDefferedFunctionWithArgs() { window.lazyDeffered = $A(arguments).join(' ') };
 
-    var defer = Fuse.Function.defer;
+    var defer = fuse.Function.defer;
     window.deferred = window.lazyDeferred = undef;
 
     defer(deferredFunction);
@@ -196,7 +196,7 @@ new Test.Unit.Runner({
   },
 
   'testFunctionMethodize': function() {
-    var methodize = Fuse.Function.methodize;
+    var methodize = fuse.Function.methodize;
 
     var Foo = { 'bar': function(baz) { return baz } };
     var baz = { 'quux': methodize(Foo.bar) };
@@ -208,7 +208,7 @@ new Test.Unit.Runner({
     // test lazy defined syntax support
     var lazy = { 'test': function() { return 'old' } };
     lazy.methodized = methodize(['test', lazy]);
-    lazy.test = Fuse.K;
+    lazy.test = fuse.K;
 
     this.assertEqual(lazy, lazy.methodized(), 'lazy defined method');
   }

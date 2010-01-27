@@ -1,6 +1,6 @@
   /*----------------------------- LANG: FUSEBOX ------------------------------*/
 
-  Fuse.Fusebox = (function() {
+  fuse.Fusebox = (function() {
 
     var SKIP_METHODS_RETURNING_ARRAYS,
 
@@ -79,7 +79,7 @@
 
           try {
             (idoc = global.frames[name].document).open();
-            idoc.write('<script>parent.Fuse.' + expando + ' = this;<\/script>');
+            idoc.write('<script>parent.fuse.' + expando + ' = this;<\/script>');
             idoc.close();
           } catch (e) {
             // Opera 9.25 throws security error when trying to write to an iframe
@@ -88,8 +88,8 @@
             throw new Error('Fusebox failed to create a sandbox by iframe.');
           }
 
-          result = global.Fuse[expando];
-          delete global.Fuse[expando];
+          result = global.fuse[expando];
+          delete global.fuse[expando];
 
           cache.push(iframe);
           return result;
@@ -906,7 +906,7 @@
 
       function updateGenerics(deep) {
         var Klass = this;
-        if (deep) Fuse.updateGenerics(Klass, deep);
+        if (deep) fuse.updateGenerics(Klass, deep);
         else Obj._each(Klass.prototype, function(value, key, proto) {
           if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
             Klass[key] = createGeneric(proto, key);
@@ -923,11 +923,9 @@
 
       // assign sandboxed natives to Fuse and add `updateGeneric` methods
       while (key = arguments[++i]) {
-        (Fuse[key] = fb[key]).updateGenerics = updateGenerics;
+        (fuse[key] = fb[key]).updateGenerics = updateGenerics;
       }
 
-      // alias
-      Fuse.List = Fuse.Array;
     })('Array', 'Boolean', 'Date', 'Function', 'Number', 'Object', 'RegExp', 'String');
 
     return Fusebox;

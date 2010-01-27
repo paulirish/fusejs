@@ -1,8 +1,8 @@
 new Test.Unit.Runner({
 
   'testEnvAgent': function() {
-    var results = Fuse.List();
-    Fuse.Object.each(Fuse.Env.Agent, function(value, key) {
+    var results = fuse.Array();
+    fuse.Object.each(fuse.env.agent, function(value, key) {
       if (typeof value === 'boolean') results.push(value);
     });
 
@@ -20,20 +20,20 @@ new Test.Unit.Runner({
 
     if (window.navigator.userAgent.indexOf('AppleWebKit/') > -1) {
       this.info('Running on WebKit');
-      this.assert(Fuse.Env.Agent.WebKit);
+      this.assert(fuse.env.agent.WebKit);
     }
     if (!!window.opera) {
       this.info('Running on Opera');
-      this.assert(Fuse.Env.Agent.Opera);
+      this.assert(fuse.env.agent.Opera);
     }
     if (!!(window.attachEvent && !window.opera)) {
       this.info('Running on IE');
-      this.assert(Fuse.Env.Agent.IE);
+      this.assert(fuse.env.agent.IE);
     }
     if (window.navigator.userAgent.indexOf('Gecko') > -1 &&
         window.navigator.userAgent.indexOf('KHTML') == -1) {
       this.info('Running on Gecko');
-      this.assert(Fuse.Env.Agent.Gecko);
+      this.assert(fuse.env.agent.Gecko);
     }
   }
 });

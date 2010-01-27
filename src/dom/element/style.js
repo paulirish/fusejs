@@ -6,7 +6,7 @@
       'width':  1
     },
 
-    FLOAT_TRANSLATIONS = typeof Fuse._docEl.style.styleFloat !== 'undefined'
+    FLOAT_TRANSLATIONS = typeof fuse._docEl.style.styleFloat !== 'undefined'
       ? { 'float': 'styleFloat', 'cssFloat': 'styleFloat' }
       : { 'float': 'cssFloat' },
 
@@ -22,7 +22,7 @@
       'ex': 1
     },
 
-    camelize = Fuse.String.plugin.camelize,
+    camelize = fuse.String.plugin.camelize,
 
     matchOpacity = /opacity:\s*(\d?\.?\d*)/,
 
@@ -94,7 +94,7 @@
     if (!Feature('ELEMENT_COMPUTED_STYLE') && !Feature('ELEMENT_CURRENT_STYLE'))
       plugin.getStyle = function getStyle(name) {
         var result = getValue(this, camelize.call(name));
-        return result === null ? result : Fuse.String(result);
+        return result === null ? result : fuse.String(result);
       };
 
     // Opera 9.2x
@@ -110,11 +110,11 @@
           dim = name == 'width' ? 'Width' : 'Height';
           result = getComputedStyle(element, name);
           if ((parseFloat(result) || 0) === element['offset' + dim])
-            return Fuse.String(Element['get' + dim](element, 'content') + 'px');
+            return fuse.String(Element['get' + dim](element, 'content') + 'px');
         }
 
         result = getComputedStyle(element, name);
-        return result === null ? result : Fuse.String(result);
+        return result === null ? result : fuse.String(result);
       };
 
     // Firefox, Safari, Opera 9.5+
@@ -126,7 +126,7 @@
         if (isNull(element, name)) return null;
 
         result = getComputedStyle(element, name);
-        return result === null ? result : Fuse.String(result);
+        return result === null ? result : fuse.String(result);
       };
 
     // IE
@@ -135,7 +135,7 @@
       // The element.offsetHeight will give us the font size in px units.
       // Inspired by Google Doctype:
       // http://code.google.com/p/doctype/source/browse/trunk/goog/style/style.js#1146
-      var span = Fuse._doc.createElement('span');
+      var span = fuse._doc.createElement('span');
       span.style.cssText = 'position:absolute;visibility:hidden;height:1em;lineHeight:0;padding:0;margin:0;border:0;';
       span.innerHTML = 'M';
 
@@ -147,7 +147,7 @@
         if (name == 'opacity') {
           result = String(plugin.getOpacity.call(this));
           if (result.indexOf('.') < 0) result += '.0';
-          return Fuse.String(result);
+          return fuse.String(result);
         }
 
         element = this.raw || this;
@@ -162,7 +162,7 @@
         // handle auto values
         if (result === 'auto') {
           if (DIMENSION_NAMES[name] && currStyle.display !== 'none')
-            return Fuse.String(this['get' +
+            return fuse.String(this['get' +
               (name == 'width' ? 'Width' : 'Height')]('content') + 'px');
           return null;
         }
@@ -177,7 +177,7 @@
             if (unit === '%') {
               size = element.appendChild(span).offsetHeight;
               element.removeChild(span);
-              return Fuse.String(Math.round(size) + 'px');
+              return fuse.String(Math.round(size) + 'px');
             }
             else if (RELATIVE_CSS_UNITS[unit])
               elemStyle = (element = element.parentNode).style;
@@ -199,7 +199,7 @@
           elemStyle[pos] = stylePos;
           runtimeStyle[pos] = runtimePos;
         }
-        return Fuse.String(result);
+        return fuse.String(result);
       }
 
       return getStyle;
@@ -214,7 +214,7 @@
   // Note: For performance we normalize all spaces to \x20.
   // http://www.w3.org/TR/html5/infrastructure.html#space-character
   (function(plugin) {
-    var split = Fuse.String.plugin.split,
+    var split = fuse.String.plugin.split,
      matchEdgeSpaces = /[\t\n\r\f]/g,
      matchExtraSpaces = /\x20{2,}/g;
 
@@ -236,7 +236,7 @@
 
         return split.call(cn, ' ');
       }
-      return Fuse.List();
+      return fuse.Array();
     };
 
     plugin.hasClassName = function hasClassName(className) {
@@ -295,14 +295,14 @@
 
     plugin.getOpacity = (function() {
       var getOpacity = function getOpacity() {
-        return Fuse.Number(parseFloat(this.style.opacity));
+        return fuse.Number(parseFloat(this.style.opacity));
       };
 
       if (Feature('ELEMENT_COMPUTED_STYLE')) {
         getOpacity = function getOpacity() {
           var element = this.raw || this,
            style = element.ownerDocument.defaultView.getComputedStyle(element, null);
-          return Fuse.Number(parseFloat(style
+          return fuse.Number(parseFloat(style
             ? style.opacity
             : element.style.opacity));
         };
@@ -312,7 +312,7 @@
           var element = this.raw || this,
            currStyle = element.currentStyle || element.style,
            result = currStyle['filter'].match(/alpha\(opacity=(.*)\)/);
-          return Fuse.Number(result && result[1] ? parseFloat(result[1]) / 100 : 1.0);
+          return fuse.Number(result && result[1] ? parseFloat(result[1]) / 100 : 1.0);
         };
       }
       return getOpacity;
@@ -329,7 +329,7 @@
 
       // TODO: Is this really needed or the best approach ?
       // Sniff for Safari 2.x
-      if (Fuse.Env.Agent.WebKit && (userAgent.match(/AppleWebKit\/(\d+)/) || [])[1] < 500) {
+      if (fuse.env.agent.WebKit && (userAgent.match(/AppleWebKit\/(\d+)/) || [])[1] < 500) {
         var __setOpacity = setOpacity;
 
         setOpacity = function setOpacity(value) {
@@ -348,7 +348,7 @@
         };
       }
       // Sniff Firefox 1.5.0.x
-      else if (Fuse.Env.Agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
+      else if (fuse.env.agent.Gecko && /rv:1\.8\.0/.test(userAgent)) {
         setOpacity = function setOpacity(value) {
           this.style.opacity = (value == 1) ? 0.999999 :
             (value == '' && isString(value)) ? '' :
@@ -385,7 +385,7 @@
     })();
 
     plugin.isVisible = function isVisible() {
-      if (!Fuse._body) return false;
+      if (!fuse._body) return false;
 
       var isVisible = function isVisible() {
         // handles IE and the fallback solution
@@ -481,12 +481,12 @@
           if (isGettingSum) {
             result = getSum(this, options);
             elemStyle.cssText = backup;
-            return Fuse.Number(result);
+            return fuse.Number(result);
           }
           result = (this.raw || this)[property];
           elemStyle.cssText = backup;
         }
-        else if (isGettingSum) return Fuse.Number(getSum(this, options));
+        else if (isGettingSum) return fuse.Number(getSum(this, options));
 
         else result = (this.raw || this)[property];
 
@@ -501,7 +501,7 @@
         if (!options.padding)
           result -= getSum(this, 'padding');
 
-        return Fuse.Number(result);
+        return fuse.Number(result);
       }
 
       var dim = i++ ? 'Width' : 'Height',

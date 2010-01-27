@@ -4,7 +4,7 @@ new Test.Unit.Runner({
     if (documentViewportProperties) return;
     // Based on properties check from http://www.quirksmode.org/viewport/compatibility.html
     documentViewportProperties = {
-      'properties': Fuse.Array(
+      'properties': fuse.Array(
         'self.pageXOffset',
         'self.pageYOffset',
         'self.screenX',
@@ -33,8 +33,8 @@ new Test.Unit.Runner({
         'document.body.offsetWidth',
         'document.body.offsetTop',
         'document.body.offsetLeft'
-      ).inject(Fuse.Array(), function(properties, prop) {
-        prop = Fuse.String(prop);
+      ).inject(fuse.Array(), function(properties, prop) {
+        prop = fuse.String(prop);
         if (!self.screen && prop.contains('self.screen') ||
             !document.body && prop.contains('document.body')) return properties;
 
@@ -45,7 +45,7 @@ new Test.Unit.Runner({
       }),
 
       'inspect': function() {
-        var props = Fuse.Array();
+        var props = fuse.Array();
         this.properties.each(function(prop) {
           if (eval(prop)) props[prop] = eval(prop);
         }, this);
@@ -60,18 +60,18 @@ new Test.Unit.Runner({
   },
 
   'testElementExtend': function() {
-    Fuse.Dom.Element.extend({ 'cheeseCake': function() { return 'Cheese cake' } });
-    this.assertRespondsTo('cheeseCake', Fuse('<div>'));
+    fuse.dom.Element.extend({ 'cheeseCake': function() { return 'Cheese cake' } });
+    this.assertRespondsTo('cheeseCake', fuse('<div>'));
 
-    Fuse.Dom.extendByTag('DIV', { 'toOutput': Fuse.Dom.Element.plugin.inspect });
+    fuse.dom.extendByTag('DIV', { 'toOutput': fuse.dom.Element.plugin.inspect });
     this.assertEqual('<div id="testdiv">', $('testdiv').toOutput(),
       'Should extend element with a `toOutput` method.');
 
     // remove toString addition
-    delete Fuse.Dom.DivElement.plugin.toOutput;
+    delete fuse.dom.DivElement.plugin.toOutput;
   },
 
-  'testFuseGet': function() {
+  'testfuseGet': function() {
     var element = $('element_extend_test');
     this.assertRespondsTo('show', element);
 
@@ -89,39 +89,39 @@ new Test.Unit.Runner({
       var element = document.createElement(tag),
        nodeName = element.nodeName.toUpperCase();
 
-      this.assertEqual(element, Fuse.get(element).raw,
-        nodeName + ' failed to return from Fuse(element)');
+      this.assertEqual(element, fuse.get(element).raw,
+        nodeName + ' failed to return from fuse(element)');
 
       // test if elements are extended
       this.assertRespondsTo('show',
-        Fuse.get(element),
+        fuse.get(element),
         nodeName + ' failed to be extended.');
     }, this);
 
     // ensure text nodes don't get extended
-    Fuse.Array(null, '', 'a', 'aa').each(function(content) {
-      var textNode = Fuse.get(document.createTextNode(content));
+    fuse.Array(null, '', 'a', 'aa').each(function(content) {
+      var textNode = fuse.get(document.createTextNode(content));
       this.assert(typeof textNode.show === 'undefined');
     }, this);
 
     // don't extend XML documents
     var xmlDoc = (new DOMParser()).parseFromString('<note><to>Sam</to></note>', 'text/xml');
-    this.assertUndefined(Fuse.get(xmlDoc.firstChild).hide);
+    this.assertUndefined(fuse.get(xmlDoc.firstChild).hide);
   },
 
   'testFuseGetReextendsDiscardedNodes': function() {
-    this.assertRespondsTo('show', Fuse.get('discard_1'));
+    this.assertRespondsTo('show', fuse.get('discard_1'));
 
-    $('element_reextend_test').innerHTML += '<div id="discard_2"></div>';
-    this.assertRespondsTo('show', Fuse.get('discard_1'));
+    $('element_reextend_test').raw.innerHTML += '<div id="discard_2"></div>';
+    this.assertRespondsTo('show', fuse.get('discard_1'));
   },
 
   'testFuseGetAfterAddMethods': function() {
-    var span = Fuse.Dom.Element('span');
-    Fuse.Dom.Element.extend({ 'testMethod': Fuse.K });
+    var span = fuse.dom.Element('span');
+    fuse.dom.Element.extend({ 'testMethod': fuse.K });
 
-    this.assertRespondsTo('testMethod', Fuse.get(span));
-    delete Fuse.Dom.Element.plugin.testMethod;
+    this.assertRespondsTo('testMethod', fuse.get(span));
+    delete fuse.dom.Element.plugin.testMethod;
   },
 
   'testDollarFunction': function() {
@@ -156,7 +156,7 @@ new Test.Unit.Runner({
 
   'testElementInsertWithHTML': function() {
     var container, main, msg,
-     documents = Fuse.Array(document, getIframeDocument());
+     documents = fuse.Array(document, getIframeDocument());
 
     if (!isIframeAccessible()) documents.pop();
 
@@ -189,7 +189,7 @@ new Test.Unit.Runner({
 
   'testElementInsertWithDOMNode': function() {
     var container, main, msg,
-     documents = Fuse.Array(document, getIframeDocument());
+     documents = fuse.Array(document, getIframeDocument());
 
     if (!isIframeAccessible()) documents.pop();
 
@@ -225,7 +225,7 @@ new Test.Unit.Runner({
   },
 
   'testElementInsertWithToElementMethod': function() {
-    var main, msg, documents = Fuse.Array(document, getIframeDocument());
+    var main, msg, documents = fuse.Array(document, getIframeDocument());
     if (!isIframeAccessible()) documents.pop();
 
     documents.each(function(context) {
@@ -243,7 +243,7 @@ new Test.Unit.Runner({
   },
 
   'testElementInsertWithToHTMLMethod': function() {
-    var main, msg, documents = Fuse.Array(document, getIframeDocument());
+    var main, msg, documents = fuse.Array(document, getIframeDocument());
     if (!isIframeAccessible()) documents.pop();
 
     documents.each(function(context) {
@@ -263,7 +263,7 @@ new Test.Unit.Runner({
   },
 
   'testElementInsertWithNonString': function() {
-    var main, msg, documents = Fuse.Array(document, getIframeDocument());
+    var main, msg, documents = fuse.Array(document, getIframeDocument());
     if (!isIframeAccessible()) documents.pop();
 
     documents.each(function(context) {
@@ -277,7 +277,7 @@ new Test.Unit.Runner({
 
   'testElementInsertInTables': function() {
     var element, table, cell, msg,
-     documents = Fuse.Array(document, getIframeDocument());
+     documents = fuse.Array(document, getIframeDocument());
 
     if (!isIframeAccessible()) documents.pop();
 
@@ -376,7 +376,7 @@ new Test.Unit.Runner({
       'TOP (uppercase position)');
 
     $('element-insertions-multiple-main').insert({
-      'top': '1', 'bottom': 2, 'before': Fuse('<p>').update('3'), 'after': '4'
+      'top': '1', 'bottom': 2, 'before': fuse('<p>').update('3'), 'after': '4'
     });
 
     this.assert(getInnerHTML('element-insertions-multiple-main').startsWith('1'));
@@ -395,7 +395,7 @@ new Test.Unit.Runner({
 
   'testElementInsertScriptElement': function() {
     var head = document.getElementsByTagName('HEAD')[0],
-     script = Fuse('script', { 'type': 'text/javascript' });
+     script = fuse('script', { 'type': 'text/javascript' });
 
     script.raw.text = 'window.__testInsertScriptElement = true;';
     $(head).insert({ 'top': script });
@@ -407,8 +407,8 @@ new Test.Unit.Runner({
   },
 
   'testNewElementInsert': function() {
-    var container = Fuse('<div>'),
-     element = Fuse('<div>');
+    var container = fuse('<div>'),
+     element = fuse('<div>');
     container.insert(element);
 
     element.insert({ 'before': '<p>a paragraph</p>' });
@@ -425,7 +425,7 @@ new Test.Unit.Runner({
   },
 
   'testElementWrap': function() {
-    var element = $('wrap'), parent = Fuse('<div>');
+    var element = $('wrap'), parent = fuse('<div>');
 
     element.wrap();
     this.assert(getInnerHTML('wrap-container').startsWith('<div><p'));
@@ -434,7 +434,7 @@ new Test.Unit.Runner({
     this.assert(getInnerHTML('wrap-container').startsWith('<div><div><p'));
 
     element.wrap(parent);
-    this.assert(Fuse.Object.isFunction(parent.setStyle));
+    this.assert(fuse.Object.isFunction(parent.setStyle));
     this.assert(getInnerHTML('wrap-container').startsWith('<div><div><div><p'));
 
     element.wrap('div', { 'className': 'wrapper' });
@@ -443,22 +443,22 @@ new Test.Unit.Runner({
     element.wrap({ 'className': 'other-wrapper' });
     this.assert(element.up().hasClassName('other-wrapper'));
 
-    element.wrap(Fuse('<div>'), { 'className': 'yet-other-wrapper' });
+    element.wrap(fuse('<div>'), { 'className': 'yet-other-wrapper' });
     this.assert(element.up().hasClassName('yet-other-wrapper'));
 
-    var orphan = Fuse('<p>'), div = Fuse('<div>');
+    var orphan = fuse('<p>'), div = fuse('<div>');
     orphan.wrap(div);
     this.assertEqual(orphan.raw.parentNode, div.raw);
   },
 
   'testElementWrapReturnsWrapper': function() {
-    var element = Fuse('<div>'), wrapper = element.wrap('div');
+    var element = fuse('<div>'), wrapper = element.wrap('div');
     this.assertNotEqual(element, wrapper);
     this.assertEqual(element.up(), wrapper);
   },
 
   'testElementIsDetached': function() {
-    var div   = Fuse('<div>'),
+    var div   = fuse('<div>'),
      fragment = document.createDocumentFragment(),
      clone    = $($('testdiv').raw.cloneNode(true));
 
@@ -500,7 +500,7 @@ new Test.Unit.Runner({
     this.assert(!$('test-nestee-hidden-visible').isVisible(),
       $('test-nestee-hidden-visible').inspect());
 
-    this.assert(!Fuse('<div>').isVisible(),
+    this.assert(!fuse('<div>').isVisible(),
       'element fragment');
 
     $('dimensions-tr').hide();
@@ -545,25 +545,25 @@ new Test.Unit.Runner({
   'testElementShow': function(){
     $('test-show-visible').show();
     this.assert($('test-show-visible').isVisible());
-    this.assert(Fuse.Object.isElement($('test-show-hidden').show().raw));
+    this.assert(fuse.Object.isElement($('test-show-hidden').show().raw));
     this.assert($('test-show-hidden').isVisible());
   },
 
   'testElementHide': function(){
     var element = $('test-hide-visible'),
-     data = Fuse.Dom.Data[element.getFuseId()];
+     data = fuse.dom.Data[element.getFuseId()];
 
     element.hide();
     this.assert(!element.isVisible());
     this.assertUndefined(data.madeHidden);
 
-    this.assert(Fuse.Object.isElement($('test-hide-hidden').hide().raw));
+    this.assert(fuse.Object.isElement($('test-hide-hidden').hide().raw));
     this.assert(!$('test-hide-hidden').isVisible());
   },
 
   'testHideAndShowWithInlineDisplay': function() {
     var element =  $('test-visible-inline'),
-     data = Fuse.Dom.Data[element.getFuseId()];
+     data = fuse.dom.Data[element.getFuseId()];
 
     element.show();
     this.assertEqual('inline', element.style.display,
@@ -626,13 +626,13 @@ new Test.Unit.Runner({
     $('testdiv').update()
     this.assertEqual('', $('testdiv').raw.innerHTML);
 
-    Fuse.Dom.Element.update('testdiv', '&nbsp;');
-    this.assert(!Fuse.String.isEmpty($('testdiv').raw.innerHTML));
+    fuse.dom.Element.update('testdiv', '&nbsp;');
+    this.assert(!fuse.String.isEmpty($('testdiv').raw.innerHTML));
   },
 
   'testElementUpdateScriptElement': function() {
     var head = document.getElementsByTagName('head')[0],
-     script = Fuse('script', { 'type': 'text/javascript' });
+     script = fuse('script', { 'type': 'text/javascript' });
 
     $(head).insert(script);
 
@@ -689,7 +689,7 @@ new Test.Unit.Runner({
       'Failed complex in table row.');
 
     // test passing object with "toElement" method
-    var newTD = Fuse('TD', { 'id': 'i_am_another_td' });
+    var newTD = fuse('TD', { 'id': 'i_am_another_td' });
     newTD.insert(document.createTextNode('more tests'));
     $('third_row').update({ 'toElement': function() { return newTD.raw; } });
 
@@ -727,7 +727,7 @@ new Test.Unit.Runner({
       'Failed to update colgroup.');
 
     // test passing object with "toElement" method
-    var newCol = Fuse('col', { 'className': 'baz' });
+    var newCol = fuse('col', { 'className': 'baz' });
     colgroup.update({ 'toElement': function() { return newCol.raw; } });
 
     this.assertEqual(newCol, colgroup.down(),
@@ -742,7 +742,7 @@ new Test.Unit.Runner({
       'Failed to update table element.');
 
     // test passing object with "toElement" method
-    var newTR = Fuse('<tr>'), newTD = Fuse('<td>');
+    var newTR = fuse('<tr>'), newTD = fuse('<td>');
     newTR.insert(newTD).insert(document.createTextNode('something else'));
 
     $('table').update({ 'toElement': function() { return newTR.raw; } });
@@ -760,7 +760,7 @@ new Test.Unit.Runner({
     this.assertEqual('C', select.getValue(), 'Failed to update opt-group element');
 
     // test passing object with "toElement" method
-    var newOption = Fuse('option', { 'value': 'E', 'text': 'option E', 'selected': true });
+    var newOption = fuse('option', { 'value': 'E', 'text': 'option E', 'selected': true });
     select.down('optgroup').update({ 'toElement': function() { return newOption.raw; } });
 
     this.assertEqual('E', select.getValue(), 'Failed to update opt-group element via `toElement`.');
@@ -775,7 +775,7 @@ new Test.Unit.Runner({
       'Failed to update select element.');
 
     // test passing object with "toElement" method
-    var newOption = Fuse('option', { 'value': '2', 'text': 'option 2', 'selected': true });
+    var newOption = fuse('option', { 'value': '2', 'text': 'option 2', 'selected': true });
     select.update({ 'toElement': function() { return newOption.raw; } });
 
     this.assertEqual('2',
@@ -784,7 +784,7 @@ new Test.Unit.Runner({
   },
 
   'testElementUpdateWithDOMNode': function() {
-    $('testdiv').update(Fuse('<div>').insert('bla'));
+    $('testdiv').update(fuse('<div>').insert('bla'));
     this.assertEqual('<div>bla</div>', getInnerHTML('testdiv'));
   },
 
@@ -856,7 +856,7 @@ new Test.Unit.Runner({
       getInnerHTML('testform-replace-container'));
 
     // test replace on fragments
-    var div = Fuse('<div>').update('<div></div>');
+    var div = fuse('<div>').update('<div></div>');
     this.assertNothingRaised(function(){ div.down().replace('<span></span>') },
       'errored on a fragment');
 
@@ -865,7 +865,7 @@ new Test.Unit.Runner({
   },
 
   'testElementReplaceWithScriptElement': function() {
-    var script = Fuse('script', { 'type': 'text/javascript' });
+    var script = fuse('script', { 'type': 'text/javascript' });
     script.update('window.__testReplaceWithScriptElement = true;');
 
     $('testdiv-replace-6').replace(script);
@@ -875,7 +875,7 @@ new Test.Unit.Runner({
     window.__testReplaceWithScriptElement = null;
 
     var fragment = document.createDocumentFragment();
-    fragment.appendChild(Fuse('script', { 'type': 'text/javascript' })
+    fragment.appendChild(fuse('script', { 'type': 'text/javascript' })
       .update('window.__testReplaceWithScriptInFragment = true;').raw);
 
     $('testdiv-replace-7').replace(fragment);
@@ -952,8 +952,8 @@ new Test.Unit.Runner({
     this.assertElementsMatch(ancestors,
       'ul', 'li', 'ul#navigation_test', 'div#nav_tests_isolator', 'body', 'html');
 
-    var dummy = Fuse('<div>');
-    dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
+    var dummy = fuse('<div>');
+    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
 
     this.assertRespondsTo('show', dummy.down().getAncestors()[0]);
   },
@@ -965,12 +965,12 @@ new Test.Unit.Runner({
 
     this.assertElementsMatch($('navigation_test_f').getDescendants(), 'em');
 
-    var dummy = Fuse('<div>');
-    dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
+    var dummy = fuse('<div>');
+    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
     this.assertRespondsTo('show', dummy.getDescendants()[0]);
 
-    var input = Fuse('<input type="text">');
-    this.assert(Fuse.Array.isArray(input.getDescendants()),
+    var input = fuse('<input type="text">');
+    this.assert(fuse.Array.isArray(input.getDescendants()),
       'Did not return an array.');
   },
 
@@ -989,8 +989,8 @@ new Test.Unit.Runner({
     this.assertEnumEqual([],
       $('navigation_test_next_sibling').getChildren());
 
-    var dummy = Fuse('<div>');
-    dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
+    var dummy = fuse('<div>');
+    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
     this.assertRespondsTo('show', dummy.getChildren()[0]);
   },
 
@@ -1000,8 +1000,8 @@ new Test.Unit.Runner({
 
     this.assertElementsMatch($('navigation_test_f').getPreviousSiblings(), 'li');
 
-    var dummy = Fuse('<div>');
-    dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
+    var dummy = fuse('<div>');
+    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down(1).getPreviousSiblings()[0]);
   },
 
@@ -1011,8 +1011,8 @@ new Test.Unit.Runner({
 
     this.assertElementsMatch($('navigation_test_f').getNextSiblings());
 
-    var dummy = Fuse('<div>');
-    dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
+    var dummy = fuse('<div>');
+    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down().getNextSiblings()[0]);
   },
 
@@ -1021,8 +1021,8 @@ new Test.Unit.Runner({
       'div#nav_test_first_sibling', 'div', 'p.test',
       'span#nav_test_prev_sibling', 'div#navigation_test_next_sibling', 'p');
 
-    var dummy = Fuse('<div>');
-    dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
+    var dummy = fuse('<div>');
+    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down().getSiblings()[0]);
   },
 
@@ -1057,8 +1057,8 @@ new Test.Unit.Runner({
     this.assertElementsMatch(element.up('li').getSiblings(), 'li.first', 'li', 'li.last');
     this.assertElementMatches(element.up('.non-existant, ul'), 'ul');
 
-    var dummy = Fuse('<div>');
-    dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
+    var dummy = fuse('<div>');
+    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down().up());
   },
 
@@ -1072,8 +1072,8 @@ new Test.Unit.Runner({
     this.assertElementMatches(element.down('ul').down('li', 1), 'li#navigation_test_f');
     this.assertElementMatches(element.down('.non-existant, .first'), 'li.first');
 
-    var dummy = Fuse('<div>');
-    dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
+    var dummy = fuse('<div>');
+    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down());
 
     // Test INPUT elements because Element#down calls Element#select
@@ -1093,8 +1093,8 @@ new Test.Unit.Runner({
     this.assertEqual(undef, element.previous(3));
     this.assertEqual(undef, $('navigation_test').down().previous());
 
-    var dummy = Fuse('<div>');
-    dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
+    var dummy = fuse('<div>');
+    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down(1).previous());
   },
 
@@ -1110,13 +1110,13 @@ new Test.Unit.Runner({
     this.assertEqual(undef, element.next(3));
     this.assertEqual(undef, element.next(2).next());
 
-    var dummy = Fuse('<div>');
-    dummy.raw.innerHTML = Fuse.String.times('<div></div>', 3);
+    var dummy = fuse('<div>');
+    dummy.raw.innerHTML = fuse.String.times('<div></div>', 3);
     this.assertRespondsTo('show', dummy.down().next());
   },
 
   'testElementMakeClipping': function() {
-    var chained = Fuse('<div>');
+    var chained = fuse('<div>');
 
     this.assertEqual(chained, chained.makeClipping());
     this.assertEqual(chained, chained.makeClipping());
@@ -1126,7 +1126,7 @@ new Test.Unit.Runner({
     this.assertEqual(chained, chained.undoClipping());
     this.assertEqual(chained, chained.undoClipping().makeClipping());
 
-    Fuse.Array('hidden','visible','scroll').each( function(overflowValue) {
+    fuse.Array('hidden','visible','scroll').each( function(overflowValue) {
       var element = $('element_with_' + overflowValue + '_overflow');
       this.assertEqual(overflowValue, element.getStyle('overflow'));
 
@@ -1225,10 +1225,10 @@ new Test.Unit.Runner({
     this.assert(!$('great-grand-child').contains(document.body));
 
     // dynamically-created elements
-    $('ancestor').insert(Fuse('<div id="weird-uncle">'));
+    $('ancestor').insert(fuse('<div id="weird-uncle">'));
     this.assert($('ancestor').contains('weird-uncle'));
 
-    $(document.body).insert(Fuse('<div id="impostor">'));
+    $(document.body).insert(fuse('<div id="impostor">'));
     this.assert(!$('ancestor').contains('impostor'));
 
     this.assert($(document.documentElement).contains(document.body));
@@ -1302,7 +1302,7 @@ new Test.Unit.Runner({
   },
 
   'testElementSetOpacity': function() {
-    Fuse.Array(0, 0.1, 0.5, 0.999).each(function(opacity) {
+    fuse.Array(0, 0.1, 0.5, 0.999).each(function(opacity) {
       $('style_test_3').setOpacity(opacity);
       var realOpacity = $('style_test_3').getOpacity('opacity');
 
@@ -1319,7 +1319,7 @@ new Test.Unit.Runner({
     this.assert(
       $('style_test_3').setOpacity(0.9999999).getStyle('opacity') > 0.999);
 
-    if (Fuse.Env.Agent.IE) {
+    if (fuse.env.agent.IE) {
       var element = $('style_test_4');
       $('style_test_4').setOpacity(0.5);
 
@@ -1333,13 +1333,13 @@ new Test.Unit.Runner({
       this.assert(2, $('style_test_5').setOpacity(0.5)
         .getStyle('zoom'));
 
-      this.assert(0.5, Fuse('<div>').setOpacity(0.5)
+      this.assert(0.5, fuse('<div>').setOpacity(0.5)
         .getOpacity());
 
-      this.assert(2,   Fuse('<div>').setOpacity(0.5)
+      this.assert(2,   fuse('<div>').setOpacity(0.5)
         .setStyle('zoom: 2;').getStyle('zoom'));
 
-      this.assert(2,   Fuse('<div>').setStyle('zoom: 2;').setOpacity(0.5)
+      this.assert(2,   fuse('<div>').setStyle('zoom: 2;').setOpacity(0.5)
         .getStyle('zoom'));
     }
   },
@@ -1378,13 +1378,13 @@ new Test.Unit.Runner({
     this.assertEqual('1px',
       $('style_test_2').getStyle('margin-left'));
 
-    Fuse.Array('not_floating_none', 'not_floating_style', 'not_floating_inline')
+    fuse.Array('not_floating_none', 'not_floating_style', 'not_floating_inline')
       .each(function(element) {
         this.assertEqual('none', $(element).getStyle('float'));
         this.assertEqual('none', $(element).getStyle('cssFloat'));
       }, this);
 
-    Fuse.Array('floating_style','floating_inline')
+    fuse.Array('floating_style','floating_inline')
       .each(function(element) {
         this.assertEqual('left', $(element).getStyle('float'));
         this.assertEqual('left', $(element).getStyle('cssFloat'));
@@ -1405,7 +1405,7 @@ new Test.Unit.Runner({
     $('op3').setStyle({ 'opacity': 0 });
     this.assertEqual(0, $('op3').getStyle('opacity'));
 
-    if (Fuse.Env.IE) {
+    if (fuse.env.IE) {
       this.assertEqual('alpha(opacity=30)', $('op1').getStyle('filter'));
       this.assertEqual('progid:DXImageTransform.Microsoft.Blur(strength=10)alpha(opacity=30)',
         $('op2').getStyle('filter'));
@@ -1444,7 +1444,7 @@ new Test.Unit.Runner({
 
     // ensure units convert to px correctly
     var tests = {
-      'unit_px_test_1': Fuse.Array(
+      'unit_px_test_1': fuse.Array(
         $w('width 192'),
         $w('height 76'),
         $w('margin-top 64'),
@@ -1458,7 +1458,7 @@ new Test.Unit.Runner({
         $w('padding-right 64')
       ),
 
-      'unit_px_test_1_1': Fuse.Array(
+      'unit_px_test_1_1': fuse.Array(
         $w('width 115'),
         $w('height 77'),
         $w('font-size 38'),
@@ -1466,15 +1466,15 @@ new Test.Unit.Runner({
         $w('border-left-width 1')
       ),
 
-      'unit_px_test_2': Fuse.Array(
+      'unit_px_test_2': fuse.Array(
         $w('font-size 32')
       ),
 
-      'unit_px_test_2_1': Fuse.Array(
+      'unit_px_test_2_1': fuse.Array(
         $w('font-size 16')
       ),
 
-      'unit_px_test_2_1_1': Fuse.Array(
+      'unit_px_test_2_1_1': fuse.Array(
         $w('font-size 16')
       )
     };
@@ -1490,7 +1490,7 @@ new Test.Unit.Runner({
 
     // WebKit has a bug effecting the style marginRight
     // https://bugs.webkit.org/show_bug.cgi?id=13343
-    if (!Fuse.Env.Agent.WebKit) {
+    if (!fuse.env.agent.WebKit) {
       tests.unit_px_test_1.push($w('margin-right 39'));
     }
     else {
@@ -1529,8 +1529,8 @@ new Test.Unit.Runner({
 
   'testElementGetAttribute': function() {
     var attribFormIssues = $('attributes_with_issues_form');
-    this.assert(Fuse.Object.isString(attribFormIssues.getAttribute('action')));
-    this.assert(Fuse.Object.isString(attribFormIssues.getAttribute('id')));
+    this.assert(fuse.Object.isString(attribFormIssues.getAttribute('action')));
+    this.assert(fuse.Object.isString(attribFormIssues.getAttribute('id')));
 
     this.assertEqual('blah-class',
       attribFormIssues.getAttribute('class'));
@@ -1561,11 +1561,11 @@ new Test.Unit.Runner({
     this.assertEqual('original',
       $('cloned_element_attributes_issue').getAttribute('foo'));
 
-    Fuse.Array('href', 'accesskey', 'accesskey', 'title').each(function(attr) {
+    fuse.Array('href', 'accesskey', 'accesskey', 'title').each(function(attr) {
       this.assertEqual('', $('attributes_with_issues_2').getAttribute(attr));
     }, this);
 
-    Fuse.Array('checked','disabled','readonly','multiple').each(function(attr) {
+    fuse.Array('checked','disabled','readonly','multiple').each(function(attr) {
       this.assertEqual(attr, $('attributes_with_issues_' + attr).getAttribute(attr));
     }, this);
 
@@ -1719,14 +1719,14 @@ new Test.Unit.Runner({
     this.assertEqual('2', table.getAttribute('cellspacing'));
     this.assertEqual('3', table.getAttribute('cellpadding'));
 
-    var iframe = Fuse('iframe', { 'frameborder': 0 });
+    var iframe = fuse('iframe', { 'frameborder': 0 });
     this.assertEqual(0, parseInt(iframe.getAttribute('frameborder')));
 
     $('attributes_with_issues_form').setAttribute('encType', 'multipart/form-data');
     this.assertEqual('multipart/form-data',
       $('attributes_with_issues_form').getAttribute('encType'));
 
-    var theForm = Fuse('form',
+    var theForm = fuse('form',
       { 'name':'encTypeForm', 'method':'post', 'action':'myPage.php', 'enctype':'multipart/form-data' });
     this.assertEqual('multipart/form-data', theForm.getAttribute('encType'));
   },
@@ -1758,7 +1758,7 @@ new Test.Unit.Runner({
       if (!tag) return false;
 
       var id = tag + '_' + index,
-       element = document.body.appendChild(Fuse(tag, { 'id': id }).raw);
+       element = document.body.appendChild(fuse(tag, { 'id': id }).raw);
 
       self.assertEqual(tag, element.tagName.toLowerCase());
       self.assertEqual(element, document.body.lastChild);
@@ -1786,12 +1786,12 @@ new Test.Unit.Runner({
     // The delayed execution of the tests
     // helps prevent a crash in some OSX
     // versions of Opera 9.2x
-    if (Fuse.Env.Agent.Opera)
+    if (fuse.env.agent.Opera)
       recursiveTestTags();
     else while (testTags()) { };
 
     /* window.ElementOld = function(tagName, attributes) {
-      if (Fuse.Env.Agent.IE && attributes && attributes.name) {
+      if (fuse.env.agent.IE && attributes && attributes.name) {
         tagName = '<' + tagName + ' name="' + attributes.name + '">';
         delete attributes.name;
       }
@@ -1806,20 +1806,20 @@ new Test.Unit.Runner({
       XHTML_TAGS.each(function(tagName) { new ElementOld(tagName) });
     }, 5); */
 
-    this.assert(Fuse('<h1>'));
-    this.assertRespondsTo('update', Fuse('<div>'));
+    this.assert(fuse('<h1>'));
+    this.assertRespondsTo('update', fuse('<div>'));
 
     this.assertEqual('foobar',
-      Fuse('a', { 'custom': 'foobar'}).getAttribute('custom'));
+      fuse('a', { 'custom': 'foobar'}).getAttribute('custom'));
 
-    var input = document.body.appendChild(Fuse('input',
+    var input = document.body.appendChild(fuse('input',
       { 'id': 'my_input_field_id', 'name': 'my_input_field' }).raw);
 
     this.assertEqual(input, document.body.lastChild);
     this.assertEqual('my_input_field', document.body.lastChild.name);
 
     // TODO: Fix IE7 and lower bug in getElementById()
-    if (Fuse.Env.Agent.IE && $('my_input_field')) {
+    if (fuse.env.agent.IE && $('my_input_field')) {
       this.assertMatch(/name=["']?my_input_field["']?/, // '
         $('my_input_field').raw.outerHTML);
     }
@@ -1829,15 +1829,15 @@ new Test.Unit.Runner({
 
     // ensure name attribute case is respected even when
     // a similar element has been cached.
-    input = Fuse('input', { 'name': 'MY_INPUT_FIELD' }).raw;
+    input = fuse('input', { 'name': 'MY_INPUT_FIELD' }).raw;
     this.assertEqual('MY_INPUT_FIELD', input.name,
       'Attribute did not respect case.');
 
     /*
     // No longer needed as FuseJS wraps elements
-    if (originalElement && Fuse.Env.Feature('ELEMENT_EXTENSIONS')) {
-      Element.prototype.fooBar = Fuse.emptyFunction;
-      this.assertRespondsTo('fooBar', Fuse('<div>'));
+    if (originalElement && fuse.env.Feature('ELEMENT_EXTENSIONS')) {
+      Element.prototype.fooBar = fuse.emptyFunction;
+      this.assertRespondsTo('fooBar', fuse('<div>'));
     }
     */
 
@@ -1846,7 +1846,7 @@ new Test.Unit.Runner({
     input = $('write_attribute_input');
 
     $w('button input').each(function(tagName) {
-      var button = Fuse(tagName, { 'type': 'reset'});
+      var button = fuse(tagName, { 'type': 'reset'});
       form.insert(button);
       input.setValue('something');
 
@@ -2003,7 +2003,7 @@ new Test.Unit.Runner({
     }
 
     function $(element) {
-      element = Fuse(element);
+      element = fuse(element);
       styles._each(function(s) {
         element.style[s] = rand(10) + 'px';
       });
@@ -2017,7 +2017,7 @@ new Test.Unit.Runner({
 
     // test elements with various positions and displays
     $w('hide show').each(function(method) {
-      Fuse.Array($w('absolute relative'), $w('relative absolute'),
+      fuse.Array($w('absolute relative'), $w('relative absolute'),
        $w('relative relative'), $w('absolute absolute'))
        .each(function(positions) {
          var targOffset,
@@ -2099,7 +2099,7 @@ new Test.Unit.Runner({
     source.setStyle({ 'width': '70px','height': '40px' });
     var srcDims = source.getDimensions();
 
-    if (!Fuse.Env.Bug('ELEMENT_STYLE_OVERFLOW_VISIBLE_EXPANDS_TO_FIT_CONTENT')) {
+    if (!fuse.env.Bug('ELEMENT_STYLE_OVERFLOW_VISIBLE_EXPANDS_TO_FIT_CONTENT')) {
       targets.each(function(id, index) {
         var target = window.$(id);
         target.clonePosition(source);
@@ -2189,7 +2189,7 @@ new Test.Unit.Runner({
   },
 
   'testCustomElementMethods': function() {
-    var Element = Fuse.Dom.Element,
+    var Element = fuse.dom.Element,
      elem = $('navigation_test_f');
 
     this.assertRespondsTo('hashBrowns', elem);
@@ -2200,16 +2200,16 @@ new Test.Unit.Runner({
   },
 
   'testSpecificCustomElementMethods': function() {
-    var Element = Fuse.Dom.Element,
+    var Element = fuse.dom.Element,
      elem = $('navigation_test_f');
 
-    this.assert(Fuse.Dom.LiElement);
+    this.assert(fuse.dom.LiElement);
     this.assertRespondsTo('pancakes', elem);
     this.assertEqual('pancakes', elem.pancakes());
 
     var elem2 = $('test-visible');
 
-    this.assert(Fuse.Dom.DivElement);
+    this.assert(fuse.dom.DivElement);
     this.assertUndefined(elem2.pancakes);
     this.assertRespondsTo('waffles', elem2);
     this.assertEqual('waffles', elem2.waffles());
@@ -2225,17 +2225,17 @@ new Test.Unit.Runner({
   },
 
   'testScriptFragment': function() {
-    var element = Fuse('<div>');
+    var element = fuse('<div>');
 
     // tests an issue with Safari 2.0 crashing when the ScriptFragment
     // regular expression is using a pipe-based approach for
     // matching any character
-    Fuse.Array('\r', '\n', ' ').each(function(character){
-      element.update('<script>' + Fuse.String.times(character, 10000) + '<\/script>');
+    fuse.Array('\r', '\n', ' ').each(function(character){
+      element.update('<script>' + fuse.String.times(character, 10000) + '<\/script>');
       this.assertEqual('', element.raw.innerHTML);
     }, this);
 
-    element.update('<script>var blah="' + Fuse.String.times('\\', 10000) + '"<\/script>');
+    element.update('<script>var blah="' + fuse.String.times('\\', 10000) + '"<\/script>');
     this.assertEqual('', element.raw.innerHTML);
   },
 
@@ -2261,7 +2261,7 @@ new Test.Unit.Runner({
       this.assertEnumEqual([afu.raw.offsetLeft, afu.raw.offsetTop],
         afu.getPositionedOffset());
 
-      var offset = [], element = Fuse('<div>');
+      var offset = [], element = fuse('<div>');
       this.assertNothingRaised(
         function() { offset = element.getPositionedOffset() });
 
@@ -2272,7 +2272,7 @@ new Test.Unit.Runner({
   },
 
   'testGetCumulativeOffset': function() {
-    var offset = [], element = Fuse('<div>');
+    var offset = [], element = fuse('<div>');
     this.assertNothingRaised(
       function() { offset = element.getCumulativeOffset() });
 
@@ -2284,7 +2284,7 @@ new Test.Unit.Runner({
   'testGetViewportOffset': function() {
     var msg,
      windows   = [window, getIframeWindow()],
-     documents = Fuse.Array(document, getIframeDocument());
+     documents = fuse.Array(document, getIframeDocument());
 
     if (!isIframeAccessible()) documents.pop();
 
@@ -2309,7 +2309,7 @@ new Test.Unit.Runner({
       // Element.getViewportOffset is forked for element.getBoundingClientRect usage.
       // Ensure each fork produces the same output when dealing with scroll offsets
       // on form fields
-      var offsets = Fuse.Array(
+      var offsets = fuse.Array(
         getElement('scrollOffset_input', context).getViewportOffset(),
         getElement('scrollOffset_textarea', context).getViewportOffset()
       );
@@ -2344,7 +2344,7 @@ new Test.Unit.Runner({
 
         this.assertEnumEqual([10, 10], element.getViewportOffset(), msg);
 
-        var offset = [], element = Fuse('<div>');
+        var offset = [], element = fuse('<div>');
         this.assertNothingRaised(
           function() { offset = element.getViewportOffset() }, msg);
 
@@ -2385,7 +2385,7 @@ new Test.Unit.Runner({
 
     // Ensure IE doesn't error when requesting offsetParent from an not attached to the document.
     this.assertNothingRaised(
-      function() { Fuse('<div>').getOffsetParent() });
+      function() { fuse('<div>').getOffsetParent() });
 
     // IE with strict doctype may try to return documentElement as offsetParent on relatively positioned elements.
     this.assertEqual(document.body,
@@ -2416,7 +2416,7 @@ new Test.Unit.Runner({
       'offsetParent should be MAP');
 
     // Ensure no errors are raised on document fragments
-    var offsetParent, div = Fuse('<div>'), fragment = document.createDocumentFragment();
+    var offsetParent, div = fuse('<div>'), fragment = document.createDocumentFragment();
     div.insert(div.raw.cloneNode(false));
     div.down().getOffsetParent();
 
@@ -2494,7 +2494,7 @@ new Test.Unit.Runner({
 
   'testViewportDimensions': function() {
     var self = this,
-     hugeDiv = Fuse('<div>')
+     hugeDiv = fuse('<div>')
       .update('testViewportDimensions')
         .setStyle('height:8000px;width:2000px');
 
@@ -2543,7 +2543,7 @@ new Test.Unit.Runner({
 
   'testViewportScrollOffsets': function() {
     preservingBrowserDimensions(
-      Fuse.Function.bind(function() {
+      fuse.Function.bind(function() {
         window.scrollTo(0, 0);
         this.assertEqual(0, $(document).viewport.getScrollOffsets().top);
 
@@ -2570,7 +2570,7 @@ new Test.Unit.Runner({
     $('body_absolute').raw.scrollTop = 0;
 
     /* scrollOffsets on input fields */
-    var offsets = Fuse.Array(
+    var offsets = fuse.Array(
       $('scrollOffset_input').getCumulativeScrollOffset(),
       $('scrollOffset_textarea').getCumulativeScrollOffset()
     );
@@ -2626,7 +2626,7 @@ new Test.Unit.Runner({
 
     if (window.Node) {
       constants.each(function(pair) {
-        this.assertEqual(Fuse.Dom.Node[pair.key], pair.value);
+        this.assertEqual(fuse.dom.Node[pair.key], pair.value);
       }, this);
     }
   }

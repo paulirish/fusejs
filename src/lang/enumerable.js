@@ -1,7 +1,7 @@
   /*---------------------------- LANG: ENUMERABLE ----------------------------*/
 
   Enumerable =
-  Fuse.Enumerable = { };
+  fuse.Enumerable = { };
 
   (function(mixin) {
     mixin.contains = function contains(value) {
@@ -29,7 +29,7 @@
     };
 
     mixin.eachSlice = function eachSlice(size, callback, thisArg) {
-      var index = -size, slices = Fuse.List(), list = this.toList();
+      var index = -size, slices = fuse.Array(), list = this.toArray();
       if (size < 1) return list;
       while ((index += size) < list.length)
         slices[slices.length] = list.slice(index, index + size);
@@ -50,7 +50,7 @@
     };
 
     mixin.filter = function filter(callback, thisArg) {
-      var results = Fuse.List();
+      var results = fuse.Array();
       callback = callback || function(value) { return value != null; };
       this._each(function(value, index, iterable) {
         if (callback.call(thisArg, value, index, iterable))
@@ -65,7 +65,7 @@
         this.each(function(value) { result = value; throw $break; });
         return result;
       }
-      return this.toList().first(callback, thisArg);
+      return this.toArray().first(callback, thisArg);
     };
 
     mixin.inGroupsOf = function inGroupsOf(size, filler) {
@@ -91,12 +91,12 @@
     };
 
     mixin.last = function last(callback, thisArg) {
-      return this.toList().last(callback, thisArg);
+      return this.toArray().last(callback, thisArg);
     };
 
     mixin.map = function map(callback, thisArg) {
-      if (!callback) return this.toList();
-      var results = Fuse.List();
+      if (!callback) return this.toArray();
+      var results = fuse.Array();
       if (thisArg) {
         this._each(function(value, index, iterable) {
           results.push(callback.call(thisArg, value, index, iterable));
@@ -135,12 +135,12 @@
 
     mixin.partition = function partition(callback, thisArg) {
       callback = callback || K;
-      var trues = Fuse.List(), falses = Fuse.List();
+      var trues = fuse.Array(), falses = fuse.Array();
       this._each(function(value, index, iterable) {
         (callback.call(thisArg, value, index, iterable) ?
           trues : falses).push(value);
       });
-      return Fuse.List(trues, falses);
+      return fuse.Array(trues, falses);
     };
 
     mixin.pluck = function pluck(property) {
@@ -150,7 +150,7 @@
     };
 
     mixin.size = function size() {
-      return Fuse.Number(this.toList().length);
+      return fuse.Number(this.toArray().length);
     };
 
     mixin.some = function some(callback, thisArg) {
@@ -177,7 +177,7 @@
     };
 
     mixin.toArray = function toArray() {
-      var results = Fuse.List();
+      var results = fuse.Array();
       this._each(function(value, index) { results[index] = value; });
       return results;
     };
@@ -189,16 +189,13 @@
       if (typeof args[args.length-1] === 'function')
         callback = args.pop();
 
-      var collection = prependList(Fuse.List.prototype.map.call(args, Fuse.Util.$A),
-        this.toArray(), Fuse.List());
+      var collection = prependList(fuse.Array.prototype.map.call(args, fuse.util.$A),
+        this.toArray(), fuse.Array());
 
       return this.map(function(value, index, iterable) {
         return callback(collection.pluck(index), index, iterable);
       });
     };
-
-    // alias
-    mixin.toList = mixin.toArray;
 
     // prevent JScript bug with named function expressions
     var contains = nil,

@@ -1,7 +1,7 @@
   /*--------------------------- ENVIRONMENT OBJECT ---------------------------*/
 
-  Fuse.Env = {
-    Agent: {
+  fuse.env = {
+    'agent': {
       'IE':           isHostObject(global, 'attachEvent') && userAgent.indexOf('Opera') < 0,
       'Opera':        userAgent.indexOf('Opera') > -1,
       'WebKit':       userAgent.indexOf('AppleWebKit/') > -1,

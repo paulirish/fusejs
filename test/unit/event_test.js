@@ -4,7 +4,7 @@ new Test.Unit.Runner({
   'testCustomEventFiring': function() {
     var span = $('span'), fired = false;
 
-    var observer = Fuse.Function.bind(function(event) {
+    var observer = fuse.Function.bind(function(event) {
       this.assertEqual(span, event.element());
       this.assertEqual(1, event.memo.index);
       fired = true;
@@ -26,7 +26,7 @@ new Test.Unit.Runner({
   // test firing an event and observing it on a containing element
   'testCustomEventBubbling': function() {
     var span = $('span'), outer = $('outer'), fired = false;
-    var observer = Fuse.Function.bind(function(event) {
+    var observer = fuse.Function.bind(function(event) {
       this.assertEqual(span, event.element());
       fired = true;
     }, this);
@@ -80,7 +80,7 @@ new Test.Unit.Runner({
     this.assertRespondsTo('hashBrowns', event);
 
     // only test `toString` addition if events don't have it
-    if (!Event.prototype || !Fuse.Object.hasKey(Event.prototype, 'toString')) {
+    if (!Event.prototype || !fuse.Object.hasKey(Event.prototype, 'toString')) {
 
       Event.addMethods({ 'toString': function() { return '[Fuse Event]' } });
       event = $('span').fire('test:somethingHappened');
@@ -89,7 +89,7 @@ new Test.Unit.Runner({
         'Failed to extend element with a toString method.');
 
       // remove toString addition
-      if (Fuse.Env.Feature('ELEMENT_SPECIFIC_EXTENSIONS'))
+      if (fuse.env.Feature('ELEMENT_SPECIFIC_EXTENSIONS'))
         delete Event.prototype.toString;
       delete Event.Methods.toString;
       Event.addMethods();
@@ -166,7 +166,7 @@ new Test.Unit.Runner({
 
   'testStopObservingWithNoneStringEventName': function() {
     this.assertNothingRaised(function() {
-      Fuse.List($('span'), $('outer')).each(Event.stopObserving);
+      fuse.Array($('span'), $('outer')).each(Event.stopObserving);
     });
   },
 
@@ -199,11 +199,11 @@ new Test.Unit.Runner({
     span.observe('test:somethingHappened', observer);
 
     fuseId = span.getFuseId();
-    data   = Fuse.Dom.Data[fuseId];
+    data   = fuse.dom.Data[fuseId];
     events = data.events;
 
     this.assert(data);
-    this.assert(Fuse.List.isArray(events['test:somethingHappened'].handlers));
+    this.assert(fuse.Array.isArray(events['test:somethingHappened'].handlers));
 
     this.assertEqual(1, events['test:somethingHappened'].handlers.length);
 
@@ -242,7 +242,7 @@ new Test.Unit.Runner({
     });
 
     // if there is a bug then this observer will be skipped
-    $(document).observe('test:somethingHappened', Fuse.emptyFunction);
+    $(document).observe('test:somethingHappened', fuse.emptyFunction);
 
     $(document).fire('test:somethingHappened');
     this.assert(!fired, 'observer should NOT have fired');
@@ -390,7 +390,7 @@ new Test.Unit.Runner({
 
   'testFuseIdDuplication': function() {
     var element = $('container').down();
-    element.observe('test:somethingHappened', Fuse.emptyFunction);
+    element.observe('test:somethingHappened', fuse.emptyFunction);
 
     var fuseId = element.getFuseId(),
      clone = $(element.raw.cloneNode(true));
@@ -398,15 +398,15 @@ new Test.Unit.Runner({
 
     this.assertNotEqual(fuseId, cloneId);
 
-    $('container').innerHTML += $('container').innerHTML;
+    $('container').raw.innerHTML += $('container').raw.innerHTML;
 
     this.assertNotEqual(fuseId, $('container').down());
     this.assertNotEqual(fuseId, $('container').down(1));
   },
 
   'testDocumentAndWindowFuseId': function() {
-    Fuse.List(document, window).each(function(object) {
-      Event.observe(object, 'test:somethingHappened', Fuse.emptyFunction);
+    fuse.Array(document, window).each(function(object) {
+      Event.observe(object, 'test:somethingHappened', fuse.emptyFunction);
 
       this.assertUndefined(object.getFuseId);
 
@@ -416,7 +416,7 @@ new Test.Unit.Runner({
 
   'testObserverExecutionOrder': function() {
     var span = $('span'), result = '';
-    Fuse.List('a', 'b', 'c', 'd').each(function(n) {
+    fuse.Array('a', 'b', 'c', 'd').each(function(n) {
       span.observe('test:somethingHappened', function() { result += n })
     });
 

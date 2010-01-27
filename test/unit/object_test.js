@@ -1,20 +1,20 @@
 new Test.Unit.Runner({
 
   'testObjectConstructorAsMethod': function() {
-    this.assertRespondsTo('max', Fuse.Object([0, 1]),
-      'convert array to Fuse.List');
+    this.assertRespondsTo('max', fuse.Object([0, 1]),
+      'convert array to fuse.Array');
 
-    this.assertRespondsTo('floor', Fuse.Object(22.8),
-      'convert primitive number to Fuse.Number');
+    this.assertRespondsTo('floor', fuse.Object(22.8),
+      'convert primitive number to fuse.Number');
 
-    this.assertRespondsTo('floor', Fuse.Object(Number(22.8)),
-      'convert number object to Fuse.Number');
+    this.assertRespondsTo('floor', fuse.Object(Number(22.8)),
+      'convert number object to fuse.Number');
 
-    this.assertRespondsTo('capitalize', Fuse.Object('x'),
-      'convert primitive string to Fuse.String');
+    this.assertRespondsTo('capitalize', fuse.Object('x'),
+      'convert primitive string to fuse.String');
 
-    this.assertRespondsTo('capitalize', Fuse.Object(String('x')),
-      'convert string object to Fuse.String');
+    this.assertRespondsTo('capitalize', fuse.Object(String('x')),
+      'convert string object to fuse.String');
   },
 
   'testObjectEach': function() {
@@ -22,7 +22,7 @@ new Test.Unit.Runner({
 
     var count = 0;
     klass.prototype.toString = 0;
-    Fuse.Object.each(new klass(), function() { count++ });
+    fuse.Object.each(new klass(), function() { count++ });
 
     this.assertEqual(1, count,
       'Failed to iterate correctly over the object properties');
@@ -32,46 +32,46 @@ new Test.Unit.Runner({
     var object = { 'foo': 'foo', 'bar': [1, 2, 3] };
 
     // test empty/null/undefined sources
-    this.assertIdentical(object, Fuse.Object._extend(object),
+    this.assertIdentical(object, fuse.Object._extend(object),
       'Failed when passing no source.');
 
-    this.assertIdentical(object, Fuse.Object._extend(object, null),
+    this.assertIdentical(object, fuse.Object._extend(object, null),
       'Failed when passing a null source.');
 
-    this.assertIdentical(object, Fuse.Object._extend(object, undef),
+    this.assertIdentical(object, fuse.Object._extend(object, undef),
       'Failed when passing an undefined source.');
 
     this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3] }, object);
 
-    this.assertIdentical(object, Fuse.Object._extend(object, { 'bla': 123 }));
+    this.assertIdentical(object, fuse.Object._extend(object, { 'bla': 123 }));
     this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3], 'bla': 123 }, object);
     this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3], 'bla': null },
-      Fuse.Object._extend(object, { 'bla': null }));
+      fuse.Object._extend(object, { 'bla': null }));
   },
 
   'testObjectExtend': function() {
     var object = { 'foo': 'foo', 'bar': [1, 2, 3] };
 
     // test empty/null/undefined sources
-    this.assertIdentical(object, Fuse.Object.extend(object),
+    this.assertIdentical(object, fuse.Object.extend(object),
       'Failed when passing no source.');
 
-    this.assertIdentical(object, Fuse.Object.extend(object, null),
+    this.assertIdentical(object, fuse.Object.extend(object, null),
       'Failed when passing a null source.');
 
-    this.assertIdentical(object, Fuse.Object.extend(object, undef),
+    this.assertIdentical(object, fuse.Object.extend(object, undef),
       'Failed when passing an undefined source.');
 
     this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3] }, object);
 
-    this.assertIdentical(object, Fuse.Object.extend(object, { 'bla': 123 }));
+    this.assertIdentical(object, fuse.Object.extend(object, { 'bla': 123 }));
     this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3], 'bla': 123 }, object);
     this.assertHashEqual({ 'foo': 'foo', 'bar': [1, 2, 3], 'bla': null },
-      Fuse.Object.extend(object, { 'bla': null }));
+      fuse.Object.extend(object, { 'bla': null }));
 
     // test shadowed `DontEnum` properties
     object = { 'foo': 'foo', 'bar': [1, 2, 3] };
-    Fuse.Object.extend(object, { 'valueOf':  function() { return '[Awesome]' } });
+    fuse.Object.extend(object, { 'valueOf':  function() { return '[Awesome]' } });
 
     this.assertEqual('[Awesome]', object.valueOf(),
       'Failed to extend shadowed `DontEnum` properties.');
@@ -79,146 +79,146 @@ new Test.Unit.Runner({
 
   'testObjectToQueryString': function() {
     this.assertEqual('a=A&b=B&c=C&d=D%23',
-      Fuse.Object.toQueryString({ 'a':'A', 'b':'B', 'c':'C', 'd':'D#' }),
+      fuse.Object.toQueryString({ 'a':'A', 'b':'B', 'c':'C', 'd':'D#' }),
       'Failed with simple object');
 
     this.assertEqual('a=A&b=B&toString=bar&valueOf=',
-      Fuse.Object.toQueryString(Fixtures.mixed_dont_enum),
+      fuse.Object.toQueryString(Fixtures.mixed_dont_enum),
       'Failed to enumerate over shadowed properties like `toString` and `valueOf`');
 
     this.assertEqual('0=a&1=b&2=c',
-      Fuse.Object.toQueryString(Fuse.List('a', 'b', 'c')),
+      fuse.Object.toQueryString(fuse.Array('a', 'b', 'c')),
       'Enumerated over inherited properties');
   },
 
   'testObjectClone': function() {
     var object = { 'foo': 'foo', 'bar': [1, 2, 3] };
 
-    this.assertNotIdentical(object, Fuse.Object.clone(object));
-    this.assertHashEqual(object, Fuse.Object.clone(object));
+    this.assertNotIdentical(object, fuse.Object.clone(object));
+    this.assertHashEqual(object, fuse.Object.clone(object));
 
     // test empty/null/undefined objects
-    this.assertHashEqual({ }, Fuse.Object.clone(),
+    this.assertHashEqual({ }, fuse.Object.clone(),
       'Failed when passing no value.');
 
-    this.assertHashEqual({ }, Fuse.Object.clone(null),
+    this.assertHashEqual({ }, fuse.Object.clone(null),
       'Failed when passing a null value.');
 
-    this.assertHashEqual({ }, Fuse.Object.clone(undef),
+    this.assertHashEqual({ }, fuse.Object.clone(undef),
       'Failed when passing an undefined value.');
 
-    var clone = Fuse.Object.clone(object);
+    var clone = fuse.Object.clone(object);
     delete clone.bar;
 
     this.assertHashEqual({ 'foo': 'foo' }, clone,
-      'Optimizing Fuse.Object.clone perf using prototyping doesn\'t allow properties to be deleted.');
+      'Optimizing fuse.Object.clone perf using prototyping doesn\'t allow properties to be deleted.');
 
     this.assertEqual('custom',
-      Fuse.Object.clone({ 'clone': function() { return 'custom' } }),
+      fuse.Object.clone({ 'clone': function() { return 'custom' } }),
       'Custom clone method on object.');
   },
 
   'testObjectToHTML': function() {
-    this.assertEqual('',    Fuse.Object.toHTML());
-    this.assertEqual('',    Fuse.Object.toHTML(''));
-    this.assertEqual('',    Fuse.Object.toHTML(null));
-    this.assertEqual('0',   Fuse.Object.toHTML(0));
-    this.assertEqual('123', Fuse.Object.toHTML(123));
+    this.assertEqual('',    fuse.Object.toHTML());
+    this.assertEqual('',    fuse.Object.toHTML(''));
+    this.assertEqual('',    fuse.Object.toHTML(null));
+    this.assertEqual('0',   fuse.Object.toHTML(0));
+    this.assertEqual('123', fuse.Object.toHTML(123));
 
-    this.assertEqual('hello world', Fuse.Object.toHTML('hello world'));
+    this.assertEqual('hello world', fuse.Object.toHTML('hello world'));
 
     this.assertEqual('hello world',
-      Fuse.Object.toHTML({ 'toHTML': function() { return 'hello world' }}));
+      fuse.Object.toHTML({ 'toHTML': function() { return 'hello world' }}));
   },
 
   'testObjectIsArray': function() {
-    this.assert(Fuse.List.isArray([]));
-    this.assert(Fuse.List.isArray([0]));
-    this.assert(Fuse.List.isArray([0, 1]));
-    this.assert(Fuse.List.isArray(Fuse.List()));
-    this.assert(Fuse.List.isArray(Fuse.List(0)));
-    this.assert(Fuse.List.isArray(Fuse.List(0, 1)));
+    this.assert(fuse.Array.isArray([]));
+    this.assert(fuse.Array.isArray([0]));
+    this.assert(fuse.Array.isArray([0, 1]));
+    this.assert(fuse.Array.isArray(fuse.Array()));
+    this.assert(fuse.Array.isArray(fuse.Array(0)));
+    this.assert(fuse.Array.isArray(fuse.Array(0, 1)));
 
-    this.assert(!Fuse.List.isArray({ }));
-    this.assert(!Fuse.List.isArray($('list').childNodes));
-    this.assert(!Fuse.List.isArray());
-    this.assert(!Fuse.List.isArray(''));
-    this.assert(!Fuse.List.isArray('foo'));
-    this.assert(!Fuse.List.isArray(0));
-    this.assert(!Fuse.List.isArray(1));
-    this.assert(!Fuse.List.isArray(null));
-    this.assert(!Fuse.List.isArray(true));
-    this.assert(!Fuse.List.isArray(false));
-    this.assert(!Fuse.List.isArray(undef));
+    this.assert(!fuse.Array.isArray({ }));
+    this.assert(!fuse.Array.isArray($('list').childNodes));
+    this.assert(!fuse.Array.isArray());
+    this.assert(!fuse.Array.isArray(''));
+    this.assert(!fuse.Array.isArray('foo'));
+    this.assert(!fuse.Array.isArray(0));
+    this.assert(!fuse.Array.isArray(1));
+    this.assert(!fuse.Array.isArray(null));
+    this.assert(!fuse.Array.isArray(true));
+    this.assert(!fuse.Array.isArray(false));
+    this.assert(!fuse.Array.isArray(undef));
   },
 
   'testObjectIsHash': function() {
-    this.assertIdentical(true, Fuse.Object.isHash($H()));
-    this.assertIdentical(true, Fuse.Object.isHash(Fuse.Hash()));
+    this.assertIdentical(true, fuse.Object.isHash($H()));
+    this.assertIdentical(true, fuse.Object.isHash(fuse.Hash()));
 
-    this.assertIdentical(false, Fuse.Object.isHash({}));
-    this.assertIdentical(false, Fuse.Object.isHash(null));
-    this.assertIdentical(false, Fuse.Object.isHash());
-    this.assertIdentical(false, Fuse.Object.isHash(''));
-    this.assertIdentical(false, Fuse.Object.isHash(2));
-    this.assertIdentical(false, Fuse.Object.isHash(false));
-    this.assertIdentical(false, Fuse.Object.isHash(true));
-    this.assertIdentical(false, Fuse.Object.isHash([]));
-    this.assertIdentical(false, Fuse.Object.isHash(Fuse.Hash.prototype));
+    this.assertIdentical(false, fuse.Object.isHash({}));
+    this.assertIdentical(false, fuse.Object.isHash(null));
+    this.assertIdentical(false, fuse.Object.isHash());
+    this.assertIdentical(false, fuse.Object.isHash(''));
+    this.assertIdentical(false, fuse.Object.isHash(2));
+    this.assertIdentical(false, fuse.Object.isHash(false));
+    this.assertIdentical(false, fuse.Object.isHash(true));
+    this.assertIdentical(false, fuse.Object.isHash([]));
+    this.assertIdentical(false, fuse.Object.isHash(fuse.Hash.prototype));
 
     // falsy variables should not mess up return value type
-    this.assertIdentical(false, Fuse.Object.isHash(0));
-    this.assertIdentical(false, Fuse.Object.isHash(''));
-    this.assertIdentical(false, Fuse.Object.isHash(NaN));
-    this.assertIdentical(false, Fuse.Object.isHash(null));
-    this.assertIdentical(false, Fuse.Object.isHash(undef));
+    this.assertIdentical(false, fuse.Object.isHash(0));
+    this.assertIdentical(false, fuse.Object.isHash(''));
+    this.assertIdentical(false, fuse.Object.isHash(NaN));
+    this.assertIdentical(false, fuse.Object.isHash(null));
+    this.assertIdentical(false, fuse.Object.isHash(undef));
   },
 
   'testObjectIsElement': function() {
-    this.assert(Fuse.Object.isElement(document.createElement('div')));
-    this.assert(Fuse.Object.isElement(Fuse.Dom.Element('div').raw));
-    this.assert(Fuse.Object.isElement($('testlog').raw));
+    this.assert(fuse.Object.isElement(document.createElement('div')));
+    this.assert(fuse.Object.isElement(fuse.dom.Element('div').raw));
+    this.assert(fuse.Object.isElement($('testlog').raw));
 
-    this.assert(!Fuse.Object.isElement(document.createTextNode('bla')));
+    this.assert(!fuse.Object.isElement(document.createTextNode('bla')));
 
     // falsy variables should not mess up return value type
-    this.assertIdentical(false, Fuse.Object.isElement(0));
-    this.assertIdentical(false, Fuse.Object.isElement(''));
-    this.assertIdentical(false, Fuse.Object.isElement(NaN));
-    this.assertIdentical(false, Fuse.Object.isElement(null));
-    this.assertIdentical(false, Fuse.Object.isElement(undef));
+    this.assertIdentical(false, fuse.Object.isElement(0));
+    this.assertIdentical(false, fuse.Object.isElement(''));
+    this.assertIdentical(false, fuse.Object.isElement(NaN));
+    this.assertIdentical(false, fuse.Object.isElement(null));
+    this.assertIdentical(false, fuse.Object.isElement(undef));
   },
 
   'testObjectIsEmpty': function () {
-    var klass = Fuse.Class({ 'foo': 1 }), instance = new klass;
+    var klass = fuse.Class({ 'foo': 1 }), instance = new klass;
     instance.foo = 1;
 
-    this.assert(Fuse.Object.isEmpty({ }));
-    this.assert(Fuse.Object.isEmpty([ ]));
-    this.assert(Fuse.Object.isEmpty(new klass));
-    this.assert(Fuse.Object.isEmpty(false));
-    this.assert(Fuse.Object.isEmpty(true));
-    this.assert(Fuse.Object.isEmpty(0));
-    this.assert(Fuse.Object.isEmpty(null));
-    this.assert(Fuse.Object.isEmpty(undef));
+    this.assert(fuse.Object.isEmpty({ }));
+    this.assert(fuse.Object.isEmpty([ ]));
+    this.assert(fuse.Object.isEmpty(new klass));
+    this.assert(fuse.Object.isEmpty(false));
+    this.assert(fuse.Object.isEmpty(true));
+    this.assert(fuse.Object.isEmpty(0));
+    this.assert(fuse.Object.isEmpty(null));
+    this.assert(fuse.Object.isEmpty(undef));
 
-    this.assert(!Fuse.Object.isEmpty({ 'foo': 1 }));
-    this.assert(!Fuse.Object.isEmpty(instance));
-    this.assert(!Fuse.Object.isEmpty([1, 2, 3]));
+    this.assert(!fuse.Object.isEmpty({ 'foo': 1 }));
+    this.assert(!fuse.Object.isEmpty(instance));
+    this.assert(!fuse.Object.isEmpty([1, 2, 3]));
   },
 
   'testObjectIsFunction': function() {
-    this.assert(Fuse.Object.isFunction(function() { }));
-    this.assert(Fuse.Object.isFunction(Fuse.Class()));
+    this.assert(fuse.Object.isFunction(function() { }));
+    this.assert(fuse.Object.isFunction(fuse.Class()));
 
-    this.assert(!Fuse.Object.isFunction(/foo/));
-    this.assert(!Fuse.Object.isFunction('a string'));
-    this.assert(!Fuse.Object.isFunction($('testlog')));
-    this.assert(!Fuse.Object.isFunction([ ]));
-    this.assert(!Fuse.Object.isFunction({ }));
-    this.assert(!Fuse.Object.isFunction(0));
-    this.assert(!Fuse.Object.isFunction(false));
-    this.assert(!Fuse.Object.isFunction(undef));
+    this.assert(!fuse.Object.isFunction(/foo/));
+    this.assert(!fuse.Object.isFunction('a string'));
+    this.assert(!fuse.Object.isFunction($('testlog')));
+    this.assert(!fuse.Object.isFunction([ ]));
+    this.assert(!fuse.Object.isFunction({ }));
+    this.assert(!fuse.Object.isFunction(0));
+    this.assert(!fuse.Object.isFunction(false));
+    this.assert(!fuse.Object.isFunction(undef));
   },
 
   'testObjectHasKey': function() {
@@ -231,16 +231,16 @@ new Test.Unit.Runner({
     function C() { this.foo = 1 }
     C.prototype = new B;
 
-    var c = new C, empty = { }, properties = Fuse.List('constructor',
+    var c = new C, empty = { }, properties = fuse.Array('constructor',
       'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString',
       'toString', 'valueOf');
 
-    this.assert(Fuse.Object.hasKey(c, 'foo'),
+    this.assert(fuse.Object.hasKey(c, 'foo'),
       'Expected c.foo as own property.');
 
     delete c.foo;
 
-    this.assert(!Fuse.Object.hasKey(c, 'foo'),
+    this.assert(!fuse.Object.hasKey(c, 'foo'),
       'Expected c.foo as inherited property.');
 
     this.assertEqual(2, c.foo, 'Expected c.foo to equal 2');
@@ -252,10 +252,10 @@ new Test.Unit.Runner({
 
     c.foo = undef;
 
-    this.assert(Fuse.Object.hasKey(c, 'foo'),
+    this.assert(fuse.Object.hasKey(c, 'foo'),
       'Expected c.foo, value set as undefined, as own property.');
 
-    this.assert(!Fuse.Object.hasKey(C.prototype, 'foo'),
+    this.assert(!fuse.Object.hasKey(C.prototype, 'foo'),
       'Expected C.prototype.foo as inherited property.');
 
     this.assertEqual(3, C.prototype.foo,
@@ -263,97 +263,97 @@ new Test.Unit.Runner({
 
     C.prototype.foo = undef;
 
-    this.assert(Fuse.Object.hasKey(A.prototype, 'foo',
+    this.assert(fuse.Object.hasKey(A.prototype, 'foo',
       'Expected A.prototype.foo as own property.'));
 
     properties.each(function(property) {
-      this.assert(!Fuse.Object.hasKey(empty, property),
+      this.assert(!fuse.Object.hasKey(empty, property),
         'Expected "' + property + '" as inherited property');
 
       // Safari 2 doesn't have many of the properties
       if (Object.prototype[property]) {
-        this.assert(Fuse.Object.hasKey(Object.prototype, property),
+        this.assert(fuse.Object.hasKey(Object.prototype, property),
           'Expected "' + property + '" as own property');
       }
     }, this);
 
-    this.assert(!Fuse.Object.hasKey(0, 'toString'));
-    this.assert(!Fuse.Object.hasKey('testing', 'valueOf'));
+    this.assert(!fuse.Object.hasKey(0, 'toString'));
+    this.assert(!fuse.Object.hasKey('testing', 'valueOf'));
 
     // test null/undefined values
-    this.assertRaise('TypeError', function() { Fuse.Object.hasKey(null,  '') });
-    this.assertRaise('TypeError', function() { Fuse.Object.hasKey(undef, '') });
+    this.assertRaise('TypeError', function() { fuse.Object.hasKey(null,  '') });
+    this.assertRaise('TypeError', function() { fuse.Object.hasKey(undef, '') });
 
     // test window object
-    this.assert(Fuse.Object.hasKey(window, 'Fuse'));
-    this.assert(!Fuse.Object.hasKey(window, 'abc123xyz'));
+    this.assert(fuse.Object.hasKey(window, 'fuse'));
+    this.assert(!fuse.Object.hasKey(window, 'abc123xyz'));
   },
 
   'testObjectIsPrimitive': function() {
-    this.assert(Fuse.Object.isPrimitive('a string'));
-    this.assert(Fuse.Object.isPrimitive(5));
-    this.assert(Fuse.Object.isPrimitive(0));
-    this.assert(Fuse.Object.isPrimitive(false));
-    this.assert(Fuse.Object.isPrimitive(true));
-    this.assert(Fuse.Object.isPrimitive(null));
-    this.assert(Fuse.Object.isPrimitive(undef));
-    this.assert(Fuse.Object.isPrimitive(NaN));
-    this.assert(Fuse.Object.isPrimitive(Infinity));
+    this.assert(fuse.Object.isPrimitive('a string'));
+    this.assert(fuse.Object.isPrimitive(5));
+    this.assert(fuse.Object.isPrimitive(0));
+    this.assert(fuse.Object.isPrimitive(false));
+    this.assert(fuse.Object.isPrimitive(true));
+    this.assert(fuse.Object.isPrimitive(null));
+    this.assert(fuse.Object.isPrimitive(undef));
+    this.assert(fuse.Object.isPrimitive(NaN));
+    this.assert(fuse.Object.isPrimitive(Infinity));
 
-    this.assert(!Fuse.Object.isPrimitive(/foo/));
-    this.assert(!Fuse.Object.isPrimitive(new Number(0)));
-    this.assert(!Fuse.Object.isPrimitive(new String('a string')));
-    this.assert(!Fuse.Object.isPrimitive(function() { }));
-    this.assert(!Fuse.Object.isPrimitive(new Boolean(true)));
-    this.assert(!Fuse.Object.isPrimitive([ ]));
-    this.assert(!Fuse.Object.isPrimitive({ }));
-    this.assert(!Fuse.Object.isPrimitive({ 'valueOf': 0 }));
-    this.assert(!Fuse.Object.isPrimitive({ 'valueOf': 'a string' }));
+    this.assert(!fuse.Object.isPrimitive(/foo/));
+    this.assert(!fuse.Object.isPrimitive(new Number(0)));
+    this.assert(!fuse.Object.isPrimitive(new String('a string')));
+    this.assert(!fuse.Object.isPrimitive(function() { }));
+    this.assert(!fuse.Object.isPrimitive(new Boolean(true)));
+    this.assert(!fuse.Object.isPrimitive([ ]));
+    this.assert(!fuse.Object.isPrimitive({ }));
+    this.assert(!fuse.Object.isPrimitive({ 'valueOf': 0 }));
+    this.assert(!fuse.Object.isPrimitive({ 'valueOf': 'a string' }));
   },
 
   'testObjectIsRegExp': function() {
-    this.assert(Fuse.Object.isRegExp(/foo/));
-    this.assert(Fuse.Object.isRegExp(new RegExp('foo')));
+    this.assert(fuse.Object.isRegExp(/foo/));
+    this.assert(fuse.Object.isRegExp(new RegExp('foo')));
 
-    this.assert(!Fuse.Object.isRegExp(alert));
-    this.assert(!Fuse.Object.isRegExp(0));
-    this.assert(!Fuse.Object.isRegExp(function() { }));
-    this.assert(!Fuse.Object.isRegExp(' string'));
-    this.assert(!Fuse.Object.isRegExp([ ]));
-    this.assert(!Fuse.Object.isRegExp({ }));
-    this.assert(!Fuse.Object.isRegExp({ 'valueOf': null }));
-    this.assert(!Fuse.Object.isRegExp({ 'valueOf': /foo/ }));
-    this.assert(!Fuse.Object.isRegExp(false));
-    this.assert(!Fuse.Object.isRegExp(undef));
+    this.assert(!fuse.Object.isRegExp(alert));
+    this.assert(!fuse.Object.isRegExp(0));
+    this.assert(!fuse.Object.isRegExp(function() { }));
+    this.assert(!fuse.Object.isRegExp(' string'));
+    this.assert(!fuse.Object.isRegExp([ ]));
+    this.assert(!fuse.Object.isRegExp({ }));
+    this.assert(!fuse.Object.isRegExp({ 'valueOf': null }));
+    this.assert(!fuse.Object.isRegExp({ 'valueOf': /foo/ }));
+    this.assert(!fuse.Object.isRegExp(false));
+    this.assert(!fuse.Object.isRegExp(undef));
   },
 
   'testObjectIsSameOrigin': function() {
-    this.assert(Fuse.Object.isSameOrigin(null), 'null');
-    this.assert(Fuse.Object.isSameOrigin(), 'undefined');
-    this.assert(Fuse.Object.isSameOrigin(''), 'empty string');
+    this.assert(fuse.Object.isSameOrigin(null), 'null');
+    this.assert(fuse.Object.isSameOrigin(), 'undefined');
+    this.assert(fuse.Object.isSameOrigin(''), 'empty string');
 
-    this.assert(Fuse.Object.isSameOrigin('/foo/bar.html'), '/foo/bar.html');
-    this.assert(Fuse.Object.isSameOrigin(window.location.href), window.location.href);
-    this.assert(!Fuse.Object.isSameOrigin('http://example.com'), 'http://example.com');
+    this.assert(fuse.Object.isSameOrigin('/foo/bar.html'), '/foo/bar.html');
+    this.assert(fuse.Object.isSameOrigin(window.location.href), window.location.href);
+    this.assert(!fuse.Object.isSameOrigin('http://example.com'), 'http://example.com');
 
     // test typecasting the url argument as a string
     this.assertNothingRaised(
-      function() { Fuse.Object.isSameOrigin(window.location) },
+      function() { fuse.Object.isSameOrigin(window.location) },
       'Error casting url as a string');
 
-    this.assert(Fuse.Object.isSameOrigin(
+    this.assert(fuse.Object.isSameOrigin(
       { 'toString': function() { return window.location.href } }),
       'Error casting url as a string');
 
 
     // simulate document.domain changes
-    var isSameOrigin = Fuse.Object.isSameOrigin,
+    var isSameOrigin = fuse.Object.isSameOrigin,
      docDomain       = 'www.example.com',
      port            = 80,
      protocol        = 'http:';
 
     // redefine method (not pretty but it gets the job done)
-    Fuse.Object.isSameOrigin = function(url) {
+    fuse.Object.isSameOrigin = function(url) {
       var domainIndex, urlDomain,
        result       = true,
        defaultPort  = protocol === 'ftp:' ? 21 : protocol === 'https:' ? 443 : 80,
@@ -369,100 +369,100 @@ new Test.Unit.Runner({
       return result;
     };
 
-    this.assert(!Fuse.Object.isSameOrigin('http://sub.example.com'),
+    this.assert(!fuse.Object.isSameOrigin('http://sub.example.com'),
       'domain www.example.com shouldn\'t allow http://sub.example.com');
 
     docDomain = 'example.com';
-    this.assert(Fuse.Object.isSameOrigin('http://sub.example.com'),
+    this.assert(fuse.Object.isSameOrigin('http://sub.example.com'),
       'domain example.com won\'t allow http://sub.example.com');
 
-    this.assert(!Fuse.Object.isSameOrigin('http://www.prefix-example.com'),
+    this.assert(!fuse.Object.isSameOrigin('http://www.prefix-example.com'),
       'domain example.com shouldn\'t allow http://www.prefix-example.com');
 
-    Fuse.Object.isSameOrigin = isSameOrigin;
+    fuse.Object.isSameOrigin = isSameOrigin;
   },
 
   'testObjectIsString': function() {
-    this.assert(Fuse.Object.isString('a string'));
-    this.assert(Fuse.Object.isString(new String('a string')));
+    this.assert(fuse.Object.isString('a string'));
+    this.assert(fuse.Object.isString(new String('a string')));
 
-    this.assert(!Fuse.Object.isString(alert));
-    this.assert(!Fuse.Object.isString(function() { }));
-    this.assert(!Fuse.Object.isString(0));
-    this.assert(!Fuse.Object.isString([ ]));
-    this.assert(!Fuse.Object.isString({ }));
-    this.assert(!Fuse.Object.isString({ 'valueOf': null }));
-    this.assert(!Fuse.Object.isString({ 'valueOf': 3.1415926535 }));
-    this.assert(!Fuse.Object.isString(false));
-    this.assert(!Fuse.Object.isString(undef));
+    this.assert(!fuse.Object.isString(alert));
+    this.assert(!fuse.Object.isString(function() { }));
+    this.assert(!fuse.Object.isString(0));
+    this.assert(!fuse.Object.isString([ ]));
+    this.assert(!fuse.Object.isString({ }));
+    this.assert(!fuse.Object.isString({ 'valueOf': null }));
+    this.assert(!fuse.Object.isString({ 'valueOf': 3.1415926535 }));
+    this.assert(!fuse.Object.isString(false));
+    this.assert(!fuse.Object.isString(undef));
   },
 
   'testObjectIsNumber': function() {
-    this.assert(Fuse.Object.isNumber(0));
-    this.assert(Fuse.Object.isNumber(1.2));
-    this.assert(Fuse.Object.isNumber(new Number(5)));
+    this.assert(fuse.Object.isNumber(0));
+    this.assert(fuse.Object.isNumber(1.2));
+    this.assert(fuse.Object.isNumber(new Number(5)));
 
-    this.assert(!Fuse.Object.isNumber(alert));
-    this.assert(!Fuse.Object.isNumber(2.5E+345));
-    this.assert(!Fuse.Object.isNumber(0/0));
-    this.assert(!Fuse.Object.isNumber(function() { }));
-    this.assert(!Fuse.Object.isNumber('a string'));
-    this.assert(!Fuse.Object.isNumber([ ]));
-    this.assert(!Fuse.Object.isNumber({ }));
-    this.assert(!Fuse.Object.isNumber({ 'valueOf': null }));
-    this.assert(!Fuse.Object.isNumber({ 'valueOf': 3.1415926535 }));
-    this.assert(!Fuse.Object.isNumber(false));
-    this.assert(!Fuse.Object.isNumber(undef));
+    this.assert(!fuse.Object.isNumber(alert));
+    this.assert(!fuse.Object.isNumber(2.5E+345));
+    this.assert(!fuse.Object.isNumber(0/0));
+    this.assert(!fuse.Object.isNumber(function() { }));
+    this.assert(!fuse.Object.isNumber('a string'));
+    this.assert(!fuse.Object.isNumber([ ]));
+    this.assert(!fuse.Object.isNumber({ }));
+    this.assert(!fuse.Object.isNumber({ 'valueOf': null }));
+    this.assert(!fuse.Object.isNumber({ 'valueOf': 3.1415926535 }));
+    this.assert(!fuse.Object.isNumber(false));
+    this.assert(!fuse.Object.isNumber(undef));
   },
 
   'testObjectIsUndefined': function() {
-    this.assert(Fuse.Object.isUndefined(undef));
+    this.assert(fuse.Object.isUndefined(undef));
 
-    this.assert(!Fuse.Object.isUndefined(null));
-    this.assert(!Fuse.Object.isUndefined(false));
-    this.assert(!Fuse.Object.isUndefined(0));
-    this.assert(!Fuse.Object.isUndefined(''));
-    this.assert(!Fuse.Object.isUndefined(function() { }));
-    this.assert(!Fuse.Object.isUndefined([]));
-    this.assert(!Fuse.Object.isUndefined({}));
+    this.assert(!fuse.Object.isUndefined(null));
+    this.assert(!fuse.Object.isUndefined(false));
+    this.assert(!fuse.Object.isUndefined(0));
+    this.assert(!fuse.Object.isUndefined(''));
+    this.assert(!fuse.Object.isUndefined(function() { }));
+    this.assert(!fuse.Object.isUndefined([]));
+    this.assert(!fuse.Object.isUndefined({}));
   },
 
   'testObjectKeys': function() {
-    this.assertEnumEqual([],          Fuse.Object.keys({ }));
-    this.assertEnumEqual([],          Fuse.Object.keys([ ]));
-    this.assertEnumEqual(['a'],       Fuse.Object.keys({ 'a': 'A' }));
-    this.assertEnumEqual($w('a b c'), Fuse.Object.keys({ 'a':'A', 'b':'B', 'c':'C' }).sort());
+    this.assertEnumEqual([],          fuse.Object.keys({ }));
+    this.assertEnumEqual([],          fuse.Object.keys([ ]));
+    this.assertEnumEqual(['a'],       fuse.Object.keys({ 'a': 'A' }));
+    this.assertEnumEqual($w('a b c'), fuse.Object.keys({ 'a':'A', 'b':'B', 'c':'C' }).sort());
 
     // ensure functions work
     var result, foo = function() { this.a = 'a' };
     foo.prototype.b = 'b';
     foo.prop = 'blah';
 
-    this.assertNothingRaised(function() { result = Fuse.Object.keys(foo) });
+    this.assertNothingRaised(function() { result = fuse.Object.keys(foo) });
     this.assertEnumEqual(['prop', 'prototype'], result.sort());
 
-    this.assertNothingRaised(function() { result = Fuse.Object.keys(new foo) });
+    this.assertNothingRaised(function() { result = fuse.Object.keys(new foo) });
     this.assertEnumEqual(['a'], result);
 
     // test objects containing shadowed properties
     this.assertEnumEqual($w('a b toString valueOf'),
-      Fuse.Object.keys(Fixtures.mixed_dont_enum).sort());
+      fuse.Object.keys(Fixtures.mixed_dont_enum).sort());
 
-    this.assertRaise('TypeError', function() { Fuse.Object.keys(null) });
-    this.assertRaise('TypeError', function() { Fuse.Object.keys(3) });
+    this.assertRaise('TypeError', function() { fuse.Object.keys(null) });
+    this.assertRaise('TypeError', function() { fuse.Object.keys(3) });
   },
 
   'testObjectValues': function() {
-    this.assertEnumEqual([],          Fuse.Object.values({ }));
-    this.assertEnumEqual([],          Fuse.Object.values([ ]));
-    this.assertEnumEqual(['A'],       Fuse.Object.values({ 'a': 'A' }));
-    this.assertEnumEqual($w('A B C'), Fuse.Object.values({ 'a':'A', 'b':'B', 'c':'C' }).sort());
+    this.assertEnumEqual([],          fuse.Object.values({ }));
+    this.assertEnumEqual([],          fuse.Object.values([ ]));
+    this.assertEnumEqual(['A'],       fuse.Object.values({ 'a': 'A' }));
+    this.assertEnumEqual($w('A B C'), fuse.Object.values({ 'a':'A', 'b':'B', 'c':'C' }).sort());
 
-    var result = Fuse.Object.values(Fixtures.mixed_dont_enum);
+    var result = fuse.Object.values(Fixtures.mixed_dont_enum);
     this.assert(result.length === 4 && result.sort().join('') == 'ABbar');
 
-    this.assertRaise('TypeError', function() { Fuse.Object.values(null) });
-    this.assertRaise('TypeError', function() { Fuse.Object.values(3) });
+    this.assertRaise('TypeError', function() { fuse.Object.values(null) });
+    this.assertRaise('TypeError', function() { fuse.Object.values(3) });
   },
 
   // sanity check
@@ -473,7 +473,7 @@ new Test.Unit.Runner({
     for (property in obj) iterations++;
     this.assertEqual(3, iterations);
 
-    // for-in is not effected by Fuse.List.plugin additions
+    // for-in is not effected by fuse.Array.plugin additions
     iterations = 0;
     for (property in arr) iterations++;
     this.assertEqual(3, iterations);

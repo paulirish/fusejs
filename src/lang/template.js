@@ -1,19 +1,19 @@
   /*----------------------------- LANG: TEMPLATE -----------------------------*/
 
-  Fuse.Template = (function() {
+  fuse.Template = (function() {
     function Klass() { }
 
     function Template(template, pattern) {
-      pattern = pattern || Fuse.Template.Pattern;
+      pattern = pattern || fuse.Template.Pattern;
       if (!isRegExp(pattern))
-        pattern = Fuse.RegExp(escapeRegExpChars(pattern));
+        pattern = fuse.RegExp(escapeRegExpChars(pattern));
       if (!pattern.global)
-        pattern = Fuse.RegExp.clone(pattern, { 'global': true });
+        pattern = fuse.RegExp.clone(pattern, { 'global': true });
 
       var instance = __instance || new Klass;
       __instance = null;
 
-      instance.template = Fuse.String(template);
+      instance.template = fuse.String(template);
       instance.pattern  = pattern;
       return instance;
     }
@@ -35,9 +35,9 @@
     return Template;
   })();
 
-  Fuse.Template.Pattern = /(\\)?(#\{([^}]*)\})/;
+  fuse.Template.Pattern = /(\\)?(#\{([^}]*)\})/;
 
-  Fuse.Template.plugin.evaluate = (function() {
+  fuse.Template.plugin.evaluate = (function() {
     function evaluate(object) {
       if (object) {
         if (isHash(object))
@@ -85,7 +85,7 @@
     function prepareReplacement(replacement) {
       if (typeof replacement === 'function')
         return function() { return replacement(slice.call(arguments, 0, -2)); };
-      var template = new Fuse.Template(replacement);
+      var template = new fuse.Template(replacement);
       return function() { return template.evaluate(slice.call(arguments, 0, -2)); };
     }
 
@@ -95,20 +95,20 @@
       if (this == null) throw new TypeError;
 
       if (!isRegExp(pattern))
-        pattern = Fuse.RegExp(escapeRegExpChars(pattern), 'g');
+        pattern = fuse.RegExp(escapeRegExpChars(pattern), 'g');
       if (!pattern.global)
-        pattern = Fuse.RegExp.clone(pattern, { 'global': true });
+        pattern = fuse.RegExp.clone(pattern, { 'global': true });
       return replace.call(this, pattern, prepareReplacement(replacement));
     };
 
     plugin.interpolate = function interpolate(object, pattern) {
       if (this == null) throw new TypeError;
-      return new Fuse.Template(this, pattern).evaluate(object);
+      return new fuse.Template(this, pattern).evaluate(object);
     };
 
     plugin.scan = function scan(pattern, callback) {
       if (this == null) throw new TypeError;
-      var result = Fuse.String(this);
+      var result = fuse.String(this);
       result.gsub(pattern, callback);
       return result;
     };
@@ -119,18 +119,18 @@
 
       if (count === 1) {
         if (!isRegExp(pattern))
-          pattern = Fuse.RegExp(escapeRegExpChars(pattern));
+          pattern = fuse.RegExp(escapeRegExpChars(pattern));
         if (pattern.global)
-          pattern = Fuse.RegExp.clone(pattern, { 'global': false });
+          pattern = fuse.RegExp.clone(pattern, { 'global': false });
         return replace.call(this, pattern, prepareReplacement(replacement));
       }
 
       if (typeof replacement !== 'function') {
-        var template = new Fuse.Template(replacement);
+        var template = new fuse.Template(replacement);
         replacement = function(match) { return template.evaluate(match); };
       }
 
-      return Fuse.String(this).gsub(pattern, function(match) {
+      return fuse.String(this).gsub(pattern, function(match) {
         if (--count < 0) return match[0];
         return replacement(match);
       });
@@ -138,4 +138,4 @@
 
     // prevent JScript bug with named function expressions
     var gsub = nil, interpolate = nil, scan = nil, sub = nil;
-  })(Fuse.String.plugin);
+  })(fuse.String.plugin);

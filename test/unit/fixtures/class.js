@@ -4,7 +4,7 @@ var Fixtures = {
     this.name = name;
   },
 
-  'Animal': Fuse.Class({
+  'Animal': fuse.Class({
     'initialize': (function() {
       function Animal(name) { this.name = name }
       return Animal;
@@ -26,7 +26,7 @@ var Fixtures = {
     },
 
     'inspect': function() {
-      return Fuse.String('#<Sellable: #{weight}kg>').interpolate(this);
+      return fuse.String('#<Sellable: #{weight}kg>').interpolate(this);
     }
   },
 
@@ -43,9 +43,9 @@ var Fixtures = {
 
 /*--------------------------------------------------------------------------*/
 
-Fuse.Object.extend(Fixtures, {
+fuse.Object.extend(Fixtures, {
   // subclass that augments a method
-  'Cat': Fuse.Class(Fixtures.Animal, {
+  'Cat': fuse.Class(Fixtures.Animal, {
     'eat': function(food) {
       if (food instanceof Fixtures.Mouse)
         return Fixtures.Cat.callSuper(this, 'eat');
@@ -54,7 +54,7 @@ Fuse.Object.extend(Fixtures, {
   }),
 
   // subclass with mixin
-  'Dog': Fuse.Class(Fixtures.Animal, Fixtures.Reproduceable, {
+  'Dog': fuse.Class(Fixtures.Animal, Fixtures.Reproduceable, {
     'constructor': function(name, weight, sex) {
       Fixtures.Dog.callSuper(this, 'constructor', name);
       this.weight = weight;
@@ -63,10 +63,10 @@ Fuse.Object.extend(Fixtures, {
   }),
 
   // empty subclass
-  'Mouse': Fuse.Class(Fixtures.Animal, { }),
+  'Mouse': fuse.Class(Fixtures.Animal, { }),
 
   // subclass with mixins
-  'Ox': Fuse.Class(Fixtures.Animal, Fixtures.Sellable, Fixtures.Reproduceable, {
+  'Ox': fuse.Class(Fixtures.Animal, Fixtures.Sellable, Fixtures.Reproduceable, {
     'initialize': function(name, weight, sex) {
       Fixtures.Ox.callSuper(this, 'initialize', name);
       this.weight = weight;
@@ -79,19 +79,19 @@ Fuse.Object.extend(Fixtures, {
     },
 
     'inspect': function() {
-      return Fuse.String('#<Ox: #{name}>').interpolate(this);
+      return fuse.String('#<Ox: #{name}>').interpolate(this);
     }
   }),
 
   // base class with mixin
-  'Plant': Fuse.Class(Fixtures.Sellable, {
+  'Plant': fuse.Class(Fixtures.Sellable, {
     'initialize': function(name, weight) {
       this.name   = name;
       this.weight = weight;
     },
 
     'inspect': function() {
-      return Fuse.String('#<Plant: #{name}>').interpolate(this);
+      return fuse.String('#<Plant: #{name}>').interpolate(this);
     }
   })
 });

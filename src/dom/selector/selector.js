@@ -1,8 +1,8 @@
   /*--------------------------- ELEMENT: SELECTOR ----------------------------*/
 
-  Fuse.addNS('Util');
+  fuse.addNS('util');
 
-  Fuse.addNS('Dom.Selector');
+  fuse.addNS('dom.Selector');
 
   (function(Selector) {
     function $$(selectors) {
@@ -22,7 +22,7 @@
         callback = context; context = null;
       }
       return Selector.select(selectors,
-        context && Fuse.get(context).raw || Fuse._doc, callback);
+        context && fuse.get(context).raw || fuse._doc, callback);
     }
 
     function rawQuery(selectors, context, callback) {
@@ -30,10 +30,10 @@
         callback = context; context = null;
       }
       return Selector.rawSelect(selectors,
-        context && Fuse.get(context).raw || Fuse._doc, callback);
+        context && fuse.get(context).raw || fuse._doc, callback);
     }
 
-    Fuse.Util.$$  = $$;
-    Fuse.query    = query;
-    Fuse.rawQuery = rawQuery;
-  })(Fuse.Dom.Selector);
+    fuse.util.$$  = $$;
+    fuse.query    = query;
+    fuse.rawQuery = rawQuery;
+  })(fuse.dom.Selector);

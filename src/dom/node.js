@@ -1,7 +1,7 @@
   /*------------------------------- DOM: NODE --------------------------------*/
 
   Node =
-  Fuse.Dom.Node = (function() {
+  fuse.dom.Node = (function() {
     function Decorator() { }
 
     function Node(node) {
@@ -75,7 +75,7 @@
         return id;
       }
       else if (node.nodeType === DOCUMENT_NODE) {
-        if (node === Fuse._doc) return '2';
+        if (node === fuse._doc) return '2';
         id = getFuseId(win.frameElement) + '-2';
         Data[id] || (Data[id] = { 'nodes': { } });
         return id;
@@ -106,7 +106,7 @@
     function createGeneric(proto, methodName) {
       return new Function('proto, slice',
         'function ' + methodName + '(node) {' +
-        'node = Fuse.get(node);' +
+        'node = fuse.get(node);' +
         'var args = arguments;' +
         'return args.length ? proto.' + methodName +
         '.apply(node, slice.call(args, 1)) : ' +
@@ -116,7 +116,7 @@
 
     function updateGenerics(deep) {
       var Klass = this;
-      if (deep) Fuse.updateGenerics(Klass, deep);
+      if (deep) fuse.updateGenerics(Klass, deep);
       else Obj._each(Klass.prototype, function(value, key, proto) {
         if (!SKIPPED_KEYS[key] && isFunction(proto[key]) && hasKey(proto, key))
           Klass[key] = createGeneric(proto, key);

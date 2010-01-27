@@ -36,7 +36,7 @@
 
     function getSheetElements() {
       var i = 0, link, links = doc.getElementsByTagName('LINK'),
-       results = Fuse.List.fromNodeList(doc.getElementsByTagName('STYLE'));
+       results = fuse.Array.fromNodeList(doc.getElementsByTagName('STYLE'));
       while (link = links[i++])
         if (link.rel.toLowerCase() === 'stylesheet')
           results.push(link);
@@ -61,9 +61,9 @@
 
     FINAL_DOCUMENT_READY_STATES = { 'complete': 1, 'loaded': 1 },
 
-    doc = Fuse._doc,
+    doc = fuse._doc,
 
-    decoratedDoc = Fuse.get(doc),
+    decoratedDoc = fuse.get(doc),
 
     checkDomLoadedState = function(event) {
       if (decoratedDoc.loaded)
@@ -237,7 +237,7 @@
           if (doc.readyState === 'complete')
             fireDomLoadedEvent();
           else {
-            try { Fuse._div.doScroll(); } catch(e) { return; }
+            try { fuse._div.doScroll(); } catch(e) { return; }
             fireDomLoadedEvent();
           }
         };
