@@ -1,3 +1,7 @@
+* Ensure new fuse.Object() is instanceof fuse.Object. [jddalton]
+
+* Add `instance` argument to fuse.Fusebox() allowing a custom object to be used as the base which sandboxed natives are attached to. [jddalton]
+
 * Ensure fuse.Object.toQueryString() works correctly when objects contain undefined values in IE. [jddalton]
 
 * Rename fuse.env.test() key `STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX` to `STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX`. [jddalton]
