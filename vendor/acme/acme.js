@@ -1188,7 +1188,7 @@ if(typeof dojo != "undefined"){
 		!!getDoc()[qsa] && 
 		// see #5832
 		(!d.isSafari || (d.isSafari > 3.1) || is525 )
-	); 
+	);
 
 	//Don't bother with n+3 type of matches, IE complains if we modify those.
 	var infixSpaceRe = /n\+\d|([^ ])?([>~+])([^ =])?/g;
