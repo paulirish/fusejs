@@ -273,8 +273,9 @@
               var i = results.length, j = 0, length = i + value.length;
               while (i < length) results[i++] = toQueryPair(key, value[j++]);
             }
-            else if (toString.call(value) !== '[object Object]')
+            else if (!value || toString.call(value) !== '[object Object]') {
               results.push(toQueryPair(key, value));
+            }
           }
         });
         return fuse.String(results.join('&'));
@@ -284,9 +285,5 @@
     })();
 
     // prevent JScript bug with named function expressions
-    var each = nil,
-     extend =  nil,
-     keys =    nil,
-     values =  nil,
-     toHTML =  nil;
+    var each = nil, extend = nil, keys = nil, values = nil, toHTML = nil;
   })();
