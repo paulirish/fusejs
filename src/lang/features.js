@@ -86,7 +86,7 @@
        return 'x'.lastIndexOf('x', -1) !== 0;
     },
 
-    'STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX': function() {
+    'STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX': function() {
       // true for IE
       var string = 'oxo', data = [], pattern = /x/;
       string.replace(pattern, '');

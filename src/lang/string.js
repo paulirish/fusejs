@@ -27,7 +27,7 @@
 
     // ECMA-5 15.5.4.11
     // For IE
-    if (envTest('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX'))
+    if (envTest('STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX'))
       plugin.replace = (function(__replace) {
         function replace(pattern, replacement) {
           var __replacement, result;
@@ -141,7 +141,7 @@
 
     // ECMA-5 15.5.4.10
     // For IE
-    if (envTest('STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX'))
+    if (envTest('STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX'))
       plugin.match = (function(__match) {
         function match(pattern) {
           var result = __match.call(this, pattern);

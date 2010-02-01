@@ -1,3 +1,5 @@
+* Rename fuse.env.test() key `STRING_METHODS_WRONGLY_SETS_REGEXP_LAST_INDEX` to `STRING_METHODS_WRONGLY_SET_REGEXP_LAST_INDEX`. [jddalton]
+
 * Rename fuse.env.Bug/Feature to fuse.env.test and add fuse.env.addTest and fuse.env.removeTest methods. [FuseJS LH #44] [jddalton, Joe Gornick, kangax]
 
 * Lowercase the Fuse namespaces and remove the List aliases. [jddalton]
